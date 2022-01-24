@@ -105,20 +105,20 @@ function create() {
 
 function update() {
     //player.x += 1;
-    if (cursors.right.isDown) {
-        var random = Math.random() * 600;
+    //if (cursors.right.isDown) {
+    //    var random = Math.random() * 600;
         //player = this.physics.add.sprite(random,450, "dude");
-        player = this.add.sprite(random,450, "dude");
-        player.anims.play("normal", true);
-    };
-    if (cursors.left.isDown) {
-        player.anims.play("normal", false);
-    };
-    if (cursors.down.isDown) {
+    //    player = this.add.sprite(random,450, "dude");
+    //    player.anims.play("normal", true);
+    //};
+    //if (cursors.left.isDown) {
+    //    player.anims.play("normal", false);
+    //};
+    //if (cursors.down.isDown) {
         //chara = this.scene.add.existing(new Chara(this, 100,100));
-        chara = new Character(this, Math.random()*400,Math.random()*400);
-        chara.anims.play("normal", true);
-    }
+    //    chara = new Character(this, Math.random()*400,Math.random()*400);
+    //    chara.anims.play("normal", true);
+    //}
     char1.update();
 }
 
