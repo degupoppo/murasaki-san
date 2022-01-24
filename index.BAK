@@ -95,7 +95,7 @@ function create() {
     //player.anims.play("normal", true);
 
     //var group = this.add.group();
-    char1 = new Character(this, Math.random()*400, Math.random()*400);
+    char1 = new Character(this, Math.random()*500, Math.random()*700);
 
 }
 
