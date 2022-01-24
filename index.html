@@ -7,7 +7,7 @@
     <title>Test</title>
     <!-- チュートリアルはここ： https://phaser.io/tutorials/making-your-first-phaser-3-game -->
     <!--script src="//cdn.jsdelivr.net/npm/phaser@3.11.0/dist/phaser.js"></script-->
-    <script src="https://www.kapipo.com/ftm/phaser.js"></script>
+    <script src="phaser.js"></script>
     <style type="text/css">
         body {
             margin: 0;
@@ -57,8 +57,8 @@ class Character extends Phaser.GameObjects.Sprite{
 let player;
 
 function preload() {
-    this.load.image("sky", "https://www.kapipo.com/ftm/assets/sky.png");
-    this.load.spritesheet("dude", "https://www.kapipo.com/ftm/png/murasaki.PNG", {frameWidth: 64, frameHeight: 51});
+    this.load.image("sky", "png/sky.png");
+    this.load.spritesheet("dude", "png/murasaki.png", {frameWidth: 64, frameHeight: 51});
     cursors = this.input.keyboard.createCursorKeys();
 }
 
