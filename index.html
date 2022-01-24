@@ -77,7 +77,7 @@ function create() {
     player.anims.play("normal", true);
 
     var group = this.add.group();
-    char1 = new Chara(this, Math.random()*400, Math.random()*400);
+    char1 = new Character(this, Math.random()*400, Math.random()*400);
 
 }
 
@@ -95,7 +95,7 @@ function update() {
     };
     if (cursors.down.isDown) {
         //chara = this.scene.add.existing(new Chara(this, 100,100));
-        chara = new Chara(this, Math.random()*400,Math.random()*400);
+        chara = new Character(this, Math.random()*400,Math.random()*400);
         chara.anims.play("normal", true);
     }
     char1.update();
