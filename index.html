@@ -65,7 +65,7 @@ function create() {
 
     this.add.image(400, 300, "sky");
     //player = this.physics.add.sprite(100,450, "dude");
-    player = this.add.sprite(100,450, "dude");
+    //player = this.add.sprite(100,450, "dude");
 
     this.anims.create({
         key: "normal",
@@ -74,16 +74,16 @@ function create() {
         repeat: -1
     });
 
-    player.anims.play("normal", true);
+    //player.anims.play("normal", true);
 
-    var group = this.add.group();
+    //var group = this.add.group();
     char1 = new Character(this, Math.random()*400, Math.random()*400);
 
 }
 
 
 function update() {
-    player.x += 1;
+    //player.x += 1;
     if (cursors.right.isDown) {
         var random = Math.random() * 600;
         //player = this.physics.add.sprite(random,450, "dude");
