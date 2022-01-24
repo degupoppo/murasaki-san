@@ -53,6 +53,7 @@ class Character extends Phaser.GameObjects.Sprite{
 		if (this.count >= 10){
 			var li = [-1, 1];
 			this.dist = li[Math.floor(Math.random() * li.length)];
+			console.log(this.dist);
 			this.mode = "move";
 			this.count = 0;
 		}
