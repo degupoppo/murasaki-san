@@ -50,8 +50,7 @@ class Character extends Phaser.GameObjects.Sprite{
 	if (this.mode = "rest") {
 		this.dist = Math.random() * 1;
 		this.mode = "move";
-	}
-	if (this.mode = "move") {
+	}else if (this.mode = "move") {
 		if (this.dist = 0){
 		        this.x += 1;
 		}
@@ -60,7 +59,7 @@ class Character extends Phaser.GameObjects.Sprite{
 		}
 		this.count += 1;
 		if (this.count >= 10) {
-			this.mode = rest;
+			this.mode = "rest";
 			this.count = 0;
 		}
 	}
