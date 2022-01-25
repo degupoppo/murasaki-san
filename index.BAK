@@ -249,6 +249,7 @@ function create() {
 
 function update() {
     char1.update();
+    scene.add.text(700, 550, char1.mode);
     if (cursors.right.isDown) {
         char1.update();
     }
