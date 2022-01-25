@@ -163,13 +163,14 @@ class Button {
         let fontsize = 12;
         const button = scene.add.text(x, y, label)
             .setFontSize(fontsize)
+            .setFontFamily("Arial")
             .setOrigin(0.5)
             .setPadding(10)
             //.setStyle({ backgroundColor: '#111' })
             .setInteractive({ useHandCursor: true })
             .on('pointerdown', () => callback())
-            .on('pointerover', () => button.setStyle({ fontSize: fontsize, fill: '#f39c12' }))
-            .on('pointerout', () => button.setStyle({ fontSize: fontsize, fill: '#FFF' }));
+            .on('pointerover', () => button.setStyle({ fontSize: fontsize, fontFamily: "Arial", fill: '#f39c12' }))
+            .on('pointerout', () => button.setStyle({ fontSize: fontsize, fontFamily: "Arial", fill: '#FFF' }));
     }
 }
 
@@ -253,7 +254,7 @@ function create() {
 
 function update() {
     char1.update();
-    text_mode = this.add.text(100, 100, char1.get_mode, {fontSize:12, fill: "#000"});
+    text_mode = this.add.text(100, 100, char1.get_mode, {font: "12 Arial", fill: "#000"});
     if (cursors.right.isDown) {
         char1.update();
     }
