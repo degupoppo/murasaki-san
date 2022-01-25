@@ -133,11 +133,16 @@ class Character extends Phaser.GameObjects.Sprite{
 }
 
 
-export class SimpleScene extends Phaser.Scene{
-    create() {
-        const helloButton = this.add.text(100, 100, "Test", {fill: "#0f0"});
-        helloButton.setInteractive();
-        helloButton.on('pointerover', () => { console.log('pointerover'); });
+class Button {
+    constructor(x, y, label, scene, callback) {
+        const button = scene.add.text(x, y, label)
+            .setOrigin(0.5)
+            .setPadding(10)
+            .setStyle({ backgroundColor: '#111' })
+            .setInteractive({ useHandCursor: true })
+            .on('pointerdown', () => callback())
+            .on('pointerover', () => button.setStyle({ fill: '#f39c12' }))
+            .on('pointerout', () => button.setStyle({ fill: '#FFF' }));
     }
 }
 
@@ -192,7 +197,7 @@ function create() {
     });
     //var group = this.add.group();
     char1 = new Character(this, 300 + Math.random()*200, 400 + Math.random()*100);
-    btn1 = new SimpleScene();
+    const button = new Button(0, 0, 'Start Game', this, () => console.log('game is started'));
 
 
 }
