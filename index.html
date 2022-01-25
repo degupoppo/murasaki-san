@@ -254,7 +254,7 @@ function create() {
 
 function update() {
     char1.update();
-    text_mode = this.add.text(100, 100, char1.get_mode, {font: "12 Arial", fill: "#000"});
+    text_mode.text = char1.get_mode;
     if (cursors.right.isDown) {
         char1.update();
     }
