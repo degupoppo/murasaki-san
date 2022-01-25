@@ -252,6 +252,7 @@ function create() {
 
 function update() {
     char1.update();
+    consle.log(char1.get_mode);
     text_mode.text = char1.get_mode;
     if (cursors.right.isDown) {
         char1.update();
