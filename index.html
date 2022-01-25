@@ -17,24 +17,6 @@
 
 <script type="text/javascript">
 
-// Create game
-
-let config = {
-    type: Phaser.AUTO,
-    width: 800,
-    height: 600,
-    scale: {
-        //autoCenter: Phaser.Scale.CENTER_HORIZONTALLY,
-    },
-    scene: {
-        preload: preload,
-        create: create,
-        update: update
-    }
-};
-
-let game = new Phaser.Game(config);
-
 
 // class
 
@@ -143,6 +125,7 @@ class Character extends Phaser.GameObjects.Sprite{
 
 
 //ボタンクラス
+//https://ysko909.github.io/posts/make-button-class-with-phaserjs/
 class OriginalButtonClass extends Phaser.GameObjects.Container{
   
   text: Phaser.GameObjects.Text;
@@ -217,7 +200,23 @@ class OriginalButtonClass extends Phaser.GameObjects.Container{
 
 // main functions
 
-let player;
+// Create game
+
+let config = {
+    type: Phaser.AUTO,
+    width: 800,
+    height: 600,
+    scale: {
+        //autoCenter: Phaser.Scale.CENTER_HORIZONTALLY,
+    },
+    scene: {
+        preload: preload,
+        create: create,
+        update: update
+    }
+};
+
+let game = new Phaser.Game(config);
 
 function preload() {
     this.load.image("sky", "png/sky.png");

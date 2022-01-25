@@ -143,6 +143,7 @@ class Character extends Phaser.GameObjects.Sprite{
 
 
 //ボタンクラス
+//https://ysko909.github.io/posts/make-button-class-with-phaserjs/
 class OriginalButtonClass extends Phaser.GameObjects.Container{
   
   text: Phaser.GameObjects.Text;
@@ -256,7 +257,8 @@ function create() {
     this.button = new OriginalButtonClass(this, 200, 200, 'hoge', {
         onClick: ()=>{
             console.log('clicked.');
-    }
+        }
+    });
 
     //player.anims.play("normal", true);
 
