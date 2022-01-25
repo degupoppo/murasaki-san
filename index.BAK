@@ -136,7 +136,7 @@ class Character extends Phaser.GameObjects.Sprite{
 class Button {
     constructor(x, y, label, scene, callback) {
         const button = scene.add.text(x, y, label)
-            .setFontSize(10);
+            .setFontSize(10)
             .setOrigin(0.5)
             .setPadding(10)
             //.setStyle({ backgroundColor: '#111' })
