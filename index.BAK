@@ -45,7 +45,7 @@ class Character extends Phaser.GameObjects.Sprite{
         this.anims.play("normal", true);
     	this.mode = "none";
         this.count = 0;
-        this.version = 0.06;
+        this.version = 0.07;
     }
     update(){
     	console.log(this.version, this.mode, this.count);
