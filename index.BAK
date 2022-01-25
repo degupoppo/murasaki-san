@@ -252,8 +252,6 @@ function create() {
 function update() {
     char1.update();
     text_mode.text = char1.get_mode;
-    if (cursors.right.isDown) {
-    }
 }
 
 

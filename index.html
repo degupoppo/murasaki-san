@@ -212,6 +212,10 @@ function preload() {
     this.load.spritesheet("murasaki_sleeping", "png/murasaki_sleeping.png", {frameWidth: 74, frameHeight: 64});
     this.load.spritesheet("murasaki_feeding", "png/murasaki_feeding.png", {frameWidth: 74, frameHeight: 64});
     cursors = this.input.keyboard.createCursorKeys();
+    const char1 = new Character(this, 300 + Math.random()*200, 400 + Math.random()*100);
+    var text_mode = this.add.text(100, 100, "test", {fontSize:12, fontFamily: "Arial", fill: "#000"});
+    const button1 = new Button(100, 25, 'Grooming', this, () => console.log('game is started'));
+    const button2 = new Button(100, 50, 'Feeding', this, () => actionOnClick());
 }
 
 
@@ -242,10 +246,6 @@ function create() {
         repeat: -1
     });
     //var group = this.add.group();
-    const char1 = new Character(this, 300 + Math.random()*200, 400 + Math.random()*100);
-    const button1 = new Button(100, 25, 'Grooming', this, () => console.log('game is started'));
-    const button2 = new Button(100, 50, 'Feeding', this, () => actionOnClick());
-    var text_mode = this.add.text(100, 100, "test", {fontSize:12, fontFamily: "Arial", fill: "#000"});
 }
 
 
