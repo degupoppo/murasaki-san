@@ -169,7 +169,7 @@ class Button {
 
 function actionOnClick() {
     console.log("click!");
-    char1.status =
+    char1.status = "feeding";
 }
 
 
