@@ -47,9 +47,9 @@ class Character extends Phaser.GameObjects.Sprite{
 	this.count = 0;
     }
     update(){
-	this.x += 1;
 	console.log(this.mode);
 	console.log(this.x);
+	console.log(this.count);
 	if (this.mode = "rest") {
 		this.count += 1;
 		if (this.count >= 100){
