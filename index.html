@@ -23,7 +23,8 @@ ToDo
     eating実装
     grooming実装
     コントラを見立てた外部ステータス格納区域の実装と、読み込み、書き込みの実装
-
+    キャラのステータスをテキストで描写, コントラから定期的に取得し計算する
+    ステータスはキャラクラスに保持させずに、コントラに見立てた外部変数に格納する。
 ***/
 
 
@@ -241,8 +242,8 @@ function create() {
         frameRate: 1,
         repeat: -1
     });
-    const char1 = new Character(this, 300 + Math.random()*200, 400 + Math.random()*100);
-    var text_mode = this.add.text(100, 100, "test", {fontSize:12, fontFamily: "Arial", fill: "#000"});
+    char1 = new Character(this, 300 + Math.random()*200, 400 + Math.random()*100);
+    text_mode = this.add.text(100, 100, "test", {fontSize:12, fontFamily: "Arial", fill: "#000"});
     const button1 = new Button(100, 25, 'Grooming', this, () => console.log('game is started'));
     const button2 = new Button(100, 50, 'Feeding', this, () => actionOnClick());
 }
