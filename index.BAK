@@ -192,6 +192,7 @@ function create() {
     });
     //var group = this.add.group();
     char1 = new Character(this, 300 + Math.random()*200, 400 + Math.random()*100);
+    btn1 = new SimpleScene();
 
 
 }
