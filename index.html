@@ -231,7 +231,7 @@ let game = new Phaser.Game(config);
 
 
 function preload() {
-    this.game.time.desiredFps = 30;
+    game.time.desiredFps = 30;
     this.load.image("sky", "png/sky.png");
     this.load.spritesheet("murasaki_right", "png/murasaki_right.png", {frameWidth: 74, frameHeight: 64});
     this.load.spritesheet("murasaki_left", "png/murasaki_left.png", {frameWidth: 74, frameHeight: 64});
