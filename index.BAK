@@ -197,7 +197,8 @@ function create() {
     });
     //var group = this.add.group();
     char1 = new Character(this, 300 + Math.random()*200, 400 + Math.random()*100);
-    const button = new Button(0, 0, 'Start Game', this, () => console.log('game is started'));
+    const button1 = new Button(50, 50, 'Start Game', this, () => console.log('game is started'));
+    const button2 = new Button(50, 50, 'Start Game', this, actionOnClick());
 
 
 }
