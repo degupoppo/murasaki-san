@@ -45,7 +45,7 @@ class Character extends Phaser.GameObjects.Sprite{
         this.anims.play("normal", true);
     	this.mode = "none";
         this.count = 0;
-        this.version = 0.05;
+        this.version = 0.06;
     }
     update(){
     	console.log(this.version, this.mode, this.count);
@@ -56,6 +56,11 @@ class Character extends Phaser.GameObjects.Sprite{
 		    if (this.count >= 100){
                 var li = ["right", "left"];
                 this.dist = li[Math.floor(Math.random() * li.length)];
+                if (this.dist == "right"){
+                    this.anims.play("murasaki_right", true);
+                }else if (this.dist == "left") {
+                    this.anims.play("murasaki_left", true);
+                }
                 this.mode = "move";
                 this.count = 0;
             }
@@ -84,6 +89,8 @@ let player;
 function preload() {
     this.load.image("sky", "png/sky.png");
     this.load.spritesheet("dude", "png/murasaki2.png", {frameWidth: 74, frameHeight: 64});
+    this.load.spritesheet("murasaki_right", "png/murasaki_right.png", {frameWidth: 74, frameHeight: 64});
+    this.load.spritesheet("murasaki_left", "png/murasaki_left.png", {frameWidth: 74, frameHeight: 64});
     cursors = this.input.keyboard.createCursorKeys();
 }
 
@@ -97,6 +104,18 @@ function create() {
     this.anims.create({
         key: "normal",
         frames: this.anims.generateFrameNumbers("dude", {start: 0, end:3}),
+        frameRate: 2,
+        repeat: -1
+    });
+    this.anims.create({
+        key: "murasaki_right",
+        frames: this.anims.generateFrameNumbers("murasaki_right", {start: 0, end:3}),
+        frameRate: 2,
+        repeat: -1
+    });
+    this.anims.create({
+        key: "murasaki_left",
+        frames: this.anims.generateFrameNumbers("murasaki_left", {start: 0, end:3}),
         frameRate: 2,
         repeat: -1
     });
