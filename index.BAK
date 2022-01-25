@@ -64,10 +64,10 @@ class Character extends Phaser.GameObjects.Sprite{
             }else if (this.dist = "left") {
                 this.x -= 1;
             }
-        if (this.count >= 100) {
-            this.mode = "rest";
-            this.count = 0;
-		}
+            if (this.count >= 100) {
+                this.mode = "rest";
+                this.count = 0;
+    		}
         }
     }
 }
