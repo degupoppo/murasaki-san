@@ -242,8 +242,8 @@ function create() {
         frameRate: 1,
         repeat: -1
     });
-    const char1 = new Character(this, 300 + Math.random()*200, 400 + Math.random()*100);
-    var text_mode = this.add.text(100, 100, "test", {fontSize:12, fontFamily: "Arial", fill: "#000"});
+    char1 = new Character(this, 300 + Math.random()*200, 400 + Math.random()*100);
+    text_mode = this.add.text(100, 100, "test", {fontSize:12, fontFamily: "Arial", fill: "#000"});
     const button1 = new Button(100, 25, 'Grooming', this, () => console.log('game is started'));
     const button2 = new Button(100, 50, 'Feeding', this, () => actionOnClick());
 }
@@ -251,7 +251,7 @@ function create() {
 
 function update() {
     char1.update();
-    text_mode.text = char1.get_mode;
+    //text_mode.text = char1.get_mode;
 }
 
 
