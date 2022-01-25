@@ -76,7 +76,7 @@ class Character extends Phaser.GameObjects.Sprite{
 	    this.count += 1;
 	    if (this.count >= 100){
             let tmp = Math.random() * 100;
-            if (tpm <= 10) {
+            if (tmp <= 10) {
                 this.mode = "sleeping";
                 this.count = 0;
             }else {
@@ -120,7 +120,7 @@ class Character extends Phaser.GameObjects.Sprite{
         this.count += 1;
         if (this.count == 1){
             this.anims.play("murasaki_sleeping", true);
-        }else if (this.count >= 500) {
+        }else if (this.count >= 1000) {
             this.mode = "resting";
             this.count = 0;
         }
