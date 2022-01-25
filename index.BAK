@@ -48,7 +48,7 @@ class Character extends Phaser.GameObjects.Sprite{
         this.version = 0.01;
     }
     update(){
-    	console.log(this.mode, this.count);
+    	console.log(this.version, this.mode, this.count);
         if (this.mode = "none") {
             this.mode = "rest";
         }else if (this.mode = "rest") {
@@ -71,6 +71,8 @@ class Character extends Phaser.GameObjects.Sprite{
                 this.mode = "rest";
                 this.count = 0;
     		}
+        } else {
+            console.log("Boo!");
         }
     }
 }
