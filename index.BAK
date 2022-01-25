@@ -258,7 +258,7 @@ function create() {
     });
     //var group = this.add.group();
     char1 = new Character(this, 300 + Math.random()*200, 400 + Math.random()*100);
-    button = game.add.button(game.world.centerX - 95, 400, "murasaki_left", actionOnClick, this, 2, 1, 0);
+    button = this.add.button(game.world.centerX - 95, 400, "murasaki_left", actionOnClick, this, 2, 1, 0);
 
     /***
     this.button = new OriginalButtonClass(this, 200, 200, 'hoge', {
