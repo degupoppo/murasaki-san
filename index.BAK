@@ -173,7 +173,7 @@ class Button {
 
 function actionOnClick() {
     console.log("click!");
-    char1.set_mode = "feeding";
+    char1.set_mode("feeding");
 }
 
 

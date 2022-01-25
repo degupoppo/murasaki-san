@@ -73,7 +73,7 @@ class Character extends Phaser.GameObjects.Sprite{
         this.coin = 0;          //TODO: get from static_status
     }
     set set_mode(mode){
-        this.mode == mode;
+        this.mode = mode;
         this.count = 0;
     }
     resting(){
@@ -173,7 +173,7 @@ class Button {
 
 function actionOnClick() {
     console.log("click!");
-    char1.set_mode("feeding");
+    char1.set_mode = "feeding";
 }
 
 
