@@ -48,7 +48,6 @@ class Character extends Phaser.GameObjects.Sprite{
     }
     update(){
 	console.log(this.mode);
-	console.log(this.x);
 	console.log(this.count);
 	if (this.mode = "rest") {
 		this.count += 1;
@@ -60,6 +59,7 @@ class Character extends Phaser.GameObjects.Sprite{
 			this.count = 0;
 		}
 	}else if (this.mode = "move") {
+		console.log("OK");
 		this.count += 1;
 		if (this.dist = "right"){
 		        this.x += 1;
