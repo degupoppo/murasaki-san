@@ -193,7 +193,7 @@ let config = {
         update: update
     },
     fps: {
-        target: 100,
+        target: 1,
         forceSetTimeOut: true
     }
 };
