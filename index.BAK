@@ -45,7 +45,7 @@ class Character extends Phaser.GameObjects.Sprite{
         this.anims.play("normal", true);
     	this.mode = "none";
         this.count = 0;
-        this.version = 0.03;
+        this.version = 0.04;
     }
     update(){
     	console.log(this.version, this.mode, this.count);
@@ -67,7 +67,7 @@ class Character extends Phaser.GameObjects.Sprite{
             }else if (this.dist = "left") {
                 this.x -= 1;
             }
-            if (this.count >= 10000) {
+            if (this.count >= 100) {
                 this.mode = "rest";
                 this.count = 0;
     		}
