@@ -53,7 +53,7 @@ C, static_status
 
 class Character extends Phaser.GameObjects.Sprite{
     constructor(scene, x, y){
-        super(scene, x, y, "murasaki_right", "Frame");
+        super(scene, x, y, "murasaki_right");
         this.scene.add.existing(this);
         this.anims.play("murasaki_right", true);
     	this.mode = "resting";
@@ -228,6 +228,7 @@ let config = {
 
 
 let game = new Phaser.Game(config);
+this.game.time.desiredFps = 30;
 
 
 function preload() {

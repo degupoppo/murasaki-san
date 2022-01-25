@@ -53,9 +53,9 @@ C, static_status
 
 class Character extends Phaser.GameObjects.Sprite{
     constructor(scene, x, y){
-        super(scene, x, y, "murasaki_right", "Frame");
+        super(scene, x, y, "murasaki_right");
         this.scene.add.existing(this);
-        this.anims.play("normal", true);
+        this.anims.play("murasaki_right", true);
     	this.mode = "resting";
         this.count = 0;
         this.version = 0.13;
