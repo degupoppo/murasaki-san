@@ -75,7 +75,7 @@ class Character extends Phaser.GameObjects.Sprite{
         this.intelligence = 2 + Math.random()* 8;
         this.luck = 2 + Math.random()* 8;
         //dymamic_status, TODO:get from contract
-        this.life = 100;        //TODO: calc from static_status
+        this.life = 100;        //TODO: get from static_status
         this.nutrition = 100;   //TODO: calc from static_status, last_mealing_time
         this.happy = 100;       //TODO: calc from static_status, last_grooming_time
         this.exp = 0;           //TODO: get from static_status
@@ -105,11 +105,12 @@ class Character extends Phaser.GameObjects.Sprite{
                 this.x -= 1;
             }
             if (this.count >= 100) {
-                this.mode = "rest";
+                this.mode = "resting";
                 this.count = 0;
     		}
         }
     }
+    //send: last_nutrition_time
     eating() {
     }
     sleeping() {
