@@ -75,8 +75,14 @@ class Character extends Phaser.GameObjects.Sprite{
     resting(){
 	    this.count += 1;
 	    if (this.count >= 100){
-            this.mode = "moving";
-            this.count = 0;
+            let tmp = Math.random() * 100;
+            if (tpm <= 10) {
+                this.mode = "sleeping";
+                this.count = 0;
+            }else {
+                this.mode = "moving";
+                this.count = 0;
+            }
         }
     }
     moving() {
@@ -112,6 +118,9 @@ class Character extends Phaser.GameObjects.Sprite{
     }
     sleeping() {
         this.count += 1;
+        if (this.count == 1){
+            this.anims.play("murasaki_sleeping", true);
+        }
     }
     //send: last_grooming_time
     grooming() {
@@ -135,15 +144,16 @@ class Character extends Phaser.GameObjects.Sprite{
 
 class Button {
     constructor(x, y, label, scene, callback) {
+        let fontsize = 12;
         const button = scene.add.text(x, y, label)
-            .setFontSize(10)
+            .setFontSize(fontsize)
             .setOrigin(0.5)
             .setPadding(10)
             //.setStyle({ backgroundColor: '#111' })
             .setInteractive({ useHandCursor: true })
             .on('pointerdown', () => callback())
-            .on('pointerover', () => button.setStyle({ fontSize: 10, fill: '#f39c12' }))
-            .on('pointerout', () => button.setStyle({ fontSize: 10, fill: '#FFF' }));
+            .on('pointerover', () => button.setStyle({ fontSize: fontsize, fill: '#f39c12' }))
+            .on('pointerout', () => button.setStyle({ fontSize: fontsize, fill: '#FFF' }));
     }
 }
 
@@ -178,6 +188,7 @@ function preload() {
     this.load.image("sky", "png/sky.png");
     this.load.spritesheet("murasaki_right", "png/murasaki_right.png", {frameWidth: 74, frameHeight: 64});
     this.load.spritesheet("murasaki_left", "png/murasaki_left.png", {frameWidth: 74, frameHeight: 64});
+    this.load.spritesheet("murasaki_sleeping", "png/murasaki_sleeping.png", {frameWidth: 74, frameHeight: 64});
     cursors = this.input.keyboard.createCursorKeys();
 }
 
@@ -194,6 +205,12 @@ function create() {
         key: "murasaki_left",
         frames: this.anims.generateFrameNumbers("murasaki_left", {start: 0, end:3}),
         frameRate: 2,
+        repeat: -1
+    });
+    this.anims.create({
+        key: "murasaki_sleeping",
+        frames: this.anims.generateFrameNumbers("murasaki_sleeping", {start: 0, end:1}),
+        frameRate: 5,
         repeat: -1
     });
     //var group = this.add.group();
