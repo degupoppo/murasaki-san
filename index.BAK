@@ -128,8 +128,8 @@ class Character extends Phaser.GameObjects.Sprite{
 //https://ysko909.github.io/posts/make-button-class-with-phaserjs/
 class OriginalButtonClass extends Phaser.GameObjects.Container{
   
-  text: Phaser.GameObjects.Text;
-  container: Phaser.GameObjects.Rectangle;
+  //text: Phaser.GameObjects.Text;
+  //container: Phaser.GameObjects.Rectangle;
   
   constructor (scene: Phaser.Scene, x:number, y:number, text:string, props: Props){
     super(scene, x, y);
