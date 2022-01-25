@@ -17,24 +17,6 @@
 
 <script type="text/javascript">
 
-// Create game
-
-let config = {
-    type: Phaser.AUTO,
-    width: 800,
-    height: 600,
-    scale: {
-        //autoCenter: Phaser.Scale.CENTER_HORIZONTALLY,
-    },
-    scene: {
-        preload: preload,
-        create: create,
-        update: update
-    }
-};
-
-let game = new Phaser.Game(config);
-
 
 // class
 
@@ -218,7 +200,23 @@ class OriginalButtonClass extends Phaser.GameObjects.Container{
 
 // main functions
 
-let player;
+// Create game
+
+let config = {
+    type: Phaser.AUTO,
+    width: 800,
+    height: 600,
+    scale: {
+        //autoCenter: Phaser.Scale.CENTER_HORIZONTALLY,
+    },
+    scene: {
+        preload: preload,
+        create: create,
+        update: update
+    }
+};
+
+let game = new Phaser.Game(config);
 
 function preload() {
     this.load.image("sky", "png/sky.png");
