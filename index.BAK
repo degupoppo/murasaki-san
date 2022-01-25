@@ -246,10 +246,22 @@ function create() {
 
 }
 
-
+/***
 function update() {
     char1.update();
     if (cursors.right.isDown) {
+        char1.update();
+    }
+}
+***/
+
+function update() {
+    delta = 1
+    this.frameTime += delta
+
+    if (this.frameTime > 16.5) {  
+        this.frameTime = 0;
+        g.gameTick++;
         char1.update();
     }
 }
