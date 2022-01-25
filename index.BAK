@@ -43,7 +43,7 @@ class Character extends Phaser.GameObjects.Sprite{
         super(scene, x, y, "dude", "Frame");
         this.scene.add.existing(this);
         this.anims.play("normal", true);
-    	this.mode = "rest";
+    	this.mode = "none";
         this.count = 0;
     }
     update(){
@@ -56,7 +56,7 @@ class Character extends Phaser.GameObjects.Sprite{
                 this.mode = "move";
                 this.count = 0;
             }
-        if (this.mode = "move") {
+        }else if (this.mode = "move") {
             console.log("OK");
             this.count += 1;
             if (this.dist = "right"){

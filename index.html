@@ -43,12 +43,14 @@ class Character extends Phaser.GameObjects.Sprite{
         super(scene, x, y, "dude", "Frame");
         this.scene.add.existing(this);
         this.anims.play("normal", true);
-    	this.mode = "rest";
+    	this.mode = "none";
         this.count = 0;
     }
     update(){
     	console.log(this.mode, this.count);
-	    if (this.mode = "rest") {
+        if (this.mode = "none") {
+            this.mode = "rest";
+        }else if (this.mode = "rest") {
 		    this.count += 1;
 		    if (this.count >= 100){
                 var li = ["right", "left"];
