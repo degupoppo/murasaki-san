@@ -120,6 +120,9 @@ class Character extends Phaser.GameObjects.Sprite{
         this.count += 1;
         if (this.count == 1){
             this.anims.play("murasaki_sleeping", true);
+        }else if (this.count >= 500) {
+            this.mode = "resting";
+            this.count = 0;
         }
     }
     //send: last_grooming_time
