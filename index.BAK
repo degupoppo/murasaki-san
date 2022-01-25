@@ -123,8 +123,7 @@ class Character extends Phaser.GameObjects.Sprite{
         else if (this.mode == "grooming") {this.grooming()}
         else if (this.mode == "working") {this.working()}
 
-
-/***
+        /***
     	console.log(this.version, this.mode, this.count);
         if (this.mode == "none") {
             this.mode = "rest";
@@ -155,7 +154,8 @@ class Character extends Phaser.GameObjects.Sprite{
         }else{
             console.log("Boo!");
         }
-***/
+        ***/
+
     }
 }
 
