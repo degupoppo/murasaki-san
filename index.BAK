@@ -191,7 +191,8 @@ let config = {
         preload: preload,
         create: create,
         update: update
-    },
+    }
+//    },
 //    fps: {
 //        target: 24,
 //        forceSetTimeOut: true
