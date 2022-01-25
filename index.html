@@ -135,15 +135,16 @@ class Character extends Phaser.GameObjects.Sprite{
 
 class Button {
     constructor(x, y, label, scene, callback) {
+        let fontsize = 12;
         const button = scene.add.text(x, y, label)
-            .setFontSize(10)
+            .setFontSize(fontsize)
             .setOrigin(0.5)
             .setPadding(10)
             //.setStyle({ backgroundColor: '#111' })
             .setInteractive({ useHandCursor: true })
             .on('pointerdown', () => callback())
-            .on('pointerover', () => button.setStyle({ fontSize: 10, fill: '#f39c12' }))
-            .on('pointerout', () => button.setStyle({ fontSize: 10, fill: '#FFF' }));
+            .on('pointerover', () => button.setStyle({ fontSize: fontsize, fill: '#f39c12' }))
+            .on('pointerout', () => button.setStyle({ fontSize: fontsize, fill: '#FFF' }));
     }
 }
 

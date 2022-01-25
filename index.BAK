@@ -142,8 +142,8 @@ class Button {
             //.setStyle({ backgroundColor: '#111' })
             .setInteractive({ useHandCursor: true })
             .on('pointerdown', () => callback())
-            .on('pointerover', () => button.setStyle({ fill: '#f39c12' }))
-            .on('pointerout', () => button.setStyle({ fill: '#FFF' }));
+            .on('pointerover', () => button.setStyle({ fontSize: 10, fill: '#f39c12' }))
+            .on('pointerout', () => button.setStyle({ fontSize: 10, fill: '#FFF' }));
     }
 }
 
