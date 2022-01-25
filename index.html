@@ -68,13 +68,13 @@ class Character extends Phaser.GameObjects.Sprite{
     	this.mode = "resting";
         this.count = 0;
         this.version = 0.12;
-        //static_status
+        //static_status, TODO:get from contract
         this.strength = 2 + Math.random()* 8;
         this.dexterity = 2 + Math.random()* 8;
         this.vitality = 2 + Math.random()* 8;
         this.intelligence = 2 + Math.random()* 8;
         this.luck = 2 + Math.random()* 8;
-        //dymamic_status
+        //dymamic_status, TODO:get from contract
         this.life = 100;
         this.nutrition = 100;
         this.happy = 100;
@@ -96,6 +96,8 @@ class Character extends Phaser.GameObjects.Sprite{
         }
     }
     moving() {
+        if (thi.count == 0){
+        }
         this.count += 1;
         if (this.dist == "right" && this.count % 2 == 0){
             this.x += 1;
@@ -116,12 +118,13 @@ class Character extends Phaser.GameObjects.Sprite{
     working() {
     }
     update(){
-        if (this.mode == "resting") {this.resting()}
-        else if (this.mode == "moving") {this.moving()}
-        else if (this.mode == "eating") {this.eating()}
-        else if (this.mode == "sleeping") {this.sleeping()}
-        else if (this.mode == "grooming") {this.grooming()}
-        else if (this.mode == "working") {this.working()}
+    	console.log(this.version, this.mode, this.count);
+        if (this.mode == "resting") {this.resting();}
+        else if (this.mode == "moving") {this.moving();}
+        else if (this.mode == "eating") {this.eating();}
+        else if (this.mode == "sleeping") {this.sleeping();}
+        else if (this.mode == "grooming") {this.grooming();}
+        else if (this.mode == "working") {this.working();}
 
         /***
     	console.log(this.version, this.mode, this.count);
