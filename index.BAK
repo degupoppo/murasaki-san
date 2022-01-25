@@ -17,6 +17,15 @@
 
 <script type="text/javascript">
 
+/***
+ToDo
+    ボタンの実装、表示、押したときの動作
+    eating実装
+    grooming実装
+    コントラを見立てた外部ステータス格納区域の実装と、読み込み、書き込みの実装
+
+***/
+
 
 // class
 
@@ -44,7 +53,7 @@ C, static_status
 
 class Character extends Phaser.GameObjects.Sprite{
     constructor(scene, x, y){
-        super(scene, x, y, "dude", "Frame");
+        super(scene, x, y, "murasaki_right", "Frame");
         this.scene.add.existing(this);
         this.anims.play("normal", true);
     	this.mode = "resting";
@@ -123,7 +132,7 @@ class Character extends Phaser.GameObjects.Sprite{
     }
 }
 
-
+/***
 //ボタンクラス
 //https://ysko909.github.io/posts/make-button-class-with-phaserjs/
 class OriginalButtonClass extends Phaser.GameObjects.Container{
@@ -196,11 +205,12 @@ class OriginalButtonClass extends Phaser.GameObjects.Container{
   }
 
 }
+***/
+
 
 
 // main functions
 
-// Create game
 
 let config = {
     type: Phaser.AUTO,
@@ -216,11 +226,12 @@ let config = {
     }
 };
 
+
 let game = new Phaser.Game(config);
+
 
 function preload() {
     this.load.image("sky", "png/sky.png");
-    this.load.spritesheet("dude", "png/murasaki2.png", {frameWidth: 74, frameHeight: 64});
     this.load.spritesheet("murasaki_right", "png/murasaki_right.png", {frameWidth: 74, frameHeight: 64});
     this.load.spritesheet("murasaki_left", "png/murasaki_left.png", {frameWidth: 74, frameHeight: 64});
     cursors = this.input.keyboard.createCursorKeys();
@@ -228,17 +239,7 @@ function preload() {
 
 
 function create() {
-
     this.add.image(400, 300, "sky");
-    //player = this.physics.add.sprite(100,450, "dude");
-    //player = this.add.sprite(100,450, "dude");
-
-    this.anims.create({
-        key: "normal",
-        frames: this.anims.generateFrameNumbers("dude", {start: 0, end:3}),
-        frameRate: 2,
-        repeat: -1
-    });
     this.anims.create({
         key: "murasaki_right",
         frames: this.anims.generateFrameNumbers("murasaki_right", {start: 0, end:3}),
@@ -251,39 +252,27 @@ function create() {
         frameRate: 2,
         repeat: -1
     });
+    //var group = this.add.group();
+    char1 = new Character(this, 300 + Math.random()*200, 400 + Math.random()*100);
 
+    /***
     this.button = new OriginalButtonClass(this, 200, 200, 'hoge', {
         onClick: ()=>{
             console.log('clicked.');
         }
     });
-
-    //player.anims.play("normal", true);
-
-    //var group = this.add.group();
-    char1 = new Character(this, 300 + Math.random()*200, 400 + Math.random()*100);
+    ***/
 
 }
 
 
 function update() {
-    //player.x += 1;
-    //if (cursors.right.isDown) {
-    //    var random = Math.random() * 600;
-        //player = this.physics.add.sprite(random,450, "dude");
-    //    player = this.add.sprite(random,450, "dude");
-    //    player.anims.play("normal", true);
-    //};
-    //if (cursors.left.isDown) {
-    //    player.anims.play("normal", false);
-    //};
-    //if (cursors.down.isDown) {
-        //chara = this.scene.add.existing(new Chara(this, 100,100));
-    //    chara = new Character(this, Math.random()*400,Math.random()*400);
-    //    chara.anims.play("normal", true);
-    //}
     char1.update();
+    if (cursors.right.isDown) {
+        char1.update();
+    }
 }
+
 
 </script>
 
