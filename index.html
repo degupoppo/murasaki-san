@@ -136,6 +136,7 @@ class Character extends Phaser.GameObjects.Sprite{
 class Button {
     constructor(x, y, label, scene, callback) {
         const button = scene.add.text(x, y, label)
+            .setFontSize(10);
             .setOrigin(0.5)
             .setPadding(10)
             //.setStyle({ backgroundColor: '#111' })
@@ -197,8 +198,8 @@ function create() {
     });
     //var group = this.add.group();
     char1 = new Character(this, 300 + Math.random()*200, 400 + Math.random()*100);
-    const button1 = new Button(100, 25, 'Feeding'.setFontSize(10), this, () => console.log('game is started'));
-    const button2 = new Button(100, 50, 'Grooming'.setFontSize(10), this, () => actionOnClick());
+    const button1 = new Button(100, 25, 'Feeding', this, () => console.log('game is started'));
+    const button2 = new Button(100, 50, 'Grooming', this, () => actionOnClick());
 
 
 }
