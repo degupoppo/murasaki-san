@@ -98,16 +98,15 @@ class Character extends Phaser.GameObjects.Sprite{
             }else if (this.dist == "left") {
                 this.anims.play("murasaki_left", true);
             }
-        }else {
+        }else if (this.count < 100) {
             if (this.dist == "right" && this.count % 2 == 0){
                 this.x += 1;
             }else if (this.dist == "left" && this.count % 2 == 0) {
                 this.x -= 1;
             }
-            if (this.count >= 100) {
-                this.mode = "rest";
-                this.count = 0;
-    		}
+        }else if (this.count >= 100) {
+            this.mode = "resting";
+            this.count = 0;
         }
     }
     //send: last_nutrition_time
