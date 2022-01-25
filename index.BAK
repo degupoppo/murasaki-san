@@ -45,13 +45,13 @@ class Character extends Phaser.GameObjects.Sprite{
         this.anims.play("normal", true);
     	this.mode = "none";
         this.count = 0;
-        this.version = 0.01;
+        this.version = 0.02;
     }
     update(){
     	console.log(this.version, this.mode, this.count);
         if (this.mode = "none") {
             this.mode = "rest";
-        }else if (this.mode = "rest") {
+        }else if (this.mode == "rest") {
 		    this.count += 1;
 		    if (this.count >= 100){
                 var li = ["right", "left"];
@@ -59,7 +59,7 @@ class Character extends Phaser.GameObjects.Sprite{
                 this.mode = "move";
                 this.count = 0;
             }
-        }else if (this.mode = "move") {
+        }else if (this.mode == "move") {
             console.log("OK");
             this.count += 1;
             if (this.dist = "right"){
@@ -71,8 +71,6 @@ class Character extends Phaser.GameObjects.Sprite{
                 this.mode = "rest";
                 this.count = 0;
     		}
-        } else {
-            console.log("Boo!");
         }
     }
 }
