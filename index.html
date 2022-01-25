@@ -38,6 +38,28 @@ let game = new Phaser.Game(config);
 
 // class
 
+/***
+A, behavior
+    1, resting
+    2, moving
+    3, eating
+    4, sleeping
+    5, grooming
+    6, working
+B, dynamic_status
+    lif: -working/+sleeping
+    nutirition: +eating
+    happy: +grooming
+    exp: +working
+    coin: +working
+C, static_status
+    strength
+    dexterity
+    vitality
+    intelligence
+    luck
+***/
+
 class Character extends Phaser.GameObjects.Sprite{
     constructor(scene, x, y){
         super(scene, x, y, "dude", "Frame");
@@ -46,8 +68,62 @@ class Character extends Phaser.GameObjects.Sprite{
     	this.mode = "none";
         this.count = 0;
         this.version = 0.12;
+        //static_status
+        this.strength = 2 + Math.random()* 8;
+        this.dexterity = 2 + Math.random()* 8;
+        this.vitality = 2 + Math.random()* 8;
+        this.intelligence = 2 + Math.random()* 8;
+        this.luck = 2 + Math.random()* 8;
+        //dymamic_status
+        this.life = 100;
+        this.nutrition = 100;
+        this.happy = 100;
+        this.exp = 0;
+        this.coin = 0;
+    }
+    resting(){
+	    this.count += 1;
+	    if (this.count >= 100){
+            var li = ["right", "left"];
+            this.dist = li[Math.floor(Math.random() * li.length)];
+            if (this.dist == "right"){
+                this.anims.play("murasaki_right", true);
+            }else if (this.dist == "left") {
+                this.anims.play("murasaki_left", true);
+            }
+            this.mode = "move";
+            this.count = 0;
+        }
+    }
+    moving() {
+        this.count += 1;
+        if (this.dist == "right" && this.count % 2 == 0){
+            this.x += 1;
+        }else if (this.dist == "left" && this.count % 2 == 0) {
+            this.x -= 1;
+        }
+        if (this.count >= 100) {
+            this.mode = "rest";
+            this.count = 0;
+		}
+    }
+    eating() {
+    }
+    sleeping() {
+    }
+    grooming() {
+    }
+    working() {
     }
     update(){
+        if (this.mode == "resting") {this.resting()}
+        else if (this.mode == "moving") {this.moving()}
+        else if (this.mode == "eating") {this.eating()}
+        else if (this.mode == "sleeping") {this.sleeping()}
+        else if (this.mode == "grooming") {this.grooming()}
+        else if (this.mode == "working") {this.working()}
+
+        /***
     	console.log(this.version, this.mode, this.count);
         if (this.mode == "none") {
             this.mode = "rest";
@@ -78,6 +154,8 @@ class Character extends Phaser.GameObjects.Sprite{
         }else{
             console.log("Boo!");
         }
+        ***/
+
     }
 }
 
