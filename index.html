@@ -76,6 +76,9 @@ class Character extends Phaser.GameObjects.Sprite{
         this.mode = mode;
         this.count = 0;
     }
+    get get_mode(){
+        return this.mode;
+    }
     resting(){
 	    this.count += 1;
 	    if (this.count >= 100){
@@ -249,7 +252,7 @@ function create() {
 
 function update() {
     char1.update();
-    this.add.text(700, 550, char1.mode).setFontSize(12);
+    this.add.text(700, 550, char1.get_mode).setFontSize(12);
     if (cursors.right.isDown) {
         char1.update();
     }
