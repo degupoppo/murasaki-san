@@ -67,7 +67,7 @@ class Character extends Phaser.GameObjects.Sprite{
         this.anims.play("normal", true);
     	this.mode = "resting";
         this.count = 0;
-        this.version = 0.12;
+        this.version = 0.13;
         //static_status, TODO:get from contract
         this.strength = 2 + Math.random()* 8;
         this.dexterity = 2 + Math.random()* 8;
@@ -75,11 +75,11 @@ class Character extends Phaser.GameObjects.Sprite{
         this.intelligence = 2 + Math.random()* 8;
         this.luck = 2 + Math.random()* 8;
         //dymamic_status, TODO:get from contract
-        this.life = 100;
-        this.nutrition = 100;
-        this.happy = 100;
-        this.exp = 0;
-        this.coin = 0;
+        this.life = 100;        //TODO: calc from static_status
+        this.nutrition = 100;   //TODO: calc from static_status, last_mealing_time
+        this.happy = 100;       //TODO: calc from static_status, last_grooming_time
+        this.exp = 0;           //TODO: get from static_status
+        this.coin = 0;          //TODO: get from static_status
     }
     resting(){
 	    this.count += 1;
@@ -90,7 +90,7 @@ class Character extends Phaser.GameObjects.Sprite{
     }
     moving() {
         this.count += 1;
-        if (thi.count == 1){
+        if (this.count == 1){
             var li = ["right", "left"];
             this.dist = li[Math.floor(Math.random() * li.length)];
             if (this.dist == "right"){
