@@ -173,7 +173,7 @@ class Character extends Phaser.GameObjects.Sprite{
         if (this.mode == "resting") {this.resting();}
         else if (this.mode == "moving") {this.moving();}
         else if (this.mode == "feeding") {this.feeding();}
-        else if (this.mode == "crying") {this.feeding();}
+        else if (this.mode == "crying") {this.crying();}
         else if (this.mode == "sleeping") {this.sleeping();}
         else if (this.mode == "grooming") {this.grooming();}
         else if (this.mode == "working") {this.working();}
@@ -275,12 +275,16 @@ function create() {
     //text_mode = this.add.text(100, 100, "test", {fontSize:12, fontFamily: "Arial", fill: "#000"});
     const button1 = new Button(100, 25, 'Grooming', this, () => console.log('game is started'));
     const button2 = new Button(100, 50, 'Feeding', this, () => actionOnClick());
+    text_coin = this.add.text(700, 100, global_coin, {fontSize:12, fontFamily: "Arial", fill: "#000"});
 }
 
 
 function update() {
     char1.update();
     //text_mode.text = char1.get_mode;
+    if (cursors.right.isDown) {
+        global_coin += 1;
+    }
 }
 
 
