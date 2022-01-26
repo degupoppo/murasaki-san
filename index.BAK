@@ -253,9 +253,9 @@ function button_grooming(contract) {
 }
 
 
-function makeBar(x, y,color) {
+function makeBar(scene, x, y,color) {
     //draw the bar
-    let bar = this.add.graphics();
+    let bar = scene.add.graphics();
 
     //color the bar
     bar.fillStyle(color, 1);
