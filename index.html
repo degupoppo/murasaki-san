@@ -71,8 +71,8 @@ let local_intelligence;
 let local_luck;
 let local_birth_time;
 //dynamic_status, read from construct continuously, write to construct
-let local_last_feeding_time = 99999999999999999999999;
-let local_last_grooming_time = 99999999999999999999999;
+let local_last_feeding_time = Date.now() + 86400000;
+let local_last_grooming_time = Date.now() + 86400000;
 let local_coin;
 let local_working_status;
 let local_working_start_time;
@@ -434,11 +434,11 @@ function update() {
         local_exp = contract.exp;
         //check character mode
         if (local_last_feeding_time > previous_local_last_feeding_time){
-            console.log("feeding");
+            //console.log("feeding");
             char1.set_mode = "feeding";
         }
         if (local_last_grooming_time > previous_local_last_grooming_time){
-            console.log("grooming");
+            //console.log("grooming");
             char1.set_mode = "grooming";
         }
     }
