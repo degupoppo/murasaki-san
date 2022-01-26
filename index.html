@@ -431,9 +431,11 @@ function update() {
         local_exp = contract.exp;
         //check character mode
         if (previous_local_last_feeding_time & local_last_feeding_time != previous_local_last_feeding_time){
+            console.log("feeding");
             char1.set_mode = "feeding";
         }
         if (previous_local_last_grooming_time & local_last_grooming_time != previous_local_last_grooming_time){
+            console.log("grooming");
             char1.set_mode = "grooming";
         }
     }
