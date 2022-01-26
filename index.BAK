@@ -280,13 +280,14 @@ function create() {
 
 
 function update() {
+    await new Promise(resolve => setTimeout(resolve, 10))
     char1.update();
     //text_mode.text = char1.get_mode;
     if (cursors.right.isDown) {
         global_coin += 1;
     }
     global_coin += 1;
-    text_coin.setText = global_coin;
+    text_coin.setText(global_coin);
 }
 
 
