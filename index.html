@@ -87,6 +87,9 @@ class Character extends Phaser.GameObjects.Sprite{
             if (tmp <= 10) {
                 this.mode = "sleeping";
                 this.count = 0;
+            }else if (tmp <= 20) {
+                this.mode = "crying";
+                this.count = 0;
             }else {
                 this.mode = "moving";
                 this.count = 0;
@@ -130,6 +133,15 @@ class Character extends Phaser.GameObjects.Sprite{
             this.count = 0;
         }
     }
+    crying() {
+        this.count += 1;
+        if (this.count == 1){
+            this.anims.play("murasaki_crying", true);
+        }else if (this.count >= 500) {
+            this.mode = "resting";
+            this.count = 0;
+        }
+    }
     sleeping() {
         this.count += 1;
         if (this.count == 1){
@@ -152,6 +164,7 @@ class Character extends Phaser.GameObjects.Sprite{
         if (this.mode == "resting") {this.resting();}
         else if (this.mode == "moving") {this.moving();}
         else if (this.mode == "feeding") {this.feeding();}
+        else if (this.mode == "crying") {this.feeding();}
         else if (this.mode == "sleeping") {this.sleeping();}
         else if (this.mode == "grooming") {this.grooming();}
         else if (this.mode == "working") {this.working();}
@@ -212,6 +225,7 @@ function preload() {
     this.load.spritesheet("murasaki_left", "png/murasaki_left.png", {frameWidth: 74, frameHeight: 64});
     this.load.spritesheet("murasaki_sleeping", "png/murasaki_sleeping.png", {frameWidth: 74, frameHeight: 64});
     this.load.spritesheet("murasaki_feeding", "png/murasaki_feeding.png", {frameWidth: 74, frameHeight: 64});
+    this.load.spritesheet("murasaki_crying", "png/murasaki_crying.png", {frameWidth: 74, frameHeight: 64});
     cursors = this.input.keyboard.createCursorKeys();
 }
 
@@ -239,6 +253,12 @@ function create() {
     this.anims.create({
         key: "murasaki_feeding",
         frames: this.anims.generateFrameNumbers("murasaki_feeding", {start: 0, end:1}),
+        frameRate: 1,
+        repeat: -1
+    });
+    this.anims.create({
+        key: "murasaki_crying",
+        frames: this.anims.generateFrameNumbers("murasaki_crying", {start: 0, end:1}),
         frameRate: 1,
         repeat: -1
     });

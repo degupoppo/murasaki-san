@@ -130,6 +130,15 @@ class Character extends Phaser.GameObjects.Sprite{
             this.count = 0;
         }
     }
+    crying() {
+        this.count += 1;
+        if (this.count == 1){
+            this.anims.play("murasaki_crying", true);
+        }else if (this.count >= 500) {
+            this.mode = "resting";
+            this.count = 0;
+        }
+    }
     sleeping() {
         this.count += 1;
         if (this.count == 1){
@@ -152,6 +161,7 @@ class Character extends Phaser.GameObjects.Sprite{
         if (this.mode == "resting") {this.resting();}
         else if (this.mode == "moving") {this.moving();}
         else if (this.mode == "feeding") {this.feeding();}
+        else if (this.mode == "crying") {this.feeding();}
         else if (this.mode == "sleeping") {this.sleeping();}
         else if (this.mode == "grooming") {this.grooming();}
         else if (this.mode == "working") {this.working();}
@@ -212,6 +222,7 @@ function preload() {
     this.load.spritesheet("murasaki_left", "png/murasaki_left.png", {frameWidth: 74, frameHeight: 64});
     this.load.spritesheet("murasaki_sleeping", "png/murasaki_sleeping.png", {frameWidth: 74, frameHeight: 64});
     this.load.spritesheet("murasaki_feeding", "png/murasaki_feeding.png", {frameWidth: 74, frameHeight: 64});
+    this.load.spritesheet("murasaki_crying", "png/murasaki_crying.png", {frameWidth: 74, frameHeight: 64});
     cursors = this.input.keyboard.createCursorKeys();
 }
 
@@ -242,8 +253,14 @@ function create() {
         frameRate: 1,
         repeat: -1
     });
+    this.anims.create({
+        key: "murasaki_crying",
+        frames: this.anims.generateFrameNumbers("murasaki_crying", {start: 0, end:1}),
+        frameRate: 1,
+        repeat: -1
+    });
     char1 = new Character(this, 300 + Math.random()*200, 400 + Math.random()*100);
-    text_mode = this.add.text(100, 100, "test", {fontSize:12, fontFamily: "Arial", fill: "#000"});
+    //text_mode = this.add.text(100, 100, "test", {fontSize:12, fontFamily: "Arial", fill: "#000"});
     const button1 = new Button(100, 25, 'Grooming', this, () => console.log('game is started'));
     const button2 = new Button(100, 50, 'Feeding', this, () => actionOnClick());
 }
