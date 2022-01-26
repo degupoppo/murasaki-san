@@ -324,9 +324,9 @@ function create() {
     text_mode = this.add.text(
         600, 170, "mode = ", {font: "10.5px Arial", fill: "#000"});
     text_satiety = this.add.text(
-        600, 170, "satiey = ", {font: "10.5px Arial", fill: "#000"});
+        600, 180, "satiey = ", {font: "10.5px Arial", fill: "#000"});
     text_happy = this.add.text(
-        600, 170, "happy = ", {font: "10.5px Arial", fill: "#000"});
+        600, 190, "happy = ", {font: "10.5px Arial", fill: "#000"});
 }
 
 
@@ -335,7 +335,7 @@ function update() {
     turn += 1;
     //update character
     char1.update();
-    if (turn % == 10) {
+    if (turn % 10 == 0) {
         //update calculation_status
         now_time = Date.now();
         age_time = now_time - global_birth_time;
