@@ -320,6 +320,8 @@ function create() {
     //calculation_status
     text_age_time = this.add.text(
         600, 160, "age_time = ", {font: "10.5px Arial", fill: "#000"});
+    text_mode = this.add.text(
+        600, 170, "mode = ", {font: "10.5px Arial", fill: "#000"});
 }
 
 
@@ -335,6 +337,7 @@ function update() {
     text_working_start_time.setText("working_start_time = " + global_working_start_time);
     text_exp.setText("exp = " + global_exp);
     text_age_time.setText("age_time = " + age_time);
+    text_mode.setText("mode = " + char1.get_mode);
     if (cursors.right.isDown) {
     }
 }
