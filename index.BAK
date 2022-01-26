@@ -25,6 +25,7 @@ ToDo
     コントラを見立てた外部ステータス格納区域の実装と、読み込み、書き込みの実装
     キャラのステータスをテキストで描写, コントラから定期的に取得し計算する
     ステータスはキャラクラスに保持させずに、コントラに見立てた外部変数に格納する。
+    1日1回？feeding, last_feeding_timeからの差でexp加算, 24hr以上の差は無効
 ***/
 
 
@@ -63,7 +64,7 @@ var global_dexterity = 2 + Math.trunc(Math.random() * 8);
 var global_vitality = 2 + Math.trunc(Math.random() * 8);
 var global_intelligence = 2 + Math.trunc(Math.random() * 8);
 var global_luck = 2 + Math.trunc(Math.random() * 8);
-var global_birth_time = Date.UTC();
+var global_birth_time = Date.now();
 //dynamic_status, read from construct continuously, write to construct
 var global_last_feeding_time = Date.now();
 var global_last_grooming_time = Date.now();
@@ -282,23 +283,35 @@ function create() {
         frameRate: 1,
         repeat: -1
     });
+    //summon character
     char1 = new Character(this, 300 + Math.random()*200, 400 + Math.random()*100);
-    //text_mode = this.add.text(100, 100, "test", {fontSize:12, fontFamily: "Arial", fill: "#000"});
+    //button
     const button1 = new Button(100, 25, 'Grooming', this, () => console.log('game is started'));
     const button2 = new Button(100, 50, 'Feeding', this, () => actionOnClick());
-    text_version = this.add.text(750, 10, version, {fontSize:12, fontFamily: "Arial", fill: "#000"});
-    text_coin = this.add.text(700, 100, global_coin, {fontSize:12, fontFamily: "Arial", fill: "#000"});
-    text_strength = this.add.text(700, 110, "strength: " + global_strength, {fontSize:12, fontFamily: "Arial", fill: "#000"});
-    text_lifetime = this.add.text(700, 120, "lifetime: ", {fontSize:12, fontFamily: "Arial", fill: "#000"});
+    //text
+    text_version = this.add.text(650, 10, "version = " + version, {font: "10.5px Arial", fill: "#000"});
+    //static_status
+    text_birth_time = this.add.text(650, 20, "birth_time = " + global_birth_time, {font: "10.5px Arial", fill: "#000"});
+    text_strength = this.add.text(650, 30, "strength = " + global_strength, {font: "10.5px Arial", fill: "#000"});
+    text_dexterity = this.add.text(650, 40, "dexterity = " + global_dexterity, {font: "10.5px Arial", fill: "#000"});
+    text_vitality = this.add.text(650, 50, "vitality = " + global_vitality, {font: "10.5px Arial", fill: "#000"});
+    text_intelligence = this.add.text(650, 60, "intelligence = " + global_intelligence, {font: "10.5px Arial", fill: "#000"});
+    text_luck = this.add.text(650, 70, "luck = " + global_luck, {font: "10.5px Arial", fill: "#000"});
+    //dynamic_status
+    text_last_feeding_time = this.add.text(650, 90, "last_feeding_time = " + global_last_feeding_time, {font: "10.5px Arial", fill: "#000"});
+    text_last_grooming_time = this.add.text(650, 100, "last_grooming_time = " + global_last_grooming_time, {font: "10.5px Arial", fill: "#000"});
+    text_coin = this.add.text(650, 110, "coin = " + global_coin, {font: "10.5px Arial", fill: "#000"});
+    text_working_status = this.add.text(650, 120, "working_status = " + global_working_status, {font: "10.5px Arial", fill: "#000"});
+    text_working_start_time = this.add.text(650, 130, "working_start_time = " + global_working_start_time, {font: "10.5px Arial", fill: "#000"});
 
 }
 
 
 function update() {
     char1.update();
-    text_lifetime.setText("lifetime: " + (Date.now() - global_birth_time) );
-    text_coin.setText(global_coin);
-    global_coin += 1;
+    //text_lifetime.setText("lifetime: " + (Date.now() - global_birth_time) );
+    //text_coin.setText(global_coin);
+    //global_coin += 1;
     if (cursors.right.isDown) {
     }
 }
