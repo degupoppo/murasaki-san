@@ -202,6 +202,8 @@ function actionOnClick() {
     char1.set_mode = "feeding";
 }
 
+const _sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 
 // main functions
 
@@ -280,7 +282,7 @@ function create() {
 
 
 function update() {
-    await new Promise(resolve => setTimeout(resolve, 10))
+    await new Promise(resolve => setTimeout(resolve, 100))
     char1.update();
     //text_mode.text = char1.get_mode;
     if (cursors.right.isDown) {
