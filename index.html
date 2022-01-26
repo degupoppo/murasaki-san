@@ -233,7 +233,7 @@ function button_feeding(contract) {
     contract.exp += delta / 1000
     contract.last_feeding_time = Date.now();
 }
-function button_feeding(grooming) {
+function button_grooming(grooming) {
     //char1.set_mode = "grooming";
     let delta = Date.now() - local_last_grooming_time;
     contract.exp += delta / 1000

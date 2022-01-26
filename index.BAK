@@ -228,13 +228,13 @@ class Button {
 
 
 function button_feeding(contract) {
-    char1.set_mode = "feeding";
+    //char1.set_mode = "feeding";
     let delta = Date.now() - local_last_feeding_time;
     contract.exp += delta / 1000
     contract.last_feeding_time = Date.now();
 }
 function button_feeding(grooming) {
-    char1.set_mode = "grooming";
+    //char1.set_mode = "grooming";
     let delta = Date.now() - local_last_grooming_time;
     contract.exp += delta / 1000
     contract.last_grooming_time = Date.now();
