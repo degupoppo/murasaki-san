@@ -121,7 +121,7 @@ class Character extends Phaser.GameObjects.Sprite{
             }else if (this.dist == "left") {
                 this.anims.play("murasaki_left", true);
             }
-	    if (this.count >= 100){
+	    }else if (this.count >= 100){
             let tmp = Math.random() * 100;
             if (tmp <= 10) {
                 this.mode = "sleeping";
@@ -240,7 +240,7 @@ function button_feeding(contract) {
     contract.exp += delta / 1000
     contract.last_feeding_time = Date.now();
 }
-function button_grooming(grooming) {
+function button_grooming(contract) {
     //char1.set_mode = "grooming";
     let delta = Date.now() - local_last_grooming_time;
     contract.exp += delta / 1000
