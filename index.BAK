@@ -26,6 +26,9 @@ ToDo
     キャラのステータスをテキストで描写, コントラから定期的に取得し計算する
     ステータスはキャラクラスに保持させずに、コントラに見立てた外部変数に格納する。
     1日1回？feeding, last_feeding_timeからの差でexp加算, 24hr以上の差は無効
+    satiety, happy, expのバーを実装する
+    Lvを実装する。必要expの対応表を作製する。
+    satietyとhappyの差別化を考える。
 ***/
 
 
@@ -430,10 +433,12 @@ function update() {
         local_working_start_time = contract.working_start_time;
         local_exp = contract.exp;
         //check character mode
-        if (previous_local_last_feeding_time & local_last_feeding_time != previous_local_last_feeding_time){
+        if (local_last_feeding_time > previous_local_last_feeding_time){
+            console.log("feeding");
             char1.set_mode = "feeding";
         }
-        if (previous_local_last_grooming_time & local_last_grooming_time != previous_local_last_grooming_time){
+        if (local_last_grooming_time > previous_local_last_grooming_time){
+            console.log("grooming");
             char1.set_mode = "grooming";
         }
     }
