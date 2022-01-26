@@ -296,7 +296,7 @@ function create() {
 
 function update() {
     char1.update();
-    text_lifetime.setText("lifetime: " + (Date.UTC() - global_birth_time) );
+    text_lifetime.setText("lifetime: " + (Date.UTC()) );
     text_coin.setText(global_coin);
     global_coin += 1;
     if (cursors.right.isDown) {
