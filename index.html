@@ -52,6 +52,10 @@ C, static_status
     luck
 ***/
 
+
+const version = "0.0.14";
+
+
 //static_status, read from construct at once
 var global_type = Math.trunc(Math.random() * 5);
 var global_strength = 2 + Math.trunc(Math.random() * 8);
@@ -74,7 +78,6 @@ class Character extends Phaser.GameObjects.Sprite{
         this.anims.play("murasaki_right", true);
     	this.mode = "resting";
         this.count = 0;
-        this.version = 0.13;
         //static_status, TODO:get from contract
         this.strength = 2 + Math.random()* 8;
         this.dexterity = 2 + Math.random()* 8;
@@ -283,6 +286,7 @@ function create() {
     //text_mode = this.add.text(100, 100, "test", {fontSize:12, fontFamily: "Arial", fill: "#000"});
     const button1 = new Button(100, 25, 'Grooming', this, () => console.log('game is started'));
     const button2 = new Button(100, 50, 'Feeding', this, () => actionOnClick());
+    text_version = this.add.text(750, 10, version, {fontSize:12, fontFamily: "Arial", fill: "#000"});
     text_coin = this.add.text(700, 100, global_coin, {fontSize:12, fontFamily: "Arial", fill: "#000"});
     text_strength = this.add.text(700, 120, "strength: " + global_strength, {fontSize:12, fontFamily: "Arial", fill: "#000"});
     text_lifetime = this.add.text(700, 120, "lifetime: ", {fontSize:12, fontFamily: "Arial", fill: "#000"});
@@ -292,7 +296,7 @@ function create() {
 
 function update() {
     char1.update();
-    text_lifetime.setText("lifetime: ", Date.UTF() - global_birth_time);
+    text_lifetime.setText("lifetime: ", Date.UTC() - global_birth_time);
     text_coin.setText(global_coin);
     global_coin += 1;
     if (cursors.right.isDown) {
