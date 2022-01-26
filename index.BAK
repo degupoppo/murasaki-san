@@ -237,8 +237,6 @@ function actionOnClick(contract) {
     contract.last_feeding_time = Date.now();
 }
 
-const _sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
 
 // main functions
 
@@ -363,7 +361,7 @@ function update() {
     text_turn.setText("turn = " + turn);
     //update character
     char1.update();
-    //update status, text
+    //update status and text
     if (turn % 10 == 0) {
         //update calculation_status
         let now_time = Date.now();
@@ -384,7 +382,7 @@ function update() {
         text_satiety.setText("satiety = " + satiety);
         text_happy.setText("happy = " + happy);
     }
-    //get status from contract
+    //read status from contract to local
     if (turn % 101 == 0) {
         //update statistic_status
         //update dynamic_status

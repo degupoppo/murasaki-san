@@ -77,19 +77,19 @@ let local_exp;
 
 class Contract {
     constructor() {
-        const this.type = Math.trunc(Math.random() * 5);
-        const this.strength = 2 + Math.trunc(Math.random() * 8);
-        const this.dexterity = 2 + Math.trunc(Math.random() * 8);
-        const this.vitality = 2 + Math.trunc(Math.random() * 8);
-        const this.intelligence = 2 + Math.trunc(Math.random() * 8);
-        const this.luck = 2 + Math.trunc(Math.random() * 8);
-        const this.birth_time = Date.now();
-        let this.last_feedint_time = Date.now();
-        let this.last_grooming_time = Date.now();
-        let this.coin = 100;
-        let this.working_status = 0;
-        let this.working_start_time = 0;
-        let this.exp = 0;
+        this.type = Math.trunc(Math.random() * 5);
+        this.strength = 2 + Math.trunc(Math.random() * 8);
+        this.dexterity = 2 + Math.trunc(Math.random() * 8);
+        this.vitality = 2 + Math.trunc(Math.random() * 8);
+        this.intelligence = 2 + Math.trunc(Math.random() * 8);
+        this.luck = 2 + Math.trunc(Math.random() * 8);
+        this.birth_time = Date.now();
+        this.last_feedint_time = Date.now();
+        this.last_grooming_time = Date.now();
+        this.coin = 100;
+        this.working_status = 0;
+        this.working_start_time = 0;
+        this.exp = 0;
     }
 }
 
@@ -237,8 +237,6 @@ function actionOnClick(contract) {
     contract.last_feeding_time = Date.now();
 }
 
-const _sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
 
 // main functions
 
@@ -363,7 +361,7 @@ function update() {
     text_turn.setText("turn = " + turn);
     //update character
     char1.update();
-    //update status, text
+    //update status and text
     if (turn % 10 == 0) {
         //update calculation_status
         let now_time = Date.now();
@@ -384,7 +382,7 @@ function update() {
         text_satiety.setText("satiety = " + satiety);
         text_happy.setText("happy = " + happy);
     }
-    //get status from contract
+    //read status from contract to local
     if (turn % 101 == 0) {
         //update statistic_status
         //update dynamic_status
