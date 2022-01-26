@@ -371,6 +371,14 @@ function create() {
         600, 220, "satiey = ", {font: "10.5px Arial", fill: "#000"});
     text_happy = this.add.text(
         600, 230, "happy = ", {font: "10.5px Arial", fill: "#000"});
+    //bar
+    bar_satiety = this.makeBar(140, 100, 0x2ecc71);
+    this.setValue(bar_satiety, 100);
+    bar = this.add.graphics();
+    bar.fillStyle(color, 1);
+    bar.fillRect(0,0,200,50);
+    bar.x = 100;
+    bar.y = 100;
 }
 
 
