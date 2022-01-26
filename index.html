@@ -75,6 +75,7 @@ let local_working_start_time;
 let local_exp;
 
 
+//fake contract
 class Contract {
     constructor() {
         this.type = Math.trunc(Math.random() * 5);
@@ -84,7 +85,7 @@ class Contract {
         this.intelligence = 2 + Math.trunc(Math.random() * 8);
         this.luck = 2 + Math.trunc(Math.random() * 8);
         this.birth_time = Date.now();
-        this.last_feedint_time = Date.now();
+        this.last_feeding_time = Date.now();
         this.last_grooming_time = Date.now();
         this.coin = 100;
         this.working_status = 0;
@@ -101,18 +102,6 @@ class Character extends Phaser.GameObjects.Sprite{
         this.anims.play("murasaki_right", true);
     	this.mode = "resting";
         this.count = 0;
-        //static_status, TODO:get from contract
-        this.strength       = 2 + Math.random()* 8;
-        this.dexterity      = 2 + Math.random()* 8;
-        this.vitality       = 2 + Math.random()* 8;
-        this.intelligence   = 2 + Math.random()* 8;
-        this.luck           = 2 + Math.random()* 8;
-        //dymamic_status, TODO:get from contract
-        this.life       = 100;  //TODO: get from static_status
-        this.nutrition  = 100;  //TODO: calc from static_status, last_mealing_time
-        this.happy      = 100;  //TODO: calc from static_status, last_grooming_time
-        this.exp        = 0;    //TODO: get from static_status
-        this.coin       = 0;    //TODO: get from static_status
     }
     set set_mode(mode){
         this.mode = mode;
@@ -314,42 +303,44 @@ function create() {
     //text
     text_version = this.add.text(600, 10, "version = " + version, {font: "10.5px Arial", fill: "#000"});
     //static_status
+    text_type = this.add.text(
+        600, 20, "type = " + local_type, {font: "10.5px Arial", fill: "#000"});
     text_birth_time = this.add.text(
-        600, 20, "birth_time = " + local_birth_time, {font: "10.5px Arial", fill: "#000"});
+        600, 30, "birth_time = " + local_birth_time, {font: "10.5px Arial", fill: "#000"});
     text_strength = this.add.text(
-        600, 30, "strength = " + local_strength, {font: "10.5px Arial", fill: "#000"});
+        600, 40, "strength = " + local_strength, {font: "10.5px Arial", fill: "#000"});
     text_dexterity = this.add.text(
-        600, 40, "dexterity = " + local_dexterity, {font: "10.5px Arial", fill: "#000"});
+        600, 50, "dexterity = " + local_dexterity, {font: "10.5px Arial", fill: "#000"});
     text_vitality = this.add.text(
-        600, 50, "vitality = " + local_vitality, {font: "10.5px Arial", fill: "#000"});
+        600, 60, "vitality = " + local_vitality, {font: "10.5px Arial", fill: "#000"});
     text_intelligence = this.add.text(
-        600, 60, "intelligence = " + local_intelligence, {font: "10.5px Arial", fill: "#000"});
+        600, 70, "intelligence = " + local_intelligence, {font: "10.5px Arial", fill: "#000"});
     text_luck = this.add.text(
-        600, 70, "luck = " + local_luck, {font: "10.5px Arial", fill: "#000"});
+        600, 80, "luck = " + local_luck, {font: "10.5px Arial", fill: "#000"});
     //dynamic_status
     text_last_feeding_time = this.add.text(
-        600, 90, "last_feeding_time = " + local_last_feeding_time, {font: "10.5px Arial", fill: "#000"});
+        600, 100, "last_feeding_time = " + local_last_feeding_time, {font: "10.5px Arial", fill: "#000"});
     text_last_grooming_time = this.add.text(
-        600, 100, "last_grooming_time = " + local_last_grooming_time, {font: "10.5px Arial", fill: "#000"});
+        600, 110, "last_grooming_time = " + local_last_grooming_time, {font: "10.5px Arial", fill: "#000"});
     text_coin = this.add.text(
-        600, 110, "coin = " + local_coin, {font: "10.5px Arial", fill: "#000"});
+        600, 120, "coin = " + local_coin, {font: "10.5px Arial", fill: "#000"});
     text_working_status = this.add.text(
-        600, 120, "working_status = " + local_working_status, {font: "10.5px Arial", fill: "#000"});
+        600, 130, "working_status = " + local_working_status, {font: "10.5px Arial", fill: "#000"});
     text_working_start_time = this.add.text(
-        600, 130, "working_start_time = " + local_working_start_time, {font: "10.5px Arial", fill: "#000"});
+        600, 140, "working_start_time = " + local_working_start_time, {font: "10.5px Arial", fill: "#000"});
     text_exp = this.add.text(
-        600, 140, "exp = " + local_exp, {font: "10.5px Arial", fill: "#000"});
+        600, 150, "exp = " + local_exp, {font: "10.5px Arial", fill: "#000"});
     //calculation_status
     text_turn = this.add.text(
-        600, 160, "turn = ", {font: "10.5px Arial", fill: "#000"});
+        600, 170, "turn = ", {font: "10.5px Arial", fill: "#000"});
     text_age_time = this.add.text(
-        600, 170, "age_time = ", {font: "10.5px Arial", fill: "#000"});
+        600, 180, "age_time = ", {font: "10.5px Arial", fill: "#000"});
     text_mode = this.add.text(
-        600, 180, "mode = ", {font: "10.5px Arial", fill: "#000"});
+        600, 190, "mode = ", {font: "10.5px Arial", fill: "#000"});
     text_satiety = this.add.text(
-        600, 190, "satiey = ", {font: "10.5px Arial", fill: "#000"});
+        600, 200, "satiey = ", {font: "10.5px Arial", fill: "#000"});
     text_happy = this.add.text(
-        600, 200, "happy = ", {font: "10.5px Arial", fill: "#000"});
+        600, 210, "happy = ", {font: "10.5px Arial", fill: "#000"});
     //fake contract
     contract = new Contract();
 }
@@ -361,6 +352,22 @@ function update() {
     text_turn.setText("turn = " + turn);
     //update character
     char1.update();
+    //read static status from contract at once
+    if (turn == 1) {
+        local_type = contract.type;
+        local_birth_time = contract.birth_time;
+        local_strength = contract.strength;
+        local_dexterity = contract.dexterity;
+        local_vitality = contract.vitality;
+        local_intelligence = contract.intelligence;
+        local_luck = contract.luck;
+        text_type.setText("type = " + local_type);
+        text_strength.setText("strength = " + local_type);
+        text_dexterity.setText("dexterity = " + local_type);
+        text_vitality.setText("vitality = " + local_type);
+        text_intelligence.setText("intelligence = " + local_type);
+        text_luck.setText("luck = " + local_type);
+    }
     //update status and text
     if (turn % 10 == 0) {
         //update calculation_status
@@ -382,18 +389,11 @@ function update() {
         text_satiety.setText("satiety = " + satiety);
         text_happy.setText("happy = " + happy);
     }
-    //read status from contract to local
+    //read dynamic status from contract to local
     if (turn % 101 == 0) {
         //update statistic_status
         //update dynamic_status
         //TODO: read from contract
-        local_type = contract.type;
-        local_strength = contract.strength;
-        local_dexterity = contract.dexterity;
-        local_vitality = contract.vitality;
-        local_intelligence = contract.intelligence;
-        local_luck = contract.luck;
-        local_birth_time = contract.birth_time;
         local_last_feeding_time = contract.last_feeding_time;
         local_last_grooming_time = contract.last_grooming_time;
         local_coin = contract.coin;
