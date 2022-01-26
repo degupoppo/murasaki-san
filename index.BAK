@@ -104,6 +104,7 @@ class Character extends Phaser.GameObjects.Sprite{
         this.anims.play("murasaki_right", true);
     	this.mode = "resting";
         this.count = 0;
+        this.dist = "right";
     }
     set set_mode(mode){
         this.mode = mode;
@@ -114,6 +115,12 @@ class Character extends Phaser.GameObjects.Sprite{
     }
     resting(){
 	    this.count += 1;
+        if (this.count == 1) {
+            if (this.dist == "right"){
+                this.anims.play("murasaki_right", true);
+            }else if (this.dist == "left") {
+                this.anims.play("murasaki_left", true);
+            }
 	    if (this.count >= 100){
             let tmp = Math.random() * 100;
             if (tmp <= 10) {
@@ -380,7 +387,7 @@ function update() {
         local_luck = contract.luck;
         text_id.setText("id = " + local_id);
         text_type.setText("type = " + local_type);
-        text_birth_time.setText("type = " + local_type);
+        text_birth_time.setText("birth_time = " + local_birth_time);
         text_strength.setText("strength = " + local_strength);
         text_dexterity.setText("dexterity = " + local_dexterity);
         text_vitality.setText("vitality = " + local_vitality);
