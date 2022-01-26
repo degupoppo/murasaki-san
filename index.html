@@ -442,6 +442,8 @@ function update() {
         text_mode.setText("mode = " + mode);
         text_satiety.setText("satiety = " + satiety);
         text_happy.setText("happy = " + happy);
+        //update bar
+        bar_satiety.scaleX = satiety / 100;
     }
     //update dynamic status from contract to local
     if (turn % 101 == 0) {
