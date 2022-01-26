@@ -186,6 +186,12 @@ class Character extends Phaser.GameObjects.Sprite{
     //send: last_grooming_time
     grooming() {
         this.count += 1;
+        if (this.count == 1){
+            this.anims.play("murasaki_feeding", true);
+        }else if (this.count >= 1000) {
+            this.mode = "resting";
+            this.count = 0;
+        }
     }
     //cost: life, gain: coin
     working() {
@@ -221,11 +227,17 @@ class Button {
 }
 
 
-function actionOnClick(contract) {
+function button_feeding(contract) {
     char1.set_mode = "feeding";
     let delta = Date.now() - local_last_feeding_time;
     contract.exp += delta / 1000
     contract.last_feeding_time = Date.now();
+}
+function button_feeding(grooming) {
+    char1.set_mode = "grooming";
+    let delta = Date.now() - local_last_grooming_time;
+    contract.exp += delta / 1000
+    contract.last_grooming_time = Date.now();
 }
 
 
@@ -302,8 +314,8 @@ function create() {
     //summon character
     char1 = new Character(this, 300 + Math.random()*200, 400 + Math.random()*100);
     //button
-    const button1 = new Button(100, 25, 'Grooming', this, () => console.log('game is started'));
-    const button2 = new Button(100, 50, 'Feeding', this, () => actionOnClick(contract));
+    const button1 = new Button(100, 25, 'Grooming', this, () => button_grooming(contract));
+    const button2 = new Button(100, 50, 'Feeding', this, () => button_feeding(contract));
     //text
     text_version = this.add.text(600, 10, "version = " + version, {font: "10.5px Arial", fill: "#000"});
     //static_status
