@@ -365,12 +365,13 @@ function update() {
         local_vitality = contract.vitality;
         local_intelligence = contract.intelligence;
         local_luck = contract.luck;
+        text_id.setText("id = " + local_id);
         text_type.setText("type = " + local_type);
-        text_strength.setText("strength = " + local_type);
-        text_dexterity.setText("dexterity = " + local_type);
-        text_vitality.setText("vitality = " + local_type);
-        text_intelligence.setText("intelligence = " + local_type);
-        text_luck.setText("luck = " + local_type);
+        text_strength.setText("strength = " + local_strength);
+        text_dexterity.setText("dexterity = " + local_dexterity);
+        text_vitality.setText("vitality = " + local_vitality);
+        text_intelligence.setText("intelligence = " + local_intelligence);
+        text_luck.setText("luck = " + local_luck);
     }
     //update status and text
     if (turn % 10 == 0) {
