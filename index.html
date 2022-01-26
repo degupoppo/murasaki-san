@@ -322,19 +322,21 @@ function create() {
     text_exp = this.add.text(
         600, 140, "exp = " + global_exp, {font: "10.5px Arial", fill: "#000"});
     //calculation_status
+    text_turn = this.add.text(
+        600, 160, "turn = ", {font: "10.5px Arial", fill: "#000"});
     text_age_time = this.add.text(
-        600, 160, "age_time = ", {font: "10.5px Arial", fill: "#000"});
+        600, 170, "age_time = ", {font: "10.5px Arial", fill: "#000"});
     text_mode = this.add.text(
-        600, 170, "mode = ", {font: "10.5px Arial", fill: "#000"});
+        600, 180, "mode = ", {font: "10.5px Arial", fill: "#000"});
     text_satiety = this.add.text(
-        600, 180, "satiey = ", {font: "10.5px Arial", fill: "#000"});
+        600, 190, "satiey = ", {font: "10.5px Arial", fill: "#000"});
     text_happy = this.add.text(
-        600, 190, "happy = ", {font: "10.5px Arial", fill: "#000"});
+        600, 200, "happy = ", {font: "10.5px Arial", fill: "#000"});
 }
 
 
 function update() {
-    //increment turn
+    //update turn
     turn += 1;
     //update character
     char1.update();
@@ -353,10 +355,16 @@ function update() {
         text_working_status.setText("working_status = " + global_working_status);
         text_working_start_time.setText("working_start_time = " + global_working_start_time);
         text_exp.setText("exp = " + global_exp);
+        text_turn.setText("turn = " + turn);
         text_age_time.setText("age_time = " + age_time);
         text_mode.setText("mode = " + mode);
         text_satiety.setText("satiety = " + satiety);
         text_happy.setText("happy = " + happy);
+    }
+    if (turn % 101 == 0) {
+        //update statistic_status
+        //update dynamic_status
+        //TODO: read from contract
     }
 }
 
