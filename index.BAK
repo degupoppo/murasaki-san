@@ -77,19 +77,19 @@ let local_exp;
 
 class Contract {
     constructor() {
-        const type = Math.trunc(Math.random() * 5);
-        const strength = 2 + Math.trunc(Math.random() * 8);
-        const dexterity = 2 + Math.trunc(Math.random() * 8);
-        const vitality = 2 + Math.trunc(Math.random() * 8);
-        const intelligence = 2 + Math.trunc(Math.random() * 8);
-        const luck = 2 + Math.trunc(Math.random() * 8);
-        const birth_time = Date.now();
-        let ast_feedint_time = Date.now();
-        let flat_grooming_time = Date.now();
-        let coin = 100;
-        let working_status = 0;
-        let working_start_time = 0;
-        let exp = 0;
+        const this.type = Math.trunc(Math.random() * 5);
+        const this.strength = 2 + Math.trunc(Math.random() * 8);
+        const this.dexterity = 2 + Math.trunc(Math.random() * 8);
+        const this.vitality = 2 + Math.trunc(Math.random() * 8);
+        const this.intelligence = 2 + Math.trunc(Math.random() * 8);
+        const this.luck = 2 + Math.trunc(Math.random() * 8);
+        const this.birth_time = Date.now();
+        let this.last_feedint_time = Date.now();
+        let this.last_grooming_time = Date.now();
+        let this.coin = 100;
+        let this.working_status = 0;
+        let this.working_start_time = 0;
+        let this.exp = 0;
     }
 }
 
@@ -366,13 +366,13 @@ function update() {
     //update status, text
     if (turn % 10 == 0) {
         //update calculation_status
-        now_time = Date.now();
-        age_time = Math.round( (now_time - local_birth_time) / 1000 );
-        mode = char1.get_mode;
+        let now_time = Date.now();
+        let age_time = Math.round( (now_time - local_birth_time) / 1000 );
+        let mode = char1.get_mode;
         //var base = 86400000
-        var base = 864000
-        satiety = Math.round( (base - (now_time - local_last_feeding_time)) / base * 1000 ) / 10;
-        happy = Math.round( (base - (now_time - local_last_grooming_time)) / base * 1000 ) / 10;
+        let base = 864000
+        let satiety = Math.round( (base - (now_time - local_last_feeding_time)) / base * 1000 ) / 10;
+        let happy = Math.round( (base - (now_time - local_last_grooming_time)) / base * 1000 ) / 10;
         //update text
         text_last_feeding_time.setText("last_feeding_time = " + local_last_feeding_time);
         text_last_grooming_time.setText("last_grooming_time = " + local_last_grooming_time);
