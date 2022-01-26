@@ -212,6 +212,9 @@ class Button {
 
 function actionOnClick() {
     char1.set_mode = "feeding";
+    delta = Date.now() - global_last_feeding_time;
+    global_exp += delta / 1000
+    global_last_feeding_time = Date.now();
 }
 
 const _sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -340,8 +343,8 @@ function update() {
         now_time = Date.now();
         age_time = Math.round( (now_time - global_birth_time) / 1000 );
         mode = char1.get_mode;
-        satiety = Math.round( (86400000 - (now_time - global_last_feeding_time)) / 86400000 * 10 ) / 10;
-        happy = Math.round( (86400000 - (now_time - global_last_grooming_time)) / 86400000 * 10 ) / 10;
+        satiety = Math.round( (86400000 - (now_time - global_last_feeding_time)) / 86400000 * 1000 ) / 10;
+        happy = Math.round( (86400000 - (now_time - global_last_grooming_time)) / 86400000 * 1000 ) / 10;
         //update text
         text_last_feeding_time.setText("last_feeding_time = " + global_last_feeding_time);
         text_last_grooming_time.setText("last_grooming_time = " + global_last_grooming_time);

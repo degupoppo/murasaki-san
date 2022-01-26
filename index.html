@@ -212,6 +212,9 @@ class Button {
 
 function actionOnClick() {
     char1.set_mode = "feeding";
+    delta = Date.now() - global_last_feeding_time;
+    global_exp += delta / 1000
+    global_last_feeding_time = Date.now();
 }
 
 const _sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
