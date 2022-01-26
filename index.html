@@ -338,8 +338,10 @@ function create() {
 function update() {
     //update turn
     turn += 1;
+    text_turn.setText("turn = " + turn);
     //update character
     char1.update();
+    //update status, text
     if (turn % 10 == 0) {
         //update calculation_status
         now_time = Date.now();
@@ -355,7 +357,6 @@ function update() {
         text_working_status.setText("working_status = " + global_working_status);
         text_working_start_time.setText("working_start_time = " + global_working_start_time);
         text_exp.setText("exp = " + global_exp);
-        text_turn.setText("turn = " + turn);
         text_age_time.setText("age_time = " + age_time);
         text_mode.setText("mode = " + mode);
         text_satiety.setText("satiety = " + satiety);
