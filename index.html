@@ -52,14 +52,20 @@ C, static_status
     luck
 ***/
 
-var global_strength = 0;
-var global_dexterity = 0;
-var global_vitality = 0;
-var global_intelligence = 0;
-var global_luck = 0;
-var global_last_feeding_time = 0;
-var global_last_grooming_time = 0;
-var global_coin = 0;
+//static_status, read from construct at once
+var global_type = Math.trunc(Math.random() * 5);
+var global_strength = 2 + Math.trunc(Math.random() * 8);
+var global_dexterity = 2 + Math.trunc(Math.random() * 8);
+var global_vitality = 2 + Math.trunc(Math.random() * 8);
+var global_intelligence = 2 + Math.trunc(Math.random() * 8);
+var global_luck = 2 + Math.trunc(Math.random() * 8);
+var global_birth_time = Date.UTC();
+//dynamic_status, read from construct continuously, write to construct
+var global_last_feeding_time = Date.UTC();
+var global_last_grooming_time = Date.UTC();
+var global_coin = 100;
+var global_working_status = 0;
+var global_working_start_time = 0;
 
 class Character extends Phaser.GameObjects.Sprite{
     constructor(scene, x, y){
@@ -278,18 +284,19 @@ function create() {
     const button1 = new Button(100, 25, 'Grooming', this, () => console.log('game is started'));
     const button2 = new Button(100, 50, 'Feeding', this, () => actionOnClick());
     text_coin = this.add.text(700, 100, global_coin, {fontSize:12, fontFamily: "Arial", fill: "#000"});
+    text_strength = this.add.text(700, 120, "strength: " + global_strength, {fontSize:12, fontFamily: "Arial", fill: "#000"});
+    text_lifetime = this.add.text(700, 120, "lifetime: ", {fontSize:12, fontFamily: "Arial", fill: "#000"});
+
 }
 
 
 function update() {
-    await _sleep(1);
     char1.update();
-    //text_mode.text = char1.get_mode;
-    if (cursors.right.isDown) {
-        global_coin += 1;
-    }
-    global_coin += 1;
+    text_lifetime.setText("lifetime: ", Date.UTF() - global_birth_time);
     text_coin.setText(global_coin);
+    global_coin += 1;
+    if (cursors.right.isDown) {
+    }
 }
 
 
