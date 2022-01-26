@@ -422,10 +422,10 @@ function update() {
         local_working_start_time = contract.working_start_time;
         local_exp = contract.exp;
         //check character mode
-        if (local_last_feeding_time != previous_local_last_feeding_time){
+        if (previous_local_last_feeding_time & local_last_feeding_time != previous_local_last_feeding_time){
             char1.set_mode = "feeding";
         }
-        if (local_last_grooming_time != previous_local_last_grooming_time){
+        if (previous_local_last_grooming_time & local_last_grooming_time != previous_local_last_grooming_time){
             char1.set_mode = "grooming";
         }
     }
