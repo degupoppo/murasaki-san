@@ -253,6 +253,25 @@ function button_grooming(contract) {
 }
 
 
+function makeBar(x, y,color) {
+    //draw the bar
+    let bar = this.add.graphics();
+
+    //color the bar
+    bar.fillStyle(color, 1);
+
+    //fill the bar with a rectangle
+    bar.fillRect(0, 0, 200, 50);
+
+    //position the bar
+    bar.x = x;
+    bar.y = y;
+
+    //return the bar
+    return bar;
+}
+
+
 // main functions
 
 
