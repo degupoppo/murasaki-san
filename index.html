@@ -71,6 +71,7 @@ var global_last_grooming_time = Date.now();
 var global_coin = 100;
 var global_working_status = 0;
 var global_working_start_time = 0;
+var global_exp = 0;
 
 class Character extends Phaser.GameObjects.Sprite{
     constructor(scene, x, y){
@@ -314,21 +315,26 @@ function create() {
         600, 120, "working_status = " + global_working_status, {font: "10.5px Arial", fill: "#000"});
     text_working_start_time = this.add.text(
         600, 130, "working_start_time = " + global_working_start_time, {font: "10.5px Arial", fill: "#000"});
-
+    text_exp = this.add.text(
+        600, 140, "exp = " + global_exp, {font: "10.5px Arial", fill: "#000"});
+    //calculation_status
+    text_age_time = this.add.text(
+        600, 160, "age_time = ", {font: "10.5px Arial", fill: "#000"});
 }
 
 
 function update() {
-    //character update
+    //update character
     char1.update();
-    //status update
+    //update calculation_status
+    age_time = Date.now() - global_birth_time;
+    //text drawing
     text_last_feeding_time.setText("last_feeding_time = " + global_last_feeding_time);
     text_last_grooming_time.setText("last_grooming_time = " + global_last_grooming_time);
     text_working_status.setText("working_status = " + global_working_status);
     text_working_start_time.setText("working_start_time = " + global_working_start_time);
-    //text_lifetime.setText("lifetime: " + (Date.now() - global_birth_time) );
-    //text_coin.setText(global_coin);
-    //global_coin += 1;
+    text_exp.setText("exp = " + global_exp);
+    text_age_time.setText("age_time = " + age_time);
     if (cursors.right.isDown) {
     }
 }
