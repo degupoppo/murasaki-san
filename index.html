@@ -74,6 +74,71 @@ var global_working_status = 0;
 var global_working_start_time = 0;
 var global_exp = 0;
 
+
+class Contract {
+    constructor() {
+        var contract_type;
+        var contract_strength;
+        var contract_dexterity;
+        var contract_vitality;
+        var contract_intelligence;
+        var contract_luck;
+        var contract_birth_time;
+        var contract_last_feedint_time;
+        var contract_flat_grooming_time;
+        var contract_coin;
+        var contract_working_status;
+        var contract_working_start_time;
+        var contract_exp;
+    }
+}
+
+
+class SceneMain extends Phaser.Scene {
+    constructor() {
+        super('SceneMain');
+    }
+    preload() {}
+    create() {
+        
+        //make 3 bars
+        let healthBar=this.makeBar(140,100,0x2ecc71);
+        this.setValue(healthBar,100);
+
+
+        let powerBar=this.makeBar(140,200,0xe74c3c);
+        this.setValue(powerBar,50);
+
+
+        let magicBar=this.makeBar(140,300,0x2980b9);
+        this.setValue(magicBar,33);
+
+    }
+    makeBar(x, y,color) {
+        //draw the bar
+        let bar = this.add.graphics();
+
+        //color the bar
+        bar.fillStyle(color, 1);
+
+        //fill the bar with a rectangle
+        bar.fillRect(0, 0, 200, 50);
+        
+        //position the bar
+        bar.x = x;
+        bar.y = y;
+
+        //return the bar
+        return bar;
+    }
+    setValue(bar,percentage) {
+        //scale the bar
+        bar.scaleX = percentage/100;
+    }
+    update() {}
+}
+
+
 class Character extends Phaser.GameObjects.Sprite{
     constructor(scene, x, y){
         super(scene, x, y, "murasaki_right");
@@ -82,17 +147,17 @@ class Character extends Phaser.GameObjects.Sprite{
     	this.mode = "resting";
         this.count = 0;
         //static_status, TODO:get from contract
-        this.strength = 2 + Math.random()* 8;
-        this.dexterity = 2 + Math.random()* 8;
-        this.vitality = 2 + Math.random()* 8;
-        this.intelligence = 2 + Math.random()* 8;
-        this.luck = 2 + Math.random()* 8;
+        this.strength       = 2 + Math.random()* 8;
+        this.dexterity      = 2 + Math.random()* 8;
+        this.vitality       = 2 + Math.random()* 8;
+        this.intelligence   = 2 + Math.random()* 8;
+        this.luck           = 2 + Math.random()* 8;
         //dymamic_status, TODO:get from contract
-        this.life = 100;        //TODO: get from static_status
-        this.nutrition = 100;   //TODO: calc from static_status, last_mealing_time
-        this.happy = 100;       //TODO: calc from static_status, last_grooming_time
-        this.exp = 0;           //TODO: get from static_status
-        this.coin = 0;          //TODO: get from static_status
+        this.life       = 100;  //TODO: get from static_status
+        this.nutrition  = 100;  //TODO: calc from static_status, last_mealing_time
+        this.happy      = 100;  //TODO: calc from static_status, last_grooming_time
+        this.exp        = 0;    //TODO: get from static_status
+        this.coin       = 0;    //TODO: get from static_status
     }
     set set_mode(mode){
         this.mode = mode;
@@ -332,6 +397,9 @@ function create() {
         600, 190, "satiey = ", {font: "10.5px Arial", fill: "#000"});
     text_happy = this.add.text(
         600, 200, "happy = ", {font: "10.5px Arial", fill: "#000"});
+    //bar
+    bar1 = new SceneMain();
+
 }
 
 
