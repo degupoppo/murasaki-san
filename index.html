@@ -230,11 +230,11 @@ class Button {
 }
 
 
-function actionOnClick() {
+function actionOnClick(contract) {
     char1.set_mode = "feeding";
-    delta = Date.now() - local_last_feeding_time;
-    local_exp += delta / 1000
-    local_last_feeding_time = Date.now();
+    let delta = Date.now() - local_last_feeding_time;
+    contract.exp += delta / 1000
+    contract.last_feeding_time = Date.now();
 }
 
 const _sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
