@@ -55,6 +55,7 @@ C, static_status
 
 
 const version = "0.0.14";
+var turn = 0;
 
 
 //static_status, read from construct at once
@@ -322,23 +323,35 @@ function create() {
         600, 160, "age_time = ", {font: "10.5px Arial", fill: "#000"});
     text_mode = this.add.text(
         600, 170, "mode = ", {font: "10.5px Arial", fill: "#000"});
+    text_satiety = this.add.text(
+        600, 170, "satiey = ", {font: "10.5px Arial", fill: "#000"});
+    text_happy = this.add.text(
+        600, 170, "happy = ", {font: "10.5px Arial", fill: "#000"});
 }
 
 
 function update() {
+    //increment turn
+    turn += 1;
     //update character
     char1.update();
-    //update calculation_status
-    age_time = Date.now() - global_birth_time;
-    //text drawing
-    text_last_feeding_time.setText("last_feeding_time = " + global_last_feeding_time);
-    text_last_grooming_time.setText("last_grooming_time = " + global_last_grooming_time);
-    text_working_status.setText("working_status = " + global_working_status);
-    text_working_start_time.setText("working_start_time = " + global_working_start_time);
-    text_exp.setText("exp = " + global_exp);
-    text_age_time.setText("age_time = " + age_time);
-    text_mode.setText("mode = " + age_time);
-    if (cursors.right.isDown) {
+    if (turn % == 10) {
+        //update calculation_status
+        now_time = Date.now();
+        age_time = now_time - global_birth_time;
+        mode = char1.get_mode;
+        satiety = (now_time - global_last_feeding_time) / 86400000;
+        happy = (now_time - global_last_grooming_time) / 86400000;
+        //update text
+        text_last_feeding_time.setText("last_feeding_time = " + global_last_feeding_time);
+        text_last_grooming_time.setText("last_grooming_time = " + global_last_grooming_time);
+        text_working_status.setText("working_status = " + global_working_status);
+        text_working_start_time.setText("working_start_time = " + global_working_start_time);
+        text_exp.setText("exp = " + global_exp);
+        text_age_time.setText("age_time = " + age_time);
+        text_mode.setText("mode = " + mode);
+        text_satiety.setText("satiety = " + satiety);
+        text_happy.setText("happy = " + happy);
     }
 }
 
