@@ -94,51 +94,6 @@ class Contract {
 }
 
 
-class SceneMain extends Phaser.Scene {
-    constructor() {
-        super('SceneMain');
-    }
-    preload() {}
-    create() {
-        
-        //make 3 bars
-        let healthBar=this.makeBar(140,100,0x2ecc71);
-        this.setValue(healthBar,100);
-
-
-        let powerBar=this.makeBar(140,200,0xe74c3c);
-        this.setValue(powerBar,50);
-
-
-        let magicBar=this.makeBar(140,300,0x2980b9);
-        this.setValue(magicBar,33);
-
-    }
-    makeBar(x, y,color) {
-        //draw the bar
-        let bar = this.add.graphics();
-
-        //color the bar
-        bar.fillStyle(color, 1);
-
-        //fill the bar with a rectangle
-        bar.fillRect(0, 0, 200, 50);
-        
-        //position the bar
-        bar.x = x;
-        bar.y = y;
-
-        //return the bar
-        return bar;
-    }
-    setValue(bar,percentage) {
-        //scale the bar
-        bar.scaleX = percentage/100;
-    }
-    update() {}
-}
-
-
 class Character extends Phaser.GameObjects.Sprite{
     constructor(scene, x, y){
         super(scene, x, y, "murasaki_right");
@@ -397,9 +352,6 @@ function create() {
         600, 190, "satiey = ", {font: "10.5px Arial", fill: "#000"});
     text_happy = this.add.text(
         600, 200, "happy = ", {font: "10.5px Arial", fill: "#000"});
-    //bar
-    bar1 = new SceneMain();
-
 }
 
 
