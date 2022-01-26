@@ -29,6 +29,8 @@ ToDo
     satiety, happy, expのバーを実装する
     Lvを実装する。必要expの対応表を作製する。
     satietyとhappyの差別化を考える。
+    fake contractにfeeding(), grooming(), lv_up()を実装する
+    working()の概念を考える
 ***/
 
 
@@ -434,11 +436,11 @@ function update() {
         local_exp = contract.exp;
         //check character mode
         if (local_last_feeding_time > previous_local_last_feeding_time){
-            console.log("feeding");
+            //console.log("feeding");
             char1.set_mode = "feeding";
         }
         if (local_last_grooming_time > previous_local_last_grooming_time){
-            console.log("grooming");
+            //console.log("grooming");
             char1.set_mode = "grooming";
         }
     }
