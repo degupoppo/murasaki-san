@@ -63,10 +63,10 @@ var global_dexterity = 2 + Math.trunc(Math.random() * 8);
 var global_vitality = 2 + Math.trunc(Math.random() * 8);
 var global_intelligence = 2 + Math.trunc(Math.random() * 8);
 var global_luck = 2 + Math.trunc(Math.random() * 8);
-var global_birth_time = Date.UTC();
+var global_birth_time = Date.now();
 //dynamic_status, read from construct continuously, write to construct
-var global_last_feeding_time = Date.UTC();
-var global_last_grooming_time = Date.UTC();
+var global_last_feeding_time = Date.now();
+var global_last_grooming_time = Date.now();
 var global_coin = 100;
 var global_working_status = 0;
 var global_working_start_time = 0;
@@ -296,7 +296,7 @@ function create() {
 
 function update() {
     char1.update();
-    text_lifetime.setText("lifetime: " + (Date.UTC()) );
+    text_lifetime.setText("lifetime: " + (Date.now() - global_birth_time) );
     text_coin.setText(global_coin);
     global_coin += 1;
     if (cursors.right.isDown) {
