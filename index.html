@@ -266,6 +266,8 @@ function preload() {
 
 
 function create() {
+    //fake contract
+    contract = new Contract();
     this.add.image(400, 300, "sky");
     this.anims.create({
         key: "murasaki_right",
@@ -301,7 +303,7 @@ function create() {
     char1 = new Character(this, 300 + Math.random()*200, 400 + Math.random()*100);
     //button
     const button1 = new Button(100, 25, 'Grooming', this, () => console.log('game is started'));
-    const button2 = new Button(100, 50, 'Feeding', this, () => actionOnClick());
+    const button2 = new Button(100, 50, 'Feeding', this, () => actionOnClick(contract));
     //text
     text_version = this.add.text(600, 10, "version = " + version, {font: "10.5px Arial", fill: "#000"});
     //static_status
@@ -345,8 +347,6 @@ function create() {
         600, 210, "satiey = ", {font: "10.5px Arial", fill: "#000"});
     text_happy = this.add.text(
         600, 220, "happy = ", {font: "10.5px Arial", fill: "#000"});
-    //fake contract
-    contract = new Contract();
 }
 
 

@@ -59,6 +59,7 @@ let turn = 0;
 
 
 //static_status, read from construct at once
+let local_id;
 let local_type;
 let local_strength;
 let local_dexterity;
@@ -265,6 +266,8 @@ function preload() {
 
 
 function create() {
+    //fake contract
+    contract = new Contract();
     this.add.image(400, 300, "sky");
     this.anims.create({
         key: "murasaki_right",
@@ -344,8 +347,6 @@ function create() {
         600, 210, "satiey = ", {font: "10.5px Arial", fill: "#000"});
     text_happy = this.add.text(
         600, 220, "happy = ", {font: "10.5px Arial", fill: "#000"});
-    //fake contract
-    contract = new Contract();
 }
 
 
