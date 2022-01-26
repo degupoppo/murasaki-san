@@ -52,6 +52,15 @@ C, static_status
     luck
 ***/
 
+var global_strength = 0;
+var global_dexterity = 0;
+var global_vitality = 0;
+var global_intelligence = 0;
+var global_luck = 0;
+var global_last_feeding_time = 0;
+var global_last_grooming_time = 0;
+var global_coin = 0;
+
 class Character extends Phaser.GameObjects.Sprite{
     constructor(scene, x, y){
         super(scene, x, y, "murasaki_right");
@@ -164,7 +173,7 @@ class Character extends Phaser.GameObjects.Sprite{
         if (this.mode == "resting") {this.resting();}
         else if (this.mode == "moving") {this.moving();}
         else if (this.mode == "feeding") {this.feeding();}
-        else if (this.mode == "crying") {this.feeding();}
+        else if (this.mode == "crying") {this.crying();}
         else if (this.mode == "sleeping") {this.sleeping();}
         else if (this.mode == "grooming") {this.grooming();}
         else if (this.mode == "working") {this.working();}
