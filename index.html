@@ -200,6 +200,7 @@ class Character extends Phaser.GameObjects.Sprite{
             }
 	    }else if (this.count >= 100){
             let tmp = Math.random() * 100;
+            let base = 864000;
             let happy = Math.round( (base - (now_time - local_last_grooming_time)) / base * 1000 ) / 10;
             if (tmp <= 10) {
                 this.mode = "sleeping";
