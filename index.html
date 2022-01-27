@@ -162,8 +162,18 @@ class Contract {
         if (this.exp >= 1000) {
             this.exp -= 1000;
             this.level += 1;
-            var li = [this.strength, this.dexterity, this.vitality, this.intelligence, this.luck];
-            li[Math.floor(Math.random() * li.length)] += 1;
+            var tmp = Math.trunc(Math.random() * 5);
+            if (tmp == 0) {
+                this.strength += 1;
+            }else if (tpm == 1) {
+                this.dexterity += 1;
+            }else if (tpm == 2) {
+                this.vitality += 1;
+            }else if (tpm == 3) {
+                this.intelligence += 1;
+            }else {
+                this.luck += 1;
+            }
         }
     }
 }

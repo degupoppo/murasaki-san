@@ -162,8 +162,18 @@ class Contract {
         if (this.exp >= 1000) {
             this.exp -= 1000;
             this.level += 1;
-            var li = [this.strength, this.dexterity, this.vitality, this.intelligence, this.luck];
-            li[Math.floor(Math.random() * li.length)] += 1;
+            var tmp = Math.trunc(Math.random() * 5);
+            if (tmp == 0) {
+                this.strength += 1;
+            }else if (tpm == 1) {
+                this.dexterity += 1;
+            }else if (tpm == 2) {
+                this.vitality += 1;
+            }else if (tpm == 3) {
+                this.intelligence += 1;
+            }else {
+                this.luck += 1;
+            }
         }
     }
 }
@@ -513,7 +523,7 @@ function update() {
         text_luck.setText("luck = " + local_luck);
     }
     //update calculation status
-    if (turn % 10 == 0) {
+    if (turn == 1 || turn % 10 == 0) {
         //update calculation_status
         let now_time = Date.now();
         let age_time = Math.round( (now_time - local_birth_time) / 1000 );
