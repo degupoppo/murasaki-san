@@ -395,6 +395,10 @@ function create() {
     bar_happy_back.scaleX = 1;
     bar_happy = makeBar(this, 600, 270, 0x4169e1);
     bar_happy.scaleX = 0;
+    bar_exp_back = makeBar(this, 600, 290, 0xa9a9a9);
+    bar_exp_back.scaleX = 1;
+    bar_exp = makeBar(this, 600, 290, 0x228b22);
+    bar_exp.scaleX = 0;
 }
 
 
@@ -447,6 +451,7 @@ function update() {
         //update bar
         bar_satiety.scaleX = satiety / 100;
         bar_happy.scaleX = happy / 100;
+        bar_exp.scaleX = local_exp / 1000;
     }
     //update dynamic status from contract to local
     if (turn % 101 == 0) {
