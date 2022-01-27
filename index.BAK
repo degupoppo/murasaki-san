@@ -31,6 +31,20 @@ ToDo
     satietyとhappyの差別化を考える。
     fake contractにfeeding(), grooming(), lv_up()を実装する
     working()の概念を考える
+        コインを稼ぐ
+        str依存？動作とステータスのイメージが一致するように
+        マイニング？お花摘み？
+    クラフト, luck, str, dexなどのステータス＋クラフト時間で成功率を変える、アイテムごとに難易度が違う
+        難しいものでも、１ヶ月とかクラフトし続ければ作れるかもしれない。
+        連続思考を防ぐため、０％も作る。またファンブルで必ず５％は失敗する
+        クラフト品のユースケースは？
+    資産
+        exp?, 時間, コイン（sota?, ohana?), 素材(あまり種類を多くしない, 低級、中級、上級、ぐらい）
+    時間を資源に
+        フリー時間しかgroomingなどできない
+        working, やcraftingは時間を費やせばそれだけ効率や成功率が増大する
+        しかしworkingさせているとgroomingやfeedingできずにexpがたまらない
+
 ***/
 
 
@@ -461,7 +475,7 @@ function update() {
         //update bar
         bar_satiety.scaleX = satiety / 100;
         bar_happy.scaleX = happy / 100;
-        let exp = (local_exp / 100) * 100;
+        let exp = (local_exp / 10000) * 100;
         if (exp > 100) { exp = 100; }
         bar_exp.scaleX = exp / 100;
     }
