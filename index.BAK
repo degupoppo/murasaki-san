@@ -118,12 +118,12 @@ class Contract {
         this.exp = 0;
     }
     grooming() {
-        let delta = Date.now() - this.last_grooming_time;
+        let delta = (Date.now() - this.last_grooming_time) / 1000;
         this.last_grooming_time = Date.now();
         this.exp += delta;
     }
     feeding() {
-        let delta = Date.now() - this.last_feeding_time;
+        let delta = (Date.now() - this.last_feeding_time) / 1000;
         this.last_feeding_time = Date.now();
         this.exp += delta;
     }
@@ -288,9 +288,10 @@ function button_feeding(contract) {
 }
 function button_grooming(contract) {
     //char1.set_mode = "grooming";
-    let delta = Date.now() - local_last_grooming_time;
-    contract.exp += delta / 1000
-    contract.last_grooming_time = Date.now();
+    //let delta = Date.now() - local_last_grooming_time;
+    //contract.exp += delta / 1000
+    //contract.last_grooming_time = Date.now();
+    contract.feeding();
 }
 
 
