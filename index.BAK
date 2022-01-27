@@ -442,7 +442,9 @@ function update() {
         //var base = 86400000
         let base = 864000
         let satiety = Math.round( (base - (now_time - local_last_feeding_time)) / base * 1000 ) / 10;
+        if (satiety < 0) { satiety = 0; }
         let happy = Math.round( (base - (now_time - local_last_grooming_time)) / base * 1000 ) / 10;
+        if (happy < 0) { happy = 0; }
         //update text
         text_last_feeding_time.setText("last_feeding_time = " + local_last_feeding_time);
         text_last_grooming_time.setText("last_grooming_time = " + local_last_grooming_time);
