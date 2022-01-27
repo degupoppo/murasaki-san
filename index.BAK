@@ -443,8 +443,10 @@ function update() {
         let base = 864000
         let satiety = Math.round( (base - (now_time - local_last_feeding_time)) / base * 1000 ) / 10;
         if (satiety < 0) { satiety = 0; }
+        if (satiety > 100) { satiety = 100; }
         let happy = Math.round( (base - (now_time - local_last_grooming_time)) / base * 1000 ) / 10;
         if (happy < 0) { happy = 0; }
+        if (happy > 100) { happy = 100; }
         //update text
         text_last_feeding_time.setText("last_feeding_time = " + local_last_feeding_time);
         text_last_grooming_time.setText("last_grooming_time = " + local_last_grooming_time);
@@ -459,9 +461,9 @@ function update() {
         //update bar
         bar_satiety.scaleX = satiety / 100;
         bar_happy.scaleX = happy / 100;
-        let exp = local_exp / 1000;
+        let exp = (local_exp / 100) * 100;
         if (exp > 100) { exp = 100; }
-        bar_exp.scaleX = exp / 1000;
+        bar_exp.scaleX = exp / 100;
     }
     //update dynamic status from contract to local
     if (turn % 101 == 0) {
