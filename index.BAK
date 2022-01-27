@@ -274,6 +274,7 @@ class Character extends Phaser.GameObjects.Sprite{
         this.count += 1;
         if (this.count == 1){
             this.anims.play("murasaki_mining", true);
+        }
     }
     update(){
         //console.log(this.version, this.mode, this.count);
