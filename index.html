@@ -142,13 +142,17 @@ class Contract {
     end_crafting(item) {
     }
     start_mining() {
-        this.mining_status = 1;
-        this.mining_start_time = Date.now();
+        if (this.mining_status == 0){
+            this.mining_start_time = Date.now();
+            this.mining_status = 1;
+        }
     }
     end_mining() {
-        this.mining_status = 0;
-        let delta = (Date.now() - this.mining_start_time) / 1000;
-        this.coin += delta;
+        if (this.mining_status == 1) {
+            let delta = (Date.now() - this.mining_start_time) / 1000;
+            this.coin += delta;
+            this.mining_status = 0;
+        }
     }
     start_farming() {
     }
