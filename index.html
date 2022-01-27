@@ -46,6 +46,7 @@ Idea
         feeding, デイリークエスト, コストなし, 24時間で最大効率
         grooming, プラスアルファ, 何かしらのコスト必要, 168時間で最大効率
 ToDo
+    つっつき動作の実装
     Lvを実装する。必要expの対応表を作製する。
     satietyとhappyの差別化を考える。
     ok fake contractにfeeding(), grooming(), lv_up()を実装する
@@ -173,7 +174,7 @@ class Character extends Phaser.GameObjects.Sprite{
         this.dist = "right";
         this.setInteractive()
         this.on("pointerdown", function (pointer) {
-            console.log("click");
+            this.on_clik();
         }, this);
     }
     set set_mode(mode){
@@ -183,6 +184,11 @@ class Character extends Phaser.GameObjects.Sprite{
     get get_mode(){
         return this.mode;
     }
+    on_click() {
+        if (this.mode != "mining") {
+            console.log("click!");
+            //this.mode = "on_click";
+        }
     resting(){
 	    this.count += 1;
         if (this.count == 1) {
