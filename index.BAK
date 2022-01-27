@@ -389,21 +389,21 @@ function create() {
     //bar
     //satiety
     text_satiety = this.add.text(600, 250, "satiety:", {font: "10.5px Arial", fill: "#000"});
-    bar_satiety_back = makeBar(this, 600, 250, 0xa9a9a9);
+    bar_satiety_back = makeBar(this, 640, 250, 0xa9a9a9);
     bar_satiety_back.scaleX = 1;
-    bar_satiety = makeBar(this, 600, 250, 0xff4500);
+    bar_satiety = makeBar(this, 640, 250, 0xff4500);
     bar_satiety.scaleX = 0;
     //happy
     text_satiety = this.add.text(600, 250, "  happy:", {font: "10.5px Arial", fill: "#000"});
-    bar_happy_back = makeBar(this, 600, 270, 0xa9a9a9);
+    bar_happy_back = makeBar(this, 6440, 270, 0xa9a9a9);
     bar_happy_back.scaleX = 1;
-    bar_happy = makeBar(this, 600, 270, 0x4169e1);
+    bar_happy = makeBar(this, 640, 270, 0x4169e1);
     bar_happy.scaleX = 0;
     //exp
     text_satiety = this.add.text(600, 250, "    exp:", {font: "10.5px Arial", fill: "#000"});
-    bar_exp_back = makeBar(this, 600, 290, 0xa9a9a9);
+    bar_exp_back = makeBar(this, 640, 290, 0xa9a9a9);
     bar_exp_back.scaleX = 1;
-    bar_exp = makeBar(this, 600, 290, 0x228b22);
+    bar_exp = makeBar(this, 640, 290, 0x228b22);
     bar_exp.scaleX = 0;
 }
 
