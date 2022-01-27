@@ -573,6 +573,7 @@ function update() {
             char1.set_mode = "mining";
         }else if (local_mining_status == 0 & char1.mode == "mining") {
             char1.set_mode = "resting";
+        }
     }
 }
 
