@@ -189,6 +189,7 @@ class Character extends Phaser.GameObjects.Sprite{
             console.log("click!");
             //this.mode = "on_click";
         }
+    }
     resting(){
 	    this.count += 1;
         if (this.count == 1) {
@@ -296,6 +297,7 @@ class Character extends Phaser.GameObjects.Sprite{
         else if (this.mode == "grooming") {this.grooming();}
         else if (this.mode == "working") {this.working();}
         else if (this.mode == "mining") {this.mining();}
+        else if (this.mode == "on_click") {this.on_click();}
     }
 }
 
