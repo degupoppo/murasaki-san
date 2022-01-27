@@ -387,15 +387,14 @@ function create() {
     text_happy = this.add.text(
         600, 230, "happy = ", {font: "10.5px Arial", fill: "#000"});
     //bar
-    bar_satiety = makeBar(this, 600, 250, 0xff0000);
     bar_satiety_back = makeBar(this, 600, 250, 0x808080);
-    bar_satiety.scaleX = 0;
     bar_satiety_back.scaleX = 1;
-    bar_happy = makeBar(this, 600, 270, 0x0000ff);
-    bar_happy_back = makeBar(this, 600, 250, 0x808080);
-    bar_happy.scaleX = 0;
+    bar_satiety = makeBar(this, 600, 250, 0xff0000);
+    bar_satiety.scaleX = 0;
+    bar_happy_back = makeBar(this, 600, 270, 0x808080);
     bar_happy_back.scaleX = 1;
-    bar_happy.scale.X = 0;
+    bar_happy = makeBar(this, 600, 270, 0x0000ff);
+    bar_happy.scaleX = 0;
 }
 
 
