@@ -388,19 +388,19 @@ function create() {
         600, 230, "happy = ", {font: "10.5px Arial", fill: "#000"});
     //bar
     //satiety
-    this.add.text(600, 250, "satiety:", {font: "10.5px Terminal", fill: "#000"});
+    this.add.text(600, 250, "satiety:", {font: "10.5px Arial", fill: "#000"});
     bar_satiety_back = makeBar(this, 640, 250, 0xa9a9a9);
     bar_satiety_back.scaleX = 1;
     bar_satiety = makeBar(this, 640, 250, 0xff4500);
     bar_satiety.scaleX = 0;
     //happy
-    this.add.text(600, 270, "  happy:", {font: "10.5px Terminal", fill: "#000"});
+    this.add.text(600, 270, "happy:", {font: "10.5px Arial", fill: "#000"});
     bar_happy_back = makeBar(this, 640, 270, 0xa9a9a9);
     bar_happy_back.scaleX = 1;
     bar_happy = makeBar(this, 640, 270, 0x4169e1);
     bar_happy.scaleX = 0;
     //exp
-    this.add.text(600, 290, "    exp:", {font: "10.5px Terminal", fill: "#000"});
+    this.add.text(600, 290, "exp:", {font: "10.5px Arial", fill: "#000"});
     bar_exp_back = makeBar(this, 640, 290, 0xa9a9a9);
     bar_exp_back.scaleX = 1;
     bar_exp = makeBar(this, 640, 290, 0x228b22);
@@ -459,7 +459,9 @@ function update() {
         //update bar
         bar_satiety.scaleX = satiety / 100;
         bar_happy.scaleX = happy / 100;
-        bar_exp.scaleX = local_exp / 1000;
+        let exp = local_exp / 1000;
+        if (exp > 100) { exp = 100; }
+        bar_exp.scaleX = exp / 1000;
     }
     //update dynamic status from contract to local
     if (turn % 101 == 0) {
