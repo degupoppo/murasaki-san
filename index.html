@@ -186,6 +186,7 @@ class Character extends Phaser.GameObjects.Sprite{
     }
     on_click() {
         if (this.mode != "mining") {
+            this.count = 0;
             this.mode = "hugging";
         }
     }
