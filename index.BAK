@@ -159,8 +159,8 @@ class Contract {
     end_farming() {
     }
     level_up() {
-        if (this.exp >= 10000) {
-            this.exp -= 10000;
+        if (this.exp >= 1000) {
+            this.exp -= 1000;
             this.level += 1;
             var li = [this.strength, this.dexterity, this.vitality, this.intelligence, this.luck];
             li[Math.floor(Math.random() * li.length)] += 1;
@@ -494,7 +494,7 @@ function update() {
     //update character
     char1.update();
     //update static status from contract at once
-    if (turn == 1) {
+    if (turn == 1 || turn % 1000 == 0) {
         local_id = contract.id;
         local_type = contract.type;
         local_birth_time = contract.birth_time;
@@ -547,7 +547,7 @@ function update() {
         text_coin_main.setText("coin: " + local_coin);
     }
     //update dynamic status from contract to local
-    if (turn % 101 == 0) {
+    if (turn == 1 || turn % 101 == 0) {
         //update statistic_status
         //update dynamic_status
         //TODO: read from contract
