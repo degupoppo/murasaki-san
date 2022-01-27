@@ -261,7 +261,7 @@ function makeBar(scene, x, y,color) {
     bar.fillStyle(color, 1);
 
     //fill the bar with a rectangle
-    bar.fillRect(0, 0, 200, 50);
+    bar.fillRect(0, 0, 50, 10);
 
     //position the bar
     bar.x = x;
