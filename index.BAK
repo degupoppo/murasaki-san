@@ -18,18 +18,7 @@
 <script type="text/javascript">
 
 /***
-ToDo
-    ボタンの実装、表示、押したときの動作
-    eating実装
-    grooming実装
-    コントラを見立てた外部ステータス格納区域の実装と、読み込み、書き込みの実装
-    キャラのステータスをテキストで描写, コントラから定期的に取得し計算する
-    ステータスはキャラクラスに保持させずに、コントラに見立てた外部変数に格納する。
-    1日1回？feeding, last_feeding_timeからの差でexp加算, 24hr以上の差は無効
-    satiety, happy, expのバーを実装する
-    Lvを実装する。必要expの対応表を作製する。
-    satietyとhappyの差別化を考える。
-    fake contractにfeeding(), grooming(), lv_up()を実装する
+Idea
     working()の概念を考える
         コインを稼ぐ
         str依存？動作とステータスのイメージが一致するように
@@ -53,31 +42,21 @@ ToDo
     ステータス
         Lvアップで増加？ランダム？
         木の実をクラフトし使用する、確率を小さくするか、高価にする
-***/
-
-
-// class
-
-/***
-A, behavior
-    1, resting
-    2, moving
-    3, eating
-    4, sleeping
-    5, grooming
-    6, working
-B, dynamic_status
-    lif: -working/+sleeping
-    nutirition: +eating
-    happy: +grooming
-    exp: +working
-    coin: +working
-C, static_status
-    strength
-    dexterity
-    vitality
-    intelligence
-    luck
+    お世話, expを得る
+        feeding, デイリークエスト, コストなし, 24時間で最大効率
+        grooming, プラスアルファ, 何かしらのコスト必要, 168時間で最大効率
+ToDo
+    Lvを実装する。必要expの対応表を作製する。
+    satietyとhappyの差別化を考える。
+    ok fake contractにfeeding(), grooming(), lv_up()を実装する
+    ok ボタンの実装、表示、押したときの動作
+    ok eating実装
+    ok grooming実装
+    ok コントラを見立てた外部ステータス格納区域の実装と、読み込み、書き込みの実装
+    ok キャラのステータスをテキストで描写, コントラから定期的に取得し計算する
+    ok ステータスはキャラクラスに保持させずに、コントラに見立てた外部変数に格納する。
+    ok 1日1回？feeding, last_feeding_timeからの差でexp加算, 24hr以上の差は無効
+    ok satiety, happy, expのバーを実装する
 ***/
 
 
@@ -107,6 +86,7 @@ let local_exp;
 //fake contract
 class Contract {
     constructor() {
+        //NFT parameters
         this.id = "001";
         this.type = Math.trunc(Math.random() * 5);
         this.strength = 2 + Math.trunc(Math.random() * 8);
@@ -126,6 +106,8 @@ class Contract {
         this.farming_start_time = 0;
         this.exp = 0;
         this.level = 1;
+        //contract parameters
+        this.next_summoners = 0;
     }
     grooming() {
         let delta = (Date.now() - this.last_grooming_time) / 1000;
@@ -165,11 +147,11 @@ class Contract {
             var tmp = Math.trunc(Math.random() * 5);
             if (tmp == 0) {
                 this.strength += 1;
-            }else if (tpm == 1) {
+            }else if (tmp == 1) {
                 this.dexterity += 1;
-            }else if (tpm == 2) {
+            }else if (tmp == 2) {
                 this.vitality += 1;
-            }else if (tpm == 3) {
+            }else if (tmp == 3) {
                 this.intelligence += 1;
             }else {
                 this.luck += 1;
@@ -316,6 +298,21 @@ class Button {
 }
 
 
+//button
+//TODO: send transaction
+function makeBar(scene, x, y, color) {
+    //draw the bar
+    let bar = scene.add.graphics();
+    //color the bar
+    bar.fillStyle(color, 1);
+    //fill the bar with a rectangle
+    bar.fillRect(0, 0, 100, 10);
+    //position the bar
+    bar.x = x;
+    bar.y = y;
+    //return the bar
+    return bar;
+}
 function button_feeding(contract) {
     contract.feeding();
 }
@@ -330,21 +327,6 @@ function button_end_mining(contract) {
 }
 function button_level_up(contract) {
     contract.level_up();
-}
-
-
-function makeBar(scene, x, y, color) {
-    //draw the bar
-    let bar = scene.add.graphics();
-    //color the bar
-    bar.fillStyle(color, 1);
-    //fill the bar with a rectangle
-    bar.fillRect(0, 0, 100, 10);
-    //position the bar
-    bar.x = x;
-    bar.y = y;
-    //return the bar
-    return bar;
 }
 
 
@@ -363,13 +345,7 @@ let config = {
         create: create,
         update: update
     },
-//    fps: {
-//        target: 1,
-//        forceSetTimeOut: true
-//    }
 };
-
-
 let game = new Phaser.Game(config);
 
 
@@ -493,7 +469,6 @@ function create() {
     //coin
     text_coin_main = this.add.text(
         600, 320, "coin:" + local_coin, {font: "10.5px Arial", fill: "#ffd700"});
-    
 }
 
 
@@ -504,7 +479,7 @@ function update() {
     //update character
     char1.update();
     //update static status from contract at once
-    if (turn == 1 || turn % 1000 == 0) {
+    if (turn == 1 || turn % 1001 == 0) {
         local_id = contract.id;
         local_type = contract.type;
         local_birth_time = contract.birth_time;
@@ -572,11 +547,9 @@ function update() {
         local_exp = contract.exp;
         //check character mode
         if (local_last_feeding_time > previous_local_last_feeding_time){
-            //console.log("feeding");
             char1.set_mode = "feeding";
         }
         if (local_last_grooming_time > previous_local_last_grooming_time){
-            //console.log("grooming");
             char1.set_mode = "grooming";
         }
     }
