@@ -171,6 +171,7 @@ class Character extends Phaser.GameObjects.Sprite{
     	this.mode = "resting";
         this.count = 0;
         this.dist = "right";
+        this.setInteractive()
         this.on("pointerdown", function (pointer) {
             console.log("click");
         }, this);
