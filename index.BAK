@@ -111,7 +111,33 @@ class Contract {
         this.coin = 100;
         this.working_status = 0;
         this.working_start_time = 0;
+        this.mining_status = 0;
+        this.mining_start_time = 0;
+        this.foarming_status = 0;
+        this.farming_start_time = 0;
         this.exp = 0;
+    }
+    grooming() {
+        let delta = Date.now() - this.last_grooming_time;
+        this.last_grooming_time = Date.now();
+        this.exp += delta;
+    }
+    feeding() {
+        let delta = Date.now() - this.last_feeding_time;
+        this.last_feeding_time = Date.now();
+        this.exp += delta;
+    }
+    start_crafting(item_id) {
+    }
+    end_crafting(item) {
+    }
+    start_mining() {
+    }
+    end_mining() {
+    }
+    start_farming() {
+    }
+    end_farming() {
     }
 }
 
@@ -255,9 +281,10 @@ class Button {
 
 function button_feeding(contract) {
     //char1.set_mode = "feeding";
-    let delta = Date.now() - local_last_feeding_time;
-    contract.exp += delta / 1000
-    contract.last_feeding_time = Date.now();
+    //let delta = Date.now() - local_last_feeding_time;
+    //contract.exp += delta / 1000
+    //contract.last_feeding_time = Date.now();
+    contract.feeding();
 }
 function button_grooming(contract) {
     //char1.set_mode = "grooming";
