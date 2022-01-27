@@ -541,9 +541,10 @@ function update() {
         //update bar
         bar_satiety.scaleX = satiety / 100;
         bar_happy.scaleX = happy / 100;
-        let exp = (local_exp / 10000) * 100;
+        let exp = (local_exp / 1000) * 100;
         if (exp > 100) { exp = 100; }
         bar_exp.scaleX = exp / 100;
+        text_coin_main.setText("coin: " + local_coin);
     }
     //update dynamic status from contract to local
     if (turn % 101 == 0) {
