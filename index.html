@@ -253,20 +253,16 @@ function button_grooming(contract) {
 }
 
 
-function makeBar(scene, x, y,color) {
+function makeBar(scene, x, y, color) {
     //draw the bar
     let bar = scene.add.graphics();
-
     //color the bar
     bar.fillStyle(color, 1);
-
     //fill the bar with a rectangle
-    bar.fillRect(0, 0, 50, 10);
-
+    bar.fillRect(0, 0, 100, 10);
     //position the bar
     bar.x = x;
     bar.y = y;
-
     //return the bar
     return bar;
 }
@@ -391,8 +387,10 @@ function create() {
     text_happy = this.add.text(
         600, 230, "happy = ", {font: "10.5px Arial", fill: "#000"});
     //bar
-    bar_satiety = makeBar(this, 600, 250, 0x2ecc71);
-    //bar_satiety.setValue(100);
+    bar_satiety = makeBar(this, 600, 250, 0xff0000);
+    bar_satiety.scaleX = 0;
+    bar_happy = makeBar(this, 600, 260, 0x0000ff);
+    bar_happy.scale.X = 0;
 }
 
 
@@ -444,6 +442,7 @@ function update() {
         text_happy.setText("happy = " + happy);
         //update bar
         bar_satiety.scaleX = satiety / 100;
+        bar_happy.scaleX = happy / 100;
     }
     //update dynamic status from contract to local
     if (turn % 101 == 0) {
