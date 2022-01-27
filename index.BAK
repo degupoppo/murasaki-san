@@ -95,6 +95,7 @@ let local_intelligence;
 let local_luck;
 let local_birth_time;
 //dynamic_status, read from construct continuously, write to construct
+let local_level = 1;
 let local_last_feeding_time = Date.now() + 864000;
 let local_last_grooming_time = Date.now() + 864000;
 let local_coin;
@@ -124,7 +125,7 @@ class Contract {
         this.farming_status = 0;
         this.farming_start_time = 0;
         this.exp = 0;
-        this.lv  1;
+        this.level = 1;
     }
     grooming() {
         let delta = (Date.now() - this.last_grooming_time) / 1000;
@@ -156,7 +157,7 @@ class Contract {
     level_up() {
         if (this.exp >= 10000) {
             this.exp -= 10000;
-            this.lv += 1;
+            this.level += 1;
             var li = [this.strength, this.dexterity, this.vitality, this.intelligence, this.luck];
             li[Math.floor(Math.random() * li.length)] += 1;
         }
@@ -313,6 +314,9 @@ function button_start_mining(contract) {
 function button_end_mining(contract) {
     contract.end_mining();
 }
+function button_level_up(contract) {
+    contract.level_up();
+}
 
 
 function makeBar(scene, x, y, color) {
@@ -427,47 +431,49 @@ function create() {
     text_luck = this.add.text(
         600, 100, "luck = " + local_luck, {font: "10.5px Arial", fill: "#000"});
     //dynamic_status
+    text_level = this.add.text(
+        600, 120, "level = " + local_level, {font: "10.5px Arial", fill: "#000"});
     text_last_feeding_time = this.add.text(
-        600, 120, "last_feeding_time = " + local_last_feeding_time, {font: "10.5px Arial", fill: "#000"});
+        600, 130, "last_feeding_time = " + local_last_feeding_time, {font: "10.5px Arial", fill: "#000"});
     text_last_grooming_time = this.add.text(
-        600, 130, "last_grooming_time = " + local_last_grooming_time, {font: "10.5px Arial", fill: "#000"});
+        600, 140, "last_grooming_time = " + local_last_grooming_time, {font: "10.5px Arial", fill: "#000"});
     text_coin = this.add.text(
-        600, 140, "coin = " + local_coin, {font: "10.5px Arial", fill: "#000"});
+        600, 150, "coin = " + local_coin, {font: "10.5px Arial", fill: "#000"});
     text_working_status = this.add.text(
-        600, 150, "working_status = " + local_working_status, {font: "10.5px Arial", fill: "#000"});
+        600, 160, "working_status = " + local_working_status, {font: "10.5px Arial", fill: "#000"});
     text_working_start_time = this.add.text(
-        600, 160, "working_start_time = " + local_working_start_time, {font: "10.5px Arial", fill: "#000"});
+        600, 170, "working_start_time = " + local_working_start_time, {font: "10.5px Arial", fill: "#000"});
     text_exp = this.add.text(
-        600, 170, "exp = " + local_exp, {font: "10.5px Arial", fill: "#000"});
+        600, 180, "exp = " + local_exp, {font: "10.5px Arial", fill: "#000"});
     //calculation_status
     text_turn = this.add.text(
-        600, 190, "turn = ", {font: "10.5px Arial", fill: "#000"});
+        600, 200, "turn = ", {font: "10.5px Arial", fill: "#000"});
     text_age_time = this.add.text(
-        600, 200, "age_time = ", {font: "10.5px Arial", fill: "#000"});
+        600, 210, "age_time = ", {font: "10.5px Arial", fill: "#000"});
     text_mode = this.add.text(
-        600, 210, "mode = ", {font: "10.5px Arial", fill: "#000"});
+        600, 220, "mode = ", {font: "10.5px Arial", fill: "#000"});
     text_satiety = this.add.text(
-        600, 220, "satiey = ", {font: "10.5px Arial", fill: "#000"});
+        600, 230, "satiey = ", {font: "10.5px Arial", fill: "#000"});
     text_happy = this.add.text(
-        600, 230, "happy = ", {font: "10.5px Arial", fill: "#000"});
+        600, 240, "happy = ", {font: "10.5px Arial", fill: "#000"});
     //bar
     //satiety
-    this.add.text(600, 250, "satiety:", {font: "10.5px Arial", fill: "#000"});
-    bar_satiety_back = makeBar(this, 640, 250, 0xa9a9a9);
+    this.add.text(600, 260, "satiety:", {font: "10.5px Arial", fill: "#000"});
+    bar_satiety_back = makeBar(this, 640, 260, 0xa9a9a9);
     bar_satiety_back.scaleX = 1;
-    bar_satiety = makeBar(this, 640, 250, 0xff4500);
+    bar_satiety = makeBar(this, 640, 260, 0xff4500);
     bar_satiety.scaleX = 0;
     //happy
-    this.add.text(600, 270, "happy:", {font: "10.5px Arial", fill: "#000"});
-    bar_happy_back = makeBar(this, 640, 270, 0xa9a9a9);
+    this.add.text(600, 280, "happy:", {font: "10.5px Arial", fill: "#000"});
+    bar_happy_back = makeBar(this, 640, 280, 0xa9a9a9);
     bar_happy_back.scaleX = 1;
-    bar_happy = makeBar(this, 640, 270, 0x4169e1);
+    bar_happy = makeBar(this, 640, 280, 0x4169e1);
     bar_happy.scaleX = 0;
     //exp
-    this.add.text(600, 290, "exp:", {font: "10.5px Arial", fill: "#000"});
-    bar_exp_back = makeBar(this, 640, 290, 0xa9a9a9);
+    this.add.text(600, 300, "exp:", {font: "10.5px Arial", fill: "#000"});
+    bar_exp_back = makeBar(this, 640, 300, 0xa9a9a9);
     bar_exp_back.scaleX = 1;
-    bar_exp = makeBar(this, 640, 290, 0x228b22);
+    bar_exp = makeBar(this, 640, 300, 0x228b22);
     bar_exp.scaleX = 0;
 }
 
@@ -512,6 +518,7 @@ function update() {
         if (happy < 0) { happy = 0; }
         if (happy > 100) { happy = 100; }
         //update text
+        text_level.setText("level = " + local_level);
         text_last_feeding_time.setText("last_feeding_time = " + local_last_feeding_time);
         text_last_grooming_time.setText("last_grooming_time = " + local_last_grooming_time);
         text_coin.setText("coin = " + local_coin);
@@ -534,6 +541,7 @@ function update() {
         //update statistic_status
         //update dynamic_status
         //TODO: read from contract
+        local_level = contract.level;
         let previous_local_last_feeding_time = local_last_feeding_time;
         let previous_local_last_grooming_time = local_last_grooming_time;
         local_last_feeding_time = contract.last_feeding_time;
