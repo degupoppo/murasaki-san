@@ -40,11 +40,19 @@ ToDo
         クラフト品のユースケースは？
     資産
         exp?, 時間, コイン（sota?, ohana?), 素材(あまり種類を多くしない, 低級、中級、上級、ぐらい）
+        expはお世話で取得
+        コインはminingで取得
+        素材はfarmingで取得
+    効率・補正
+        Lv, Str/Dex/Intなどのステータス, endを押すまでの経過時間
+        クラフト品による補正
     時間を資源に
         フリー時間しかgroomingなどできない
         working, やcraftingは時間を費やせばそれだけ効率や成功率が増大する
         しかしworkingさせているとgroomingやfeedingできずにexpがたまらない
-
+    ステータス
+        Lvアップで増加？ランダム？
+        木の実をクラフトし使用する、確率を小さくするか、高価にする
 ***/
 
 
@@ -149,6 +157,8 @@ class Contract {
         if (this.exp >= 10000) {
             this.exp -= 10000;
             this.lv += 1;
+            var li = [this.strength, this.dexterity, this.vitality, this.intelligence, this.luck];
+            li[Math.floor(Math.random() * li.length)] += 1;
         }
     }
 }
