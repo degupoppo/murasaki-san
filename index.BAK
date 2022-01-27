@@ -186,6 +186,7 @@ class Character extends Phaser.GameObjects.Sprite{
     }
     on_click() {
         if (this.mode != "mining") {
+            this.count = 0;
             this.mode = "hugging";
         }
     }
@@ -199,10 +200,11 @@ class Character extends Phaser.GameObjects.Sprite{
             }
 	    }else if (this.count >= 100){
             let tmp = Math.random() * 100;
+            let happy = Math.round( (base - (now_time - local_last_grooming_time)) / base * 1000 ) / 10;
             if (tmp <= 10) {
                 this.mode = "sleeping";
                 this.count = 0;
-            }else if (tmp <= 20) {
+            }else if (tmp <= 20 & happy <= 10) {
                 this.mode = "crying";
                 this.count = 0;
             }else {
@@ -379,7 +381,8 @@ let game = new Phaser.Game(config);
 
 
 function preload() {
-    this.load.image("sky", "png/sky.png");
+    //this.load.image("sky", "png/sky.png");
+    this.load.image("back", "png/back.png");
     this.load.spritesheet("murasaki_right", "png/murasaki_right.png", {frameWidth: 74, frameHeight: 64});
     this.load.spritesheet("murasaki_left", "png/murasaki_left.png", {frameWidth: 74, frameHeight: 64});
     this.load.spritesheet("murasaki_sleeping", "png/murasaki_sleeping.png", {frameWidth: 74, frameHeight: 64});
@@ -394,7 +397,7 @@ function preload() {
 function create() {
     //fake contract
     contract = new Contract();
-    this.add.image(400, 300, "sky");
+    this.add.image(400, 300, "back");
     this.anims.create({
         key: "murasaki_right",
         frames: this.anims.generateFrameNumbers("murasaki_right", {start: 0, end:3}),
