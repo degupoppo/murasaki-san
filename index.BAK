@@ -79,6 +79,7 @@ ToDo
 ***/
 
 
+
 //dummy contract
 //--------------------------------------------------------------------------------------------------------
 class Contract {
@@ -217,6 +218,7 @@ class Contract {
         }
     }
 }
+
 
 
 //character
@@ -396,6 +398,7 @@ class Character extends Phaser.GameObjects.Sprite{
 }
 
 
+
 //accessories
 //--------------------------------------------------------------------------------------------------------
 
@@ -468,6 +471,7 @@ function button_stop_farming(contract) {
         contract.stop_mining();
     }
 }
+
 
 
 // main functions

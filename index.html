@@ -382,6 +382,7 @@ class Character extends Phaser.GameObjects.Sprite{
         if (this.count == 1){
             this.anims.play("murasaki_farming", true);
         }
+    }
     update(){
         //console.log(this.version, this.mode, this.count);
         if (this.mode == "resting") {this.resting();}
