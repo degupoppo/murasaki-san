@@ -312,7 +312,7 @@ class Character extends Phaser.GameObjects.Sprite{
             if (this.x < 100 && this.moving_degree > 90 && this.moving_degree <270) {
                 console.log("xr");
                 this.moving_degree -= 180;
-            }else if (this.x > 700 && this.moving_degree < 90 || this.moving_degree > 270) {
+            }else if (this.x > 700 && (this.moving_degree < 90 || this.moving_degree > 270)) {
                 console.log("xl");
                 this.moving_degree -= 180;
             }
