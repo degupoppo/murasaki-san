@@ -367,7 +367,7 @@ function button_end_mining(contract) {
     }
 }
 function button_level_up(contract) {
-    if (window.confirm("[Fake MetaMask]\n\nStart Mining?\n")) {
+    if (window.confirm("[Fake MetaMask]\n\nConfirm Level-Up?\n")) {
         contract.level_up();
     }
 }
@@ -388,6 +388,9 @@ let config = {
         preload: preload,
         create: create,
         update: update
+    },
+    render: {
+    pixelArt: false
     },
 };
 let game = new Phaser.Game(config);
