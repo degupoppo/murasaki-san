@@ -28,9 +28,15 @@ Idea
         クラフト品のユースケースは？
     資産
         exp?, 時間, コイン（sota?, ohana?), 素材(あまり種類を多くしない, 低級、中級、上級、ぐらい）
-        expはお世話で取得
-        コインはminingで取得
-        素材はfarmingで取得
+        exp
+            お世話で取得
+            Lv upに必要
+        コイン
+            miningで取得
+            
+        素材
+            farmingで取得
+            Craftingに必要
     効率・補正
         Lv, Str/Dex/Intなどのステータス, endを押すまでの経過時間
         クラフト品による補正
@@ -41,11 +47,22 @@ Idea
     ステータス
         Lvアップで増加？ランダム？
         木の実をクラフトし使用する、確率を小さくするか、高価にする
+        Strength: 筋力
+            Miningの効率up
+        Dexterity: 器用さ
+            Farmingの効率up
+        Intelligence: 知力
+            Craftingの効率up
+        Vitality: 体力
+            
+        Luck: 運
+            ボーナスダイスに加算
     お世話, expを得る
         feeding, デイリークエスト, コストなし, 24時間で最大効率
         grooming, プラスアルファ, 何かしらのコスト必要, 168時間で最大効率
 ToDo
-    絵を大きめにする
+    移動を見直す. 距離ランダム, 上下の動きも実装する
+    絵を大きめにする, 元絵を大きめに読み込み, scaleXYで縮小する
     Lvを実装する。必要expの対応表を作製する。
     satietyとhappyの差別化を考える。
     ok つっつき動作の実装
@@ -538,7 +555,7 @@ function create() {
     bar_exp.scaleX = 0;
     //coin
     text_coin_main = this.add.text(
-        600, 320, "coin:" + local_coin, {font: "10.5px Arial", fill: "#ffd700"});
+        600, 320, "coin:" + local_coin, {font: "10.5px Arial", fill: "#000"});
 }
 
 
