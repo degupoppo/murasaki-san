@@ -506,6 +506,7 @@ function preload() {
     this.load.spritesheet("murasaki_crying", "png/murasaki_crying.png", {frameWidth: 74, frameHeight: 64});
     this.load.spritesheet("murasaki_mining", "png/murasaki_mining.png", {frameWidth: 74, frameHeight: 64});
     this.load.spritesheet("murasaki_hugging", "png/murasaki_hugging.png", {frameWidth: 74, frameHeight: 64});
+    this.load.sprite("button_feeding", "png/button_feeding.png", {frameWidth: 500, frameHeight: 500});
     cursors = this.input.keyboard.createCursorKeys();
 }
 
@@ -640,7 +641,8 @@ function create() {
     text_material_main = this.add.text(
         600, 330, "material:" + local_material, {font: "10.5px Arial", fill: "#000"});
     //button
-    test = this.add.sprite(200,200, "murasaki_hugging");
+    test = this.add.sprite(200,200, "button_feeding");
+    test.setInteractive()
     test.on('pointerdown', () => button_feeding(contract) );
 
 }
