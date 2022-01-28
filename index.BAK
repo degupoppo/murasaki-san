@@ -641,7 +641,7 @@ function create() {
         600, 330, "material:" + local_material, {font: "10.5px Arial", fill: "#000"});
     //button
     test = this.add.sprite(200,200, "murasaki_hugging");
-    test.on('pointerdown', () => callback() );
+    test.on('pointerdown', () => button_feeding(contract) );
 
 }
 
