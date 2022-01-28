@@ -464,12 +464,12 @@ function button_stop_mining(contract) {
 }
 function button_start_farming(contract) {
     if (window.confirm("[ Dummy MetaMask Message ]\n\nStart Farming?\n")) {
-        contract.start_mining();
+        contract.start_farming();
     }
 }
 function button_stop_farming(contract) {
     if (window.confirm("[ Dummy MetaMask Message ]\n\nStop Farming?\n")) {
-        contract.stop_mining();
+        contract.stop_farming();
     }
 }
 
@@ -537,9 +537,12 @@ function preload() {
     this.load.spritesheet("murasaki_crying", "png/murasaki_crying.png", {frameWidth: 370, frameHeight: 320});
     this.load.spritesheet("murasaki_mining", "png/murasaki_mining.png", {frameWidth: 370, frameHeight: 320});
     this.load.spritesheet("murasaki_hugging", "png/murasaki_hugging.png", {frameWidth: 370, frameHeight: 320});
-    this.load.image("button_feeding", "png/button_feeding.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("food_sweet_potato", "png/food_sweet_potato.png", {frameWidth: 500, frameHeight: 500});
     this.load.spritesheet("murasaki_farming", "png/murasaki_farming.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("button_feeding", "png/button_feeding.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_grooming", "png/button_feeding.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_mining", "png/button_feeding.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_farming", "png/button_feeding.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("food_sweet_potato", "png/food_sweet_potato.png", {frameWidth: 500, frameHeight: 500});
     //cursors = this.input.keyboard.createCursorKeys();
 }
 
@@ -682,11 +685,26 @@ function create() {
     text_material_main = this.add.text(
         600, 330, "material:" + local_material, {font: "10.5px Arial", fill: "#000"});
     //button
-    test = this.add.sprite(660,430, "button_feeding");
-    test.scaleX = test.scaleX * 0.1
-    test.scaleY = test.scaleY * 0.1
-    test.setInteractive()
-    test.on('pointerdown', () => button_feeding(contract) );
+    button_feeding = this.add.sprite(660,430, "button_feeding");
+    button_feeding.scaleX = test.scaleX * 0.1
+    button_feeding.scaleY = test.scaleY * 0.1
+    button_feeding.setInteractive()
+    button_feeding.on('pointerdown', () => button_feeding(contract) );
+    button_grooming = this.add.sprite(400,300, "button_feeding");
+    button_grooming.scaleX = test.scaleX * 0.1
+    button_grooming.scaleY = test.scaleY * 0.1
+    button_grooming.setInteractive()
+    button_grooming.on('pointerdown', () => button_grooming(contract) );
+    button_mining = this.add.sprite(10,430, "button_feeding");
+    button_mining.scaleX = test.scaleX * 0.1
+    button_mining.scaleY = test.scaleY * 0.1
+    button_mining.setInteractive()
+    button_mining.on('pointerdown', () => button_mining(contract) );
+    button_farming = this.add.sprite(200,430, "button_feeding");
+    button_farming.scaleX = test.scaleX * 0.1
+    button_farming.scaleY = test.scaleY * 0.1
+    button_farming.setInteractive()
+    button_farming.on('pointerdown', () => button_farming(contract) );
 }
 
 
