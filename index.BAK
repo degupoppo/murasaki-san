@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="png" href="png/icon.PNG">
-    <title>Test</title>
+    <title>House of MurasakiSan</title>
     <script src="phaser.js"></script>
     <style type="text/css">
         body {
@@ -458,8 +458,8 @@ function create() {
     });
     //summon character
     char1 = new Character(this, 300 + Math.random()*200, 400 + Math.random()*100);
-    char1.scaleX = char1.scaleX * 2;
-    char1.scaley = char1.scaley * 2;
+    char1.scaleX = char1.scaleX * 1.2;
+    char1.scaleY = char1.scaleY * 1.2;
     //button
     const button1 = new Button(50, 20, 'Feeding', this, () => button_feeding(contract));
     const button2 = new Button(50, 40, 'Grooming', this, () => button_grooming(contract));
