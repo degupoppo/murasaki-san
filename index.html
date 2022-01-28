@@ -216,7 +216,7 @@ class Character extends Phaser.GameObjects.Sprite{
                 this.anims.play("murasaki_left", true);
             }
             this.resting_count = 70 + Math.random() * 30;
-	    }else if (this.count >= resting_count){
+	    }else if (this.count >= this.resting_count){
             let tmp = Math.random() * 100;
             let base = 864000;
             let now_time = Date.now();
