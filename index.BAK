@@ -79,35 +79,6 @@ ToDo
 ***/
 
 
-const version = "0.0.14";
-let turn = 0;
-
-
-//static_status, read from construct at once
-let local_id;
-let local_type;
-let local_strength;
-let local_dexterity;
-let local_vitality;
-let local_intelligence;
-let local_luck;
-let local_birth_time;
-//dynamic_status, read from construct continuously, write to construct
-let local_level = 1;
-let local_last_feeding_time = Date.now() + 864000;
-let local_last_grooming_time = Date.now() + 864000;
-let local_coin;
-let local_working_status;
-let local_working_start_time;
-let local_exp;
-let local_mining_status;
-let local_mining_start_time;
-let local_next_exp_required;
-let local_material;
-let local_farming_status;
-let local_farming_start_time;
-
-
 //dummy contract
 //--------------------------------------------------------------------------------------------------------
 class Contract {
@@ -503,6 +474,35 @@ function button_stop_farming(contract) {
 //--------------------------------------------------------------------------------------------------------
 
 
+const version = "0.0.14";
+let turn = 0;
+
+
+//static_status, read from construct at once
+let local_id;
+let local_type;
+let local_strength;
+let local_dexterity;
+let local_vitality;
+let local_intelligence;
+let local_luck;
+let local_birth_time;
+//dynamic_status, read from construct continuously, write to construct
+let local_level = 1;
+let local_last_feeding_time = Date.now() + 864000;
+let local_last_grooming_time = Date.now() + 864000;
+let local_coin;
+let local_working_status;
+let local_working_start_time;
+let local_exp;
+let local_mining_status;
+let local_mining_start_time;
+let local_next_exp_required;
+let local_material;
+let local_farming_status;
+let local_farming_start_time;
+
+
 let config = {
     type: Phaser.AUTO,
     width: 800,
@@ -601,8 +601,8 @@ function create() {
     new Button(30, 70, 'Grooming', this, () => button_grooming(contract));
     new Button(30, 100, 'Start Mining', this, () => button_start_mining(contract));
     new Button(30, 130, 'Stop Mining', this, () => button_stop_mining(contract));
-    new Button(30, 160, 'Start Farming', this, () => button_start_mining(contract));
-    new Button(30, 190, 'Stop Farming', this, () => button_stop_mining(contract));
+    new Button(30, 160, 'Start Farming', this, () => button_start_farming(contract));
+    new Button(30, 190, 'Stop Farming', this, () => button_stop_farming(contract));
     //back color
     let status_back = this.add.graphics();
     status_back.fillStyle(0xa9a9a9, 1).fillRect(590, 5, 200, 350);
