@@ -338,6 +338,7 @@ class Button {
         const button = scene.add.text(x, y, label)
             .setFontSize(fontsize)
             .setFontFamily("Arial")
+            .setFill("#000000")
             //.setOrigin(0.5)
             //.setPadding(10)
             //.setStyle({ backgroundColor: '#111' })
