@@ -244,8 +244,10 @@ class Character extends Phaser.GameObjects.Sprite{
             this.moving_speed = 0.7 + Math.random() * 0.3;  //0.7-1.0
             this.moving_count = 70 + Math.random() * 30;    //70-100
             if (this.moving_degree > 90 & this.moving_degree <= 270) {
+                this.dist = "left";
                 this.anims.play("murasaki_left", true);
             }else {
+                this.dist = "right";
                 this.anims.play("murasaki_right", true);
             }
         }else if (this.count < this.moving_count) {
