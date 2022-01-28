@@ -311,8 +311,10 @@ class Character extends Phaser.GameObjects.Sprite{
                 this.moving_degree -= 180;
             }
             if (this.y > 500 && this.moving_dgree > 180) {
+                console.log("yu");
                 this.moving_degree = 360 - this.moving_degree;
             }else if (this.y < 250 && this.moving_degree < 180) {
+                console.log("yd");
                 this.moving_degree = 360 - this.moving_degree;
             }
             //determine speed, count
