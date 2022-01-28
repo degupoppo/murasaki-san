@@ -153,7 +153,7 @@ class Contract {
             this.crafting_status = 1;
         }
     }
-    end_crafting(item) {
+    stop_crafting(item) {
         if (this.crafting_status == 1) {
             let delta = (Date.now() - this.crafting_start_time) / 1000;
             //nft mint check
@@ -166,7 +166,7 @@ class Contract {
             this.mining_status = 1;
         }
     }
-    end_mining() {
+    stop_mining() {
         if (this.mining_status == 1) {
             let delta = (Date.now() - this.mining_start_time) / 10000;
             delta = math.trunc(delta);
@@ -180,7 +180,7 @@ class Contract {
             this.farming_status = 1;
         }
     }
-    end_farming() {
+    stop_farming() {
         if (this.farming_status == 1) {
             let delta = (Date.now() - this.farming_start_time) / 100000;
             delta = math.trunc(delta);
@@ -462,6 +462,11 @@ class Button {
             .on('pointerout', () => button.setStyle({ fontSize: fontsize, fontFamily: "Arial", fill: '#000000' }));
     }
 }
+function button_level_up(contract) {
+    if (window.confirm("[ Dummy MetaMask Message ]\n\nConfirm Level-Up?\n")) {
+        contract.level_up();
+    }
+}
 function button_feeding(contract) {
     if (window.confirm("[ Dummy MetaMask Message ]\n\nConfirm Feeding?\n")) {
         contract.feeding();
@@ -477,14 +482,19 @@ function button_start_mining(contract) {
         contract.start_mining();
     }
 }
-function button_end_mining(contract) {
-    if (window.confirm("[ Dummy MetaMask Message ]\n\nEnd Mining?\n")) {
-        contract.end_mining();
+function button_stop_mining(contract) {
+    if (window.confirm("[ Dummy MetaMask Message ]\n\nstop Mining?\n")) {
+        contract.stop_mining();
     }
 }
-function button_level_up(contract) {
-    if (window.confirm("[ Dummy MetaMask Message ]\n\nConfirm Level-Up?\n")) {
-        contract.level_up();
+function button_start_farming(contract) {
+    if (window.confirm("[ Dummy MetaMask Message ]\n\nStart Farming?\n")) {
+        contract.start_mining();
+    }
+}
+function button_stop_farming(contract) {
+    if (window.confirm("[ Dummy MetaMask Message ]\n\nStop Farming?\n")) {
+        contract.stop_mining();
     }
 }
 
@@ -586,11 +596,13 @@ function create() {
     char1.scaleX = char1.scaleX * 0.25;
     char1.scaleY = char1.scaleY * 0.25;
     //button
-    const button1 = new Button(30, 10, 'Feeding', this, () => button_feeding(contract));
-    const button2 = new Button(30, 40, 'Grooming', this, () => button_grooming(contract));
-    const button3 = new Button(30, 70, 'Start Mining', this, () => button_start_mining(contract));
-    const button4 = new Button(30, 100, 'End Mining', this, () => button_end_mining(contract));
-    const button5 = new Button(30, 130, 'Level Up', this, () => button_level_up(contract));
+    new Button(30, 10, 'Level Up', this, () => button_level_up(contract));
+    new Button(30, 40, 'Feeding', this, () => button_feeding(contract));
+    new Button(30, 70, 'Grooming', this, () => button_grooming(contract));
+    new Button(30, 100, 'Start Mining', this, () => button_start_mining(contract));
+    new Button(30, 130, 'Stop Mining', this, () => button_stop_mining(contract));
+    new Button(30, 160, 'Start Farming', this, () => button_start_farming(contract));
+    new Button(30, 190, 'Stop Farming', this, () => button_stop_farming(contract));
     //back color
     let status_back = this.add.graphics();
     status_back.fillStyle(0xa9a9a9, 1).fillRect(590, 5, 200, 350);
