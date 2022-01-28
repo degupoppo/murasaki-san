@@ -257,8 +257,8 @@ class Character extends Phaser.GameObjects.Sprite{
             }
             console.log(this.moving_degree);
         }else if (this.count < this.moving_count) {
-            this.x += Math.cos(this.moving_degree) * this.moving_speed;
-            this.y += Math.sin(this.moving_degree) * this.moving_speed;
+            this.x += Math.cos(this.moving_degree * (Math.PI/180)) * this.moving_speed;
+            this.y += Math.sin(this.moving_degree * (Math.PI/180)) * this.moving_speed;
         }else if (this.count >= this.moving_count) {
             this.mode = "resting";
             this.count = 0;

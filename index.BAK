@@ -255,6 +255,7 @@ class Character extends Phaser.GameObjects.Sprite{
                 this.dist = "right";
                 this.anims.play("murasaki_right", true);
             }
+            console.log(this.moving_degree);
         }else if (this.count < this.moving_count) {
             this.x += Math.cos(this.moving_degree) * this.moving_speed;
             this.y += Math.sin(this.moving_degree) * this.moving_speed;
