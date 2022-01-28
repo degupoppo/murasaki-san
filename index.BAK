@@ -347,27 +347,27 @@ function makeBar(scene, x, y, color) {
     return bar;
 }
 function button_feeding(contract) {
-    if (window.confirm("[Fake MetaMask]\n\nConfirm Feeding?\n")) {
+    if (window.confirm("[ Fake MetaMask ]\n\nConfirm Feeding?\n")) {
         contract.feeding();
     }
 }
 function button_grooming(contract) {
-    if (window.confirm("[Fake MetaMask]\n\nConfirm Grooming?\n")) {
+    if (window.confirm("[ Fake MetaMask ]\n\nConfirm Grooming?\n")) {
         contract.grooming();
     }
 }
 function button_start_mining(contract) {
-    if (window.confirm("[Fake MetaMask]\n\nStart Mining?\n")) {
+    if (window.confirm("[ Fake MetaMask ]\n\nStart Mining?\n")) {
         contract.start_mining();
     }
 }
 function button_end_mining(contract) {
-    if (window.confirm("[Fake MetaMask]\n\nEnd Mining?\n")) {
+    if (window.confirm("[ Fake MetaMask ]\n\nEnd Mining?\n")) {
         contract.end_mining();
     }
 }
 function button_level_up(contract) {
-    if (window.confirm("[Fake MetaMask]\n\nConfirm Level-Up?\n")) {
+    if (window.confirm("[ Fake MetaMask ]\n\nConfirm Level-Up?\n")) {
         contract.level_up();
     }
 }
@@ -390,7 +390,7 @@ let config = {
         update: update
     },
     render: {
-    pixelArt: false
+        pixelArt: false
     },
 };
 let game = new Phaser.Game(config);
