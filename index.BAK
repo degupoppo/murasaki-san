@@ -63,6 +63,7 @@ Idea
 ToDo
     絵を大きめにする, 元絵を大きめに読み込み, scaleXYで縮小する
     satietyとhappyの差別化を考える。
+    その場所への移動を実装する
     ok Lvを実装する。必要expの対応表を作製する。
     ok 移動を見直す. 距離ランダム, 上下の動きも実装する
     ok つっつき動作の実装
@@ -333,6 +334,7 @@ class Character extends Phaser.GameObjects.Sprite{
         }else if (this.count < this.moving_count) {
             this.x += Math.cos(this.moving_degree * (Math.PI/180)) * this.moving_speed;
             this.y -= Math.sin(this.moving_degree * (Math.PI/180)) * this.moving_speed;
+        //return to resting
         }else if (this.count >= this.moving_count) {
             this.mode = "resting";
             this.count = 0;
@@ -637,6 +639,8 @@ function create() {
         600, 320, "coin:" + local_coin, {font: "10.5px Arial", fill: "#000"});
     text_material_main = this.add.text(
         600, 330, "material:" + local_material, {font: "10.5px Arial", fill: "#000"});
+    //button
+    
 }
 
 
