@@ -469,7 +469,7 @@ function create() {
     const button4 = new Button(30, 100, 'End Mining', this, () => button_end_mining(contract));
     const button5 = new Button(30, 130, 'Level Up', this, () => button_level_up(contract));
     //status_back
-    let status_back = this.add.graphics(
+    let status_back = this.add.graphics();
     status_back.fillStyle(0xffffff, 1).fillRect(590, 20, 100, 260);
     status_back.alpha = 0.5;
     //text
