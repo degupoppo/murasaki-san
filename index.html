@@ -238,27 +238,27 @@ class Character extends Phaser.GameObjects.Sprite{
         if (this.count == 1){
             //determine degree, 0-30, 150-210, 330-360
             this.moving_degree = Math.random() * 120;
-            if (this.moving_degree > 30 & this.moving_degree < 150) {
+            if (this.moving_degree > 30 && this.moving_degree < 150) {
                 this.moving_degree += 120;
-            }else if (this.moving_degree > 210 & this.moving_degree < 330) {
+            }else if (this.moving_degree > 210 && this.moving_degree < 330) {
                 this.moving_degree += 120;
             }
             //out of area check
-            if (this.x < 20 & this.moving_degree > 90 and this.moving_degree <270) {
+            if (this.x < 20 && this.moving_degree > 90 && this.moving_degree <270) {
                 this.moving_degree -= 180;
-            }else if (this.x > 780 & this.moving_degree < 90 or this.moving_degree > 270) {
+            }else if (this.x > 780 && this.moving_degree < 90 || this.moving_degree > 270) {
                 this.moving_degree -= 180;
             }
-            if (this.y < 580 & this.moving_dgree > 180) {
+            if (this.y < 580 && this.moving_dgree > 180) {
                 this.moving_degree = 360 - this.moving_degree;
-            }else if (this.y > 380 & this.moving_degree < 180 {
+            }else if (this.y > 380 && this.moving_degree < 180 {
                 this.moving_degree = 360 - this.moving_degree;
             }
             //determine speed, count
             this.moving_speed = 0.3 + Math.random() * 0.2;  //0.3-0.5
             this.moving_count = 60 + Math.random() * 40;    //70-100
             //determine left or right
-            if (this.moving_degree > 90 & this.moving_degree <= 270) {
+            if (this.moving_degree > 90 && this.moving_degree <= 270) {
                 this.dist = "left";
                 this.anims.play("murasaki_left", true);
             }else {

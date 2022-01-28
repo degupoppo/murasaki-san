@@ -244,9 +244,9 @@ class Character extends Phaser.GameObjects.Sprite{
                 this.moving_degree += 120;
             }
             //out of area check
-            if (this.x < 20 & this.moving_degree > 90 and this.moving_degree <270) {
+            if (this.x < 20 & this.moving_degree > 90 & this.moving_degree <270) {
                 this.moving_degree -= 180;
-            }else if (this.x > 780 & this.moving_degree < 90 or this.moving_degree > 270) {
+            }else if (this.x > 780 & this.moving_degree < 90 || this.moving_degree > 270) {
                 this.moving_degree -= 180;
             }
             if (this.y < 580 & this.moving_dgree > 180) {
@@ -254,6 +254,7 @@ class Character extends Phaser.GameObjects.Sprite{
             }else if (this.y > 380 & this.moving_degree < 180 {
                 this.moving_degree = 360 - this.moving_degree;
             }
+            //determine speed, count
             this.moving_speed = 0.3 + Math.random() * 0.2;  //0.3-0.5
             this.moving_count = 60 + Math.random() * 40;    //70-100
             //determine left or right
