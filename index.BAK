@@ -155,7 +155,7 @@ class Contract {
     stop_farming() {
         if (this.farming_status == 1) {
             let delta = (Date.now() - this.farming_start_time) / 100000;
-            delta = math.trunc(delta);
+            delta = Math.trunc(delta);
             this.material += delta;
             this.farming_status = 0;
         }
@@ -686,18 +686,18 @@ function create() {
         600, 330, "material:" + local_material, {font: "10.5px Arial", fill: "#000"});
     //button
     button_feeding = this.add.sprite(660,430, "button_feeding");
-    button_feeding.scaleX = test.scaleX * 0.1
-    button_feeding.scaleY = test.scaleY * 0.1
+    button_feeding.scaleX = button_feeding.scaleX * 0.1
+    button_feeding.scaleY = button_feeding.scaleY * 0.1
     button_feeding.setInteractive()
     button_feeding.on('pointerdown', () => button_feeding(contract) );
     button_grooming = this.add.sprite(400,300, "button_feeding");
-    button_grooming.scaleX = test.scaleX * 0.1
-    button_grooming.scaleY = test.scaleY * 0.1
+    button_grooming.scaleX = button_grooming.scaleX * 0.1
+    button_grooming.scaleY = button_grooming.scaleY * 0.1
     button_grooming.setInteractive()
     button_grooming.on('pointerdown', () => button_grooming(contract) );
     button_mining = this.add.sprite(10,430, "button_feeding");
-    button_mining.scaleX = test.scaleX * 0.1
-    button_mining.scaleY = test.scaleY * 0.1
+    button_mining.scaleX = button_mining.scaleX * 0.1
+    button_mining.scaleY = button_mining.scaleY * 0.1
     button_mining.setInteractive()
     button_mining.on('pointerdown', () => button_mining(contract) );
     button_farming = this.add.sprite(200,300, "button_feeding");
