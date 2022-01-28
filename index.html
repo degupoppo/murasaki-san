@@ -458,6 +458,8 @@ function create() {
     });
     //summon character
     char1 = new Character(this, 300 + Math.random()*200, 400 + Math.random()*100);
+    char1.scaleX = char1.scaleX * 2;
+    char1.scaleY = char1.scaleY * 2;
     //button
     const button1 = new Button(50, 20, 'Feeding', this, () => button_feeding(contract));
     const button2 = new Button(50, 40, 'Grooming', this, () => button_grooming(contract));
