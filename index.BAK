@@ -308,9 +308,9 @@ class Character extends Phaser.GameObjects.Sprite{
             }else if (this.x > 700 && this.moving_degree < 90 || this.moving_degree > 270) {
                 this.moving_degree -= 180;
             }
-            if (this.y > 550 && this.moving_dgree > 180) {
+            if (this.y > 500 && this.moving_dgree > 180) {
                 this.moving_degree = 360 - this.moving_degree;
-            }else if (this.y < 300 && this.moving_degree < 180) {
+            }else if (this.y < 250 && this.moving_degree < 180) {
                 this.moving_degree = 360 - this.moving_degree;
             }
             //determine speed, count
@@ -720,7 +720,7 @@ function update() {
         let exp = (local_exp / local_next_exp_required) * 100;
         if (exp > 100) { exp = 100; }
         bar_exp.scaleX = exp / 100;
-        text_coin_main.setText("coin: " + local_coin);
+        text_coin_main.setText("coin:    " + local_coin);
     }
     //update dynamic status from contract to local
     if (turn == 1 || turn % 101 == 0) {
