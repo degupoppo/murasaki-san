@@ -62,8 +62,8 @@ Idea
         grooming, プラスアルファ, 何かしらのコスト必要, 168時間で最大効率
 ToDo
     絵を大きめにする, 元絵を大きめに読み込み, scaleXYで縮小する
-    Lvを実装する。必要expの対応表を作製する。
     satietyとhappyの差別化を考える。
+    ok Lvを実装する。必要expの対応表を作製する。
     ok 移動を見直す. 距離ランダム, 上下の動きも実装する
     ok つっつき動作の実装
     ok fake contractにfeeding(), grooming(), lv_up()を実装する
@@ -118,6 +118,7 @@ class Contract {
         this.last_feeding_time = Date.now();
         this.last_grooming_time = Date.now();
         this.coin = 100;
+        this.material = 0;
         this.working_status = 0;
         this.working_start_time = 0;
         this.mining_status = 0;
@@ -140,8 +141,17 @@ class Contract {
         this.exp += delta;
     }
     start_crafting(item_id) {
+        if (this.crafting_status == 0){
+            this.crafting_start_time = Date.now();
+            this.crafting_status = 1;
+        }
     }
     end_crafting(item) {
+        if (this.crafting_status == 1) {
+            let delta = (Date.now() - this.crafting_start_time) / 1000;
+            //nft mint check
+            this.crafting_status = 0;
+        }
     }
     start_mining() {
         if (this.mining_status == 0){
@@ -157,8 +167,17 @@ class Contract {
         }
     }
     start_farming() {
+        if (this.farming_status == 0){
+            this.farming_start_time = Date.now();
+            this.farming_status = 1;
+        }
     }
     end_farming() {
+        if (this.farming_status == 1) {
+            let delta = (Date.now() - this.farming_start_time) / 1000;
+            this.material += delta;
+            this.farming_status = 0;
+        }
     }
     level_up() {
         let exp_required = 0;
