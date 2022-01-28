@@ -48,9 +48,10 @@ Idea
         feeding, デイリークエスト, コストなし, 24時間で最大効率
         grooming, プラスアルファ, 何かしらのコスト必要, 168時間で最大効率
 ToDo
-    つっつき動作の実装
+    絵を大きめにする
     Lvを実装する。必要expの対応表を作製する。
     satietyとhappyの差別化を考える。
+    ok つっつき動作の実装
     ok fake contractにfeeding(), grooming(), lv_up()を実装する
     ok ボタンの実装、表示、押したときの動作
     ok eating実装
@@ -614,6 +615,7 @@ function update() {
 
 </script>
 
+</center>
 
 </body>
 </html>
