@@ -61,10 +61,10 @@ Idea
         feeding, デイリークエスト, コストなし, 24時間で最大効率
         grooming, プラスアルファ, 何かしらのコスト必要, 168時間で最大効率
 ToDo
-    移動を見直す. 距離ランダム, 上下の動きも実装する
     絵を大きめにする, 元絵を大きめに読み込み, scaleXYで縮小する
     Lvを実装する。必要expの対応表を作製する。
     satietyとhappyの差別化を考える。
+    ok 移動を見直す. 距離ランダム, 上下の動きも実装する
     ok つっつき動作の実装
     ok fake contractにfeeding(), grooming(), lv_up()を実装する
     ok ボタンの実装、表示、押したときの動作
@@ -161,8 +161,48 @@ class Contract {
     end_farming() {
     }
     level_up() {
-        if (this.exp >= 1000) {
-            this.exp -= 1000;
+        let exp_required = 0;
+        if (this.level == 1) {
+            exp_required = 1000;
+        }else if (this.level == 2) {
+            exp_required = 3000;
+        }else if (this.level == 3) {
+            exp_required = 6000;
+        }else if (this.level == 4) {
+            exp_required = 10000;
+        }else if (this.level == 5) {
+            exp_required = 15000;
+        }else if (this.level == 6) {
+            exp_required = 21000;
+        }else if (this.level == 7) {
+            exp_required = 28000;
+        }else if (this.level == 8) {
+            exp_required = 36000;
+        }else if (this.level == 9) {
+            exp_required = 45000;
+        }else if (this.level == 10) {
+            exp_required = 55000;
+        }else if (this.level == 11) {
+            exp_required = 66000;
+        }else if (this.level == 12) {
+            exp_required = 78000;
+        }else if (this.level == 13) {
+            exp_required = 91000;
+        }else if (this.level == 14) {
+            exp_required = 105000;
+        }else if (this.level == 15) {
+            exp_required = 120000;
+        }else if (this.level == 16) {
+            exp_required = 136000;
+        }else if (this.level == 17) {
+            exp_required = 153000;
+        }else if (this.level == 18) {
+            exp_required = 171000;
+        }else if (this.level == 19) {
+            exp_required = 190000;
+        }
+        if (this.exp >= exp_required) {
+            this.exp -= exp_required;
             this.level += 1;
             var tmp = Math.trunc(Math.random() * 5);
             if (tmp == 0) {
@@ -657,7 +697,48 @@ function update() {
         //update bar
         bar_satiety.scaleX = satiety / 100;
         bar_happy.scaleX = happy / 100;
-        let exp = (local_exp / 1000) * 100;
+        //exp
+        let exp_required = 0;
+        if (this.level == 1) {
+            exp_required = 1000;
+        }else if (this.level == 2) {
+            exp_required = 3000;
+        }else if (this.level == 3) {
+            exp_required = 6000;
+        }else if (this.level == 4) {
+            exp_required = 10000;
+        }else if (this.level == 5) {
+            exp_required = 15000;
+        }else if (this.level == 6) {
+            exp_required = 21000;
+        }else if (this.level == 7) {
+            exp_required = 28000;
+        }else if (this.level == 8) {
+            exp_required = 36000;
+        }else if (this.level == 9) {
+            exp_required = 45000;
+        }else if (this.level == 10) {
+            exp_required = 55000;
+        }else if (this.level == 11) {
+            exp_required = 66000;
+        }else if (this.level == 12) {
+            exp_required = 78000;
+        }else if (this.level == 13) {
+            exp_required = 91000;
+        }else if (this.level == 14) {
+            exp_required = 105000;
+        }else if (this.level == 15) {
+            exp_required = 120000;
+        }else if (this.level == 16) {
+            exp_required = 136000;
+        }else if (this.level == 17) {
+            exp_required = 153000;
+        }else if (this.level == 18) {
+            exp_required = 171000;
+        }else if (this.level == 19) {
+            exp_required = 190000;
+        }
+        let exp = (local_exp / exp_required) * 100;
         if (exp > 100) { exp = 100; }
         bar_exp.scaleX = exp / 100;
         text_coin_main.setText("coin: " + local_coin);
