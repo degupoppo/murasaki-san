@@ -374,7 +374,8 @@ let config = {
     width: 800,
     height: 600,
     scale: {
-        autoCenter: Phaser.Scale.CENTER_HORIZONTALLY,
+        mode: Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.CENTER_BOTH
     },
     scene: {
         preload: preload,
