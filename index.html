@@ -437,37 +437,37 @@ class Button {
             .on('pointerout', () => button.setStyle({ fontSize: fontsize, fontFamily: "Arial", fill: '#000000' }));
     }
 }
-function button_level_up(contract) {
+function level_up(contract) {
     if (window.confirm("[ Dummy MetaMask Message ]\n\nConfirm Level-Up?\n")) {
         contract.level_up();
     }
 }
-function button_feeding(contract) {
+function feeding(contract) {
     if (window.confirm("[ Dummy MetaMask Message ]\n\nConfirm Feeding?\n")) {
         contract.feeding();
     }
 }
-function button_grooming(contract) {
+function grooming(contract) {
     if (window.confirm("[ Dummy MetaMask Message ]\n\nConfirm Grooming?\n")) {
         contract.grooming();
     }
 }
-function button_start_mining(contract) {
+function start_mining(contract) {
     if (window.confirm("[ Dummy MetaMask Message ]\n\nStart Mining?\n")) {
         contract.start_mining();
     }
 }
-function button_stop_mining(contract) {
+function stop_mining(contract) {
     if (window.confirm("[ Dummy MetaMask Message ]\n\nstop Mining?\n")) {
         contract.stop_mining();
     }
 }
-function button_start_farming(contract) {
+function start_farming(contract) {
     if (window.confirm("[ Dummy MetaMask Message ]\n\nStart Farming?\n")) {
         contract.start_farming();
     }
 }
-function button_stop_farming(contract) {
+function stop_farming(contract) {
     if (window.confirm("[ Dummy MetaMask Message ]\n\nStop Farming?\n")) {
         contract.stop_farming();
     }
@@ -604,13 +604,13 @@ function create() {
     char1.scaleX = char1.scaleX * 0.25;
     char1.scaleY = char1.scaleY * 0.25;
     //button
-    new Button(30, 10, 'Level Up', this, () => button_level_up(contract));
-    new Button(30, 40, 'Feeding', this, () => button_feeding(contract));
-    new Button(30, 70, 'Grooming', this, () => button_grooming(contract));
-    new Button(30, 100, 'Start Mining', this, () => button_start_mining(contract));
-    new Button(30, 130, 'Stop Mining', this, () => button_stop_mining(contract));
-    new Button(30, 160, 'Start Farming', this, () => button_start_farming(contract));
-    new Button(30, 190, 'Stop Farming', this, () => button_stop_farming(contract));
+    new Button(30, 10, 'Level Up', this, () => level_up(contract));
+    new Button(30, 40, 'Feeding', this, () => feeding(contract));
+    new Button(30, 70, 'Grooming', this, () => grooming(contract));
+    new Button(30, 100, 'Start Mining', this, () => start_mining(contract));
+    new Button(30, 130, 'Stop Mining', this, () => stop_mining(contract));
+    new Button(30, 160, 'Start Farming', this, () => start_farming(contract));
+    new Button(30, 190, 'Stop Farming', this, () => stop_farming(contract));
     //back color
     let status_back = this.add.graphics();
     status_back.fillStyle(0xa9a9a9, 1).fillRect(590, 5, 200, 350);
@@ -689,22 +689,22 @@ function create() {
     button_feeding.scaleX = button_feeding.scaleX * 0.1
     button_feeding.scaleY = button_feeding.scaleY * 0.1
     button_feeding.setInteractive()
-    button_feeding.on('pointerdown', () => button_feeding(contract) );
+    button_feeding.on('pointerdown', () => feeding(contract) );
     button_grooming = this.add.sprite(400,300, "button_feeding");
     button_grooming.scaleX = button_grooming.scaleX * 0.1
     button_grooming.scaleY = button_grooming.scaleY * 0.1
     button_grooming.setInteractive()
-    button_grooming.on('pointerdown', () => button_grooming(contract) );
+    button_grooming.on('pointerdown', () => grooming(contract) );
     button_mining = this.add.sprite(10,430, "button_feeding");
     button_mining.scaleX = button_mining.scaleX * 0.1
     button_mining.scaleY = button_mining.scaleY * 0.1
     button_mining.setInteractive()
-    button_mining.on('pointerdown', () => button_mining(contract) );
+    button_mining.on('pointerdown', () => start_mining(contract) );
     button_farming = this.add.sprite(200,300, "button_feeding");
     button_farming.scaleX = button_farming.scaleX * 0.1
     button_farming.scaleY = button_farming.scaleY * 0.1
     button_farming.setInteractive()
-    button_farming.on('pointerdown', () => button_farming(contract) );
+    button_farming.on('pointerdown', () => start_farming(contract) );
 }
 
 
