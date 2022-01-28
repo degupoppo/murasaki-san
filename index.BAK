@@ -168,7 +168,8 @@ class Contract {
     }
     end_mining() {
         if (this.mining_status == 1) {
-            let delta = (Date.now() - this.mining_start_time) / 1000;
+            let delta = (Date.now() - this.mining_start_time) / 10000;
+            delta = math.trunc(delta);
             this.coin += delta;
             this.mining_status = 0;
         }
@@ -181,7 +182,8 @@ class Contract {
     }
     end_farming() {
         if (this.farming_status == 1) {
-            let delta = (Date.now() - this.farming_start_time) / 1000;
+            let delta = (Date.now() - this.farming_start_time) / 10000;
+            delta = math.trunc(delta);
             this.material += delta;
             this.farming_status = 0;
         }
@@ -402,6 +404,11 @@ class Character extends Phaser.GameObjects.Sprite{
             this.count = 0;
         }
     }
+    farming() {
+        this.count += 1;
+        if (this.count == 1){
+            this.anims.play("murasaki_farming", true);
+        }
     update(){
         //console.log(this.version, this.mode, this.count);
         if (this.mode == "resting") {this.resting();}
@@ -413,11 +420,12 @@ class Character extends Phaser.GameObjects.Sprite{
         else if (this.mode == "working") {this.working();}
         else if (this.mode == "mining") {this.mining();}
         else if (this.mode == "hugging") {this.hugging();}
+        else if (this.mode == "farming") {this.farming();}
     }
 }
 
 
-//accessory func and class
+//accessories
 //--------------------------------------------------------------------------------------------------------
 
 //bar
@@ -515,8 +523,9 @@ function preload() {
     this.load.spritesheet("murasaki_mining", "png/murasaki_mining.png", {frameWidth: 370, frameHeight: 320});
     this.load.spritesheet("murasaki_hugging", "png/murasaki_hugging.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("button_feeding", "png/button_feeding.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("food_sweet_potate", "png/food_sweet_potate.png", {frameWidth: 500, frameHeight: 500});
-    cursors = this.input.keyboard.createCursorKeys();
+    this.load.image("food_sweet_potato", "png/food_sweet_potato.png", {frameWidth: 500, frameHeight: 500});
+    this.load.spritesheet("murasaki_farming", "png/murasaki_farming.png", {frameWidth: 370, frameHeight: 320});
+    //cursors = this.input.keyboard.createCursorKeys();
 }
 
 
@@ -566,10 +575,16 @@ function create() {
         frameRate: 1,
         repeat: -1
     });
+    this.anims.create({
+        key: "murasaki_farming",
+        frames: this.anims.generateFrameNumbers("murasaki_farming", {start: 0, end:1}),
+        frameRate: 1,
+        repeat: -1
+    });
     //summon character
     char1 = new Character(this, 300 + Math.random()*200, 400 + Math.random()*100);
-    char1.scaleX = char1.scaleX * 0.2;
-    char1.scaleY = char1.scaleY * 0.2;
+    char1.scaleX = char1.scaleX * 0.25;
+    char1.scaleY = char1.scaleY * 0.25;
     //button
     const button1 = new Button(30, 10, 'Feeding', this, () => button_feeding(contract));
     const button2 = new Button(30, 40, 'Grooming', this, () => button_grooming(contract));
@@ -747,6 +762,11 @@ function update() {
         if (local_mining_status == 1 & char1.mode != "mining"){
             char1.set_mode = "mining";
         }else if (local_mining_status == 0 & char1.mode == "mining") {
+            char1.set_mode = "resting";
+        }
+        if (local_farming_status == 1 & char1.mode != "farming"){
+            char1.set_mode = "farming";
+        }else if (local_farming_status == 0 & char1.mode == "farming") {
             char1.set_mode = "resting";
         }
     }
