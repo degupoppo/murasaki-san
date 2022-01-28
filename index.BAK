@@ -296,32 +296,25 @@ class Character extends Phaser.GameObjects.Sprite{
     }
     moving() {
         this.count += 1;
+        //determine direction
         if (this.count == 1){
             //determine degree, 0-30, 150-210, 330-360
             var li = [0,10,20,30,150,160,170,180,190,200,210,330,340,350]
             this.moving_degree = li[Math.floor(Math.random() * li.length)];
-            /***
-            this.moving_degree = Math.random() * 120;
-            if (this.moving_degree > 30 && this.moving_degree < 150) {
-                this.moving_degree += 120;
-            }else if (this.moving_degree > 210 && this.moving_degree < 330) {
-                this.moving_degree += 120;
-            }
-            ***/
             //out of area check
             if (this.x < 100 && this.moving_degree > 90 && this.moving_degree <270) {
-                console.log("xr");
                 this.moving_degree -= 180;
             }else if (this.x > 700 && (this.moving_degree < 90 || this.moving_degree > 270)) {
-                console.log("xl");
                 this.moving_degree -= 180;
             }
             if (this.y > 500 && this.moving_degree > 180) {
-                console.log("yu");
                 this.moving_degree = 360 - this.moving_degree;
             }else if (this.y < 250 && this.moving_degree < 180) {
-                console.log("yd");
                 this.moving_degree = 360 - this.moving_degree;
+            }
+            //minus check
+            if (this.moving_degree < 0) {
+                this.moving_degree += 360;
             }
             //determine speed, count
             this.moving_speed = 0.3 + Math.random() * 0.2;  //0.3-0.5
@@ -335,7 +328,8 @@ class Character extends Phaser.GameObjects.Sprite{
                 this.anims.play("murasaki_right", true);
             }
             //debug
-            console.log(this.moving_degree, Math.sin(this.moving_degree * (Math.PI/180)), this.x, this.y);
+            //console.log(this.moving_degree, Math.sin(this.moving_degree * (Math.PI/180)), this.x, this.y);
+        //moving
         }else if (this.count < this.moving_count) {
             this.x += Math.cos(this.moving_degree * (Math.PI/180)) * this.moving_speed;
             this.y -= Math.sin(this.moving_degree * (Math.PI/180)) * this.moving_speed;
@@ -343,33 +337,6 @@ class Character extends Phaser.GameObjects.Sprite{
             this.mode = "resting";
             this.count = 0;
         }
-
-/***
-            if (this.x <= 100) {
-                this.dist = "right";
-            }else if (this.x >= 700) {
-                this.dist = "left";
-            }else {
-                var li = ["right", "left"];
-                this.dist = li[Math.floor(Math.random() * li.length)];
-            }
-            if (this.dist == "right"){
-                this.anims.play("murasaki_right", true);
-            }else if (this.dist == "left") {
-                this.anims.play("murasaki_left", true);
-            }
-        }else if (this.count < 100) {
-            if (this.dist == "right" && this.count % 2 == 0){
-                this.x += 1;
-            }else if (this.dist == "left" && this.count % 2 == 0) {
-                this.x -= 1;
-            }
-        }else if (this.count >= 100) {
-            this.mode = "resting";
-            this.count = 0;
-        }
-***/
-
     }
     //send: last_nutrition_time
     feeding() {
