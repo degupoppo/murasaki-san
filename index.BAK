@@ -109,6 +109,7 @@ let local_farming_start_time;
 
 
 //dummy contract
+//--------------------------------------------------------------------------------------------------------
 class Contract {
     constructor() {
         //NFT parameters
@@ -245,6 +246,8 @@ class Contract {
 }
 
 
+//character
+//--------------------------------------------------------------------------------------------------------
 class Character extends Phaser.GameObjects.Sprite{
     constructor(scene, x, y){
         super(scene, x, y, "murasaki_right");
@@ -414,6 +417,9 @@ class Character extends Phaser.GameObjects.Sprite{
 }
 
 
+//accessory func and class
+//--------------------------------------------------------------------------------------------------------
+
 //bar
 function makeBar(scene, x, y, color) {
     //draw the bar
@@ -476,6 +482,7 @@ function button_level_up(contract) {
 
 
 // main functions
+//--------------------------------------------------------------------------------------------------------
 
 
 let config = {
@@ -561,8 +568,8 @@ function create() {
     });
     //summon character
     char1 = new Character(this, 300 + Math.random()*200, 400 + Math.random()*100);
-    char1.scaleX = char1.scaleX * 1.3;
-    char1.scaleY = char1.scaleY * 1.3;
+    char1.scaleX = char1.scaleX * 0.2;
+    char1.scaleY = char1.scaleY * 0.2;
     //button
     const button1 = new Button(30, 10, 'Feeding', this, () => button_feeding(contract));
     const button2 = new Button(30, 40, 'Grooming', this, () => button_grooming(contract));
