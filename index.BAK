@@ -149,7 +149,7 @@ class Contract {
     end_crafting(item) {
         if (this.crafting_status == 1) {
             let delta = (Date.now() - this.crafting_start_time) / 1000;
-            //nft mint
+            //nft mint check
             this.crafting_status = 0;
         }
     }
@@ -315,7 +315,7 @@ class Character extends Phaser.GameObjects.Sprite{
             }
             //determine speed, count
             this.moving_speed = 0.3 + Math.random() * 0.2;  //0.3-0.5
-            this.moving_count = 60 + Math.random() * 40;    //70-100
+            this.moving_count = 70 + Math.random() * 30;    //70-100
             //determine left or right
             if (this.moving_degree > 90 && this.moving_degree <= 270) {
                 this.dist = "left";
