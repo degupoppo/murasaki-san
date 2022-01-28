@@ -298,7 +298,7 @@ class Character extends Phaser.GameObjects.Sprite{
         this.count += 1;
         if (this.count == 1){
             //determine degree, 0-30, 150-210, 330-360
-            var li = [0,10,20,30,150,160,170,180,190,200,210,330,340,350]
+            var li = [0,10,20,30,150,160,170,180,190,200,210,330,340,350,360]
             this.moving_degree = li[Math.floor(Math.random() * li.length)];
             /***
             this.moving_degree = Math.random() * 120;
