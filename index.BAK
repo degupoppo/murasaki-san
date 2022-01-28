@@ -54,7 +54,7 @@ Idea
         Intelligence: 知力
             Craftingの効率up
         Vitality: 体力
-            
+            不要？
         Luck: 運
             ボーナスダイスに加算
     お世話, expを得る
@@ -743,7 +743,7 @@ function update() {
         local_working_start_time = contract.working_start_time;
         local_mining_status = contract.mining_status;
         local_exp = contract.exp;
-        local_next_exp_required = contract.net_exp_required;
+        local_next_exp_required = contract.next_exp_required;
         //check character mode
         if (local_last_feeding_time > previous_local_last_feeding_time){
             char1.set_mode = "feeding";
