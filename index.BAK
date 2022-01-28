@@ -216,7 +216,7 @@ class Character extends Phaser.GameObjects.Sprite{
                 this.anims.play("murasaki_left", true);
             }
             this.resting_count = 70 + Math.random() * 30;
-	    }else if (this.count >= resting_count){
+	    }else if (this.count >= this.resting_count){
             let tmp = Math.random() * 100;
             let base = 864000;
             let now_time = Date.now();
@@ -249,9 +249,9 @@ class Character extends Phaser.GameObjects.Sprite{
             }else if (this.x > 780 && this.moving_degree < 90 || this.moving_degree > 270) {
                 this.moving_degree -= 180;
             }
-            if (this.y < 580 && this.moving_dgree > 180) {
+            if (this.y > 580 && this.moving_dgree > 180) {
                 this.moving_degree = 360 - this.moving_degree;
-            }else if (this.y > 380 && this.moving_degree < 180) {
+            }else if (this.y < 380 && this.moving_degree < 180) {
                 this.moving_degree = 360 - this.moving_degree;
             }
             //determine speed, count
