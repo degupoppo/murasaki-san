@@ -347,6 +347,7 @@ function makeBar(scene, x, y, color) {
     return bar;
 }
 function button_feeding(contract) {
+    alert("Feeding");
     contract.feeding();
 }
 function button_grooming(contract) {
