@@ -390,7 +390,7 @@ let config = {
         update: update
     },
     render: {
-        pixelArt: false
+        pixelArt: true
     },
 };
 let game = new Phaser.Game(config);
