@@ -184,7 +184,7 @@ class Contract {
     }
     level_up() {
         if (this.exp >= this.next_exp_required) {
-            this.exp -= this.exp_required;
+            this.exp -= this.next_exp_required;
             this.level += 1;
             //status up
             var tmp = Math.trunc(Math.random() * 5);
@@ -732,7 +732,7 @@ function update() {
         if (exp > 100) { exp = 100; }
         bar_exp.scaleX = exp / 100;
         text_coin_main.setText("coin:    " + local_coin);
-        text_material_main.setText("material:" + local_coin);
+        text_material_main.setText("material:" + local_material);
     }
     //update dynamic status from contract to local
     if (turn == 1 || turn % 101 == 0) {

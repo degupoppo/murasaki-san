@@ -312,9 +312,15 @@ class Character extends Phaser.GameObjects.Sprite{
             if (this.x < 100 && this.moving_degree > 90 && this.moving_degree <270) {
                 console.log("xr");
                 this.moving_degree -= 180;
+                if (this.moving_degree < 0) {
+                    this.moving_degree += 360;
+                }
             }else if (this.x > 700 && (this.moving_degree < 90 || this.moving_degree > 270)) {
                 console.log("xl");
                 this.moving_degree -= 180;
+                if (this.moving_degree < 0) {
+                    this.moving_degree += 360;
+                }
             }
             if (this.y > 500 && this.moving_degree > 180) {
                 console.log("yu");
@@ -732,7 +738,7 @@ function update() {
         if (exp > 100) { exp = 100; }
         bar_exp.scaleX = exp / 100;
         text_coin_main.setText("coin:    " + local_coin);
-        text_material_main.setText("material:" + local_coin);
+        text_material_main.setText("material:" + local_material);
     }
     //update dynamic status from contract to local
     if (turn == 1 || turn % 101 == 0) {
