@@ -104,6 +104,8 @@ let local_mining_status;
 let local_mining_start_time;
 let local_next_exp_required;
 let local_material;
+let local_farming_status;
+let local_farming_start_time;
 
 
 //dummy contract
@@ -497,16 +499,16 @@ let game = new Phaser.Game(config);
 
 
 function preload() {
-    //this.load.image("sky", "png/sky.png");
     this.load.image("back", "png/back.jpg");
-    this.load.spritesheet("murasaki_right", "png/murasaki_right.png", {frameWidth: 74, frameHeight: 64});
-    this.load.spritesheet("murasaki_left", "png/murasaki_left.png", {frameWidth: 74, frameHeight: 64});
-    this.load.spritesheet("murasaki_sleeping", "png/murasaki_sleeping.png", {frameWidth: 74, frameHeight: 64});
-    this.load.spritesheet("murasaki_feeding", "png/murasaki_feeding.png", {frameWidth: 74, frameHeight: 64});
-    this.load.spritesheet("murasaki_crying", "png/murasaki_crying.png", {frameWidth: 74, frameHeight: 64});
-    this.load.spritesheet("murasaki_mining", "png/murasaki_mining.png", {frameWidth: 74, frameHeight: 64});
-    this.load.spritesheet("murasaki_hugging", "png/murasaki_hugging.png", {frameWidth: 74, frameHeight: 64});
+    this.load.spritesheet("murasaki_right", "png/murasaki_right.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("murasaki_left", "png/murasaki_left.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("murasaki_sleeping", "png/murasaki_sleeping.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("murasaki_feeding", "png/murasaki_feeding.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("murasaki_crying", "png/murasaki_crying.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("murasaki_mining", "png/murasaki_mining.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("murasaki_hugging", "png/murasaki_hugging.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("button_feeding", "png/button_feeding.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("food_sweet_potate", "png/food_sweet_potate.png", {frameWidth: 500, frameHeight: 500});
     cursors = this.input.keyboard.createCursorKeys();
 }
 
@@ -641,12 +643,11 @@ function create() {
     text_material_main = this.add.text(
         600, 330, "material:" + local_material, {font: "10.5px Arial", fill: "#000"});
     //button
-    test = this.add.sprite(660,440, "button_feeding");
+    test = this.add.sprite(660,430, "button_feeding");
     test.scaleX = test.scaleX * 0.1
     test.scaleY = test.scaleY * 0.1
     test.setInteractive()
     test.on('pointerdown', () => button_feeding(contract) );
-
 }
 
 
@@ -726,6 +727,7 @@ function update() {
         local_working_status = contract.working_status;
         local_working_start_time = contract.working_start_time;
         local_mining_status = contract.mining_status;
+        local_farming_status = contract.farming_status;
         local_exp = contract.exp;
         local_next_exp_required = contract.next_exp_required;
         //check character mode
