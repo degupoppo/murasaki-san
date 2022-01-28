@@ -338,13 +338,13 @@ class Button {
         const button = scene.add.text(x, y, label)
             .setFontSize(fontsize)
             .setFontFamily("Arial")
-            .setOrigin(0.5)
-            .setPadding(10)
+            //.setOrigin(0.5)
+            //.setPadding(10)
             //.setStyle({ backgroundColor: '#111' })
             .setInteractive({ useHandCursor: true })
             .on('pointerdown', () => callback())
-            .on('pointerover', () => button.setStyle({ fontSize: fontsize, fontFamily: "Arial", fill: '#f39c12' }))
-            .on('pointerout', () => button.setStyle({ fontSize: fontsize, fontFamily: "Arial", fill: '#FFF' }));
+            .on('pointerover', () => button.setStyle({ fontSize: fontsize, fontFamily: "Arial", fill: '#ffff00' }))
+            .on('pointerout', () => button.setStyle({ fontSize: fontsize, fontFamily: "Arial", fill: '#000000' }));
     }
 }
 function button_feeding(contract) {
