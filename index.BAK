@@ -235,18 +235,18 @@ class Character extends Phaser.GameObjects.Sprite{
     moving() {
         this.count += 1;
         if (this.count == 1){
-            //determine degree, 0-45 or 135-275 or 315-360
+            //determine degree, 0-30, 150-210, 330-360
             this.moving_degree = Math.random() * 120;
             if (this.moving_degree > 30 & this.moving_degree < 150) {
                 this.moving_degree += 120;
-            }else if (this.moving_degree > 275 & this.moving_degree < 315) {
+            }else if (this.moving_degree > 210 & this.moving_degree < 330) {
                 this.moving_degree += 120;
             }
             //out of area check
             //if (this.x < 20 & this.moving_degree > 90 and this.moving_degree <270) {
                 
             this.moving_speed = 0.3 + Math.random() * 0.2;  //0.3-0.5
-            this.moving_count = 70 + Math.random() * 30;    //70-100
+            this.moving_count = 60 + Math.random() * 40;    //70-100
             //determine left or right
             if (this.moving_degree > 90 & this.moving_degree <= 270) {
                 this.dist = "left";
