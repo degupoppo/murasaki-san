@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="png" href="png/icon.PNG">
-    <title>House of MurasakiSan</title>
+    <title>House of Murasaki San</title>
     <script src="phaser.js"></script>
     <style type="text/css">
         body {
@@ -86,7 +86,7 @@ let local_mining_status;
 let local_mining_start_time;
 
 
-//fake contract
+//dummy contract
 class Contract {
     constructor() {
         //NFT parameters
@@ -314,25 +314,7 @@ class Character extends Phaser.GameObjects.Sprite{
 }
 
 
-class Button {
-    constructor(x, y, label, scene, callback) {
-        let fontsize = 12;
-        const button = scene.add.text(x, y, label)
-            .setFontSize(fontsize)
-            .setFontFamily("Arial")
-            .setOrigin(0.5)
-            .setPadding(10)
-            //.setStyle({ backgroundColor: '#111' })
-            .setInteractive({ useHandCursor: true })
-            .on('pointerdown', () => callback())
-            .on('pointerover', () => button.setStyle({ fontSize: fontsize, fontFamily: "Arial", fill: '#f39c12' }))
-            .on('pointerout', () => button.setStyle({ fontSize: fontsize, fontFamily: "Arial", fill: '#FFF' }));
-    }
-}
-
-
-//button
-//TODO: send transaction
+//bar
 function makeBar(scene, x, y, color) {
     //draw the bar
     let bar = scene.add.graphics();
@@ -346,28 +328,47 @@ function makeBar(scene, x, y, color) {
     //return the bar
     return bar;
 }
+
+
+//button
+//TODO: send transaction
+class Button {
+    constructor(x, y, label, scene, callback) {
+        let fontsize = 15;
+        const button = scene.add.text(x, y, label)
+            .setFontSize(fontsize)
+            .setFontFamily("Arial")
+            .setOrigin(0.5)
+            .setPadding(10)
+            //.setStyle({ backgroundColor: '#111' })
+            .setInteractive({ useHandCursor: true })
+            .on('pointerdown', () => callback())
+            .on('pointerover', () => button.setStyle({ fontSize: fontsize, fontFamily: "Arial", fill: '#ffff00' }))
+            .on('pointerout', () => button.setStyle({ fontSize: fontsize, fontFamily: "Arial", fill: '#000000' }));
+    }
+}
 function button_feeding(contract) {
-    if (window.confirm("[ Fake MetaMask ]\n\nConfirm Feeding?\n")) {
+    if (window.confirm("[ Dummy MetaMask Message ]\n\nConfirm Feeding?\n")) {
         contract.feeding();
     }
 }
 function button_grooming(contract) {
-    if (window.confirm("[ Fake MetaMask ]\n\nConfirm Grooming?\n")) {
+    if (window.confirm("[ Dummy MetaMask Message ]\n\nConfirm Grooming?\n")) {
         contract.grooming();
     }
 }
 function button_start_mining(contract) {
-    if (window.confirm("[ Fake MetaMask ]\n\nStart Mining?\n")) {
+    if (window.confirm("[ Dummy MetaMask Message ]\n\nStart Mining?\n")) {
         contract.start_mining();
     }
 }
 function button_end_mining(contract) {
-    if (window.confirm("[ Fake MetaMask ]\n\nEnd Mining?\n")) {
+    if (window.confirm("[ Dummy MetaMask Message ]\n\nEnd Mining?\n")) {
         contract.end_mining();
     }
 }
 function button_level_up(contract) {
-    if (window.confirm("[ Fake MetaMask ]\n\nConfirm Level-Up?\n")) {
+    if (window.confirm("[ Dummy MetaMask Message ]\n\nConfirm Level-Up?\n")) {
         contract.level_up();
     }
 }
