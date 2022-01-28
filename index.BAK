@@ -14,9 +14,6 @@
 </head>
 <body>
 
-<br>
-<center>
-
 <script type="text/javascript">
 
 /***
@@ -374,8 +371,8 @@ let config = {
     width: 800,
     height: 600,
     scale: {
-        //mode: Phaser.Scale.FIT,
-        //autoCenter: Phaser.Scale.CENTER_BOTH
+        mode: Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.CENTER_BOTH
     },
     scene: {
         preload: preload,
@@ -615,8 +612,6 @@ function update() {
 
 
 </script>
-
-</center>
 
 </body>
 </html>
