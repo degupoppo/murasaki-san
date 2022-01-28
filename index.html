@@ -141,7 +141,7 @@ class Contract {
     stop_mining() {
         if (this.mining_status == 1) {
             let delta = (Date.now() - this.mining_start_time) / 10000;
-            delta = math.trunc(delta);
+            delta = Math.trunc(delta);
             this.coin += delta;
             this.mining_status = 0;
         }
@@ -155,7 +155,7 @@ class Contract {
     stop_farming() {
         if (this.farming_status == 1) {
             let delta = (Date.now() - this.farming_start_time) / 100000;
-            delta = math.trunc(delta);
+            delta = Math.trunc(delta);
             this.material += delta;
             this.farming_status = 0;
         }

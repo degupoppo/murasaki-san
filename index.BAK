@@ -141,7 +141,7 @@ class Contract {
     stop_mining() {
         if (this.mining_status == 1) {
             let delta = (Date.now() - this.mining_start_time) / 10000;
-            delta = math.trunc(delta);
+            delta = Math.trunc(delta);
             this.coin += delta;
             this.mining_status = 0;
         }
@@ -700,7 +700,7 @@ function create() {
     button_mining.scaleY = test.scaleY * 0.1
     button_mining.setInteractive()
     button_mining.on('pointerdown', () => button_mining(contract) );
-    button_farming = this.add.sprite(200,430, "button_feeding");
+    button_farming = this.add.sprite(200,300, "button_feeding");
     button_farming.scaleX = test.scaleX * 0.1
     button_farming.scaleY = test.scaleY * 0.1
     button_farming.setInteractive()
