@@ -468,6 +468,11 @@ function create() {
     const button3 = new Button(30, 70, 'Start Mining', this, () => button_start_mining(contract));
     const button4 = new Button(30, 100, 'End Mining', this, () => button_end_mining(contract));
     const button5 = new Button(30, 130, 'Level Up', this, () => button_level_up(contract));
+    //status_back
+    let status_back = this.add.graphics(
+        graphics.fillStyle(0xffffff, 1).fillRect(590, 20, 100, 260)
+        );
+    status_back.alpha = 0.5;
     //text
     text_version = this.add.text(600, 10, "version = " + version, {font: "10.5px Arial", fill: "#000"});
     //static_status
