@@ -30,13 +30,13 @@ Idea
         exp?, 時間, コイン（sota?, ohana?), 素材(あまり種類を多くしない, 低級、中級、上級、ぐらい）
         exp
             お世話で取得
-            Lv upに必要
+            Lv upで消費
         コイン
             miningで取得
-            
+            Craftingで消費
         素材
             farmingで取得
-            Craftingに必要
+            Craftingで消費
     効率・補正
         Lv, Str/Dex/Intなどのステータス, endを押すまでの経過時間
         クラフト品による補正
@@ -235,6 +235,23 @@ class Character extends Phaser.GameObjects.Sprite{
     moving() {
         this.count += 1;
         if (this.count == 1){
+            this.moving_degree = Math.random() * 360;       //0-360
+            this.moving_speed = 70 + Math.random() * 30;    //70-100
+            if (this.moving_degree > 90 & this.moving_degree <= 270) {
+                this.anims.play("murasaki_left", true);
+            }else {
+                this.anims.play("murasaki_right", true);
+            }
+        }else if (this.count < 100) {
+            this.x += Math.cos(this.moving_degree);
+            this.y += Math.sin(this.moving_degree);
+        }else if (this.count >= 100) {
+            this.mode = "resting";
+            this.count = 0;
+        }
+
+
+
             if (this.x <= 100) {
                 this.dist = "right";
             }else if (this.x >= 700) {

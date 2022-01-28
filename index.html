@@ -235,6 +235,23 @@ class Character extends Phaser.GameObjects.Sprite{
     moving() {
         this.count += 1;
         if (this.count == 1){
+            this.moving_degree = Math.random() * 360;       //0-360
+            this.moving_speed = 70 + Math.random() * 30;    //70-100
+            if (this.moving_degree > 90 & this.moving_degree <= 270) {
+                this.anims.play("murasaki_left", true);
+            }else {
+                this.anims.play("murasaki_right", true);
+            }
+        }else if (this.count < 100) {
+            this.x += Math.cos(this.moving_degree);
+            this.y += Math.sin(this.moving_degree);
+        }else if (this.count >= 100) {
+            this.mode = "resting";
+            this.count = 0;
+        }
+
+
+/***
             if (this.x <= 100) {
                 this.dist = "right";
             }else if (this.x >= 700) {
@@ -258,6 +275,7 @@ class Character extends Phaser.GameObjects.Sprite{
             this.mode = "resting";
             this.count = 0;
         }
+***/
     }
     //send: last_nutrition_time
     feeding() {
