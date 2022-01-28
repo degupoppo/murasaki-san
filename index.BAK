@@ -61,9 +61,9 @@ Idea
         feeding, デイリークエスト, コストなし, 24時間で最大効率
         grooming, プラスアルファ, 何かしらのコスト必要, 168時間で最大効率
 ToDo
-    絵を大きめにする, 元絵を大きめに読み込み, scaleXYで縮小する
     satietyとhappyの差別化を考える。
-    その場所への移動を実装する
+    場所への移動を実装する, mining, farming, feedingに組み込む
+    ok 絵を大きめにする, 元絵を大きめに読み込み, scaleXYで縮小する
     ok Lvを実装する。必要expの対応表を作製する。
     ok 移動を見直す. 距離ランダム, 上下の動きも実装する
     ok つっつき動作の実装
@@ -382,6 +382,7 @@ class Character extends Phaser.GameObjects.Sprite{
         if (this.count == 1){
             this.anims.play("murasaki_farming", true);
         }
+    }
     update(){
         //console.log(this.version, this.mode, this.count);
         if (this.mode == "resting") {this.resting();}
