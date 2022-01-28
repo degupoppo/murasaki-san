@@ -642,6 +642,8 @@ function create() {
         600, 330, "material:" + local_material, {font: "10.5px Arial", fill: "#000"});
     //button
     test = this.add.sprite(200,200, "button_feeding");
+    test.scaleX = test.scaleX * 0.2
+    test.scaleY = test.scaleY * 0.2
     test.setInteractive()
     test.on('pointerdown', () => button_feeding(contract) );
 
