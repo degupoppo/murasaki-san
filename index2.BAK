@@ -159,17 +159,32 @@ async function get_web3() {
     web3 = await connect();
     wallet = await get_wallet(web3);
     contract = await get_contract(web3);
-    ///return {
-    //    web3,
-    //    wallet,
-    //    contract
-    console.log(wallet);
+    return {
+        web3,
+        wallet,
+        contract
+    };
 }
-get_web3();
+let {web3, wallet, contract} = get_web3();
 console.log(wallet);
 
 function contract_get_strength() {
     return contract.methods.get_strength().call();
+}
+function contract_get_dexterity() {
+    return contract.methods.get_dexterity().call();
+}
+function contract_get_vitality() {
+    return contract.methods.get_vitality().call();
+}
+function contract_get_intelligence() {
+    return contract.methods.get_intelligence().call();
+}
+function contract_get_luck() {
+    return contract.methods.get_luck().call();
+}
+function contract_get_birth_time() {
+    return contract.methods.get_birth_time().call();
 }
 
 
