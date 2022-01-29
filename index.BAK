@@ -98,7 +98,8 @@ function connect() {
                 symbol: 'ASTL',
                 decimals: 18
             },
-            rpcUrls: ['http://153.121.47.127:9933/']
+            rpcUrls: ["http://153.121.47.127:9933/"],
+            blockExplorerUrls: ['https://etherscan.io'],
         }]
     })
     window.ethereum.enable();
