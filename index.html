@@ -332,7 +332,7 @@ class Character extends Phaser.GameObjects.Sprite{
             //food.scaleX = button_farming.scaleX * 0.1;
             //food.scaleY = button_farming.scaleY * 0.1;
             //determine moving_degree
-            let radian = Math.atan( (150-this.x) / (250-this.y) );
+            let radian = Math.atan( (250-this.y) / (150-this.x) );
             this.moving_degree = radian / (Math.PI/180)
 
             /***
