@@ -360,8 +360,8 @@ class Character extends Phaser.GameObjects.Sprite{
             this.submode = 2;
             console.log(this.moving_degree);
         }else if (this.submode == 2) {
-            this.x += Math.cos(this.moving_degree * (Math.PI/180)) * this.moving_speed;
-            this.y += Math.sin(this.moving_degree * (Math.PI/180)) * this.moving_speed;
+            this.x -= Math.cos(this.moving_degree * (Math.PI/180)) * this.moving_speed;
+            this.y -= Math.sin(this.moving_degree * (Math.PI/180)) * this.moving_speed;
             if (this.x > 140 && this.x < 160 && this.y > 240 && this.y < 260) {
                 this.submode = 3;
             }
