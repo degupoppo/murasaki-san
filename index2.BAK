@@ -115,7 +115,8 @@ function get_contract(web3) {
     const address = "0x0Ff72e0dEE0b814FAC4a094069b41D3F06434897";
     //import contract2 from "abi_contract.json";
     //const abi = "abi.json";
-    const abi = [{
+    const abi = [
+        {
 		"inputs": [],
 		"name": "coin",
 		"outputs": [
@@ -123,11 +124,19 @@ function get_contract(web3) {
 				"internalType": "uint256",
 				"name": "",
 				"type": "uint256"
-			}
+			},
 		],
 		"stateMutability": "view",
 		"type": "function"
-	}]
+	    },
+    	{
+    		"inputs": [],
+    		"name": "feeding",
+    		"outputs": [],
+    		"stateMutability": "nonpayable",
+    		"type": "function"
+    	}
+    ]
     const contract = new web3.eth.Contract(abi, address);
     return contract;
 }
@@ -139,7 +148,7 @@ function call_contract(contract) {
 //send to contract
 function send_contract(web3, contract, wallet, data) {
     //let data = "1";
-    contract.methods.summon("1").send({from:wallet});
+    contract.methods.feeding().send({from:wallet});
 }
 //example
 async function main() {
@@ -147,16 +156,11 @@ async function main() {
     var contract = await get_contract(web3);
     var call = await call_contract(contract);
     console.log(call);
-    var wallet = await get_wallet(web3);
-    console.log(wallet);
-    await send_contract(web3, contract, wallet);
+    //var wallet = await get_wallet(web3);
+    //console.log(wallet);
+    //await send_contract(web3, contract, wallet);
 }
-
-web3 = connect();
-wallet = get_wallet(web3);
-contract = get_contract(web3);
-a = call_contract(contract);
-console.log(a);
+main();
 
 
 
