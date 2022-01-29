@@ -326,6 +326,31 @@ class Character extends Phaser.GameObjects.Sprite{
         this.count += 1;
 
         if (this.submode == 1) {
+
+            this.target_x = 150;
+            this.target_y = 250;
+            let delta_x = target_x - this.x;
+            if (delta_x >0) {
+                this.dist = "right";
+                this.anims.play("murasaki_right", true);
+            }else {
+                this.dist = "left";
+                this.anims.play("murasaki_left", true);
+            }
+            this.submode = 2;
+        }else if (this.submode == 2) {
+            let delta_x = target_x - this.x;
+            let delta_y = target_y - this.y;
+            let delta_x2 = delta_x / (delta_x + delta_y);
+            let delta_y2 = delta_y / (delta_x + delta_y);
+            this.x += delta_x2;
+            this.y += delta_y2;
+
+            if (this.x > 140 && this.x < 160 && this.y > 240 && this.y < 260) {
+                this.submode = 3;
+            }
+
+            /***
             //summon food
             //food = this.scene.add.sprite(150,250, "food_sweet_potato");
             //food = game.scene.add.sprite(150,250, "food_sweet_potato");
@@ -345,7 +370,6 @@ class Character extends Phaser.GameObjects.Sprite{
             let sin = A / C;
             let cos = B / C;
             this.moving_degree = Math.asin(sin) / (Math.PI/180);
-            ***/
 
             //determine left or right
             if (this.moving_degree > 90 && this.moving_degree <= 270) {
@@ -360,11 +384,12 @@ class Character extends Phaser.GameObjects.Sprite{
             this.submode = 2;
             console.log(this.moving_degree);
         }else if (this.submode == 2) {
-            this.x += Math.cos(this.moving_degree * (Math.PI/180)) * this.moving_speed;
-            this.y += Math.sin(this.moving_degree * (Math.PI/180)) * this.moving_speed;
+            this.x -= Math.cos(this.moving_degree * (Math.PI/180)) * this.moving_speed;
+            this.y -= Math.sin(this.moving_degree * (Math.PI/180)) * this.moving_speed;
             if (this.x > 140 && this.x < 160 && this.y > 240 && this.y < 260) {
                 this.submode = 3;
             }
+            ***/
         }else if (this.submode == 3) {
             this.anims.play("murasaki_feeding", true);
             food.destroy();
