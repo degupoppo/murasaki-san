@@ -136,9 +136,9 @@ async function main() {
     var wallet = await get_wallet(web3);
     console.log(wallet);
     var contract = await get_contract(web3);
-    //var call = await call_contract(contract);
-    //console.log(call);
-    await send_contract(web3, contract, wallet);
+    var call = await call_contract(contract);
+    console.log(call);
+    //await send_contract(web3, contract, wallet);
 }
 //main();
 
