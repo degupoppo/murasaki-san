@@ -855,6 +855,7 @@ function update() {
         //check character mode
         if (local_last_feeding_time > previous_local_last_feeding_time){
             char1.set_mode = "feeding";
+            char1.submode = 1;
             char1.count = 0;
             food = this.add.sprite(150,250, "food_sweet_potato");
             food.scaleX = food.scaleX * 0.1;
