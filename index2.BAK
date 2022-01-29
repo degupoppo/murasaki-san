@@ -156,9 +156,9 @@ async function main() {
 }
 ***/
 async function get_web3() {
-    web3 = await connect();
-    wallet = await get_wallet(web3);
-    contract = await get_contract(web3);
+    let web3 = await connect();
+    let wallet = await get_wallet(web3);
+    let contract = await get_contract(web3);
     return {
         web3,
         wallet,

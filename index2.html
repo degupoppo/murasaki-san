@@ -160,9 +160,9 @@ async function get_web3() {
     let wallet = await get_wallet(web3);
     let contract = await get_contract(web3);
     return {
-        web3,
-        wallet,
-        contract
+        web3: web3,
+        wallet: wallet,
+        contract: contract
     };
 }
 let {web3, wallet, contract} = get_web3();
