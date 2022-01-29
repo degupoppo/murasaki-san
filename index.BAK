@@ -890,6 +890,10 @@ function update() {
             char1.count = 0;
             char1.target_x = 600;
             char1.target_y = 400;
+            if (typeof food) {
+                food.destroy();
+            }
+            //food.visible = false;
             food = this.add.sprite(600,400, "food_sweet_potato");
             food.scaleX = food.scaleX * 0.1;
             food.scaleY = food.scaleY * 0.1;
