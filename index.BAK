@@ -335,7 +335,7 @@ class Character extends Phaser.GameObjects.Sprite{
             let target_x = 150;
             let target_y = 250;
             let A = this.x - target_x;
-            let B = this.y - taget_y;
+            let B = this.y - target_y;
             let C = (A ** 2 + B ** 2) ** 0.5;
             let sin = A / C;
             let cos = B / C;
@@ -856,8 +856,8 @@ function update() {
         if (local_last_feeding_time > previous_local_last_feeding_time){
             char1.set_mode = "feeding";
             food = this.add.sprite(150,250, "food_sweet_potato");
-            food.scaleX = button_farming.scaleX * 0.1;
-            food.scaleY = button_farming.scaleY * 0.1;
+            food.scaleX = food.scaleX * 0.1;
+            food.scaleY = food.scaleY * 0.1;
         }
         if (local_last_grooming_time > previous_local_last_grooming_time){
             char1.set_mode = "grooming";
