@@ -325,7 +325,7 @@ class Character extends Phaser.GameObjects.Sprite{
         this.count += 1;
         this.submode = 1;
 
-        if (this.submode == 1);
+        if (this.submode == 1) {
             //summon food
             food = this.add.sprite(150,250, "food_sweet_potato");
             food.scaleX = button_farming.scaleX * 0.1

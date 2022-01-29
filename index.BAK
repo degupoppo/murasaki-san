@@ -359,9 +359,7 @@ class Character extends Phaser.GameObjects.Sprite{
             }
         }
 
-
         /***
-
         if (this.count == 1) {
             //summon food
             food = this.add.sprite(150,250, "food_sweet_potato");
