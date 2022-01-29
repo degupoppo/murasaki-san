@@ -323,12 +323,78 @@ class Character extends Phaser.GameObjects.Sprite{
     //send: last_nutrition_time
     feeding() {
         this.count += 1;
+        this.submode = 1;
+
+        if (this.submode == 1);
+            //summon food
+            food = this.add.sprite(150,250, "food_sweet_potato");
+            food.scaleX = button_farming.scaleX * 0.1
+            food.scaleY = button_farming.scaleY * 0.1
+            //determine moving_degree
+            let target_x = 150;
+            let target_y = 250;
+            let A = this.x - target_x;
+            let B = this.y - taget_y;
+            let C = (A ** 2 + B ** 2) ** 0.5;
+            let sin = A / C;
+            let cos = B / C;
+            this.moving_degree = Math.asin(sin);
+            this.moving_speed = 1;
+            this.submode = 2;
+        }else if (this.submode == 2) {
+            this.x += Math.cos(this.moving_degree * (Math.PI/180)) * this.moving_speed;
+            this.y -= Math.sin(this.moving_degree * (Math.PI/180)) * this.moving_speed;
+            if (this.x > 140 && this.x < 160 && this.y > 240 && this.y < 260) {
+                this.submode = 3;
+            }
+        }else if (this.submode == 3) {
+            this.anims.play("murasaki_feeding", true);
+            food.destroy();
+            this.count_limit = this.count + 1000;
+            this.submode = 4;
+        }else if (this.submode == 4) {
+            if (this.count >= this.count_limit) {
+                this.mode = "resting";
+                this.count = 0;
+            }
+        }
+
+
+        /***
+
+        if (this.count == 1) {
+            //summon food
+            food = this.add.sprite(150,250, "food_sweet_potato");
+            food.scaleX = button_farming.scaleX * 0.1
+            food.scaleY = button_farming.scaleY * 0.1
+            //determine moving_degree
+            let target_x = 150;
+            let target_y = 250;
+            let A = this.x - target_x;
+            let B = this.y - taget_y;
+            let C = (A ** 2 + B ** 2) ** 0.5;
+            let sin = A / C;
+            let cos = B / C;
+            this.moving_degree = Math.asin(sin);
+            this.moving_speed = 1;
+        }else if (this.count > 1) {
+            if (this.x > 140 && this.x < 160 && this.y > 240 && this.y < 260) {
+                this.anims.play("murasaki_feeding", true);
+                food.destroy();
+                this.cout_limit = this.count + 1000;
+            }else {
+                this.x += Math.cos(this.moving_degree * (Math.PI/180)) * this.moving_speed;
+                this.y -= Math.sin(this.moving_degree * (Math.PI/180)) * this.moving_speed;
+            }
+        }
+
         if (this.count == 1){
             this.anims.play("murasaki_feeding", true);
         }else if (this.count >= 1000) {
             this.mode = "resting";
             this.count = 0;
         }
+        ***/
     }
     crying() {
         this.count += 1;
@@ -699,12 +765,12 @@ function create() {
     button_mining.scaleX = button_mining.scaleX * 0.1
     button_mining.scaleY = button_mining.scaleY * 0.1
     button_mining.setInteractive()
-    button_mining.on('pointerdown', () => mining(contract) );
+    button_mining.on('pointerdown', () => start_mining(contract) );
     button_farming = this.add.sprite(200,300, "button_feeding");
     button_farming.scaleX = button_farming.scaleX * 0.1
     button_farming.scaleY = button_farming.scaleY * 0.1
     button_farming.setInteractive()
-    button_farming.on('pointerdown', () => farming(contract) );
+    button_farming.on('pointerdown', () => start_farming(contract) );
 }
 
 
