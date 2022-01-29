@@ -329,7 +329,7 @@ class Character extends Phaser.GameObjects.Sprite{
 
             this.target_x = 150;
             this.target_y = 250;
-            let delta_x = target_x - this.x;
+            let delta_x = this.target_x - this.x;
             if (delta_x >0) {
                 this.dist = "right";
                 this.anims.play("murasaki_right", true);
@@ -339,8 +339,8 @@ class Character extends Phaser.GameObjects.Sprite{
             }
             this.submode = 2;
         }else if (this.submode == 2) {
-            let delta_x = target_x - this.x;
-            let delta_y = target_y - this.y;
+            let delta_x = this.target_x - this.x;
+            let delta_y = this.target_y - this.y;
             let delta_x2 = delta_x / (delta_x + delta_y);
             let delta_y2 = delta_y / (delta_x + delta_y);
             this.x += delta_x2;

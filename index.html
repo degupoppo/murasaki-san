@@ -344,7 +344,7 @@ class Character extends Phaser.GameObjects.Sprite{
             let delta_x2 = delta_x / (delta_x + delta_y);
             let delta_y2 = delta_y / (delta_x + delta_y);
             this.x += delta_x2;
-            this.y += delta_y2;
+            this.y -= delta_y2;
 
             if (this.x > 140 && this.x < 160 && this.y > 240 && this.y < 260) {
                 this.submode = 3;
