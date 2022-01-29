@@ -5,7 +5,7 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="png" href="png/icon.PNG">
     <title>House of Murasaki San</title>
-    <script src="phaser.js"></script>
+    <!-- <script src="phaser.js"></script> -->
     <script src="web3.min.js"></script>
     <style type="text/css">
         body {
@@ -82,7 +82,7 @@ ToDo
 ***/
 
 
-
+/***
 //web3
 //--------------------------------------------------------------------------------------------------------
 //connect to metamask
@@ -105,7 +105,6 @@ function connect() {
     window.ethereum.enable();
     return web3;
 }
-connect();
 //get wallet
 async function get_wallet(web3) {
     const wallet = await web3.eth.getAccounts();
@@ -138,7 +137,7 @@ async function main() {
     console.log(wallet);
     await send_contract(web3, contract, wallet);
 }
-
+***/
 
 
 //dummy contract
@@ -785,7 +784,7 @@ function create() {
     new Button(30, 130, 'Stop Mining', this, () => stop_mining(contract));
     new Button(30, 160, 'Start Farming', this, () => start_farming(contract));
     new Button(30, 190, 'Stop Farming', this, () => stop_farming(contract));
-    new Button(30, 220, 'Connect Metamask', this, () => connect());
+    new Button(30, 220, 'Connect to Metamask', this, () => connect());
     //back color
     let status_back = this.add.graphics();
     status_back.fillStyle(0xa9a9a9, 1).fillRect(590, 5, 200, 350);
