@@ -890,7 +890,7 @@ function update() {
             char1.count = 0;
             char1.target_x = 600;
             char1.target_y = 400;
-            if (typeof food) {
+            if (typeof food !== "undefined") {
                 food.destroy();
                 //food.visible = false;
             }
