@@ -332,6 +332,7 @@ class Character extends Phaser.GameObjects.Sprite{
             //food.scaleX = button_farming.scaleX * 0.1;
             //food.scaleY = button_farming.scaleY * 0.1;
             //determine moving_degree
+            //let radian = Math.atan( (250-this.y) / (150-this.x) );
             let radian = Math.atan( (150-this.x) / (250-this.y) );
             this.moving_degree = radian / (Math.PI/180)
 
@@ -346,12 +347,21 @@ class Character extends Phaser.GameObjects.Sprite{
             this.moving_degree = Math.asin(sin) / (Math.PI/180);
             ***/
 
+            //determine left or right
+            if (this.moving_degree > 90 && this.moving_degree <= 270) {
+                this.dist = "left";
+                this.anims.play("murasaki_left", true);
+            }else {
+                this.dist = "right";
+                this.anims.play("murasaki_right", true);
+            }
+
             this.moving_speed = 1;
             this.submode = 2;
             console.log(this.moving_degree);
         }else if (this.submode == 2) {
             this.x += Math.cos(this.moving_degree * (Math.PI/180)) * this.moving_speed;
-            this.y -= Math.sin(this.moving_degree * (Math.PI/180)) * this.moving_speed;
+            this.y += Math.sin(this.moving_degree * (Math.PI/180)) * this.moving_speed;
             if (this.x > 140 && this.x < 160 && this.y > 240 && this.y < 260) {
                 this.submode = 3;
             }
