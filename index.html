@@ -97,12 +97,12 @@ class Contract {
         this.last_grooming_time = Date.now();
         this.coin = 100;
         this.material = 0;
-        this.working_status = 0;
-        this.working_start_time = 0;
         this.mining_status = 0;
         this.mining_start_time = 0;
         this.farming_status = 0;
         this.farming_start_time = 0;
+        this.crafting_status = 0;
+        this.crafting_start_time = 0;
         this.exp = 0;
         this.level = 1;
         this.next_exp_required = 1000;
@@ -392,9 +392,6 @@ class Character extends Phaser.GameObjects.Sprite{
         }
     }
     //cost: life, gain: coin
-    working() {
-        this.count += 1;
-    }
     mining() {
         this.count += 1;
         if (this.submode == 0) {
@@ -470,7 +467,6 @@ class Character extends Phaser.GameObjects.Sprite{
         else if (this.mode == "crying") {this.crying();}
         else if (this.mode == "sleeping") {this.sleeping();}
         else if (this.mode == "grooming") {this.grooming();}
-        else if (this.mode == "working") {this.working();}
         else if (this.mode == "mining") {this.mining();}
         else if (this.mode == "hugging") {this.hugging();}
         else if (this.mode == "farming") {this.farming();}
@@ -576,8 +572,6 @@ let local_level = 1;
 let local_last_feeding_time = Date.now() + 864000;
 let local_last_grooming_time = Date.now() + 864000;
 let local_coin;
-let local_working_status;
-let local_working_start_time;
 let local_exp;
 let local_mining_status;
 let local_mining_start_time;
@@ -585,6 +579,8 @@ let local_next_exp_required;
 let local_material;
 let local_farming_status;
 let local_farming_start_time;
+let local_crafting_status;
+let local_crafting_start_time;
 
 
 let config = {
@@ -759,10 +755,6 @@ function create() {
         600, 140, "last_grooming_time = " + local_last_grooming_time, {font: "10.5px Arial", fill: "#000"});
     text_coin = this.add.text(
         600, 150, "coin = " + local_coin, {font: "10.5px Arial", fill: "#000"});
-    text_working_status = this.add.text(
-        600, 160, "working_status = " + local_working_status, {font: "10.5px Arial", fill: "#000"});
-    text_working_start_time = this.add.text(
-        600, 170, "working_start_time = " + local_working_start_time, {font: "10.5px Arial", fill: "#000"});
     text_exp = this.add.text(
         600, 180, "exp = " + local_exp, {font: "10.5px Arial", fill: "#000"});
     //calculation_status
@@ -847,8 +839,6 @@ function update() {
         text_last_feeding_time.setText("last_feeding_time = " + local_last_feeding_time);
         text_last_grooming_time.setText("last_grooming_time = " + local_last_grooming_time);
         text_coin.setText("coin = " + local_coin);
-        text_working_status.setText("working_status = " + local_working_status);
-        text_working_start_time.setText("working_start_time = " + local_working_start_time);
         text_exp.setText("exp = " + local_exp);
         text_age_time.setText("age_time = " + age_time);
         text_mode.setText("mode = " + mode);
@@ -876,10 +866,9 @@ function update() {
         local_last_grooming_time = contract.last_grooming_time;
         local_coin = contract.coin;
         local_material = contract.material;
-        local_working_status = contract.working_status;
-        local_working_start_time = contract.working_start_time;
         local_mining_status = contract.mining_status;
         local_farming_status = contract.farming_status;
+        local_crafting_status = contract.crafting_status;
         local_exp = contract.exp;
         local_next_exp_required = contract.next_exp_required;
         //check character mode
