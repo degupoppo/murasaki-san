@@ -914,7 +914,7 @@ function update() {
             char1.submode = 0;
             char1.count = 0;
             char1.target_x = 90;
-            char1.target_y = 420;
+            char1.target_y = 310;
         }else if (local_farming_status == 0 & char1.mode == "farming") {
             char1.set_mode = "resting";
         }
