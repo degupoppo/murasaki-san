@@ -143,6 +143,7 @@ function send_contract(web3, contract, wallet, data) {
     //let data = "1";
     contract.methods.feeding().send({from:wallet});
 }
+/***
 //example
 async function main() {
     var web3 = await connect();
@@ -153,13 +154,18 @@ async function main() {
     console.log(call);
     await send_contract(web3, contract, wallet);
 }
-//main();
-
-web3 = connect();
-wallet = get_wallet(web3);
-contract = get_contract(web3);
+***/
+async function get_web3() {
+    web3 = await connect();
+    wallet = await get_wallet(web3);
+    contract = await get_contract(web3);
+    console.log(wallet);
+}
 console.log(wallet);
 
+function contract_get_strength() {
+    return contract.methods.get_strength().call();
+}
 
 
 
