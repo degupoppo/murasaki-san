@@ -156,9 +156,9 @@ async function main() {
     var contract = await get_contract(web3);
     var call = await call_contract(contract);
     console.log(call);
-    //var wallet = await get_wallet(web3);
-    //console.log(wallet);
-    //await send_contract(web3, contract, wallet);
+    var wallet = await get_wallet(web3);
+    console.log(wallet);
+    await send_contract(web3, contract, wallet);
 }
 main();
 
@@ -810,6 +810,7 @@ function create() {
     new Button(30, 160, 'Start Farming', this, () => start_farming(contract));
     new Button(30, 190, 'Stop Farming', this, () => stop_farming(contract));
     new Button(30, 220, 'Connect to Metamask', this, () => connect());
+    new Button(30, 250, 'Test', this, () => main());
     //back color
     let status_back = this.add.graphics();
     status_back.fillStyle(0xa9a9a9, 1).fillRect(590, 5, 200, 350);
