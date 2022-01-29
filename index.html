@@ -341,8 +341,8 @@ class Character extends Phaser.GameObjects.Sprite{
         }else if (this.submode == 2) {
             let delta_x = this.target_x - this.x;
             let delta_y = this.target_y - this.y;
-            let delta_x2 = delta_x / (delta_x + delta_y);
-            let delta_y2 = delta_y / (delta_x + delta_y);
+            let delta_x2 = delta_x / (Math.abs(delta_x) + Math.abs(delta_y));
+            let delta_y2 = delta_y / (Math.abs(delta_x) + Math.abs(delta_y));
             this.x += delta_x2;
             this.y -= delta_y2;
 
