@@ -30,6 +30,13 @@ contract Character {
     uint delta;
     uint tmp;
 
+    function get_coin() public view returns (uint) {
+        return coin;
+    }
+    function get_strength() public view returns (uint) {
+        return strength;
+    }
+
     function feeding() public {
         if (mining_status == 0 && farming_status == 0 && crafting_status == 0) {
             delta = block.timestamp - last_feeding_time;
