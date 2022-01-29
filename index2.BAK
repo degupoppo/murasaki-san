@@ -128,7 +128,7 @@ function get_contract(web3) {
 		"stateMutability": "view",
 		"type": "function"
 	}]
-    const contract = new web3.eth.Contract(contract2.abi, address);
+    const contract = new web3.eth.Contract(abi, address);
     return contract;
 }
 //call from contract
