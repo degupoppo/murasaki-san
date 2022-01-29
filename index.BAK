@@ -120,7 +120,7 @@ class Contract {
         this.exp += delta;
     }
     start_crafting(item_id) {
-        if (this.crafting_status == 0){
+        if (this.mining_status == 0 && this.farming_status == 0 && this.crafting_status == 0){
             this.crafting_start_time = Date.now();
             this.crafting_status = 1;
         }
@@ -133,7 +133,7 @@ class Contract {
         }
     }
     start_mining() {
-        if (this.mining_status == 0){
+        if (this.mining_status == 0 && this.farming_status == 0 && this.crafting_status == 0){
             this.mining_start_time = Date.now();
             this.mining_status = 1;
         }
@@ -147,7 +147,7 @@ class Contract {
         }
     }
     start_farming() {
-        if (this.farming_status == 0){
+        if (this.mining_status == 0 && this.farming_status == 0 && this.crafting_status == 0){
             this.farming_start_time = Date.now();
             this.farming_status = 1;
         }
@@ -913,8 +913,8 @@ function update() {
             char1.set_mode = "farming";
             char1.submode = 0;
             char1.count = 0;
-            char1.target_x = 90;
-            char1.target_y = 310;
+            char1.target_x = 150;
+            char1.target_y = 260;
         }else if (local_farming_status == 0 & char1.mode == "farming") {
             char1.set_mode = "resting";
         }
