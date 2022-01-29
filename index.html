@@ -327,8 +327,8 @@ class Character extends Phaser.GameObjects.Sprite{
 
         if (this.submode == 1) {
 
-            this.target_x = 150;
-            this.target_y = 250;
+            this.target_x = 600;
+            this.target_y = 400;
             let delta_x = this.target_x - this.x;
             if (delta_x >0) {
                 this.dist = "right";
@@ -346,7 +346,10 @@ class Character extends Phaser.GameObjects.Sprite{
             this.x += delta_x2;
             this.y += delta_y2;
 
-            if (this.x > 140 && this.x < 160 && this.y > 240 && this.y < 260) {
+            if (this.x > this.target_x-10 
+              && this.x < this.target_x+10 
+              && this.y > this.target_y-10 
+              && this.y < this.target_y+10) {
                 this.submode = 3;
             }
 
@@ -915,7 +918,7 @@ function update() {
             char1.set_mode = "feeding";
             char1.submode = 1;
             char1.count = 0;
-            food = this.add.sprite(150,250, "food_sweet_potato");
+            food = this.add.sprite(600,400, "food_sweet_potato");
             food.scaleX = food.scaleX * 0.1;
             food.scaleY = food.scaleY * 0.1;
         }
