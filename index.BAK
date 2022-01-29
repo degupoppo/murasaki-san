@@ -88,6 +88,7 @@ ToDo
 //connect to metamask
 function connect() {
     const web3 = new Web3(window.ethereum);
+    /***
     window.ethereum.request({
         method: 'wallet_addEthereumChain',
         params: [{
@@ -102,10 +103,11 @@ function connect() {
             blockExplorerUrls: ['https://etherscan.io'],
         }]
     })
+    ***/
     window.ethereum.enable();
     return web3;
 }
-//connect();
+connect();
 //get wallet
 async function get_wallet(web3) {
     const wallet = await web3.eth.getAccounts();
