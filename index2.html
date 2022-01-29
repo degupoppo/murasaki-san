@@ -132,11 +132,11 @@ function send_contract(web3, contract, wallet, data) {
 //example
 async function main() {
     var web3 = await connect();
+    var wallet = await get_wallet(web3);
+    console.log(wallet);
     var contract = await get_contract(web3);
     var call = await call_contract(contract);
     console.log(call);
-    var wallet = await get_wallet(web3);
-    console.log(wallet);
     await send_contract(web3, contract, wallet);
 }
 //main();
