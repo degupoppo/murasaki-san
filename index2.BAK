@@ -113,8 +113,21 @@ async function get_wallet(web3) {
 //prepare contract
 function get_contract(web3) {
     const address = "0x0Ff72e0dEE0b814FAC4a094069b41D3F06434897";
-    import contract2 from "abi_contract.json";
+    //import contract2 from "abi_contract.json";
     //const abi = "abi.json";
+    const abi = [{
+		"inputs": [],
+		"name": "coin",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}]
     const contract = new web3.eth.Contract(contract2.abi, address);
     return contract;
 }
@@ -143,6 +156,7 @@ web3 = connect();
 wallet = get_wallet(web3);
 contract = get_contract(web3);
 a = call_contract(contract);
+conlose.log(a);
 
 
 
