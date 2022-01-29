@@ -91,14 +91,14 @@ function connect() {
     window.ethereum.request({
         method: 'wallet_addEthereumChain',
         params: [{
-            chainId: '0x1111',
+            chainId: '0x1111',  //4369
             chainName: 'Murasaki chain',
             nativeCurrency: {
                 name: 'ASTL',
                 symbol: 'ASTL',
                 decimals: 18
             },
-            rpcUrls: ["http://kapipo.com:9933/"],
+            rpcUrls: ["http://kapipo.com:9933/", "https://kapipo.com:9933/"],
             blockExplorerUrls: ['https://etherscan.io'],
         }]
     })
@@ -785,6 +785,7 @@ function create() {
     new Button(30, 130, 'Stop Mining', this, () => stop_mining(contract));
     new Button(30, 160, 'Start Farming', this, () => start_farming(contract));
     new Button(30, 190, 'Stop Farming', this, () => stop_farming(contract));
+    new Button(30, 220, 'Stop Farming', this, () => stop_farming(contract));
     //back color
     let status_back = this.add.graphics();
     status_back.fillStyle(0xa9a9a9, 1).fillRect(590, 5, 200, 350);

@@ -91,7 +91,7 @@ function connect() {
     window.ethereum.request({
         method: 'wallet_addEthereumChain',
         params: [{
-            chainId: '0x1111',
+            chainId: '0x1111',  //4369
             chainName: 'Murasaki chain',
             nativeCurrency: {
                 name: 'ASTL',
@@ -785,6 +785,7 @@ function create() {
     new Button(30, 130, 'Stop Mining', this, () => stop_mining(contract));
     new Button(30, 160, 'Start Farming', this, () => start_farming(contract));
     new Button(30, 190, 'Stop Farming', this, () => stop_farming(contract));
+    new Button(30, 220, 'Connect Metamask', this, () => connect());
     //back color
     let status_back = this.add.graphics();
     status_back.fillStyle(0xa9a9a9, 1).fillRect(590, 5, 200, 350);
