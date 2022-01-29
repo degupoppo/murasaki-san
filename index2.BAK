@@ -160,7 +160,7 @@ async function main() {
     console.log(wallet);
     await send_contract(web3, contract, wallet);
 }
-main();
+//main();
 
 
 
