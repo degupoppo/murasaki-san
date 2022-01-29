@@ -88,6 +88,7 @@ ToDo
 //connect to metamask
 function connect() {
     const web3 = new Web3(window.ethereum);
+    window.ethereum.enable();
     window.ethereum.request({
         method: 'wallet_addEthereumChain',
         params: [{
@@ -96,14 +97,12 @@ function connect() {
             nativeCurrency: {
                 name: 'sby',
                 symbol: 'SBY',
-
                 decimals: 18
             },
             rpcUrls: ["https://rpc.shibuya.astar.network:8545"],
             blockExplorerUrls: ['https://blockscout.com/shibuya'],
         }]
-    })
-    window.ethereum.enable();
+    });
     return web3;
 }
 //get wallet
