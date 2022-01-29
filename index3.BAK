@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="png" href="png/murasaki1.PNG">
+    <title>Test</title>
+    <!-- チュートリアルはここ： https://phaser.io/tutorials/making-your-first-phaser-3-game -->
+    <!--script src="//cdn.jsdelivr.net/npm/phaser@3.11.0/dist/phaser.js"></script-->
+    <script src="phaser.js"></script>
+    <style type="text/css">
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+
+<script type="text/javascript">
+
+
+// Create game
+
+let config = {
+    type: Phaser.AUTO,
+    width: 800,
+    height: 600,
+    scale: {
+        //autoCenter: Phaser.Scale.CENTER_HORIZONTALLY,
+    },
+    scene: {
+        preload: preload,
+        create: create,
+        update: update
+    }
+};
+
+let game = new Phaser.Game(config);
+
+
+// class
+
+class Character extends Phaser.GameObjects.Sprite{
+    constructor(scene, x, y){
+        super(scene, x, y, "dude", "Frame");
+        this.scene.add.existing(this);
+        this.anims.play("normal", true);
+    }
+    update(){
+        this.x += 1;
+    }
+}
+
+
+// main functions
+
+let player;
+
+function preload() {
+    this.load.image("sky", "assets/sky.png");
+    this.load.spritesheet("dude", "png/murasaki.PNG", {frameWidth: 64, frameHeight: 51});
+    cursors = this.input.keyboard.createCursorKeys();
+}
+
+
+function create() {
+
+    this.add.image(400, 300, "sky");
+    //player = this.physics.add.sprite(100,450, "dude");
+    player = this.add.sprite(100,450, "dude");
+
+    this.anims.create({
+        key: "normal",
+        frames: this.anims.generateFrameNumbers("dude", {start: 0, end:2}),
+        frameRate: 2,
+        repeat: -1
+    });
+
+    player.anims.play("normal", true);
+
+    var group = this.add.group();
+    char1 = new Chara(this, Math.random()*400, Math.random()*400);
+
+}
+
+
+function update() {
+    player.x += 1;
+    if (cursors.right.isDown) {
+        var random = Math.random() * 600;
+        //player = this.physics.add.sprite(random,450, "dude");
+        player = this.add.sprite(random,450, "dude");
+        player.anims.play("normal", true);
+    };
+    if (cursors.left.isDown) {
+        player.anims.play("normal", false);
+    };
+    if (cursors.down.isDown) {
+        //chara = this.scene.add.existing(new Chara(this, 100,100));
+        chara = new Chara(this, Math.random()*400,Math.random()*400);
+        chara.anims.play("normal", true);
+    }
+    char1.update();
+}
+
+</script>
+
+
+</body>
+</html>

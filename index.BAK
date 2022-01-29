@@ -133,7 +133,8 @@ class Contract {
         }
     }
     start_mining() {
-        if (this.mining_status == 0 && this.farming_status == 0 && this.crafting_status == 0){
+        //if (this.mining_status == 0 && this.farming_status == 0 && this.crafting_status == 0){
+        if (this.mining_status == 0){
             this.mining_start_time = Date.now();
             this.mining_status = 1;
         }
