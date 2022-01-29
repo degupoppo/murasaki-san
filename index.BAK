@@ -88,9 +88,23 @@ ToDo
 //connect to metamask
 function connect() {
     const web3 = new Web3(window.ethereum);
+    window.ethereum.request({
+        method: 'wallet_addEthereumChain',
+        params: [{
+            chainId: '0x1111',
+            chainName: 'Murasaki chain',
+            nativeCurrency: {
+                name: 'ASTL',
+                symbol: 'ASTL',
+                decimals: 18
+            },
+            rpcUrls: ['http://153.121.47.127:9933/']
+        }]
+    })
     window.ethereum.enable();
     return web3;
 }
+connect()
 //get wallet
 async function get_wallet(web3) {
     const wallet = await web3.eth.getAccounts();
