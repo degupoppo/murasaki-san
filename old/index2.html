@@ -6,7 +6,6 @@
     <link rel="icon" type="png" href="png/icon.PNG">
     <title>House of Murasaki San</title>
     <script src="phaser.js"></script>
-    <script src="web3.min.js"></script>
     <style type="text/css">
         body {
             margin: 0;
@@ -16,8 +15,6 @@
 <body>
 
 <script type="text/javascript">
-
-
 
 /***
 Idea
@@ -83,63 +80,6 @@ ToDo
 
 
 
-//web3
-//--------------------------------------------------------------------------------------------------------
-//connect to metamask
-function connect() {
-    const web3 = new Web3(window.ethereum);
-    window.ethereum.request({
-        method: 'wallet_addEthereumChain',
-        params: [{
-            chainId: '0x51',  //4369
-            chainName: 'Shibuya Testnet',
-            nativeCurrency: {
-                name: 'sby',
-                symbol: 'SBY',
-                decimals: 18
-            },
-            rpcUrls: ["https://rpc.shibuya.astar.network:8545"],
-            blockExplorerUrls: ['https://blockscout.com/shibuya'],
-        }]
-    })
-    window.ethereum.enable();
-    return web3;
-}
-//get wallet
-async function get_wallet(web3) {
-    const wallet = await web3.eth.getAccounts();
-    return wallet[0];
-}
-//prepare contract
-function get_contract(web3) {
-    const address = "0x8759719d13f5f403c54c4cd742faa6522bc6d965";
-    const abi = "abi.json";
-    const contract = new web3.eth.Contract(abi, address);
-    return contract;
-}
-//call from contract
-function call_contract(contract) {
-    var text = contract.methods.next_summoner().call();
-    return text;
-}
-//send to contract
-function send_contract(web3, contract, wallet, data) {
-    //let data = "1";
-    contract.methods.summon("1").send({from:wallet});
-}
-//example
-async function main() {
-    var web3 = await connect();
-    var contract = await get_contract(web3);
-    var call = await call_contract(contract);
-    console.log(call);
-    var wallet = await get_wallet(web3);
-    console.log(wallet);
-    await send_contract(web3, contract, wallet);
-}
-
-
-
 //dummy contract
 //--------------------------------------------------------------------------------------------------------
 class Contract {
@@ -194,7 +134,6 @@ class Contract {
     }
     start_mining() {
         if (this.mining_status == 0 && this.farming_status == 0 && this.crafting_status == 0){
-        //if (this.mining_status == 0){
             this.mining_start_time = Date.now();
             this.mining_status = 1;
         }
@@ -784,7 +723,6 @@ function create() {
     new Button(30, 130, 'Stop Mining', this, () => stop_mining(contract));
     new Button(30, 160, 'Start Farming', this, () => start_farming(contract));
     new Button(30, 190, 'Stop Farming', this, () => stop_farming(contract));
-    new Button(30, 220, 'Connect to Metamask', this, () => connect());
     //back color
     let status_back = this.add.graphics();
     status_back.fillStyle(0xa9a9a9, 1).fillRect(590, 5, 200, 350);
