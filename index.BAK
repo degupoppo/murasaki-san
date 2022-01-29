@@ -229,6 +229,7 @@ class Character extends Phaser.GameObjects.Sprite{
         this.scene.add.existing(this);
         this.anims.play("murasaki_right", true);
     	this.mode = "resting";
+        this.submode = 1;
         this.count = 0;
         this.dist = "right";
         this.setInteractive()
@@ -323,7 +324,6 @@ class Character extends Phaser.GameObjects.Sprite{
     //send: last_nutrition_time
     feeding() {
         this.count += 1;
-        this.submode = 1;
 
         if (this.submode == 1) {
             //summon food
@@ -855,6 +855,7 @@ function update() {
         //check character mode
         if (local_last_feeding_time > previous_local_last_feeding_time){
             char1.set_mode = "feeding";
+            char1.count = 0;
             food = this.add.sprite(150,250, "food_sweet_potato");
             food.scaleX = food.scaleX * 0.1;
             food.scaleY = food.scaleY * 0.1;
