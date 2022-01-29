@@ -793,24 +793,24 @@ function create() {
         600, 330, "material:" + local_material, {font: "10.5px Arial", fill: "#000"});
     //button
     button_feeding = this.add.sprite(660,430, "button_feeding");
-    button_feeding.scaleX = button_feeding.scaleX * 0.1
-    button_feeding.scaleY = button_feeding.scaleY * 0.1
-    button_feeding.setInteractive()
+    button_feeding.scaleX = button_feeding.scaleX * 0.08;
+    button_feeding.scaleY = button_feeding.scaleY * 0.08;
+    button_feeding.setInteractive();
     button_feeding.on('pointerdown', () => feeding(contract) );
     button_grooming = this.add.sprite(400,300, "button_feeding");
-    button_grooming.scaleX = button_grooming.scaleX * 0.1
-    button_grooming.scaleY = button_grooming.scaleY * 0.1
-    button_grooming.setInteractive()
+    button_grooming.scaleX = button_grooming.scaleX * 0.08;
+    button_grooming.scaleY = button_grooming.scaleY * 0.08;
+    button_grooming.setInteractive();
     button_grooming.on('pointerdown', () => grooming(contract) );
     button_mining = this.add.sprite(10,430, "button_feeding");
-    button_mining.scaleX = button_mining.scaleX * 0.1
-    button_mining.scaleY = button_mining.scaleY * 0.1
-    button_mining.setInteractive()
+    button_mining.scaleX = button_mining.scaleX * 0.08;
+    button_mining.scaleY = button_mining.scaleY * 0.08;
+    button_mining.setInteractive();
     button_mining.on('pointerdown', () => start_mining(contract) );
     button_farming = this.add.sprite(200,300, "button_feeding");
-    button_farming.scaleX = button_farming.scaleX * 0.1
-    button_farming.scaleY = button_farming.scaleY * 0.1
-    button_farming.setInteractive()
+    button_farming.scaleX = button_farming.scaleX * 0.08;
+    button_farming.scaleY = button_farming.scaleY * 0.08;
+    button_farming.setInteractive();
     button_farming.on('pointerdown', () => start_farming(contract) );
 }
 
