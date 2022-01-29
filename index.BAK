@@ -328,9 +328,9 @@ class Character extends Phaser.GameObjects.Sprite{
         if (this.submode == 1) {
             //summon food
             //food = this.scene.add.sprite(150,250, "food_sweet_potato");
-            food = game.add.sprite(150,250, "food_sweet_potato");
-            food.scaleX = button_farming.scaleX * 0.1;
-            food.scaleY = button_farming.scaleY * 0.1;
+            //food = game.scene.add.sprite(150,250, "food_sweet_potato");
+            //food.scaleX = button_farming.scaleX * 0.1;
+            //food.scaleY = button_farming.scaleY * 0.1;
             //determine moving_degree
             let target_x = 150;
             let target_y = 250;
@@ -855,6 +855,9 @@ function update() {
         //check character mode
         if (local_last_feeding_time > previous_local_last_feeding_time){
             char1.set_mode = "feeding";
+            food = this.add.sprite(150,250, "food_sweet_potato");
+            food.scaleX = button_farming.scaleX * 0.1;
+            food.scaleY = button_farming.scaleY * 0.1;
         }
         if (local_last_grooming_time > previous_local_last_grooming_time){
             char1.set_mode = "grooming";
