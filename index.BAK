@@ -397,7 +397,6 @@ class Character extends Phaser.GameObjects.Sprite{
     }
     mining() {
         this.count += 1;
-
         if (this.submode == 0) {
             let delta_x = this.target_x - this.x;
             if (delta_x >0) {
@@ -411,8 +410,8 @@ class Character extends Phaser.GameObjects.Sprite{
         }else if (this.submode == 1) {
             let delta_x = this.target_x - this.x;
             let delta_y = this.target_y - this.y;
-            let delta_x2 = delta_x / (Math.abs(delta_x) + Math.abs(delta_y)) * 1.2;
-            let delta_y2 = delta_y / (Math.abs(delta_x) + Math.abs(delta_y)) * 1.2;
+            let delta_x2 = delta_x / (Math.abs(delta_x) + Math.abs(delta_y)) * 1;
+            let delta_y2 = delta_y / (Math.abs(delta_x) + Math.abs(delta_y)) * 1;
             this.x += delta_x2;
             this.y += delta_y2;
             if (this.x > this.target_x-10 
@@ -424,11 +423,6 @@ class Character extends Phaser.GameObjects.Sprite{
         }else if (this.submode == 2) {
             this.anims.play("murasaki_mining", true);
         }
-        /***
-        if (this.count == 1){
-            this.anims.play("murasaki_mining", true);
-        }
-        ***/
     }
     hugging() {
         this.count += 1;
@@ -441,7 +435,30 @@ class Character extends Phaser.GameObjects.Sprite{
     }
     farming() {
         this.count += 1;
-        if (this.count == 1){
+        if (this.submode == 0) {
+            let delta_x = this.target_x - this.x;
+            if (delta_x >0) {
+                this.dist = "right";
+                this.anims.play("murasaki_feeding_happy_right", true);
+            }else {
+                this.dist = "left";
+                this.anims.play("murasaki_feeding_happy_left", true);
+            }
+            this.submode = 1;
+        }else if (this.submode == 1) {
+            let delta_x = this.target_x - this.x;
+            let delta_y = this.target_y - this.y;
+            let delta_x2 = delta_x / (Math.abs(delta_x) + Math.abs(delta_y)) * 1;
+            let delta_y2 = delta_y / (Math.abs(delta_x) + Math.abs(delta_y)) * 1;
+            this.x += delta_x2;
+            this.y += delta_y2;
+            if (this.x > this.target_x-10 
+              && this.x < this.target_x+10 
+              && this.y > this.target_y-10 
+              && this.y < this.target_y+10) {
+                this.submode = 2;
+            }
+        }else if (this.submode == 2) {
             this.anims.play("murasaki_farming", true);
         }
     }
@@ -677,10 +694,6 @@ function create() {
         frameRate: 1,
         repeat: -1
     });
-    //summon character
-    char1 = new Character(this, 300 + Math.random()*200, 400 + Math.random()*100);
-    char1.scaleX = char1.scaleX * 0.25;
-    char1.scaleY = char1.scaleY * 0.25;
     //button_icon
     button_feeding = this.add.sprite(660,430, "button_feeding");
     button_feeding.scaleX = button_feeding.scaleX * 0.08;
@@ -702,6 +715,10 @@ function create() {
     button_farming.scaleY = button_farming.scaleY * 0.08;
     button_farming.setInteractive();
     button_farming.on('pointerdown', () => start_farming(contract) );
+    //summon character
+    char1 = new Character(this, 300 + Math.random()*200, 400 + Math.random()*100);
+    char1.scaleX = char1.scaleX * 0.25;
+    char1.scaleY = char1.scaleY * 0.25;
     //button_text
     new Button(30, 10, 'Level Up', this, () => level_up(contract));
     new Button(30, 40, 'Feeding', this, () => feeding(contract));
@@ -886,7 +903,7 @@ function update() {
             char1.set_mode = "mining";
             char1.submode = 0;
             char1.count = 0;
-            char1.target_x = 50;
+            char1.target_x = 70;
             char1.target_y = 420;
         }else if (local_mining_status == 0 & char1.mode == "mining") {
             char1.set_mode = "resting";
@@ -894,6 +911,10 @@ function update() {
         //farming
         if (local_farming_status == 1 & char1.mode != "farming"){
             char1.set_mode = "farming";
+            char1.submode = 0;
+            char1.count = 0;
+            char1.target_x = 90;
+            char1.target_y = 420;
         }else if (local_farming_status == 0 & char1.mode == "farming") {
             char1.set_mode = "resting";
         }
