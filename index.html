@@ -99,7 +99,7 @@ async function get_wallet(web3) {
 //prepare contract
 function get_contract(web3) {
     const address = "0x8759719d13f5f403c54c4cd742faa6522bc6d965";
-    const abi = "rarity_abi.json";
+    const abi = "abi.json";
     const contract = new web3.eth.Contract(abi, address);
     return contract;
 }
@@ -112,6 +112,16 @@ function call_contract(contract) {
 function send_contract(web3, contract, wallet, data) {
     //let data = "1";
     contract.methods.summon("1").send({from:wallet});
+}
+//example
+async function main() {
+    var web3 = await connect();
+    var contract = await get_contract(web3);
+    var call = await call_contract(contract);
+    console.log(call);
+    var wallet = await get_wallet(web3);
+    console.log(wallet);
+    await send_contract(web3, contract, wallet);
 }
 
 

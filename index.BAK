@@ -83,6 +83,49 @@ ToDo
 
 
 
+//web3
+//--------------------------------------------------------------------------------------------------------
+//connect to metamask
+function connect() {
+    const web3 = new Web3(window.ethereum);
+    window.ethereum.enable();
+    return web3;
+}
+//get wallet
+async function get_wallet(web3) {
+    const wallet = await web3.eth.getAccounts();
+    return wallet[0];
+}
+//prepare contract
+function get_contract(web3) {
+    const address = "0x8759719d13f5f403c54c4cd742faa6522bc6d965";
+    const abi = "abi.json";
+    const contract = new web3.eth.Contract(abi, address);
+    return contract;
+}
+//call from contract
+function call_contract(contract) {
+    var text = contract.methods.next_summoner().call();
+    return text;
+}
+//send to contract
+function send_contract(web3, contract, wallet, data) {
+    //let data = "1";
+    contract.methods.summon("1").send({from:wallet});
+}
+//example
+async function main() {
+    var web3 = await connect();
+    var contract = await get_contract(web3);
+    var call = await call_contract(contract);
+    console.log(call);
+    var wallet = await get_wallet(web3);
+    console.log(wallet);
+    await send_contract(web3, contract, wallet);
+}
+
+
+
 //dummy contract
 //--------------------------------------------------------------------------------------------------------
 class Contract {
