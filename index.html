@@ -334,12 +334,12 @@ class Character extends Phaser.GameObjects.Sprite{
             //determine moving_degree
             let target_x = 150;
             let target_y = 250;
-            let A = this.x - target_x;
-            let B = this.y - target_y;
+            let A = target_x - this.x;
+            let B = target_y - this.y;
             let C = (A ** 2 + B ** 2) ** 0.5;
             let sin = A / C;
             let cos = B / C;
-            this.moving_degree = Math.asin(sin);
+            this.moving_degree = Math.asin(sin) / (Math.PI/180);
             this.moving_speed = 1;
             this.submode = 2;
             console.log(A, B, C, this.moving_degree);
