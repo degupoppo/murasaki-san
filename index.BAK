@@ -104,7 +104,7 @@ function connect() {
     window.ethereum.enable();
     return web3;
 }
-connect()
+connect();
 //get wallet
 async function get_wallet(web3) {
     const wallet = await web3.eth.getAccounts();
