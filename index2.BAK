@@ -211,7 +211,7 @@ async function contract_grooming() {
     let web3 = await connect();
     let contract = await get_contract(web3);
     let wallet = await get_wallet(web3);
-    contract.methods.feeding().send({from:wallet});
+    contract.methods.grooming().send({from:wallet});
 }
 
 
@@ -965,6 +965,7 @@ function update() {
         let satiety = Math.round( (base - (now_time/1000 - local_last_feeding_time)) / base * 1000 ) / 10;
         if (satiety < 0) { satiety = 0; }
         if (satiety > 100) { satiety = 100; }
+        //let happy = Math.round( (base - (now_time - local_last_grooming_time)) / base * 1000 ) / 10;
         let happy = Math.round( (base - (now_time - local_last_grooming_time)) / base * 1000 ) / 10;
         if (happy < 0) { happy = 0; }
         if (happy > 100) { happy = 100; }
