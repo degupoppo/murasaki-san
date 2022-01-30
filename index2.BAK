@@ -966,7 +966,7 @@ function update() {
         if (satiety < 0) { satiety = 0; }
         if (satiety > 100) { satiety = 100; }
         //let happy = Math.round( (base - (now_time - local_last_grooming_time)) / base * 1000 ) / 10;
-        let happy = Math.round( (base - (now_time - local_last_grooming_time)) / base * 1000 ) / 10;
+        let happy = Math.round( (base - (now_time/1000 - local_last_grooming_time)) / base * 1000 ) / 10;
         if (happy < 0) { happy = 0; }
         if (happy > 100) { happy = 100; }
         //update text
