@@ -978,8 +978,8 @@ function update() {
     //update dynamic status from contract to local
     if (turn == 1 || turn % 201 == 0) {
         //update dynamic_status
-        //local_strength = contract.strength;
-        //local_strength = contract_get_strength(contract_main);
+        /***
+        local_strength = contract.strength;
         local_dexterity = contract.dexterity;
         local_vitality = contract.vitality;
         local_intelligence = contract.intelligence;
@@ -996,6 +996,7 @@ function update() {
         local_crafting_status = contract.crafting_status;
         local_exp = contract.exp;
         local_next_exp_required = contract.next_exp_required;
+        ***/
         //check character mode
         //feeding
         if (local_last_feeding_time > previous_local_last_feeding_time){
