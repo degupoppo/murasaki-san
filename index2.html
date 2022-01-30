@@ -181,6 +181,7 @@ async function test() {
     let web3 = await connect();
     let contract = await get_contract(web3);
     res = await contract.methods.get_strength().call();
+    local_strength = res;
     console.log(res);
 }
 
@@ -984,7 +985,7 @@ function update() {
     //update dynamic status from contract to local
     if (turn == 1 || turn % 201 == 0) {
         //update dynamic_status
-        local_strength = contract.strength;
+        //local_strength = contract.strength;
         //local_strength = contract_get_strength(contract_main);
         local_dexterity = contract.dexterity;
         local_vitality = contract.vitality;

@@ -181,8 +181,8 @@ async function test() {
     let web3 = await connect();
     let contract = await get_contract(web3);
     res = await contract.methods.get_strength().call();
+    local_strength = res;
     console.log(res);
-    return res;
 }
 
 
