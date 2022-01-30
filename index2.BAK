@@ -1046,8 +1046,8 @@ function update() {
             food.scaleY = food.scaleY * 0.1;
         }
         //grooming
-        //if (local_last_grooming_time > previous_local_last_grooming_time){
-        if (flag_grooming == 1){
+        if (local_last_grooming_time > previous_local_last_grooming_time){
+        //if (flag_grooming == 1){
             flag_grooming = 0;
             char1.set_mode = "grooming";
         }
