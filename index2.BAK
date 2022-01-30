@@ -725,6 +725,9 @@ let local_farming_status;
 let local_farming_start_time;
 let local_crafting_status;
 let local_crafting_start_time;
+//flag
+let flag_feeding;
+let flag_grooming;
 
 
 let config = {
@@ -962,6 +965,7 @@ function update() {
     }
     //update calculation status
     if (turn == 1 || turn % 100 == 0) {
+        text_turn.setText("turn = " + turn);
         //update calculation_status
         let now_time = Date.now();
         let age_time = Math.round( (now_time - local_birth_time) / 1000 );
@@ -1022,12 +1026,12 @@ function update() {
         local_exp = contract.exp;
         local_next_exp_required = contract.next_exp_required;
         ***/
-        let previous_local_last_feeding_time = local_last_feeding_time;
-        let previous_local_last_grooming_time = local_last_grooming_time;
         test();
         //check character mode
         //feeding
         if (local_last_feeding_time > previous_local_last_feeding_time){
+        //if (flag_feeding == 1){
+            flag_feeding = 0;
             char1.set_mode = "feeding";
             char1.submode = 0;
             char1.count = 0;
@@ -1042,7 +1046,9 @@ function update() {
             food.scaleY = food.scaleY * 0.1;
         }
         //grooming
-        if (local_last_grooming_time > previous_local_last_grooming_time){
+        //if (local_last_grooming_time > previous_local_last_grooming_time){
+        if (flag_grooming == 1){
+            flag_grooming = 0;
             char1.set_mode = "grooming";
         }
         //mining
@@ -1065,6 +1071,9 @@ function update() {
         }else if (local_farming_status == 0 & char1.mode == "farming") {
             char1.set_mode = "resting";
         }
+        //save last time to next update
+        let previous_local_last_feeding_time = local_last_feeding_time;
+        let previous_local_last_grooming_time = local_last_grooming_time;
     }
 }
 
