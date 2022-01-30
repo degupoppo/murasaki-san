@@ -160,13 +160,13 @@ async function get_web3() {
     let wallet = await get_wallet(web3);
     let contract = await get_contract(web3);
     return {
-        web3: web3,
-        wallet: wallet,
-        contract: contract
+        A: web3,
+        B: wallet,
+        C: contract
     };
 }
-let {web3, wallet, contract} = get_web3();
-console.log(wallet);
+let {A, B, C} = get_web3();
+console.log(B);
 
 function contract_get_strength() {
     return contract.methods.get_strength().call();
