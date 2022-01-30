@@ -180,7 +180,7 @@ async function get_contract2() {
 contract_main = get_contract2();
 
 async function contract_get_strength(contract_tmp) {
-    let res = await contract_tmp.methods.get_strength().call()
+    let res = await contract_tmp.methods.get_strength().call();
     return res;
 }
 function contract_get_dexterity() {
