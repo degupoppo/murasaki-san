@@ -725,8 +725,8 @@ let local_farming_status;
 let local_farming_start_time;
 let local_crafting_status;
 let local_crafting_start_time;
-let previous_local_last_feeding_time = Date.now() + 8640000;
-let previous_local_last_grooming_time = Date.now() + 8640000;
+let previous_local_last_feeding_time = Date.now() + 864000 * 10;
+let previous_local_last_grooming_time = Date.now() + 864000 * 10;
 //flag
 //let flag_feeding;
 //let flag_grooming;
