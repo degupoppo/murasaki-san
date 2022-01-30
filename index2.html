@@ -177,7 +177,15 @@ async function get_contract2() {
     return contract;
 }
 
-contract_main = await get_contract2();
+async function test() {
+    let web3 = await connect();
+    let contract = await get_contract(web3);
+    res = await contract.methods.get_strength().call();
+    console.log(res);
+}
+
+
+//contract_main = await get_contract2();
 
 async function contract_get_strength(contract_tmp) {
     let res = await contract_tmp.methods.get_strength().call();
@@ -846,7 +854,7 @@ function create() {
     new Button(30, 160, 'Start Farming', this, () => start_farming(contract));
     new Button(30, 190, 'Stop Farming', this, () => stop_farming(contract));
     new Button(30, 220, 'Connect to Metamask', this, () => connect());
-    new Button(30, 250, 'Test', this, () => main());
+    new Button(30, 250, 'Test', this, () => test());
     //back color
     let status_back = this.add.graphics();
     status_back.fillStyle(0xa9a9a9, 1).fillRect(590, 5, 200, 350);
@@ -976,8 +984,8 @@ function update() {
     //update dynamic status from contract to local
     if (turn == 1 || turn % 201 == 0) {
         //update dynamic_status
-        //local_strength = contract.strength;
-        local_strength = contract_get_strength(contract_main);
+        local_strength = contract.strength;
+        //local_strength = contract_get_strength(contract_main);
         local_dexterity = contract.dexterity;
         local_vitality = contract.vitality;
         local_intelligence = contract.intelligence;
