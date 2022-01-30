@@ -213,6 +213,12 @@ async function contract_grooming() {
     let wallet = await get_wallet(web3);
     contract.methods.grooming().send({from:wallet});
 }
+async function contract_level_up() {
+    let web3 = await connect();
+    let contract = await get_contract(web3);
+    let wallet = await get_wallet(web3);
+    contract.methods.level_up().send({from:wallet});
+}
 
 
 
@@ -854,7 +860,8 @@ function create() {
     char1.scaleX = char1.scaleX * 0.25;
     char1.scaleY = char1.scaleY * 0.25;
     //button_text
-    new Button(30, 10, 'Level Up', this, () => level_up(contract));
+    //new Button(30, 10, 'Level Up', this, () => level_up(contract));
+    new Button(30, 10, 'Level Up', this, () => contract_level_up());
     //new Button(30, 40, 'Feeding', this, () => feeding(contract));
     new Button(30, 40, 'Feeding', this, () => contract_feeding());
     //new Button(30, 70, 'Grooming', this, () => grooming(contract));

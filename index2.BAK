@@ -213,6 +213,12 @@ async function contract_grooming() {
     let wallet = await get_wallet(web3);
     contract.methods.grooming().send({from:wallet});
 }
+async function contract_level_up() {
+    let web3 = await connect();
+    let contract = await get_contract(web3);
+    let wallet = await get_wallet(web3);
+    contract.methods.level_up().send({from:wallet});
+}
 
 
 
@@ -400,9 +406,10 @@ class Character extends Phaser.GameObjects.Sprite{
             this.resting_count = 70 + Math.random() * 30;
 	    }else if (this.count >= this.resting_count){
             let tmp = Math.random() * 100;
-            let base = 864000;
+            //let base = 864000;
+            let base = 864000/1000;
             let now_time = Date.now();
-            let happy = Math.round( (base - (now_time - local_last_grooming_time)) / base * 1000 ) / 10;
+            let happy = Math.round( (base - (now_time/1000 - local_last_grooming_time)) / base * 1000 ) / 10;
             if (tmp <= 10) {
                 this.mode = "sleeping";
                 this.count = 0;
