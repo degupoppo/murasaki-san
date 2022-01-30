@@ -180,32 +180,25 @@ async function get_contract2() {
 async function test() {
     let web3 = await connect();
     let contract = await get_contract(web3);
-    res = await contract.methods.get_strength().call();
-    local_strength = res;
-    console.log(res);
-}
-
-
-//contract_main = await get_contract2();
-
-async function contract_get_strength(contract_tmp) {
-    let res = await contract_tmp.methods.get_strength().call();
-    return res;
-}
-function contract_get_dexterity() {
-    return contract.methods.get_dexterity().call();
-}
-function contract_get_vitality() {
-    return contract.methods.get_vitality().call();
-}
-function contract_get_intelligence() {
-    return contract.methods.get_intelligence().call();
-}
-function contract_get_luck() {
-    return contract.methods.get_luck().call();
-}
-function contract_get_birth_time() {
-    return contract.methods.get_birth_time().call();
+    local_strength = await contract.methods.get_strength().call();
+    local_dexterity = await contract.methods.get_dexterity().call();
+    local_vitality = await contract.methods.get_vitality().call();
+    local_intelligence = await contract.methods.get_intelligence().call();
+    local_luck = await contract.methods.get_luck().call();
+    local_birth_time = await contract.methods.get_birth_time().call();
+    local_last_feeding_time = await contract.methods.get_last_feeding_time().call();
+    local_last_grooming_time = await contract.methods.get_last_grooming_time().call();
+    local_coin = await contract.methods.get_coin().call();
+    local_material = await contract.methods.get_material().call();
+    local_mining_status = await contract.methods.get_ining_status().call();
+    local_mining_start_time = await contract.methods.get_mining_start_time().call();
+    local_farming_status = await contract.methods.get_farming_status().call();
+    local_farming_start_time = await contract.methods.get_farming_start_time().call();
+    local_crafting_status = await contract.methods.get_crafting_status().call();
+    local_crafting_start_time = await contract.methods.get_crafting_start_time().call();
+    local_exp = await contract.methods.get_exp().call();
+    local_level = await contract.methods.get_level().call();
+    local_next_exp_required = await contract.methods.get_next_exp_required().call();
 }
 
 
@@ -985,8 +978,8 @@ function update() {
     //update dynamic status from contract to local
     if (turn == 1 || turn % 201 == 0) {
         //update dynamic_status
-        //local_strength = contract.strength;
-        //local_strength = contract_get_strength(contract_main);
+        /***
+        local_strength = contract.strength;
         local_dexterity = contract.dexterity;
         local_vitality = contract.vitality;
         local_intelligence = contract.intelligence;
@@ -1003,6 +996,7 @@ function update() {
         local_crafting_status = contract.crafting_status;
         local_exp = contract.exp;
         local_next_exp_required = contract.next_exp_required;
+        ***/
         //check character mode
         //feeding
         if (local_last_feeding_time > previous_local_last_feeding_time){
