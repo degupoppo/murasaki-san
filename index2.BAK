@@ -179,8 +179,9 @@ async function get_contract2() {
 
 contract_main = get_contract2();
 
-async function contract_get_strength(contract) {
-    return contract.methods.get_strength().call();
+async function contract_get_strength(contract_tmp) {
+    let res = await contract_tmp.methods.get_strength().call()
+    return res;
 }
 function contract_get_dexterity() {
     return contract.methods.get_dexterity().call();
@@ -976,7 +977,7 @@ function update() {
     if (turn == 1 || turn % 201 == 0) {
         //update dynamic_status
         //local_strength = contract.strength;
-        local_strength = contract_get_strength(contract);
+        local_strength = contract_get_strength(contract_main);
         local_dexterity = contract.dexterity;
         local_vitality = contract.vitality;
         local_intelligence = contract.intelligence;
