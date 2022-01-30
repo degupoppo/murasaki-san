@@ -207,6 +207,12 @@ async function contract_feeding() {
     let wallet = await get_wallet(web3);
     contract.methods.feeding().send({from:wallet});
 }
+async function contract_grooming() {
+    let web3 = await connect();
+    let contract = await get_contract(web3);
+    let wallet = await get_wallet(web3);
+    contract.methods.grooming().send({from:wallet});
+}
 
 
 
@@ -850,7 +856,8 @@ function create() {
     new Button(30, 10, 'Level Up', this, () => level_up(contract));
     //new Button(30, 40, 'Feeding', this, () => feeding(contract));
     new Button(30, 40, 'Feeding', this, () => contract_feeding());
-    new Button(30, 70, 'Grooming', this, () => grooming(contract));
+    //new Button(30, 70, 'Grooming', this, () => grooming(contract));
+    new Button(30, 70, 'Grooming', this, () => contract_grooming());
     new Button(30, 100, 'Start Mining', this, () => start_mining(contract));
     new Button(30, 130, 'Stop Mining', this, () => stop_mining(contract));
     new Button(30, 160, 'Start Farming', this, () => start_farming(contract));
@@ -952,7 +959,8 @@ function update() {
         let age_time = Math.round( (now_time - local_birth_time) / 1000 );
         let mode = char1.get_mode;
         //var base = 86400000
-        let base = 864000
+        //let base = 864000
+        let base = 864000/1000
         //let satiety = Math.round( (base - (now_time - local_last_feeding_time)) / base * 1000 ) / 10;
         let satiety = Math.round( (base - (now_time/1000 - local_last_feeding_time)) / base * 1000 ) / 10;
         if (satiety < 0) { satiety = 0; }
