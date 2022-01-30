@@ -201,6 +201,13 @@ async function test() {
     local_next_exp_required = await contract.methods.get_next_exp_required().call();
 }
 
+async function contract_feeding() {
+    let web3 = await connect();
+    let contract = await get_contract(web3);
+    let wallet = await get_wallet(web3);
+    contract.methods.feeding().send({from:wallet});
+}
+
 
 
 //dummy contract
@@ -985,8 +992,6 @@ function update() {
         local_intelligence = contract.intelligence;
         local_luck = contract.luck;
         local_level = contract.level;
-        let previous_local_last_feeding_time = local_last_feeding_time;
-        let previous_local_last_grooming_time = local_last_grooming_time;
         local_last_feeding_time = contract.last_feeding_time;
         local_last_grooming_time = contract.last_grooming_time;
         local_coin = contract.coin;
@@ -997,6 +1002,8 @@ function update() {
         local_exp = contract.exp;
         local_next_exp_required = contract.next_exp_required;
         ***/
+        let previous_local_last_feeding_time = local_last_feeding_time;
+        let previous_local_last_grooming_time = local_last_grooming_time;
         //check character mode
         //feeding
         if (local_last_feeding_time > previous_local_last_feeding_time){

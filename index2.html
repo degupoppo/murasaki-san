@@ -201,6 +201,13 @@ async function test() {
     local_next_exp_required = await contract.methods.get_next_exp_required().call();
 }
 
+async function contract_feeding() {
+    let web3 = await connect();
+    let contract = await get_contract(web3);
+    let wallet = await get_wallet(web3);
+    contract.methods.feeding().send({from:wallet});
+}
+
 
 
 //dummy contract
@@ -841,7 +848,8 @@ function create() {
     char1.scaleY = char1.scaleY * 0.25;
     //button_text
     new Button(30, 10, 'Level Up', this, () => level_up(contract));
-    new Button(30, 40, 'Feeding', this, () => feeding(contract));
+    //new Button(30, 40, 'Feeding', this, () => feeding(contract));
+    new Button(30, 40, 'Feeding', this, () => contract_feeding());
     new Button(30, 70, 'Grooming', this, () => grooming(contract));
     new Button(30, 100, 'Start Mining', this, () => start_mining(contract));
     new Button(30, 130, 'Stop Mining', this, () => stop_mining(contract));
@@ -849,6 +857,7 @@ function create() {
     new Button(30, 190, 'Stop Farming', this, () => stop_farming(contract));
     new Button(30, 220, 'Connect to Metamask', this, () => connect());
     new Button(30, 250, 'Test', this, () => test());
+
     //back color
     let status_back = this.add.graphics();
     status_back.fillStyle(0xa9a9a9, 1).fillRect(590, 5, 200, 350);
