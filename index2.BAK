@@ -143,7 +143,7 @@ function send_contract(web3, contract, wallet, data) {
     //let data = "1";
     contract.methods.feeding().send({from:wallet});
 }
-/***
+
 //example
 async function main() {
     var web3 = await connect();
@@ -154,7 +154,7 @@ async function main() {
     console.log(call);
     await send_contract(web3, contract, wallet);
 }
-***/
+
 async function get_web3() {
     let web3 = await connect();
     let wallet = await get_wallet(web3);
@@ -165,10 +165,21 @@ async function get_web3() {
         C: contract
     };
 }
-let {A, B, C} = get_web3();
-console.log(B);
+//let {A, B, C} = get_web3();
+//console.log(B);
+//wallet = get_wallet(web3);
+//console.log(wallet);
 
-function contract_get_strength() {
+async function get_contract2() {
+    var web3 = await connect();
+    var wallet = await get_wallet(web3);
+    var contract = await get_contract(web3);
+    return contract;
+}
+
+contract_main = get_contract2();
+
+function contract_get_strength(contract) {
     return contract.methods.get_strength().call();
 }
 function contract_get_dexterity() {
@@ -914,26 +925,16 @@ function update() {
     //update character
     char1.update();
     //update static status from contract at once
-    if (turn == 1 || turn % 1001 == 0) {
+    if (turn == 1) {
         local_id = contract.id;
         local_type = contract.type;
         local_birth_time = contract.birth_time;
-        local_strength = contract.strength;
-        local_dexterity = contract.dexterity;
-        local_vitality = contract.vitality;
-        local_intelligence = contract.intelligence;
-        local_luck = contract.luck;
         text_id.setText("id = " + local_id);
         text_type.setText("type = " + local_type);
         text_birth_time.setText("birth_time = " + local_birth_time);
-        text_strength.setText("strength = " + local_strength);
-        text_dexterity.setText("dexterity = " + local_dexterity);
-        text_vitality.setText("vitality = " + local_vitality);
-        text_intelligence.setText("intelligence = " + local_intelligence);
-        text_luck.setText("luck = " + local_luck);
     }
     //update calculation status
-    if (turn == 1 || turn % 10 == 0) {
+    if (turn == 1 || turn % 100 == 0) {
         //update calculation_status
         let now_time = Date.now();
         let age_time = Math.round( (now_time - local_birth_time) / 1000 );
@@ -948,6 +949,11 @@ function update() {
         if (happy > 100) { happy = 100; }
         //update text
         text_level.setText("level = " + local_level);
+        text_strength.setText("strength = " + local_strength);
+        text_dexterity.setText("dexterity = " + local_dexterity);
+        text_vitality.setText("vitality = " + local_vitality);
+        text_intelligence.setText("intelligence = " + local_intelligence);
+        text_luck.setText("luck = " + local_luck);
         text_last_feeding_time.setText("last_feeding_time = " + local_last_feeding_time);
         text_last_grooming_time.setText("last_grooming_time = " + local_last_grooming_time);
         text_coin.setText("coin = " + local_coin);
@@ -967,10 +973,13 @@ function update() {
         text_material_main.setText("material:" + local_material);
     }
     //update dynamic status from contract to local
-    if (turn == 1 || turn % 101 == 0) {
-        //update statistic_status
+    if (turn == 1 || turn % 201 == 0) {
         //update dynamic_status
-        //TODO: read from contract
+        local_strength = contract.strength;
+        local_dexterity = contract.dexterity;
+        local_vitality = contract.vitality;
+        local_intelligence = contract.intelligence;
+        local_luck = contract.luck;
         local_level = contract.level;
         let previous_local_last_feeding_time = local_last_feeding_time;
         let previous_local_last_grooming_time = local_last_grooming_time;
