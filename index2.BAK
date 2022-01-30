@@ -860,7 +860,8 @@ function create() {
     char1.scaleX = char1.scaleX * 0.25;
     char1.scaleY = char1.scaleY * 0.25;
     //button_text
-    new Button(30, 10, 'Level Up', this, () => level_up(contract));
+    //new Button(30, 10, 'Level Up', this, () => level_up(contract));
+    new Button(30, 10, 'Level Up', this, () => contract_level_up());
     //new Button(30, 40, 'Feeding', this, () => feeding(contract));
     new Button(30, 40, 'Feeding', this, () => contract_feeding());
     //new Button(30, 70, 'Grooming', this, () => grooming(contract));
@@ -1003,6 +1004,7 @@ function update() {
     }
     //update dynamic status from contract to local
     if (turn == 1 || turn % 201 == 0) {
+        test();
         //update dynamic_status
         /***
         local_strength = contract.strength;
