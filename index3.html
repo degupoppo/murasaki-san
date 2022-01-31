@@ -226,7 +226,7 @@ async function contract_level_up(summoner) {
     contract.methods.level_up(summoner).send({from:wallet});
 }
 
-//mint
+//summon
 async function contract_summon(ctype) {
     let web3 = await connect();
     let contract = await get_contract(web3);
@@ -260,6 +260,23 @@ async function contract_stop_farming(summoner) {
     let contract = await get_contract(web3);
     let wallet = await get_wallet(web3);
     contract.methods.stop_farming(summoner).send({from:wallet});
+}
+
+//get owned summoners
+async function contract_my_summoners() {
+    let web3 = await connect();
+    let contract = await get_contract(web3);
+    let wallet = await get_wallet(web3);
+    let next_summoner = await contract.methods.next_summoner().call();
+    let res = [];
+    for (let i = 0; i < next_summoner; i++) {
+        let owner = await contract.methods.ownerOf(i).call();
+        if (owner == wallet) {
+            res.push(i);
+        }
+    }
+    console.log(res);
+    return res;
 }
 
 /***
@@ -970,6 +987,8 @@ function create() {
     new Button(30, 190, 'Stop Farming', this, () => stop_farming(contract));
     new Button(30, 220, 'Connect to Metamask', this, () => connect());
     new Button(30, 250, 'Summon', this, () => contract_summon("1"));
+    new Button(30, 280, 'Test', this, () => contract_my_summoners());
+
     //back color
     let status_back = this.add.graphics();
     status_back.fillStyle(0xa9a9a9, 1).fillRect(590, 5, 200, 350);
