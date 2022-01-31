@@ -247,6 +247,34 @@ async function contract_summon(ctype) {
     contract.methods.summon(ctype).send({from:wallet});
 }
 
+//mining
+async function contract_start_mining(summoner) {
+    let web3 = await connect();
+    let contract = await get_contract(web3);
+    let wallet = await get_wallet(web3);
+    contract.methods.start_mining(summoner).send({from:wallet});
+}
+async function contract_stop_mining(summoner) {
+    let web3 = await connect();
+    let contract = await get_contract(web3);
+    let wallet = await get_wallet(web3);
+    contract.methods.stop_mining(summoner).send({from:wallet});
+}
+
+//farming
+async function contract_start_farming(summoner) {
+    let web3 = await connect();
+    let contract = await get_contract(web3);
+    let wallet = await get_wallet(web3);
+    contract.methods.start_farming(summoner).send({from:wallet});
+}
+async function contract_stop_farming(summoner) {
+    let web3 = await connect();
+    let contract = await get_contract(web3);
+    let wallet = await get_wallet(web3);
+    contract.methods.stop_farming(summoner).send({from:wallet});
+}
+
 /***
 //let {A, B, C} = get_web3();
 //console.log(B);
@@ -941,13 +969,15 @@ function create() {
     char1.scaleY = char1.scaleY * 0.25;
     //button_text
     //new Button(30, 10, 'Level Up', this, () => level_up(contract));
-    new Button(30, 10, 'Level Up', this, () => contract_level_up());
+    new Button(30, 10, 'Level Up', this, () => contract_level_up(summoner));
     //new Button(30, 40, 'Feeding', this, () => feeding(contract));
-    new Button(30, 40, 'Feeding', this, () => contract_feeding());
+    new Button(30, 40, 'Feeding', this, () => contract_feeding(summoner));
     //new Button(30, 70, 'Grooming', this, () => grooming(contract));
-    new Button(30, 70, 'Grooming', this, () => contract_grooming());
-    new Button(30, 100, 'Start Mining', this, () => start_mining(contract));
-    new Button(30, 130, 'Stop Mining', this, () => stop_mining(contract));
+    new Button(30, 70, 'Grooming', this, () => contract_grooming(summoner));
+    //new Button(30, 100, 'Start Mining', this, () => start_mining(contract));
+    //new Button(30, 130, 'Stop Mining', this, () => stop_mining(contract));
+    new Button(30, 100, 'Start Mining', this, () => contract_start_mining(summoner));
+    new Button(30, 130, 'Stop Mining', this, () => contract_stop_mining(summoner));
     new Button(30, 160, 'Start Farming', this, () => start_farming(contract));
     new Button(30, 190, 'Stop Farming', this, () => stop_farming(contract));
     new Button(30, 220, 'Connect to Metamask', this, () => connect());
