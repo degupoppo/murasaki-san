@@ -21,7 +21,7 @@
 <script type="text/javascript">
 
 let summoner_selected = document.getElementById("summoner");
-//console.log(element.value);
+console.log(element.value);
 
 
 /***
@@ -167,7 +167,8 @@ async function test() {
 async function contract_update_status(summoner) {
     let web3 = await connect();
     let contract = await get_contract(web3);
-    let res = await contract.methods.get_status(summoner).call();
+    //let res = await contract.methods.get_status(summoner).call();
+    let res = await contract.methods.get_status(0).call();
     console.log(res);
     /***
     const {r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,r13,r14,r15,r16,r17,r18,r19} = res;
@@ -1107,6 +1108,7 @@ function update() {
         ***/
         //test();
         let summoner_selected = document.getElementById("summoner");
+        console.log(summoner_selected);
         contract_update_status(summoner_selected);
         //check character mode
         //feeding
