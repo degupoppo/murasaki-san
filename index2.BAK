@@ -7,6 +7,7 @@
     <title>House of Murasaki San</title>
     <script src="phaser.js"></script>
     <script src="web3.min.js"></script>
+    <script src="abi_contract.js"></script>
     <style type="text/css">
         body {
             margin: 0;
@@ -64,13 +65,21 @@ Idea
         feeding, デイリークエスト, コストなし, 24時間で最大効率
         grooming, プラスアルファ, 何かしらのコスト必要, 168時間で最大効率
 ToDo
-    コントラクト内にステータスを保持する
-    コントラクト内のステータスを読み出す
-    ステータスを保有したNFTを作成する
-    NFTのmint方法を確立する
+    UI：Mintボタン
+    UI：所有summonerの表示と選択
+    UI：所有itemのリアルタイム更新と表示
+    コントラ：random
+    コントラ：crafting, summonerが所有するNFT, 所有summonerを紐付けるよう書き換える
+    コントラ：レベルアップの実装
+    アイデア：coinのユースケースを考える
+    アイデア：materialのバランスを考える
     wallet所有のNFTを選べるUIを作る
     satietyとhappyの差別化を考える。
-    場所への移動を実装する, mining, farming, feedingに組み込む, コードの汎用性を上げる
+    ok コントラクト内にステータスを保持する
+    ok コントラクト内のステータスを読み出す
+    ok ステータスを保有したNFTを作成する
+    ok NFTのmint方法を確立する
+    ok 場所への移動を実装する, mining, farming, feedingに組み込む, コードの汎用性を上げる
     ok 絵を大きめにする, 元絵を大きめに読み込み, scaleXYで縮小する
     ok Lvを実装する。必要expの対応表を作製する。
     ok 移動を見直す. 距離ランダム, 上下の動きも実装する
@@ -90,6 +99,7 @@ ToDo
 
 //web3
 //--------------------------------------------------------------------------------------------------------
+
 //connect to metamask
 async function connect() {
     const web3 = await new Web3(window.ethereum);
@@ -110,73 +120,20 @@ async function connect() {
     });
     return web3;
 }
+
 //get wallet
 async function get_wallet(web3) {
     const wallet = await web3.eth.getAccounts();
     return wallet[0];
 }
-//prepare contract
+
+//prepare contract, need abi_contract.js
 async function get_contract(web3) {
-    //const address = "0x2F21aec8D62275a9650Eac016381705A6b26545a";
-    //const abi = [{"inputs":[],"name":"birth_time","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"coin","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"crafting_start_time","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"crafting_status","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"ctype","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"dexterity","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"exp","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"farming_start_time","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"farming_status","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"feeding","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"get_birth_time","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"get_coin","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"get_crafting_start_time","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"get_crafting_status","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"get_ctype","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"get_dexterity","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"get_exp","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"get_farming_start_time","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"get_farming_status","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"get_id","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"get_intelligence","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"get_last_feeding_time","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"get_last_grooming_time","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"get_level","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"get_luck","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"get_material","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"get_mining_start_time","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"get_mining_status","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"get_next_exp_required","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"get_strength","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"get_vitality","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"grooming","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"id","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"intelligence","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"last_feeding_time","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"last_grooming_time","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"level","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"level_up","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"luck","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"material","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"mining_start_time","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"mining_status","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"next_exp_required","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"start_mining","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"stop_mining","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"strength","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"vitality","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"}]
-    //import contract2 from "abi_contract.json";
-    //const abi = "abi.json";
-    //fetch("abi_contract.json")
-    //    .then(response => {
-    //        return response.json();
-    //})
-    //    .then(jsondata => abi);
-    
-    //const fs = require("fs");
-    //const jsonObject = JSON.parse(fs.readFileSync("abi_contract.json", "utf8"));
-    //const abi = jsonObject.abi;
     const contract = await new web3.eth.Contract(abi, contract_address);
     return contract;
 }
-//call from contract
-function call_contract(contract) {
-    var text = contract.methods.get_coin().call();
-    return text;
-}
-//send to contract
-function send_contract(web3, contract, wallet, data) {
-    //let data = "1";
-    contract.methods.feeding().send({from:wallet});
-}
 
-//example
-async function main() {
-    var web3 = await connect();
-    var wallet = await get_wallet(web3);
-    console.log(wallet);
-    var contract = await get_contract(web3);
-    var call = await call_contract(contract);
-    console.log(call);
-    await send_contract(web3, contract, wallet);
-}
-
-async function get_web3() {
-    let web3 = await connect();
-    let wallet = await get_wallet(web3);
-    let contract = await get_contract(web3);
-    return {
-        A: web3,
-        B: wallet,
-        C: contract
-    };
-}
-//let {A, B, C} = get_web3();
-//console.log(B);
-//wallet = get_wallet(web3);
-//console.log(wallet);
-
-async function get_contract2() {
-    var web3 = await connect();
-    var wallet = await get_wallet(web3);
-    var contract = await get_contract(web3);
-    return contract;
-}
-
+//call status from contract
 async function test() {
     let web3 = await connect();
     let contract = await get_contract(web3);
@@ -201,24 +158,75 @@ async function test() {
     local_next_exp_required = await contract.methods.get_next_exp_required().call();
 }
 
+//call status from contract
+
+//send feeding
 async function contract_feeding() {
     let web3 = await connect();
     let contract = await get_contract(web3);
     let wallet = await get_wallet(web3);
     contract.methods.feeding().send({from:wallet});
 }
+
+//send grooming
 async function contract_grooming() {
     let web3 = await connect();
     let contract = await get_contract(web3);
     let wallet = await get_wallet(web3);
     contract.methods.grooming().send({from:wallet});
 }
+
+//send level_up
 async function contract_level_up() {
     let web3 = await connect();
     let contract = await get_contract(web3);
     let wallet = await get_wallet(web3);
     contract.methods.level_up().send({from:wallet});
 }
+
+/***
+//let {A, B, C} = get_web3();
+//console.log(B);
+//wallet = get_wallet(web3);
+//console.log(wallet);
+
+async function get_contract2() {
+    var web3 = await connect();
+    var wallet = await get_wallet(web3);
+    var contract = await get_contract(web3);
+    return contract;
+}
+//example
+async function main() {
+    var web3 = await connect();
+    var wallet = await get_wallet(web3);
+    console.log(wallet);
+    var contract = await get_contract(web3);
+    var call = await call_contract(contract);
+    console.log(call);
+    await send_contract(web3, contract, wallet);
+}
+//call from contract
+function call_contract(contract) {
+    var text = contract.methods.get_coin().call();
+    return text;
+}
+//send to contract
+function send_contract(web3, contract, wallet, data) {
+    //let data = "1";
+    contract.methods.feeding().send({from:wallet});
+}
+async function get_web3() {
+    let web3 = await connect();
+    let wallet = await get_wallet(web3);
+    let contract = await get_contract(web3);
+    return {
+        A: web3,
+        B: wallet,
+        C: contract
+    };
+}
+***/
 
 
 
@@ -752,6 +760,8 @@ let config = {
 let game = new Phaser.Game(config);
 
 
+// preload
+//--------------------------------------------------------------------------------------------------------
 function preload() {
     this.load.image("back", "png/back.jpg");
     this.load.spritesheet("murasaki_right", "png/murasaki_right.png", {frameWidth: 370, frameHeight: 320});
@@ -775,6 +785,8 @@ function preload() {
 }
 
 
+// create
+//--------------------------------------------------------------------------------------------------------
 function create() {
     //fake contract
     contract = new Contract();
@@ -950,6 +962,8 @@ function create() {
 }
 
 
+// update
+//--------------------------------------------------------------------------------------------------------
 function update() {
     //update turn
     turn += 1;
@@ -1081,6 +1095,8 @@ function update() {
 
 
 </script>
+
+Donate: 0x2F7448B62134e52C2f46454d0089Ae21B5248805
 
 </body>
 </html>

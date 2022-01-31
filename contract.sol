@@ -1,7 +1,6 @@
 
-//0x0Ff72e0dEE0b814FAC4a094069b41D3F06434897
-
 // SPDX-License-Identifier: MIT
+
 pragma solidity ^0.8.7;
 
 contract Character {
@@ -29,6 +28,32 @@ contract Character {
     uint public next_exp_required = 1000;
     uint delta;
     uint tmp;
+
+    function get_status() public view returns (uint[21] memory) {
+        uint[21] memory li_status;
+        li_status[0] = id;
+        li_status[1] = ctype;
+        li_status[2] = strength;
+        li_status[3] = dexterity;
+        li_status[4] = vitality;
+        li_status[5] = intelligence;
+        li_status[6] = luck;
+        li_status[7] = birth_time;
+        li_status[8] = last_feeding_time;
+        li_status[9] = last_grooming_time;
+        li_status[10] = coin;
+        li_status[11] = material;
+        li_status[12] = mining_status;
+        li_status[13] = mining_start_time;
+        li_status[14] = farming_status;
+        li_status[15] = farming_start_time;
+        li_status[16] = crafting_status;
+        li_status[17] = crafting_start_time;
+        li_status[18] = exp;
+        li_status[19] = level;
+        li_status[20] = next_exp_required;
+        return li_status;
+    }
 
     function get_id() public view returns (uint) {
         return id;
