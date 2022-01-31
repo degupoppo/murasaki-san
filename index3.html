@@ -813,6 +813,7 @@ let local_crafting_status;
 let local_crafting_start_time;
 let previous_local_last_feeding_time = Date.now() + 864000 * 10;
 let previous_local_last_grooming_time = Date.now() + 864000 * 10;
+let summoner;
 //flag
 //let flag_feeding;
 //let flag_grooming;
@@ -1147,7 +1148,7 @@ function update() {
     //update dynamic status from contract to local
     if (turn == 1 || turn % 201 == 0) {
         //update dynamic_status
-        let summoner = document.getElementById("summoner").value;
+        summoner = document.getElementById("summoner").value;
         contract_update_status(summoner);
     }
 }

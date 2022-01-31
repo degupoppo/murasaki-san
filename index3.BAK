@@ -1078,7 +1078,6 @@ function update() {
         }
         //grooming
         if (local_last_grooming_time > previous_local_last_grooming_time){
-        //if (flag_grooming == 1){
             flag_grooming = 0;
             char1.set_mode = "grooming";
         }
@@ -1148,7 +1147,7 @@ function update() {
     //update dynamic status from contract to local
     if (turn == 1 || turn % 201 == 0) {
         //update dynamic_status
-        let summoner = document.getElementById("summoner").value;
+        summoner = document.getElementById("summoner").value;
         contract_update_status(summoner);
     }
 }

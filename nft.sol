@@ -678,7 +678,6 @@ contract murasaki is ERC721{
         farming_status[_next_summoner] = 0;
         farming_start_time[_next_summoner] = 0;
         exp[_next_summoner] = 0;
-        level[_next_summoner] = 1;
         next_exp_required[_next_summoner] = 1000;        
         _safeMint(msg.sender, _next_summoner);
         next_summoner++;
