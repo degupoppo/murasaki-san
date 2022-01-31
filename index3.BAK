@@ -137,6 +137,7 @@ async function get_contract(web3) {
     return contract;
 }
 
+/***
 //call status from contract
 async function test() {
     let web3 = await connect();
@@ -161,8 +162,9 @@ async function test() {
     local_level = await contract.methods.get_level().call();
     local_next_exp_required = await contract.methods.get_next_exp_required().call();
 }
+***/
 
-async function web3_update_status(summoner) {
+async function contract_update_status(summoner) {
     let web3 = await connect();
     let contract = await get_contract(web3);
     let status = await contract.methods.get_status(summoner);
@@ -212,6 +214,14 @@ async function contract_level_up() {
     let contract = await get_contract(web3);
     let wallet = await get_wallet(web3);
     contract.methods.level_up().send({from:wallet});
+}
+
+//mint
+async function contract_summon(ctype) {
+    let web3 = await connect();
+    let contract = await get_contract(web3);
+    let wallet = await get_wallet(web3);
+    contract.methods.summon(ctype).send({from:wallet});
 }
 
 /***
@@ -918,8 +928,7 @@ function create() {
     new Button(30, 160, 'Start Farming', this, () => start_farming(contract));
     new Button(30, 190, 'Stop Farming', this, () => stop_farming(contract));
     new Button(30, 220, 'Connect to Metamask', this, () => connect());
-    new Button(30, 250, 'Test', this, () => test());
-
+    new Button(30, 250, 'Mint', this, () => mint());
     //back color
     let status_back = this.add.graphics();
     status_back.fillStyle(0xa9a9a9, 1).fillRect(590, 5, 200, 350);
@@ -1072,7 +1081,8 @@ function update() {
         local_exp = contract.exp;
         local_next_exp_required = contract.next_exp_required;
         ***/
-        test();
+        //test();
+        contract_update_status(summoner_selected);
         //check character mode
         //feeding
         if (local_last_feeding_time > previous_local_last_feeding_time){

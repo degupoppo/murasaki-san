@@ -16,11 +16,11 @@
 </head>
 <body>
 
-<input type="number" value = 1 id="summoner">
+<input type="number" value = 0 id="summoner">
 
 <script type="text/javascript">
 
-let element = document.getElementById("summoner");
+let summoner_selected = document.getElementById("summoner");
 console.log(element.value);
 
 
@@ -160,6 +160,32 @@ async function test() {
     local_exp = await contract.methods.get_exp().call();
     local_level = await contract.methods.get_level().call();
     local_next_exp_required = await contract.methods.get_next_exp_required().call();
+}
+
+async function web3_update_status(summoner) {
+    let web3 = await connect();
+    let contract = await get_contract(web3);
+    let status = await contract.methods.get_status(summoner);
+    local_ctype = status[0];
+    local_strength = status[1];
+    local_dexterity = status[2];
+    local_vitality = status[3];
+    local_intelligence = status[4];
+    local_luck = status[5];
+    local_birth_time = status[6];
+    local_last_feeding_time = status[7];
+    local_last_grooming_time = status[8];
+    local_coin = status[8];
+    local_material = status[9];
+    local_mining_status = status[10];
+    local_mining_start_time = status[11];
+    local_farming_status = status[12];
+    local_farming_start_time = status[13];
+    local_crafting_status = status[14];
+    local_crafting_start_time = status[15];
+    local_exp = status[16];
+    local_level = status[17];
+    local_next_exp_required = status[18];
 }
 
 //call status from contract
