@@ -16,7 +16,13 @@
 </head>
 <body>
 
-<input type="number" value = 0 id="summoner">
+<input type="number" value = -1 id="summoner2"><br>
+
+<form name="select_summoner">
+<select name="select_summoner">
+</select>
+</form>
+<br>
 
 <script type="text/javascript">
 
@@ -123,61 +129,12 @@ async function get_contract(web3) {
     return contract;
 }
 
-/***
-//call status from contract
-async function test() {
-    let web3 = await connect();
-    let contract = await get_contract(web3);
-    local_strength = await contract.methods.get_strength().call();
-    local_dexterity = await contract.methods.get_dexterity().call();
-    local_vitality = await contract.methods.get_vitality().call();
-    local_intelligence = await contract.methods.get_intelligence().call();
-    local_luck = await contract.methods.get_luck().call();
-    local_birth_time = await contract.methods.get_birth_time().call();
-    local_last_feeding_time = await contract.methods.get_last_feeding_time().call();
-    local_last_grooming_time = await contract.methods.get_last_grooming_time().call();
-    local_coin = await contract.methods.get_coin().call();
-    local_material = await contract.methods.get_material().call();
-    local_mining_status = await contract.methods.get_mining_status().call();
-    local_mining_start_time = await contract.methods.get_mining_start_time().call();
-    local_farming_status = await contract.methods.get_farming_status().call();
-    local_farming_start_time = await contract.methods.get_farming_start_time().call();
-    local_crafting_status = await contract.methods.get_crafting_status().call();
-    local_crafting_start_time = await contract.methods.get_crafting_start_time().call();
-    local_exp = await contract.methods.get_exp().call();
-    local_level = await contract.methods.get_level().call();
-    local_next_exp_required = await contract.methods.get_next_exp_required().call();
-}
-***/
 
 async function contract_update_status(summoner) {
     let web3 = await connect();
     let contract = await get_contract(web3);
     let res = await contract.methods.get_status(summoner).call();
-    console.log(res);
-    /***
-    const {r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,r13,r14,r15,r16,r17,r18,r19} = res;
-    local_ctype = r0;
-    local_strength = r1;
-    local_dexterity = r2;
-    local_vitality = r3;
-    local_intelligence = r4;
-    local_luck = r5;
-    local_birth_time = r6;
-    local_last_feeding_time = r7;
-    local_last_grooming_time = r8;
-    local_coin = r9;
-    local_material = r10;
-    local_mining_status = r11;
-    local_mining_start_time = r12;
-    local_farming_status = r13;
-    local_farming_start_time = r14;
-    local_crafting_status = r15;
-    local_crafting_start_time = r16;
-    local_exp = r17;
-    local_level = r18;
-    local_next_exp_required = r19;
-    ***/    
+    console.log(res);   
     local_ctype = res[0];
     local_strength = res[1];
     local_dexterity = res[2];
@@ -272,198 +229,27 @@ async function contract_my_summoners() {
     for (let i = 0; i < next_summoner; i++) {
         let owner = await contract.methods.ownerOf(i).call();
         if (owner == wallet) {
-            res.push(i);
+            res.push({text:i, value:i});
         }
     }
     console.log(res);
     return res;
 }
 
-/***
-//let {A, B, C} = get_web3();
-//console.log(B);
-//wallet = get_wallet(web3);
-//console.log(wallet);
+function _create_dropdownlist( form_name, select_name, select_array ){
+	// length
+	document[form_name][select_name].length = select_array.length;
+	
+	// text, value
+	var i;
+	for ( i=0; i<select_array.length; i++){
+		document[form_name][select_name].options[i].text = select_array[i].text;
+		document[form_name][select_name].options[i].value = select_array[i].value;
+	}
+}
 
-async function get_contract2() {
-    var web3 = await connect();
-    var wallet = await get_wallet(web3);
-    var contract = await get_contract(web3);
-    return contract;
-}
-//example
-async function main() {
-    var web3 = await connect();
-    var wallet = await get_wallet(web3);
-    console.log(wallet);
-    var contract = await get_contract(web3);
-    var call = await call_contract(contract);
-    console.log(call);
-    await send_contract(web3, contract, wallet);
-}
-//call from contract
-function call_contract(contract) {
-    var text = contract.methods.get_coin().call();
-    return text;
-}
-//send to contract
-function send_contract(web3, contract, wallet, data) {
-    //let data = "1";
-    contract.methods.feeding().send({from:wallet});
-}
-async function get_web3() {
-    let web3 = await connect();
-    let wallet = await get_wallet(web3);
-    let contract = await get_contract(web3);
-    return {
-        A: web3,
-        B: wallet,
-        C: contract
-    };
-}
-***/
-
-
-
-//dummy contract
-//--------------------------------------------------------------------------------------------------------
-class Contract {
-    constructor() {
-        //NFT parameters
-        this.id = "001";
-        this.type = Math.trunc(Math.random() * 5);
-        this.strength = 2 + Math.trunc(Math.random() * 8);
-        this.dexterity = 2 + Math.trunc(Math.random() * 8);
-        this.vitality = 2 + Math.trunc(Math.random() * 8);
-        this.intelligence = 2 + Math.trunc(Math.random() * 8);
-        this.luck = 2 + Math.trunc(Math.random() * 8);
-        this.birth_time = Date.now();
-        this.last_feeding_time = Date.now();
-        this.last_grooming_time = Date.now();
-        this.coin = 100;
-        this.material = 0;
-        this.mining_status = 0;
-        this.mining_start_time = 0;
-        this.farming_status = 0;
-        this.farming_start_time = 0;
-        this.crafting_status = 0;
-        this.crafting_start_time = 0;
-        this.exp = 0;
-        this.level = 1;
-        this.next_exp_required = 1000;
-        //contract parameters
-        this.next_summoners = 0;
-    }
-    grooming() {
-        let delta = (Date.now() - this.last_grooming_time) / 1000;
-        this.last_grooming_time = Date.now();
-        this.exp += delta;
-    }
-    feeding() {
-        let delta = (Date.now() - this.last_feeding_time) / 1000;
-        this.last_feeding_time = Date.now();
-        this.exp += delta;
-    }
-    start_crafting(item_id) {
-        if (this.mining_status == 0 && this.farming_status == 0 && this.crafting_status == 0){
-            this.crafting_start_time = Date.now();
-            this.crafting_status = 1;
-        }
-    }
-    stop_crafting(item) {
-        if (this.crafting_status == 1) {
-            let delta = (Date.now() - this.crafting_start_time) / 1000;
-            //nft mint check
-            this.crafting_status = 0;
-        }
-    }
-    start_mining() {
-        if (this.mining_status == 0 && this.farming_status == 0 && this.crafting_status == 0){
-        //if (this.mining_status == 0){
-            this.mining_start_time = Date.now();
-            this.mining_status = 1;
-        }
-    }
-    stop_mining() {
-        if (this.mining_status == 1) {
-            let delta = (Date.now() - this.mining_start_time) / 10000;
-            delta = Math.trunc(delta);
-            this.coin += delta;
-            this.mining_status = 0;
-        }
-    }
-    start_farming() {
-        if (this.mining_status == 0 && this.farming_status == 0 && this.crafting_status == 0){
-            this.farming_start_time = Date.now();
-            this.farming_status = 1;
-        }
-    }
-    stop_farming() {
-        if (this.farming_status == 1) {
-            let delta = (Date.now() - this.farming_start_time) / 100000;
-            delta = Math.trunc(delta);
-            this.material += delta;
-            this.farming_status = 0;
-        }
-    }
-    level_up() {
-        if (this.exp >= this.next_exp_required) {
-            this.exp -= this.next_exp_required;
-            this.level += 1;
-            //status up
-            var tmp = Math.trunc(Math.random() * 5);
-            if (tmp == 0) {
-                this.strength += 1;
-            }else if (tmp == 1) {
-                this.dexterity += 1;
-            }else if (tmp == 2) {
-                this.vitality += 1;
-            }else if (tmp == 3) {
-                this.intelligence += 1;
-            }else {
-                this.luck += 1;
-            }
-            //update next exp
-            if (this.level == 2) {
-                this.next_exp_required = 3000;
-            }else if (this.level == 3) {
-                this.next_exp_required = 6000;
-            }else if (this.level == 4) {
-                this.next_exp_required = 10000;
-            }else if (this.level == 5) {
-                this.next_exp_required = 15000;
-            }else if (this.level == 6) {
-                this.next_exp_required = 21000;
-            }else if (this.level == 7) {
-                this.next_exp_required = 28000;
-            }else if (this.level == 8) {
-                this.next_exp_required = 36000;
-            }else if (this.level == 9) {
-                this.next_exp_required = 45000;
-            }else if (this.level == 10) {
-                this.next_exp_required = 55000;
-            }else if (this.level == 11) {
-                this.next_exp_required = 66000;
-            }else if (this.level == 12) {
-                this.next_exp_required = 78000;
-            }else if (this.level == 13) {
-                this.next_exp_required = 91000;
-            }else if (this.level == 14) {
-                this.next_exp_required = 105000;
-            }else if (this.level == 15) {
-                this.next_exp_required = 120000;
-            }else if (this.level == 16) {
-                this.next_exp_required = 136000;
-            }else if (this.level == 17) {
-                this.next_exp_required = 153000;
-            }else if (this.level == 18) {
-                this.next_exp_required = 171000;
-            }else if (this.level == 19) {
-                this.next_exp_required = 190000;
-            }
-        }
-    }
-}
+opt_array = contract_my_summoners();
+_create_dropdownlist("select_summoner","select_summoner", opt_array )
 
 
 
@@ -810,8 +596,6 @@ let local_luck;
 let local_birth_time;
 //dynamic_status, read from construct continuously, write to construct
 let local_level = 1;
-//let local_last_feeding_time = Date.now() + 864000;
-//let local_last_grooming_time = Date.now() + 864000;
 let local_last_feeding_time;
 let local_last_grooming_time;
 let local_coin;
@@ -824,15 +608,11 @@ let local_farming_status;
 let local_farming_start_time;
 let local_crafting_status;
 let local_crafting_start_time;
-let previous_local_last_feeding_time = Date.now() + 864000 * 10;
-let previous_local_last_grooming_time = Date.now() + 864000 * 10;
-let summoner;
+let previous_local_last_feeding_time;
+let previous_local_last_grooming_time;
+let summoner = -1;
 let satiety;
 let happy;
-//flag
-//let flag_feeding;
-//let flag_grooming;
-
 
 let config = {
     type: Phaser.AUTO,
@@ -886,7 +666,7 @@ function preload() {
 function create() {
 
     //fake contract
-    contract = new Contract();
+    //contract = new Contract();
 
     //back image
     this.add.image(400, 300, "back");
@@ -958,22 +738,22 @@ function create() {
     button_feeding.scaleX = button_feeding.scaleX * 0.08;
     button_feeding.scaleY = button_feeding.scaleY * 0.08;
     button_feeding.setInteractive();
-    button_feeding.on('pointerdown', () => feeding(contract) );
+    button_feeding.on('pointerdown', () => contract_feeding(summoner) );
     button_grooming = this.add.sprite(400,300, "button_feeding");
     button_grooming.scaleX = button_grooming.scaleX * 0.08;
     button_grooming.scaleY = button_grooming.scaleY * 0.08;
     button_grooming.setInteractive();
-    button_grooming.on('pointerdown', () => grooming(contract) );
+    button_grooming.on('pointerdown', () => contract_grooming(summoner) );
     button_mining = this.add.sprite(10,430, "button_feeding");
     button_mining.scaleX = button_mining.scaleX * 0.08;
     button_mining.scaleY = button_mining.scaleY * 0.08;
     button_mining.setInteractive();
-    button_mining.on('pointerdown', () => start_mining(contract) );
+    button_mining.on('pointerdown', () => contract_start_mining(summoner) );
     button_farming = this.add.sprite(200,300, "button_feeding");
     button_farming.scaleX = button_farming.scaleX * 0.08;
     button_farming.scaleY = button_farming.scaleY * 0.08;
     button_farming.setInteractive();
-    button_farming.on('pointerdown', () => start_farming(contract) );
+    button_farming.on('pointerdown', () => contract_start_farming(summoner) );
 
     //summon character
     char1 = new Character(this, 300 + Math.random()*200, 400 + Math.random()*100);
@@ -1062,7 +842,6 @@ function create() {
         600, 320, "coin:" + local_coin, {font: "10.5px Arial", fill: "#000"});
     text_material_main = this.add.text(
         600, 330, "material:" + local_material, {font: "10.5px Arial", fill: "#000"});
-
 }
 
 
@@ -1070,6 +849,11 @@ function create() {
 // update
 //--------------------------------------------------------------------------------------------------------
 function update() {
+
+    if (summoner == -1) {
+        return 0;
+    }
+
     //update turn
     turn += 1;
     //text_turn.setText("turn = " + turn);
@@ -1179,6 +963,7 @@ function update() {
 }
 
 
+
 /***
     ok コントラクト内にステータスを保持する
     ok コントラクト内のステータスを読み出す
@@ -1198,6 +983,172 @@ function update() {
     ok ステータスはキャラクラスに保持させずに、コントラに見立てた外部変数に格納する。
     ok 1日1回？feeding, last_feeding_timeからの差でexp加算, 24hr以上の差は無効
     ok satiety, happy, expのバーを実装する
+
+//dummy contract
+//--------------------------------------------------------------------------------------------------------
+class Contract {
+    constructor() {
+        //NFT parameters
+        this.id = "001";
+        this.type = Math.trunc(Math.random() * 5);
+        this.strength = 2 + Math.trunc(Math.random() * 8);
+        this.dexterity = 2 + Math.trunc(Math.random() * 8);
+        this.vitality = 2 + Math.trunc(Math.random() * 8);
+        this.intelligence = 2 + Math.trunc(Math.random() * 8);
+        this.luck = 2 + Math.trunc(Math.random() * 8);
+        this.birth_time = Date.now();
+        this.last_feeding_time = Date.now();
+        this.last_grooming_time = Date.now();
+        this.coin = 100;
+        this.material = 0;
+        this.mining_status = 0;
+        this.mining_start_time = 0;
+        this.farming_status = 0;
+        this.farming_start_time = 0;
+        this.crafting_status = 0;
+        this.crafting_start_time = 0;
+        this.exp = 0;
+        this.level = 1;
+        this.next_exp_required = 1000;
+        //contract parameters
+        this.next_summoners = 0;
+    }
+    grooming() {
+        let delta = (Date.now() - this.last_grooming_time) / 1000;
+        this.last_grooming_time = Date.now();
+        this.exp += delta;
+    }
+    feeding() {
+        let delta = (Date.now() - this.last_feeding_time) / 1000;
+        this.last_feeding_time = Date.now();
+        this.exp += delta;
+    }
+    start_crafting(item_id) {
+        if (this.mining_status == 0 && this.farming_status == 0 && this.crafting_status == 0){
+            this.crafting_start_time = Date.now();
+            this.crafting_status = 1;
+        }
+    }
+    stop_crafting(item) {
+        if (this.crafting_status == 1) {
+            let delta = (Date.now() - this.crafting_start_time) / 1000;
+            //nft mint check
+            this.crafting_status = 0;
+        }
+    }
+    start_mining() {
+        if (this.mining_status == 0 && this.farming_status == 0 && this.crafting_status == 0){
+        //if (this.mining_status == 0){
+            this.mining_start_time = Date.now();
+            this.mining_status = 1;
+        }
+    }
+    stop_mining() {
+        if (this.mining_status == 1) {
+            let delta = (Date.now() - this.mining_start_time) / 10000;
+            delta = Math.trunc(delta);
+            this.coin += delta;
+            this.mining_status = 0;
+        }
+    }
+    start_farming() {
+        if (this.mining_status == 0 && this.farming_status == 0 && this.crafting_status == 0){
+            this.farming_start_time = Date.now();
+            this.farming_status = 1;
+        }
+    }
+    stop_farming() {
+        if (this.farming_status == 1) {
+            let delta = (Date.now() - this.farming_start_time) / 100000;
+            delta = Math.trunc(delta);
+            this.material += delta;
+            this.farming_status = 0;
+        }
+    }
+    level_up() {
+        if (this.exp >= this.next_exp_required) {
+            this.exp -= this.next_exp_required;
+            this.level += 1;
+            //status up
+            var tmp = Math.trunc(Math.random() * 5);
+            if (tmp == 0) {
+                this.strength += 1;
+            }else if (tmp == 1) {
+                this.dexterity += 1;
+            }else if (tmp == 2) {
+                this.vitality += 1;
+            }else if (tmp == 3) {
+                this.intelligence += 1;
+            }else {
+                this.luck += 1;
+            }
+            //update next exp
+            if (this.level == 2) {
+                this.next_exp_required = 3000;
+            }else if (this.level == 3) {
+                this.next_exp_required = 6000;
+            }else if (this.level == 4) {
+                this.next_exp_required = 10000;
+            }else if (this.level == 5) {
+                this.next_exp_required = 15000;
+            }else if (this.level == 6) {
+                this.next_exp_required = 21000;
+            }else if (this.level == 7) {
+                this.next_exp_required = 28000;
+            }else if (this.level == 8) {
+                this.next_exp_required = 36000;
+            }else if (this.level == 9) {
+                this.next_exp_required = 45000;
+            }else if (this.level == 10) {
+                this.next_exp_required = 55000;
+            }else if (this.level == 11) {
+                this.next_exp_required = 66000;
+            }else if (this.level == 12) {
+                this.next_exp_required = 78000;
+            }else if (this.level == 13) {
+                this.next_exp_required = 91000;
+            }else if (this.level == 14) {
+                this.next_exp_required = 105000;
+            }else if (this.level == 15) {
+                this.next_exp_required = 120000;
+            }else if (this.level == 16) {
+                this.next_exp_required = 136000;
+            }else if (this.level == 17) {
+                this.next_exp_required = 153000;
+            }else if (this.level == 18) {
+                this.next_exp_required = 171000;
+            }else if (this.level == 19) {
+                this.next_exp_required = 190000;
+            }
+        }
+    }
+}
+
+//call status from contract
+async function test() {
+    let web3 = await connect();
+    let contract = await get_contract(web3);
+    local_strength = await contract.methods.get_strength().call();
+    local_dexterity = await contract.methods.get_dexterity().call();
+    local_vitality = await contract.methods.get_vitality().call();
+    local_intelligence = await contract.methods.get_intelligence().call();
+    local_luck = await contract.methods.get_luck().call();
+    local_birth_time = await contract.methods.get_birth_time().call();
+    local_last_feeding_time = await contract.methods.get_last_feeding_time().call();
+    local_last_grooming_time = await contract.methods.get_last_grooming_time().call();
+    local_coin = await contract.methods.get_coin().call();
+    local_material = await contract.methods.get_material().call();
+    local_mining_status = await contract.methods.get_mining_status().call();
+    local_mining_start_time = await contract.methods.get_mining_start_time().call();
+    local_farming_status = await contract.methods.get_farming_status().call();
+    local_farming_start_time = await contract.methods.get_farming_start_time().call();
+    local_crafting_status = await contract.methods.get_crafting_status().call();
+    local_crafting_start_time = await contract.methods.get_crafting_start_time().call();
+    local_exp = await contract.methods.get_exp().call();
+    local_level = await contract.methods.get_level().call();
+    local_next_exp_required = await contract.methods.get_next_exp_required().call();
+}
+
 ***/
 
 
