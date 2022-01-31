@@ -256,8 +256,8 @@ async function button_update_summoners() {
 //update summoner
 function button_select_summoner() {
     summoner = document.getElementById("summoner").value;
-    previous_local_last_feeding_time = null;
-    previous_local_last_grooming_time = null;
+    previous_local_last_feeding_time = Date.now() + 10;
+    previous_local_last_grooming_time = Date.now() + 10;
     char1.set_mode = "resting";
 }
 

@@ -256,7 +256,7 @@ async function button_update_summoners() {
 //update summoner
 function button_select_summoner() {
     summoner = document.getElementById("summoner").value;
-    previous_local_last_feeding_time = null;
+    previous_local_last_feeding_time = Data.now();
     previous_local_last_grooming_time = null;
     char1.set_mode = "resting";
 }
@@ -928,7 +928,7 @@ function update() {
         if (satiety > 100) { satiety = 100; }
         //let happy = Math.round( (base - (now_time - local_last_grooming_time)) / base * 1000 ) / 10;
         let base2 = 86400 * 7
-        happy = Math.round( (base - (now_time - local_last_grooming_time)) / base * 1000 ) / 10;
+        happy = Math.round( (base2 - (now_time - local_last_grooming_time)) / base2 * 1000 ) / 10;
         if (happy < 0) { happy = 0; }
         if (happy > 100) { happy = 100; }
         //update text
