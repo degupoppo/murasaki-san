@@ -175,17 +175,17 @@ async function web3_update_status(summoner) {
     local_birth_time = status[6];
     local_last_feeding_time = status[7];
     local_last_grooming_time = status[8];
-    local_coin = status[8];
-    local_material = status[9];
-    local_mining_status = status[10];
-    local_mining_start_time = status[11];
-    local_farming_status = status[12];
-    local_farming_start_time = status[13];
-    local_crafting_status = status[14];
-    local_crafting_start_time = status[15];
-    local_exp = status[16];
-    local_level = status[17];
-    local_next_exp_required = status[18];
+    local_coin = status[9];
+    local_material = status[10];
+    local_mining_status = status[11];
+    local_mining_start_time = status[12];
+    local_farming_status = status[13];
+    local_farming_start_time = status[14];
+    local_crafting_status = status[15];
+    local_crafting_start_time = status[16];
+    local_exp = status[17];
+    local_level = status[18];
+    local_next_exp_required = status[19];
 }
 
 //call status from contract
