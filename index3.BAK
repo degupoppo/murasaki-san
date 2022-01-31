@@ -1109,7 +1109,7 @@ function update() {
         //test();
         let summoner_input = document.getElementById("summoner");
         console.log(summoner_input.value);
-        contract_update_status(summoner_selected);
+        contract_update_status(summoner_input.value);
         //check character mode
         //feeding
         if (local_last_feeding_time > previous_local_last_feeding_time){
