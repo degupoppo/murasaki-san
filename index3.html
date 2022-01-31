@@ -167,7 +167,7 @@ async function contract_update_status(summoner) {
     let web3 = await connect();
     let contract = await get_contract(web3);
     let res = await contract.methods.get_status(summoner).call();
-    //console.log(res);
+    console.log(res);
     /***
     const {r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,r13,r14,r15,r16,r17,r18,r19} = res;
     local_ctype = r0;
@@ -202,11 +202,11 @@ async function contract_update_status(summoner) {
     local_last_grooming_time = res[8];
     local_coin = res[9];
     local_material = res[10];
-    local_mining_res = res[11];
+    local_mining_status = res[11];
     local_mining_start_time = res[12];
-    local_farming_res = res[13];
+    local_farming_status = res[13];
     local_farming_start_time = res[14];
-    local_crafting_res = res[15];
+    local_crafting_status = res[15];
     local_crafting_start_time = res[16];
     local_exp = res[17];
     local_level = res[18];
