@@ -16,7 +16,7 @@
 </head>
 <body>
 
-<input type="number" id="summoner">
+<input type="number" value = 1 id="summoner">
 
 <script type="text/javascript">
 
