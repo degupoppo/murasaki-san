@@ -167,9 +167,10 @@ async function test() {
 async function contract_update_status(summoner) {
     let web3 = await connect();
     let contract = await get_contract(web3);
-    let status = await contract.methods.get_status(0);
-    console.log(status);
-    const {r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,r13,r14,r15,r16,r17,r18,r19} = status;
+    let res = await contract.methods.get_status(summoner).call();
+    console.log(res);
+    /***
+    const {r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,r13,r14,r15,r16,r17,r18,r19} = res;
     local_ctype = r0;
     local_strength = r1;
     local_dexterity = r2;
@@ -190,29 +191,27 @@ async function contract_update_status(summoner) {
     local_exp = r17;
     local_level = r18;
     local_next_exp_required = r19;
-    
-    /***
-    local_ctype = status[0];
-    local_strength = status[1];
-    local_dexterity = status[2];
-    local_vitality = status[3];
-    local_intelligence = status[4];
-    local_luck = status[5];
-    local_birth_time = status[6];
-    local_last_feeding_time = status[7];
-    local_last_grooming_time = status[8];
-    local_coin = status[9];
-    local_material = status[10];
-    local_mining_status = status[11];
-    local_mining_start_time = status[12];
-    local_farming_status = status[13];
-    local_farming_start_time = status[14];
-    local_crafting_status = status[15];
-    local_crafting_start_time = status[16];
-    local_exp = status[17];
-    local_level = status[18];
-    local_next_exp_required = status[19];
-    ***/
+    ***/    
+    local_ctype = res[0];
+    local_strength = res[1];
+    local_dexterity = res[2];
+    local_vitality = res[3];
+    local_intelligence = res[4];
+    local_luck = res[5];
+    local_birth_time = res[6];
+    local_last_feeding_time = res[7];
+    local_last_grooming_time = res[8];
+    local_coin = res[9];
+    local_material = res[10];
+    local_mining_res = res[11];
+    local_mining_start_time = res[12];
+    local_farming_res = res[13];
+    local_farming_start_time = res[14];
+    local_crafting_res = res[15];
+    local_crafting_start_time = res[16];
+    local_exp = res[17];
+    local_level = res[18];
+    local_next_exp_required = res[19];
 }
 
 //call status from contract
