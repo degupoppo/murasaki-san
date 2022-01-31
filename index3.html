@@ -167,9 +167,9 @@ async function test() {
 async function contract_update_status(summoner) {
     let web3 = await connect();
     let contract = await get_contract(web3);
-    let status = await contract.methods.get_status(0);
-    console.log(status);
-    const {r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,r13,r14,r15,r16,r17,r18,r19} = status;
+    let res = await contract.methods.get_status(0);
+    console.log(res);
+    const {r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,r13,r14,r15,r16,r17,r18,r19} = res;
     local_ctype = r0;
     local_strength = r1;
     local_dexterity = r2;
