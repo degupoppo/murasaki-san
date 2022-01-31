@@ -19,7 +19,7 @@
 <input type="number" value = -1 id="summoner2"><br>
 
 <form name="select_summoner">
-<select name="select_summoner">
+<select name="select_summoner" id="summoner">
 <option value="-1">-1<option>
 </select>
 </form>
@@ -869,7 +869,7 @@ function update() {
     char1.update();
     //update static status from contract at once
     if (turn == 1) {
-        local_id = contract.id;
+        local_id = summoner;
         local_type = contract.type;
         local_birth_time = contract.birth_time;
         text_id.setText("id = " + local_id);

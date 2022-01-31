@@ -867,15 +867,17 @@ function update() {
     //text_turn.setText("turn = " + turn);
     //update character
     char1.update();
+    /***
     //update static status from contract at once
     if (turn == 1) {
-        local_id = contract.id;
+        local_id = summoner;
         local_type = contract.type;
         local_birth_time = contract.birth_time;
         text_id.setText("id = " + local_id);
         text_type.setText("type = " + local_type);
         text_birth_time.setText("birth_time = " + local_birth_time);
     }
+    ***/
     //update calculation status
     if (turn == 1 || turn % 100 == 0) {
         //feeding
