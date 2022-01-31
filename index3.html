@@ -595,7 +595,7 @@ let turn = 0;
 
 //static_status, read from construct at once
 let local_id;
-let local_type;
+let local_ctype;
 let local_strength;
 let local_dexterity;
 let local_vitality;
@@ -790,7 +790,7 @@ function create() {
     text_summoner = this.add.text(
         600, 30, "summoner = " + summoner, {font: "10.5px Arial", fill: "#000"});
     text_type = this.add.text(
-        600, 40, "type = " + local_type, {font: "10.5px Arial", fill: "#000"});
+        600, 40, "type = " + local_ctype, {font: "10.5px Arial", fill: "#000"});
     text_birth_time = this.add.text(
         600, 50, "birth_time = " + local_birth_time, {font: "10.5px Arial", fill: "#000"});
     text_strength = this.add.text(
@@ -939,7 +939,7 @@ function update() {
         if (happy > 100) { happy = 100; }
         //update text
         text_summoner.setText("summoner = " + summoner);
-        text_type.setText("type = " + local_type);
+        text_type.setText("type = " + local_ctype);
         text_birth_time.setText("birth_time = " + local_birth_time);
         text_level.setText("level = " + local_level);
         text_strength.setText("strength = " + local_strength);
