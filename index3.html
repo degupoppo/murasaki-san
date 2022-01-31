@@ -509,10 +509,6 @@ class Character extends Phaser.GameObjects.Sprite{
             this.resting_count = 70 + Math.random() * 30;
 	    }else if (this.count >= this.resting_count){
             let tmp = Math.random() * 100;
-            //let base = 864000;
-            let base = 864000/1000;
-            let now_time = Date.now();
-            let happy = Math.round( (base - (now_time/1000 - local_last_grooming_time)) / base * 1000 ) / 10;
             if (tmp <= 10) {
                 this.mode = "sleeping";
                 this.count = 0;
@@ -800,10 +796,8 @@ function stop_farming(contract) {
 // main functions
 //--------------------------------------------------------------------------------------------------------
 
-
 const version = "0.0.14";
 let turn = 0;
-
 
 //static_status, read from construct at once
 let local_id;
@@ -816,8 +810,10 @@ let local_luck;
 let local_birth_time;
 //dynamic_status, read from construct continuously, write to construct
 let local_level = 1;
-let local_last_feeding_time = Date.now() + 864000;
-let local_last_grooming_time = Date.now() + 864000;
+//let local_last_feeding_time = Date.now() + 864000;
+//let local_last_grooming_time = Date.now() + 864000;
+let local_last_feeding_time;
+let local_last_grooming_time;
 let local_coin;
 let local_exp;
 let local_mining_status;
@@ -828,13 +824,13 @@ let local_farming_status;
 let local_farming_start_time;
 let local_crafting_status;
 let local_crafting_start_time;
-let previous_local_last_feeding_time = Date.now() + 864000 * 10;
-let previous_local_last_grooming_time = Date.now() + 864000 * 10;
+//let previous_local_last_feeding_time = Date.now() + 864000 * 10;
+//let previous_local_last_grooming_time = Date.now() + 864000 * 10;
+let previous_local_last_feeding_time;
+let previous_local_last_grooming_time;
 let summoner;
-//flag
-//let flag_feeding;
-//let flag_grooming;
-
+let satiety;
+let happy;
 
 let config = {
     type: Phaser.AUTO,
@@ -854,6 +850,7 @@ let config = {
     },
 };
 let game = new Phaser.Game(config);
+
 
 
 // preload
@@ -881,12 +878,18 @@ function preload() {
 }
 
 
+
 // create
 //--------------------------------------------------------------------------------------------------------
 function create() {
+
     //fake contract
     contract = new Contract();
+
+    //back image
     this.add.image(400, 300, "back");
+
+    //animations
     this.anims.create({
         key: "murasaki_right",
         frames: this.anims.generateFrameNumbers("murasaki_right", {start: 0, end:3}),
@@ -947,6 +950,7 @@ function create() {
         frameRate: 1,
         repeat: -1
     });
+
     //button_icon
     button_feeding = this.add.sprite(660,430, "button_feeding");
     button_feeding.scaleX = button_feeding.scaleX * 0.08;
@@ -968,10 +972,12 @@ function create() {
     button_farming.scaleY = button_farming.scaleY * 0.08;
     button_farming.setInteractive();
     button_farming.on('pointerdown', () => start_farming(contract) );
+
     //summon character
     char1 = new Character(this, 300 + Math.random()*200, 400 + Math.random()*100);
     char1.scaleX = char1.scaleX * 0.25;
     char1.scaleY = char1.scaleY * 0.25;
+
     //button_text
     new Button(30, 10, 'Level Up', this, () => contract_level_up(summoner));
     new Button(30, 40, 'Feeding', this, () => contract_feeding(summoner));
@@ -983,11 +989,12 @@ function create() {
     new Button(30, 250, 'Summon', this, () => contract_summon("1"));
     new Button(30, 280, 'Test', this, () => contract_my_summoners());
 
-    //back color
+    //status window color fill
     let status_back = this.add.graphics();
     status_back.fillStyle(0xa9a9a9, 1).fillRect(590, 5, 200, 350);
     status_back.alpha = 0.5;
-    //text
+
+    //status window
     text_version = this.add.text(600, 10, "version = " + version, {font: "10.5px Arial", fill: "#000"});
     //static_status
     text_id = this.add.text(
@@ -1028,6 +1035,7 @@ function create() {
         600, 230, "satiey = ", {font: "10.5px Arial", fill: "#000"});
     text_happy = this.add.text(
         600, 240, "happy = ", {font: "10.5px Arial", fill: "#000"});
+
     //bar
     //satiety
     this.add.text(600, 260, "satiety:", {font: "10.5px Arial", fill: "#000"});
@@ -1052,7 +1060,9 @@ function create() {
         600, 320, "coin:" + local_coin, {font: "10.5px Arial", fill: "#000"});
     text_material_main = this.add.text(
         600, 330, "material:" + local_material, {font: "10.5px Arial", fill: "#000"});
+
 }
+
 
 
 // update
@@ -1124,11 +1134,11 @@ function update() {
         //let base = 864000
         let base = 864000/1000
         //let satiety = Math.round( (base - (now_time - local_last_feeding_time)) / base * 1000 ) / 10;
-        let satiety = Math.round( (base - (now_time/1000 - local_last_feeding_time)) / base * 1000 ) / 10;
+        satiety = Math.round( (base - (now_time/1000 - local_last_feeding_time)) / base * 1000 ) / 10;
         if (satiety < 0) { satiety = 0; }
         if (satiety > 100) { satiety = 100; }
         //let happy = Math.round( (base - (now_time - local_last_grooming_time)) / base * 1000 ) / 10;
-        let happy = Math.round( (base - (now_time/1000 - local_last_grooming_time)) / base * 1000 ) / 10;
+        happy = Math.round( (base - (now_time/1000 - local_last_grooming_time)) / base * 1000 ) / 10;
         if (happy < 0) { happy = 0; }
         if (happy > 100) { happy = 100; }
         //update text
