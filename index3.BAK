@@ -20,8 +20,7 @@
 
 <script type="text/javascript">
 
-let summoner_input = document.getElementById("summoner");
-console.log(element.value);
+let summoner = document.getElementById("summoner").value;
 
 
 /***
@@ -167,9 +166,8 @@ async function test() {
 async function contract_update_status(summoner) {
     let web3 = await connect();
     let contract = await get_contract(web3);
-    //let res = await contract.methods.get_status(summoner).call();
-    let res = await contract.methods.get_status(0).call();
-    console.log(res);
+    let res = await contract.methods.get_status(summoner).call();
+    //console.log(res);
     /***
     const {r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,r13,r14,r15,r16,r17,r18,r19} = res;
     local_ctype = r0;
@@ -218,27 +216,27 @@ async function contract_update_status(summoner) {
 //call status from contract
 
 //send feeding
-async function contract_feeding() {
+async function contract_feeding(summoner) {
     let web3 = await connect();
     let contract = await get_contract(web3);
     let wallet = await get_wallet(web3);
-    contract.methods.feeding().send({from:wallet});
+    contract.methods.feeding(summoner).send({from:wallet});
 }
 
 //send grooming
-async function contract_grooming() {
+async function contract_grooming(summoner) {
     let web3 = await connect();
     let contract = await get_contract(web3);
     let wallet = await get_wallet(web3);
-    contract.methods.grooming().send({from:wallet});
+    contract.methods.grooming(summoner).send({from:wallet});
 }
 
 //send level_up
-async function contract_level_up() {
+async function contract_level_up(summoner) {
     let web3 = await connect();
     let contract = await get_contract(web3);
     let wallet = await get_wallet(web3);
-    contract.methods.level_up().send({from:wallet});
+    contract.methods.level_up(summoner).send({from:wallet});
 }
 
 //mint
@@ -1107,9 +1105,9 @@ function update() {
         local_next_exp_required = contract.next_exp_required;
         ***/
         //test();
-        let summoner_input = document.getElementById("summoner");
-        console.log(summoner_input.value);
-        contract_update_status(summoner_input.value);
+        let summoner = document.getElementById("summoner").value;
+        //console.log(summoner_input.value);
+        contract_update_status(summoner);
         //check character mode
         //feeding
         if (local_last_feeding_time > previous_local_last_feeding_time){
