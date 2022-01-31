@@ -17,11 +17,11 @@
 <body>
 
 <form name="select_summoner">
-    <input type="button" value="Update Summoners" onclick="button_update_summoners();"/>
+    <input type="button" value="Update Summoner List" onclick="button_update_summoners();"/>
     <select name="select_summoner" id="summoner">
         <option value="***">***<option>
     </select>
-    <input type="button" value="Select Summoner" onclick="button_select_summoner();"/>
+    <input type="button" value="Swith Summoner" onclick="button_select_summoner();"/>
 </form>
 <br>
 
@@ -916,18 +916,19 @@ function update() {
         }
         text_turn.setText("turn = " + turn);
         //update calculation_status
-        let now_time = Date.now();
-        let age_time = Math.round( (now_time - local_birth_time) / 1000 );
+        let now_time = Date.now() / 1000;
+        let age_time = Math.round( now_time - local_birth_time );
         let mode = char1.get_mode;
         //var base = 86400000
         //let base = 864000
-        let base = 864000/1000
+        let base = 86400
         //let satiety = Math.round( (base - (now_time - local_last_feeding_time)) / base * 1000 ) / 10;
-        satiety = Math.round( (base - (now_time/1000 - local_last_feeding_time)) / base * 1000 ) / 10;
+        satiety = Math.round( (base - (now_time - local_last_feeding_time)) / base * 1000 ) / 10;
         if (satiety < 0) { satiety = 0; }
         if (satiety > 100) { satiety = 100; }
         //let happy = Math.round( (base - (now_time - local_last_grooming_time)) / base * 1000 ) / 10;
-        happy = Math.round( (base - (now_time/1000 - local_last_grooming_time)) / base * 1000 ) / 10;
+        let base2 = 86400 * 7
+        happy = Math.round( (base - (now_time - local_last_grooming_time)) / base * 1000 ) / 10;
         if (happy < 0) { happy = 0; }
         if (happy > 100) { happy = 100; }
         //update text
