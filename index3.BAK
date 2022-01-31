@@ -20,7 +20,7 @@
 
 <script type="text/javascript">
 
-let summoner_selected = document.getElementById("summoner");
+let summoner_input = document.getElementById("summoner");
 console.log(element.value);
 
 
@@ -1107,8 +1107,8 @@ function update() {
         local_next_exp_required = contract.next_exp_required;
         ***/
         //test();
-        let summoner_selected = document.getElementById("summoner");
-        console.log(summoner_selected);
+        let summoner_input = document.getElementById("summoner");
+        console.log(summoner_input.value);
         contract_update_status(summoner_selected);
         //check character mode
         //feeding
