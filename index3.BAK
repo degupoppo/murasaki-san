@@ -973,20 +973,16 @@ function create() {
     char1.scaleX = char1.scaleX * 0.25;
     char1.scaleY = char1.scaleY * 0.25;
     //button_text
-    //new Button(30, 10, 'Level Up', this, () => level_up(contract));
     new Button(30, 10, 'Level Up', this, () => contract_level_up(summoner));
-    //new Button(30, 40, 'Feeding', this, () => feeding(contract));
     new Button(30, 40, 'Feeding', this, () => contract_feeding(summoner));
-    //new Button(30, 70, 'Grooming', this, () => grooming(contract));
     new Button(30, 70, 'Grooming', this, () => contract_grooming(summoner));
-    //new Button(30, 100, 'Start Mining', this, () => start_mining(contract));
-    //new Button(30, 130, 'Stop Mining', this, () => stop_mining(contract));
     new Button(30, 100, 'Start Mining', this, () => contract_start_mining(summoner));
     new Button(30, 130, 'Stop Mining', this, () => contract_stop_mining(summoner));
-    new Button(30, 160, 'Start Farming', this, () => start_farming(contract));
-    new Button(30, 190, 'Stop Farming', this, () => stop_farming(contract));
-    new Button(30, 220, 'Connect to Metamask', this, () => connect());
+    new Button(30, 160, 'Start Farming', this, () => contract_start_farming(summoner));
+    new Button(30, 190, 'Stop Farming', this, () => contract_stop_farming(summoner));
     new Button(30, 250, 'Summon', this, () => contract_summon("1"));
+    new Button(30, 280, 'Test', this, () => contract_my_summoners());
+
     //back color
     let status_back = this.add.graphics();
     status_back.fillStyle(0xa9a9a9, 1).fillRect(590, 5, 200, 350);
