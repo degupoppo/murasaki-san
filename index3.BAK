@@ -25,6 +25,10 @@ let summoner = document.getElementById("summoner").value;
 
 /***
 Idea
+    FeedingとGrooming
+    Coin, MaterialとCrafting
+    ステータス
+
     working()の概念を考える
         コインを稼ぐ
         str依存？動作とステータスのイメージが一致するように
@@ -34,6 +38,7 @@ Idea
         連続思考を防ぐため、０％も作る。またファンブルで必ず５％は失敗する
         クラフト品のユースケースは？
     資産
+        summoner間での移動は50%が消える
         exp?, 時間, コイン（sota?, ohana?), 素材(あまり種類を多くしない, 低級、中級、上級、ぐらい）
         exp
             お世話で取得
@@ -68,7 +73,7 @@ Idea
         feeding, デイリークエスト, コストなし, 24時間で最大効率
         grooming, プラスアルファ, 何かしらのコスト必要, 168時間で最大効率
 ToDo
-    UI：Mintボタン
+    UI：Mintボタン, type指定可能に
     UI：所有summonerの表示と選択
     UI：所有itemのリアルタイム更新と表示
     コントラ：random
@@ -78,24 +83,6 @@ ToDo
     アイデア：materialのバランスを考える
     wallet所有のNFTを選べるUIを作る
     satietyとhappyの差別化を考える。
-    ok コントラクト内にステータスを保持する
-    ok コントラクト内のステータスを読み出す
-    ok ステータスを保有したNFTを作成する
-    ok NFTのmint方法を確立する
-    ok 場所への移動を実装する, mining, farming, feedingに組み込む, コードの汎用性を上げる
-    ok 絵を大きめにする, 元絵を大きめに読み込み, scaleXYで縮小する
-    ok Lvを実装する。必要expの対応表を作製する。
-    ok 移動を見直す. 距離ランダム, 上下の動きも実装する
-    ok つっつき動作の実装
-    ok fake contractにfeeding(), grooming(), lv_up()を実装する
-    ok ボタンの実装、表示、押したときの動作
-    ok eating実装
-    ok grooming実装
-    ok コントラを見立てた外部ステータス格納区域の実装と、読み込み、書き込みの実装
-    ok キャラのステータスをテキストで描写, コントラから定期的に取得し計算する
-    ok ステータスはキャラクラスに保持させずに、コントラに見立てた外部変数に格納する。
-    ok 1日1回？feeding, last_feeding_timeからの差でexp加算, 24hr以上の差は無効
-    ok satiety, happy, expのバーを実装する
 ***/
 
 
@@ -1073,75 +1060,8 @@ function update() {
     }
     //update calculation status
     if (turn == 1 || turn % 100 == 0) {
-        text_turn.setText("turn = " + turn);
-        //update calculation_status
-        let now_time = Date.now();
-        let age_time = Math.round( (now_time - local_birth_time) / 1000 );
-        let mode = char1.get_mode;
-        //var base = 86400000
-        //let base = 864000
-        let base = 864000/1000
-        //let satiety = Math.round( (base - (now_time - local_last_feeding_time)) / base * 1000 ) / 10;
-        let satiety = Math.round( (base - (now_time/1000 - local_last_feeding_time)) / base * 1000 ) / 10;
-        if (satiety < 0) { satiety = 0; }
-        if (satiety > 100) { satiety = 100; }
-        //let happy = Math.round( (base - (now_time - local_last_grooming_time)) / base * 1000 ) / 10;
-        let happy = Math.round( (base - (now_time/1000 - local_last_grooming_time)) / base * 1000 ) / 10;
-        if (happy < 0) { happy = 0; }
-        if (happy > 100) { happy = 100; }
-        //update text
-        text_level.setText("level = " + local_level);
-        text_strength.setText("strength = " + local_strength);
-        text_dexterity.setText("dexterity = " + local_dexterity);
-        text_vitality.setText("vitality = " + local_vitality);
-        text_intelligence.setText("intelligence = " + local_intelligence);
-        text_luck.setText("luck = " + local_luck);
-        text_last_feeding_time.setText("last_feeding_time = " + local_last_feeding_time);
-        text_last_grooming_time.setText("last_grooming_time = " + local_last_grooming_time);
-        text_coin.setText("coin = " + local_coin);
-        text_exp.setText("exp = " + local_exp);
-        text_age_time.setText("age_time = " + age_time);
-        text_mode.setText("mode = " + mode);
-        text_satiety.setText("satiety = " + satiety);
-        text_happy.setText("happy = " + happy);
-        //update bar
-        bar_satiety.scaleX = satiety / 100;
-        bar_happy.scaleX = happy / 100;
-        //exp
-        let exp = (local_exp / local_next_exp_required) * 100;
-        if (exp > 100) { exp = 100; }
-        bar_exp.scaleX = exp / 100;
-        text_coin_main.setText("coin:    " + local_coin);
-        text_material_main.setText("material:" + local_material);
-    }
-    //update dynamic status from contract to local
-    if (turn == 1 || turn % 201 == 0) {
-        //update dynamic_status
-        /***
-        local_strength = contract.strength;
-        local_dexterity = contract.dexterity;
-        local_vitality = contract.vitality;
-        local_intelligence = contract.intelligence;
-        local_luck = contract.luck;
-        local_level = contract.level;
-        local_last_feeding_time = contract.last_feeding_time;
-        local_last_grooming_time = contract.last_grooming_time;
-        local_coin = contract.coin;
-        local_material = contract.material;
-        local_mining_status = contract.mining_status;
-        local_farming_status = contract.farming_status;
-        local_crafting_status = contract.crafting_status;
-        local_exp = contract.exp;
-        local_next_exp_required = contract.next_exp_required;
-        ***/
-        //test();
-        let summoner = document.getElementById("summoner").value;
-        //console.log(summoner_input.value);
-        contract_update_status(summoner);
-        //check character mode
         //feeding
         if (local_last_feeding_time > previous_local_last_feeding_time){
-        //if (flag_feeding == 1){
             flag_feeding = 0;
             char1.set_mode = "feeding";
             char1.submode = 0;
@@ -1182,11 +1102,78 @@ function update() {
         }else if (local_farming_status == 0 & char1.mode == "farming") {
             char1.set_mode = "resting";
         }
-        //save last time to next update
+        text_turn.setText("turn = " + turn);
+        //update calculation_status
+        let now_time = Date.now();
+        let age_time = Math.round( (now_time - local_birth_time) / 1000 );
+        let mode = char1.get_mode;
+        //var base = 86400000
+        //let base = 864000
+        let base = 864000/1000
+        //let satiety = Math.round( (base - (now_time - local_last_feeding_time)) / base * 1000 ) / 10;
+        let satiety = Math.round( (base - (now_time/1000 - local_last_feeding_time)) / base * 1000 ) / 10;
+        if (satiety < 0) { satiety = 0; }
+        if (satiety > 100) { satiety = 100; }
+        //let happy = Math.round( (base - (now_time - local_last_grooming_time)) / base * 1000 ) / 10;
+        let happy = Math.round( (base - (now_time/1000 - local_last_grooming_time)) / base * 1000 ) / 10;
+        if (happy < 0) { happy = 0; }
+        if (happy > 100) { happy = 100; }
+        //update text
+        text_level.setText("level = " + local_level);
+        text_strength.setText("strength = " + local_strength);
+        text_dexterity.setText("dexterity = " + local_dexterity);
+        text_vitality.setText("vitality = " + local_vitality);
+        text_intelligence.setText("intelligence = " + local_intelligence);
+        text_luck.setText("luck = " + local_luck);
+        text_last_feeding_time.setText("last_feeding_time = " + local_last_feeding_time);
+        text_last_grooming_time.setText("last_grooming_time = " + local_last_grooming_time);
+        text_coin.setText("coin = " + local_coin);
+        text_exp.setText("exp = " + local_exp);
+        text_age_time.setText("age_time = " + age_time);
+        text_mode.setText("mode = " + mode);
+        text_satiety.setText("satiety = " + satiety);
+        text_happy.setText("happy = " + happy);
+        //update bar
+        bar_satiety.scaleX = satiety / 100;
+        bar_happy.scaleX = happy / 100;
+        //exp
+        let exp = (local_exp / local_next_exp_required) * 100;
+        if (exp > 100) { exp = 100; }
+        bar_exp.scaleX = exp / 100;
+        text_coin_main.setText("coin:    " + local_coin);
+        text_material_main.setText("material:" + local_material);
         previous_local_last_feeding_time = local_last_feeding_time;
         previous_local_last_grooming_time = local_last_grooming_time;
     }
+    //update dynamic status from contract to local
+    if (turn == 1 || turn % 201 == 0) {
+        //update dynamic_status
+        let summoner = document.getElementById("summoner").value;
+        contract_update_status(summoner);
+    }
 }
+
+
+/***
+    ok コントラクト内にステータスを保持する
+    ok コントラクト内のステータスを読み出す
+    ok ステータスを保有したNFTを作成する
+    ok NFTのmint方法を確立する
+    ok 場所への移動を実装する, mining, farming, feedingに組み込む, コードの汎用性を上げる
+    ok 絵を大きめにする, 元絵を大きめに読み込み, scaleXYで縮小する
+    ok Lvを実装する。必要expの対応表を作製する。
+    ok 移動を見直す. 距離ランダム, 上下の動きも実装する
+    ok つっつき動作の実装
+    ok fake contractにfeeding(), grooming(), lv_up()を実装する
+    ok ボタンの実装、表示、押したときの動作
+    ok eating実装
+    ok grooming実装
+    ok コントラを見立てた外部ステータス格納区域の実装と、読み込み、書き込みの実装
+    ok キャラのステータスをテキストで描写, コントラから定期的に取得し計算する
+    ok ステータスはキャラクラスに保持させずに、コントラに見立てた外部変数に格納する。
+    ok 1日1回？feeding, last_feeding_timeからの差でexp加算, 24hr以上の差は無効
+    ok satiety, happy, expのバーを実装する
+***/
 
 
 </script>
