@@ -16,14 +16,13 @@
 </head>
 <body>
 
-<input type="number" value = -1 id="summoner2"><br>
-
 <form name="select_summoner">
-<select name="select_summoner" id="summoner">
-<option value="-1">-1<option>
-</select>
+    <input type="button" value="Update Summoners" onclick="button_update_summoner();"/>
+    <select name="select_summoner" id="summoner">
+        <option value="***">-1<option>
+    </select>
+    <input type="button" value="Select Summoner" onclick="button_select_summoner();"/>
 </form>
-<input type="button" value="Update Summoner" onclick="button_update_summoner();"/>
 <br>
 
 <script type="text/javascript">
@@ -238,11 +237,9 @@ async function contract_my_summoners() {
     return res;
 }
 
+//update select list
 function _create_dropdownlist( form_name, select_name, select_array ){
-	// length
 	document[form_name][select_name].length = select_array.length;
-	
-	// text, value
 	var i;
 	for ( i=0; i<select_array.length; i++){
 		document[form_name][select_name].options[i].text = select_array[i].text;
@@ -250,12 +247,14 @@ function _create_dropdownlist( form_name, select_name, select_array ){
 	}
 }
 
-async function update_summoner_list() {
+//update summoner list
+async function button_update_summoners() {
     opt_array = await contract_my_summoners();
     _create_dropdownlist("select_summoner","select_summoner", opt_array )
 }
 
-function button_update_summoner() {
+//update summoner
+function button_select_summoner() {
     summoner = document.getElementById("summoner").value;
 }
 
