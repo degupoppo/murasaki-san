@@ -248,14 +248,17 @@ function _create_dropdownlist( form_name, select_name, select_array ){
 }
 
 //update summoner list
-async function update_summoner_list() {
+async function button_update_summoners() {
     opt_array = await contract_my_summoners();
     _create_dropdownlist("select_summoner","select_summoner", opt_array )
 }
 
 //update summoner
-function button_update_summoner() {
+function button_select_summoner() {
     summoner = document.getElementById("summoner").value;
+    previous_local_last_feeding_time = null;
+    previous_local_last_grooming_time = null;
+    char1.set_mode = "resting";
 }
 
 

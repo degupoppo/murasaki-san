@@ -17,7 +17,7 @@
 <body>
 
 <form name="select_summoner">
-    <input type="button" value="Update Summoners" onclick="button_update_summoner();"/>
+    <input type="button" value="Update Summoners" onclick="button_update_summoners();"/>
     <select name="select_summoner" id="summoner">
         <option value="***">-1<option>
     </select>
@@ -256,6 +256,9 @@ async function button_update_summoners() {
 //update summoner
 function button_select_summoner() {
     summoner = document.getElementById("summoner").value;
+    previous_local_last_feeding_time = null;
+    previous_local_last_grooming_time = null;
+    char1.set_mode = "resting";
 }
 
 
