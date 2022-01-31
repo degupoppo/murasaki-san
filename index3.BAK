@@ -21,7 +21,7 @@
 <script type="text/javascript">
 
 let summoner_selected = document.getElementById("summoner");
-console.log(element.value);
+//console.log(element.value);
 
 
 /***

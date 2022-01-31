@@ -168,6 +168,7 @@ async function contract_update_status(summoner) {
     let web3 = await connect();
     let contract = await get_contract(web3);
     let status = await contract.methods.get_status(summoner);
+    console.log(status);
     local_ctype = status[0];
     local_strength = status[1];
     local_dexterity = status[2];
