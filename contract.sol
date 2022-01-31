@@ -55,82 +55,18 @@ contract Character {
         return li_status;
     }
 
-    function get_id() public view returns (uint) {
-        return id;
-    }
-    function get_ctype() public view returns (uint) {
-        return ctype;
-    }
-    function get_strength() public view returns (uint) {
-        return strength;
-    }
-    function get_dexterity() public view returns (uint) {
-        return dexterity;
-    }
-    function get_vitality() public view returns (uint) {
-        return vitality;
-    }
-    function get_intelligence() public view returns (uint) {
-        return intelligence;
-    }
-    function get_luck() public view returns (uint) {
-        return luck;
-    }
-    function get_birth_time() public view returns (uint) {
-        return birth_time;
-    }
-    function get_last_feeding_time() public view returns (uint) {
-        return last_feeding_time;
-    }
-    function get_last_grooming_time() public view returns (uint) {
-        return last_grooming_time;
-    }
-    function get_coin() public view returns (uint) {
-        return coin;
-    }
-    function get_material() public view returns (uint) {
-        return material;
-    }
-    function get_mining_status() public view returns (uint) {
-        return mining_status;
-    }
-    function get_mining_start_time() public view returns (uint) {
-        return mining_start_time;
-    }
-    function get_farming_status() public view returns (uint) {
-        return farming_status;
-    }
-    function get_farming_start_time() public view returns (uint) {
-        return farming_start_time;
-    }
-    function get_crafting_status() public view returns (uint) {
-        return crafting_status;
-    }
-    function get_crafting_start_time() public view returns (uint) {
-        return crafting_start_time;
-    }
-    function get_exp() public view returns (uint) {
-        return exp;
-    }
-    function get_level() public view returns (uint) {
-        return level;
-    }
-    function get_next_exp_required() public view returns (uint) {
-        return next_exp_required;
-    }
-
     function feeding() public {
         if (mining_status == 0 && farming_status == 0 && crafting_status == 0) {
-            delta = block.timestamp - last_feeding_time;
-            last_feeding_time = block.timestamp;
+            delta = (block.timestamp - last_feeding_time) / 10;
             exp += delta;
+            last_feeding_time = block.timestamp;
         }
     }
     function grooming() public {
         if (mining_status == 0 && farming_status == 0 && crafting_status == 0) {
-            delta = block.timestamp - last_grooming_time;
-            last_grooming_time = block.timestamp;
+            delta = (block.timestamp - last_grooming_time) / 10;
             exp += delta;
+            last_grooming_time = block.timestamp;
         }
     }
     function start_mining() public {
@@ -141,7 +77,7 @@ contract Character {
     }
     function stop_mining() public {
         if (mining_status == 1) {
-            delta = (block.timestamp - mining_start_time) / 10;
+            delta = (block.timestamp - mining_start_time) / 100;
             coin += delta;
             mining_status = 0;
         }

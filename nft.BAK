@@ -707,7 +707,7 @@ contract murasaki is ERC721{
     function stop_mining(uint _summoner) public {
         require(_isApprovedOrOwner(msg.sender, _summoner));
         require(mining_status[_summoner] == 1);
-        tmp = (block.timestamp - mining_start_time[_summoner]) / 100;
+        tmp = (block.timestamp - mining_start_time[_summoner]) / 10;
         coin[_summoner] += tmp;
         mining_status[_summoner] = 0;
     }
@@ -720,7 +720,7 @@ contract murasaki is ERC721{
     function stop_farming(uint _summoner) public {
         require(_isApprovedOrOwner(msg.sender, _summoner));
         require(farming_status[_summoner] == 1);
-        tmp = (block.timestamp - farming_start_time[_summoner]) / 1000;
+        tmp = (block.timestamp - farming_start_time[_summoner]) / 100;
         material[_summoner] += tmp;
         farming_status[_summoner] = 0;
     }
