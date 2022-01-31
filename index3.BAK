@@ -20,6 +20,7 @@
 
 <form name="select_summoner">
 <select name="select_summoner">
+<option value="-1">-1<option>
 </select>
 </form>
 <br>
@@ -248,8 +249,10 @@ function _create_dropdownlist( form_name, select_name, select_array ){
 	}
 }
 
-opt_array = contract_my_summoners();
-_create_dropdownlist("select_summoner","select_summoner", opt_array )
+async function update_summoner_list() {
+    opt_array = await contract_my_summoners();
+    _create_dropdownlist("select_summoner","select_summoner", opt_array )
+}
 
 
 
