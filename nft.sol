@@ -678,6 +678,7 @@ contract murasaki is ERC721{
         farming_status[_next_summoner] = 0;
         farming_start_time[_next_summoner] = 0;
         exp[_next_summoner] = 0;
+        level[_next_summoner] = 1;
         next_exp_required[_next_summoner] = 1000;        
         _safeMint(msg.sender, _next_summoner);
         next_summoner++;
@@ -687,15 +688,15 @@ contract murasaki is ERC721{
         require(_isApprovedOrOwner(msg.sender, _summoner));
         require(mining_status[_summoner] == 0 && farming_status[_summoner] == 0 && crafting_status[_summoner] == 0);
         tmp = block.timestamp - last_feeding_time[_summoner];
-        exp[_summoner] += tmp;
         last_feeding_time[_summoner] = block.timestamp;
+        exp[_summoner] += tmp;
     }
     function grooming(uint _summoner) public {
         require(_isApprovedOrOwner(msg.sender, _summoner));
         require(mining_status[_summoner] == 0 && farming_status[_summoner] == 0 && crafting_status[_summoner] == 0);
         tmp = block.timestamp - last_grooming_time[_summoner];
-        exp[_summoner] += tmp;
         last_grooming_time[_summoner] = block.timestamp;
+        exp[_summoner] += tmp;
     }
     function start_mining(uint _summoner) public {
         require(_isApprovedOrOwner(msg.sender, _summoner));
