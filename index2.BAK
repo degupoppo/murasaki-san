@@ -16,11 +16,7 @@
 </head>
 <body>
 
-<select id="summoner">
-<option value="orange">Orange</option>
-<option value="lemon" selected>Lemon</option>
-<option value="strawberry">Strawberry</option>
-</select>
+<input type="number" id="summoner">
 
 <script type="text/javascript">
 
