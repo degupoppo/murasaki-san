@@ -17,7 +17,7 @@
 <body>
 
 <form name="select_summoner">
-    <input type="button" value="Update Summoners" onclick="button_update_summoner();"/>
+    <input type="button" value="Update Summoners" onclick="button_update_summoners();"/>
     <select name="select_summoner" id="summoner">
         <option value="***">-1<option>
     </select>
@@ -867,23 +867,14 @@ function update() {
     //update turn
     turn += 1;
     //text_turn.setText("turn = " + turn);
+
     //update character
     char1.update();
-    /***
-    //update static status from contract at once
-    if (turn == 1) {
-        local_id = summoner;
-        local_type = contract.type;
-        local_birth_time = contract.birth_time;
-        text_id.setText("id = " + local_id);
-        text_type.setText("type = " + local_type);
-        text_birth_time.setText("birth_time = " + local_birth_time);
-    }
-    ***/
+
     //update calculation status
     if (turn == 1 || turn % 100 == 0) {
         //feeding
-        if (local_last_feeding_time > previous_local_last_feeding_time){
+        if (previous_local_last_feeding_time != null && local_last_feeding_time > previous_local_last_feeding_time){
             flag_feeding = 0;
             char1.set_mode = "feeding";
             char1.submode = 0;
@@ -969,6 +960,7 @@ function update() {
         previous_local_last_feeding_time = local_last_feeding_time;
         previous_local_last_grooming_time = local_last_grooming_time;
     }
+
     //update dynamic status from contract to local
     if (turn == 1 || turn % 201 == 0) {
         //update dynamic_status
