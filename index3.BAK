@@ -1106,6 +1106,7 @@ function update() {
         local_next_exp_required = contract.next_exp_required;
         ***/
         //test();
+        let summoner_selected = document.getElementById("summoner");
         contract_update_status(summoner_selected);
         //check character mode
         //feeding
