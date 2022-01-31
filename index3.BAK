@@ -928,7 +928,7 @@ function create() {
     new Button(30, 160, 'Start Farming', this, () => start_farming(contract));
     new Button(30, 190, 'Stop Farming', this, () => stop_farming(contract));
     new Button(30, 220, 'Connect to Metamask', this, () => connect());
-    new Button(30, 250, 'Mint', this, () => mint());
+    new Button(30, 250, 'Summon', this, () => contract_summon("1"));
     //back color
     let status_back = this.add.graphics();
     status_back.fillStyle(0xa9a9a9, 1).fillRect(590, 5, 200, 350);
