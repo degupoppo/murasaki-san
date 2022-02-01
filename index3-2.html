@@ -931,16 +931,17 @@ function update() {
         if (happy > 100) { happy = 100; }
 
         //update text
+        text_level.setText          (" Lv: " + local_level);
+        text_strength.setText       ("STR: " + local_strength);
+        text_dexterity.setText      ("DEX: " + local_dexterity);
+        text_vitality.setText       ("VIT: " + local_vitality);
+        text_intelligence.setText   ("INT: " + local_intelligence);
+        text_luck.setText           ("LUK: " + local_luck);
+
         text_turn.setText("turn = " + turn);
         text_summoner.setText("summoner = " + summoner);
         text_type.setText("type = " + local_ctype);
         //text_birth_time.setText("birth_time = " + local_birth_time);
-        text_level.setText("level = " + local_level);
-        text_strength.setText("strength = " + local_strength);
-        text_dexterity.setText("dexterity = " + local_dexterity);
-        text_vitality.setText("vitality = " + local_vitality);
-        text_intelligence.setText("intelligence = " + local_intelligence);
-        text_luck.setText("luck = " + local_luck);
         //text_last_feeding_time.setText("last_feeding_time = " + local_last_feeding_time);
         //text_last_grooming_time.setText("last_grooming_time = " + local_last_grooming_time);
         text_coin.setText("coin = " + local_coin);
