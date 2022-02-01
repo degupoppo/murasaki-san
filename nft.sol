@@ -656,8 +656,8 @@ contract murasaki is ERC721{
         return li_status;
     }
 
-    function summon(uint _ctype) external {
-        require(1 <= _ctype && _ctype <= 11);
+    function summon(uint _ctype) external payable {
+        require(0 <= _ctype && _ctype <= 1);
         uint _next_summoner = next_summoner;
         ctype[_next_summoner] = _ctype;
         level[_next_summoner] = 1;
