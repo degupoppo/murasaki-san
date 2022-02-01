@@ -29,6 +29,15 @@
 </head>
 
 <body>
+    type:&nbsp;
+    <select name="class" id="ctype">
+        <option value="0"> 0 <option>
+        <option value="1"> 1 <option>
+        <option value="2"> 2 <option>
+        <option value="3"> 3 <option>
+        <option value="4"> 4 <option>
+    </select>
+    &nbsp;
     <input type="button" value="[ Summon ]" onclick="contract_summon(1);" />
     <br>
     <input type="button" value="[ Update your Summoners → ]" onclick="button_update_summoners();" />
@@ -120,7 +129,8 @@ async function contract_update_status(summoner) {
 //call status from contract
 
 //summon
-async function contract_summon(ctype) {
+async function contract_summon() {
+    let ctype = document.getElementById("summoner").value
     let web3 = await connect();
     let contract = await get_contract(web3);
     let wallet = await get_wallet(web3);
