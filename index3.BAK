@@ -706,7 +706,7 @@ function preload() {
     this.load.image("button_mining", "png/button_feeding.png", {frameWidth: 500, frameHeight: 500});
     this.load.image("button_farming", "png/button_feeding.png", {frameWidth: 500, frameHeight: 500});
     this.load.image("food_sweet_potato", "png/food_sweet_potato.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("item_bear", "png/bear.jpg", {frameWidth: 720, frameHeight: 622});
+    this.load.image("item_bear", "png/item_bear.png", {frameWidth: 720, frameHeight: 622});
     //cursors = this.input.keyboard.createCursorKeys();
 }
 
