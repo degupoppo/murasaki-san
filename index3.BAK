@@ -262,6 +262,19 @@ function button_select_summoner() {
 }
 
 
+//url parameter
+//https://www.tam-tam.co.jp/tipsnote/javascript/post9911.html
+var urlParam = location.search.substring(1);
+if(urlParam) {
+  var param = urlParam.split('&');
+  var paramArray = [];
+  for (i = 0; i < param.length; i++) {
+    var paramItem = param[i].split('=');
+    paramArray[paramItem[0]] = paramItem[1];
+  }
+    summoner = paramArray.summoner
+}
+
 
 //character
 //--------------------------------------------------------------------------------------------------------
@@ -952,7 +965,7 @@ function update() {
             char1.submode = 0;
             char1.count = 0;
             char1.target_x = 300;
-            char1.target_y = 300;
+            char1.target_y = 250;
 
             /***
             flag_grooming = 0;

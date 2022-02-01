@@ -739,7 +739,7 @@ contract murasaki is ERC721{
         }else if (level[_summoner] == 5) {
             next_exp_required[_summoner] = 15000;
         }else if (level[_summoner] == 6) {
-            next_exp_required[_summoner] = 2100;
+            next_exp_required[_summoner] = 21000;
         }else if (level[_summoner] == 7) {
             next_exp_required[_summoner] = 28000;
         }else if (level[_summoner] == 8) {
