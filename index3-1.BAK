@@ -29,6 +29,10 @@
 </head>
 
 <body bgcolor="#DDA0DD">
+    <font size="4" color="#EE82EE"> Murasaki san version 0.1.0</font>
+    <br>
+    <br>
+    <br>
     type:
     <select name="class" id="ctype">
         <option value="1">1</option>
@@ -51,8 +55,7 @@
     </form>
     <br>
     <br>
-    <br>
-    <font size="2" color="#EE82EE)">donation: 0x2F7448B62134e52C2f46454d0089Ae21B5248805</font>
+    <font size="1" color="#EE82EE)">donation: 0x2F7448B62134e52C2f46454d0089Ae21B5248805</font>
 
 <script type="text/javascript">
 
