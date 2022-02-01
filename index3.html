@@ -94,6 +94,40 @@ ToDo
 
 
 
+//global variants
+//--------------------------------------------------------------------------------------------------------
+
+const version = "0.0.14";
+let turn = 0;
+
+let local_ctype;
+let local_strength;
+let local_dexterity;
+let local_vitality;
+let local_intelligence;
+let local_luck;
+let local_birth_time;
+let local_level = 1;
+let local_last_feeding_time;
+let local_last_grooming_time;
+let local_coin;
+let local_exp;
+let local_mining_status;
+let local_mining_start_time;
+let local_next_exp_required;
+let local_material;
+let local_farming_status;
+let local_farming_start_time;
+let local_crafting_status;
+let local_crafting_start_time;
+let previous_local_last_feeding_time;
+let previous_local_last_grooming_time;
+let summoner = -1;
+let satiety;
+let happy;
+
+
+
 //web3
 //--------------------------------------------------------------------------------------------------------
 
@@ -646,37 +680,6 @@ function stop_farming(contract) {
 // main functions
 //--------------------------------------------------------------------------------------------------------
 
-const version = "0.0.14";
-let turn = 0;
-
-//static_status, read from construct at once
-let local_id;
-let local_ctype;
-let local_strength;
-let local_dexterity;
-let local_vitality;
-let local_intelligence;
-let local_luck;
-let local_birth_time;
-//dynamic_status, read from construct continuously, write to construct
-let local_level = 1;
-let local_last_feeding_time;
-let local_last_grooming_time;
-let local_coin;
-let local_exp;
-let local_mining_status;
-let local_mining_start_time;
-let local_next_exp_required;
-let local_material;
-let local_farming_status;
-let local_farming_start_time;
-let local_crafting_status;
-let local_crafting_start_time;
-let previous_local_last_feeding_time;
-let previous_local_last_grooming_time;
-let summoner = -1;
-let satiety;
-let happy;
 
 let config = {
     type: Phaser.AUTO,
