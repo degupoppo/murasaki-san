@@ -2,6 +2,7 @@
 
 
 <!---
+
 picture
     背景
     クリックアイコン（grooming, mining, farming, crafting）
@@ -10,74 +11,26 @@ picture
     おなかへった・・・
     ものづくりちゅう！
     ありがとう！
-Idea
-    FeedingとGrooming
-    Coin, MaterialとCrafting
-    ステータス
 
-    working()の概念を考える
-        コインを稼ぐ
-        str依存？動作とステータスのイメージが一致するように
-        マイニング？お花摘み？
-    クラフト, luck, str, dexなどのステータス＋クラフト時間で成功率を変える、アイテムごとに難易度が違う
-        難しいものでも、１ヶ月とかクラフトし続ければ作れるかもしれない。
-        連続思考を防ぐため、０％も作る。またファンブルで必ず５％は失敗する
-        クラフト品のユースケースは？
-    資産
-        summoner間での移動は50%が消える
-        exp?, 時間, コイン（sota?, ohana?), 素材(あまり種類を多くしない, 低級、中級、上級、ぐらい）
-        exp
-            お世話で取得
-            Lv upで消費
-        コイン
-            miningで取得
-            Craftingで消費
-        素材
-            farmingで取得
-            Craftingで消費
-    効率・補正
-        Lv, Str/Dex/Intなどのステータス, endを押すまでの経過時間
-        クラフト品による補正
-    時間を資源に
-        フリー時間しかgroomingなどできない
-        working, やcraftingは時間を費やせばそれだけ効率や成功率が増大する
-        しかしworkingさせているとgroomingやfeedingできずにexpがたまらない
-    ステータス
-        Lvアップで増加？ランダム？
-        木の実をクラフトし使用する、確率を小さくするか、高価にする
-        Strength: 筋力
-            Miningの効率up
-        Dexterity: 器用さ
-            Farmingの効率up
-        Intelligence: 知力
-            Craftingの効率up
-        Vitality: 体力
-            不要？
-        Luck: 運
-            ボーナスダイスに加算
-    お世話, expを得る
-        feeding, デイリークエスト, コストなし, 24時間で最大効率
-        grooming, プラスアルファ, 何かしらのコスト必要, 168時間で最大効率
+Idea
+    feeding, grooming, mining, farming, craftingの関係
+    satiety, happy, coin, materialのバランス
+    lv, str, dex, int, val, lucの補正方法, 上昇方法
+
 ToDo
-    UI：Mintボタン, type指定可能に
-    UI：所有summonerの表示と選択
+    stopのUI実装. 現在の取得数計算、経過時間、など
+    craftingコントラの実装
+    item craftingのUIの実装
     UI：所有itemのリアルタイム更新と表示
     コントラ：random
     コントラ：crafting, summonerが所有するNFT, 所有summonerを紐付けるよう書き換える
     コントラ：レベルアップの実装
     アイデア：coinのユースケースを考える
     アイデア：materialのバランスを考える
-    wallet所有のNFTを選べるUIを作る
     satietyとhappyの差別化を考える。
-
-    <form name="select_summoner">
-        <input type="button" value="Update Summoner List" onclick="button_update_summoners();"/>
-        <select name="select_summoner" id="summoner">
-            <option value="***">***<option>
-        </select>
-        <input type="button" value="Swith Summoner" onclick="button_select_summoner();"/>
-    </form>
-    <br>
+    ok wallet所有のNFTを選べるUIを作る
+    ok UI：Mintボタン, type指定可能に
+    ok UI：所有summonerの表示と選択
 
 --->
 
@@ -102,11 +55,13 @@ ToDo
 
 <body>
 
+
+
 <script type="text/javascript">
 
 
 
-//global variants
+// global variants
 //--------------------------------------------------------------------------------------------------------
 
 const version = "0.0.14";
@@ -140,7 +95,7 @@ let happy;
 
 
 
-//web
+// html
 //--------------------------------------------------------------------------------------------------------
 
 //get summoner from url parameter
@@ -158,7 +113,7 @@ if(urlParam) {
 
 
 
-//web3
+// web3
 //--------------------------------------------------------------------------------------------------------
 
 //connect to metamask
@@ -284,7 +239,7 @@ async function contract_stop_farming(summoner) {
 
 
 
-//character
+// summoner
 //--------------------------------------------------------------------------------------------------------
 class Murasakisan extends Phaser.GameObjects.Sprite{
     constructor(scene, x, y){
@@ -1015,7 +970,20 @@ function update() {
 
 
 
-/***
+</script>
+
+
+
+</body>
+</html>
+
+
+
+<!---
+
+//garbedge
+//--------------------------------------------------------------------------------------------------------
+
     ok コントラクト内にステータスを保持する
     ok コントラクト内のステータスを読み出す
     ok ステータスを保有したNFTを作成する
@@ -1240,14 +1208,59 @@ function button_select_summoner() {
 }
 
 
-***/
+    working()の概念を考える
+        コインを稼ぐ
+        str依存？動作とステータスのイメージが一致するように
+        マイニング？お花摘み？
+    クラフト, luck, str, dexなどのステータス＋クラフト時間で成功率を変える、アイテムごとに難易度が違う
+        難しいものでも、１ヶ月とかクラフトし続ければ作れるかもしれない。
+        連続思考を防ぐため、０％も作る。またファンブルで必ず５％は失敗する
+        クラフト品のユースケースは？
+    資産
+        summoner間での移動は50%が消える
+        exp?, 時間, コイン（sota?, ohana?), 素材(あまり種類を多くしない, 低級、中級、上級、ぐらい）
+        exp
+            お世話で取得
+            Lv upで消費
+        コイン
+            miningで取得
+            Craftingで消費
+        素材
+            farmingで取得
+            Craftingで消費
+    効率・補正
+        Lv, Str/Dex/Intなどのステータス, endを押すまでの経過時間
+        クラフト品による補正
+    時間を資源に
+        フリー時間しかgroomingなどできない
+        working, やcraftingは時間を費やせばそれだけ効率や成功率が増大する
+        しかしworkingさせているとgroomingやfeedingできずにexpがたまらない
+    ステータス
+        Lvアップで増加？ランダム？
+        木の実をクラフトし使用する、確率を小さくするか、高価にする
+        Strength: 筋力
+            Miningの効率up
+        Dexterity: 器用さ
+            Farmingの効率up
+        Intelligence: 知力
+            Craftingの効率up
+        Vitality: 体力
+            不要？
+        Luck: 運
+            ボーナスダイスに加算
+    お世話, expを得る
+        feeding, デイリークエスト, コストなし, 24時間で最大効率
+        grooming, プラスアルファ, 何かしらのコスト必要, 168時間で最大効率
 
-
-</script>
-
-<!---
 Donate: 0x2F7448B62134e52C2f46454d0089Ae21B5248805
---->
 
-</body>
-</html>
+    <form name="select_summoner">
+        <input type="button" value="Update Summoner List" onclick="button_update_summoners();"/>
+        <select name="select_summoner" id="summoner">
+            <option value="***">***<option>
+        </select>
+        <input type="button" value="Swith Summoner" onclick="button_select_summoner();"/>
+    </form>
+    <br>
+
+--->
