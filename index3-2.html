@@ -798,18 +798,18 @@ function create() {
 
     //status window
     let font_arg = {font: "10.5px Arial", fill: "#000"};
-    text_summoner =     this.add.text(600,  30, "Summoner: " + summoner, font_arg);
-    text_type =         this.add.text(600,  40, "Type: " + local_ctype, font_arg);
-    text_strength =     this.add.text(600,  60, " STR: " + local_strength, font_arg);
-    text_dexterity =    this.add.text(600,  70, " DEX: " + local_dexterity, font_arg);
-    text_vitality =     this.add.text(600,  80, " VIT: " + local_vitality, font_arg);
-    text_intelligence = this.add.text(600,  90, " INT = " + local_intelligence, font_arg);
-    text_luck =         this.add.text(600, 100, " LUK: " + local_luck, font_arg);
-    text_level =        this.add.text(600, 120, "  Lv: " + local_level, font_arg);
-    text_exp =          this.add.text(600, 180, " EXP: " + local_exp, font_arg);
-    text_turn =         this.add.text(600, 200, "turn = ", font_arg);
-    text_age_time =     this.add.text(600, 210, " age = ", font_arg);
-    text_mode =         this.add.text(600, 220, "mode = ", font_arg);
+    text_summoner =     this.add.text(600,  10, "Summoner: " + summoner, font_arg);
+    text_type =         this.add.text(600,  20, "Type: " + local_ctype, font_arg);
+    text_strength =     this.add.text(600,  40, " STR: " + local_strength, font_arg);
+    text_dexterity =    this.add.text(600,  50, " DEX: " + local_dexterity, font_arg);
+    text_vitality =     this.add.text(600,  60, " VIT: " + local_vitality, font_arg);
+    text_intelligence = this.add.text(600,  70, " INT = " + local_intelligence, font_arg);
+    text_luck =         this.add.text(600,  80, " LUK: " + local_luck, font_arg);
+    text_level =        this.add.text(600,  90, "  Lv: " + local_level, font_arg);
+    text_exp =          this.add.text(600, 100, " EXP: " + local_exp, font_arg);
+    text_turn =         this.add.text(600, 120, "turn = ", font_arg);
+    text_age_time =     this.add.text(600, 130, " age = ", font_arg);
+    text_mode =         this.add.text(600, 140, "mode = ", font_arg);
     //text_version = this.add.text(600, 10, "version = " + version, {font: "10.5px Arial", fill: "#000"});
     //text_last_feeding_time = this.add.text(
     //    600, 130, "last_feeding_time = " + local_last_feeding_time, {font: "10.5px Arial", fill: "#000"});
@@ -826,28 +826,28 @@ function create() {
 
     //bar
     //satiety
-    this.add.text(600, 260, "satiety:", {font: "10.5px Arial", fill: "#000"});
-    bar_satiety_back = makeBar(this, 640, 260, 0xa9a9a9);
+    this.add.text(600, 160, "satiety:", font_arg);
+    bar_satiety_back = makeBar(this, 640, 160, 0xa9a9a9);
     bar_satiety_back.scaleX = 1;
-    bar_satiety = makeBar(this, 640, 260, 0xff4500);
+    bar_satiety = makeBar(this, 640, 160, 0xff4500);
     bar_satiety.scaleX = 0;
     //happy
-    this.add.text(600, 280, "happy:", {font: "10.5px Arial", fill: "#000"});
-    bar_happy_back = makeBar(this, 640, 280, 0xa9a9a9);
+    this.add.text(600, 180, "happy:", font_arg);
+    bar_happy_back = makeBar(this, 640, 180, 0xa9a9a9);
     bar_happy_back.scaleX = 1;
-    bar_happy = makeBar(this, 640, 280, 0x4169e1);
+    bar_happy = makeBar(this, 640, 180, 0x4169e1);
     bar_happy.scaleX = 0;
     //exp
-    this.add.text(600, 300, "exp:", {font: "10.5px Arial", fill: "#000"});
-    bar_exp_back = makeBar(this, 640, 300, 0xa9a9a9);
+    this.add.text(600, 200, "exp:", font_arg);
+    bar_exp_back = makeBar(this, 640, 200, 0xa9a9a9);
     bar_exp_back.scaleX = 1;
-    bar_exp = makeBar(this, 640, 300, 0x228b22);
+    bar_exp = makeBar(this, 640, 200, 0x228b22);
     bar_exp.scaleX = 0;
     //coin
     text_coin = this.add.text(
-        600, 320, "coin:" + local_coin, {font: "10.5px Arial", fill: "#000"});
+        600, 220, "Coin: " + local_coin, font_arg);
     text_material = this.add.text(
-        600, 330, "material:" + local_material, {font: "10.5px Arial", fill: "#000"});
+        600, 230, "Material: " + local_material, font_arg);
 }
 
 
@@ -870,7 +870,7 @@ function update() {
     //update calculation status
     if (turn == 1 || turn % 100 == 0) {
 
-        //feeding
+        //feeding check
         if (local_last_feeding_time > previous_local_last_feeding_time){
             murasakisan.set_mode = "feeding";
             murasakisan.submode = 0;
@@ -886,7 +886,7 @@ function update() {
             food.scaleY = food.scaleY * 0.1;
         }
 
-        //grooming
+        //grooming check
         if (local_last_grooming_time > previous_local_last_grooming_time){
             murasakisan.set_mode = "grooming";
             murasakisan.submode = 0;
@@ -895,7 +895,7 @@ function update() {
             murasakisan.target_y = 250;
         }
 
-        //mining
+        //mining check
         if (local_mining_status == 1 & murasakisan.mode != "mining"){
             murasakisan.set_mode = "mining";
             murasakisan.submode = 0;
@@ -906,7 +906,7 @@ function update() {
             murasakisan.set_mode = "resting";
         }
 
-        //farming
+        //farming check
         if (local_farming_status == 1 & murasakisan.mode != "farming"){
             murasakisan.set_mode = "farming";
             murasakisan.submode = 0;
@@ -922,44 +922,51 @@ function update() {
         let age_time = Math.round( now_time - local_birth_time );
         let mode = murasakisan.get_mode;
         let base = 86400
+        //satiety
         satiety = Math.round( (base - (now_time - local_last_feeding_time)) / base * 1000 ) / 10;
         if (satiety < 0) { satiety = 0; }
         if (satiety > 100) { satiety = 100; }
         let base2 = 86400 * 7
+        //happy
         happy = Math.round( (base2 - (now_time - local_last_grooming_time)) / base2 * 1000 ) / 10;
         if (happy < 0) { happy = 0; }
         if (happy > 100) { happy = 100; }
+        //exp
+        let exp = (local_exp / local_next_exp_required) * 100;
+        if (exp > 100) { exp = 100; }
 
         //update text
+        text_summoner.setText   ("summoner = " + summoner);
+        text_type.setText       ("type = " + local_ctype);
+        //status
         text_level.setText          (" Lv: " + local_level);
         text_strength.setText       ("STR: " + local_strength);
         text_dexterity.setText      ("DEX: " + local_dexterity);
         text_vitality.setText       ("VIT: " + local_vitality);
         text_intelligence.setText   ("INT: " + local_intelligence);
         text_luck.setText           ("LUK: " + local_luck);
-
-        text_turn.setText("turn = " + turn);
-        text_summoner.setText("summoner = " + summoner);
-        text_type.setText("type = " + local_ctype);
-        //text_birth_time.setText("birth_time = " + local_birth_time);
-        //text_last_feeding_time.setText("last_feeding_time = " + local_last_feeding_time);
-        //text_last_grooming_time.setText("last_grooming_time = " + local_last_grooming_time);
+        text_exp.setText            ("EXP: " + local_exp);
+        //game info
+        text_turn.setText       ("turn = " + turn);
+        text_age_time.setText   ("age = " + age_time);
+        text_mode.setText       ("mode = " + mode);
+        //coin & material
         text_coin.setText("coin = " + local_coin);
-        text_exp.setText("exp = " + local_exp);
-        text_age_time.setText("age_time = " + age_time);
-        text_mode.setText("mode = " + mode);
-        //text_satiety.setText("satiety = " + satiety);
-        //text_happy.setText("happy = " + happy);
+        text_material.setText("material = " + local_material);
+
         //update bar
         bar_satiety.scaleX = satiety / 100;
         bar_happy.scaleX = happy / 100;
-
-        //exp
-        let exp = (local_exp / local_next_exp_required) * 100;
-        if (exp > 100) { exp = 100; }
         bar_exp.scaleX = exp / 100;
+
+        //text_birth_time.setText("birth_time = " + local_birth_time);
+        //text_last_feeding_time.setText("last_feeding_time = " + local_last_feeding_time);
+        //text_last_grooming_time.setText("last_grooming_time = " + local_last_grooming_time);
+        //text_satiety.setText("satiety = " + satiety);
+        //text_happy.setText("happy = " + happy);
         //text_coin_main.setText("coin:    " + local_coin);
         //text_material_main.setText("material:" + local_material);
+
         previous_local_last_feeding_time = local_last_feeding_time;
         previous_local_last_grooming_time = local_last_grooming_time;
     }
