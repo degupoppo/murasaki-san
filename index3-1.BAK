@@ -32,7 +32,6 @@
     <font size="1" color="#c71585">(version 0.1.0)</font><br>
     <br>
     <br>
-    <br>
     <font size="2">Summon your Murasaki-San</font><br>
     <font size="2">type:</font>
     <select name="class" id="ctype">
