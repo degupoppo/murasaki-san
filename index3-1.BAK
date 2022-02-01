@@ -107,7 +107,7 @@ async function contract_summon() {
     let web3 = await connect();
     let contract = await get_contract(web3);
     let wallet = await get_wallet(web3);
-    contract.methods.summon(ctype).send({from:wallet});
+    contract.methods.summon(ctype).send({from:wallet, value:1});
 }
 
 //get owned summoners
