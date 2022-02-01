@@ -28,7 +28,7 @@
     </style>
 </head>
 
-<body bgcolor="#EE82EE">
+<body bgcolor="#DDA0DD">
     type:
     <select name="class" id="ctype">
         <option value="1">1</option>
@@ -52,7 +52,7 @@
     <br>
     <br>
     <br>
-    <font size="2" color="#BA55D3)">donation: 0x2F7448B62134e52C2f46454d0089Ae21B5248805</font>
+    <font size="2" color="#EE82EE)">donation: 0x2F7448B62134e52C2f46454d0089Ae21B5248805</font>
 
 <script type="text/javascript">
 
