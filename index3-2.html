@@ -21,6 +21,7 @@ Idea
         farming(dex), mining(str), crafting(int)のtotal timeでレベルアップ時のstatus換算を変える
         加えて、木の実で能動的に上げることもできる
         valはno feeding/grooming timeが0で最大効率, valが高いと得られる経験値が増える?
+
 ToDo
     stopのUI実装. 現在の取得数計算、経過時間、など
     craftingコントラの実装
@@ -430,7 +431,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             this.x = this.target_x;
             this.y = this.target_y;
             this.anims.play("murasaki_grooming", true);
-            this.count_limit = this.count + 1000;
+            this.count_limit = this.count + 1500;
             this.submode = 3;
         }else if (this.submode == 3) {
             if (this.count >= this.count_limit) {
@@ -739,22 +740,22 @@ function create() {
     button_feeding = this.add.sprite(660,430, "button_feeding");
     button_feeding.scaleX = button_feeding.scaleX * 0.08;
     button_feeding.scaleY = button_feeding.scaleY * 0.08;
-    button_feeding.setInteractive();
+    button_feeding.setInteractive({useHandCursor: true});
     button_feeding.on('pointerdown', () => contract_feeding(summoner) );
     button_grooming = this.add.sprite(400,300, "button_feeding");
     button_grooming.scaleX = button_grooming.scaleX * 0.08;
     button_grooming.scaleY = button_grooming.scaleY * 0.08;
-    button_grooming.setInteractive();
+    button_grooming.setInteractive({useHandCursor: true});
     button_grooming.on('pointerdown', () => contract_grooming(summoner) );
     button_mining = this.add.sprite(10,430, "button_feeding");
     button_mining.scaleX = button_mining.scaleX * 0.08;
     button_mining.scaleY = button_mining.scaleY * 0.08;
-    button_mining.setInteractive();
+    button_mining.setInteractive({useHandCursor: true});
     button_mining.on('pointerdown', () => contract_start_mining(summoner) );
     button_farming = this.add.sprite(200,300, "button_feeding");
     button_farming.scaleX = button_farming.scaleX * 0.08;
     button_farming.scaleY = button_farming.scaleY * 0.08;
-    button_farming.setInteractive();
+    button_farming.setInteractive({useHandCursor: true});
     button_farming.on('pointerdown', () => contract_start_farming(summoner) );
 
     //summon character

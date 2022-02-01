@@ -20,7 +20,8 @@ Idea
     lv, str, dex, int, val, lucの補正方法, 上昇方法
         farming(dex), mining(str), crafting(int)のtotal timeでレベルアップ時のstatus換算を変える
         加えて、木の実で能動的に上げることもできる
-        valはno feeding/grooming timeが0で最大効率, valが高いと得られる経験値が増える
+        valはno feeding/grooming timeが0で最大効率, valが高いと得られる経験値が増える?
+
 ToDo
     stopのUI実装. 現在の取得数計算、経過時間、など
     craftingコントラの実装
@@ -256,7 +257,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         this.dist = "right";
         this.target_x = 0;
         this.target_y = 0;
-        this.setInteractive()
+        this.setInteractive({useHandCursor: true});
         this.on("pointerdown", function (pointer) {
             this.on_click();
         }, this);
@@ -430,7 +431,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             this.x = this.target_x;
             this.y = this.target_y;
             this.anims.play("murasaki_grooming", true);
-            this.count_limit = this.count + 1000;
+            this.count_limit = this.count + 1500;
             this.submode = 3;
         }else if (this.submode == 3) {
             if (this.count >= this.count_limit) {
