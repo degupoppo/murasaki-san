@@ -1,4 +1,6 @@
 
+
+
 <!---
 Idea
     FeedingとGrooming
@@ -61,8 +63,11 @@ ToDo
     satietyとhappyの差別化を考える。
 --->
 
+
+
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="png" href="png/icon.PNG">
@@ -76,18 +81,19 @@ ToDo
         }
     </style>
 </head>
-<body>
 
-<form name="select_summoner">
-    <input type="button" value="Update Summoner List" onclick="button_update_summoners();"/>
-    <select name="select_summoner" id="summoner">
-        <option value="***">***<option>
-    </select>
-    <input type="button" value="Swith Summoner" onclick="button_select_summoner();"/>
-</form>
-<br>
+<body>
+    <form name="select_summoner">
+        <input type="button" value="Update Summoner List" onclick="button_update_summoners();"/>
+        <select name="select_summoner" id="summoner">
+            <option value="***">***<option>
+        </select>
+        <input type="button" value="Swith Summoner" onclick="button_select_summoner();"/>
+    </form>
+    <br>
 
 <script type="text/javascript">
+
 
 
 //global variants
@@ -464,7 +470,6 @@ class Character extends Phaser.GameObjects.Sprite{
     }
     //send: last_grooming_time
     grooming() {
-
         this.count += 1;
         if (this.submode == 0) {
             let delta_x = this.target_x - this.x;
@@ -487,13 +492,12 @@ class Character extends Phaser.GameObjects.Sprite{
               && this.x < this.target_x+10 
               && this.y > this.target_y-10 
               && this.y < this.target_y+10) {
-                this.x = this.target_x;
-                this.y = this.target_y;
                 this.submode = 2;
             }
         }else if (this.submode == 2) {
+            this.x = this.target_x;
+            this.y = this.target_y;
             this.anims.play("murasaki_grooming", true);
-            //food.destroy();
             this.count_limit = this.count + 2000;
             this.submode = 3;
         }else if (this.submode == 3) {
@@ -502,16 +506,6 @@ class Character extends Phaser.GameObjects.Sprite{
                 this.count = 0;
             }
         }
-
-        /***
-        this.count += 1;
-        if (this.count == 1){
-            this.anims.play("murasaki_feeding", true);
-        }else if (this.count >= 1000) {
-            this.mode = "resting";
-            this.count = 0;
-        }
-        ***/
     }
     //cost: life, gain: coin
     mining() {
