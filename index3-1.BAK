@@ -31,11 +31,10 @@
 <body>
     type:&nbsp;
     <select name="class" id="ctype">
-        <option value="0"> 0 <option>
-        <option value="1"> 1 <option>
-        <option value="2"> 2 <option>
-        <option value="3"> 3 <option>
-        <option value="4"> 4 <option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
     </select>
     &nbsp;
     <input type="button" value="[ Summon ]" onclick="contract_summon(1);" />
@@ -45,10 +44,10 @@
         <input type="button" value="[ Update your Summoners → ]" onclick="button_update_summoners();" />
         &nbsp;
         <select name="select_summoner" id="summoner">
-            <option value="***">***<option>
+            <option value="***">***</option>
         </select>
         &nbsp;
-        <input type="button" value="[ Start! ]" onclick="button_select_summoner();" />
+        <input type="button" value="[ Start ]" onclick="button_select_summoner();" />
     </form>
     <br>
 
