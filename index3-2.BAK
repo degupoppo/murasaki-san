@@ -257,7 +257,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         this.dist = "right";
         this.target_x = 0;
         this.target_y = 0;
-        this.setInteractive({useHandCursor: true});
+        this.setInteractive()
         this.on("pointerdown", function (pointer) {
             this.on_click();
         }, this);
@@ -740,22 +740,22 @@ function create() {
     button_feeding = this.add.sprite(660,430, "button_feeding");
     button_feeding.scaleX = button_feeding.scaleX * 0.08;
     button_feeding.scaleY = button_feeding.scaleY * 0.08;
-    button_feeding.setInteractive();
+    button_feeding.setInteractive({useHandCursor: true});
     button_feeding.on('pointerdown', () => contract_feeding(summoner) );
     button_grooming = this.add.sprite(400,300, "button_feeding");
     button_grooming.scaleX = button_grooming.scaleX * 0.08;
     button_grooming.scaleY = button_grooming.scaleY * 0.08;
-    button_grooming.setInteractive();
+    button_grooming.setInteractive({useHandCursor: true});
     button_grooming.on('pointerdown', () => contract_grooming(summoner) );
     button_mining = this.add.sprite(10,430, "button_feeding");
     button_mining.scaleX = button_mining.scaleX * 0.08;
     button_mining.scaleY = button_mining.scaleY * 0.08;
-    button_mining.setInteractive();
+    button_mining.setInteractive({useHandCursor: true});
     button_mining.on('pointerdown', () => contract_start_mining(summoner) );
     button_farming = this.add.sprite(200,300, "button_feeding");
     button_farming.scaleX = button_farming.scaleX * 0.08;
     button_farming.scaleY = button_farming.scaleY * 0.08;
-    button_farming.setInteractive();
+    button_farming.setInteractive({useHandCursor: true});
     button_farming.on('pointerdown', () => contract_start_farming(summoner) );
 
     //summon character
