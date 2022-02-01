@@ -782,14 +782,14 @@ function create() {
 
     //button_text
     new Button(30, 10, 'Level Up', this, () => contract_level_up(summoner));
-    new Button(30, 40, 'Feeding', this, () => contract_feeding(summoner));
-    new Button(30, 70, 'Grooming', this, () => contract_grooming(summoner));
-    new Button(30, 100, 'Start Mining', this, () => contract_start_mining(summoner));
+    //new Button(30, 40, 'Feeding', this, () => contract_feeding(summoner));
+    //new Button(30, 70, 'Grooming', this, () => contract_grooming(summoner));
+    //new Button(30, 100, 'Start Mining', this, () => contract_start_mining(summoner));
     new Button(30, 130, 'Stop Mining', this, () => contract_stop_mining(summoner));
-    new Button(30, 160, 'Start Farming', this, () => contract_start_farming(summoner));
+    //new Button(30, 160, 'Start Farming', this, () => contract_start_farming(summoner));
     new Button(30, 190, 'Stop Farming', this, () => contract_stop_farming(summoner));
-    new Button(30, 250, 'Summon', this, () => contract_summon("1"));
-    new Button(30, 280, 'Test', this, () => update_summoner_list());
+    //new Button(30, 250, 'Summon', this, () => contract_summon("1"));
+    //new Button(30, 280, 'Test', this, () => update_summoner_list());
 
     //status window color fill
     let status_back = this.add.graphics();
@@ -797,46 +797,32 @@ function create() {
     status_back.alpha = 0.5;
 
     //status window
-    text_version = this.add.text(600, 10, "version = " + version, {font: "10.5px Arial", fill: "#000"});
-    //static_status
-    text_summoner = this.add.text(
-        600, 30, "summoner = " + summoner, {font: "10.5px Arial", fill: "#000"});
-    text_type = this.add.text(
-        600, 40, "type = " + local_ctype, {font: "10.5px Arial", fill: "#000"});
-    text_birth_time = this.add.text(
-        600, 50, "birth_time = " + local_birth_time, {font: "10.5px Arial", fill: "#000"});
-    text_strength = this.add.text(
-        600, 60, "strength = " + local_strength, {font: "10.5px Arial", fill: "#000"});
-    text_dexterity = this.add.text(
-        600, 70, "dexterity = " + local_dexterity, {font: "10.5px Arial", fill: "#000"});
-    text_vitality = this.add.text(
-        600, 80, "vitality = " + local_vitality, {font: "10.5px Arial", fill: "#000"});
-    text_intelligence = this.add.text(
-        600, 90, "intelligence = " + local_intelligence, {font: "10.5px Arial", fill: "#000"});
-    text_luck = this.add.text(
-        600, 100, "luck = " + local_luck, {font: "10.5px Arial", fill: "#000"});
-    //dynamic_status
-    text_level = this.add.text(
-        600, 120, "level = " + local_level, {font: "10.5px Arial", fill: "#000"});
-    text_last_feeding_time = this.add.text(
-        600, 130, "last_feeding_time = " + local_last_feeding_time, {font: "10.5px Arial", fill: "#000"});
-    text_last_grooming_time = this.add.text(
-        600, 140, "last_grooming_time = " + local_last_grooming_time, {font: "10.5px Arial", fill: "#000"});
-    text_coin = this.add.text(
-        600, 150, "coin = " + local_coin, {font: "10.5px Arial", fill: "#000"});
-    text_exp = this.add.text(
-        600, 180, "exp = " + local_exp, {font: "10.5px Arial", fill: "#000"});
-    //calculation_status
-    text_turn = this.add.text(
-        600, 200, "turn = ", {font: "10.5px Arial", fill: "#000"});
-    text_age_time = this.add.text(
-        600, 210, "age_time = ", {font: "10.5px Arial", fill: "#000"});
-    text_mode = this.add.text(
-        600, 220, "mode = ", {font: "10.5px Arial", fill: "#000"});
-    text_satiety = this.add.text(
-        600, 230, "satiey = ", {font: "10.5px Arial", fill: "#000"});
-    text_happy = this.add.text(
-        600, 240, "happy = ", {font: "10.5px Arial", fill: "#000"});
+    let font_arg = {font: "10.5px Arial", fill: "#000"};
+    text_summoner = this.add.text(600, 30, "Summoner: " + summoner, font_arg);
+    text_type = this.add.text(600, 40, "Type: " + local_ctype, font_arg);
+    text_strength = this.add.text(600, 60, "STR: " + local_strength, font_arg);
+    text_dexterity = this.add.text(600, 70, "DEX: " + local_dexterity, font_arg);
+    text_vitality = this.add.text(600, 80, "VIT: " + local_vitality, font_arg);
+    text_intelligence = this.add.text(600, 90, "intelligence = " + local_intelligence, font_arg);
+    text_luck = this.add.text(600, 100, "LUK: " + local_luck, font_arg);
+    text_level = this.add.text(600, 120, "Lv: " + local_level, font_arg);
+    text_exp = this.add.text(600, 180, "EXP: " + local_exp, font_arg);
+    text_turn = this.add.text(600, 200, "turn = ", font_arg);
+    text_age_time = this.add.text(600, 210, "age = ", font_arg);
+    text_mode = this.add.text(600, 220, "mode = ", font_arg);
+    //text_version = this.add.text(600, 10, "version = " + version, {font: "10.5px Arial", fill: "#000"});
+    //text_last_feeding_time = this.add.text(
+    //    600, 130, "last_feeding_time = " + local_last_feeding_time, {font: "10.5px Arial", fill: "#000"});
+    //text_last_grooming_time = this.add.text(
+    //    600, 140, "last_grooming_time = " + local_last_grooming_time, {font: "10.5px Arial", fill: "#000"});
+    //text_coin = this.add.text(
+    //    600, 150, "coin = " + local_coin, {font: "10.5px Arial", fill: "#000"});
+    //text_birth_time = this.add.text(
+    //    600, 50, "birth_time = " + local_birth_time, {font: "10.5px Arial", fill: "#000"});
+    //text_satiety = this.add.text(
+    //    600, 230, "satiey = ", {font: "10.5px Arial", fill: "#000"});
+    //text_happy = this.add.text(
+    //    600, 240, "happy = ", {font: "10.5px Arial", fill: "#000"});
 
     //bar
     //satiety
@@ -946,15 +932,15 @@ function update() {
         text_turn.setText("turn = " + turn);
         text_summoner.setText("summoner = " + summoner);
         text_type.setText("type = " + local_ctype);
-        text_birth_time.setText("birth_time = " + local_birth_time);
+        //text_birth_time.setText("birth_time = " + local_birth_time);
         text_level.setText("level = " + local_level);
         text_strength.setText("strength = " + local_strength);
         text_dexterity.setText("dexterity = " + local_dexterity);
         text_vitality.setText("vitality = " + local_vitality);
         text_intelligence.setText("intelligence = " + local_intelligence);
         text_luck.setText("luck = " + local_luck);
-        text_last_feeding_time.setText("last_feeding_time = " + local_last_feeding_time);
-        text_last_grooming_time.setText("last_grooming_time = " + local_last_grooming_time);
+        //text_last_feeding_time.setText("last_feeding_time = " + local_last_feeding_time);
+        //text_last_grooming_time.setText("last_grooming_time = " + local_last_grooming_time);
         text_coin.setText("coin = " + local_coin);
         text_exp.setText("exp = " + local_exp);
         text_age_time.setText("age_time = " + age_time);
