@@ -99,34 +99,6 @@ async function get_contract(web3) {
     return contract;
 }
 
-
-async function contract_update_status(summoner) {
-    let web3 = await connect();
-    let contract = await get_contract(web3);
-    let res = await contract.methods.get_status(summoner).call();
-    console.log(res);   
-    local_ctype = res[0];
-    local_strength = res[1];
-    local_dexterity = res[2];
-    local_vitality = res[3];
-    local_intelligence = res[4];
-    local_luck = res[5];
-    local_birth_time = res[6];
-    local_last_feeding_time = res[7];
-    local_last_grooming_time = res[8];
-    local_coin = res[9];
-    local_material = res[10];
-    local_mining_status = res[11];
-    local_mining_start_time = res[12];
-    local_farming_status = res[13];
-    local_farming_start_time = res[14];
-    local_crafting_status = res[15];
-    local_crafting_start_time = res[16];
-    local_exp = res[17];
-    local_level = res[18];
-    local_next_exp_required = res[19];
-}
-
 //call status from contract
 
 //summon
