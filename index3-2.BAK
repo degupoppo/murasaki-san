@@ -6,26 +6,29 @@
 picture
     背景
     クリックアイコン（grooming, mining, farming, crafting）
-    しゅっきん！
-    ごきげん！
+    しゅっきん！（お仕事へ移動中）
+    ごきげん！（お腹いっぱい＆ハッピーなときなど）
     おなかへった・・・
-    ものづくりちゅう！
-    ありがとう！
-    クラフトアイテムたくさん
+    ものづくりちゅう！（クラフト中）
+    ありがとう！（ご飯たべたあとなど）
+    クラフトアイテムたくさん（飼い主手伝う）
 
 Idea
     main idea
-        献身性によって成長と変化を実感できる育成型NFT
-        時間が基本資源, summonerをどの状態にしたかで変化の仕方が違う
+        献身によって成長と変化を実感できる育成型NFT
+        時間が基本資源, summonerをどの状態にどれだけしたかで変化の仕方が違う
         マメにかつ長期間お世話されたsummonerほど出来ることが増える設計
-        競争ではなく箱庭型
+        競争ではなく箱庭型、効率化を考えなくても良い雰囲気で。
+        拡大再生産による可能性の拡大, 明日のコインのための今日コインを使う
+        効率的にプレイしておおよそ2年間で最大値に達する時間軸で。
+        全てのアイテムを買うことはできない。
     feeding, grooming, mining, farming, craftingの関係
     satiety, happy, coin, materialのバランス, 消費タイミング, 補正
         materialはcrafting時に消費する基本資源, たくさん費やすほど成功率が上がる, 失敗しても減る
         coinはcraft成功時に支払われる資源, 成功時に減る
-    lv, str, dex, int, val, lukの補正方法, 上昇方法
+    level, str, dex, int, val, lukの補正方法, 上昇方法
         farming(dex), mining(str), crafting(int)のtotal timeでレベルアップ時のstatus換算を変える
-        加えて、木の実で能動的に上げることもできる
+        加えて、高コストだが木の実で能動的に上げることもできる
         valはno feeding/grooming timeが0で最大効率, valが高いと得られる経験値が増える?
     items
         mining, farming, crafting補正アイテム, 置物？動く？
