@@ -28,6 +28,7 @@
 </head>
 
 <body bgcolor="#DDA0DD">
+    <img src="png/food_sweet_potato.png" width="64" height="64">
     <font size="5" color="#c71585">House of Murasaki-San</font><br>
     <font size="1" color="#c71585">(version 0.1.0)</font><br>
     <br>
@@ -107,7 +108,7 @@ async function contract_summon() {
     let web3 = await connect();
     let contract = await get_contract(web3);
     let wallet = await get_wallet(web3);
-    contract.methods.summon(ctype).send({from:wallet, value:1});
+    contract.methods.summon(ctype).send({from:wallet});
 }
 
 //get owned summoners
