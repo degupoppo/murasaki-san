@@ -55,11 +55,11 @@
             <option value="***">***</option>
         </select>
         &nbsp;
-        <input type="button" value=" House Visit " onclick="button_select_summoner();" />
+        <input type="button" value=" Visit Home " onclick="button_select_summoner();" />
     </form>
     <br>
     <br>
-    <font size="1" color="#000000)">donation: 0x2F7448B62134e52C2f46454d0089Ae21B5248805</font>
+    <font size="1" color="#000000)">Donation Address: 0x2F7448B62134e52C2f46454d0089Ae21B5248805</font>
 
 <script type="text/javascript">
 

@@ -16,7 +16,7 @@ picture
 Idea
     main idea
         献身性によって成長と変化を実感できる育成型NFT
-        時間が基本資源, summonerをどの状態にしておくかを選択する
+        時間が基本資源, summonerをどの状態にしたかで変化の仕方が違う
         マメにかつ長期間お世話されたsummonerほど出来ることが増える設計
         競争ではなく箱庭型
     feeding, grooming, mining, farming, craftingの関係
@@ -36,6 +36,7 @@ ToDo
         solidityのsummon関数にpayableをつける
         web3jsのvalueに0.1など追記
         solidityのsummonにrequiredでvalue閾値を追記
+        solidityにwithdraw関数を追加
     stopのUI実装. 現在の取得数計算、経過時間、など
     craftingコントラの実装
     item craftingのUIの実装
