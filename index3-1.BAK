@@ -103,7 +103,7 @@ async function get_contract(web3) {
 
 //summon
 async function contract_summon() {
-    let ctype = document.getElementById("summoner").value
+    let ctype = document.getElementById("ctype").value
     let web3 = await connect();
     let contract = await get_contract(web3);
     let wallet = await get_wallet(web3);
