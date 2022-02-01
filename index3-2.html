@@ -14,9 +14,13 @@ picture
 
 Idea
     feeding, grooming, mining, farming, craftingの関係
-    satiety, happy, coin, materialのバランス
+    satiety, happy, coin, materialのバランス, 消費タイミング, 補正
+        materialはcrafting時に消費する基本資源, たくさん費やすほど成功率が上がる, 失敗しても減る
+        coinはcraft成功時に支払われる資源, 成功時に減る
     lv, str, dex, int, val, lucの補正方法, 上昇方法
-
+        farming(dex), mining(str), crafting(int)のtotal timeでレベルアップ時のstatus換算を変える
+        加えて、木の実で能動的に上げることもできる
+        valはno feeding/grooming timeが0で最大効率, valが高いと得られる経験値が増える?
 ToDo
     stopのUI実装. 現在の取得数計算、経過時間、など
     craftingコントラの実装
@@ -426,7 +430,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             this.x = this.target_x;
             this.y = this.target_y;
             this.anims.play("murasaki_grooming", true);
-            this.count_limit = this.count + 2000;
+            this.count_limit = this.count + 1000;
             this.submode = 3;
         }else if (this.submode == 3) {
             if (this.count >= this.count_limit) {
