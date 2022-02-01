@@ -869,6 +869,7 @@ function update() {
 
     //update calculation status
     if (turn == 1 || turn % 100 == 0) {
+
         //feeding
         if (local_last_feeding_time > previous_local_last_feeding_time){
             murasakisan.set_mode = "feeding";
@@ -884,6 +885,7 @@ function update() {
             food.scaleX = food.scaleX * 0.1;
             food.scaleY = food.scaleY * 0.1;
         }
+
         //grooming
         if (local_last_grooming_time > previous_local_last_grooming_time){
             murasakisan.set_mode = "grooming";
@@ -892,6 +894,7 @@ function update() {
             murasakisan.target_x = 300;
             murasakisan.target_y = 250;
         }
+
         //mining
         if (local_mining_status == 1 & murasakisan.mode != "mining"){
             murasakisan.set_mode = "mining";
@@ -902,6 +905,7 @@ function update() {
         }else if (local_mining_status == 0 & murasakisan.mode == "mining") {
             murasakisan.set_mode = "resting";
         }
+
         //farming
         if (local_farming_status == 1 & murasakisan.mode != "farming"){
             murasakisan.set_mode = "farming";
@@ -912,22 +916,20 @@ function update() {
         }else if (local_farming_status == 0 & murasakisan.mode == "farming") {
             murasakisan.set_mode = "resting";
         }
+
         //update calculation_status
         let now_time = Date.now() / 1000;
         let age_time = Math.round( now_time - local_birth_time );
         let mode = murasakisan.get_mode;
-        //var base = 86400000
-        //let base = 864000
         let base = 86400
-        //let satiety = Math.round( (base - (now_time - local_last_feeding_time)) / base * 1000 ) / 10;
         satiety = Math.round( (base - (now_time - local_last_feeding_time)) / base * 1000 ) / 10;
         if (satiety < 0) { satiety = 0; }
         if (satiety > 100) { satiety = 100; }
-        //let happy = Math.round( (base - (now_time - local_last_grooming_time)) / base * 1000 ) / 10;
         let base2 = 86400 * 7
         happy = Math.round( (base2 - (now_time - local_last_grooming_time)) / base2 * 1000 ) / 10;
         if (happy < 0) { happy = 0; }
         if (happy > 100) { happy = 100; }
+
         //update text
         text_turn.setText("turn = " + turn);
         text_summoner.setText("summoner = " + summoner);
@@ -945,11 +947,12 @@ function update() {
         text_exp.setText("exp = " + local_exp);
         text_age_time.setText("age_time = " + age_time);
         text_mode.setText("mode = " + mode);
-        text_satiety.setText("satiety = " + satiety);
-        text_happy.setText("happy = " + happy);
+        //text_satiety.setText("satiety = " + satiety);
+        //text_happy.setText("happy = " + happy);
         //update bar
         bar_satiety.scaleX = satiety / 100;
         bar_happy.scaleX = happy / 100;
+
         //exp
         let exp = (local_exp / local_next_exp_required) * 100;
         if (exp > 100) { exp = 100; }
