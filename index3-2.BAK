@@ -2,6 +2,12 @@
 
 
 <!---
+picture
+    背景
+    しゅっきん！
+    ごきげん！
+    おなかへった・・・
+    
 Idea
     FeedingとGrooming
     Coin, MaterialとCrafting
@@ -70,7 +76,6 @@ ToDo
         <input type="button" value="Swith Summoner" onclick="button_select_summoner();"/>
     </form>
     <br>
-
 
 --->
 
