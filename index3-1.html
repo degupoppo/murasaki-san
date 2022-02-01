@@ -50,10 +50,10 @@
         <input type="button" value="[ Start ]" onclick="button_select_summoner();" />
     </form>
     <br>
+    <br>
+    <h2 stype="color:gray">Donate: 0x2F7448B62134e52C2f46454d0089Ae21B5248805</h2>
 
 <script type="text/javascript">
-
-
 
 //global variants
 //--------------------------------------------------------------------------------------------------------
@@ -97,8 +97,6 @@ async function get_contract(web3) {
     const contract = await new web3.eth.Contract(abi, contract_address);
     return contract;
 }
-
-//call status from contract
 
 //summon
 async function contract_summon() {
@@ -151,9 +149,7 @@ function button_select_summoner() {
 
 </script>
 
-<!---
-Donate: 0x2F7448B62134e52C2f46454d0089Ae21B5248805
---->
+
 
 </body>
 </html>
