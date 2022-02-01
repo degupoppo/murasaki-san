@@ -33,7 +33,7 @@
     <br>
     <br>
     <font size="2">Summon Murasaki-San</font><br>
-    type:
+    <font size="2">type:</font>
     <select name="class" id="ctype">
         <option value="1">1</option>
         <option value="2">2</option>
@@ -54,6 +54,7 @@
         &nbsp;
         <input type="button" value=" House Visit " onclick="button_select_summoner();" />
     </form>
+    <br>
     <br>
     <font size="1" color="#000000)">donation: 0x2F7448B62134e52C2f46454d0089Ae21B5248805</font>
 
