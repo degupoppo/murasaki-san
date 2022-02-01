@@ -29,13 +29,13 @@
 
 <body bgcolor="#DDA0DD">
     <img src="png/food_sweet_potato.png" width="32" height="32">
-    &nbsp;
     <font size="5" color="#c71585">House of Murasaki-San</font>
     <img src="png/food_sweet_potato.png" width="32" height="32">
-    &nbsp;
     <br>
     <font size="1" color="#c71585">(version 0.1.0)</font><br>
     <br>
+    <br>
+    <a href="index3-2.html?summoner=0">Demo Play</a>
     <br>
     <font size="2">Summon your Murasaki-San</font><br>
     <font size="2">type:</font>
