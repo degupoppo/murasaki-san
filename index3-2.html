@@ -11,16 +11,25 @@ picture
     おなかへった・・・
     ものづくりちゅう！
     ありがとう！
+    クラフトアイテムたくさん
 
 Idea
+    main idea
+        献身性によって成長と変化を実感できる育成型NFT
+        時間が基本資源, summonerをどの状態にしておくかを選択する
+        マメにかつ長期間お世話されたsummonerほど出来ることが増える設計
+        競争ではなく箱庭型
     feeding, grooming, mining, farming, craftingの関係
     satiety, happy, coin, materialのバランス, 消費タイミング, 補正
         materialはcrafting時に消費する基本資源, たくさん費やすほど成功率が上がる, 失敗しても減る
         coinはcraft成功時に支払われる資源, 成功時に減る
-    lv, str, dex, int, val, lucの補正方法, 上昇方法
+    lv, str, dex, int, val, lukの補正方法, 上昇方法
         farming(dex), mining(str), crafting(int)のtotal timeでレベルアップ時のstatus換算を変える
         加えて、木の実で能動的に上げることもできる
         valはno feeding/grooming timeが0で最大効率, valが高いと得られる経験値が増える?
+    items
+        mining, farming, crafting補正アイテム, 置物？動く？
+        exp補正アイテム
 
 ToDo
     stopのUI実装. 現在の取得数計算、経過時間、など
@@ -270,7 +279,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         return this.mode;
     }
     on_click() {
-        if (this.mode != "mining") {
+        if (this.mode == "resting" || this.mode == "moving") {
             this.count = 0;
             this.mode = "hugging";
         }
@@ -857,7 +866,7 @@ function update() {
         return 0;
     }
 
-    //update turn
+    //increment turn
     turn += 1;
     //text_turn.setText("turn = " + turn);
 
@@ -867,8 +876,7 @@ function update() {
     //update calculation status
     if (turn == 1 || turn % 100 == 0) {
         //feeding
-        if (previous_local_last_feeding_time != null && local_last_feeding_time > previous_local_last_feeding_time){
-            flag_feeding = 0;
+        if (local_last_feeding_time > previous_local_last_feeding_time){
             murasakisan.set_mode = "feeding";
             murasakisan.submode = 0;
             murasakisan.count = 0;
@@ -883,19 +891,12 @@ function update() {
             food.scaleY = food.scaleY * 0.1;
         }
         //grooming
-        if (previous_local_last_grooming_time != null && local_last_grooming_time > previous_local_last_grooming_time){
-
-            flag_feeding = 0;
+        if (local_last_grooming_time > previous_local_last_grooming_time){
             murasakisan.set_mode = "grooming";
             murasakisan.submode = 0;
             murasakisan.count = 0;
             murasakisan.target_x = 300;
             murasakisan.target_y = 250;
-
-            /***
-            flag_grooming = 0;
-            murasakisan.set_mode = "grooming";
-            ***/
         }
         //mining
         if (local_mining_status == 1 & murasakisan.mode != "mining"){
@@ -917,7 +918,6 @@ function update() {
         }else if (local_farming_status == 0 & murasakisan.mode == "farming") {
             murasakisan.set_mode = "resting";
         }
-        text_turn.setText("turn = " + turn);
         //update calculation_status
         let now_time = Date.now() / 1000;
         let age_time = Math.round( now_time - local_birth_time );
@@ -935,6 +935,7 @@ function update() {
         if (happy < 0) { happy = 0; }
         if (happy > 100) { happy = 100; }
         //update text
+        text_turn.setText("turn = " + turn);
         text_summoner.setText("summoner = " + summoner);
         text_type.setText("type = " + local_ctype);
         text_birth_time.setText("birth_time = " + local_birth_time);
