@@ -29,7 +29,7 @@
 </head>
 
 <body>
-    type:&nbsp;
+    type:
     <select name="class" id="ctype">
         <option value="1">1</option>
         <option value="2">2</option>
@@ -51,7 +51,7 @@
     </form>
     <br>
     <br>
-    <h2 stype="color:gray">Donate: 0x2F7448B62134e52C2f46454d0089Ae21B5248805</h2>
+    <h4 stype="color:gray">Donate: 0x2F7448B62134e52C2f46454d0089Ae21B5248805</h2>
 
 <script type="text/javascript">
 
