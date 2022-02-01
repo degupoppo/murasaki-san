@@ -1,36 +1,6 @@
 
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="png" href="png/icon.PNG">
-    <title>House of Murasaki San</title>
-    <script src="phaser.js"></script>
-    <script src="web3.min.js"></script>
-    <script src="abi_contract3.js"></script>
-    <style type="text/css">
-        body {
-            margin: 0;
-        }
-    </style>
-</head>
-<body>
 
-<form name="select_summoner">
-    <input type="button" value="Update Summoner List" onclick="button_update_summoners();"/>
-    <select name="select_summoner" id="summoner">
-        <option value="***">***<option>
-    </select>
-    <input type="button" value="Swith Summoner" onclick="button_select_summoner();"/>
-</form>
-<br>
-
-<script type="text/javascript">
-
-//let summoner = document.getElementById("summoner").value;
-
-
-/***
+<!---
 Idea
     FeedingとGrooming
     Coin, MaterialとCrafting
@@ -90,8 +60,36 @@ ToDo
     アイデア：materialのバランスを考える
     wallet所有のNFTを選べるUIを作る
     satietyとhappyの差別化を考える。
-***/
+--->
 
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="png" href="png/icon.PNG">
+    <title>House of Murasaki San</title>
+    <script src="phaser.js"></script>
+    <script src="web3.min.js"></script>
+    <script src="abi_contract3.js"></script>
+    <style type="text/css">
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+<form name="select_summoner">
+    <input type="button" value="Update Summoner List" onclick="button_update_summoners();"/>
+    <select name="select_summoner" id="summoner">
+        <option value="***">***<option>
+    </select>
+    <input type="button" value="Swith Summoner" onclick="button_select_summoner();"/>
+</form>
+<br>
+
+<script type="text/javascript">
 
 
 //global variants
@@ -809,7 +807,7 @@ function create() {
 
     //items
     //bear
-    item_bear = this.add.sprite(300,300, "item_bear");
+    item_bear = this.add.sprite(300,250, "item_bear");
     item_bear.scaleX = item_bear.scaleX * 0.25;
     item_bear.scaleY = item_bear.scaleY * 0.25;
 
