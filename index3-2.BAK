@@ -826,28 +826,28 @@ function create() {
 
     //bar
     //satiety
-    this.add.text(600, 160, "satiety:", font_arg);
+    this.add.text(600, 160, "Satiety:", font_arg);
     bar_satiety_back = makeBar(this, 640, 160, 0xa9a9a9);
     bar_satiety_back.scaleX = 1;
     bar_satiety = makeBar(this, 640, 160, 0xff4500);
     bar_satiety.scaleX = 0;
     //happy
-    this.add.text(600, 180, "happy:", {font: "10.5px Arial", fill: "#000"});
+    this.add.text(600, 180, "Happy:", font_arg);
     bar_happy_back = makeBar(this, 640, 180, 0xa9a9a9);
     bar_happy_back.scaleX = 1;
     bar_happy = makeBar(this, 640, 180, 0x4169e1);
     bar_happy.scaleX = 0;
     //exp
-    this.add.text(600, 200, "exp:", {font: "10.5px Arial", fill: "#000"});
+    this.add.text(600, 200, "exp:", font_arg);
     bar_exp_back = makeBar(this, 640, 200, 0xa9a9a9);
     bar_exp_back.scaleX = 1;
     bar_exp = makeBar(this, 640, 200, 0x228b22);
     bar_exp.scaleX = 0;
     //coin
     text_coin = this.add.text(
-        600, 220, "Coin: " + local_coin, {font: "10.5px Arial", fill: "#000"});
+        600, 220, "Coin: " + local_coin, font_arg);
     text_material = this.add.text(
-        600, 230, "Material: " + local_material, {font: "10.5px Arial", fill: "#000"});
+        600, 230, "Material: " + local_material, font_arg);
 }
 
 
