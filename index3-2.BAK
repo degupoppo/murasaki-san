@@ -673,9 +673,6 @@ function preload() {
 //--------------------------------------------------------------------------------------------------------
 function create() {
 
-    //fake contract
-    //contract = new Contract();
-
     //back image
     this.add.image(400, 300, "back");
 
@@ -793,7 +790,7 @@ function create() {
 
     //status window color fill
     let status_back = this.add.graphics();
-    status_back.fillStyle(0xa9a9a9, 1).fillRect(590, 5, 200, 350);
+    status_back.fillStyle(0xa9a9a9, 1).fillRect(590, 5, 200, 250);
     status_back.alpha = 0.5;
 
     //status window
@@ -838,7 +835,7 @@ function create() {
     bar_happy = makeBar(this, 640, 180, 0x4169e1);
     bar_happy.scaleX = 0;
     //exp
-    this.add.text(600, 200, "exp:", font_arg);
+    this.add.text(600, 200, "EXP:", font_arg);
     bar_exp_back = makeBar(this, 640, 200, 0xa9a9a9);
     bar_exp_back.scaleX = 1;
     bar_exp = makeBar(this, 640, 200, 0x228b22);
