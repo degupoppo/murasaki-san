@@ -28,7 +28,7 @@
     </style>
 </head>
 
-<body>
+<body bgcolor="背景色">
     type:
     <select name="class" id="ctype">
         <option value="1">1</option>
@@ -41,7 +41,7 @@
     <br>
     <br>
     <form name="select_summoner">
-        <input type="button" value="[ Update your Summoners → ]" onclick="button_update_summoners();" />
+        <input type="button" value="[ Search your Summoners → ]" onclick="button_update_summoners();" />
         &nbsp;
         <select name="select_summoner" id="summoner">
             <option value="***">***</option>
