@@ -4,6 +4,7 @@
 <!---
 picture
     背景
+    クリックアイコン（grooming, mining, farming, crafting）
     しゅっきん！
     ごきげん！
     おなかへった・・・
@@ -139,6 +140,24 @@ let happy;
 
 
 
+//web
+//--------------------------------------------------------------------------------------------------------
+
+//get summoner from url parameter
+//https://www.tam-tam.co.jp/tipsnote/javascript/post9911.html
+var urlParam = location.search.substring(1);
+if(urlParam) {
+    var param = urlParam.split('&');
+    var paramArray = [];
+    for (i = 0; i < param.length; i++) {
+        var paramItem = param[i].split('=');
+        paramArray[paramItem[0]] = paramItem[1];
+    }
+    summoner = paramArray.summoner
+}
+
+
+
 //web3
 //--------------------------------------------------------------------------------------------------------
 
@@ -175,7 +194,7 @@ async function get_contract(web3) {
     return contract;
 }
 
-
+//update local status reading from contract
 async function contract_update_status(summoner) {
     let web3 = await connect();
     let contract = await get_contract(web3);
@@ -202,8 +221,6 @@ async function contract_update_status(summoner) {
     local_level = res[18];
     local_next_exp_required = res[19];
 }
-
-//call status from contract
 
 //send feeding
 async function contract_feeding(summoner) {
@@ -265,64 +282,11 @@ async function contract_stop_farming(summoner) {
     contract.methods.stop_farming(summoner).send({from:wallet});
 }
 
-//get owned summoners
-async function contract_my_summoners() {
-    let web3 = await connect();
-    let contract = await get_contract(web3);
-    let wallet = await get_wallet(web3);
-    let next_summoner = await contract.methods.next_summoner().call();
-    let res = [];
-    for (let i = 0; i < next_summoner; i++) {
-        let owner = await contract.methods.ownerOf(i).call();
-        if (owner == wallet) {
-            res.push({text:i, value:i});
-        }
-    }
-    console.log(res);
-    return res;
-}
-
-//update select list
-function _create_dropdownlist( form_name, select_name, select_array ){
-	document[form_name][select_name].length = select_array.length;
-	var i;
-	for ( i=0; i<select_array.length; i++){
-		document[form_name][select_name].options[i].text = select_array[i].text;
-		document[form_name][select_name].options[i].value = select_array[i].value;
-	}
-}
-
-//update summoner list
-async function button_update_summoners() {
-    opt_array = await contract_my_summoners();
-    _create_dropdownlist("select_summoner","select_summoner", opt_array )
-}
-
-//update summoner
-function button_select_summoner() {
-    summoner = document.getElementById("summoner").value;
-    previous_local_last_feeding_time = Date.now() + 10;
-    previous_local_last_grooming_time = Date.now() + 10;
-    char1.set_mode = "resting";
-}
-
-//url parameter
-//https://www.tam-tam.co.jp/tipsnote/javascript/post9911.html
-var urlParam = location.search.substring(1);
-if(urlParam) {
-    var param = urlParam.split('&');
-    var paramArray = [];
-    for (i = 0; i < param.length; i++) {
-        var paramItem = param[i].split('=');
-        paramArray[paramItem[0]] = paramItem[1];
-    }
-    summoner = paramArray.summoner
-}
 
 
 //character
 //--------------------------------------------------------------------------------------------------------
-class Character extends Phaser.GameObjects.Sprite{
+class Murasakisan extends Phaser.GameObjects.Sprite{
     constructor(scene, x, y){
         super(scene, x, y, "murasaki_right");
         this.scene.add.existing(this);
@@ -835,9 +799,9 @@ function create() {
     button_farming.on('pointerdown', () => contract_start_farming(summoner) );
 
     //summon character
-    char1 = new Character(this, 300 + Math.random()*200, 400 + Math.random()*100);
-    char1.scaleX = char1.scaleX * 0.25;
-    char1.scaleY = char1.scaleY * 0.25;
+    murasakisan = new Murasakisan(this, 300 + Math.random()*200, 400 + Math.random()*100);
+    murasakisan.scaleX = murasakisan.scaleX * 0.25;
+    murasakisan.scaleY = murasakisan.scaleY * 0.25;
 
     //button_text
     new Button(30, 10, 'Level Up', this, () => contract_level_up(summoner));
@@ -938,18 +902,18 @@ function update() {
     //text_turn.setText("turn = " + turn);
 
     //update character
-    char1.update();
+    murasakisan.update();
 
     //update calculation status
     if (turn == 1 || turn % 100 == 0) {
         //feeding
         if (previous_local_last_feeding_time != null && local_last_feeding_time > previous_local_last_feeding_time){
             flag_feeding = 0;
-            char1.set_mode = "feeding";
-            char1.submode = 0;
-            char1.count = 0;
-            char1.target_x = 600;
-            char1.target_y = 400;
+            murasakisan.set_mode = "feeding";
+            murasakisan.submode = 0;
+            murasakisan.count = 0;
+            murasakisan.target_x = 600;
+            murasakisan.target_y = 400;
             if (typeof food !== "undefined") {
                 food.destroy();
                 //food.visible = false;
@@ -962,42 +926,42 @@ function update() {
         if (previous_local_last_grooming_time != null && local_last_grooming_time > previous_local_last_grooming_time){
 
             flag_feeding = 0;
-            char1.set_mode = "grooming";
-            char1.submode = 0;
-            char1.count = 0;
-            char1.target_x = 300;
-            char1.target_y = 250;
+            murasakisan.set_mode = "grooming";
+            murasakisan.submode = 0;
+            murasakisan.count = 0;
+            murasakisan.target_x = 300;
+            murasakisan.target_y = 250;
 
             /***
             flag_grooming = 0;
-            char1.set_mode = "grooming";
+            murasakisan.set_mode = "grooming";
             ***/
         }
         //mining
-        if (local_mining_status == 1 & char1.mode != "mining"){
-            char1.set_mode = "mining";
-            char1.submode = 0;
-            char1.count = 0;
-            char1.target_x = 70;
-            char1.target_y = 420;
-        }else if (local_mining_status == 0 & char1.mode == "mining") {
-            char1.set_mode = "resting";
+        if (local_mining_status == 1 & murasakisan.mode != "mining"){
+            murasakisan.set_mode = "mining";
+            murasakisan.submode = 0;
+            murasakisan.count = 0;
+            murasakisan.target_x = 70;
+            murasakisan.target_y = 420;
+        }else if (local_mining_status == 0 & murasakisan.mode == "mining") {
+            murasakisan.set_mode = "resting";
         }
         //farming
-        if (local_farming_status == 1 & char1.mode != "farming"){
-            char1.set_mode = "farming";
-            char1.submode = 0;
-            char1.count = 0;
-            char1.target_x = 150;
-            char1.target_y = 260;
-        }else if (local_farming_status == 0 & char1.mode == "farming") {
-            char1.set_mode = "resting";
+        if (local_farming_status == 1 & murasakisan.mode != "farming"){
+            murasakisan.set_mode = "farming";
+            murasakisan.submode = 0;
+            murasakisan.count = 0;
+            murasakisan.target_x = 150;
+            murasakisan.target_y = 260;
+        }else if (local_farming_status == 0 & murasakisan.mode == "farming") {
+            murasakisan.set_mode = "resting";
         }
         text_turn.setText("turn = " + turn);
         //update calculation_status
         let now_time = Date.now() / 1000;
         let age_time = Math.round( now_time - local_birth_time );
-        let mode = char1.get_mode;
+        let mode = murasakisan.get_mode;
         //var base = 86400000
         //let base = 864000
         let base = 86400
@@ -1235,6 +1199,46 @@ async function test() {
     local_level = await contract.methods.get_level().call();
     local_next_exp_required = await contract.methods.get_next_exp_required().call();
 }
+
+//get owned summoners
+async function contract_my_summoners() {
+    let web3 = await connect();
+    let contract = await get_contract(web3);
+    let wallet = await get_wallet(web3);
+    let next_summoner = await contract.methods.next_summoner().call();
+    let res = [];
+    for (let i = 0; i < next_summoner; i++) {
+        let owner = await contract.methods.ownerOf(i).call();
+        if (owner == wallet) {
+            res.push({text:i, value:i});
+        }
+    }
+    console.log(res);
+    return res;
+}
+
+//update summoner select list
+function _create_dropdownlist( form_name, select_name, select_array ){
+	document[form_name][select_name].length = select_array.length;
+	var i;
+	for ( i=0; i<select_array.length; i++){
+		document[form_name][select_name].options[i].text = select_array[i].text;
+		document[form_name][select_name].options[i].value = select_array[i].value;
+	}
+}
+async function button_update_summoners() {
+    opt_array = await contract_my_summoners();
+    _create_dropdownlist("select_summoner","select_summoner", opt_array )
+}
+
+//update summoner
+function button_select_summoner() {
+    summoner = document.getElementById("summoner").value;
+    previous_local_last_feeding_time = Date.now() + 10;
+    previous_local_last_grooming_time = Date.now() + 10;
+    murasakisan.set_mode = "resting";
+}
+
 
 ***/
 
