@@ -445,6 +445,8 @@ class Character extends Phaser.GameObjects.Sprite{
               && this.x < this.target_x+10 
               && this.y > this.target_y-10 
               && this.y < this.target_y+10) {
+                this.x = this.target_x;
+                this.y = this.target_y;
                 this.submode = 2;
             }
         }else if (this.submode == 2) {
@@ -793,8 +795,8 @@ function create() {
     //items
     //bear
     item_bear = this.add.sprite(300,300, "item_bear");
-    item_bear.scaleX = item_bear.scaleX * 0.08;
-    item_bear.scaleY = item_bear.scaleY * 0.08;
+    item_bear.scaleX = item_bear.scaleX * 0.25;
+    item_bear.scaleY = item_bear.scaleY * 0.25;
 
     //button_icon
     button_feeding = this.add.sprite(660,430, "button_feeding");
