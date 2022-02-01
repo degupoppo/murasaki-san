@@ -28,11 +28,11 @@
 </head>
 
 <body bgcolor="#DDA0DD">
-    <font size="4" color="#c71585"> House of Murasaki-San<br>(version 0.1.0)</font>
+    <font size="4" color="#c71585"> House of Murasaki-San (version 0.1.0)</font>
     <br>
     <br>
     <br>
-    <font size="2">Summon Murasaki-San</font><br>
+    <font size="2">Summon your Murasaki-San</font><br>
     <font size="2">type:</font>
     <select name="class" id="ctype">
         <option value="1">1</option>
