@@ -791,18 +791,18 @@ function create() {
     //status window color fill
     let status_back = this.add.graphics();
     status_back.fillStyle(0xa9a9a9, 1).fillRect(590, 5, 200, 250);
-    status_back.alpha = 0.5;
+    status_back.alpha = 0.4;
 
     //status window
     let font_arg = {font: "10.5px Arial", fill: "#000"};
     text_summoner =     this.add.text(600,  10, "Summoner: " + summoner, font_arg);
     text_type =         this.add.text(600,  20, "Type: " + local_ctype, font_arg);
+    text_level =        this.add.text(600,  90, "  Lv: " + local_level, font_arg);
     text_strength =     this.add.text(600,  40, " STR: " + local_strength, font_arg);
     text_dexterity =    this.add.text(600,  50, " DEX: " + local_dexterity, font_arg);
     text_vitality =     this.add.text(600,  60, " VIT: " + local_vitality, font_arg);
     text_intelligence = this.add.text(600,  70, " INT = " + local_intelligence, font_arg);
     text_luck =         this.add.text(600,  80, " LUK: " + local_luck, font_arg);
-    text_level =        this.add.text(600,  90, "  Lv: " + local_level, font_arg);
     text_exp =          this.add.text(600, 100, " EXP: " + local_exp, font_arg);
     text_turn =         this.add.text(600, 120, "turn = ", font_arg);
     text_age_time =     this.add.text(600, 130, " age = ", font_arg);
