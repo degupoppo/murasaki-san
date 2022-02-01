@@ -32,6 +32,10 @@ Idea
         exp補正アイテム
 
 ToDo
+    summon costの設定
+        solidityのsummon関数にpayableをつける
+        web3jsのvalueに0.1など追記
+        solidityのsummonにrequiredでvalue閾値を追記
     stopのUI実装. 現在の取得数計算、経過時間、など
     craftingコントラの実装
     item craftingのUIの実装
