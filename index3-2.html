@@ -14,6 +14,13 @@ picture
     クラフトアイテムたくさん（飼い主手伝う）
 
 Idea
+    time
+        1日86400秒をどの状態に振り分けるか
+            mining, farming, crafting, resting
+        mining: coin得る, str偏向
+        farming: mat得る, dex偏向
+        crafting: itemトライ, int偏向
+        resting: grooming時にexp得る
     main idea
         献身によって成長と変化を実感できる育成型NFT
         時間が基本資源, summonerをどの状態にどれだけしたかで変化の仕方が違う
@@ -21,6 +28,9 @@ Idea
         競争ではなく箱庭型、効率化を考えなくても良い雰囲気で。
         拡大再生産による可能性の拡大, 明日のコインのための今日コインを使う
         効率的にプレイしておおよそ2年間で最大値に達するインフレ率で。
+            インフレ率を低くして、変化の少ない状態で長く遊べるようにする
+            インフレ率：+100%/y程度を目指す
+            mining特化して, 1年間の献身で+100%, farmingも同様
         全てのアイテムを買うことはできない。
     feeding, grooming, mining, farming, craftingの関係
     satiety, happy, coin, materialのバランス, 消費タイミング, 補正
@@ -30,11 +40,47 @@ Idea
         farming(dex), mining(str), crafting(int)のtotal timeでレベルアップ時のstatus換算を変える
         加えて、高コストだが木の実で能動的に上げることもできる
         valはno feeding/grooming timeが0で最大効率, valが高いと得られる経験値が増える?
+        Level上昇による補正
+            +1ですべての補正+5%
     items
-        mining, farming, crafting補正アイテム, 置物？動く？
-        exp補正アイテム
+        置物？動く？
+        mining, farming, crafting補正アイテム
+            1個で+5%有利になる
+        exp補正アイテム → 制御が難しいので作らない
+            expは献身性によってのみ得られる
+        代わりにmining, farmingしてくれるペット
+            Astar君、Ms. Astarとでも
+            効率は本体の1/4～半分程度？
+            成長はさせない？本体とともに効率が上がる
+        大体, 3日で成功率80%に調整する
+    まとめ
+        time
+            1day=86,400secをmining, farming, crafting, restingのどれかに振り分ける
+            mining: +coin, Lv-up時 +STR
+            farming: +material, Lv-up時 +DEX
+            crafting: item try, Lv-up時 +INT
+            resting: grooming時 +EXP
+        Lv-up
+            1レベル上がると全効率が+5%
+            1年間で12-15Lvまで上がる, +60%-75%
+            mining, farmingはLv2から, craftingはLv3から
+            ステータスポイントは+1, 費やした時間に応じて分割して加算する
+        item
+            mining, farming, craftingに対応する3種類
+                1つ所持すると効率+5%
+            本体の半分の効率でmining, farmingするペット
+            ステータスを上昇させる木の実
+            完全なオブジェ
+            補正なしで3日で成功率80%程度の難易度
+            難易度による差別化をどうするか
+                すべて同じ効果だが, 
 
 ToDo
+    itemのクラフト難易度, 想定個数, 効果を練り込む
+        小さい効果のものをたくさん作るか, 大きい効果のものを少量作るか
+        失敗ありで何回も試行するか、必ず成功するが時間がかかるか
+        対象ステータス特化か、全体的に底上げだが比率を変えるか
+            Lvは全体底上げ、クラフトは特化、がよいか
     summon costの設定
         solidityのsummon関数にpayableをつける
         web3jsのvalueに0.1など追記

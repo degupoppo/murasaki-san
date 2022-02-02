@@ -680,7 +680,7 @@ contract murasaki is ERC721, Ownable{
 
     uint tmp;
     uint public base = 86400;
-    uint public price = 1 ether;
+    uint public price = 0 ether;
 
     function set_base(uint _base) public onlyOwner {
         base = _base;
@@ -751,6 +751,7 @@ contract murasaki is ERC721, Ownable{
         exp[_summoner] += tmp;
         last_feeding_time[_summoner] = block.timestamp;
     }
+
     function grooming(uint _summoner) public {
         require(_isApprovedOrOwner(msg.sender, _summoner));
         require(mining_status[_summoner] == 0 && farming_status[_summoner] == 0 && crafting_status[_summoner] == 0);
@@ -758,6 +759,7 @@ contract murasaki is ERC721, Ownable{
         exp[_summoner] += tmp;
         last_grooming_time[_summoner] = block.timestamp;
     }
+
     function start_mining(uint _summoner) public {
         require(_isApprovedOrOwner(msg.sender, _summoner));
         require(mining_status[_summoner] == 0 && farming_status[_summoner] == 0 && crafting_status[_summoner] == 0);
@@ -771,6 +773,7 @@ contract murasaki is ERC721, Ownable{
         coin[_summoner] += tmp;
         mining_status[_summoner] = 0;
     }
+
     function start_farming(uint _summoner) public {
         require(_isApprovedOrOwner(msg.sender, _summoner));
         require(mining_status[_summoner] == 0 && farming_status[_summoner] == 0 && crafting_status[_summoner] == 0);
@@ -784,6 +787,61 @@ contract murasaki is ERC721, Ownable{
         material[_summoner] += tmp;
         farming_status[_summoner] = 0;
     }
+
+
+    //crafting
+
+    uint public next_item = 10;
+
+    struct item {
+        uint item_id;
+        uint crafting_summoner;
+        uint crafted_time;
+    }
+
+    mapping(uint => item) public items;
+
+    function start_craftingg(uint _summoner, uint _item_id, uint _coin, uint _material) public {
+        require(_isApprovedOrOwner(msg.sender, _summoner));
+        require(mining_status[_summoner] == 0 && farming_status[_summoner] == 0 && crafting_status[_summoner] == 0);
+        require(coin[_summoner] == _coin && material[_summoner] == _material);
+        uint x = _item_id;
+        x++;
+        coin[_summoner] -= _coin;
+        material[_summoner] -= _material;
+        crafting_status[_summoner] = 1;
+        crafting_start_time[_summoner] = block.timestamp;
+    }
+
+    function stop_crafting(uint _summoner) public {
+        require(_isApprovedOrOwner(msg.sender, _summoner), "owner error");
+        require(crafting_status[_summoner] == 1, "status error");
+        uint _delta_time = (block.timestamp - crafting_start_time[_summoner]);
+        crafting_status[_summoner] = 0;
+        uint _item_id = 1;
+        craft(_summoner, _item_id, _delta_time);
+    }
+    
+    function crafting_check(uint _summoner, uint _item_id, uint _delta_time) public pure returns (bool) {
+        uint x = _summoner;
+        x++;
+        uint y = _item_id;
+        y++;
+        uint z = _delta_time;
+        z++;
+        return true;
+    }
+
+    function craft(uint _summoner, uint _item_id, uint _delta_time) public {
+        bool crafted = crafting_check(_summoner, _item_id, _delta_time);
+        crafted = true;
+        if (crafted) {
+            items[next_item] = item(_item_id, _summoner, uint32(block.timestamp));
+            _safeMint(msg.sender, next_item);
+            next_item++;
+        }
+    }
+
     function level_up(uint _summoner) public {
         require(_isApprovedOrOwner(msg.sender, _summoner));
         require(exp[_summoner] >= next_exp_required[_summoner]);
@@ -829,4 +887,6 @@ contract murasaki is ERC721, Ownable{
         }
     }
 }
+
+
 
