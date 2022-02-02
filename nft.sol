@@ -787,7 +787,15 @@ contract murasaki is ERC721, Ownable{
         material[_summoner] += tmp;
         farming_status[_summoner] = 0;
     }
-
+    
+    function spend_coin(uint _summoner, uint _coin) external {
+        require(_isApprovedOrOwner(msg.sender, _summoner));
+        coin[_summoner] -= _coin;
+    }
+    function spend_material(uint _summoner, uint _material) external {
+        require(_isApprovedOrOwner(msg.sender, _summoner));
+        material[_summoner] -= _material;
+    }
 
     //crafting
 
@@ -890,7 +898,12 @@ contract murasaki is ERC721, Ownable{
 
 
 interface murasaki {
-	function coin(uint) external view returns (uint);
+    function getApproved(uint) external view returns (address);
+    function ownerOf(uint) external view returns (address);
+    function coin(uint) external view returns (uint);
+    function material(uint) external view returns (uint);
+    function spend_coin(uint _summoner, uint _coin) external;
+    function spend_material(uint _summoner, uint _material) external;
 }
 
 
