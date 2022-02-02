@@ -47,7 +47,7 @@
     <input type="button" value=" Summon " onclick="contract_summon(1);" />
     <br>
     <br>
-    <font size="2">Search your Murasaki-San</font><br>
+    <font size="2">Search your summoned Murasaki-San</font><br>
     <form name="select_summoner">
         <input type="button" value=" Search => " onclick="button_update_summoners();" />
         &nbsp;
@@ -112,6 +112,7 @@ async function contract_summon() {
     let web3 = await connect();
     let contract = await get_contract(web3);
     let wallet = await get_wallet(web3);
+    let price = 1 * 10**18;
     contract.methods.summon(ctype).send({from:wallet});
 }
 
