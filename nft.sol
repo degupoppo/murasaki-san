@@ -889,4 +889,11 @@ contract murasaki is ERC721, Ownable{
 }
 
 
+interface murasaki {
+	function coin(uint) external view returns (uint);
+}
 
+
+contract crafting is is ERC721{
+
+}
