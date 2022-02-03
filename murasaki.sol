@@ -695,14 +695,17 @@ contract Murasaki_Main is ERC721, Ownable{
     mapping(uint => uint) public last_total_crafting_sec;
     mapping(uint => uint) public last_level_up_time;
     mapping(uint => uint) public last_grooming_time_plus_working_time;
+    mapping(uint => uint) public base0_item_count;
+    mapping(uint => uint) public base1_item_count;
+    mapping(uint => uint) public base2_item_count;
 
-    uint public base = 86400;
+    uint public base_sec = 86400;
     uint public price = 0.1 ether;
     address public murasaki_craft_address;
 
     //set variants, only owner
-    function set_base(uint _base) public onlyOwner {
-        base = _base;
+    function set_base_sec(uint _base_sec) public onlyOwner {
+        base_sec = _base_sec;
     }
     function set_price(uint _price) public onlyOwner {
         price = _price;
@@ -786,8 +789,19 @@ contract Murasaki_Main is ERC721, Ownable{
         require(_isApprovedOrOwner(msg.sender, _summoner));
         //require(mining_status[_summoner] == 0 && farming_status[_summoner] == 0 && crafting_status[_summoner] == 0);
         uint _delta_sec = block.timestamp - last_feeding_time[_summoner];
+        if (_delta_sec >= (base_sec * 1)) {
+            _delta_sec = base_sec * 1;
+        }
         exp[_summoner] += _delta_sec / 10;
         last_feeding_time[_summoner] = block.timestamp;
+    }
+    function calc_satiety(uint _summoner) public view returns (uint) {
+        uint _delta_sec = block.timestamp - last_feeding_time[_summoner];
+        if (_delta_sec >= (base_sec * 1)) {
+            _delta_sec = base_sec * 1;
+        }
+        uint _satiety = 100 * ((base_sec - _delta_sec) / base_sec);
+        return _satiety;
     }
 
     //grooming
@@ -796,15 +810,27 @@ contract Murasaki_Main is ERC721, Ownable{
         require(mining_status[_summoner] == 0 && farming_status[_summoner] == 0 && crafting_status[_summoner] == 0);
         //uint _delta_sec = block.timestamp - last_grooming_time[_summoner];
         uint _delta_sec = block.timestamp - last_grooming_time_plus_working_time[_summoner];
+        if (_delta_sec >= (base_sec * 5)) {
+            _delta_sec = base_sec * 5;
+        }
         exp[_summoner] += _delta_sec / 10;
         last_grooming_time_plus_working_time[_summoner] = block.timestamp;
         last_grooming_time[_summoner] = block.timestamp;
+    }
+    function calc_happy(uint _summoner) public view returns (uint) {
+        uint _delta_sec = block.timestamp - last_grooming_time[_summoner];
+        if (_delta_sec >= (base_sec * 5)) {
+            _delta_sec = base_sec * 5;
+        }
+        uint _happy = 100 * ((base_sec - (_delta_sec*5)) / (base_sec*5));
+        return _happy;
     }
 
     //mining
     function start_mining(uint _summoner) public {
         require(_isApprovedOrOwner(msg.sender, _summoner));
         require(mining_status[_summoner] == 0 && farming_status[_summoner] == 0 && crafting_status[_summoner] == 0);
+        require(calc_satiety(_summoner) >= 20 && calc_happy(_summoner) >= 20);
         mining_status[_summoner] = 1;
         mining_start_time[_summoner] = block.timestamp;
     }
@@ -830,6 +856,7 @@ contract Murasaki_Main is ERC721, Ownable{
     function start_farming(uint _summoner) public {
         require(_isApprovedOrOwner(msg.sender, _summoner));
         require(mining_status[_summoner] == 0 && farming_status[_summoner] == 0 && crafting_status[_summoner] == 0);
+        require(calc_satiety(_summoner) >= 20 && calc_happy(_summoner) >= 20);
         farming_status[_summoner] = 1;
         farming_start_time[_summoner] = block.timestamp;
     }
@@ -878,6 +905,7 @@ contract Murasaki_Main is ERC721, Ownable{
         require(_isApprovedOrOwner(msg.sender, _summoner));
         require(mining_status[_summoner] == 0 && farming_status[_summoner] == 0 && crafting_status[_summoner] == 0);
         require(coin[_summoner] == _coin && material[_summoner] == _material);
+        require(calc_satiety(_summoner) >= 20 && calc_happy(_summoner) >= 20);
         coin[_summoner] -= _coin;
         material[_summoner] -= _material;
         crafting_item_base_id[_summoner] = _item_base_id;
@@ -1037,6 +1065,7 @@ contract Murasaki_Craft is ERC721, Ownable{
     ok grooming時, resting timeによる+exp補正の実装
     ok coin, materialの送金機能の実装, ペナルティをどうするか
     ok statusによるmining, farming, craftingの補正
+    ok working開始時のsatiety, happy閾値を実装
     item一覧とdifficultyの設定
     itemのdifficultyを加味したcraftingの実装
     所持itemによるmining, farming, craftingの補正
