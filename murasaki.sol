@@ -700,7 +700,7 @@ contract Murasaki_Main is ERC721, Ownable{
     mapping(uint => uint) public base2_item_count;
 
     uint public base_sec = 86400;
-    uint public price = 0.1 ether;
+    uint public price = 0 ether;
     address public murasaki_craft_address;
 
     //set variants, only owner
@@ -800,7 +800,7 @@ contract Murasaki_Main is ERC721, Ownable{
         if (_delta_sec >= (base_sec * 1)) {
             _delta_sec = base_sec * 1;
         }
-        uint _satiety = 100 * ((base_sec - _delta_sec) / base_sec);
+        uint _satiety = 100 * (base_sec - _delta_sec) / base_sec;
         return _satiety;
     }
 
@@ -822,7 +822,7 @@ contract Murasaki_Main is ERC721, Ownable{
         if (_delta_sec >= (base_sec * 5)) {
             _delta_sec = base_sec * 5;
         }
-        uint _happy = 100 * ((base_sec - (_delta_sec*5)) / (base_sec*5));
+        uint _happy = 100 * ((base_sec*5) - _delta_sec) / (base_sec*5);
         return _happy;
     }
 
@@ -838,7 +838,7 @@ contract Murasaki_Main is ERC721, Ownable{
         require(_isApprovedOrOwner(msg.sender, _summoner));
         require(mining_status[_summoner] == 1);
         uint _delta = calc_coin(_summoner);
-        _delta += (_delta/100 * strength[_summoner]);    //status modification
+        _delta += (_delta * strength[_summoner]) / 100;    //status modification
         coin[_summoner] += _delta;
         uint _delta_sec = block.timestamp - mining_start_time[_summoner];
         total_mining_sec[_summoner] += _delta_sec;
@@ -864,7 +864,7 @@ contract Murasaki_Main is ERC721, Ownable{
         require(_isApprovedOrOwner(msg.sender, _summoner));
         require(farming_status[_summoner] == 1);
         uint _delta = calc_material(_summoner);
-        _delta += (_delta/100 * dexterity[_summoner]);   //status modification
+        _delta += (_delta * dexterity[_summoner]) / 100;   //status modification
         material[_summoner] += _delta;
         uint _delta_sec = block.timestamp - farming_start_time[_summoner];
         total_farming_sec[_summoner] += _delta_sec;
@@ -904,7 +904,7 @@ contract Murasaki_Main is ERC721, Ownable{
     function start_craftingg(uint _summoner, uint _item_base_id, uint _item_id, uint _coin, uint _material) public {
         require(_isApprovedOrOwner(msg.sender, _summoner));
         require(mining_status[_summoner] == 0 && farming_status[_summoner] == 0 && crafting_status[_summoner] == 0);
-        require(coin[_summoner] == _coin && material[_summoner] == _material);
+        require(coin[_summoner] >= _coin && material[_summoner] >= _material);
         require(calc_satiety(_summoner) >= 20 && calc_happy(_summoner) >= 20);
         coin[_summoner] -= _coin;
         material[_summoner] -= _material;
@@ -913,7 +913,7 @@ contract Murasaki_Main is ERC721, Ownable{
         crafting_status[_summoner] = 1;
         crafting_start_time[_summoner] = block.timestamp;
     }
-    function stop_crafting(uint _summoner, address _mc) public {
+    function stop_crafting(uint _summoner) public {
         require(_isApprovedOrOwner(msg.sender, _summoner), "owner error");
         require(crafting_status[_summoner] == 1, "status error");
         uint _delta_sec = (block.timestamp - crafting_start_time[_summoner]);
@@ -922,11 +922,11 @@ contract Murasaki_Main is ERC721, Ownable{
         total_crafting_sec[_summoner] += _delta_sec;
         last_total_crafting_sec[_summoner] += _delta_sec;
         last_grooming_time_plus_working_time[_summoner] += _delta_sec;
-        crafting_status[_summoner] = 0;
         //bool _crafted = crafting_check(_item_base_id, _item_id, _delta_time);
         bool _crafted = crafting_check(_summoner);
+        crafting_status[_summoner] = 0;
         if (_crafted) {
-            Murasaki_Craft mc = Murasaki_Craft(_mc);
+            Murasaki_Craft mc = Murasaki_Craft(murasaki_craft_address);
             mc.craft(_item_base_id, _item_id, _summoner, msg.sender);
         }
     }
@@ -944,14 +944,19 @@ contract Murasaki_Main is ERC721, Ownable{
         uint _item_id = crafting_item_id[_summoner];
         uint _delta_time = (block.timestamp - crafting_start_time[_summoner]);
         uint _dc = get_item_dc(_item_base_id, _item_id);
-        _dc -= (_dc/100 * intelligence[_summoner]/100); //status modification
-        _dc -= (_dc/100 * level[_summoner]); //level modification
-        uint _delta = _dc - _delta_time;
+        _dc -= (_dc * intelligence[_summoner]/100) / 100; //status modification
+        _dc -= (_dc * level[_summoner]) / 100; //level modification
+        uint _delta;
+        if (_delta_time >= _dc) {
+            _delta = 0;
+        }else {
+            _delta = _dc - _delta_time;
+        }
         return _delta;
     }
     function get_item_dc(uint _item_base_id, uint _item_id) public pure returns (uint) {
         //TODO: library of dc required
-        return _item_base_id * _item_id * 0 + 1000;
+        return _item_base_id * _item_id * 0 + 10;
     }
 
     //level-up

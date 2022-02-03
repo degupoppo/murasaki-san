@@ -25,7 +25,9 @@ ToDo
         item_idの選択方法
         craftのstart/stopボタン
         成功/失敗の表現
-    summoner所持itemの検索
+    summoner所持item
+        所持itemの検索
+        所持itemの表示
 
 Idea
     time
