@@ -1059,7 +1059,7 @@ function update() {
             murasakisan.count = 0;
             murasakisan.target_x = 100;
             murasakisan.target_y = 450;
-        }else if (local_crafting_status == 0 & murasakisan.mode == "farming") {
+        }else if (local_crafting_status == 0 & murasakisan.mode == "crafting") {
             murasakisan.set_mode = "resting";
         }
 
@@ -1069,12 +1069,12 @@ function update() {
         let mode = murasakisan.get_mode;
         let base = 86400
         //satiety
-        satiety = Math.round( (base - (now_time - local_last_feeding_time)) / base * 1000 ) / 10;
+        satiety = Math.round( (base - (now_time - local_last_feeding_time)) / base * 100 );
         if (satiety < 0) { satiety = 0; }
         if (satiety > 100) { satiety = 100; }
         let base2 = 86400 * 5
         //happy
-        happy = Math.round( (base2 - (now_time - local_last_grooming_time)) / base2 * 1000 ) / 10;
+        happy = Math.round( (base2 - (now_time - local_last_grooming_time)) / base2 * 100 );
         if (happy < 0) { happy = 0; }
         if (happy > 100) { happy = 100; }
         //exp

@@ -901,7 +901,7 @@ contract Murasaki_Main is ERC721, Ownable{
     }
 
     //crafting
-    function start_craftingg(uint _summoner, uint _item_base_id, uint _item_id, uint _coin, uint _material) public {
+    function start_crafting(uint _summoner, uint _item_base_id, uint _item_id, uint _coin, uint _material) public {
         require(_isApprovedOrOwner(msg.sender, _summoner));
         require(mining_status[_summoner] == 0 && farming_status[_summoner] == 0 && crafting_status[_summoner] == 0);
         require(coin[_summoner] >= _coin && material[_summoner] >= _material);
