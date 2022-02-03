@@ -358,7 +358,6 @@ async function contract_stop_farming(summoner) {
 }
 
 //crafting
-//***TODO*** spell miss!!!
 async function contract_start_crafting(summoner) {
     let web3 = await connect();
     let contract = await get_contract(web3);
@@ -367,6 +366,7 @@ async function contract_start_crafting(summoner) {
     let item_id = 0;
     let coin = 1;
     let material = 1;
+    //***TODO*** spell miss!!!**********************************************************************************
     contract.methods.start_craftingg(summoner, item_base_id, item_id, coin, material).send({from:wallet});
 }
 async function contract_stop_crafting(summoner) {
@@ -590,8 +590,8 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         }else if (this.submode == 1) {
             let delta_x = this.target_x - this.x;
             let delta_y = this.target_y - this.y;
-            let delta_x2 = delta_x / (Math.abs(delta_x) + Math.abs(delta_y)) * 1;
-            let delta_y2 = delta_y / (Math.abs(delta_x) + Math.abs(delta_y)) * 1;
+            let delta_x2 = delta_x / (Math.abs(delta_x) + Math.abs(delta_y)) * 0.8;
+            let delta_y2 = delta_y / (Math.abs(delta_x) + Math.abs(delta_y)) * 0.8;
             this.x += delta_x2;
             this.y += delta_y2;
             if (this.x > this.target_x-10 
@@ -628,8 +628,8 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         }else if (this.submode == 1) {
             let delta_x = this.target_x - this.x;
             let delta_y = this.target_y - this.y;
-            let delta_x2 = delta_x / (Math.abs(delta_x) + Math.abs(delta_y)) * 1;
-            let delta_y2 = delta_y / (Math.abs(delta_x) + Math.abs(delta_y)) * 1;
+            let delta_x2 = delta_x / (Math.abs(delta_x) + Math.abs(delta_y)) * 0.8;
+            let delta_y2 = delta_y / (Math.abs(delta_x) + Math.abs(delta_y)) * 0.8;
             this.x += delta_x2;
             this.y += delta_y2;
             if (this.x > this.target_x-10 
@@ -657,8 +657,8 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         }else if (this.submode == 1) {
             let delta_x = this.target_x - this.x;
             let delta_y = this.target_y - this.y;
-            let delta_x2 = delta_x / (Math.abs(delta_x) + Math.abs(delta_y)) * 1;
-            let delta_y2 = delta_y / (Math.abs(delta_x) + Math.abs(delta_y)) * 1;
+            let delta_x2 = delta_x / (Math.abs(delta_x) + Math.abs(delta_y)) * 0.8;
+            let delta_y2 = delta_y / (Math.abs(delta_x) + Math.abs(delta_y)) * 0.8;
             this.x += delta_x2;
             this.y += delta_y2;
             if (this.x > this.target_x-10 

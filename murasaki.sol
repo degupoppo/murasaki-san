@@ -792,7 +792,7 @@ contract Murasaki_Main is ERC721, Ownable{
         if (_delta_sec >= (base_sec * 1)) {
             _delta_sec = base_sec * 1;
         }
-        exp[_summoner] += _delta_sec / 10;
+        exp[_summoner] += _delta_sec / 10;  //*** /100? ***
         last_feeding_time[_summoner] = block.timestamp;
     }
     function calc_satiety(uint _summoner) public view returns (uint) {
@@ -813,7 +813,7 @@ contract Murasaki_Main is ERC721, Ownable{
         if (_delta_sec >= (base_sec * 5)) {
             _delta_sec = base_sec * 5;
         }
-        exp[_summoner] += _delta_sec / 10;
+        exp[_summoner] += _delta_sec / 10;   //*** /100? ***
         last_grooming_time_plus_working_time[_summoner] = block.timestamp;
         last_grooming_time[_summoner] = block.timestamp;
     }
