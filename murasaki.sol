@@ -1074,6 +1074,7 @@ contract Murasaki_Craft is ERC721, Ownable{
     item一覧とdifficultyの設定
     itemのdifficultyを加味したcraftingの実装
     所持itemによるmining, farming, craftingの補正
+    ワールドスピード係数の実装
 
 ***/
 
