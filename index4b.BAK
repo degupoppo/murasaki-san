@@ -641,6 +641,35 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             this.anims.play("murasaki_farming", true);
         }
     }
+    crafting() {
+        this.count += 1;
+        if (this.submode == 0) {
+            let delta_x = this.target_x - this.x;
+            if (delta_x >0) {
+                this.dist = "right";
+                this.anims.play("murasaki_working_right", true);
+            }else {
+                this.dist = "left";
+                this.anims.play("murasaki_working_left", true);
+            }
+            this.submode = 1;
+        }else if (this.submode == 1) {
+            let delta_x = this.target_x - this.x;
+            let delta_y = this.target_y - this.y;
+            let delta_x2 = delta_x / (Math.abs(delta_x) + Math.abs(delta_y)) * 1;
+            let delta_y2 = delta_y / (Math.abs(delta_x) + Math.abs(delta_y)) * 1;
+            this.x += delta_x2;
+            this.y += delta_y2;
+            if (this.x > this.target_x-10 
+              && this.x < this.target_x+10 
+              && this.y > this.target_y-10 
+              && this.y < this.target_y+10) {
+                this.submode = 2;
+            }
+        }else if (this.submode == 2) {
+            this.anims.play("murasaki_farming", true);
+        }
+    }
     update(){
         //console.log(this.version, this.mode, this.count);
         if (this.mode == "resting") {this.resting();}
@@ -652,6 +681,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         else if (this.mode == "mining") {this.mining();}
         else if (this.mode == "hugging") {this.hugging();}
         else if (this.mode == "farming") {this.farming();}
+        else if (this.mode == "crafting") {this.farming();}
     }
 }
 
@@ -873,7 +903,7 @@ function create() {
     button_farming.scaleY = button_farming.scaleY * 0.08;
     button_farming.setInteractive({useHandCursor: true});
     button_farming.on('pointerdown', () => contract_start_farming(summoner) );
-    button_crafting = this.add.sprite(100,500, "button_crafting");
+    button_crafting = this.add.sprite(100,500, "button_feeding");
     button_crafting.scaleX = button_crafting.scaleX * 0.08;
     button_crafting.scaleY = button_crafting.scaleY * 0.08;
     button_crafting.setInteractive({useHandCursor: true});
@@ -1019,6 +1049,17 @@ function update() {
             murasakisan.target_x = 150;
             murasakisan.target_y = 260;
         }else if (local_farming_status == 0 & murasakisan.mode == "farming") {
+            murasakisan.set_mode = "resting";
+        }
+
+        //crafting check
+        if (local_crafting_status == 1 & murasakisan.mode != "crafting"){
+            murasakisan.set_mode = "crafting";
+            murasakisan.submode = 0;
+            murasakisan.count = 0;
+            murasakisan.target_x = 100;
+            murasakisan.target_y = 450;
+        }else if (local_crafting_status == 0 & murasakisan.mode == "farming") {
             murasakisan.set_mode = "resting";
         }
 
