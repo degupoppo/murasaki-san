@@ -357,6 +357,24 @@ async function contract_stop_farming(summoner) {
     contract.methods.stop_farming(summoner).send({from:wallet});
 }
 
+//crafting
+async function contract_start_crafting(summoner) {
+    let web3 = await connect();
+    let contract = await get_contract(web3);
+    let wallet = await get_wallet(web3);
+    let item_base_id = 0;
+    let item_id = 0;
+    let coin = 1;
+    let material = 1;
+    contract.methods.start_crafting(summoner, item_base_id, item_id, coin, material).send({from:wallet});
+}
+async function contract_stop_crafting(summoner) {
+    let web3 = await connect();
+    let contract = await get_contract(web3);
+    let wallet = await get_wallet(web3);
+    contract.methods.stop_crafting(summoner).send({from:wallet});
+}
+
 
 
 // summoner
@@ -676,41 +694,6 @@ class Button {
             .on('pointerout', () => button.setStyle({ fontSize: fontsize, fontFamily: "Arial", fill: '#000000' }));
     }
 }
-function level_up(contract) {
-    if (window.confirm("[ Dummy MetaMask Message ]\n\nConfirm Level-Up?\n")) {
-        contract.level_up();
-    }
-}
-function feeding(contract) {
-    if (window.confirm("[ Dummy MetaMask Message ]\n\nConfirm Feeding?\n")) {
-        contract.feeding();
-    }
-}
-function grooming(contract) {
-    if (window.confirm("[ Dummy MetaMask Message ]\n\nConfirm Grooming?\n")) {
-        contract.grooming();
-    }
-}
-function start_mining(contract) {
-    if (window.confirm("[ Dummy MetaMask Message ]\n\nStart Mining?\n")) {
-        contract.start_mining();
-    }
-}
-function stop_mining(contract) {
-    if (window.confirm("[ Dummy MetaMask Message ]\n\nstop Mining?\n")) {
-        contract.stop_mining();
-    }
-}
-function start_farming(contract) {
-    if (window.confirm("[ Dummy MetaMask Message ]\n\nStart Farming?\n")) {
-        contract.start_farming();
-    }
-}
-function stop_farming(contract) {
-    if (window.confirm("[ Dummy MetaMask Message ]\n\nStop Farming?\n")) {
-        contract.stop_farming();
-    }
-}
 
 
 
@@ -890,6 +873,11 @@ function create() {
     button_farming.scaleY = button_farming.scaleY * 0.08;
     button_farming.setInteractive({useHandCursor: true});
     button_farming.on('pointerdown', () => contract_start_farming(summoner) );
+    button_crafting = this.add.sprite(100,500, "button_feeding");
+    button_crafting.scaleX = button_crafting.scaleX * 0.08;
+    button_crafting.scaleY = button_crafting.scaleY * 0.08;
+    button_crafting.setInteractive({useHandCursor: true});
+    button_crafting.on('pointerdown', () => contract_start_crafting(summoner) );
 
     //summon character
     murasakisan = new Murasakisan(this, 300 + Math.random()*200, 400 + Math.random()*100);
@@ -900,6 +888,7 @@ function create() {
     new Button(30, 10, 'Level Up', this, () => contract_level_up(summoner));
     new Button(30, 40, 'Stop Mining', this, () => contract_stop_mining(summoner));
     new Button(30, 70, 'Stop Farming', this, () => contract_stop_farming(summoner));
+    new Button(30, 100, 'Stop Crafting', this, () => contract_stop_crafting(summoner));
     //new Button(30, 40, 'Feeding', this, () => contract_feeding(summoner));
     //new Button(30, 70, 'Grooming', this, () => contract_grooming(summoner));
     //new Button(30, 100, 'Start Mining', this, () => contract_start_mining(summoner));
@@ -1042,7 +1031,7 @@ function update() {
         satiety = Math.round( (base - (now_time - local_last_feeding_time)) / base * 1000 ) / 10;
         if (satiety < 0) { satiety = 0; }
         if (satiety > 100) { satiety = 100; }
-        let base2 = 86400 * 7
+        let base2 = 86400 * 5
         //happy
         happy = Math.round( (base2 - (now_time - local_last_grooming_time)) / base2 * 1000 ) / 10;
         if (happy < 0) { happy = 0; }
