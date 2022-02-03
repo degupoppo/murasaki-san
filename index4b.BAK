@@ -28,6 +28,7 @@ ToDo
     summoner所持item
         所持itemの検索
         所持itemの表示
+    working中のfeeding動作の実装
 
 Idea
     time
@@ -365,7 +366,7 @@ async function contract_start_crafting(summoner) {
     let item_base_id = 0;
     let item_id = 0;
     let coin = 1;
-    let material = 1;
+    let material = 0;
     //***TODO*** spell miss!!!**********************************************************************************
     contract.methods.start_craftingg(summoner, item_base_id, item_id, coin, material).send({from:wallet});
 }
