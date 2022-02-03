@@ -358,8 +358,7 @@ async function contract_stop_farming(summoner) {
 }
 
 //crafting
-//***TODO*** spell miss!!!
-async function contract_start_craftingg(summoner) {
+async function contract_start_crafting(summoner) {
     let web3 = await connect();
     let contract = await get_contract(web3);
     let wallet = await get_wallet(web3);
@@ -367,7 +366,8 @@ async function contract_start_craftingg(summoner) {
     let item_id = 0;
     let coin = 1;
     let material = 1;
-    contract.methods.start_crafting(summoner, item_base_id, item_id, coin, material).send({from:wallet});
+    //***TODO*** spell miss!!!**********************************************************************************
+    contract.methods.start_craftingg(summoner, item_base_id, item_id, coin, material).send({from:wallet});
 }
 async function contract_stop_crafting(summoner) {
     let web3 = await connect();
