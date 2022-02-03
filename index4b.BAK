@@ -165,7 +165,7 @@ ToDo
     <title>House of Murasaki-San</title>
     <script src="phaser.js"></script>
     <script src="web3.min.js"></script>
-    <script src="abi_contract3.js"></script>
+    <script src="abi4.js"></script>
     <style type="text/css">
         body {
             margin: 0;

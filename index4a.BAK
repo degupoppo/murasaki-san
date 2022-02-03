@@ -7,7 +7,7 @@
     <link rel="icon" type="png" href="png/icon.PNG">
     <title>House of Murasaki-San</title>
     <script src="web3.min.js"></script>
-    <script src="abi_contract3.js"></script>
+    <script src="abi4.js"></script>
     <style type="text/css">
         html, body {
             width: 100%;
@@ -102,7 +102,7 @@ async function get_wallet(web3) {
 
 //prepare contract, need abi_contract.js
 async function get_contract(web3) {
-    const contract = await new web3.eth.Contract(abi, contract_address);
+    const contract = await new web3.eth.Contract(abi_murasaki_main, contract_address);
     return contract;
 }
 

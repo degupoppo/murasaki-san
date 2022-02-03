@@ -102,7 +102,7 @@ async function get_wallet(web3) {
 
 //prepare contract, need abi_contract.js
 async function get_contract(web3) {
-    const contract = await new web3.eth.Contract(abi, contract_address);
+    const contract = await new web3.eth.Contract(abi_murasaki_main, contract_address_murasaki_main);
     return contract;
 }
 
