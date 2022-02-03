@@ -33,6 +33,21 @@ Idea
             mining特化して, 1年間の献身で+100%, farmingも同様
         全てのアイテムを買うことはできない。
     feeding, grooming, mining, farming, craftingの関係
+        feeding:
+            24時間でメーター0
+            マイナスにはならない, 0→100のときに+exp
+            どんなモード中でも可能
+        grooming:
+            resting中のみ可能
+            72時間でメーター0
+            マイナスにはならない
+            +exp計算方法    ***TODO***
+                その時点のlast_level_up_timeからのdelta_timeを算出
+                last_total_mining_time, last_total_farming_timeを算出
+                上記3つの数からlast_total_resting_timeを算出
+                
+            その時点のtotal_resting_timeを算出し, last_level_up_timeからのdelta_timeで割り、その係数分+exp
+                つまり, 前回level-upから100%restingなら100%+exp, mining多くしてればexp減る
     satiety, happy, coin, materialのバランス, 消費タイミング, 補正
         materialはcrafting時に消費する基本資源, たくさん費やすほど成功率が上がる, 失敗しても減る
         coinはcraft成功時に支払われる資源, 成功時に減る
@@ -65,6 +80,7 @@ Idea
             1年間で12-15Lvまで上がる, +60%-75%
             mining, farmingはLv2から, craftingはLv3から
             ステータスポイントは+1, 費やした時間に応じて分割して加算する
+            設計と計算を用意しにするため、Level-up時にsatiety, happy, expをすべてリセットする
         item
             mining, farming, craftingに対応する3種類
                 1つ所持すると効率+5%
@@ -74,6 +90,12 @@ Idea
             補正なしで3日で成功率80%程度の難易度
             難易度による差別化をどうするか
                 すべて同じ効果だが, 
+    Level-up
+        last_feeding_time, last_grooming_time, expをすべてリセットする
+        last_level_up_timeからnow.timeまでのdelta_timeを取得する
+        delta_timeのうち, total_mining_time, total_farming_time, 残りをtotal_resting_timeとし
+            それぞれのtotal_timeが何％か算出する
+        point per level (1? 2?) をそれぞれのtotal_time割合で分割してパラメータに合算する
 
 ToDo
     itemのクラフト難易度, 想定個数, 効果を練り込む
@@ -81,11 +103,9 @@ ToDo
         失敗ありで何回も試行するか、必ず成功するが時間がかかるか
         対象ステータス特化か、全体的に底上げだが比率を変えるか
             Lvは全体底上げ、クラフトは特化、がよいか
-    summon costの設定
-        solidityのsummon関数にpayableをつける
-        web3jsのvalueに0.1など追記
-        solidityのsummonにrequiredでvalue閾値を追記
-        solidityにwithdraw関数を追加
+        アイテムごとの差別化はどうするか
+            一律何個所持で補正をかけるか
+            +1%, +3%, +5%など大きさを作るか
     stopのUI実装. 現在の取得数計算、経過時間、など
     craftingコントラの実装
     item craftingのUIの実装
@@ -95,10 +115,15 @@ ToDo
     コントラ：レベルアップの実装
     アイデア：coinのユースケースを考える
     アイデア：materialのバランスを考える
-    satietyとhappyの差別化を考える。
+    ok satietyとhappyの差別化を考える。
     ok wallet所有のNFTを選べるUIを作る
     ok UI：Mintボタン, type指定可能に
     ok UI：所有summonerの表示と選択
+    ok summon costの設定
+        ok solidityのsummon関数にpayableをつける
+        ok web3jsのvalueに0.1など追記
+        ok solidityのsummonにrequiredでvalue閾値を追記
+        ok solidityにwithdraw関数を追加
 
 --->
 
@@ -536,7 +561,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
     hugging() {
         this.count += 1;
         if (this.count == 1){
-            this.anims.play("murasaki_hugging", true);
+            this.anims.play("murasaki_click", true);
         }else if (this.count >= 250) {
             this.mode = "resting";
             this.count = 0;

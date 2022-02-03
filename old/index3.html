@@ -1,90 +1,1240 @@
-<html>
+
+
+
+<!---
+Idea
+    FeedingとGrooming
+    Coin, MaterialとCrafting
+    ステータス
+
+    working()の概念を考える
+        コインを稼ぐ
+        str依存？動作とステータスのイメージが一致するように
+        マイニング？お花摘み？
+    クラフト, luck, str, dexなどのステータス＋クラフト時間で成功率を変える、アイテムごとに難易度が違う
+        難しいものでも、１ヶ月とかクラフトし続ければ作れるかもしれない。
+        連続思考を防ぐため、０％も作る。またファンブルで必ず５％は失敗する
+        クラフト品のユースケースは？
+    資産
+        summoner間での移動は50%が消える
+        exp?, 時間, コイン（sota?, ohana?), 素材(あまり種類を多くしない, 低級、中級、上級、ぐらい）
+        exp
+            お世話で取得
+            Lv upで消費
+        コイン
+            miningで取得
+            Craftingで消費
+        素材
+            farmingで取得
+            Craftingで消費
+    効率・補正
+        Lv, Str/Dex/Intなどのステータス, endを押すまでの経過時間
+        クラフト品による補正
+    時間を資源に
+        フリー時間しかgroomingなどできない
+        working, やcraftingは時間を費やせばそれだけ効率や成功率が増大する
+        しかしworkingさせているとgroomingやfeedingできずにexpがたまらない
+    ステータス
+        Lvアップで増加？ランダム？
+        木の実をクラフトし使用する、確率を小さくするか、高価にする
+        Strength: 筋力
+            Miningの効率up
+        Dexterity: 器用さ
+            Farmingの効率up
+        Intelligence: 知力
+            Craftingの効率up
+        Vitality: 体力
+            不要？
+        Luck: 運
+            ボーナスダイスに加算
+    お世話, expを得る
+        feeding, デイリークエスト, コストなし, 24時間で最大効率
+        grooming, プラスアルファ, 何かしらのコスト必要, 168時間で最大効率
+ToDo
+    UI：Mintボタン, type指定可能に
+    UI：所有summonerの表示と選択
+    UI：所有itemのリアルタイム更新と表示
+    コントラ：random
+    コントラ：crafting, summonerが所有するNFT, 所有summonerを紐付けるよう書き換える
+    コントラ：レベルアップの実装
+    アイデア：coinのユースケースを考える
+    アイデア：materialのバランスを考える
+    wallet所有のNFTを選べるUIを作る
+    satietyとhappyの差別化を考える。
+--->
+
+
+
+<!DOCTYPE html>
+<html lang="ja">
+
 <head>
-<button class="btn1">Btn1</button>
-<meta charset="UTF-8">
-<script src="web3.min.js"></script>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="png" href="png/icon.PNG">
+    <title>House of Murasaki San</title>
+    <script src="phaser.js"></script>
+    <script src="web3.min.js"></script>
+    <script src="abi_contract3.js"></script>
+    <style type="text/css">
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <form name="select_summoner">
+        <input type="button" value="Update Summoner List" onclick="button_update_summoners();"/>
+        <select name="select_summoner" id="summoner">
+            <option value="***">***<option>
+        </select>
+        <input type="button" value="Swith Summoner" onclick="button_select_summoner();"/>
+    </form>
+    <br>
+
 <script type="text/javascript">
 
-const abi = [{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"approved","type":"address"},{"indexed":true,"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"Approval","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"operator","type":"address"},{"indexed":false,"internalType":"bool","name":"approved","type":"bool"}],"name":"ApprovalForAll","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":true,"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"Transfer","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":false,"internalType":"uint256","name":"level","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"summoner","type":"uint256"}],"name":"leveled","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":false,"internalType":"uint256","name":"class","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"summoner","type":"uint256"}],"name":"summoned","type":"event"},{"inputs":[{"internalType":"uint256","name":"_summoner","type":"uint256"}],"name":"adventure","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"adventurers_log","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"approve","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"owner","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"class","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"id","type":"uint256"}],"name":"classes","outputs":[{"internalType":"string","name":"description","type":"string"}],"stateMutability":"pure","type":"function"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"getApproved","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"address","name":"operator","type":"address"}],"name":"isApprovedForAll","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"level","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"_summoner","type":"uint256"}],"name":"level_up","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"next_summoner","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"ownerOf","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"safeTransferFrom","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"},{"internalType":"bytes","name":"_data","type":"bytes"}],"name":"safeTransferFrom","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"operator","type":"address"},{"internalType":"bool","name":"approved","type":"bool"}],"name":"setApprovalForAll","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"_summoner","type":"uint256"},{"internalType":"uint256","name":"_xp","type":"uint256"}],"name":"spend_xp","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"_class","type":"uint256"}],"name":"summon","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"_summoner","type":"uint256"}],"name":"summoner","outputs":[{"internalType":"uint256","name":"_xp","type":"uint256"},{"internalType":"uint256","name":"_log","type":"uint256"},{"internalType":"uint256","name":"_class","type":"uint256"},{"internalType":"uint256","name":"_level","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"_summoner","type":"uint256"}],"name":"tokenURI","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"transferFrom","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"xp","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"curent_level","type":"uint256"}],"name":"xp_required","outputs":[{"internalType":"uint256","name":"xp_to_next_level","type":"uint256"}],"stateMutability":"pure","type":"function"}]
 
-console.log("start");
 
-//Metamask�̐ڑ�
-function connect() {
-    const web3 = new Web3(window.ethereum);
+//global variants
+//--------------------------------------------------------------------------------------------------------
+
+const version = "0.0.14";
+let turn = 0;
+
+let local_ctype;
+let local_strength;
+let local_dexterity;
+let local_vitality;
+let local_intelligence;
+let local_luck;
+let local_birth_time;
+let local_level = 1;
+let local_last_feeding_time;
+let local_last_grooming_time;
+let local_coin;
+let local_exp;
+let local_mining_status;
+let local_mining_start_time;
+let local_next_exp_required;
+let local_material;
+let local_farming_status;
+let local_farming_start_time;
+let local_crafting_status;
+let local_crafting_start_time;
+let previous_local_last_feeding_time;
+let previous_local_last_grooming_time;
+let summoner = -1;
+let satiety;
+let happy;
+
+
+
+//web3
+//--------------------------------------------------------------------------------------------------------
+
+//connect to metamask
+async function connect() {
+    const web3 = await new Web3(window.ethereum);
     window.ethereum.enable();
+    window.ethereum.request({
+        method: 'wallet_addEthereumChain',
+        params: [{
+            chainId: '0x51',  //4369
+            chainName: 'Shibuya Testnet',
+            nativeCurrency: {
+                name: 'sby',
+                symbol: 'SBY',
+                decimals: 18
+            },
+            rpcUrls: ["https://rpc.shibuya.astar.network:8545"],
+            blockExplorerUrls: ['https://blockscout.com/shibuya'],
+        }]
+    });
     return web3;
 }
 
-//�R���g���̗p��
-function get_contract(web3) {
-    const address = "0x8759719d13f5f403c54c4cd742faa6522bc6d965";
-    //const abi = "./rarity_abi.json";
-    const contract = new web3.eth.Contract(abi, address);
-    return contract;
-}
-
-//�R���g���N�g����call
-function call_contract(contract) {
-    var text = contract.methods.next_summoner().call();
-    return text;
-}
-
-//wallet���擾
+//get wallet
 async function get_wallet(web3) {
     const wallet = await web3.eth.getAccounts();
     return wallet[0];
 }
 
-//�R���g���N�g��send
-function send_contract(web3, contract, wallet) {
-    //var wallet = web3.eth.getAccounts();
-    contract.methods.summon("1").send({from:wallet});
+//prepare contract, need abi_contract.js
+async function get_contract(web3) {
+    const contract = await new web3.eth.Contract(abi, contract_address);
+    return contract;
 }
 
-async function main() {
-    var web3 = await connect();
-    var contract = await get_contract(web3);
-    var call = await call_contract(contract);
-    console.log(call);
-    var wallet = await get_wallet(web3);
-    console.log(wallet);
-    await send_contract(web3, contract, wallet);
+
+async function contract_update_status(summoner) {
+    let web3 = await connect();
+    let contract = await get_contract(web3);
+    let res = await contract.methods.get_status(summoner).call();
+    console.log(res);   
+    local_ctype = res[0];
+    local_strength = res[1];
+    local_dexterity = res[2];
+    local_vitality = res[3];
+    local_intelligence = res[4];
+    local_luck = res[5];
+    local_birth_time = res[6];
+    local_last_feeding_time = res[7];
+    local_last_grooming_time = res[8];
+    local_coin = res[9];
+    local_material = res[10];
+    local_mining_status = res[11];
+    local_mining_start_time = res[12];
+    local_farming_status = res[13];
+    local_farming_start_time = res[14];
+    local_crafting_status = res[15];
+    local_crafting_start_time = res[16];
+    local_exp = res[17];
+    local_level = res[18];
+    local_next_exp_required = res[19];
 }
+
+//call status from contract
+
+//send feeding
+async function contract_feeding(summoner) {
+    let web3 = await connect();
+    let contract = await get_contract(web3);
+    let wallet = await get_wallet(web3);
+    contract.methods.feeding(summoner).send({from:wallet});
+}
+
+//send grooming
+async function contract_grooming(summoner) {
+    let web3 = await connect();
+    let contract = await get_contract(web3);
+    let wallet = await get_wallet(web3);
+    contract.methods.grooming(summoner).send({from:wallet});
+}
+
+//send level_up
+async function contract_level_up(summoner) {
+    let web3 = await connect();
+    let contract = await get_contract(web3);
+    let wallet = await get_wallet(web3);
+    contract.methods.level_up(summoner).send({from:wallet});
+}
+
+//summon
+async function contract_summon(ctype) {
+    let web3 = await connect();
+    let contract = await get_contract(web3);
+    let wallet = await get_wallet(web3);
+    contract.methods.summon(ctype).send({from:wallet});
+}
+
+//mining
+async function contract_start_mining(summoner) {
+    let web3 = await connect();
+    let contract = await get_contract(web3);
+    let wallet = await get_wallet(web3);
+    contract.methods.start_mining(summoner).send({from:wallet});
+}
+async function contract_stop_mining(summoner) {
+    let web3 = await connect();
+    let contract = await get_contract(web3);
+    let wallet = await get_wallet(web3);
+    contract.methods.stop_mining(summoner).send({from:wallet});
+}
+
+//farming
+async function contract_start_farming(summoner) {
+    let web3 = await connect();
+    let contract = await get_contract(web3);
+    let wallet = await get_wallet(web3);
+    contract.methods.start_farming(summoner).send({from:wallet});
+}
+async function contract_stop_farming(summoner) {
+    let web3 = await connect();
+    let contract = await get_contract(web3);
+    let wallet = await get_wallet(web3);
+    contract.methods.stop_farming(summoner).send({from:wallet});
+}
+
+//get owned summoners
+async function contract_my_summoners() {
+    let web3 = await connect();
+    let contract = await get_contract(web3);
+    let wallet = await get_wallet(web3);
+    let next_summoner = await contract.methods.next_summoner().call();
+    let res = [];
+    for (let i = 0; i < next_summoner; i++) {
+        let owner = await contract.methods.ownerOf(i).call();
+        if (owner == wallet) {
+            res.push({text:i, value:i});
+        }
+    }
+    console.log(res);
+    return res;
+}
+
+//update select list
+function _create_dropdownlist( form_name, select_name, select_array ){
+	document[form_name][select_name].length = select_array.length;
+	var i;
+	for ( i=0; i<select_array.length; i++){
+		document[form_name][select_name].options[i].text = select_array[i].text;
+		document[form_name][select_name].options[i].value = select_array[i].value;
+	}
+}
+
+//update summoner list
+async function button_update_summoners() {
+    opt_array = await contract_my_summoners();
+    _create_dropdownlist("select_summoner","select_summoner", opt_array )
+}
+
+//update summoner
+function button_select_summoner() {
+    summoner = document.getElementById("summoner").value;
+    previous_local_last_feeding_time = Date.now() + 10;
+    previous_local_last_grooming_time = Date.now() + 10;
+    char1.set_mode = "resting";
+}
+
+//url parameter
+//https://www.tam-tam.co.jp/tipsnote/javascript/post9911.html
+var urlParam = location.search.substring(1);
+if(urlParam) {
+    var param = urlParam.split('&');
+    var paramArray = [];
+    for (i = 0; i < param.length; i++) {
+        var paramItem = param[i].split('=');
+        paramArray[paramItem[0]] = paramItem[1];
+    }
+    summoner = paramArray.summoner
+}
+
+
+//character
+//--------------------------------------------------------------------------------------------------------
+class Character extends Phaser.GameObjects.Sprite{
+    constructor(scene, x, y){
+        super(scene, x, y, "murasaki_right");
+        this.scene.add.existing(this);
+        this.anims.play("murasaki_right", true);
+    	this.mode = "resting";
+        this.submode = 0;
+        this.count = 0;
+        this.dist = "right";
+        this.target_x = 0;
+        this.target_y = 0;
+        this.setInteractive()
+        this.on("pointerdown", function (pointer) {
+            this.on_click();
+        }, this);
+    }
+    set set_mode(mode){
+        this.mode = mode;
+        this.count = 0;
+    }
+    get get_mode(){
+        return this.mode;
+    }
+    on_click() {
+        if (this.mode != "mining") {
+            this.count = 0;
+            this.mode = "hugging";
+        }
+    }
+    resting(){
+	    this.count += 1;
+        if (this.count == 1) {
+            if (this.dist == "right"){
+                this.anims.play("murasaki_right", true);
+            }else if (this.dist == "left") {
+                this.anims.play("murasaki_left", true);
+            }
+            this.resting_count = 70 + Math.random() * 30;
+	    }else if (this.count >= this.resting_count){
+            let tmp = Math.random() * 100;
+            if (tmp <= 10) {
+                this.mode = "sleeping";
+                this.count = 0;
+            }else if (tmp <= 20 & happy <= 10) {
+                this.mode = "crying";
+                this.count = 0;
+            }else {
+                this.mode = "moving";
+                this.count = 0;
+            }
+        }
+    }
+    moving() {
+        this.count += 1;
+        //determine direction
+        if (this.count == 1){
+            //determine degree, 0-30, 150-210, 330-360
+            var li = [0,10,20,30,150,160,170,180,190,200,210,330,340,350]
+            this.moving_degree = li[Math.floor(Math.random() * li.length)];
+            //out of area check
+            if (this.x < 100 && this.moving_degree > 90 && this.moving_degree <270) {
+                this.moving_degree -= 180;
+            }else if (this.x > 700 && (this.moving_degree < 90 || this.moving_degree > 270)) {
+                this.moving_degree -= 180;
+            }
+            if (this.y > 500 && this.moving_degree > 180) {
+                this.moving_degree = 360 - this.moving_degree;
+            }else if (this.y < 250 && this.moving_degree < 180) {
+                this.moving_degree = 360 - this.moving_degree;
+            }
+            //minus check
+            if (this.moving_degree < 0) {
+                this.moving_degree += 360;
+            }
+            //determine speed, count
+            this.moving_speed = 0.3 + Math.random() * 0.2;  //0.3-0.5
+            this.moving_count = 70 + Math.random() * 30;    //70-100
+            //determine left or right
+            if (this.moving_degree > 90 && this.moving_degree <= 270) {
+                this.dist = "left";
+                this.anims.play("murasaki_left", true);
+            }else {
+                this.dist = "right";
+                this.anims.play("murasaki_right", true);
+            }
+            //debug
+            //console.log(this.moving_degree, Math.sin(this.moving_degree * (Math.PI/180)), this.x, this.y);
+        //moving
+        }else if (this.count < this.moving_count) {
+            this.x += Math.cos(this.moving_degree * (Math.PI/180)) * this.moving_speed;
+            this.y -= Math.sin(this.moving_degree * (Math.PI/180)) * this.moving_speed;
+        //return to resting
+        }else if (this.count >= this.moving_count) {
+            this.mode = "resting";
+            this.count = 0;
+        }
+    }
+    //send: last_nutrition_time
+    feeding() {
+        this.count += 1;
+        if (this.submode == 0) {
+            //this.target_x = 600;
+            //this.target_y = 400;
+            let delta_x = this.target_x - this.x;
+            if (delta_x >0) {
+                this.dist = "right";
+                this.anims.play("murasaki_feeding_happy_right", true);
+            }else {
+                this.dist = "left";
+                this.anims.play("murasaki_feeding_happy_left", true);
+            }
+            this.submode = 1;
+        }else if (this.submode == 1) {
+            let delta_x = this.target_x - this.x;
+            let delta_y = this.target_y - this.y;
+            let delta_x2 = delta_x / (Math.abs(delta_x) + Math.abs(delta_y)) * 1.2;
+            let delta_y2 = delta_y / (Math.abs(delta_x) + Math.abs(delta_y)) * 1.2;
+            this.x += delta_x2;
+            this.y += delta_y2;
+            if (this.x > this.target_x-10 
+              && this.x < this.target_x+10 
+              && this.y > this.target_y-10 
+              && this.y < this.target_y+10) {
+                this.submode = 2;
+            }
+        }else if (this.submode == 2) {
+            this.anims.play("murasaki_feeding", true);
+            food.destroy();
+            this.count_limit = this.count + 1000;
+            this.submode = 3;
+        }else if (this.submode == 3) {
+            if (this.count >= this.count_limit) {
+                this.mode = "resting";
+                this.count = 0;
+            }
+        }
+    }
+    crying() {
+        this.count += 1;
+        if (this.count == 1){
+            this.anims.play("murasaki_crying", true);
+        }else if (this.count >= 500) {
+            this.mode = "resting";
+            this.count = 0;
+        }
+    }
+    sleeping() {
+        this.count += 1;
+        if (this.count == 1){
+            this.anims.play("murasaki_sleeping", true);
+        }else if (this.count >= 1000) {
+            this.mode = "resting";
+            this.count = 0;
+        }
+    }
+    //send: last_grooming_time
+    grooming() {
+        this.count += 1;
+        if (this.submode == 0) {
+            let delta_x = this.target_x - this.x;
+            if (delta_x >0) {
+                this.dist = "right";
+                this.anims.play("murasaki_feeding_happy_right", true);
+            }else {
+                this.dist = "left";
+                this.anims.play("murasaki_feeding_happy_left", true);
+            }
+            this.submode = 1;
+        }else if (this.submode == 1) {
+            let delta_x = this.target_x - this.x;
+            let delta_y = this.target_y - this.y;
+            let delta_x2 = delta_x / (Math.abs(delta_x) + Math.abs(delta_y)) * 1.2;
+            let delta_y2 = delta_y / (Math.abs(delta_x) + Math.abs(delta_y)) * 1.2;
+            this.x += delta_x2;
+            this.y += delta_y2;
+            if (this.x > this.target_x-10 
+              && this.x < this.target_x+10 
+              && this.y > this.target_y-10 
+              && this.y < this.target_y+10) {
+                this.submode = 2;
+            }
+        }else if (this.submode == 2) {
+            this.x = this.target_x;
+            this.y = this.target_y;
+            this.anims.play("murasaki_grooming", true);
+            this.count_limit = this.count + 2000;
+            this.submode = 3;
+        }else if (this.submode == 3) {
+            if (this.count >= this.count_limit) {
+                this.mode = "resting";
+                this.count = 0;
+            }
+        }
+    }
+    //cost: life, gain: coin
+    mining() {
+        this.count += 1;
+        if (this.submode == 0) {
+            let delta_x = this.target_x - this.x;
+            if (delta_x >0) {
+                this.dist = "right";
+                this.anims.play("murasaki_feeding_happy_right", true);
+            }else {
+                this.dist = "left";
+                this.anims.play("murasaki_feeding_happy_left", true);
+            }
+            this.submode = 1;
+        }else if (this.submode == 1) {
+            let delta_x = this.target_x - this.x;
+            let delta_y = this.target_y - this.y;
+            let delta_x2 = delta_x / (Math.abs(delta_x) + Math.abs(delta_y)) * 1;
+            let delta_y2 = delta_y / (Math.abs(delta_x) + Math.abs(delta_y)) * 1;
+            this.x += delta_x2;
+            this.y += delta_y2;
+            if (this.x > this.target_x-10 
+              && this.x < this.target_x+10 
+              && this.y > this.target_y-10 
+              && this.y < this.target_y+10) {
+                this.submode = 2;
+            }
+        }else if (this.submode == 2) {
+            this.anims.play("murasaki_mining", true);
+        }
+    }
+    hugging() {
+        this.count += 1;
+        if (this.count == 1){
+            this.anims.play("murasaki_hugging", true);
+        }else if (this.count >= 250) {
+            this.mode = "resting";
+            this.count = 0;
+        }
+    }
+    farming() {
+        this.count += 1;
+        if (this.submode == 0) {
+            let delta_x = this.target_x - this.x;
+            if (delta_x >0) {
+                this.dist = "right";
+                this.anims.play("murasaki_feeding_happy_right", true);
+            }else {
+                this.dist = "left";
+                this.anims.play("murasaki_feeding_happy_left", true);
+            }
+            this.submode = 1;
+        }else if (this.submode == 1) {
+            let delta_x = this.target_x - this.x;
+            let delta_y = this.target_y - this.y;
+            let delta_x2 = delta_x / (Math.abs(delta_x) + Math.abs(delta_y)) * 1;
+            let delta_y2 = delta_y / (Math.abs(delta_x) + Math.abs(delta_y)) * 1;
+            this.x += delta_x2;
+            this.y += delta_y2;
+            if (this.x > this.target_x-10 
+              && this.x < this.target_x+10 
+              && this.y > this.target_y-10 
+              && this.y < this.target_y+10) {
+                this.submode = 2;
+            }
+        }else if (this.submode == 2) {
+            this.anims.play("murasaki_farming", true);
+        }
+    }
+    update(){
+        //console.log(this.version, this.mode, this.count);
+        if (this.mode == "resting") {this.resting();}
+        else if (this.mode == "moving") {this.moving();}
+        else if (this.mode == "feeding") {this.feeding();}
+        else if (this.mode == "crying") {this.crying();}
+        else if (this.mode == "sleeping") {this.sleeping();}
+        else if (this.mode == "grooming") {this.grooming();}
+        else if (this.mode == "mining") {this.mining();}
+        else if (this.mode == "hugging") {this.hugging();}
+        else if (this.mode == "farming") {this.farming();}
+    }
+}
+
+
+
+//accessories
+//--------------------------------------------------------------------------------------------------------
+
+//bar
+function makeBar(scene, x, y, color) {
+    //draw the bar
+    let bar = scene.add.graphics();
+    //color the bar
+    bar.fillStyle(color, 1);
+    //fill the bar with a rectangle
+    bar.fillRect(0, 0, 100, 10);
+    //position the bar
+    bar.x = x;
+    bar.y = y;
+    //return the bar
+    return bar;
+}
+
+
+//button
+//TODO: send transaction
+class Button {
+    constructor(x, y, label, scene, callback) {
+        let fontsize = 18;
+        const button = scene.add.text(x, y, label)
+            .setFontSize(fontsize)
+            .setFontFamily("Arial")
+            .setFill("#000000")
+            //.setOrigin(0.5)
+            //.setPadding(10)
+            //.setStyle({ backgroundColor: '#111' })
+            .setInteractive({ useHandCursor: true })
+            .on('pointerdown', () => callback())
+            .on('pointerover', () => button.setStyle({ fontSize: fontsize, fontFamily: "Arial", fill: '#ffff00' }))
+            .on('pointerout', () => button.setStyle({ fontSize: fontsize, fontFamily: "Arial", fill: '#000000' }));
+    }
+}
+function level_up(contract) {
+    if (window.confirm("[ Dummy MetaMask Message ]\n\nConfirm Level-Up?\n")) {
+        contract.level_up();
+    }
+}
+function feeding(contract) {
+    if (window.confirm("[ Dummy MetaMask Message ]\n\nConfirm Feeding?\n")) {
+        contract.feeding();
+    }
+}
+function grooming(contract) {
+    if (window.confirm("[ Dummy MetaMask Message ]\n\nConfirm Grooming?\n")) {
+        contract.grooming();
+    }
+}
+function start_mining(contract) {
+    if (window.confirm("[ Dummy MetaMask Message ]\n\nStart Mining?\n")) {
+        contract.start_mining();
+    }
+}
+function stop_mining(contract) {
+    if (window.confirm("[ Dummy MetaMask Message ]\n\nstop Mining?\n")) {
+        contract.stop_mining();
+    }
+}
+function start_farming(contract) {
+    if (window.confirm("[ Dummy MetaMask Message ]\n\nStart Farming?\n")) {
+        contract.start_farming();
+    }
+}
+function stop_farming(contract) {
+    if (window.confirm("[ Dummy MetaMask Message ]\n\nStop Farming?\n")) {
+        contract.stop_farming();
+    }
+}
+
+
+
+// main functions
+//--------------------------------------------------------------------------------------------------------
+
+
+let config = {
+    type: Phaser.AUTO,
+    width: 800,
+    height: 600,
+    scale: {
+        mode: Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.CENTER_BOTH
+    },
+    scene: {
+        preload: preload,
+        create: create,
+        update: update
+    },
+    render: {
+        pixelArt: false
+    },
+};
+let game = new Phaser.Game(config);
+
+
+
+// preload
+//--------------------------------------------------------------------------------------------------------
+function preload() {
+    this.load.image("back", "png/back.jpg");
+    this.load.spritesheet("murasaki_right", "png/murasaki_right.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("murasaki_left", "png/murasaki_left.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("murasaki_sleeping", "png/murasaki_sleeping.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("murasaki_feeding", "png/murasaki_feeding.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("murasaki_feeding_happy_right", 
+        "png/murasaki_feeding_happy_right.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("murasaki_feeding_happy_left", 
+        "png/murasaki_feeding_happy_left.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("murasaki_crying", "png/murasaki_crying.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("murasaki_mining", "png/murasaki_mining.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("murasaki_hugging", "png/murasaki_hugging.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("murasaki_farming", "png/murasaki_farming.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("murasaki_grooming", "png/murasaki_grooming.png", {frameWidth: 720, frameHeight: 622});
+    this.load.image("button_feeding", "png/button_feeding.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_grooming", "png/button_feeding.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_mining", "png/button_feeding.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_farming", "png/button_feeding.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("food_sweet_potato", "png/food_sweet_potato.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("item_bear", "png/item_bear.png", {frameWidth: 720, frameHeight: 622});
+    //cursors = this.input.keyboard.createCursorKeys();
+}
+
+
+
+// create
+//--------------------------------------------------------------------------------------------------------
+function create() {
+
+    //fake contract
+    //contract = new Contract();
+
+    //back image
+    this.add.image(400, 300, "back");
+
+    //animations
+    this.anims.create({
+        key: "murasaki_right",
+        frames: this.anims.generateFrameNumbers("murasaki_right", {start: 0, end:3}),
+        frameRate: 2,
+        repeat: -1
+    });
+    this.anims.create({
+        key: "murasaki_left",
+        frames: this.anims.generateFrameNumbers("murasaki_left", {start: 0, end:3}),
+        frameRate: 2,
+        repeat: -1
+    });
+    this.anims.create({
+        key: "murasaki_sleeping",
+        frames: this.anims.generateFrameNumbers("murasaki_sleeping", {start: 0, end:1}),
+        frameRate: 1,
+        repeat: -1
+    });
+    this.anims.create({
+        key: "murasaki_feeding",
+        frames: this.anims.generateFrameNumbers("murasaki_feeding", {start: 0, end:1}),
+        frameRate: 1,
+        repeat: -1
+    });
+    this.anims.create({
+        key: "murasaki_feeding_happy_right",
+        frames: this.anims.generateFrameNumbers("murasaki_feeding_happy_right", {start: 0, end:1}),
+        frameRate: 1,
+        repeat: -1
+    });
+    this.anims.create({
+        key: "murasaki_feeding_happy_left",
+        frames: this.anims.generateFrameNumbers("murasaki_feeding_happy_left", {start: 0, end:1}),
+        frameRate: 1,
+        repeat: -1
+    });
+    this.anims.create({
+        key: "murasaki_crying",
+        frames: this.anims.generateFrameNumbers("murasaki_crying", {start: 0, end:1}),
+        frameRate: 1,
+        repeat: -1
+    });
+    this.anims.create({
+        key: "murasaki_mining",
+        frames: this.anims.generateFrameNumbers("murasaki_mining", {start: 0, end:1}),
+        frameRate: 1,
+        repeat: -1
+    });
+    this.anims.create({
+        key: "murasaki_hugging",
+        frames: this.anims.generateFrameNumbers("murasaki_hugging", {start: 0, end:1}),
+        frameRate: 1,
+        repeat: -1
+    });
+    this.anims.create({
+        key: "murasaki_farming",
+        frames: this.anims.generateFrameNumbers("murasaki_farming", {start: 0, end:1}),
+        frameRate: 1,
+        repeat: -1
+    });
+    this.anims.create({
+        key: "murasaki_grooming",
+        frames: this.anims.generateFrameNumbers("murasaki_grooming", {start: 0, end:1}),
+        frameRate: 1,
+        repeat: -1
+    });
+
+    //items
+    //bear
+    item_bear = this.add.sprite(300,250, "item_bear");
+    item_bear.scaleX = item_bear.scaleX * 0.25;
+    item_bear.scaleY = item_bear.scaleY * 0.25;
+
+    //button_icon
+    button_feeding = this.add.sprite(660,430, "button_feeding");
+    button_feeding.scaleX = button_feeding.scaleX * 0.08;
+    button_feeding.scaleY = button_feeding.scaleY * 0.08;
+    button_feeding.setInteractive();
+    button_feeding.on('pointerdown', () => contract_feeding(summoner) );
+    button_grooming = this.add.sprite(400,300, "button_feeding");
+    button_grooming.scaleX = button_grooming.scaleX * 0.08;
+    button_grooming.scaleY = button_grooming.scaleY * 0.08;
+    button_grooming.setInteractive();
+    button_grooming.on('pointerdown', () => contract_grooming(summoner) );
+    button_mining = this.add.sprite(10,430, "button_feeding");
+    button_mining.scaleX = button_mining.scaleX * 0.08;
+    button_mining.scaleY = button_mining.scaleY * 0.08;
+    button_mining.setInteractive();
+    button_mining.on('pointerdown', () => contract_start_mining(summoner) );
+    button_farming = this.add.sprite(200,300, "button_feeding");
+    button_farming.scaleX = button_farming.scaleX * 0.08;
+    button_farming.scaleY = button_farming.scaleY * 0.08;
+    button_farming.setInteractive();
+    button_farming.on('pointerdown', () => contract_start_farming(summoner) );
+
+    //summon character
+    char1 = new Character(this, 300 + Math.random()*200, 400 + Math.random()*100);
+    char1.scaleX = char1.scaleX * 0.25;
+    char1.scaleY = char1.scaleY * 0.25;
+
+    //button_text
+    new Button(30, 10, 'Level Up', this, () => contract_level_up(summoner));
+    new Button(30, 40, 'Feeding', this, () => contract_feeding(summoner));
+    new Button(30, 70, 'Grooming', this, () => contract_grooming(summoner));
+    new Button(30, 100, 'Start Mining', this, () => contract_start_mining(summoner));
+    new Button(30, 130, 'Stop Mining', this, () => contract_stop_mining(summoner));
+    new Button(30, 160, 'Start Farming', this, () => contract_start_farming(summoner));
+    new Button(30, 190, 'Stop Farming', this, () => contract_stop_farming(summoner));
+    new Button(30, 250, 'Summon', this, () => contract_summon("1"));
+    new Button(30, 280, 'Test', this, () => update_summoner_list());
+
+    //status window color fill
+    let status_back = this.add.graphics();
+    status_back.fillStyle(0xa9a9a9, 1).fillRect(590, 5, 200, 350);
+    status_back.alpha = 0.5;
+
+    //status window
+    text_version = this.add.text(600, 10, "version = " + version, {font: "10.5px Arial", fill: "#000"});
+    //static_status
+    text_summoner = this.add.text(
+        600, 30, "summoner = " + summoner, {font: "10.5px Arial", fill: "#000"});
+    text_type = this.add.text(
+        600, 40, "type = " + local_ctype, {font: "10.5px Arial", fill: "#000"});
+    text_birth_time = this.add.text(
+        600, 50, "birth_time = " + local_birth_time, {font: "10.5px Arial", fill: "#000"});
+    text_strength = this.add.text(
+        600, 60, "strength = " + local_strength, {font: "10.5px Arial", fill: "#000"});
+    text_dexterity = this.add.text(
+        600, 70, "dexterity = " + local_dexterity, {font: "10.5px Arial", fill: "#000"});
+    text_vitality = this.add.text(
+        600, 80, "vitality = " + local_vitality, {font: "10.5px Arial", fill: "#000"});
+    text_intelligence = this.add.text(
+        600, 90, "intelligence = " + local_intelligence, {font: "10.5px Arial", fill: "#000"});
+    text_luck = this.add.text(
+        600, 100, "luck = " + local_luck, {font: "10.5px Arial", fill: "#000"});
+    //dynamic_status
+    text_level = this.add.text(
+        600, 120, "level = " + local_level, {font: "10.5px Arial", fill: "#000"});
+    text_last_feeding_time = this.add.text(
+        600, 130, "last_feeding_time = " + local_last_feeding_time, {font: "10.5px Arial", fill: "#000"});
+    text_last_grooming_time = this.add.text(
+        600, 140, "last_grooming_time = " + local_last_grooming_time, {font: "10.5px Arial", fill: "#000"});
+    text_coin = this.add.text(
+        600, 150, "coin = " + local_coin, {font: "10.5px Arial", fill: "#000"});
+    text_exp = this.add.text(
+        600, 180, "exp = " + local_exp, {font: "10.5px Arial", fill: "#000"});
+    //calculation_status
+    text_turn = this.add.text(
+        600, 200, "turn = ", {font: "10.5px Arial", fill: "#000"});
+    text_age_time = this.add.text(
+        600, 210, "age_time = ", {font: "10.5px Arial", fill: "#000"});
+    text_mode = this.add.text(
+        600, 220, "mode = ", {font: "10.5px Arial", fill: "#000"});
+    text_satiety = this.add.text(
+        600, 230, "satiey = ", {font: "10.5px Arial", fill: "#000"});
+    text_happy = this.add.text(
+        600, 240, "happy = ", {font: "10.5px Arial", fill: "#000"});
+
+    //bar
+    //satiety
+    this.add.text(600, 260, "satiety:", {font: "10.5px Arial", fill: "#000"});
+    bar_satiety_back = makeBar(this, 640, 260, 0xa9a9a9);
+    bar_satiety_back.scaleX = 1;
+    bar_satiety = makeBar(this, 640, 260, 0xff4500);
+    bar_satiety.scaleX = 0;
+    //happy
+    this.add.text(600, 280, "happy:", {font: "10.5px Arial", fill: "#000"});
+    bar_happy_back = makeBar(this, 640, 280, 0xa9a9a9);
+    bar_happy_back.scaleX = 1;
+    bar_happy = makeBar(this, 640, 280, 0x4169e1);
+    bar_happy.scaleX = 0;
+    //exp
+    this.add.text(600, 300, "exp:", {font: "10.5px Arial", fill: "#000"});
+    bar_exp_back = makeBar(this, 640, 300, 0xa9a9a9);
+    bar_exp_back.scaleX = 1;
+    bar_exp = makeBar(this, 640, 300, 0x228b22);
+    bar_exp.scaleX = 0;
+    //coin
+    text_coin_main = this.add.text(
+        600, 320, "coin:" + local_coin, {font: "10.5px Arial", fill: "#000"});
+    text_material_main = this.add.text(
+        600, 330, "material:" + local_material, {font: "10.5px Arial", fill: "#000"});
+}
+
+
+
+// update
+//--------------------------------------------------------------------------------------------------------
+function update() {
+
+    if (summoner == -1) {
+        return 0;
+    }
+
+    //update turn
+    turn += 1;
+    //text_turn.setText("turn = " + turn);
+
+    //update character
+    char1.update();
+
+    //update calculation status
+    if (turn == 1 || turn % 100 == 0) {
+        //feeding
+        if (previous_local_last_feeding_time != null && local_last_feeding_time > previous_local_last_feeding_time){
+            flag_feeding = 0;
+            char1.set_mode = "feeding";
+            char1.submode = 0;
+            char1.count = 0;
+            char1.target_x = 600;
+            char1.target_y = 400;
+            if (typeof food !== "undefined") {
+                food.destroy();
+                //food.visible = false;
+            }
+            food = this.add.sprite(600,400, "food_sweet_potato");
+            food.scaleX = food.scaleX * 0.1;
+            food.scaleY = food.scaleY * 0.1;
+        }
+        //grooming
+        if (previous_local_last_grooming_time != null && local_last_grooming_time > previous_local_last_grooming_time){
+
+            flag_feeding = 0;
+            char1.set_mode = "grooming";
+            char1.submode = 0;
+            char1.count = 0;
+            char1.target_x = 300;
+            char1.target_y = 250;
+
+            /***
+            flag_grooming = 0;
+            char1.set_mode = "grooming";
+            ***/
+        }
+        //mining
+        if (local_mining_status == 1 & char1.mode != "mining"){
+            char1.set_mode = "mining";
+            char1.submode = 0;
+            char1.count = 0;
+            char1.target_x = 70;
+            char1.target_y = 420;
+        }else if (local_mining_status == 0 & char1.mode == "mining") {
+            char1.set_mode = "resting";
+        }
+        //farming
+        if (local_farming_status == 1 & char1.mode != "farming"){
+            char1.set_mode = "farming";
+            char1.submode = 0;
+            char1.count = 0;
+            char1.target_x = 150;
+            char1.target_y = 260;
+        }else if (local_farming_status == 0 & char1.mode == "farming") {
+            char1.set_mode = "resting";
+        }
+        text_turn.setText("turn = " + turn);
+        //update calculation_status
+        let now_time = Date.now() / 1000;
+        let age_time = Math.round( now_time - local_birth_time );
+        let mode = char1.get_mode;
+        //var base = 86400000
+        //let base = 864000
+        let base = 86400
+        //let satiety = Math.round( (base - (now_time - local_last_feeding_time)) / base * 1000 ) / 10;
+        satiety = Math.round( (base - (now_time - local_last_feeding_time)) / base * 1000 ) / 10;
+        if (satiety < 0) { satiety = 0; }
+        if (satiety > 100) { satiety = 100; }
+        //let happy = Math.round( (base - (now_time - local_last_grooming_time)) / base * 1000 ) / 10;
+        let base2 = 86400 * 7
+        happy = Math.round( (base2 - (now_time - local_last_grooming_time)) / base2 * 1000 ) / 10;
+        if (happy < 0) { happy = 0; }
+        if (happy > 100) { happy = 100; }
+        //update text
+        text_summoner.setText("summoner = " + summoner);
+        text_type.setText("type = " + local_ctype);
+        text_birth_time.setText("birth_time = " + local_birth_time);
+        text_level.setText("level = " + local_level);
+        text_strength.setText("strength = " + local_strength);
+        text_dexterity.setText("dexterity = " + local_dexterity);
+        text_vitality.setText("vitality = " + local_vitality);
+        text_intelligence.setText("intelligence = " + local_intelligence);
+        text_luck.setText("luck = " + local_luck);
+        text_last_feeding_time.setText("last_feeding_time = " + local_last_feeding_time);
+        text_last_grooming_time.setText("last_grooming_time = " + local_last_grooming_time);
+        text_coin.setText("coin = " + local_coin);
+        text_exp.setText("exp = " + local_exp);
+        text_age_time.setText("age_time = " + age_time);
+        text_mode.setText("mode = " + mode);
+        text_satiety.setText("satiety = " + satiety);
+        text_happy.setText("happy = " + happy);
+        //update bar
+        bar_satiety.scaleX = satiety / 100;
+        bar_happy.scaleX = happy / 100;
+        //exp
+        let exp = (local_exp / local_next_exp_required) * 100;
+        if (exp > 100) { exp = 100; }
+        bar_exp.scaleX = exp / 100;
+        text_coin_main.setText("coin:    " + local_coin);
+        text_material_main.setText("material:" + local_material);
+        previous_local_last_feeding_time = local_last_feeding_time;
+        previous_local_last_grooming_time = local_last_grooming_time;
+    }
+
+    //update dynamic status from contract to local
+    if (turn == 1 || turn % 201 == 0) {
+        //update dynamic_status
+        //summoner = document.getElementById("summoner").value;
+        contract_update_status(summoner);
+    }
+}
+
+
 
 /***
+    ok コントラクト内にステータスを保持する
+    ok コントラクト内のステータスを読み出す
+    ok ステータスを保有したNFTを作成する
+    ok NFTのmint方法を確立する
+    ok 場所への移動を実装する, mining, farming, feedingに組み込む, コードの汎用性を上げる
+    ok 絵を大きめにする, 元絵を大きめに読み込み, scaleXYで縮小する
+    ok Lvを実装する。必要expの対応表を作製する。
+    ok 移動を見直す. 距離ランダム, 上下の動きも実装する
+    ok つっつき動作の実装
+    ok fake contractにfeeding(), grooming(), lv_up()を実装する
+    ok ボタンの実装、表示、押したときの動作
+    ok eating実装
+    ok grooming実装
+    ok コントラを見立てた外部ステータス格納区域の実装と、読み込み、書き込みの実装
+    ok キャラのステータスをテキストで描写, コントラから定期的に取得し計算する
+    ok ステータスはキャラクラスに保持させずに、コントラに見立てた外部変数に格納する。
+    ok 1日1回？feeding, last_feeding_timeからの差でexp加算, 24hr以上の差は無効
+    ok satiety, happy, expのバーを実装する
 
-//await�ŃR���g������function��call
-async function main() {
-    text = await contract.methods.next_summoner().call();
-    console.log(text);
-    document.write(text);
-    //return text;
-}
-main();
-//res = main();
-//console.log(res);
-//document.write(res);
-
-function btn1() {
-    console.log("btn1");
-    async function getwallet() {
-        wallet = await web3.eth.getAccounts();
-        console.log(wallet[0]);
-        contract.methods.summon("1").send({from:wallet[0]});
-        //return wallet[0];
+//dummy contract
+//--------------------------------------------------------------------------------------------------------
+class Contract {
+    constructor() {
+        //NFT parameters
+        this.id = "001";
+        this.type = Math.trunc(Math.random() * 5);
+        this.strength = 2 + Math.trunc(Math.random() * 8);
+        this.dexterity = 2 + Math.trunc(Math.random() * 8);
+        this.vitality = 2 + Math.trunc(Math.random() * 8);
+        this.intelligence = 2 + Math.trunc(Math.random() * 8);
+        this.luck = 2 + Math.trunc(Math.random() * 8);
+        this.birth_time = Date.now();
+        this.last_feeding_time = Date.now();
+        this.last_grooming_time = Date.now();
+        this.coin = 100;
+        this.material = 0;
+        this.mining_status = 0;
+        this.mining_start_time = 0;
+        this.farming_status = 0;
+        this.farming_start_time = 0;
+        this.crafting_status = 0;
+        this.crafting_start_time = 0;
+        this.exp = 0;
+        this.level = 1;
+        this.next_exp_required = 1000;
+        //contract parameters
+        this.next_summoners = 0;
     }
-    getwallet();
-    //wallet = getwallet();
-    //contract.methods.summon("1").send({from:wallet});
+    grooming() {
+        let delta = (Date.now() - this.last_grooming_time) / 1000;
+        this.last_grooming_time = Date.now();
+        this.exp += delta;
+    }
+    feeding() {
+        let delta = (Date.now() - this.last_feeding_time) / 1000;
+        this.last_feeding_time = Date.now();
+        this.exp += delta;
+    }
+    start_crafting(item_id) {
+        if (this.mining_status == 0 && this.farming_status == 0 && this.crafting_status == 0){
+            this.crafting_start_time = Date.now();
+            this.crafting_status = 1;
+        }
+    }
+    stop_crafting(item) {
+        if (this.crafting_status == 1) {
+            let delta = (Date.now() - this.crafting_start_time) / 1000;
+            //nft mint check
+            this.crafting_status = 0;
+        }
+    }
+    start_mining() {
+        if (this.mining_status == 0 && this.farming_status == 0 && this.crafting_status == 0){
+        //if (this.mining_status == 0){
+            this.mining_start_time = Date.now();
+            this.mining_status = 1;
+        }
+    }
+    stop_mining() {
+        if (this.mining_status == 1) {
+            let delta = (Date.now() - this.mining_start_time) / 10000;
+            delta = Math.trunc(delta);
+            this.coin += delta;
+            this.mining_status = 0;
+        }
+    }
+    start_farming() {
+        if (this.mining_status == 0 && this.farming_status == 0 && this.crafting_status == 0){
+            this.farming_start_time = Date.now();
+            this.farming_status = 1;
+        }
+    }
+    stop_farming() {
+        if (this.farming_status == 1) {
+            let delta = (Date.now() - this.farming_start_time) / 100000;
+            delta = Math.trunc(delta);
+            this.material += delta;
+            this.farming_status = 0;
+        }
+    }
+    level_up() {
+        if (this.exp >= this.next_exp_required) {
+            this.exp -= this.next_exp_required;
+            this.level += 1;
+            //status up
+            var tmp = Math.trunc(Math.random() * 5);
+            if (tmp == 0) {
+                this.strength += 1;
+            }else if (tmp == 1) {
+                this.dexterity += 1;
+            }else if (tmp == 2) {
+                this.vitality += 1;
+            }else if (tmp == 3) {
+                this.intelligence += 1;
+            }else {
+                this.luck += 1;
+            }
+            //update next exp
+            if (this.level == 2) {
+                this.next_exp_required = 3000;
+            }else if (this.level == 3) {
+                this.next_exp_required = 6000;
+            }else if (this.level == 4) {
+                this.next_exp_required = 10000;
+            }else if (this.level == 5) {
+                this.next_exp_required = 15000;
+            }else if (this.level == 6) {
+                this.next_exp_required = 21000;
+            }else if (this.level == 7) {
+                this.next_exp_required = 28000;
+            }else if (this.level == 8) {
+                this.next_exp_required = 36000;
+            }else if (this.level == 9) {
+                this.next_exp_required = 45000;
+            }else if (this.level == 10) {
+                this.next_exp_required = 55000;
+            }else if (this.level == 11) {
+                this.next_exp_required = 66000;
+            }else if (this.level == 12) {
+                this.next_exp_required = 78000;
+            }else if (this.level == 13) {
+                this.next_exp_required = 91000;
+            }else if (this.level == 14) {
+                this.next_exp_required = 105000;
+            }else if (this.level == 15) {
+                this.next_exp_required = 120000;
+            }else if (this.level == 16) {
+                this.next_exp_required = 136000;
+            }else if (this.level == 17) {
+                this.next_exp_required = 153000;
+            }else if (this.level == 18) {
+                this.next_exp_required = 171000;
+            }else if (this.level == 19) {
+                this.next_exp_required = 190000;
+            }
+        }
+    }
+}
+
+//call status from contract
+async function test() {
+    let web3 = await connect();
+    let contract = await get_contract(web3);
+    local_strength = await contract.methods.get_strength().call();
+    local_dexterity = await contract.methods.get_dexterity().call();
+    local_vitality = await contract.methods.get_vitality().call();
+    local_intelligence = await contract.methods.get_intelligence().call();
+    local_luck = await contract.methods.get_luck().call();
+    local_birth_time = await contract.methods.get_birth_time().call();
+    local_last_feeding_time = await contract.methods.get_last_feeding_time().call();
+    local_last_grooming_time = await contract.methods.get_last_grooming_time().call();
+    local_coin = await contract.methods.get_coin().call();
+    local_material = await contract.methods.get_material().call();
+    local_mining_status = await contract.methods.get_mining_status().call();
+    local_mining_start_time = await contract.methods.get_mining_start_time().call();
+    local_farming_status = await contract.methods.get_farming_status().call();
+    local_farming_start_time = await contract.methods.get_farming_start_time().call();
+    local_crafting_status = await contract.methods.get_crafting_status().call();
+    local_crafting_start_time = await contract.methods.get_crafting_start_time().call();
+    local_exp = await contract.methods.get_exp().call();
+    local_level = await contract.methods.get_level().call();
+    local_next_exp_required = await contract.methods.get_next_exp_required().call();
 }
 
 ***/
 
+
 </script>
 
-</head>
-<body>
-<input type ="button" value="Exec" onclick="main();"/>
+<!---
+Donate: 0x2F7448B62134e52C2f46454d0089Ae21B5248805
+--->
+
 </body>
 </html>

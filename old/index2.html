@@ -6,6 +6,8 @@
     <link rel="icon" type="png" href="png/icon.PNG">
     <title>House of Murasaki San</title>
     <script src="phaser.js"></script>
+    <script src="web3.min.js"></script>
+    <script src="abi_contract.js"></script>
     <style type="text/css">
         body {
             margin: 0;
@@ -14,7 +16,13 @@
 </head>
 <body>
 
+<input type="number" value = 0 id="summoner">
+
 <script type="text/javascript">
+
+let summoner_selected = document.getElementById("summoner");
+console.log(element.value);
+
 
 /***
 Idea
@@ -61,8 +69,21 @@ Idea
         feeding, デイリークエスト, コストなし, 24時間で最大効率
         grooming, プラスアルファ, 何かしらのコスト必要, 168時間で最大効率
 ToDo
+    UI：Mintボタン
+    UI：所有summonerの表示と選択
+    UI：所有itemのリアルタイム更新と表示
+    コントラ：random
+    コントラ：crafting, summonerが所有するNFT, 所有summonerを紐付けるよう書き換える
+    コントラ：レベルアップの実装
+    アイデア：coinのユースケースを考える
+    アイデア：materialのバランスを考える
+    wallet所有のNFTを選べるUIを作る
     satietyとhappyの差別化を考える。
-    場所への移動を実装する, mining, farming, feedingに組み込む, コードの汎用性を上げる
+    ok コントラクト内にステータスを保持する
+    ok コントラクト内のステータスを読み出す
+    ok ステータスを保有したNFTを作成する
+    ok NFTのmint方法を確立する
+    ok 場所への移動を実装する, mining, farming, feedingに組み込む, コードの汎用性を上げる
     ok 絵を大きめにする, 元絵を大きめに読み込み, scaleXYで縮小する
     ok Lvを実装する。必要expの対応表を作製する。
     ok 移動を見直す. 距離ランダム, 上下の動きも実装する
@@ -76,6 +97,166 @@ ToDo
     ok ステータスはキャラクラスに保持させずに、コントラに見立てた外部変数に格納する。
     ok 1日1回？feeding, last_feeding_timeからの差でexp加算, 24hr以上の差は無効
     ok satiety, happy, expのバーを実装する
+***/
+
+
+
+//web3
+//--------------------------------------------------------------------------------------------------------
+
+//connect to metamask
+async function connect() {
+    const web3 = await new Web3(window.ethereum);
+    window.ethereum.enable();
+    window.ethereum.request({
+        method: 'wallet_addEthereumChain',
+        params: [{
+            chainId: '0x51',  //4369
+            chainName: 'Shibuya Testnet',
+            nativeCurrency: {
+                name: 'sby',
+                symbol: 'SBY',
+                decimals: 18
+            },
+            rpcUrls: ["https://rpc.shibuya.astar.network:8545"],
+            blockExplorerUrls: ['https://blockscout.com/shibuya'],
+        }]
+    });
+    return web3;
+}
+
+//get wallet
+async function get_wallet(web3) {
+    const wallet = await web3.eth.getAccounts();
+    return wallet[0];
+}
+
+//prepare contract, need abi_contract.js
+async function get_contract(web3) {
+    const contract = await new web3.eth.Contract(abi, contract_address);
+    return contract;
+}
+
+//call status from contract
+async function test() {
+    let web3 = await connect();
+    let contract = await get_contract(web3);
+    local_strength = await contract.methods.get_strength().call();
+    local_dexterity = await contract.methods.get_dexterity().call();
+    local_vitality = await contract.methods.get_vitality().call();
+    local_intelligence = await contract.methods.get_intelligence().call();
+    local_luck = await contract.methods.get_luck().call();
+    local_birth_time = await contract.methods.get_birth_time().call();
+    local_last_feeding_time = await contract.methods.get_last_feeding_time().call();
+    local_last_grooming_time = await contract.methods.get_last_grooming_time().call();
+    local_coin = await contract.methods.get_coin().call();
+    local_material = await contract.methods.get_material().call();
+    local_mining_status = await contract.methods.get_mining_status().call();
+    local_mining_start_time = await contract.methods.get_mining_start_time().call();
+    local_farming_status = await contract.methods.get_farming_status().call();
+    local_farming_start_time = await contract.methods.get_farming_start_time().call();
+    local_crafting_status = await contract.methods.get_crafting_status().call();
+    local_crafting_start_time = await contract.methods.get_crafting_start_time().call();
+    local_exp = await contract.methods.get_exp().call();
+    local_level = await contract.methods.get_level().call();
+    local_next_exp_required = await contract.methods.get_next_exp_required().call();
+}
+
+async function web3_update_status(summoner) {
+    let web3 = await connect();
+    let contract = await get_contract(web3);
+    let status = await contract.methods.get_status(summoner);
+    console.log(status);
+    local_ctype = status[0];
+    local_strength = status[1];
+    local_dexterity = status[2];
+    local_vitality = status[3];
+    local_intelligence = status[4];
+    local_luck = status[5];
+    local_birth_time = status[6];
+    local_last_feeding_time = status[7];
+    local_last_grooming_time = status[8];
+    local_coin = status[9];
+    local_material = status[10];
+    local_mining_status = status[11];
+    local_mining_start_time = status[12];
+    local_farming_status = status[13];
+    local_farming_start_time = status[14];
+    local_crafting_status = status[15];
+    local_crafting_start_time = status[16];
+    local_exp = status[17];
+    local_level = status[18];
+    local_next_exp_required = status[19];
+}
+
+//call status from contract
+
+//send feeding
+async function contract_feeding() {
+    let web3 = await connect();
+    let contract = await get_contract(web3);
+    let wallet = await get_wallet(web3);
+    contract.methods.feeding().send({from:wallet});
+}
+
+//send grooming
+async function contract_grooming() {
+    let web3 = await connect();
+    let contract = await get_contract(web3);
+    let wallet = await get_wallet(web3);
+    contract.methods.grooming().send({from:wallet});
+}
+
+//send level_up
+async function contract_level_up() {
+    let web3 = await connect();
+    let contract = await get_contract(web3);
+    let wallet = await get_wallet(web3);
+    contract.methods.level_up().send({from:wallet});
+}
+
+/***
+//let {A, B, C} = get_web3();
+//console.log(B);
+//wallet = get_wallet(web3);
+//console.log(wallet);
+
+async function get_contract2() {
+    var web3 = await connect();
+    var wallet = await get_wallet(web3);
+    var contract = await get_contract(web3);
+    return contract;
+}
+//example
+async function main() {
+    var web3 = await connect();
+    var wallet = await get_wallet(web3);
+    console.log(wallet);
+    var contract = await get_contract(web3);
+    var call = await call_contract(contract);
+    console.log(call);
+    await send_contract(web3, contract, wallet);
+}
+//call from contract
+function call_contract(contract) {
+    var text = contract.methods.get_coin().call();
+    return text;
+}
+//send to contract
+function send_contract(web3, contract, wallet, data) {
+    //let data = "1";
+    contract.methods.feeding().send({from:wallet});
+}
+async function get_web3() {
+    let web3 = await connect();
+    let wallet = await get_wallet(web3);
+    let contract = await get_contract(web3);
+    return {
+        A: web3,
+        B: wallet,
+        C: contract
+    };
+}
 ***/
 
 
@@ -134,6 +315,7 @@ class Contract {
     }
     start_mining() {
         if (this.mining_status == 0 && this.farming_status == 0 && this.crafting_status == 0){
+        //if (this.mining_status == 0){
             this.mining_start_time = Date.now();
             this.mining_status = 1;
         }
@@ -263,9 +445,10 @@ class Character extends Phaser.GameObjects.Sprite{
             this.resting_count = 70 + Math.random() * 30;
 	    }else if (this.count >= this.resting_count){
             let tmp = Math.random() * 100;
-            let base = 864000;
+            //let base = 864000;
+            let base = 864000/1000;
             let now_time = Date.now();
-            let happy = Math.round( (base - (now_time - local_last_grooming_time)) / base * 1000 ) / 10;
+            let happy = Math.round( (base - (now_time/1000 - local_last_grooming_time)) / base * 1000 ) / 10;
             if (tmp <= 10) {
                 this.mode = "sleeping";
                 this.count = 0;
@@ -581,6 +764,11 @@ let local_farming_status;
 let local_farming_start_time;
 let local_crafting_status;
 let local_crafting_start_time;
+let previous_local_last_feeding_time = Date.now() + 864000 * 10;
+let previous_local_last_grooming_time = Date.now() + 864000 * 10;
+//flag
+//let flag_feeding;
+//let flag_grooming;
 
 
 let config = {
@@ -603,6 +791,8 @@ let config = {
 let game = new Phaser.Game(config);
 
 
+// preload
+//--------------------------------------------------------------------------------------------------------
 function preload() {
     this.load.image("back", "png/back.jpg");
     this.load.spritesheet("murasaki_right", "png/murasaki_right.png", {frameWidth: 370, frameHeight: 320});
@@ -626,6 +816,8 @@ function preload() {
 }
 
 
+// create
+//--------------------------------------------------------------------------------------------------------
 function create() {
     //fake contract
     contract = new Contract();
@@ -716,13 +908,19 @@ function create() {
     char1.scaleX = char1.scaleX * 0.25;
     char1.scaleY = char1.scaleY * 0.25;
     //button_text
-    new Button(30, 10, 'Level Up', this, () => level_up(contract));
-    new Button(30, 40, 'Feeding', this, () => feeding(contract));
-    new Button(30, 70, 'Grooming', this, () => grooming(contract));
+    //new Button(30, 10, 'Level Up', this, () => level_up(contract));
+    new Button(30, 10, 'Level Up', this, () => contract_level_up());
+    //new Button(30, 40, 'Feeding', this, () => feeding(contract));
+    new Button(30, 40, 'Feeding', this, () => contract_feeding());
+    //new Button(30, 70, 'Grooming', this, () => grooming(contract));
+    new Button(30, 70, 'Grooming', this, () => contract_grooming());
     new Button(30, 100, 'Start Mining', this, () => start_mining(contract));
     new Button(30, 130, 'Stop Mining', this, () => stop_mining(contract));
     new Button(30, 160, 'Start Farming', this, () => start_farming(contract));
     new Button(30, 190, 'Stop Farming', this, () => stop_farming(contract));
+    new Button(30, 220, 'Connect to Metamask', this, () => connect());
+    new Button(30, 250, 'Test', this, () => test());
+
     //back color
     let status_back = this.add.graphics();
     status_back.fillStyle(0xa9a9a9, 1).fillRect(590, 5, 200, 350);
@@ -795,47 +993,48 @@ function create() {
 }
 
 
+// update
+//--------------------------------------------------------------------------------------------------------
 function update() {
     //update turn
     turn += 1;
-    text_turn.setText("turn = " + turn);
+    //text_turn.setText("turn = " + turn);
     //update character
     char1.update();
     //update static status from contract at once
-    if (turn == 1 || turn % 1001 == 0) {
+    if (turn == 1) {
         local_id = contract.id;
         local_type = contract.type;
         local_birth_time = contract.birth_time;
-        local_strength = contract.strength;
-        local_dexterity = contract.dexterity;
-        local_vitality = contract.vitality;
-        local_intelligence = contract.intelligence;
-        local_luck = contract.luck;
         text_id.setText("id = " + local_id);
         text_type.setText("type = " + local_type);
         text_birth_time.setText("birth_time = " + local_birth_time);
-        text_strength.setText("strength = " + local_strength);
-        text_dexterity.setText("dexterity = " + local_dexterity);
-        text_vitality.setText("vitality = " + local_vitality);
-        text_intelligence.setText("intelligence = " + local_intelligence);
-        text_luck.setText("luck = " + local_luck);
     }
     //update calculation status
-    if (turn == 1 || turn % 10 == 0) {
+    if (turn == 1 || turn % 100 == 0) {
+        text_turn.setText("turn = " + turn);
         //update calculation_status
         let now_time = Date.now();
         let age_time = Math.round( (now_time - local_birth_time) / 1000 );
         let mode = char1.get_mode;
         //var base = 86400000
-        let base = 864000
-        let satiety = Math.round( (base - (now_time - local_last_feeding_time)) / base * 1000 ) / 10;
+        //let base = 864000
+        let base = 864000/1000
+        //let satiety = Math.round( (base - (now_time - local_last_feeding_time)) / base * 1000 ) / 10;
+        let satiety = Math.round( (base - (now_time/1000 - local_last_feeding_time)) / base * 1000 ) / 10;
         if (satiety < 0) { satiety = 0; }
         if (satiety > 100) { satiety = 100; }
-        let happy = Math.round( (base - (now_time - local_last_grooming_time)) / base * 1000 ) / 10;
+        //let happy = Math.round( (base - (now_time - local_last_grooming_time)) / base * 1000 ) / 10;
+        let happy = Math.round( (base - (now_time/1000 - local_last_grooming_time)) / base * 1000 ) / 10;
         if (happy < 0) { happy = 0; }
         if (happy > 100) { happy = 100; }
         //update text
         text_level.setText("level = " + local_level);
+        text_strength.setText("strength = " + local_strength);
+        text_dexterity.setText("dexterity = " + local_dexterity);
+        text_vitality.setText("vitality = " + local_vitality);
+        text_intelligence.setText("intelligence = " + local_intelligence);
+        text_luck.setText("luck = " + local_luck);
         text_last_feeding_time.setText("last_feeding_time = " + local_last_feeding_time);
         text_last_grooming_time.setText("last_grooming_time = " + local_last_grooming_time);
         text_coin.setText("coin = " + local_coin);
@@ -855,13 +1054,15 @@ function update() {
         text_material_main.setText("material:" + local_material);
     }
     //update dynamic status from contract to local
-    if (turn == 1 || turn % 101 == 0) {
-        //update statistic_status
+    if (turn == 1 || turn % 201 == 0) {
         //update dynamic_status
-        //TODO: read from contract
+        /***
+        local_strength = contract.strength;
+        local_dexterity = contract.dexterity;
+        local_vitality = contract.vitality;
+        local_intelligence = contract.intelligence;
+        local_luck = contract.luck;
         local_level = contract.level;
-        let previous_local_last_feeding_time = local_last_feeding_time;
-        let previous_local_last_grooming_time = local_last_grooming_time;
         local_last_feeding_time = contract.last_feeding_time;
         local_last_grooming_time = contract.last_grooming_time;
         local_coin = contract.coin;
@@ -871,9 +1072,13 @@ function update() {
         local_crafting_status = contract.crafting_status;
         local_exp = contract.exp;
         local_next_exp_required = contract.next_exp_required;
+        ***/
+        test();
         //check character mode
         //feeding
         if (local_last_feeding_time > previous_local_last_feeding_time){
+        //if (flag_feeding == 1){
+            flag_feeding = 0;
             char1.set_mode = "feeding";
             char1.submode = 0;
             char1.count = 0;
@@ -889,6 +1094,8 @@ function update() {
         }
         //grooming
         if (local_last_grooming_time > previous_local_last_grooming_time){
+        //if (flag_grooming == 1){
+            flag_grooming = 0;
             char1.set_mode = "grooming";
         }
         //mining
@@ -911,11 +1118,18 @@ function update() {
         }else if (local_farming_status == 0 & char1.mode == "farming") {
             char1.set_mode = "resting";
         }
+        //save last time to next update
+        previous_local_last_feeding_time = local_last_feeding_time;
+        previous_local_last_grooming_time = local_last_grooming_time;
     }
 }
 
 
 </script>
+
+<!---
+Donate: 0x2F7448B62134e52C2f46454d0089Ae21B5248805
+--->
 
 </body>
 </html>
