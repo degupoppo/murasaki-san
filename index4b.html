@@ -276,11 +276,11 @@ async function contract_update_status(summoner) {
     let res = await contract.methods.get_status(summoner).call();
     console.log(res);   
     local_ctype = res[0];
-    local_strength = res[1];
-    local_dexterity = res[2];
-    local_vitality = res[3];
-    local_intelligence = res[4];
-    local_luck = res[5];
+    local_strength = res[1] /100;
+    local_dexterity = res[2] /100;
+    local_vitality = res[3] /100;
+    local_intelligence = res[4] /100;
+    local_luck = res[5] /100;
     local_birth_time = res[6];
     local_last_feeding_time = res[7];
     local_last_grooming_time = res[8];
