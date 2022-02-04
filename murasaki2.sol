@@ -701,10 +701,11 @@ contract Murasaki_Main is ERC721, Ownable{
     uint32 public base_sec = 86400;
     uint8 public price = 0 ether;
     address public murasaki_craft_address;
+    address public murasaki_pet_address;
     uint32 public speed = 1;
 
     //item dc, depends on only item_id but not item_base_id
-    uint32[20] public dc_item = [
+    uint32[20] public dc_table = [
         1000,
         3000,
         6000,
@@ -724,7 +725,7 @@ contract Murasaki_Main is ERC721, Ownable{
         153000,
         171000,
         190000
-        ];
+    ];
 
     //set variants, only owner
     function set_base_sec(uint32 _base_sec) public onlyOwner {
@@ -735,6 +736,9 @@ contract Murasaki_Main is ERC721, Ownable{
     }
     function set_murasaki_craft_address(address _address) public onlyOwner {
         murasaki_craft_address = _address;
+    }
+    function set_murasaki_pet_address(address _address) public onlyOwner {
+        murasaki_pet_address = _address;
     }
     function set_speed(uint32 _speed) public onlyOwner {
         speed = _speed;
@@ -939,6 +943,16 @@ contract Murasaki_Main is ERC721, Ownable{
         material[_summoner_to] += (_material - _material/5); //transfer fee 20%
     }
 
+    //receive_coin_from_pet, pet address only
+    function receive_coin_from_pet(uint32 _summoner, uint32 _coin) external {
+        require(msg.sender == murasaki_pet_address);
+        coin[_summoner] += _coin;
+    }
+    function receive_material_from_pet(uint32 _summoner, uint32 _material) external {
+        require(msg.sender == murasaki_pet_address);
+        material[_summoner] += _material;
+    }
+
     //crafting
     function start_crafting(uint32 _summoner, uint8 _item_base_id, uint8 _item_id, uint32 _coin, uint32 _material) public {
         require(_isApprovedOrOwner(msg.sender, _summoner));
@@ -998,7 +1012,7 @@ contract Murasaki_Main is ERC721, Ownable{
     function get_item_dc(uint8 _item_base_id, uint8 _item_id) public view returns (uint32) {
         //TODO: library of dc required
         //return _item_base_id * _item_id * 0 + 1000;
-        uint32 _dc = _item_base_id * 0 + dc_item[_item_id];
+        uint32 _dc = _item_base_id * 0 + dc_table[_item_id];
         return _dc;
     }
 
@@ -1088,15 +1102,25 @@ contract Murasaki_Craft is ERC721, Ownable{
         uint32 crafted_time;
         uint32 crafted_summoner;
         uint32 owner_summoner;
-        address owner_wallet;
+        address crafted_wallet;
     }
 
     mapping(uint32 => item) public items;
 
-    function set_murasaki_main_address (address _address) public onlyOwner{
+    function set_murasaki_main_address(address _address) public onlyOwner{
         murasaki_main_address = _address;
     }
 
+    //change owner of summoner, only owned summoners and items
+    function change_owner_summoner(uint32 _summoner, uint32 _item) public{
+        //require(_isApprovedOrOwner(msg.sender, _summoner));
+        require(_isApprovedOrOwner(msg.sender, _item));
+        Murasaki_Main mm = Murasaki_Main(murasaki_main_address);
+        require(msg.sender == mm.ownerOf(_summoner));
+        items[_item].owner_summoner = _summoner;
+    }
+
+    //craft
     function craft(uint8 _item_base_id, uint8 _item_id, uint32 _summoner, address _wallet) public {
         require(msg.sender == murasaki_main_address);
         items[next_item] = item(_item_base_id, _item_id, uint32(block.timestamp), _summoner, _summoner, _wallet);
@@ -1106,11 +1130,167 @@ contract Murasaki_Craft is ERC721, Ownable{
 }
 
 
+
+//Murasaki Pet
+//---------------------------------------------------------------------------------------------------------------------
+
+contract Murasaki_Pet is ERC721, Ownable{
+
+    string constant public name = "Murasaki Pet";
+    string constant public symbol = "MP";
+
+    uint32 public next_pet = 0;
+    uint32 public speed = 1;
+    address public murasaki_main_address;
+
+    struct pet {
+        uint8 class;
+        uint32 crafted_time;
+        uint32 crafted_summoner;
+        uint32 owner_summoner;
+        address crafted_wallet;
+    }
+
+    mapping(uint32 => pet) public pets;
+    mapping(uint32 => uint32) public coin;
+    mapping(uint32 => uint32) public material;
+    mapping(uint32 => uint8) public mining_status;
+    mapping(uint32 => uint32) public mining_start_time;
+    mapping(uint32 => uint8) public farming_status;
+    mapping(uint32 => uint32) public farming_start_time;
+
+
+    //admin
+    function set_murasaki_main_address (address _address) public onlyOwner{
+        murasaki_main_address = _address;
+    }
+    function set_speed (uint32 _speed) public onlyOwner{
+        speed = _speed;
+    }
+
+    //craft pet
+    function craft(uint8 _class, uint32 _summoner, address _wallet) public {
+        //require(msg.sender == murasaki_main_address);
+        pets[next_pet] = pet(_class, uint32(block.timestamp), _summoner, _summoner, _wallet);
+        _safeMint(_wallet, next_pet);
+        next_pet++;
+    }
+
+    //change owner_summoner, only owned summoners and pets
+    function change_owner_summoner(uint32 _summoner, uint32 _pet) public{
+        require(_isApprovedOrOwner(msg.sender, _pet));
+        Murasaki_Main mm = Murasaki_Main(murasaki_main_address);
+        require(msg.sender == mm.ownerOf(_summoner));
+        pets[_pet].owner_summoner = _summoner;
+    }
+
+    //send coin, material to owner_summoner
+    function send_coin_to_owner_summoner(uint32 _pet) public {
+        require(_isApprovedOrOwner(msg.sender, _pet));
+        require(coin[_pet] > 0);
+        Murasaki_Main mm = Murasaki_Main(murasaki_main_address);
+        uint32 _owner_summoner = pets[_pet].owner_summoner;
+        require(msg.sender == mm.ownerOf(_owner_summoner));
+        mm.receive_coin_from_pet(_owner_summoner, coin[_pet]);
+        coin[_pet] = 0;
+    }
+    function send_material_to_owner_summoner(uint32 _pet) public {
+        require(_isApprovedOrOwner(msg.sender, _pet));
+        require(material[_pet] > 0);
+        Murasaki_Main mm = Murasaki_Main(murasaki_main_address);
+        uint32 _owner_summoner = pets[_pet].owner_summoner;
+        require(msg.sender == mm.ownerOf(_owner_summoner));
+        mm.receive_material_from_pet(_owner_summoner, material[_pet]);
+        material[_pet] = 0;
+    }
+
+    //get_owner_summoner_status
+    function get_owner_summoner_status(uint32 _pet) public view returns (uint32[20] memory) {
+        Murasaki_Main mm = Murasaki_Main(murasaki_main_address);
+        uint32 _owner_summoner = pets[_pet].owner_summoner;
+        uint32[20] memory _status = mm.get_status(_owner_summoner);
+        return _status;
+    }
+
+    //mining
+    function start_mining(uint32 _pet) public {
+        require(_isApprovedOrOwner(msg.sender, _pet));
+        require(mining_status[_pet] == 0 && farming_status[_pet] == 0);
+        uint32 _now = uint32(block.timestamp);
+        mining_start_time[_pet] = _now;
+        mining_status[_pet] = 1;
+    }
+    function stop_mining(uint32 _pet) public {
+        require(_isApprovedOrOwner(msg.sender, _pet));
+        require(mining_status[_pet] == 1);
+        uint32 _delta = calc_coin(_pet);
+        coin[_pet] += _delta;
+        send_coin_to_owner_summoner(_pet);
+        mining_status[_pet] = 0;
+    }
+    function calc_coin(uint32 _pet) public view returns (uint32) {
+        require(mining_status[_pet] == 1);
+        uint32 _now = uint32(block.timestamp);
+        uint32 _delta = (_now - mining_start_time[_pet]) * speed / 100;
+        uint32[20] memory _status = get_owner_summoner_status(_pet);
+        uint32 _str = _status[1];
+        uint32 _level = _status[18];
+        _delta += (_delta * _str) / 100;    //status modification
+        _delta += (_delta * _level) / 100;    //level modification
+        _delta = _delta / 4;    //pet modification
+        return _delta;
+    }
+
+    //farming
+
+}
+
+
+
+//Idea
+//---------------------------------------------------------------------------------------------------------------------
+
 /***
 
-    item一覧とdifficultyの設定
-    itemのdifficultyを加味したcraftingの実装
     所持itemによるmining, farming, craftingの補正
+        itemもフラグ性にするか
+            boolが100個の配列を用意し, craftするたびに該当フラグを立ててゆく
+            あるいはuint32で, craftしたitem_idを該当箇所に代入してゆく
+            craft完了時にitem_idを取得して代入する
+            item譲渡時がとても面倒そうだが。
+            ＊案＊
+                itemごとにnumを決める
+                summonerはすべてのnumを予約したuint32配列を有する
+                craftするとsummonerのitem配列の[num]にnftのidを格納する
+                UI側はsummonerのitem配列を参照してitem所持の有無を把握出来るのでかなり楽
+                item譲渡時はowner_summonerのitem配列[num]を消す
+                owner walletは所持summonerのitem配列[num]へセット可能
+                譲渡には送料としてcoinを要求する
+                working時にitem配列を集計して個数を数え補正する
+                mining, farming, crafting, その他（petなど）の4種類のitem配列に分けるか
+        craftコントラから、summonerがownerのitemをどうやって検索,カウントするか
+        craftコントラに, craft時にmappingでsummonerごとの所持数をカウントする
+        transfer時は所持カウントも動かさないといけない
+    pet所持の有無の判定とpetとの相互作用
+        pet複数所持時のルール整備
+            summoner側にuint32のpet変数をつくり, craft時に格納するか
+                UI側でsummoner IDからpetを参照しやすいし、
+                petがcoinやmaterial送るときは、pet関数に格納されていることをrequireさせられる
+                owner_summoner移行時はmain側の変数も書き換えないと行けないのでgasがかかるかも
+            1つのsummonerに1つまで紐付け可能にする
+            summonerに紐付けられているpetしかcoin/materialをearnできない
+        pet譲渡時の挙動
+            
+        別コントラ？同日コントラ内？
+        mainへの書き込みはcoinとmaterial
+            msg.senderにpetコントラを許可する, from petは無条件で許可する
+            sendの許可はpetコントラ側で行う
+        mainからの読み込みはsummonerのステータスとレベル
+            summonerの状態によらず独立して行う？
+            summonerかpetのどちらかしかmining, farmingできない？ 
+                この場合は, summonerもpetのコントラを読みに行かないといけない
+    ok item一覧とdifficultyの設定
+    ok itemのdifficultyを加味したcraftingの実装
     ok Level-upによるstatus補正の実装
     ok grooming時, resting timeによる+exp補正の実装
     ok coin, materialの送金機能の実装, ペナルティをどうするか
