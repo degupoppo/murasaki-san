@@ -696,7 +696,7 @@ contract Murasaki_Main is ERC721, Ownable{
     //mapping(uint32 => uint8) public base0_item_count;
     //mapping(uint32 => uint8) public base1_item_count;
     //mapping(uint32 => uint8) public base2_item_count;
-    mapping(uint32 => uint32[64]) public items;
+    mapping(uint32 => uint32[64]) public base0_item_count;
 
     uint32 public next_summoner;
     uint32 public base_sec = 86400;
