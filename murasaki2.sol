@@ -680,8 +680,6 @@ contract Murasaki_Main is ERC721, Ownable{
     mapping(uint32 => uint32) public farming_start_time;
     mapping(uint32 => uint8) public crafting_status;
     mapping(uint32 => uint32) public crafting_start_time;
-    //mapping(uint32 => uint8) public crafting_item_base_id;
-    //mapping(uint32 => uint8) public crafting_item_id;
     mapping(uint32 => uint8) public crafting_item_type;
     mapping(uint32 => uint32) public exp;
     mapping(uint32 => uint8) public level;
@@ -694,9 +692,6 @@ contract Murasaki_Main is ERC721, Ownable{
     mapping(uint32 => uint32) public last_total_crafting_sec;
     mapping(uint32 => uint32) public last_level_up_time;
     mapping(uint32 => uint32) public last_grooming_time_plus_working_time;
-    //mapping(uint32 => uint8) public base0_item_count;
-    //mapping(uint32 => uint8) public base1_item_count;
-    //mapping(uint32 => uint8) public base2_item_count;
     mapping(uint32 => uint32[64]) public items;
 
     uint32 public next_summoner;
@@ -1015,19 +1010,6 @@ contract Murasaki_Main is ERC721, Ownable{
         }
         return _delta;
     }
-
-    /*
-    function get_item_dc(uint8 _item_type) public view returns (uint32) {
-        //TODO: library of dc required
-        //return _item_base_id * _item_id * 0 + 1000;
-        //uint32 _dc = _item_base_id * 0 + dc_table[_item_id];
-        Murasaki_Craft mc = Murasaki_Craft(murasaki_craft_address);
-        mc
-
-        uint32 _dc = dc_table[(_item_type % 16)];
-        return _dc;
-    }
-    */
     
     //interact with Murasaki_Craf
     //set item nft to summoner, insert item nft number into item array of summoner at position [item_id]
@@ -1045,6 +1027,18 @@ contract Murasaki_Main is ERC721, Ownable{
         uint32 _now = uint32(block.timestamp);
         //status addition
         uint32 _base_sec = _now - last_level_up_time[_summoner];
+        uint32 _resting_sec = _base_sec - last_total_mining_sec[_summoner] - last_total_farming_sec[_summoner] - last_total_crafting_sec[_summoner]
+        uint32 _percent_mining = 100 * (last_total_mining_sec[_summoner] + _resting_sec/3) / _base_sec;
+        uint32 _percent_farming = 100 * (last_total_farming_sec[_summoner] + _resting_sec/3) / _base_sec;
+        uint32 _percent_crafting = 100 * (last_total_crafting_sec[_summoner] + _resting_sec/3) / _base_sec;
+        strength[_summoner] += _percent_mining;
+        dexterity[_summoner] += _percent_farming;
+        intelligence[_summoner] += _percent_crafting;
+        last_total_mining_sec[_summoner] = 0;
+        last_total_farming_sec[_summoner] = 0;
+        last_total_crafting_sec[_summoner] = 0;
+        /*
+        uint32 _base_sec = _now - last_level_up_time[_summoner];
         uint32 _percent_mining = 100 * last_total_mining_sec[_summoner] / _base_sec;
         uint32 _percent_farming = 100 * last_total_farming_sec[_summoner] / _base_sec;
         uint32 _percent_crafting = 100 * last_total_crafting_sec[_summoner] / _base_sec;
@@ -1056,6 +1050,7 @@ contract Murasaki_Main is ERC721, Ownable{
         last_total_mining_sec[_summoner] = 0;
         last_total_farming_sec[_summoner] = 0;
         last_total_crafting_sec[_summoner] = 0;
+        */
         //reset feeding, grooming, exp
         last_feeding_time[_summoner] = _now;
         last_grooming_time[_summoner] = _now;
@@ -1557,9 +1552,30 @@ contract Murasaki_Pet is ERC721, Ownable{
 
 /***
 
-    mmの所持pet_idの利用
+    item, pet NFTの譲渡の実装
+        update関数の実装
+            mm側に用意し, mcとmpのowner_summonerおよびwallet onwerをすべてチェックしてfalseを0に置換する
+    1つのpet/itemが2つ以上のsummonerに紐付け可能なことを回避する実装を考える
     
-    所持itemによるmining, farming, craftingの補正
+    ok pet所持の有無の判定とpetとの相互作用
+        *pet複数所持時のルール整備
+            summoner側にuint32のpet変数をつくり, craft時に格納するか
+                UI側でsummoner IDからpetを参照しやすいし、
+                petがcoinやmaterial送るときは、pet関数に格納されていることをrequireさせられる
+                owner_summoner移行時はmain側の変数も書き換えないと行けないのでgasがかかるかも
+            1つのsummonerに1つまで紐付け可能にする
+            summonerに紐付けられているpetしかcoin/materialをearnできない
+        pet譲渡時の挙動
+            
+        別コントラ？同日コントラ内？
+        mainへの書き込みはcoinとmaterial
+            msg.senderにpetコントラを許可する, from petは無条件で許可する
+            sendの許可はpetコントラ側で行う
+        mainからの読み込みはsummonerのステータスとレベル
+            summonerの状態によらず独立して行う？
+            summonerかpetのどちらかしかmining, farmingできない？ 
+                この場合は, summonerもpetのコントラを読みに行かないといけない
+    ok 所持itemによるmining, farming, craftingの補正
         itemもフラグ性にするか
             boolが100個の配列を用意し, craftするたびに該当フラグを立ててゆく
             あるいはuint32で, craftしたitem_idを該当箇所に代入してゆく
@@ -1578,24 +1594,6 @@ contract Murasaki_Pet is ERC721, Ownable{
         craftコントラから、summonerがownerのitemをどうやって検索,カウントするか
         craftコントラに, craft時にmappingでsummonerごとの所持数をカウントする
         transfer時は所持カウントも動かさないといけない
-    pet所持の有無の判定とpetとの相互作用
-        *pet複数所持時のルール整備
-            summoner側にuint32のpet変数をつくり, craft時に格納するか
-                UI側でsummoner IDからpetを参照しやすいし、
-                petがcoinやmaterial送るときは、pet関数に格納されていることをrequireさせられる
-                owner_summoner移行時はmain側の変数も書き換えないと行けないのでgasがかかるかも
-            1つのsummonerに1つまで紐付け可能にする
-            summonerに紐付けられているpetしかcoin/materialをearnできない
-        pet譲渡時の挙動
-            
-        別コントラ？同日コントラ内？
-        mainへの書き込みはcoinとmaterial
-            msg.senderにpetコントラを許可する, from petは無条件で許可する
-            sendの許可はpetコントラ側で行う
-        mainからの読み込みはsummonerのステータスとレベル
-            summonerの状態によらず独立して行う？
-            summonerかpetのどちらかしかmining, farmingできない？ 
-                この場合は, summonerもpetのコントラを読みに行かないといけない
     ok item一覧とdifficultyの設定
     ok itemのdifficultyを加味したcraftingの実装
     ok Level-upによるstatus補正の実装
