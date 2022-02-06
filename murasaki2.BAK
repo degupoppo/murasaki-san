@@ -706,29 +706,6 @@ contract Murasaki_Main is ERC721, Ownable{
     address public murasaki_pet_address;
     uint32 public speed = 1;
 
-    //item dc, depends on only item_id but not item_base_id
-    uint32[20] public dc_table = [
-        1000,
-        3000,
-        6000,
-        10000,
-        15000,
-        21000,
-        28000,
-        36000,
-        45000,
-        55000,
-        66000,
-        78000,
-        91000,
-        105000,
-        120000,
-        136000,
-        153000,
-        171000,
-        190000
-    ];
-
     //set variants, only owner
     function set_base_sec(uint32 _base_sec) public onlyOwner {
         base_sec = _base_sec;
@@ -890,7 +867,20 @@ contract Murasaki_Main is ERC721, Ownable{
         uint32 _delta = (_now - mining_start_time[_summoner]) * speed / 100;
         _delta += (_delta * strength[_summoner]) / 100;    //status modification
         _delta += (_delta * level[_summoner]) / 100;    //level modification
+        uint8 _mining_items = count_mining_items(_summoner);
+        _delta += (_delta * _mining_items) / 100;   //item modification
         return _delta;
+    }
+    function count_mining_items(uint32 _summoner) public view returns (uint8) {
+        require(mining_status[_summoner] == 1);
+        uint32[64] memory _items = items[_summoner];
+        uint8 _mining_items = 0;
+        for (uint i = 1; i <= 16; i++) {
+            if (_items[i] > 1) {
+                _mining_items++;
+            }
+        }
+        return _mining_items;
     }
 
     //farming
@@ -956,12 +946,21 @@ contract Murasaki_Main is ERC721, Ownable{
     }
 
     //crafting
-    function start_crafting(uint32 _summoner, uint8 _item_type, uint32 _coin, uint32 _material) public {
+    //function start_crafting(uint32 _summoner, uint8 _item_type, uint32 _coin, uint32 _material) public {
+    function start_crafting(uint32 _summoner, uint8 _item_type) public {
         require(_isApprovedOrOwner(msg.sender, _summoner));
         require(mining_status[_summoner] == 0 && farming_status[_summoner] == 0 && crafting_status[_summoner] == 0);
-        require(coin[_summoner] >= _coin && material[_summoner] >= _material);
+        //require(coin[_summoner] >= _coin && material[_summoner] >= _material);
         require(calc_satiety(_summoner) >= 20 && calc_happy(_summoner) >= 20);
         uint32 _now = uint32(block.timestamp);
+
+        Murasaki_Craft mc = Murasaki_Craft(murasaki_craft_address);
+        uint32[3] memory _dc_table = mc.get_item_dc(_item_type);
+        //uint32 _dc = _dc_table[0];
+        uint32 _coin = _dc_table[1];
+        uint32 _material = _dc_table[2];
+        require(coin[_summoner] >= _coin && material[_summoner] >= _material);
+
         coin[_summoner] -= _coin;
         material[_summoner] -= _material;
         crafting_item_type[_summoner] = _item_type;
@@ -979,8 +978,13 @@ contract Murasaki_Main is ERC721, Ownable{
         last_grooming_time_plus_working_time[_summoner] += _delta_sec;
         bool _crafted = crafting_check(_summoner);
         if (_crafted) {
-            Murasaki_Craft mc = Murasaki_Craft(murasaki_craft_address);
-            mc.craft(_type, _summoner, msg.sender);
+            if (_item_type == 49) {
+                Murasaki_Pet mp = Murasaki_Pet(murasaki_pet_address);
+                mp.craft(_summoner, msg.sender);
+            } else{
+                Murasaki_Craft mc = Murasaki_Craft(murasaki_craft_address);
+                mc.craft(_item_type, _summoner, msg.sender);
+            }
         }
         crafting_status[_summoner] = 0; //dont move
     }
@@ -996,8 +1000,11 @@ contract Murasaki_Main is ERC721, Ownable{
         require(crafting_status[_summoner] == 1, "status error");
         uint32 _now = uint32(block.timestamp);
         uint8 _item_type = crafting_item_type[_summoner];
-        uint32 _delta_time = (_now - crafting_start_time[_summoner]);
-        uint32 _dc = get_item_dc(_item_type);
+        uint32 _delta_time = (_now - crafting_start_time[_summoner]) * speed;
+        //dc
+        Murasaki_Craft mc = Murasaki_Craft(murasaki_craft_address);
+        uint32[3] memory _dc_table = mc.get_item_dc(_item_type);
+        uint32 _dc = _dc_table[0];
         _dc -= (_dc * intelligence[_summoner]/100) / 100;   //status modification
         _dc -= (_dc * level[_summoner]) / 100;  //level modification
         uint32 _delta;
@@ -1008,19 +1015,25 @@ contract Murasaki_Main is ERC721, Ownable{
         }
         return _delta;
     }
+
+    /*
     function get_item_dc(uint8 _item_type) public view returns (uint32) {
         //TODO: library of dc required
         //return _item_base_id * _item_id * 0 + 1000;
         //uint32 _dc = _item_base_id * 0 + dc_table[_item_id];
-        uint32 _dc = _item_type % 16 dc_table[_item_type];
+        Murasaki_Craft mc = Murasaki_Craft(murasaki_craft_address);
+        mc
+
+        uint32 _dc = dc_table[(_item_type % 16)];
         return _dc;
     }
+    */
     
     //interact with Murasaki_Craf
     //set item nft to summoner, insert item nft number into item array of summoner at position [item_id]
     //only from murasaki_craft contract
     function set_item_to_summoner(uint32 _item, uint32 _item_type, uint32 _summoner) public {
-        require(msg.sender == murasaki_craft_address);
+        require(msg.sender == murasaki_craft_address || msg.sender == murasaki_pet_address);
         items[_summoner][_item_type] = _item;
     }
 
@@ -1114,9 +1127,242 @@ contract Murasaki_Craft is ERC721, Ownable{
 
     mapping(uint32 => item) public items;
 
+    //item dc
+    uint32[64] public dc_table = [
+        //0:dummy
+        0,
+        //1-16: mining item
+        1000,
+        3000,
+        6000,
+        10000,
+        15000,
+        21000,
+        28000,
+        36000,
+        45000,
+        55000,
+        66000,
+        78000,
+        91000,
+        105000,
+        120000,
+        136000,
+        //17-32: farming item
+        1000,
+        3000,
+        6000,
+        10000,
+        15000,
+        21000,
+        28000,
+        36000,
+        45000,
+        55000,
+        66000,
+        78000,
+        91000,
+        105000,
+        120000,
+        136000,
+        //33-48: crafting item
+        1000,
+        3000,
+        6000,
+        10000,
+        15000,
+        21000,
+        28000,
+        36000,
+        45000,
+        55000,
+        66000,
+        78000,
+        91000,
+        105000,
+        120000,
+        136000,
+        //49: pet
+        1000,
+        //50-63: unreserved
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000
+    ];
+    //item coin
+    uint32[64] public coin_table = [
+        //0:dummy
+        0,
+        //1-16: mining item
+        100,
+        300,
+        600,
+        1000,
+        1500,
+        2100,
+        2800,
+        3600,
+        4500,
+        5500,
+        6600,
+        7800,
+        9100,
+        10500,
+        12000,
+        13600,
+        //17-32: farming item
+        100,
+        300,
+        600,
+        1000,
+        1500,
+        2100,
+        2800,
+        3600,
+        4500,
+        5500,
+        6600,
+        7800,
+        9100,
+        10500,
+        12000,
+        13600,
+        //33-48: crafting item
+        100,
+        300,
+        600,
+        1000,
+        1500,
+        2100,
+        2800,
+        3600,
+        4500,
+        5500,
+        6600,
+        7800,
+        9100,
+        10500,
+        12000,
+        13600,
+        //49: pet
+        100,
+        //50-63: unreserved
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100
+    ];
+    //item material
+    uint32[64] public material_table = [
+        //0:dummy
+        0,
+        //1-16: mining item
+        10,
+        30,
+        60,
+        100,
+        150,
+        210,
+        280,
+        360,
+        450,
+        550,
+        660,
+        780,
+        910,
+        1050,
+        1200,
+        1360,
+        //17-32: farming item
+        10,
+        30,
+        60,
+        100,
+        150,
+        210,
+        280,
+        360,
+        450,
+        550,
+        660,
+        780,
+        910,
+        1050,
+        1200,
+        1360,
+        //33-48: crafting item
+        10,
+        30,
+        60,
+        100,
+        150,
+        210,
+        280,
+        360,
+        450,
+        550,
+        660,
+        780,
+        910,
+        1050,
+        1200,
+        1360,
+        //49: pet
+        10,
+        //50-63: unreserved
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10
+    ];
+    
     //admin
     function set_murasaki_main_address(address _address) public onlyOwner{
         murasaki_main_address = _address;
+    }
+
+    //get item dc
+    function get_item_dc(uint8 _item_type) public view returns (uint32[3] memory) {
+        //TODO: library of dc required
+        //return _item_base_id * _item_id * 0 + 1000;
+        //uint32 _dc = _item_base_id * 0 + dc_table[_item_id];
+        //uint32 _dc = dc_table[(_item_type % 16)];
+        //uint32[3] memory _dc = dc_table[_item_type];
+        uint32 _dc = dc_table[_item_type];
+        uint32 _coin = coin_table[_item_type];
+        uint32 _material = material_table[_item_type];
+        return [_dc, _coin, _material];
     }
 
     //craft, only from mm
@@ -1126,11 +1372,20 @@ contract Murasaki_Craft is ERC721, Ownable{
         items[next_item] = item(_item_type, _now, _summoner, _summoner, _wallet);
         _safeMint(_wallet, next_item);
         //set item to summoner
-        set_item_to_summoner(next_item, _summoner);
+        set_item_to_summoner_from_mm(next_item, _summoner);
         next_item++;
     }
 
-    //set_item_to_summoner
+    //set_item_to_summoner, Murasaki_Main only
+    function set_item_to_summoner_from_mm(uint32 _item, uint32 _summoner) public {
+        require(msg.sender == murasaki_main_address);
+        Murasaki_Main mm = Murasaki_Main(murasaki_main_address);
+        items[_item].owner_summoner = _summoner;
+        uint8 _item_type = items[_item].item_type;
+        mm.set_item_to_summoner(_item, _item_type, _summoner);
+    }
+
+    //set_item_to_summoner, independent function
     function set_item_to_summoner(uint32 _item, uint32 _summoner) public {
         require(_isApprovedOrOwner(msg.sender, _item));
         Murasaki_Main mm = Murasaki_Main(murasaki_main_address);
@@ -1157,7 +1412,6 @@ contract Murasaki_Pet is ERC721, Ownable{
     address public murasaki_main_address;
 
     struct pet {
-        uint8 class;
         uint32 crafted_time;
         uint32 crafted_summoner;
         uint32 owner_summoner;
@@ -1172,7 +1426,6 @@ contract Murasaki_Pet is ERC721, Ownable{
     mapping(uint32 => uint8) public farming_status;
     mapping(uint32 => uint32) public farming_start_time;
 
-
     //admin
     function set_murasaki_main_address (address _address) public onlyOwner{
         murasaki_main_address = _address;
@@ -1182,12 +1435,21 @@ contract Murasaki_Pet is ERC721, Ownable{
     }
 
     //craft pet
-    function craft(uint8 _class, uint32 _summoner, address _wallet) public {
-        //require(msg.sender == murasaki_main_address);
-        pets[next_pet] = pet(_class, uint32(block.timestamp), _summoner, _summoner, _wallet);
+    function craft(uint32 _summoner, address _wallet) public {
+        require(msg.sender == murasaki_main_address);
+        pets[next_pet] = pet(uint32(block.timestamp), _summoner, _summoner, _wallet);
         _safeMint(_wallet, next_pet);
-        set_pet_to_summoner(next_pet, _summoner);
+        set_pet_to_summoner_from_mm(next_pet, _summoner);
         next_pet++;
+    }
+
+    //set_pet_to_summoner, mm only
+    function set_pet_to_summoner_from_mm(uint32 _pet, uint32 _summoner) public {
+        require(msg.sender == murasaki_main_address);
+        Murasaki_Main mm = Murasaki_Main(murasaki_main_address);
+        pets[_pet].owner_summoner = _summoner;
+        uint8 _item_type = 49;  //49-63: special item_type
+        mm.set_item_to_summoner(_pet, _item_type, _summoner);
     }
 
     //set_pet_to_summoner
@@ -1258,6 +1520,33 @@ contract Murasaki_Pet is ERC721, Ownable{
     }
 
     //farming
+    function start_farming(uint32 _pet) public {
+        require(_isApprovedOrOwner(msg.sender, _pet));
+        require(mining_status[_pet] == 0 && farming_status[_pet] == 0);
+        uint32 _now = uint32(block.timestamp);
+        farming_start_time[_pet] = _now;
+        farming_status[_pet] = 1;
+    }
+    function stop_farming(uint32 _pet) public {
+        require(_isApprovedOrOwner(msg.sender, _pet));
+        require(farming_status[_pet] == 1);
+        uint32 _delta = calc_material(_pet);
+        material[_pet] += _delta;
+        send_material_to_owner_summoner(_pet);
+        farming_status[_pet] = 0;
+    }
+    function calc_material(uint32 _pet) public view returns (uint32) {
+        require(farming_status[_pet] == 1);
+        uint32 _now = uint32(block.timestamp);
+        uint32 _delta = (_now - farming_start_time[_pet]) * speed / 1000;
+        uint32[20] memory _status = get_owner_summoner_status(_pet);
+        uint32 _dex = _status[2];
+        uint32 _level = _status[18];
+        _delta += (_delta * _dex) / 100;    //status modification
+        _delta += (_delta * _level) / 100;    //level modification
+        _delta = _delta / 4;    //pet modification
+        return _delta;
+    }
 
 }
 
@@ -1268,6 +1557,7 @@ contract Murasaki_Pet is ERC721, Ownable{
 
 /***
 
+    
     所持itemによるmining, farming, craftingの補正
         itemもフラグ性にするか
             boolが100個の配列を用意し, craftするたびに該当フラグを立ててゆく
@@ -1288,7 +1578,7 @@ contract Murasaki_Pet is ERC721, Ownable{
         craftコントラに, craft時にmappingでsummonerごとの所持数をカウントする
         transfer時は所持カウントも動かさないといけない
     pet所持の有無の判定とpetとの相互作用
-        pet複数所持時のルール整備
+        *pet複数所持時のルール整備
             summoner側にuint32のpet変数をつくり, craft時に格納するか
                 UI側でsummoner IDからpetを参照しやすいし、
                 petがcoinやmaterial送るときは、pet関数に格納されていることをrequireさせられる
