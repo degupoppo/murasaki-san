@@ -1071,12 +1071,12 @@ function update() {
         let now_time = Date.now() / 1000;
         let age_time = Math.round( now_time - local_birth_time );
         let mode = murasakisan.get_mode;
-        let base = 86400
+        let base = 86400 /100
         //satiety
         satiety = Math.round( (base - (now_time - local_last_feeding_time)) / base * 100 );
         if (satiety < 0) { satiety = 0; }
         if (satiety > 100) { satiety = 100; }
-        let base2 = 86400 * 5
+        let base2 = 86400 * 5 /100
         //happy
         happy = Math.round( (base2 - (now_time - local_last_grooming_time)) / base2 * 100 );
         if (happy < 0) { happy = 0; }
