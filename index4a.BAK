@@ -7,7 +7,7 @@
     <link rel="icon" type="png" href="png/icon.PNG">
     <title>House of Murasaki-San</title>
     <script src="web3.min.js"></script>
-    <script src="abi4.js"></script>
+    <script src="murasaki_main.js"></script>
     <style type="text/css">
         html, body {
             width: 100%;
@@ -35,13 +35,13 @@
     <font size="1" color="#c71585">(version 0.4.0a)</font><br>
     <br>
     <br>
-    <font size="2"><a href="index3-2.html?summoner=0">> Demo Preview Here <</a></font><br>
+    <font size="2"><a href="index4b.html?summoner=0">> Demo Preview Here <</a></font><br>
     <br>
     <font size="2">Summon your Murasaki-San</font><br>
     <font size="2">type:</font>
     <select name="class" id="ctype">
-        <option value="1">1</option>
-        <option value="2">2</option>
+        <option value="1">0</option>
+        <option value="2">1</option>
     </select>
     &nbsp;
     <input type="button" value=" Summon " onclick="contract_summon(1);" />
