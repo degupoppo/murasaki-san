@@ -373,8 +373,7 @@ async function contract_start_crafting(summoner) {
     let item_id = 0;
     let coin = 1;
     let material = 0;
-    //***TODO*** spell miss!!!**********************************************************************************
-    contract.methods.start_craftingg(summoner, item_base_id, item_id, coin, material).send({from:wallet});
+    contract.methods.start_crafting(summoner, item_base_id, item_id, coin, material).send({from:wallet});
 }
 async function contract_stop_crafting(summoner) {
     let web3 = await connect();
