@@ -1071,7 +1071,7 @@ function update() {
         let now_time = Date.now() / 1000;
         let age_time = Math.round( now_time - local_birth_time );
         let mode = murasakisan.get_mode;
-        let base = 86400
+        let base = 86400 /1000
         //satiety
         satiety = Math.round( (base - (now_time - local_last_feeding_time)) / base * 100 );
         if (satiety < 0) { satiety = 0; }
