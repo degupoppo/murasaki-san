@@ -1,6 +1,44 @@
 
 
 
+/***
+
+ToDo
+
+    item, pet NFTの譲渡の実装
+        update関数の実装
+            mm側に用意し, mcとmpのowner_summonerおよびwallet onwerをすべてチェックしてfalseを0に置換する
+
+    1つのpet/itemが2つ以上のsummonerに紐付け可能なことを回避する実装を考える
+
+    Luckの補正の実装
+        feeding/grooming時に+αでexp得る確率
+        stop mining/farming時に+αでcoin/material得る確率
+        crafting時に割引で行える確率
+
+    ワールドダイスの実装
+        クラフト品とする, 少し高めのコスト設定
+        すべての補正+1～20%
+        utc 0時以降, その日の分を振れる
+        何かしらの判定時に, ダイス振ってあったら+補正
+            utc 0時以前がlast_dice時間ならば補正なし
+        Luck補正を利用する
+        ダイス補正の期待値+10.5%を織り込んでバランス設計する
+
+    Vitステータスの削除
+
+    summonerパラメータのstruct化
+
+    ゆっくりと成長する木の実装
+        item type = 50ぐらいの専用スロット
+        成長するまで何が生えるかわからない
+        summonerの行動によって結果がかわる
+        1ヶ月で最大成長ぐらいか
+
+***/
+
+
+
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
 
@@ -818,8 +856,8 @@ contract Murasaki_Main is ERC721, Ownable{
         require(mining_status[_summoner] == 0 && farming_status[_summoner] == 0 && crafting_status[_summoner] == 0);
         uint32 _now = uint32(block.timestamp);
         uint32 _delta_sec = _now - last_grooming_time_plus_working_time[_summoner];
-        if (_delta_sec >= (base_sec * 5)) {
-            _delta_sec = base_sec * 5;
+        if (_delta_sec >= (base_sec * 3)) {
+            _delta_sec = base_sec * 3;
         }
         exp[_summoner] += _delta_sec * speed / 100 ;
         last_grooming_time_plus_working_time[_summoner] = _now;
@@ -828,10 +866,10 @@ contract Murasaki_Main is ERC721, Ownable{
     function calc_happy(uint32 _summoner) public view returns (uint32) {
         uint32 _now = uint32(block.timestamp);
         uint32 _delta_sec = _now - last_grooming_time[_summoner];
-        if (_delta_sec >= (base_sec * 5)) {
-            _delta_sec = base_sec * 5;
+        if (_delta_sec >= (base_sec * 3)) {
+            _delta_sec = base_sec * 3;
         }
-        uint32 _happy = 100 * ((base_sec*5) - _delta_sec) / (base_sec*5);
+        uint32 _happy = 100 * ((base_sec*3) - _delta_sec) / (base_sec*3);
         return _happy;
     }
 
@@ -1553,11 +1591,6 @@ contract Murasaki_Pet is ERC721, Ownable{
 //---------------------------------------------------------------------------------------------------------------------
 
 /***
-
-    item, pet NFTの譲渡の実装
-        update関数の実装
-            mm側に用意し, mcとmpのowner_summonerおよびwallet onwerをすべてチェックしてfalseを0に置換する
-    1つのpet/itemが2つ以上のsummonerに紐付け可能なことを回避する実装を考える
     
     ok pet所持の有無の判定とpetとの相互作用
         *pet複数所持時のルール整備
