@@ -3,6 +3,7 @@
 
 <!---
 
+
 picture
     背景
 ok! クリックアイコン（grooming, mining, farming, crafting）
@@ -17,31 +18,34 @@ ok! しゅっきん！（お仕事へ移動中）
     失敗しちゃった・・・（クラフト失敗時など）
     れべるあっぷ！
 
+
 ToDo
-ok  Vit不要か
-        restingはexpブースト, Lukをわずかに上昇？
-ok  stopのUI実装
-        mining: 現在の+coin概算値
-        farming: 現在の+material概算値
-        crafting: 現在の残り時間
+
+    petのUI実装
+        pet所持の有無を監視
+        petの絵の用意
+        pet関数の実装
+            moving
+            resting
+            mining
+            farming
+            moving_working
+        petへのstart mining/farmingとstopの実装
+
     craftingのUI実装
         item_idの選択方法
         craftのstart/stopボタン
         成功/失敗の表現
+
     summoner所持item
         所持itemの検索
-        所持itemの表示
-    working中のfeeding動作の実装
-    leve-up時のfeeding, grooming暴発対策
+        所持itemのスプライト表示
+
+    資源のバランスと差別化
+        coinとmaterialの差別化
+
 
 Idea
-    time
-        1日86400秒をどの状態に振り分けるか
-            mining, farming, crafting, resting
-        mining: coin得る, str偏向
-        farming: mat得る, dex偏向
-        crafting: itemトライ, int偏向
-        resting: grooming時にexp得る
     main idea
         献身によって成長と変化を実感できる育成型NFT
         時間が基本資源, summonerをどの状態にどれだけしたかで変化の仕方が違う
@@ -53,51 +57,13 @@ Idea
             インフレ率：+100%/y程度を目指す
             mining特化して, 1年間の献身で+100%, farmingも同様
         全てのアイテムを買うことはできない。
-    feeding, grooming, mining, farming, craftingの関係
-        feeding:
-            24時間でメーター0
-            マイナスにはならない, 0→100のときに+exp
-            どんなモード中でも可能
-        grooming:
-            resting中のみ可能
-            72時間でメーター0
-            マイナスにはならない
-            +exp計算方法    ***TODO***
-                その時点のlast_level_up_timeからのdelta_timeを算出
-                last_total_mining_time, last_total_farming_timeを算出
-                上記3つの数からlast_total_resting_timeを算出
-                
-            その時点のtotal_resting_timeを算出し, last_level_up_timeからのdelta_timeで割り、その係数分+exp
-                つまり, 前回level-upから100%restingなら100%+exp, mining多くしてればexp減る
-    satiety, happy, coin, materialのバランス, 消費タイミング, 補正
-        materialはcrafting時に消費する基本資源, たくさん費やすほど成功率が上がる, 失敗しても減る
-        coinはcraft成功時に支払われる資源, 成功時に減る
-    level, str, dex, int, val, lukの補正方法, 上昇方法
-        farming(dex), mining(str), crafting(int)のtotal timeでレベルアップ時のstatus換算を変える
-        加えて、高コストだが木の実で能動的に上げることもできる
-        valはno feeding/grooming timeが0で最大効率, valが高いと得られる経験値が増える?
-        Level上昇による補正
-            +1ですべての補正+5%
-    items
-        置物？動く？
-        mining, farming, crafting補正アイテム
-            1個で+5%有利になる
-        exp補正アイテム → 制御が難しいので作らない
-            expは献身性によってのみ得られる
-        代わりにmining, farmingしてくれるペット
-            Astar君、Ms. Astarとでも
-            効率は本体の1/4～半分程度？
-            成長はさせない？本体とともに効率が上がる
-        大体, 3日で成功率80%に調整する
-        すべて同じ効果だが、1個目, 2個目とdifficultyを上げる
-            重ね効果を得にくいように。1個目作るのは安いが、2個目は高い、など
     まとめ
         time
             1day=86,400secをmining, farming, crafting, restingのどれかに振り分ける
             mining: +coin, Lv-up時 +STR
             farming: +material, Lv-up時 +DEX
             crafting: item try, Lv-up時 +INT
-            resting: grooming時 +EXP, +VIT
+            resting: grooming時 追加+EXP, 全部ステータス均等に追加
         Lv-up
             1レベル上がると全効率が+5%
             1年間で12-15Lvまで上がる, +60%-75%
@@ -108,54 +74,11 @@ Idea
             mining, farming, craftingに対応する3種類
                 1つ所持すると効率+5%
             本体の半分の効率でmining, farmingするペット
-            ステータスを上昇させる木の実
+            ステータスを恒久的に上昇させる木の実（非NFT）
             完全なオブジェ
             補正なしで3日で成功率80%程度の難易度
             難易度による差別化をどうするか
                 すべて同じ効果だが, 効果を重複するために複数並べるには高いものも買わないといけない
-    Level-up
-        last_feeding_time, last_grooming_time, expをすべてリセットする
-        last_level_up_timeからnow.timeまでのdelta_timeを取得する
-        delta_timeのうち, total_mining_time, total_farming_time, 残りをtotal_resting_timeとし
-            それぞれのtotal_timeが何％か算出する
-        point per level (1? 2?) をそれぞれのtotal_time割合で分割してパラメータに合算する
-
-ToDo
-    stopのUI実装
-        mining: 現在の+coin概算値
-        farming: 現在の+material概算値
-        crafting: 現在の残り時間
-    craftingのUI実装
-        item_idの選択方法
-        craftのstart/stopボタン
-        成功/失敗の表現
-    summoner所持itemの検索
-    summoner所持itemによるsprite描写
-    itemのクラフト難易度, 想定個数, 効果を練り込む
-        小さい効果のものをたくさん作るか, 大きい効果のものを少量作るか
-        失敗ありで何回も試行するか、必ず成功するが時間がかかるか
-        対象ステータス特化か、全体的に底上げだが比率を変えるか
-            Lvは全体底上げ、クラフトは特化、がよいか
-        アイテムごとの差別化はどうするか
-            一律何個所持で補正をかけるか
-            +1%, +3%, +5%など大きさを作るか
-    ok craftingコントラの実装
-    item craftingのUIの実装
-    UI：所有itemのリアルタイム更新と表示
-    コントラ：random
-    コントラ：crafting, summonerが所有するNFT, 所有summonerを紐付けるよう書き換える
-    コントラ：レベルアップの実装
-    アイデア：coinのユースケースを考える
-    アイデア：materialのバランスを考える
-    ok satietyとhappyの差別化を考える。
-    ok wallet所有のNFTを選べるUIを作る
-    ok UI：Mintボタン, type指定可能に
-    ok UI：所有summonerの表示と選択
-    ok summon costの設定
-        ok solidityのsummon関数にpayableをつける
-        ok web3jsのvalueに0.1など追記
-        ok solidityのsummonにrequiredでvalue閾値を追記
-        ok solidityにwithdraw関数を追加
 
 --->
 
@@ -216,12 +139,20 @@ let local_crafting_status;
 let local_crafting_start_time;
 let previous_local_last_feeding_time;
 let previous_local_last_grooming_time;
+let previous_local_level;
 let summoner = -1;
 let satiety;
 let happy;
 let local_coin_calc;
 let local_material_calc;
 let local_crafting_calc;
+let local_pet;
+let local_pet_mining_status;
+let local_pet_mining_start_time;
+let local_pet_coin_calc;
+let local_pet_farming_status;
+let local_pet_farming_start_time;
+let local_pet_material_calc;
 
 
 
@@ -279,6 +210,12 @@ async function get_contract(web3) {
     return contract;
 }
 
+//prepare contract, pet
+async function get_contract_pet(web3) {
+    const contract = await new web3.eth.Contract(abi_murasaki_pet, contract_address_murasaki_pet);
+    return contract;
+}
+
 //update local status reading from contract
 async function contract_update_status(summoner) {
     let web3 = await connect();
@@ -312,6 +249,19 @@ async function contract_update_status(summoner) {
         local_material_calc = await contract.methods.calc_material(summoner).call();
     }else if (local_crafting_status == 1) {
         local_crafting_calc = await contract.methods.calc_crafting(summoner).call();
+    }
+    //pet check
+    //TODO: call whole items list, then view at type 49
+    local_pet = await contract.methods.items(summoner, 49).call();
+    if (local_pet != 0) {
+        /* NEED to update contract!
+        let contract_pet = await get_contract_pet(web3);
+        res = await contract_pet.methods.get_status(summoner).call();
+        local_pet_mining_status = res[0];
+        local_pet_mining_start_time = res[1];
+        local_pet_farming_status = res[2];
+        local_pet_farming_start_time = res[3];
+        */
     }
 }
 
@@ -380,7 +330,7 @@ async function contract_start_crafting(summoner) {
     let web3 = await connect();
     let contract = await get_contract(web3);
     let wallet = await get_wallet(web3);
-    let item_type = 1;
+    let item_type = 49;
     contract.methods.start_crafting(summoner, item_type).send({from:wallet});
 }
 async function contract_stop_crafting(summoner) {
@@ -390,6 +340,14 @@ async function contract_stop_crafting(summoner) {
     contract.methods.stop_crafting(summoner).send({from:wallet});
 }
 
+//get items
+async function contract_get_items(summoner) {
+    let web3 = await connect();
+    let contract = await get_contract(web3);
+    let wallet = await get_wallet(web3);
+    let items = await contract.methods.items(summoner,49).call();
+    console.log(items);
+}
 
 
 // summoner
@@ -461,7 +419,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             }
             if (this.y > 500 && this.moving_degree > 180) {
                 this.moving_degree = 360 - this.moving_degree;
-            }else if (this.y < 250 && this.moving_degree < 180) {
+            }else if (this.y < 300 && this.moving_degree < 180) {
                 this.moving_degree = 360 - this.moving_degree;
             }
             //minus check
@@ -924,7 +882,7 @@ function create() {
     button_crafting.setInteractive({useHandCursor: true});
     button_crafting.on('pointerdown', () => contract_start_crafting(summoner) );
 
-    //summon character
+    //summoner
     murasakisan = new Murasakisan(this, 300 + Math.random()*200, 400 + Math.random()*100);
     murasakisan.scaleX = murasakisan.scaleX * 0.25;
     murasakisan.scaleY = murasakisan.scaleY * 0.25;
@@ -934,6 +892,8 @@ function create() {
     new Button(30, 40, 'Stop Mining', this, () => contract_stop_mining(summoner));
     new Button(30, 70, 'Stop Farming', this, () => contract_stop_farming(summoner));
     new Button(30, 100, 'Stop Crafting', this, () => contract_stop_crafting(summoner));
+    new Button(30, 130, 'Test', this, () => contract_get_items(summoner));
+
     //new Button(30, 40, 'Feeding', this, () => contract_feeding(summoner));
     //new Button(30, 70, 'Grooming', this, () => contract_grooming(summoner));
     //new Button(30, 100, 'Start Mining', this, () => contract_start_mining(summoner));
@@ -943,7 +903,7 @@ function create() {
 
     //status window color fill
     let status_back = this.add.graphics();
-    status_back.fillStyle(0xa9a9a9, 1).fillRect(590, 5, 200, 250);
+    status_back.fillStyle(0xa9a9a9, 1).fillRect(590, 5, 200, 300);
     status_back.alpha = 0.4;
 
     //status window
@@ -1003,6 +963,9 @@ function create() {
     text_working_mode = this.add.text(600, 250, "***", font_arg);
     text_working_calc = this.add.text(600, 260, "***", font_arg);
 
+    //pet
+    text_pet = this.add.text(600, 280, "***", font_arg);
+
 }
 
 
@@ -1023,7 +986,11 @@ function update() {
     murasakisan.update();
 
     //update calculation status
-    if (turn == 1 || turn % 100 == 0) {
+    if (turn % 100 == 0) {
+
+        //level up
+        if (local_level > previous_local_level) {
+        }else 
 
         //feeding check
         if (local_last_feeding_time > previous_local_last_feeding_time){
@@ -1039,7 +1006,7 @@ function update() {
             food = this.add.sprite(600,400, "food_sweet_potato");
             food.scaleX = food.scaleX * 0.1;
             food.scaleY = food.scaleY * 0.1;
-        }
+        }else
 
         //grooming check
         if (local_last_grooming_time > previous_local_last_grooming_time){
@@ -1051,7 +1018,7 @@ function update() {
         }
 
         //mining check
-        if (local_mining_status == 1 & murasakisan.mode != "mining"){
+        if (local_mining_status == 1 & murasakisan.mode != "mining" & murasakisan.mode != "feeding"){
             murasakisan.set_mode = "mining";
             murasakisan.submode = 0;
             murasakisan.count = 0;
@@ -1059,10 +1026,10 @@ function update() {
             murasakisan.target_y = 420;
         }else if (local_mining_status == 0 & murasakisan.mode == "mining") {
             murasakisan.set_mode = "resting";
-        }
+        }else
 
         //farming check
-        if (local_farming_status == 1 & murasakisan.mode != "farming"){
+        if (local_farming_status == 1 & murasakisan.mode != "farming" & murasakisan.mode != "feeding"){
             murasakisan.set_mode = "farming";
             murasakisan.submode = 0;
             murasakisan.count = 0;
@@ -1070,15 +1037,15 @@ function update() {
             murasakisan.target_y = 260;
         }else if (local_farming_status == 0 & murasakisan.mode == "farming") {
             murasakisan.set_mode = "resting";
-        }
+        }else 
 
         //crafting check
-        if (local_crafting_status == 1 & murasakisan.mode != "crafting"){
+        if (local_crafting_status == 1 & murasakisan.mode != "crafting" & murasakisan.mode != "feeding"){
             murasakisan.set_mode = "crafting";
             murasakisan.submode = 0;
             murasakisan.count = 0;
-            murasakisan.target_x = 100;
-            murasakisan.target_y = 450;
+            murasakisan.target_x = 500;
+            murasakisan.target_y = 250;
         }else if (local_crafting_status == 0 & murasakisan.mode == "crafting") {
             murasakisan.set_mode = "resting";
         }
@@ -1087,12 +1054,12 @@ function update() {
         let now_time = Date.now() / 1000;
         let age_time = Math.round(now_time - local_birth_time);
         let mode = murasakisan.get_mode;
-        let base = 86400 /100;
+        let base = 86400 /10;
         //satiety
         satiety = Math.round( (base - (now_time - local_last_feeding_time)) / base * 100 );
         if (satiety < 0) { satiety = 0; }
         if (satiety > 100) { satiety = 100; }
-        let base2 = 86400 * 3 /100;
+        let base2 = 86400 * 3 /10;
         //happy
         happy = Math.round( (base2 - (now_time - local_last_grooming_time)) / base2 * 100 );
         if (happy < 0) { happy = 0; }
@@ -1133,11 +1100,18 @@ function update() {
             text_working_mode.setText("+material");
             text_working_calc.setText(local_material_calc);
         }else if (mode == "crafting") {
-            text_working_mode.setText("to complete crafting");
+            text_working_mode.setText("complete crafting");
             text_working_calc.setText(local_crafting_calc + " sec");
         }else {
             text_working_mode.setText("*****");
             text_working_calc.setText("*****");
+        }
+
+        //pet
+        if (local_pet == 0) {
+            text_pet.setText("pet_id = not yet crafted");
+        } else{
+            text_pet.setText("pet_id = " + local_pet);
         }
 
         //text_birth_time.setText("birth_time = " + local_birth_time);
@@ -1150,6 +1124,7 @@ function update() {
 
         previous_local_last_feeding_time = local_last_feeding_time;
         previous_local_last_grooming_time = local_last_grooming_time;
+        previous_local_level = local_level;
     }
 
     //update dynamic status from contract to local
@@ -1444,6 +1419,87 @@ function button_select_summoner() {
         feeding, デイリークエスト, コストなし, 24時間で最大効率
         grooming, プラスアルファ, 何かしらのコスト必要, 168時間で最大効率
 
+ok  working中のfeeding動作の実装
+ok  leve-up時のfeeding, grooming暴発対策
+ok  Vit不要か
+        restingはexpブースト, Lukをわずかに上昇？
+ok  stopのUI実装
+        mining: 現在の+coin概算値
+        farming: 現在の+material概算値
+        crafting: 現在の残り時間
+
+    time
+        1日86400秒をどの状態に振り分けるか
+            mining, farming, crafting, resting
+        mining: coin得る, str偏向
+        farming: mat得る, dex偏向
+        crafting: itemトライ, int偏向
+        resting: grooming時にexp得る
+
+    feeding, grooming, mining, farming, craftingの関係
+        feeding:
+            24時間でメーター0
+            マイナスにはならない, 0→100のときに+exp
+            どんなモード中でも可能
+        grooming:
+            resting中のみ可能
+            72時間でメーター0
+            マイナスにはならない
+            +exp計算方法    ***TODO***
+                その時点のlast_level_up_timeからのdelta_timeを算出
+                last_total_mining_time, last_total_farming_timeを算出
+                上記3つの数からlast_total_resting_timeを算出
+                
+            その時点のtotal_resting_timeを算出し, last_level_up_timeからのdelta_timeで割り、その係数分+exp
+                つまり, 前回level-upから100%restingなら100%+exp, mining多くしてればexp減る
+    satiety, happy, coin, materialのバランス, 消費タイミング, 補正
+        materialはcrafting時に消費する基本資源, たくさん費やすほど成功率が上がる, 失敗しても減る
+        coinはcraft成功時に支払われる資源, 成功時に減る
+    level, str, dex, int, val, lukの補正方法, 上昇方法
+        farming(dex), mining(str), crafting(int)のtotal timeでレベルアップ時のstatus換算を変える
+        加えて、高コストだが木の実で能動的に上げることもできる
+        valはno feeding/grooming timeが0で最大効率, valが高いと得られる経験値が増える?
+        Level上昇による補正
+            +1ですべての補正+5%
+    items
+        置物？動く？
+        mining, farming, crafting補正アイテム
+            1個で+5%有利になる
+        exp補正アイテム → 制御が難しいので作らない
+            expは献身性によってのみ得られる
+        代わりにmining, farmingしてくれるペット
+            Astar君、Ms. Astarとでも
+            効率は本体の1/4～半分程度？
+            成長はさせない？本体とともに効率が上がる
+        大体, 3日で成功率80%に調整する
+        すべて同じ効果だが、1個目, 2個目とdifficultyを上げる
+            重ね効果を得にくいように。1個目作るのは安いが、2個目は高い、など
+
+    ok satietyとhappyの差別化を考える。
+    ok wallet所有のNFTを選べるUIを作る
+    ok UI：Mintボタン, type指定可能に
+    ok UI：所有summonerの表示と選択
+    ok summon costの設定
+        ok solidityのsummon関数にpayableをつける
+        ok web3jsのvalueに0.1など追記
+        ok solidityのsummonにrequiredでvalue閾値を追記
+        ok solidityにwithdraw関数を追加
+
+    Level-up
+        last_feeding_time, last_grooming_time, expをすべてリセットする
+        last_level_up_timeからnow.timeまでのdelta_timeを取得する
+        delta_timeのうち, total_mining_time, total_farming_time, 残りをtotal_resting_timeとし
+            それぞれのtotal_timeが何％か算出する
+        point per level (1? 2?) をそれぞれのtotal_time割合で分割してパラメータに合算する
+
+
+    ok stopのUI実装
+        mining: 現在の+coin概算値
+        farming: 現在の+material概算値
+        crafting: 現在の残り時間
+
+
+
 Donate: 0x2F7448B62134e52C2f46454d0089Ae21B5248805
 
     <form name="select_summoner">
@@ -1454,5 +1510,15 @@ Donate: 0x2F7448B62134e52C2f46454d0089Ae21B5248805
         <input type="button" value="Swith Summoner" onclick="button_select_summoner();"/>
     </form>
     <br>
+
+    ok craftingコントラの実装
+    item craftingのUIの実装
+    UI：所有itemのリアルタイム更新と表示
+    コントラ：random
+    コントラ：crafting, summonerが所有するNFT, 所有summonerを紐付けるよう書き換える
+    コントラ：レベルアップの実装
+    アイデア：coinのユースケースを考える
+    アイデア：materialのバランスを考える
+
 
 --->
