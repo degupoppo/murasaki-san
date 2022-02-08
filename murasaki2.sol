@@ -1,15 +1,7 @@
 
-
-
 /***
 
 ToDo
-
-    item, pet NFTの譲渡の実装
-        update関数の実装
-            mm側に用意し, mcとmpのowner_summonerおよびwallet onwerをすべてチェックしてfalseを0に置換する
-
-    1つのpet/itemが2つ以上のsummonerに紐付け可能なことを回避する実装を考える
 
     Luckの補正の実装
         feeding/grooming時に+αでexp得る確率
@@ -26,15 +18,21 @@ ToDo
         ダイス補正の期待値+10.5%を織り込んでバランス設計する
         乱数の実装
 
-    Vitステータスの削除
-
-    summonerパラメータのstruct化
-
     ゆっくりと成長する木の実装
         item type = 50ぐらいの専用スロット
         成長するまで何が生えるかわからない
         summonerの行動によって結果がかわる
         1ヶ月で最大成長ぐらいか
+
+    item, pet NFTの譲渡の実装
+        update関数の実装
+            mm側に用意し, mcとmpのowner_summonerおよびwallet onwerをすべてチェックしてfalseを0に置換する
+
+    1つのpet/itemが2つ以上のsummonerに紐付け可能なことを回避する実装を考える
+
+    Vitステータスの削除
+
+    summonerパラメータのstruct化
 
     URIの実装
         rarity方式にするか
