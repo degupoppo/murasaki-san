@@ -37,12 +37,24 @@ ok! しゅっきん！（お仕事へ移動中）
     成功したよー！（クラフト成功時, mining終了時など）
     失敗しちゃった・・・（クラフト失敗時など）
     れべるあっぷ！
+    マイニングアイテム案（STR系）
+        良いスコップ
+        石像
+    ファーミングアイテム案（DEX系）
+        良いじょうろ
+    クラフティングアイテム案（INT系）
+        携帯電話
+
 
 
 ToDo
 
+    stop workingの整備
+        stop workingボタン
+        ボタン周辺に進捗情報を表示
+
     petのUI実装
-        ok pet所持の有無を監視
+     ok pet所持の有無を監視
         petの絵の用意
         pet関数の実装
             moving
@@ -154,8 +166,20 @@ let local_pet_coin_calc;
 let local_pet_farming_status;
 let local_pet_farming_start_time;
 let local_pet_material_calc;
-let flag_pet = 0;
 
+let flag_pet = 0;       //0:not crafted, 1:crafted
+
+let previous_local_mining_status;
+let previous_local_farming_status;
+let previous_local_crafting_status;
+
+/*
+//flag management
+let flag_mining = 0;    //-1:unable, 0:enable, 1:working
+let flag_farming = -1;    //-1:unable, 0:enable, 1:working
+let flag_crafting = -1;    //-1:unable, 0:enable, 1:working
+let flag_grooming = 0;    //-1:unable, 0:enable, 1:working
+*/
 
 
 // html
@@ -304,7 +328,11 @@ async function contract_start_mining(summoner) {
     let web3 = await connect();
     let contract = await get_contract(web3);
     let wallet = await get_wallet(web3);
-    contract.methods.start_mining(summoner).send({from:wallet});
+    if (local_mining_status == 0) {
+        contract.methods.start_mining(summoner).send({from:wallet});
+    }else {
+        contract.methods.stop_mining(summoner).send({from:wallet});
+    }
 }
 async function contract_stop_mining(summoner) {
     let web3 = await connect();
@@ -318,7 +346,11 @@ async function contract_start_farming(summoner) {
     let web3 = await connect();
     let contract = await get_contract(web3);
     let wallet = await get_wallet(web3);
-    contract.methods.start_farming(summoner).send({from:wallet});
+    if (local_farming_status == 0) {
+        contract.methods.start_farming(summoner).send({from:wallet});
+    }else {
+        contract.methods.stop_farming(summoner).send({from:wallet});
+    }
 }
 async function contract_stop_farming(summoner) {
     let web3 = await connect();
@@ -865,6 +897,10 @@ function makeBar(scene, x, y, color) {
 }
 
 
+function dummy() {
+}
+
+
 //button
 //TODO: send transaction
 class Button {
@@ -932,12 +968,22 @@ function preload() {
     this.load.spritesheet("murasaki_working_right", "png/murasaki_working_right.png", {frameWidth: 370, frameHeight: 320});
     this.load.spritesheet("murasaki_click", "png/murasaki_click.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("button_feeding", "png/button_feeding.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_feeding_pointerover", "png/button_feeding_pointerover.png", {frameWidth: 500, frameHeight: 500});
     this.load.image("button_grooming", "png/button_grooming.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("button_mining", "png/button_mining.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("button_farming", "png/button_farming.png", {frameWidth: 500, frameHeight: 500});
     this.load.image("food_sweet_potato", "png/food_sweet_potato.png", {frameWidth: 500, frameHeight: 500});
     this.load.image("item_bear", "png/item_bear.png", {frameWidth: 720, frameHeight: 622});
     this.load.spritesheet("pet_normal", "png/pet_normal.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_mining_enable", "png/button_mining_enable.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_mining_unable", "png/button_mining_unable.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_mining_pointerover", "png/button_mining_pointerover.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_mining_working", "png/button_mining_working.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_farming_enable", "png/button_farming_enable.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_farming_unable", "png/button_farming_unable.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_farming_pointerover", "png/button_farming_pointerover.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_farming_working", "png/button_farming_working.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_grooming_enable", "png/button_grooming_enable.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_grooming_unable", "png/button_grooming_unable.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_grooming_pointerover", "png/button_grooming_pointerover.png", {frameWidth: 500, frameHeight: 500});
 }
 
 
@@ -1034,8 +1080,6 @@ function create() {
         frameRate: 1,
         repeat: -1
     });
-
-    
     this.anims.create({
         key: "pet_normal",
         frames: this.anims.generateFrameNumbers("pet_normal", {start:0, end:1}),
@@ -1055,12 +1099,20 @@ function create() {
     button_feeding.scaleY = button_feeding.scaleY * 0.1;
     button_feeding.setInteractive({useHandCursor: true});
     button_feeding.on('pointerdown', () => contract_feeding(summoner) );
-    button_grooming = this.add.sprite(350,130, "button_grooming");
+    button_feeding.on('pointerover', () => button_feeding.setTexture("button_feeding_pointerover"));
+    button_feeding.on('pointerout', () => button_feeding.setTexture("button_feeding"));
+
+    button_grooming = this.add.sprite(350,130, "button_grooming_unable");
     button_grooming.scaleX = button_grooming.scaleX * 0.1;
     button_grooming.scaleY = button_grooming.scaleY * 0.1;
     button_grooming.setInteractive({useHandCursor: true});
     button_grooming.on('pointerdown', () => contract_grooming(summoner) );
-    button_mining = this.add.sprite(40,390, "button_mining");
+    button_grooming.on('pointerover', () => button_grooming.setTexture("button_grooming_pointerover"));
+    button_grooming.on('pointerout', () => button_grooming.setTexture("button_grooming"));
+    button_grooming.disableInteractive();
+
+    /*
+    button_mining = this.add.sprite(40,380, "button_mining");
     button_mining.scaleX = button_mining.scaleX * 0.1;
     button_mining.scaleY = button_mining.scaleY * 0.1;
     button_mining.setInteractive({useHandCursor: true});
@@ -1070,11 +1122,31 @@ function create() {
     button_farming.scaleY = button_farming.scaleY * 0.1;
     button_farming.setInteractive({useHandCursor: true});
     button_farming.on('pointerdown', () => contract_start_farming(summoner) );
+    */
     button_crafting = this.add.sprite(500,130, "button_feeding");
     button_crafting.scaleX = button_crafting.scaleX * 0.1;
     button_crafting.scaleY = button_crafting.scaleY * 0.1;
     button_crafting.setInteractive({useHandCursor: true});
     button_crafting.on('pointerdown', () => contract_start_crafting(summoner) );
+
+    button_mining = this.add.sprite(40,370, "button_mining_unable");
+    button_mining.scaleX = button_mining.scaleX * 0.1;
+    button_mining.scaleY = button_mining.scaleY * 0.1;
+    button_mining.setInteractive({useHandCursor: true});
+    button_mining.on('pointerdown', () => contract_start_mining(summoner) );
+    button_mining.on('pointerover', () => button_mining.setTexture("button_mining_pointerover"));
+    button_mining.on('pointerout', () => button_mining.setTexture("button_mining_enable"));
+    button_mining.disableInteractive();
+
+    button_farming = this.add.sprite(40,220, "button_farming_unable");
+    button_farming.scaleX = button_farming.scaleX * 0.1;
+    button_farming.scaleY = button_farming.scaleY * 0.1;
+    button_farming.setInteractive({useHandCursor: true});
+    button_farming.on('pointerdown', () => contract_start_farming(summoner) );
+    button_farming.on('pointerover', () => button_farming.setTexture("button_farming_pointerover"));
+    button_farming.on('pointerout', () => button_farming.setTexture("button_farming_enable"));
+    button_farming.disableInteractive();
+
 
     //summoner
     murasakisan = new Murasakisan(this, 300 + Math.random()*200, 400 + Math.random()*100);
@@ -1330,8 +1402,68 @@ function update() {
         previous_local_level = local_level;
     }
 
+    //flag management & button activation
+    if (turn % 151 == 0) {
+
+        if (
+            previous_local_mining_status != local_mining_status ||
+            previous_local_farming_status != local_farming_status ||
+            previous_local_crafting_status != local_crafting_status
+            ) {
+
+            //grooming
+            if (local_farming_status == 1 || local_crafting_status == 1 || local_mining_status == 1) {
+                button_grooming.setTexture("button_grooming_unable");
+                button_grooming.disableInteractive();
+            }else {
+                button_grooming.setTexture("button_grooming_enable");
+                button_grooming.on('pointerover', () => button_grooming.setTexture("button_grooming_pointerover"));
+                button_grooming.on('pointerout', () => button_grooming.setTexture("button_grooming_enable"));
+                button_grooming.setInteractive();
+            }
+
+            //farming
+            if (local_farming_status == 1 || local_crafting_status == 1 || local_level <= 1) {
+                button_mining.setTexture("button_mining_unable");
+                button_mining.disableInteractive();
+            }else if (local_mining_status == 1) {
+                button_mining.setTexture("button_mining_working");
+                button_mining.on('pointerover', () => button_mining.setTexture("button_mining_working"));
+                button_mining.on('pointerout', () => button_mining.setTexture("button_mining_working"));
+                button_mining.setInteractive();
+            }else {
+                button_mining.setTexture("button_mining_enable");
+                button_mining.on('pointerover', () => button_mining.setTexture("button_mining_pointerover"));
+                button_mining.on('pointerout', () => button_mining.setTexture("button_mining_enable"));
+                button_mining.setInteractive();
+            }
+
+            //mining
+            if (local_mining_status == 1 || local_crafting_status == 1 || local_level <= 1) {
+                button_farming.setTexture("button_farming_unable");
+                button_farming.disableInteractive();
+            }else if (local_farming_status == 1) {
+                button_farming.setTexture("button_farming_working");
+                button_farming.on('pointerover', () => button_farming.setTexture("button_farming_working"));
+                button_farming.on('pointerout', () => button_farming.setTexture("button_farming_working"));
+                button_farming.setInteractive();
+            }else {
+                button_farming.setTexture("button_farming_enable");
+                button_farming.on('pointerover', () => button_farming.setTexture("button_farming_pointerover"));
+                button_farming.on('pointerout', () => button_farming.setTexture("button_farming_enable"));
+                button_farming.setInteractive();
+            }
+        }
+
+        previous_local_mining_status = local_mining_status;
+        previous_local_farming_status = local_farming_status;
+        previous_local_crafting_status = local_crafting_status;
+
+
+    }
+
     //update dynamic status from contract to local
-    if (turn == 1 || turn % 201 == 0) {
+    if (turn % 201 == 0) {
         //update dynamic_status
         //summoner = document.getElementById("summoner").value;
         contract_update_status(summoner);
