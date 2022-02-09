@@ -23,11 +23,11 @@
 
 <!---
 
-
 picture
     背景
 ok! クリックアイコン（grooming, mining, farming, crafting）
     クリックアイコン（crafting）
+    クリックアイコン（level-up）
 ok! しゅっきん！（お仕事へ移動中）
     ごきげん！（お腹いっぱい＆ハッピーなときなど）
     おなかへった・・・
@@ -45,13 +45,7 @@ ok! しゅっきん！（お仕事へ移動中）
     クラフティングアイテム案（INT系）
         携帯電話
 
-
-
 ToDo
-
-    stop workingの整備
-        stop workingボタン
-        ボタン周辺に進捗情報を表示
 
     petのUI実装
      ok pet所持の有無を監視
@@ -69,6 +63,10 @@ ToDo
         craftのstart/stopボタン
         成功/失敗の表現
 
+    ステータス表示の実装
+        数値＋視覚情報
+        STR, DEX等のメーターをどうするか
+
     summoner所持item
         所持itemの検索
         所持itemのスプライト表示
@@ -76,6 +74,10 @@ ToDo
     資源のバランスと差別化
         coinとmaterialの差別化
 
+    色を変える
+        phaser3での色彩変化
+        もしくは手動での色彩変化済み画像の用意
+        あるいは、ユニークな色のアクセサリー
 
 Idea
     main idea
@@ -113,10 +115,6 @@ Idea
                 すべて同じ効果だが, 効果を重複するために複数並べるには高いものも買わないといけない
 
 --->
-
-
-
-
 
 
 
@@ -365,7 +363,11 @@ async function contract_start_crafting(summoner) {
     let contract = await get_contract(web3);
     let wallet = await get_wallet(web3);
     let item_type = 49;
-    contract.methods.start_crafting(summoner, item_type).send({from:wallet});
+    if (local_crafting_status == 0) {
+        contract.methods.start_crafting(summoner, item_type).send({from:wallet});
+    } else{
+        contract.methods.stop_crafting(summoner).send({from:wallet});
+    }
 }
 async function contract_stop_crafting(summoner) {
     let web3 = await connect();
@@ -969,7 +971,6 @@ function preload() {
     this.load.spritesheet("murasaki_click", "png/murasaki_click.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("button_feeding", "png/button_feeding.png", {frameWidth: 500, frameHeight: 500});
     this.load.image("button_feeding_pointerover", "png/button_feeding_pointerover.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("button_grooming", "png/button_grooming.png", {frameWidth: 500, frameHeight: 500});
     this.load.image("food_sweet_potato", "png/food_sweet_potato.png", {frameWidth: 500, frameHeight: 500});
     this.load.image("item_bear", "png/item_bear.png", {frameWidth: 720, frameHeight: 622});
     this.load.spritesheet("pet_normal", "png/pet_normal.png", {frameWidth: 500, frameHeight: 500});
@@ -977,10 +978,17 @@ function preload() {
     this.load.image("button_mining_unable", "png/button_mining_unable.png", {frameWidth: 500, frameHeight: 500});
     this.load.image("button_mining_pointerover", "png/button_mining_pointerover.png", {frameWidth: 500, frameHeight: 500});
     this.load.image("button_mining_working", "png/button_mining_working.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_mining_pointerover_stop", "png/button_mining_pointerover_stop.png", {frameWidth: 500, frameHeight: 500});
     this.load.image("button_farming_enable", "png/button_farming_enable.png", {frameWidth: 500, frameHeight: 500});
     this.load.image("button_farming_unable", "png/button_farming_unable.png", {frameWidth: 500, frameHeight: 500});
     this.load.image("button_farming_pointerover", "png/button_farming_pointerover.png", {frameWidth: 500, frameHeight: 500});
     this.load.image("button_farming_working", "png/button_farming_working.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_farming_pointerover_stop", "png/button_farming_pointerover_stop.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_crafting_enable", "png/button_mining_enable.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_crafting_unable", "png/button_mining_unable.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_crafting_pointerover", "png/button_mining_pointerover.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_crafting_working", "png/button_mining_working.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_crafting_pointerover_stop", "png/button_mining_pointerover_stop.png", {frameWidth: 500, frameHeight: 500});
     this.load.image("button_grooming_enable", "png/button_grooming_enable.png", {frameWidth: 500, frameHeight: 500});
     this.load.image("button_grooming_unable", "png/button_grooming_unable.png", {frameWidth: 500, frameHeight: 500});
     this.load.image("button_grooming_pointerover", "png/button_grooming_pointerover.png", {frameWidth: 500, frameHeight: 500});
@@ -1111,25 +1119,16 @@ function create() {
     button_grooming.on('pointerout', () => button_grooming.setTexture("button_grooming"));
     button_grooming.disableInteractive();
 
-    /*
-    button_mining = this.add.sprite(40,380, "button_mining");
-    button_mining.scaleX = button_mining.scaleX * 0.1;
-    button_mining.scaleY = button_mining.scaleY * 0.1;
-    button_mining.setInteractive({useHandCursor: true});
-    button_mining.on('pointerdown', () => contract_start_mining(summoner) );
-    button_farming = this.add.sprite(40,220, "button_farming");
-    button_farming.scaleX = button_farming.scaleX * 0.1;
-    button_farming.scaleY = button_farming.scaleY * 0.1;
-    button_farming.setInteractive({useHandCursor: true});
-    button_farming.on('pointerdown', () => contract_start_farming(summoner) );
-    */
-    button_crafting = this.add.sprite(500,130, "button_feeding");
+    button_crafting = this.add.sprite(500,130, "button_crafting_unable");
     button_crafting.scaleX = button_crafting.scaleX * 0.1;
     button_crafting.scaleY = button_crafting.scaleY * 0.1;
     button_crafting.setInteractive({useHandCursor: true});
     button_crafting.on('pointerdown', () => contract_start_crafting(summoner) );
+    button_crafting.on('pointerover', () => button_crafting.setTexture("button_crafting_pointerover"));
+    button_crafting.on('pointerout', () => button_crafting.setTexture("button_crafting_enable"));
+    button_crafting.disableInteractive();
 
-    button_mining = this.add.sprite(40,370, "button_mining_unable");
+    button_mining = this.add.sprite(40,360, "button_mining_unable");
     button_mining.scaleX = button_mining.scaleX * 0.1;
     button_mining.scaleY = button_mining.scaleY * 0.1;
     button_mining.setInteractive({useHandCursor: true});
@@ -1155,10 +1154,10 @@ function create() {
 
     //button_text
     new Button(30, 10, 'Level Up', this, () => contract_level_up(summoner));
-    new Button(30, 40, 'Stop Mining', this, () => contract_stop_mining(summoner));
-    new Button(30, 70, 'Stop Farming', this, () => contract_stop_farming(summoner));
-    new Button(30, 100, 'Stop Crafting', this, () => contract_stop_crafting(summoner));
-    new Button(30, 130, 'Test', this, () => contract_get_items(summoner));
+    //new Button(30, 40, 'Stop Mining', this, () => contract_stop_mining(summoner));
+    //new Button(30, 70, 'Stop Farming', this, () => contract_stop_farming(summoner));
+    //new Button(30, 100, 'Stop Crafting', this, () => contract_stop_crafting(summoner));
+    //new Button(30, 130, 'Test', this, () => contract_get_items(summoner));
 
     //new Button(30, 40, 'Feeding', this, () => contract_feeding(summoner));
     //new Button(30, 70, 'Grooming', this, () => contract_grooming(summoner));
@@ -1226,8 +1225,8 @@ function create() {
         600, 230, "Material: " + local_material, font_arg);
 
     //progression
-    text_working_mode = this.add.text(600, 250, "***", font_arg);
-    text_working_calc = this.add.text(600, 260, "***", font_arg);
+    //text_working_mode = this.add.text(600, 250, "***", font_arg);
+    text_working_calc = this.add.text(600, 260, "***", {font: "14px Arial", fill: "#000"});
 
     //pet
     text_pet = this.add.text(600, 280, "***", font_arg);
@@ -1363,17 +1362,24 @@ function update() {
 
         //update progression status
         if (mode == "mining") {
-            text_working_mode.setText("+coin");
-            text_working_calc.setText(local_coin_calc);
+            //text_working_mode.setText("+coin");
+            //text_working_calc.setText(local_coin_calc);
+            text_working_calc.setText("+ " + local_coin_calc + " coin");
         }else if (mode == "farming") {
-            text_working_mode.setText("+material");
-            text_working_calc.setText(local_material_calc);
+            //text_working_mode.setText("+material");
+            //text_working_calc.setText(local_material_calc);
+            text_working_calc.setText("+ " + local_material_calc + " material");
         }else if (mode == "crafting") {
-            text_working_mode.setText("complete crafting");
-            text_working_calc.setText(local_crafting_calc + " sec");
+            //text_working_mode.setText("complete crafting");
+            //text_working_calc.setText(local_crafting_calc + " sec");
+            if (local_crafting_calc > 0) {
+                text_working_calc.setText(local_crafting_calc + " sec left");
+            } else{
+                text_working_calc.setText("Completed!");
+            }
         }else {
-            text_working_mode.setText("*****");
-            text_working_calc.setText("*****");
+            //text_working_mode.setText("");
+            text_working_calc.setText("");
         }
 
         //pet
@@ -1422,15 +1428,17 @@ function update() {
                 button_grooming.setInteractive();
             }
 
-            //farming
+            //mining
             if (local_farming_status == 1 || local_crafting_status == 1 || local_level <= 1) {
                 button_mining.setTexture("button_mining_unable");
                 button_mining.disableInteractive();
             }else if (local_mining_status == 1) {
                 button_mining.setTexture("button_mining_working");
-                button_mining.on('pointerover', () => button_mining.setTexture("button_mining_working"));
+                button_mining.on('pointerover', () => button_mining.setTexture("button_mining_pointerover_stop"));
                 button_mining.on('pointerout', () => button_mining.setTexture("button_mining_working"));
                 button_mining.setInteractive();
+                text_working_calc.x = 70;
+                text_working_calc.y = 340;
             }else {
                 button_mining.setTexture("button_mining_enable");
                 button_mining.on('pointerover', () => button_mining.setTexture("button_mining_pointerover"));
@@ -1438,27 +1446,48 @@ function update() {
                 button_mining.setInteractive();
             }
 
-            //mining
+            //farming
             if (local_mining_status == 1 || local_crafting_status == 1 || local_level <= 1) {
                 button_farming.setTexture("button_farming_unable");
                 button_farming.disableInteractive();
             }else if (local_farming_status == 1) {
                 button_farming.setTexture("button_farming_working");
-                button_farming.on('pointerover', () => button_farming.setTexture("button_farming_working"));
+                button_farming.on('pointerover', () => button_farming.setTexture("button_farming_pointerover_stop"));
                 button_farming.on('pointerout', () => button_farming.setTexture("button_farming_working"));
                 button_farming.setInteractive();
+                text_working_calc.x = 70;
+                text_working_calc.y = 210;
             }else {
                 button_farming.setTexture("button_farming_enable");
                 button_farming.on('pointerover', () => button_farming.setTexture("button_farming_pointerover"));
                 button_farming.on('pointerout', () => button_farming.setTexture("button_farming_enable"));
                 button_farming.setInteractive();
             }
+
+            //crafting
+            if (local_mining_status == 1 || local_farming_status == 1 || local_level <= 2) {
+                button_crafting.setTexture("button_crafting_unable");
+                button_crafting.disableInteractive();
+            }else if (local_crafting_status == 1) {
+                button_crafting.setTexture("button_crafting_working");
+                button_crafting.on('pointerover', () => button_crafting.setTexture("button_crafting_pointerover_stop"));
+                button_crafting.on('pointerout', () => button_crafting.setTexture("button_crafting_working"));
+                button_crafting.setInteractive();
+                text_working_calc.x = 470;
+                text_working_calc.y = 80;
+            }else {
+                button_crafting.setTexture("button_crafting_enable");
+                button_crafting.on('pointerover', () => button_crafting.setTexture("button_crafting_pointerover"));
+                button_crafting.on('pointerout', () => button_crafting.setTexture("button_crafting_enable"));
+                button_crafting.setInteractive();
+            }
+
+
         }
 
         previous_local_mining_status = local_mining_status;
         previous_local_farming_status = local_farming_status;
         previous_local_crafting_status = local_crafting_status;
-
 
     }
 
@@ -1854,6 +1883,11 @@ Donate: 0x2F7448B62134e52C2f46454d0089Ae21B5248805
     コントラ：レベルアップの実装
     アイデア：coinのユースケースを考える
     アイデア：materialのバランスを考える
+
+ok  stop workingの整備
+        stop workingボタン
+        ボタン周辺に進捗情報を表示
+
 
 
 --->
