@@ -47,6 +47,11 @@ ok! しゅっきん！（お仕事へ移動中）
 
 ToDo
 
+    craftingのUI実装
+        item_idの選択方法
+        craftのstart/stopボタン
+        成功/失敗の表現
+
     petのUI実装
      ok pet所持の有無を監視
         petの絵の用意
@@ -58,14 +63,16 @@ ToDo
             moving_working
         petへのstart mining/farmingとstopの実装
 
-    craftingのUI実装
-        item_idの選択方法
-        craftのstart/stopボタン
-        成功/失敗の表現
+    BGMと効果音の追加
+        BGMのON/OFFボタンの実装
+        効果音の実装
 
     ステータス表示の実装
         数値＋視覚情報
         STR, DEX等のメーターをどうするか
+            レーダーチャート？
+                三角形のレーダーチャート + Luck表記
+        coin, materialの表記をどうするか
 
     summoner所持item
         所持itemの検索
@@ -944,6 +951,7 @@ let config = {
     render: {
         pixelArt: false
     },
+    //resolution: 5,
 };
 let game = new Phaser.Game(config);
 
@@ -952,7 +960,11 @@ let game = new Phaser.Game(config);
 // preload
 //--------------------------------------------------------------------------------------------------------
 function preload() {
+
+    //back
     this.load.image("back", "png/back.jpg");
+
+    //murasakisan
     this.load.spritesheet("murasaki_right", "png/murasaki_right.png", {frameWidth: 370, frameHeight: 320});
     this.load.spritesheet("murasaki_left", "png/murasaki_left.png", {frameWidth: 370, frameHeight: 320});
     this.load.spritesheet("murasaki_sleeping", "png/murasaki_sleeping.png", {frameWidth: 370, frameHeight: 320});
@@ -969,6 +981,8 @@ function preload() {
     this.load.spritesheet("murasaki_working_left", "png/murasaki_working_left.png", {frameWidth: 370, frameHeight: 320});
     this.load.spritesheet("murasaki_working_right", "png/murasaki_working_right.png", {frameWidth: 370, frameHeight: 320});
     this.load.spritesheet("murasaki_click", "png/murasaki_click.png", {frameWidth: 370, frameHeight: 320});
+
+    //button
     this.load.image("button_feeding", "png/button_feeding.png", {frameWidth: 500, frameHeight: 500});
     this.load.image("button_feeding_pointerover", "png/button_feeding_pointerover.png", {frameWidth: 500, frameHeight: 500});
     this.load.image("food_sweet_potato", "png/food_sweet_potato.png", {frameWidth: 500, frameHeight: 500});
@@ -992,6 +1006,11 @@ function preload() {
     this.load.image("button_grooming_enable", "png/button_grooming_enable.png", {frameWidth: 500, frameHeight: 500});
     this.load.image("button_grooming_unable", "png/button_grooming_unable.png", {frameWidth: 500, frameHeight: 500});
     this.load.image("button_grooming_pointerover", "png/button_grooming_pointerover.png", {frameWidth: 500, frameHeight: 500});
+
+    //sound
+    this.load.audio("bgm1", "mp3/Morning_2.mp3");
+    this.load.audio("bgm2", "mp3/picopico2.mp3");
+
 }
 
 
@@ -1164,7 +1183,11 @@ function create() {
     //new Button(30, 100, 'Start Mining', this, () => contract_start_mining(summoner));
     //new Button(30, 160, 'Start Farming', this, () => contract_start_farming(summoner));
     //new Button(30, 250, 'Summon', this, () => contract_summon("1"));
-    //new Button(30, 280, 'Test', this, () => update_summoner_list());
+    bgm1 = this.sound.add("bgm1", {volume:1});
+    bgm1.loop = true;
+    bgm2 = this.sound.add("bgm2");
+    bgm2.loop = true;
+    new Button(30, 40, 'BGM♪', this, () => bgm1.play());
 
     //status window color fill
     let status_back = this.add.graphics();
@@ -1245,7 +1268,7 @@ function update() {
 
     //increment turn
     turn += 1;
-    //text_turn.setText("turn = " + turn);
+    text_turn.setText("turn = " + turn);
 
     //update character
     murasakisan.update();
@@ -1481,7 +1504,6 @@ function update() {
                 button_crafting.on('pointerout', () => button_crafting.setTexture("button_crafting_enable"));
                 button_crafting.setInteractive();
             }
-
 
         }
 
