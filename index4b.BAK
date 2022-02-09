@@ -123,8 +123,6 @@ Idea
 
 --->
 
-
-
 <script type="text/javascript">
 
 
@@ -1183,7 +1181,7 @@ function create() {
     //new Button(30, 100, 'Start Mining', this, () => contract_start_mining(summoner));
     //new Button(30, 160, 'Start Farming', this, () => contract_start_farming(summoner));
     //new Button(30, 250, 'Summon', this, () => contract_summon("1"));
-    bgm1 = this.sound.add("bgm1", {volume:1});
+    bgm1 = this.sound.add("bgm1", {volume:0.5});
     bgm1.loop = true;
     bgm2 = this.sound.add("bgm2");
     bgm2.loop = true;
@@ -1253,6 +1251,47 @@ function create() {
 
     //pet
     text_pet = this.add.text(600, 280, "***", font_arg);
+
+    //rader chart
+    let x0 = 730;
+    let y0 = 70;
+    let r = 50;
+    //circle = this.add.graphics();
+    //circle.fillStyle(0xc0c0c0, 1).fillCircle(x0, y0, r);
+    triangle_base1 = this.add.graphics();
+    let x1 = 0
+    let y1 = r;
+    let x2 = (2 * r) / (5**0.5);
+    let y2 = -1 * r / (5**0.5);
+    let x3 = -2 * r / (5**0.5);
+    let y3 = -1 * r / (5**0.5);
+    triangle_base1.fillStyle(0x87cefa, 1).fillTriangle(x0+x1, y0-y1, x0+x2, y0-y2, x0+x3, y0-y3);
+
+    triangle_base2 = this.add.graphics();
+    x1 = 0
+    y1 = r/2;
+    x2 = (2 * r/2) / (5**0.5);
+    y2 = -1 * r/2 / (5**0.5);
+    x3 = -2 * r/2 / (5**0.5);
+    y3 = -1 * r/2 / (5**0.5);
+    triangle_base1.fillStyle(0x695ed, 1).fillTriangle(x0+x1, y0-y1, x0+x2, y0-y2, x0+x3, y0-y3);
+
+    triangle = this.add.graphics();
+    let str = 2000;
+    let dex = 886;
+    let int = 715;
+    let A = str / 3000 * r;
+    let B = dex / 3000 * r;
+    let C = int / 3000 * r;
+    x1 = 0
+    y1 = A;
+    x2 = (2 * B) / (5**0.5);
+    y2 = -1 * B / (5**0.5);
+    x3 = -2 * C / (5**0.5);
+    y3 = -1 * C / (5**0.5);
+    triangle.fillStyle(0xffff00, 1).fillTriangle( x0+x1, y0-y1, x0+x2, y0-y2, x0+x3, y0-y3);
+    //triangle.fillStyle(0x800000, 1).fillTriangle(50,10,10,100,90,100);
+    //this.add.line()
 
 }
 
