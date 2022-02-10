@@ -1,0 +1,504 @@
+
+    ok コントラクト内にステータスを保持する
+    ok コントラクト内のステータスを読み出す
+    ok ステータスを保有したNFTを作成する
+    ok NFTのmint方法を確立する
+    ok 場所への移動を実装する, mining, farming, feedingに組み込む, コードの汎用性を上げる
+    ok 絵を大きめにする, 元絵を大きめに読み込み, scaleXYで縮小する
+    ok Lvを実装する。必要expの対応表を作製する。
+    ok 移動を見直す. 距離ランダム, 上下の動きも実装する
+    ok つっつき動作の実装
+    ok fake contractにfeeding(), grooming(), lv_up()を実装する
+    ok ボタンの実装、表示、押したときの動作
+    ok eating実装
+    ok grooming実装
+    ok コントラを見立てた外部ステータス格納区域の実装と、読み込み、書き込みの実装
+    ok キャラのステータスをテキストで描写, コントラから定期的に取得し計算する
+    ok ステータスはキャラクラスに保持させずに、コントラに見立てた外部変数に格納する。
+    ok 1日1回？feeding, last_feeding_timeからの差でexp加算, 24hr以上の差は無効
+    ok satiety, happy, expのバーを実装する
+
+//dummy contract
+//--------------------------------------------------------------------------------------------------------
+class Contract {
+    constructor() {
+        //NFT parameters
+        this.id = "001";
+        this.type = Math.trunc(Math.random() * 5);
+        this.strength = 2 + Math.trunc(Math.random() * 8);
+        this.dexterity = 2 + Math.trunc(Math.random() * 8);
+        this.vitality = 2 + Math.trunc(Math.random() * 8);
+        this.intelligence = 2 + Math.trunc(Math.random() * 8);
+        this.luck = 2 + Math.trunc(Math.random() * 8);
+        this.birth_time = Date.now();
+        this.last_feeding_time = Date.now();
+        this.last_grooming_time = Date.now();
+        this.coin = 100;
+        this.material = 0;
+        this.mining_status = 0;
+        this.mining_start_time = 0;
+        this.farming_status = 0;
+        this.farming_start_time = 0;
+        this.crafting_status = 0;
+        this.crafting_start_time = 0;
+        this.exp = 0;
+        this.level = 1;
+        this.next_exp_required = 1000;
+        //contract parameters
+        this.next_summoners = 0;
+    }
+    grooming() {
+        let delta = (Date.now() - this.last_grooming_time) / 1000;
+        this.last_grooming_time = Date.now();
+        this.exp += delta;
+    }
+    feeding() {
+        let delta = (Date.now() - this.last_feeding_time) / 1000;
+        this.last_feeding_time = Date.now();
+        this.exp += delta;
+    }
+    start_crafting(item_id) {
+        if (this.mining_status == 0 && this.farming_status == 0 && this.crafting_status == 0){
+            this.crafting_start_time = Date.now();
+            this.crafting_status = 1;
+        }
+    }
+    stop_crafting(item) {
+        if (this.crafting_status == 1) {
+            let delta = (Date.now() - this.crafting_start_time) / 1000;
+            //nft mint check
+            this.crafting_status = 0;
+        }
+    }
+    start_mining() {
+        if (this.mining_status == 0 && this.farming_status == 0 && this.crafting_status == 0){
+        //if (this.mining_status == 0){
+            this.mining_start_time = Date.now();
+            this.mining_status = 1;
+        }
+    }
+    stop_mining() {
+        if (this.mining_status == 1) {
+            let delta = (Date.now() - this.mining_start_time) / 10000;
+            delta = Math.trunc(delta);
+            this.coin += delta;
+            this.mining_status = 0;
+        }
+    }
+    start_farming() {
+        if (this.mining_status == 0 && this.farming_status == 0 && this.crafting_status == 0){
+            this.farming_start_time = Date.now();
+            this.farming_status = 1;
+        }
+    }
+    stop_farming() {
+        if (this.farming_status == 1) {
+            let delta = (Date.now() - this.farming_start_time) / 100000;
+            delta = Math.trunc(delta);
+            this.material += delta;
+            this.farming_status = 0;
+        }
+    }
+    level_up() {
+        if (this.exp >= this.next_exp_required) {
+            this.exp -= this.next_exp_required;
+            this.level += 1;
+            //status up
+            var tmp = Math.trunc(Math.random() * 5);
+            if (tmp == 0) {
+                this.strength += 1;
+            }else if (tmp == 1) {
+                this.dexterity += 1;
+            }else if (tmp == 2) {
+                this.vitality += 1;
+            }else if (tmp == 3) {
+                this.intelligence += 1;
+            }else {
+                this.luck += 1;
+            }
+            //update next exp
+            if (this.level == 2) {
+                this.next_exp_required = 3000;
+            }else if (this.level == 3) {
+                this.next_exp_required = 6000;
+            }else if (this.level == 4) {
+                this.next_exp_required = 10000;
+            }else if (this.level == 5) {
+                this.next_exp_required = 15000;
+            }else if (this.level == 6) {
+                this.next_exp_required = 21000;
+            }else if (this.level == 7) {
+                this.next_exp_required = 28000;
+            }else if (this.level == 8) {
+                this.next_exp_required = 36000;
+            }else if (this.level == 9) {
+                this.next_exp_required = 45000;
+            }else if (this.level == 10) {
+                this.next_exp_required = 55000;
+            }else if (this.level == 11) {
+                this.next_exp_required = 66000;
+            }else if (this.level == 12) {
+                this.next_exp_required = 78000;
+            }else if (this.level == 13) {
+                this.next_exp_required = 91000;
+            }else if (this.level == 14) {
+                this.next_exp_required = 105000;
+            }else if (this.level == 15) {
+                this.next_exp_required = 120000;
+            }else if (this.level == 16) {
+                this.next_exp_required = 136000;
+            }else if (this.level == 17) {
+                this.next_exp_required = 153000;
+            }else if (this.level == 18) {
+                this.next_exp_required = 171000;
+            }else if (this.level == 19) {
+                this.next_exp_required = 190000;
+            }
+        }
+    }
+}
+
+//call status from contract
+async function test() {
+    let web3 = await connect();
+    let contract = await get_contract(web3);
+    local_strength = await contract.methods.get_strength().call();
+    local_dexterity = await contract.methods.get_dexterity().call();
+    local_vitality = await contract.methods.get_vitality().call();
+    local_intelligence = await contract.methods.get_intelligence().call();
+    local_luck = await contract.methods.get_luck().call();
+    local_birth_time = await contract.methods.get_birth_time().call();
+    local_last_feeding_time = await contract.methods.get_last_feeding_time().call();
+    local_last_grooming_time = await contract.methods.get_last_grooming_time().call();
+    local_coin = await contract.methods.get_coin().call();
+    local_material = await contract.methods.get_material().call();
+    local_mining_status = await contract.methods.get_mining_status().call();
+    local_mining_start_time = await contract.methods.get_mining_start_time().call();
+    local_farming_status = await contract.methods.get_farming_status().call();
+    local_farming_start_time = await contract.methods.get_farming_start_time().call();
+    local_crafting_status = await contract.methods.get_crafting_status().call();
+    local_crafting_start_time = await contract.methods.get_crafting_start_time().call();
+    local_exp = await contract.methods.get_exp().call();
+    local_level = await contract.methods.get_level().call();
+    local_next_exp_required = await contract.methods.get_next_exp_required().call();
+}
+
+//get owned summoners
+async function contract_my_summoners() {
+    let web3 = await connect();
+    let contract = await get_contract(web3);
+    let wallet = await get_wallet(web3);
+    let next_summoner = await contract.methods.next_summoner().call();
+    let res = [];
+    for (let i = 0; i < next_summoner; i++) {
+        let owner = await contract.methods.ownerOf(i).call();
+        if (owner == wallet) {
+            res.push({text:i, value:i});
+        }
+    }
+    console.log(res);
+    return res;
+}
+
+//update summoner select list
+function _create_dropdownlist( form_name, select_name, select_array ){
+	document[form_name][select_name].length = select_array.length;
+	var i;
+	for ( i=0; i<select_array.length; i++){
+		document[form_name][select_name].options[i].text = select_array[i].text;
+		document[form_name][select_name].options[i].value = select_array[i].value;
+	}
+}
+async function button_update_summoners() {
+    opt_array = await contract_my_summoners();
+    _create_dropdownlist("select_summoner","select_summoner", opt_array )
+}
+
+//update summoner
+function button_select_summoner() {
+    summoner = document.getElementById("summoner").value;
+    previous_local_last_feeding_time = Date.now() + 10;
+    previous_local_last_grooming_time = Date.now() + 10;
+    murasakisan.set_mode = "resting";
+}
+
+
+    working()の概念を考える
+        コインを稼ぐ
+        str依存？動作とステータスのイメージが一致するように
+        マイニング？お花摘み？
+    クラフト, luck, str, dexなどのステータス＋クラフト時間で成功率を変える、アイテムごとに難易度が違う
+        難しいものでも、１ヶ月とかクラフトし続ければ作れるかもしれない。
+        連続思考を防ぐため、０％も作る。またファンブルで必ず５％は失敗する
+        クラフト品のユースケースは？
+    資産
+        summoner間での移動は50%が消える
+        exp?, 時間, コイン（sota?, ohana?), 素材(あまり種類を多くしない, 低級、中級、上級、ぐらい）
+        exp
+            お世話で取得
+            Lv upで消費
+        コイン
+            miningで取得
+            Craftingで消費
+        素材
+            farmingで取得
+            Craftingで消費
+    効率・補正
+        Lv, Str/Dex/Intなどのステータス, endを押すまでの経過時間
+        クラフト品による補正
+    時間を資源に
+        フリー時間しかgroomingなどできない
+        working, やcraftingは時間を費やせばそれだけ効率や成功率が増大する
+        しかしworkingさせているとgroomingやfeedingできずにexpがたまらない
+    ステータス
+        Lvアップで増加？ランダム？
+        木の実をクラフトし使用する、確率を小さくするか、高価にする
+        Strength: 筋力
+            Miningの効率up
+        Dexterity: 器用さ
+            Farmingの効率up
+        Intelligence: 知力
+            Craftingの効率up
+        Vitality: 体力
+            不要？
+        Luck: 運
+            ボーナスダイスに加算
+    お世話, expを得る
+        feeding, デイリークエスト, コストなし, 24時間で最大効率
+        grooming, プラスアルファ, 何かしらのコスト必要, 168時間で最大効率
+
+ok  working中のfeeding動作の実装
+ok  leve-up時のfeeding, grooming暴発対策
+ok  Vit不要か
+        restingはexpブースト, Lukをわずかに上昇？
+ok  stopのUI実装
+        mining: 現在の+coin概算値
+        farming: 現在の+material概算値
+        crafting: 現在の残り時間
+
+    time
+        1日86400秒をどの状態に振り分けるか
+            mining, farming, crafting, resting
+        mining: coin得る, str偏向
+        farming: mat得る, dex偏向
+        crafting: itemトライ, int偏向
+        resting: grooming時にexp得る
+
+    feeding, grooming, mining, farming, craftingの関係
+        feeding:
+            24時間でメーター0
+            マイナスにはならない, 0→100のときに+exp
+            どんなモード中でも可能
+        grooming:
+            resting中のみ可能
+            72時間でメーター0
+            マイナスにはならない
+            +exp計算方法    ***TODO***
+                その時点のlast_level_up_timeからのdelta_timeを算出
+                last_total_mining_time, last_total_farming_timeを算出
+                上記3つの数からlast_total_resting_timeを算出
+                
+            その時点のtotal_resting_timeを算出し, last_level_up_timeからのdelta_timeで割り、その係数分+exp
+                つまり, 前回level-upから100%restingなら100%+exp, mining多くしてればexp減る
+    satiety, happy, coin, materialのバランス, 消費タイミング, 補正
+        materialはcrafting時に消費する基本資源, たくさん費やすほど成功率が上がる, 失敗しても減る
+        coinはcraft成功時に支払われる資源, 成功時に減る
+    level, str, dex, int, val, lukの補正方法, 上昇方法
+        farming(dex), mining(str), crafting(int)のtotal timeでレベルアップ時のstatus換算を変える
+        加えて、高コストだが木の実で能動的に上げることもできる
+        valはno feeding/grooming timeが0で最大効率, valが高いと得られる経験値が増える?
+        Level上昇による補正
+            +1ですべての補正+5%
+    items
+        置物？動く？
+        mining, farming, crafting補正アイテム
+            1個で+5%有利になる
+        exp補正アイテム → 制御が難しいので作らない
+            expは献身性によってのみ得られる
+        代わりにmining, farmingしてくれるペット
+            Astar君、Ms. Astarとでも
+            効率は本体の1/4～半分程度？
+            成長はさせない？本体とともに効率が上がる
+        大体, 3日で成功率80%に調整する
+        すべて同じ効果だが、1個目, 2個目とdifficultyを上げる
+            重ね効果を得にくいように。1個目作るのは安いが、2個目は高い、など
+
+    ok satietyとhappyの差別化を考える。
+    ok wallet所有のNFTを選べるUIを作る
+    ok UI：Mintボタン, type指定可能に
+    ok UI：所有summonerの表示と選択
+    ok summon costの設定
+        ok solidityのsummon関数にpayableをつける
+        ok web3jsのvalueに0.1など追記
+        ok solidityのsummonにrequiredでvalue閾値を追記
+        ok solidityにwithdraw関数を追加
+
+    Level-up
+        last_feeding_time, last_grooming_time, expをすべてリセットする
+        last_level_up_timeからnow.timeまでのdelta_timeを取得する
+        delta_timeのうち, total_mining_time, total_farming_time, 残りをtotal_resting_timeとし
+            それぞれのtotal_timeが何％か算出する
+        point per level (1? 2?) をそれぞれのtotal_time割合で分割してパラメータに合算する
+
+
+    ok stopのUI実装
+        mining: 現在の+coin概算値
+        farming: 現在の+material概算値
+        crafting: 現在の残り時間
+
+
+
+Donate: 0x2F7448B62134e52C2f46454d0089Ae21B5248805
+
+    <form name="select_summoner">
+        <input type="button" value="Update Summoner List" onclick="button_update_summoners();"/>
+        <select name="select_summoner" id="summoner">
+            <option value="***">***<option>
+        </select>
+        <input type="button" value="Swith Summoner" onclick="button_select_summoner();"/>
+    </form>
+    <br>
+
+    ok craftingコントラの実装
+    item craftingのUIの実装
+    UI：所有itemのリアルタイム更新と表示
+    コントラ：random
+    コントラ：crafting, summonerが所有するNFT, 所有summonerを紐付けるよう書き換える
+    コントラ：レベルアップの実装
+    アイデア：coinのユースケースを考える
+    アイデア：materialのバランスを考える
+
+ok  stop workingの整備
+        stop workingボタン
+        ボタン周辺に進捗情報を表示
+
+    //scene.add.polygon(100, 100, [0,-r/2,r,0,0,r,-r,0], 0xffff00, 0.9);
+    //scene.add.polygon(200, 200, [100,100,200,200,100,300,50,200], 0xffff00, 0.9);
+    //scene.add.graphics().fillStyle(0xc0c0c0, 1).fillCircle(200, 200, 10, 1);
+
+    /*    
+    //circle.fillStyle(0xc0c0c0, 1).fillCircle(x0, y0, r, 0.5);
+    poly = new Phaser.GameObjects.Polygon(
+        scene,
+        x0,
+        y0,
+        [
+            10,10,
+            10,50,
+            50,10
+        ],
+        0xffff00,
+        1
+    );
+    //test = scene.add.graphics(0,0);
+    //test.fillPoints(poly, true);
+
+    /*
+    //circle = this.add.graphics();
+    //circle.fillStyle(0xc0c0c0, 1).fillCircle(x0, y0, r);
+    triangle_base1 = scene.add.graphics();
+    let x1 = 0
+    let y1 = r;
+    let x2 = (2 * r) / (5**0.5);
+    let y2 = -1 * r / (5**0.5);
+    let x3 = -2 * r / (5**0.5);
+    let y3 = -1 * r / (5**0.5);
+    triangle_base1.fillStyle(0x87cefa, 1).fillTriangle(x0+x1, y0-y1, x0+x2, y0-y2, x0+x3, y0-y3);
+
+    triangle_base2 = scene.add.graphics();
+    x1 = 0
+    y1 = r/2;
+    x2 = (2 * r/2) / (5**0.5);
+    y2 = -1 * r/2 / (5**0.5);
+    x3 = -2 * r/2 / (5**0.5);
+    y3 = -1 * r/2 / (5**0.5);
+    triangle_base1.fillStyle(0x695ed, 1).fillTriangle(x0+x1, y0-y1, x0+x2, y0-y2, x0+x3, y0-y3);
+
+    triangle = scene.add.graphics();
+    let str = 788;
+    let dex = 886;
+    let int = 715;
+    let A = str / 3000 * r;
+    let B = dex / 3000 * r;
+    let C = int / 3000 * r;
+    x1 = 0
+    y1 = A;
+    x2 = (2 * B) / (5**0.5);
+    y2 = -1 * B / (5**0.5);
+    x3 = -2 * C / (5**0.5);
+    y3 = -1 * C / (5**0.5);
+    triangle.fillStyle(0xffff00, 1).fillTriangle( x0+x1, y0-y1, x0+x2, y0-y2, x0+x3, y0-y3);
+    //triangle.fillStyle(0x800000, 1).fillTriangle(50,10,10,100,90,100);
+    //this.add.line()
+    */
+
+        //text_birth_time.setText("birth_time = " + local_birth_time);
+        //text_last_feeding_time.setText("last_feeding_time = " + local_last_feeding_time);
+        //text_last_grooming_time.setText("last_grooming_time = " + local_last_grooming_time);
+        //text_satiety.setText("satiety = " + satiety);
+        //text_happy.setText("happy = " + happy);
+        //text_coin_main.setText("coin:    " + local_coin);
+        //text_material_main.setText("material:" + local_material);
+
+    //new Button(30, 40, 'Stop Mining', this, () => contract_stop_mining(summoner));
+    //new Button(30, 70, 'Stop Farming', this, () => contract_stop_farming(summoner));
+    //new Button(30, 100, 'Stop Crafting', this, () => contract_stop_crafting(summoner));
+    //new Button(30, 130, 'Test', this, () => contract_get_items(summoner));
+    //new Button(30, 40, 'Feeding', this, () => contract_feeding(summoner));
+    //new Button(30, 70, 'Grooming', this, () => contract_grooming(summoner));
+    //new Button(30, 100, 'Start Mining', this, () => contract_start_mining(summoner));
+    //new Button(30, 160, 'Start Farming', this, () => contract_start_farming(summoner));
+    //new Button(30, 250, 'Summon', this, () => contract_summon("1"));
+    //new Button(30, 40, 'BGM♪', this, () => music());
+
+    //text_vitality =     this.add.text(600,  70, " VIT: " + local_vitality, font_arg);
+    //text_version = this.add.text(600, 10, "version = " + version, {font: "10.5px Arial", fill: "#000"});
+    //text_last_feeding_time = this.add.text(
+    //    600, 130, "last_feeding_time = " + local_last_feeding_time, {font: "10.5px Arial", fill: "#000"});
+    //text_last_grooming_time = this.add.text(
+    //    600, 140, "last_grooming_time = " + local_last_grooming_time, {font: "10.5px Arial", fill: "#000"});
+    //text_coin = this.add.text(
+    //    600, 150, "coin = " + local_coin, {font: "10.5px Arial", fill: "#000"});
+    //text_birth_time = this.add.text(
+    //    600, 50, "birth_time = " + local_birth_time, {font: "10.5px Arial", fill: "#000"});
+    //text_satiety = this.add.text(
+    //    600, 230, "satiey = ", {font: "10.5px Arial", fill: "#000"});
+    //text_happy = this.add.text(
+    //    600, 240, "happy = ", {font: "10.5px Arial", fill: "#000"});
+
+
+Idea
+    main idea
+        献身によって成長と変化を実感できる育成型NFT
+        時間が基本資源, summonerをどの状態にどれだけしたかで変化の仕方が違う
+        マメにかつ長期間お世話されたsummonerほど出来ることが増える設計
+        競争ではなく箱庭型、効率化を考えなくても良い雰囲気で。
+        拡大再生産による可能性の拡大, 明日のコインのため今日コインを使う
+        効率的にプレイしておおよそ2年間で最大値に達するインフレ率で。
+            インフレ率を低くして、変化の少ない状態で長く遊べるようにする
+            インフレ率：+100%/y程度を目指す
+            mining特化して, 1年間の献身で+100%, farmingも同様
+        全てのアイテムを買うことはできない。
+    まとめ
+        time
+            1day=86,400secをmining, farming, crafting, restingのどれかに振り分ける
+            mining: +coin, Lv-up時 +STR
+            farming: +material, Lv-up時 +DEX
+            crafting: item try, Lv-up時 +INT
+            resting: grooming時 追加+EXP, 全部ステータス均等に追加
+        Lv-up
+            1レベル上がると全効率が+5%
+            1年間で12-15Lvまで上がる, +60%-75%
+            mining, farmingはLv2から, craftingはLv3から
+            ステータスポイントは+1, 費やした時間に応じて分割して加算する
+            設計と計算を用意しにするため、Level-up時にsatiety, happy, expをすべてリセットする
+        item
+            mining, farming, craftingに対応する3種類
+                1つ所持すると効率+5%
+            本体の半分の効率でmining, farmingするペット
+            ステータスを恒久的に上昇させる木の実（非NFT）
+            完全なオブジェ
+            補正なしで3日で成功率80%程度の難易度
+            難易度による差別化をどうするか
+                すべて同じ効果だが, 効果を重複するために複数並べるには高いものも買わないといけない
+

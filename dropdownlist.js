@@ -10,7 +10,7 @@ var CreateDropDownList = function (scene, x, y, options) {
 
         background: scene.rexUI.add.roundRectangle(0, 0, 2, 2, 0, COLOR_PRIMARY),
 
-        icon: scene.rexUI.add.roundRectangle(0, 0, 10, 10, 5, COLOR_LIGHT),
+        icon: scene.rexUI.add.roundRectangle(0, 0, 6, 6, 5, COLOR_LIGHT),
 
         text: CreateTextObject(scene, '')
             .setFixedSize(maxTextSize.width, maxTextSize.height),
