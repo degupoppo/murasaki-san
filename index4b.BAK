@@ -1227,9 +1227,9 @@ function create() {
     button_farming.disableInteractive();
 
     //bgm
-    bgm1 = this.sound.add("bgm1", {volume:0.5, loop:true});
-    bgm2 = this.sound.add("bgm2", {volume:0.5, loop:true});
-    bgm3 = this.sound.add("bgm3", {volume:0.5, loop:true});
+    bgm1 = this.sound.add("bgm1", {volume:0.3, loop:true});
+    bgm2 = this.sound.add("bgm2", {volume:0.3, loop:true});
+    bgm3 = this.sound.add("bgm3", {volume:0.3, loop:true});
 
     //summoner
     murasakisan = new Murasakisan(this, 300 + Math.random()*200, 400 + Math.random()*100);
