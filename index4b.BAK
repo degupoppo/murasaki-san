@@ -11,6 +11,7 @@
     <script src="murasaki_main.js"></script>
     <script src="murasaki_craft.js"></script>
     <script src="murasaki_pet.js"></script>
+    <script src="dropdownlist.js"></script>
     <style type="text/css">
         body {
             margin: 0;
@@ -37,6 +38,7 @@ ok! しゅっきん！（お仕事へ移動中）
     成功したよー！（クラフト成功時, mining終了時など）
     失敗しちゃった・・・（クラフト失敗時など）
     れべるあっぷ！
+    おんがくかんしょうちゅう～♪
     マイニングアイテム案（STR系）
         良いスコップ
         石像
@@ -44,12 +46,14 @@ ok! しゅっきん！（お仕事へ移動中）
         良いじょうろ
     クラフティングアイテム案（INT系）
         携帯電話
+        ミュージックボックス
 
 ToDo
 
     craftingのUI実装
-        item_idの選択方法
-        craftのstart/stopボタン
+     ok item_idの選択方法
+     ok craftのstart/stopボタン
+        選択アイテムのコスト表示
         成功/失敗の表現
 
     petのUI実装
@@ -66,10 +70,11 @@ ToDo
     BGMと効果音の追加
         BGMのON/OFFボタンの実装
         効果音の実装
+        クラフト可能なミュージックボックスの実装
 
     ステータス表示の実装
         数値＋視覚情報
-        STR, DEX等のメーターをどうするか
+     ok STR, DEX等のメーターをどうするか
             レーダーチャート？
                 三角形のレーダーチャート + Luck表記
         coin, materialの表記をどうするか
@@ -171,10 +176,13 @@ let local_pet_farming_start_time;
 let local_pet_material_calc;
 
 let flag_pet = 0;       //0:not crafted, 1:crafted
+let flag_music = 0;
 
 let previous_local_mining_status;
 let previous_local_farming_status;
 let previous_local_crafting_status;
+
+let bgm;
 
 /*
 //flag management
@@ -367,8 +375,18 @@ async function contract_start_crafting(summoner) {
     let web3 = await connect();
     let contract = await get_contract(web3);
     let wallet = await get_wallet(web3);
-    let item_type = 49;
+    //get item type from dropdown list
+    let item_text = craft_item_list.text;
+    let item_type = 0;
+    if (item_text == "Ms. Astar") {
+        item_type = 49;
+    }else if (item_text == "Music box") {
+        item_type = 50;
+    }else {
+        item_type = 1;
+    }
     if (local_crafting_status == 0) {
+        console.log(item_type);
         contract.methods.start_crafting(summoner, item_type).send({from:wallet});
     } else{
         contract.methods.stop_crafting(summoner).send({from:wallet});
@@ -927,6 +945,61 @@ class Button {
     }
 }
 
+//music
+function music() {
+    if (flag_music == 0) {
+        let array = [bgm1, bgm2];
+        bgm = array[Math.floor(Math.random() * array.length)];
+        bgm.play();
+        flag_music = 1;
+    }else {
+        bgm.stop();
+        flag_music = 0;
+    }
+}
+
+
+//rader chart
+function radarchart(scene, str, dex, int, luk) {
+
+    let x0 = 730;
+    let y0 = 70;
+    let r = 50;
+
+    let base = 20;
+
+    let x1 = 0;
+    let y1 = -r * str/base;
+    let x2 = r * dex/base;
+    let y2 = 0;
+    let x3 = 0;
+    let y3 = r * luk/base;
+    let x4 = -r * int/base;
+    let y4 = 0;
+    
+    try {
+        radar1.setVisible(false);
+        radar2.setVisible(false);
+        radar3.setVisible(false);
+        radar4.setVisible(false);
+        radar5.setVisible(false);
+        radar6.setVisible(false);
+        radar7.setVisible(false);
+        radar8.setVisible(false);
+    } catch(error) {
+    }
+
+    //scene.add.graphics().fillStyle(0xc0c0c0, 1).fillCircle(x0, y0, r, 0.5);
+    radar1 = scene.add.polygon(x0+r, y0+r, [0,-r,r,0,0,r,-r,0], 0xc0c0c0, 0.4);
+    radar2 = scene.add.polygon(x0+r*0.75, y0+r*0.75, [0,-r*0.75,r*0.75,0,0,r*0.75,-r*0.75,0], 0xc0c0c0, 0.6);
+    radar3 = scene.add.polygon(x0+r/2, y0+r/2, [0,-r/2,r/2,0,0,r/2,-r/2,0], 0xc0c0c0, 0.8);
+    radar4 = scene.add.polygon(x0+(-x4+x2)/2, y0+(-y1+y3)/2, [x1,y1,x2,y2,x3,y3,x4,y4], 0xffff00, 1);
+    radar5 = scene.add.text(x0-10, y0-r-8, "STR", {font: "10.5px Arial", fill: "#000000"});
+    radar6 = scene.add.text(x0+r, y0-6, "DEX", {font: "10.5px Arial", fill: "#000000"});
+    radar7 = scene.add.text(x0-10, y0+r, "LUK", {font: "10.5px Arial", fill: "#000000"});
+    radar8 = scene.add.text(x0-r-15, y0-6, "INT", {font: "10.5px Arial", fill: "#000000"});
+
+}
 
 
 // main functions
@@ -1008,6 +1081,15 @@ function preload() {
     //sound
     this.load.audio("bgm1", "mp3/Morning_2.mp3");
     this.load.audio("bgm2", "mp3/picopico2.mp3");
+
+    //dropdownlist
+    //https://rexrainbow.github.io/phaser3-rex-notes/docs/site/ui-menu/
+    this.load.scenePlugin({
+        key: 'rexuiplugin',
+        url: 'rexuiplugin.min.js',
+        sceneKey: 'rexUI'
+    });
+
 
 }
 
@@ -1163,6 +1245,9 @@ function create() {
     button_farming.on('pointerout', () => button_farming.setTexture("button_farming_enable"));
     button_farming.disableInteractive();
 
+    //bgm
+    bgm1 = this.sound.add("bgm1", {volume:0.5, loop:true});
+    bgm2 = this.sound.add("bgm2", {volume:0.5, loop:true});
 
     //summoner
     murasakisan = new Murasakisan(this, 300 + Math.random()*200, 400 + Math.random()*100);
@@ -1181,11 +1266,7 @@ function create() {
     //new Button(30, 100, 'Start Mining', this, () => contract_start_mining(summoner));
     //new Button(30, 160, 'Start Farming', this, () => contract_start_farming(summoner));
     //new Button(30, 250, 'Summon', this, () => contract_summon("1"));
-    bgm1 = this.sound.add("bgm1", {volume:0.5});
-    bgm1.loop = true;
-    bgm2 = this.sound.add("bgm2");
-    bgm2.loop = true;
-    new Button(30, 40, 'BGM♪', this, () => bgm1.play());
+    new Button(30, 40, 'BGM♪', this, () => music());
 
     //status window color fill
     let status_back = this.add.graphics();
@@ -1252,47 +1333,10 @@ function create() {
     //pet
     text_pet = this.add.text(600, 280, "***", font_arg);
 
-    //rader chart
-    let x0 = 730;
-    let y0 = 70;
-    let r = 50;
-    //circle = this.add.graphics();
-    //circle.fillStyle(0xc0c0c0, 1).fillCircle(x0, y0, r);
-    triangle_base1 = this.add.graphics();
-    let x1 = 0
-    let y1 = r;
-    let x2 = (2 * r) / (5**0.5);
-    let y2 = -1 * r / (5**0.5);
-    let x3 = -2 * r / (5**0.5);
-    let y3 = -1 * r / (5**0.5);
-    triangle_base1.fillStyle(0x87cefa, 1).fillTriangle(x0+x1, y0-y1, x0+x2, y0-y2, x0+x3, y0-y3);
-
-    triangle_base2 = this.add.graphics();
-    x1 = 0
-    y1 = r/2;
-    x2 = (2 * r/2) / (5**0.5);
-    y2 = -1 * r/2 / (5**0.5);
-    x3 = -2 * r/2 / (5**0.5);
-    y3 = -1 * r/2 / (5**0.5);
-    triangle_base1.fillStyle(0x695ed, 1).fillTriangle(x0+x1, y0-y1, x0+x2, y0-y2, x0+x3, y0-y3);
-
-    triangle = this.add.graphics();
-    let str = 2000;
-    let dex = 886;
-    let int = 715;
-    let A = str / 3000 * r;
-    let B = dex / 3000 * r;
-    let C = int / 3000 * r;
-    x1 = 0
-    y1 = A;
-    x2 = (2 * B) / (5**0.5);
-    y2 = -1 * B / (5**0.5);
-    x3 = -2 * C / (5**0.5);
-    y3 = -1 * C / (5**0.5);
-    triangle.fillStyle(0xffff00, 1).fillTriangle( x0+x1, y0-y1, x0+x2, y0-y2, x0+x3, y0-y3);
-    //triangle.fillStyle(0x800000, 1).fillTriangle(50,10,10,100,90,100);
-    //this.add.line()
-
+    //craft item dropdown list
+    let options = ["Ms. Astar", "Music box", "item3", "item7"];
+    craft_item_list = CreateDropDownList(this, 500, 65, options)
+        .layout()
 }
 
 
@@ -1317,6 +1361,8 @@ function update() {
 
     //update calculation status
     if (turn % 100 == 0) {
+
+        //console.log(dropDownList.text, dropDownList.value);
 
         //level up
         if (local_level > previous_local_level) {
@@ -1471,7 +1517,7 @@ function update() {
     }
 
     //flag management & button activation
-    if (turn % 151 == 0) {
+    if (turn % 250 == 0) {
 
         if (
             previous_local_mining_status != local_mining_status ||
@@ -1543,6 +1589,9 @@ function update() {
                 button_crafting.on('pointerout', () => button_crafting.setTexture("button_crafting_enable"));
                 button_crafting.setInteractive();
             }
+
+            //update raderchart
+            radarchart(this, local_strength, local_dexterity, local_intelligence, local_luck);
 
         }
 
@@ -1949,6 +1998,65 @@ ok  stop workingの整備
         stop workingボタン
         ボタン周辺に進捗情報を表示
 
+    //scene.add.polygon(100, 100, [0,-r/2,r,0,0,r,-r,0], 0xffff00, 0.9);
+    //scene.add.polygon(200, 200, [100,100,200,200,100,300,50,200], 0xffff00, 0.9);
+    //scene.add.graphics().fillStyle(0xc0c0c0, 1).fillCircle(200, 200, 10, 1);
+
+    /*    
+    //circle.fillStyle(0xc0c0c0, 1).fillCircle(x0, y0, r, 0.5);
+    poly = new Phaser.GameObjects.Polygon(
+        scene,
+        x0,
+        y0,
+        [
+            10,10,
+            10,50,
+            50,10
+        ],
+        0xffff00,
+        1
+    );
+    //test = scene.add.graphics(0,0);
+    //test.fillPoints(poly, true);
+
+    /*
+    //circle = this.add.graphics();
+    //circle.fillStyle(0xc0c0c0, 1).fillCircle(x0, y0, r);
+    triangle_base1 = scene.add.graphics();
+    let x1 = 0
+    let y1 = r;
+    let x2 = (2 * r) / (5**0.5);
+    let y2 = -1 * r / (5**0.5);
+    let x3 = -2 * r / (5**0.5);
+    let y3 = -1 * r / (5**0.5);
+    triangle_base1.fillStyle(0x87cefa, 1).fillTriangle(x0+x1, y0-y1, x0+x2, y0-y2, x0+x3, y0-y3);
+
+    triangle_base2 = scene.add.graphics();
+    x1 = 0
+    y1 = r/2;
+    x2 = (2 * r/2) / (5**0.5);
+    y2 = -1 * r/2 / (5**0.5);
+    x3 = -2 * r/2 / (5**0.5);
+    y3 = -1 * r/2 / (5**0.5);
+    triangle_base1.fillStyle(0x695ed, 1).fillTriangle(x0+x1, y0-y1, x0+x2, y0-y2, x0+x3, y0-y3);
+
+    triangle = scene.add.graphics();
+    let str = 788;
+    let dex = 886;
+    let int = 715;
+    let A = str / 3000 * r;
+    let B = dex / 3000 * r;
+    let C = int / 3000 * r;
+    x1 = 0
+    y1 = A;
+    x2 = (2 * B) / (5**0.5);
+    y2 = -1 * B / (5**0.5);
+    x3 = -2 * C / (5**0.5);
+    y3 = -1 * C / (5**0.5);
+    triangle.fillStyle(0xffff00, 1).fillTriangle( x0+x1, y0-y1, x0+x2, y0-y2, x0+x3, y0-y3);
+    //triangle.fillStyle(0x800000, 1).fillTriangle(50,10,10,100,90,100);
+    //this.add.line()
+    */
 
 
 --->
