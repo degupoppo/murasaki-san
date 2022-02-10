@@ -153,7 +153,7 @@ let previous_local_mining_status;
 let previous_local_farming_status;
 let previous_local_crafting_status;
 
-let bgm;
+let bgm = 0;
 
 
 // html
@@ -922,8 +922,15 @@ class Button {
 //music
 function music() {
     if (flag_music == 0) {
-        let array = [bgm1, bgm2, bgm3];
-        bgm = array[Math.floor(Math.random() * array.length)];
+        if (bgm == bgm1) {
+            bgm = bgm2;
+        }else if (bgm == bgm2) {
+            bgm = bgm3;
+        }else {
+            bgm = bgm1;
+        }
+        //let array = [bgm1, bgm2, bgm3];
+        //bgm = array[Math.floor(Math.random() * array.length)];
         bgm.play();
         flag_music = 1;
     }else {
