@@ -951,7 +951,7 @@ class Button {
 //music
 function music() {
     if (flag_music == 0) {
-        let array = [bgm1, bgm2];
+        let array = [bgm1, bgm2, bgm3, bgm4];
         bgm = array[Math.floor(Math.random() * array.length)];
         bgm.play();
         flag_music = 1;
@@ -1083,7 +1083,9 @@ function preload() {
 
     //sound
     this.load.audio("bgm1", "mp3/Morning_2.mp3");
-    this.load.audio("bgm2", "mp3/picopico2.mp3");
+    this.load.audio("bgm2", "mp3/Roll_Roll_Roll.mp3");
+    this.load.audio("bgm3", "mp3/amaoto.mp3");
+    this.load.audio("bgm4", "mp3/boukenki.mp3");
 
     //dropdownlist
     //https://rexrainbow.github.io/phaser3-rex-notes/docs/site/ui-menu/
@@ -1254,6 +1256,8 @@ function create() {
     //bgm
     bgm1 = this.sound.add("bgm1", {volume:0.5, loop:true});
     bgm2 = this.sound.add("bgm2", {volume:0.5, loop:true});
+    bgm3 = this.sound.add("bgm3", {volume:0.5, loop:true});
+    bgm4 = this.sound.add("bgm4", {volume:0.5, loop:true});
 
     //summoner
     murasakisan = new Murasakisan(this, 300 + Math.random()*200, 400 + Math.random()*100);
