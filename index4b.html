@@ -68,9 +68,9 @@ ToDo
         petへのstart mining/farmingとstopの実装
 
     BGMと効果音の追加
-        BGMのON/OFFボタンの実装
+     ok BGMのON/OFFボタンの実装
         効果音の実装
-        クラフト可能なミュージックボックスの実装
+     ok クラフト可能なミュージックボックスの実装
 
     ステータス表示の実装
         数値＋視覚情報
@@ -174,9 +174,11 @@ let local_pet_coin_calc;
 let local_pet_farming_status;
 let local_pet_farming_start_time;
 let local_pet_material_calc;
+let local_musicbox;
 
 let flag_pet = 0;       //0:not crafted, 1:crafted
 let flag_music = 0;
+let flag_musicbox = 0;
 
 let previous_local_mining_status;
 let previous_local_farming_status;
@@ -300,6 +302,7 @@ async function contract_update_status(summoner) {
         local_pet_farming_start_time = res[3];
         */
     }
+    local_musicbox = await contract.methods.items(summoner, 50).call();
 }
 
 //send feeding
@@ -1090,6 +1093,9 @@ function preload() {
         sceneKey: 'rexUI'
     });
 
+    //items
+    this.load.image("item_musicbox", "png/item_musicbox.png", {frameWidth: 300, frameHeight: 300});
+
 
 }
 
@@ -1266,7 +1272,7 @@ function create() {
     //new Button(30, 100, 'Start Mining', this, () => contract_start_mining(summoner));
     //new Button(30, 160, 'Start Farming', this, () => contract_start_farming(summoner));
     //new Button(30, 250, 'Summon', this, () => contract_summon("1"));
-    new Button(30, 40, 'BGM♪', this, () => music());
+    //new Button(30, 40, 'BGM♪', this, () => music());
 
     //status window color fill
     let status_back = this.add.graphics();
@@ -1491,9 +1497,7 @@ function update() {
         }
 
         //pet
-        if (local_pet == 0) {
-            text_pet.setText("pet_id = not yet crafted");
-        } else{
+        if (local_pet > 0) {
             text_pet.setText("pet_id = " + local_pet);
             if (flag_pet == 0) {
                 pet = new Pet(this, 300 + Math.random()*200, 400 + Math.random()*100);
@@ -1501,8 +1505,22 @@ function update() {
                 pet.scaleY = pet.scaleY * 0.1;
                 flag_pet = 1;
             }
+        } else{
+            text_pet.setText("pet_id = not yet crafted");
         }
 
+        //musicbox
+        if (local_musicbox > 0) {
+            if (flag_musicbox == 0) {
+                item_musicbox = this.add.sprite(750,550, "item_musicbox");
+                item_musicbox.scaleX = item_musicbox.scaleX * 0.2;
+                item_musicbox.scaleY = item_musicbox.scaleY * 0.2;
+                item_musicbox.setInteractive({useHandCursor: true});
+                item_musicbox.on('pointerdown', () => music() );
+                flag_musicbox = 1;
+            }
+        }
+        
         //text_birth_time.setText("birth_time = " + local_birth_time);
         //text_last_feeding_time.setText("last_feeding_time = " + local_last_feeding_time);
         //text_last_grooming_time.setText("last_grooming_time = " + local_last_grooming_time);

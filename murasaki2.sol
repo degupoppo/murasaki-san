@@ -1081,10 +1081,10 @@ contract Murasaki_Main is ERC721, Ownable{
         //status addition
         uint32 _base_sec = _now - last_level_up_time[_summoner];
         uint32 _resting_sec = _base_sec - last_total_mining_sec[_summoner] - last_total_farming_sec[_summoner] - last_total_crafting_sec[_summoner];
-        uint32 _percent_mining = 100 * (last_total_mining_sec[_summoner] + _resting_sec/4) / _base_sec;
-        uint32 _percent_farming = 100 * (last_total_farming_sec[_summoner] + _resting_sec/4) / _base_sec;
-        uint32 _percent_crafting = 100 * (last_total_crafting_sec[_summoner] + _resting_sec/4) / _base_sec;
-        uint32 _percent_luck = 100 * (_resting_sec/4) / _base_sec;
+        uint32 _percent_mining = 200 * (last_total_mining_sec[_summoner] + _resting_sec/4) / _base_sec;
+        uint32 _percent_farming = 200 * (last_total_farming_sec[_summoner] + _resting_sec/4) / _base_sec;
+        uint32 _percent_crafting = 200 * (last_total_crafting_sec[_summoner] + _resting_sec/4) / _base_sec;
+        uint32 _percent_luck = 200 * (_resting_sec/4) / _base_sec;
         strength[_summoner] += _percent_mining;
         dexterity[_summoner] += _percent_farming;
         intelligence[_summoner] += _percent_crafting;
