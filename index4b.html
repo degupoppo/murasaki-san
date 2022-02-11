@@ -6,12 +6,12 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="png" href="png/icon.PNG">
     <title>House of Murasaki-San</title>
-    <script src="phaser.js"></script>
-    <script src="web3.min.js"></script>
-    <script src="murasaki_main.js"></script>
-    <script src="murasaki_craft.js"></script>
-    <script src="murasaki_pet.js"></script>
-    <script src="dropdownlist.js"></script>
+    <script src="js/phaser.js"></script>
+    <script src="js/web3.min.js"></script>
+    <script src="js/murasaki_main.js"></script>
+    <script src="js/murasaki_craft.js"></script>
+    <script src="js/murasaki_pet.js"></script>
+    <script src="js/dropdownlist.js"></script>
     <style type="text/css">
         body {
             margin: 0;
@@ -940,8 +940,8 @@ function music() {
 //rader chart
 function radarchart(scene, str, dex, int, luk) {
     //position
-    let x0 = 720;
-    let y0 = 70;
+    let x0 = 710;
+    let y0 = 120;
     let r = 50;
     //base
     let base = 20;
@@ -969,8 +969,8 @@ function radarchart(scene, str, dex, int, luk) {
     //draw
     //scene.add.graphics().fillStyle(0xc0c0c0, 1).fillCircle(x0, y0, r, 0.5);
     radar1 = scene.add.polygon(x0+r, y0+r, [0,-r,r,0,0,r,-r,0], 0xc0c0c0, 0.4);
-    radar2 = scene.add.polygon(x0+r*0.75, y0+r*0.75, [0,-r*0.75,r*0.75,0,0,r*0.75,-r*0.75,0], 0xc0c0c0, 0.6);
-    radar3 = scene.add.polygon(x0+r/2, y0+r/2, [0,-r/2,r/2,0,0,r/2,-r/2,0], 0xc0c0c0, 0.8);
+    radar2 = scene.add.polygon(x0+r*0.75, y0+r*0.75, [0,-r*0.75,r*0.75,0,0,r*0.75,-r*0.75,0], 0xc0c0c0, 0.4);
+    radar3 = scene.add.polygon(x0+r/2, y0+r/2, [0,-r/2,r/2,0,0,r/2,-r/2,0], 0xc0c0c0, 0.4);
     radar4 = scene.add.polygon(x0+(-x4+x2)/2, y0+(-y1+y3)/2, [x1,y1,x2,y2,x3,y3,x4,y4], 0xffff00, 1);
     radar5 = scene.add.text(x0-10, y0-r-15, "STR"+"\n"+local_strength, {font: "10.5px Arial", fill: "#000000"});
     radar6 = scene.add.text(x0+r, y0-6, "DEX"+"\n"+local_dexterity, {font: "10.5px Arial", fill: "#000000"});
@@ -1064,7 +1064,7 @@ function preload() {
     //https://rexrainbow.github.io/phaser3-rex-notes/docs/site/ui-menu/
     this.load.scenePlugin({
         key: 'rexuiplugin',
-        url: 'rexuiplugin.min.js',
+        url: 'js/rexuiplugin.min.js',
         sceneKey: 'rexUI'
     });
 
@@ -1241,14 +1241,14 @@ function create() {
     //status window color fill
     let status_back = this.add.graphics();
     //status_back.fillStyle(0xa9a9a9, 1).fillRect(640, 5, 210, 230);
-    status_back.fillStyle(0xffffff, 1).fillRect(640, 5, 210, 230);
+    status_back.fillStyle(0xffffff, 1).fillRect(640, 5, 210, 280);
     status_back.alpha = 0.5;
 
     //status window
     let font_arg = {font: "10.5px Arial", fill: "#000"};
-    text_summoner =     this.add.text(655, 12, "***", font_arg);
-    text_level =        this.add.text(740, 12, "***", font_arg);
-    text_age_time =     this.add.text(740, 22, "***", font_arg);
+    text_summoner =     this.add.text(650, 10, "***", font_arg);
+    text_level =        this.add.text(650, 20, "***", font_arg);
+    text_age_time =     this.add.text(650, 30, "***", font_arg);
 
     //debug status
     text_type =         this.add.text(10, 540, "***", font_arg);
@@ -1268,26 +1268,26 @@ function create() {
 
     //bar
     //satiety
-    this.add.text(650, 150, "Satiety:", font_arg);
-    bar_satiety_back = makeBar(this, 690, 150, 0xffc0cb);
+    this.add.text(650, 200, "Satiety:", font_arg);
+    bar_satiety_back = makeBar(this, 690, 200, 0xffc0cb);
     bar_satiety_back.scaleX = 1;
-    bar_satiety = makeBar(this, 690, 150, 0xff4500);
+    bar_satiety = makeBar(this, 690, 200, 0xff4500);
     bar_satiety.scaleX = 0;
     //happy
-    this.add.text(650, 165, "Happy:", font_arg);
-    bar_happy_back = makeBar(this, 690, 165, 0xadd8e6);
+    this.add.text(650, 215, "Happy:", font_arg);
+    bar_happy_back = makeBar(this, 690, 215, 0xadd8e6);
     bar_happy_back.scaleX = 1;
-    bar_happy = makeBar(this, 690, 165, 0x4169e1);
+    bar_happy = makeBar(this, 690, 215, 0x4169e1);
     bar_happy.scaleX = 0;
     //exp
-    this.add.text(650, 180, "Exp:", font_arg);
-    bar_exp_back = makeBar(this, 690, 180, 0x90ee90);
+    this.add.text(650, 230, "Exp:", font_arg);
+    bar_exp_back = makeBar(this, 690, 230, 0x90ee90);
     bar_exp_back.scaleX = 1;
-    bar_exp = makeBar(this, 690, 180, 0x228b22);
+    bar_exp = makeBar(this, 690, 230, 0x228b22);
     bar_exp.scaleX = 0;
     //coin
-    text_coin = this.add.text(650, 200, "***", {font: "10.5px Arial", fill: "#000", backgroundColor: "#ffff00"});
-    text_material = this.add.text(650, 215, "***", {font: "10.5px Arial", fill: "#000", backgroundColor: "#7cfc00"});
+    text_coin = this.add.text(650, 250, "***", {font: "10.5px Arial", fill: "#000", backgroundColor: "#ffff00"});
+    text_material = this.add.text(650, 265, "***", {font: "10.5px Arial", fill: "#000", backgroundColor: "#7cfc00"});
 
     //progression
     text_working_calc = this.add.text(600, 260, "", {font: "14px Arial", fill: "#000"});
