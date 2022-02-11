@@ -940,7 +940,7 @@ function music() {
 //rader chart
 function radarchart(scene, str, dex, int, luk) {
     //position
-    let x0 = 730;
+    let x0 = 720;
     let y0 = 70;
     let r = 50;
     //base
@@ -972,10 +972,10 @@ function radarchart(scene, str, dex, int, luk) {
     radar2 = scene.add.polygon(x0+r*0.75, y0+r*0.75, [0,-r*0.75,r*0.75,0,0,r*0.75,-r*0.75,0], 0xc0c0c0, 0.6);
     radar3 = scene.add.polygon(x0+r/2, y0+r/2, [0,-r/2,r/2,0,0,r/2,-r/2,0], 0xc0c0c0, 0.8);
     radar4 = scene.add.polygon(x0+(-x4+x2)/2, y0+(-y1+y3)/2, [x1,y1,x2,y2,x3,y3,x4,y4], 0xffff00, 1);
-    radar5 = scene.add.text(x0-10, y0-r-8, "STR", {font: "10.5px Arial", fill: "#000000"});
-    radar6 = scene.add.text(x0+r, y0-6, "DEX", {font: "10.5px Arial", fill: "#000000"});
-    radar7 = scene.add.text(x0-10, y0+r, "LUK", {font: "10.5px Arial", fill: "#000000"});
-    radar8 = scene.add.text(x0-r-15, y0-6, "INT", {font: "10.5px Arial", fill: "#000000"});
+    radar5 = scene.add.text(x0-10, y0-r-15, "STR"+"\n"+local_strength, {font: "10.5px Arial", fill: "#000000"});
+    radar6 = scene.add.text(x0+r, y0-6, "DEX"+"\n"+local_dexterity, {font: "10.5px Arial", fill: "#000000"});
+    radar7 = scene.add.text(x0-10, y0+r-5, "LUK"+"\n"+local_luck, {font: "10.5px Arial", fill: "#000000"});
+    radar8 = scene.add.text(x0-r-15, y0-6, "INT"+"\n"+local_intelligence, {font: "10.5px Arial", fill: "#000000"});
 }
 
 
@@ -1237,55 +1237,60 @@ function create() {
     //button_text
     new Button(30, 10, 'Level Up', this, () => contract_level_up(summoner));
 
+
     //status window color fill
     let status_back = this.add.graphics();
-    status_back.fillStyle(0xa9a9a9, 1).fillRect(590, 5, 200, 300);
-    status_back.alpha = 0.4;
+    //status_back.fillStyle(0xa9a9a9, 1).fillRect(640, 5, 210, 230);
+    status_back.fillStyle(0xffffff, 1).fillRect(640, 5, 210, 230);
+    status_back.alpha = 0.5;
 
     //status window
     let font_arg = {font: "10.5px Arial", fill: "#000"};
-    text_summoner =     this.add.text(600,  10, "Summoner: " + summoner, font_arg);
-    text_type =         this.add.text(600,  20, "Type: " + local_ctype, font_arg);
-    text_level =        this.add.text(600,  40, "  Lv: " + local_level, font_arg);
+    text_summoner =     this.add.text(655, 12, "***", font_arg);
+    text_level =        this.add.text(740, 12, "***", font_arg);
+    text_age_time =     this.add.text(740, 22, "***", font_arg);
+
+    //debug status
+    text_type =         this.add.text(10, 540, "***", font_arg);
+    text_turn =         this.add.text(10, 550, "***", font_arg);
+    text_mode =         this.add.text(10, 560, "***", font_arg);
+    text_pet =          this.add.text(10, 570, "***", font_arg);
+    text_exp =          this.add.text(10, 580, "***", font_arg);
+
+
+    /*
     text_strength =     this.add.text(600,  50, " STR: " + local_strength, font_arg);
     text_dexterity =    this.add.text(600,  60, " DEX: " + local_dexterity, font_arg);
     text_intelligence = this.add.text(600,  70, " INT = " + local_intelligence, font_arg);
     text_luck =         this.add.text(600,  80, " LUK: " + local_luck, font_arg);
-    text_exp =          this.add.text(600, 100, " EXP: " + local_exp, font_arg);
-    text_turn =         this.add.text(600, 120, "turn = ", font_arg);
-    text_age_time =     this.add.text(600, 130, " age = ", font_arg);
-    text_mode =         this.add.text(600, 140, "mode = ", font_arg);
+    */
+
 
     //bar
     //satiety
-    this.add.text(600, 160, "Satiety:", font_arg);
-    bar_satiety_back = makeBar(this, 640, 160, 0xa9a9a9);
+    this.add.text(650, 150, "Satiety:", font_arg);
+    bar_satiety_back = makeBar(this, 690, 150, 0xffc0cb);
     bar_satiety_back.scaleX = 1;
-    bar_satiety = makeBar(this, 640, 160, 0xff4500);
+    bar_satiety = makeBar(this, 690, 150, 0xff4500);
     bar_satiety.scaleX = 0;
     //happy
-    this.add.text(600, 180, "Happy:", font_arg);
-    bar_happy_back = makeBar(this, 640, 180, 0xa9a9a9);
+    this.add.text(650, 165, "Happy:", font_arg);
+    bar_happy_back = makeBar(this, 690, 165, 0xadd8e6);
     bar_happy_back.scaleX = 1;
-    bar_happy = makeBar(this, 640, 180, 0x4169e1);
+    bar_happy = makeBar(this, 690, 165, 0x4169e1);
     bar_happy.scaleX = 0;
     //exp
-    this.add.text(600, 200, "EXP:", font_arg);
-    bar_exp_back = makeBar(this, 640, 200, 0xa9a9a9);
+    this.add.text(650, 180, "Exp:", font_arg);
+    bar_exp_back = makeBar(this, 690, 180, 0x90ee90);
     bar_exp_back.scaleX = 1;
-    bar_exp = makeBar(this, 640, 200, 0x228b22);
+    bar_exp = makeBar(this, 690, 180, 0x228b22);
     bar_exp.scaleX = 0;
     //coin
-    text_coin = this.add.text(
-        600, 220, "Coin: " + local_coin, font_arg);
-    text_material = this.add.text(
-        600, 230, "Material: " + local_material, font_arg);
+    text_coin = this.add.text(650, 200, "***", {font: "10.5px Arial", fill: "#000", backgroundColor: "#ffff00"});
+    text_material = this.add.text(650, 215, "***", {font: "10.5px Arial", fill: "#000", backgroundColor: "#7cfc00"});
 
     //progression
-    text_working_calc = this.add.text(600, 260, "***", {font: "14px Arial", fill: "#000"});
-
-    //pet
-    text_pet = this.add.text(600, 280, "***", font_arg);
+    text_working_calc = this.add.text(600, 260, "", {font: "14px Arial", fill: "#000"});
 
     //craft item dropdown list
     let options = [
@@ -1403,23 +1408,29 @@ function update() {
         if (exp > 100) { exp = 100; }
 
         //update text
-        text_summoner.setText   ("summoner = " + summoner);
+        let age = Math.round( age_time / 86400 * 10 ) / 10;
+        text_summoner.setText   ("id: " + summoner);
+        text_level.setText      ("Lv: " + local_level);
+        text_age_time.setText   ("age: " + age + " d");
+
+        //degub
         text_type.setText       ("type = " + local_ctype);
-        //status
-        text_level.setText          (" Lv: " + local_level);
+        text_exp.setText        ("exp= " + local_exp);
+        text_turn.setText       ("turn = " + turn);
+        text_mode.setText       ("mode = " + mode);
+
+        /*
         text_strength.setText       ("STR: " + local_strength);
         text_dexterity.setText      ("DEX: " + local_dexterity);
         //text_vitality.setText       ("VIT: " + local_vitality);
         text_intelligence.setText   ("INT: " + local_intelligence);
         text_luck.setText           ("LUK: " + local_luck);
-        text_exp.setText            ("EXP: " + local_exp);
+        */
+
         //game info
-        text_turn.setText       ("turn = " + turn);
-        text_age_time.setText   ("age = " + age_time);
-        text_mode.setText       ("mode = " + mode);
         //coin & material
-        text_coin.setText("coin = " + local_coin);
-        text_material.setText("material = " + local_material);
+        text_coin.setText("Coin: " + local_coin);
+        text_material.setText("Material: " + local_material);
 
         //update bar
         bar_satiety.scaleX = satiety / 100;
