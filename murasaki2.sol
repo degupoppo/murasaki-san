@@ -855,8 +855,10 @@ contract Murasaki_Main is ERC721, Ownable{
         //require(mining_status[_summoner] == 0 && farming_status[_summoner] == 0 && crafting_status[_summoner] == 0);
         uint32 _now = uint32(block.timestamp);
         uint32 _delta_sec = _now - last_feeding_time[_summoner];
-        if (_delta_sec >= (base_sec * 1)) {
-            _delta_sec = base_sec * 1;
+        //if (_delta_sec >= (base_sec * 1)) {
+        //    _delta_sec = base_sec * 1;
+        if (_delta_sec >= (base_sec / 2)) {
+            _delta_sec = base_sec / 2;
         }
         exp[_summoner] += _delta_sec * speed / 100;
         last_feeding_time[_summoner] = _now;
@@ -864,8 +866,10 @@ contract Murasaki_Main is ERC721, Ownable{
     function calc_satiety(uint32 _summoner) public view returns (uint32) {
         uint32 _now = uint32(block.timestamp);
         uint32 _delta_sec = _now - last_feeding_time[_summoner];
-        if (_delta_sec >= (base_sec * 1)) {
-            _delta_sec = base_sec * 1;
+        //if (_delta_sec >= (base_sec * 1)) {
+        //    _delta_sec = base_sec * 1;
+        if (_delta_sec >= (base_sec / 2)) {
+            _delta_sec = base_sec / 2;
         }
         uint32 _satiety = 100 * (base_sec - _delta_sec) / base_sec;
         return _satiety;

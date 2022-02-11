@@ -121,7 +121,8 @@ var GetMaxTextObjectSize = function (scene, contentArray) {
 
 var CreateTextObject = function (scene, text) {
     var textObject = scene.add.text(0, 0, text, {
-        fontSize: '12px'
+        fontSize: '12px',
+				fontFamily: 'Arial'
     })
     return textObject;
 }

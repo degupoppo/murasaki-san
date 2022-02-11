@@ -41,11 +41,9 @@ ok! しゅっきん！（お仕事へ移動中）
     おんがくかんしょうちゅう～♪
     マイニングアイテム案（STR系）
         良いスコップ
-        石像
     ファーミングアイテム案（DEX系）
         良いじょうろ
     クラフティングアイテム案（INT系）
-        携帯電話
         ミュージックボックス
 
 ToDo
@@ -1048,11 +1046,11 @@ function preload() {
     this.load.image("button_farming_pointerover", "png/button_farming_pointerover.png", {frameWidth: 500, frameHeight: 500});
     this.load.image("button_farming_working", "png/button_farming_working.png", {frameWidth: 500, frameHeight: 500});
     this.load.image("button_farming_pointerover_stop", "png/button_farming_pointerover_stop.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("button_crafting_enable", "png/button_mining_enable.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("button_crafting_unable", "png/button_mining_unable.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("button_crafting_pointerover", "png/button_mining_pointerover.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("button_crafting_working", "png/button_mining_working.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("button_crafting_pointerover_stop", "png/button_mining_pointerover_stop.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_crafting_enable", "png/button_crafting_enable.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_crafting_unable", "png/button_crafting_unable.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_crafting_pointerover", "png/button_crafting_pointerover.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_crafting_working", "png/button_crafting_working.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_crafting_pointerover_stop", "png/button_crafting_pointerover_stop.png", {frameWidth: 500, frameHeight: 500});
     this.load.image("button_grooming_enable", "png/button_grooming_enable.png", {frameWidth: 500, frameHeight: 500});
     this.load.image("button_grooming_unable", "png/button_grooming_unable.png", {frameWidth: 500, frameHeight: 500});
     this.load.image("button_grooming_pointerover", "png/button_grooming_pointerover.png", {frameWidth: 500, frameHeight: 500});
@@ -1390,7 +1388,7 @@ function update() {
         let now_time = Date.now() / 1000;
         let age_time = Math.round(now_time - local_birth_time);
         let mode = murasakisan.get_mode;
-        let base = 86400 /10;
+        let base = 86400 /2 /10;
         //satiety
         satiety = Math.round( (base - (now_time - local_last_feeding_time)) / base * 100 );
         if (satiety < 0) { satiety = 0; }

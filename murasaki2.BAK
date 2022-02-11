@@ -1,4 +1,57 @@
 
+/***
+
+ToDo
+
+    Luckの補正の実装
+        feeding/grooming時に+αでexp得る確率
+        stop mining/farming時に+αでcoin/material得る確率
+        crafting時に割引で行える確率
+
+    itemの補正方法の修正
+        1つ所持するとステータス+1もしくは+2の補正で
+        わかりやすくすべてステータス値に換算させる
+        補正はあくまでステータス値の合計値で行う
+
+    itemリストの再整備
+        str, dex, int, luk, その他か
+        12 + 12 + 12 + 12 + 12 = 60？
+
+    ワールドダイスの実装
+        クラフト品とする, 少し高めのコスト設定
+        すべての補正+1～20%
+        utc 0時以降, その日の分を振れる
+        何かしらの判定時に, ダイス振ってあったら+補正
+            utc 0時以前がlast_dice時間ならば補正なし
+        Luck補正を利用する
+        ダイス補正の期待値+10.5%を織り込んでバランス設計する
+        乱数の実装
+
+    ゆっくりと成長する木の実装
+        item type = 50ぐらいの専用スロット
+        成長するまで何が生えるかわからない
+        summonerの行動によって結果がかわる
+        1ヶ月で最大成長ぐらいか
+
+    item, pet NFTの譲渡の実装
+        update関数の実装
+            mm側に用意し, mcとmpのowner_summonerおよびwallet onwerをすべてチェックしてfalseを0に置換する
+
+    1つのpet/itemが2つ以上のsummonerに紐付け可能なことを回避する実装を考える
+
+    Vitステータスの削除
+
+    summonerパラメータのstruct化
+
+    URIの実装
+        rarity方式にするか
+        murasakiアイコン＋levelにするか
+        base64等のURI関数の実装
+
+    ok mining, farming, craftingの要求レベルの実装
+
+***/
+
 
 
 // SPDX-License-Identifier: MIT
@@ -749,6 +802,11 @@ contract Murasaki_Main is ERC721, Ownable{
         return li_status;
     }
 
+    //call items as array
+    function get_items(uint32 _summoner) public view returns (uint32[64] memory) {
+        return items[_summoner];
+    }
+
     //summon
     function summon(uint8 _ctype) external payable {
         require(msg.value >= price, "price error");
@@ -766,7 +824,8 @@ contract Murasaki_Main is ERC721, Ownable{
         coin[_next_summoner] = 0;
         material[_next_summoner] = 0;
         exp[_next_summoner] = 0;
-        next_exp_required[_next_summoner] = 1000;
+        //next_exp_required[_next_summoner] = 1000;
+        next_exp_required[_next_summoner] = 100;
         //initialize other parameters
         birth_time[_next_summoner] = _now;
         last_feeding_time[_next_summoner] = _now;
@@ -796,8 +855,10 @@ contract Murasaki_Main is ERC721, Ownable{
         //require(mining_status[_summoner] == 0 && farming_status[_summoner] == 0 && crafting_status[_summoner] == 0);
         uint32 _now = uint32(block.timestamp);
         uint32 _delta_sec = _now - last_feeding_time[_summoner];
-        if (_delta_sec >= (base_sec * 1)) {
-            _delta_sec = base_sec * 1;
+        //if (_delta_sec >= (base_sec * 1)) {
+        //    _delta_sec = base_sec * 1;
+        if (_delta_sec >= (base_sec / 2)) {
+            _delta_sec = base_sec / 2;
         }
         exp[_summoner] += _delta_sec * speed / 100;
         last_feeding_time[_summoner] = _now;
@@ -818,8 +879,8 @@ contract Murasaki_Main is ERC721, Ownable{
         require(mining_status[_summoner] == 0 && farming_status[_summoner] == 0 && crafting_status[_summoner] == 0);
         uint32 _now = uint32(block.timestamp);
         uint32 _delta_sec = _now - last_grooming_time_plus_working_time[_summoner];
-        if (_delta_sec >= (base_sec * 5)) {
-            _delta_sec = base_sec * 5;
+        if (_delta_sec >= (base_sec * 3)) {
+            _delta_sec = base_sec * 3;
         }
         exp[_summoner] += _delta_sec * speed / 100 ;
         last_grooming_time_plus_working_time[_summoner] = _now;
@@ -828,10 +889,10 @@ contract Murasaki_Main is ERC721, Ownable{
     function calc_happy(uint32 _summoner) public view returns (uint32) {
         uint32 _now = uint32(block.timestamp);
         uint32 _delta_sec = _now - last_grooming_time[_summoner];
-        if (_delta_sec >= (base_sec * 5)) {
-            _delta_sec = base_sec * 5;
+        if (_delta_sec >= (base_sec * 3)) {
+            _delta_sec = base_sec * 3;
         }
-        uint32 _happy = 100 * ((base_sec*5) - _delta_sec) / (base_sec*5);
+        uint32 _happy = 100 * ((base_sec*3) - _delta_sec) / (base_sec*3);
         return _happy;
     }
 
@@ -840,6 +901,7 @@ contract Murasaki_Main is ERC721, Ownable{
         require(_isApprovedOrOwner(msg.sender, _summoner));
         require(mining_status[_summoner] == 0 && farming_status[_summoner] == 0 && crafting_status[_summoner] == 0);
         require(calc_satiety(_summoner) >= 20 && calc_happy(_summoner) >= 20);
+        require(level[_summoner] >= 2);
         uint32 _now = uint32(block.timestamp);
         mining_status[_summoner] = 1;
         mining_start_time[_summoner] = _now;
@@ -883,6 +945,7 @@ contract Murasaki_Main is ERC721, Ownable{
         require(_isApprovedOrOwner(msg.sender, _summoner));
         require(mining_status[_summoner] == 0 && farming_status[_summoner] == 0 && crafting_status[_summoner] == 0);
         require(calc_satiety(_summoner) >= 20 && calc_happy(_summoner) >= 20);
+        require(level[_summoner] >= 2);
         uint32 _now = uint32(block.timestamp);
         farming_status[_summoner] = 1;
         farming_start_time[_summoner] = _now;
@@ -947,6 +1010,7 @@ contract Murasaki_Main is ERC721, Ownable{
         require(mining_status[_summoner] == 0 && farming_status[_summoner] == 0 && crafting_status[_summoner] == 0);
         //require(coin[_summoner] >= _coin && material[_summoner] >= _material);
         require(calc_satiety(_summoner) >= 20 && calc_happy(_summoner) >= 20);
+        require(level[_summoner] >= 3);
         uint32 _now = uint32(block.timestamp);
 
         Murasaki_Craft mc = Murasaki_Craft(murasaki_craft_address);
@@ -1028,10 +1092,10 @@ contract Murasaki_Main is ERC721, Ownable{
         //status addition
         uint32 _base_sec = _now - last_level_up_time[_summoner];
         uint32 _resting_sec = _base_sec - last_total_mining_sec[_summoner] - last_total_farming_sec[_summoner] - last_total_crafting_sec[_summoner];
-        uint32 _percent_mining = 100 * (last_total_mining_sec[_summoner] + _resting_sec/4) / _base_sec;
-        uint32 _percent_farming = 100 * (last_total_farming_sec[_summoner] + _resting_sec/4) / _base_sec;
-        uint32 _percent_crafting = 100 * (last_total_crafting_sec[_summoner] + _resting_sec/4) / _base_sec;
-        uint32 _percent_luck = 100 * (_resting_sec/4) / _base_sec;
+        uint32 _percent_mining = 200 * (last_total_mining_sec[_summoner] + _resting_sec/4) / _base_sec;
+        uint32 _percent_farming = 200 * (last_total_farming_sec[_summoner] + _resting_sec/4) / _base_sec;
+        uint32 _percent_crafting = 200 * (last_total_crafting_sec[_summoner] + _resting_sec/4) / _base_sec;
+        uint32 _percent_luck = 200 * (_resting_sec/4) / _base_sec;
         strength[_summoner] += _percent_mining;
         dexterity[_summoner] += _percent_farming;
         intelligence[_summoner] += _percent_crafting;
@@ -1062,7 +1126,8 @@ contract Murasaki_Main is ERC721, Ownable{
         level[_summoner] += 1;
         //update next_exp_required
         if (level[_summoner] == 2) {
-            next_exp_required[_summoner] = 3000;
+            //next_exp_required[_summoner] = 3000;
+            next_exp_required[_summoner] = 300;
         }else if (level[_summoner] == 3) {
             next_exp_required[_summoner] = 6000;
         }else if (level[_summoner] == 4) {
@@ -1404,7 +1469,7 @@ contract Murasaki_Pet is ERC721, Ownable{
     string constant public name = "Murasaki Pet";
     string constant public symbol = "MP";
 
-    uint32 public next_pet = 0;
+    uint32 public next_pet = 1;
     uint32 public speed = 1;
     address public murasaki_main_address;
 
@@ -1416,12 +1481,12 @@ contract Murasaki_Pet is ERC721, Ownable{
     }
 
     mapping(uint32 => pet) public pets;
-    mapping(uint32 => uint32) public coin;
-    mapping(uint32 => uint32) public material;
     mapping(uint32 => uint8) public mining_status;
     mapping(uint32 => uint32) public mining_start_time;
+    mapping(uint32 => uint32) public coin;
     mapping(uint32 => uint8) public farming_status;
     mapping(uint32 => uint32) public farming_start_time;
+    mapping(uint32 => uint32) public material;
 
     //admin
     function set_murasaki_main_address (address _address) public onlyOwner{
@@ -1429,6 +1494,16 @@ contract Murasaki_Pet is ERC721, Ownable{
     }
     function set_speed (uint32 _speed) public onlyOwner{
         speed = _speed;
+    }
+
+    //get_status
+    function get_status(uint32 _pet) public view returns (uint32[4] memory){
+        uint32[4] memory res;
+        res[0] = mining_status[_pet];
+        res[1] = mining_start_time[_pet];
+        res[2] = farming_status[_pet];
+        res[3] = farming_start_time[_pet];
+        return res;
     }
 
     //craft pet
@@ -1553,11 +1628,6 @@ contract Murasaki_Pet is ERC721, Ownable{
 //---------------------------------------------------------------------------------------------------------------------
 
 /***
-
-    item, pet NFTの譲渡の実装
-        update関数の実装
-            mm側に用意し, mcとmpのowner_summonerおよびwallet onwerをすべてチェックしてfalseを0に置換する
-    1つのpet/itemが2つ以上のsummonerに紐付け可能なことを回避する実装を考える
     
     ok pet所持の有無の判定とpetとの相互作用
         *pet複数所持時のルール整備
