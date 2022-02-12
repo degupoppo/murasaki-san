@@ -1,4 +1,4 @@
-const contract_address_murasaki_pet = "0x2F9781179A3Bc9121021dc2E78c1929BBB5f26F4";
+const contract_address_murasaki_pet = "0x31e5de89319f1e385dB7A9dcf4f8e111E62A25Fd";
 const abi_murasaki_pet = [
 	{
 		"anonymous": false,
@@ -529,6 +529,25 @@ const abi_murasaki_pet = [
 				"internalType": "uint32[20]",
 				"name": "",
 				"type": "uint32[20]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint32",
+				"name": "_pet",
+				"type": "uint32"
+			}
+		],
+		"name": "get_status",
+		"outputs": [
+			{
+				"internalType": "uint32[4]",
+				"name": "",
+				"type": "uint32[4]"
 			}
 		],
 		"stateMutability": "view",

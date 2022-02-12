@@ -48,14 +48,23 @@ ok! しゅっきん！（お仕事へ移動中）
 
 ToDo
 
+    coin/material送金UIの実装
+
+    ステータス表示の実装
+        coin, materialの表記をどうするか
+
+    BGMと効果音の追加
+        効果音の吟味と割り当て
+
+    summoner所持item
+        所持itemの検索
+        所持itemのスプライト表示
+
     craftingのUI実装
      ok item_idの選択方法
      ok craftのstart/stopボタン
-        選択アイテムのコスト表示
+     ok 選択アイテムのコスト表示
         成功/失敗の表現
-
-    coin/material送金UIの実装
-        
 
     petのUI実装
      ok pet所持の有無を監視
@@ -69,12 +78,13 @@ ToDo
         petへのstart mining/farmingとstopの実装
 
     BGMと効果音の追加
+        効果音の吟味と割り当て完了
      ok BGMのON/OFFボタンの実装
-        効果音の実装
+     ok 効果音の実装
      ok クラフト可能なミュージックボックスの実装
 
     ステータス表示の実装
-        数値＋視覚情報
+     ok 数値＋視覚情報
      ok STR, DEX等のメーターをどうするか
             レーダーチャート？
                 三角形のレーダーチャート + Luck表記
@@ -150,8 +160,11 @@ let flag_musicbox = 0;
 let previous_local_mining_status;
 let previous_local_farming_status;
 let previous_local_crafting_status;
+let previous_local_exp;
 
 let bgm = 0;
+
+let SPEED = 24;
 
 
 // html
@@ -344,9 +357,9 @@ async function contract_start_crafting(summoner) {
     //get item type from dropdown list
     let item_text = craft_item_list.text;
     let item_type = 0;
-    if (item_text == "Ms. Astar (100/10)") {
+    if (item_text == "Ms. Astar (1000/100)") {
         item_type = 49;
-    }else if (item_text == "Music Box (100/10)") {
+    }else if (item_text == "Music Box (3000/300)") {
         item_type = 50;
     }else {
         item_type = 1;
@@ -972,10 +985,10 @@ function radarchart(scene, str, dex, int, luk) {
     radar2 = scene.add.polygon(x0+r*0.75, y0+r*0.75, [0,-r*0.75,r*0.75,0,0,r*0.75,-r*0.75,0], 0xc0c0c0, 0.4);
     radar3 = scene.add.polygon(x0+r/2, y0+r/2, [0,-r/2,r/2,0,0,r/2,-r/2,0], 0xc0c0c0, 0.4);
     radar4 = scene.add.polygon(x0+(-x4+x2)/2, y0+(-y1+y3)/2, [x1,y1,x2,y2,x3,y3,x4,y4], 0xffff00, 1);
-    radar5 = scene.add.text(x0-10, y0-r-15, "STR"+"\n"+local_strength, {font: "10.5px Arial", fill: "#000000"});
-    radar6 = scene.add.text(x0+r, y0-6, "DEX"+"\n"+local_dexterity, {font: "10.5px Arial", fill: "#000000"});
-    radar7 = scene.add.text(x0-10, y0+r-5, "LUK"+"\n"+local_luck, {font: "10.5px Arial", fill: "#000000"});
-    radar8 = scene.add.text(x0-r-15, y0-6, "INT"+"\n"+local_intelligence, {font: "10.5px Arial", fill: "#000000"});
+    radar5 = scene.add.text(x0-10, y0-r-15, "STR"+"\n"+str, {font: "10.5px Arial", fill: "#000000"});
+    radar6 = scene.add.text(x0+r, y0-6, "DEX"+"\n"+dex, {font: "10.5px Arial", fill: "#000000"});
+    radar7 = scene.add.text(x0-10, y0+r-5, "LUK"+"\n"+luk, {font: "10.5px Arial", fill: "#000000"});
+    radar8 = scene.add.text(x0-r-15, y0-6, "INT"+"\n"+int, {font: "10.5px Arial", fill: "#000000"});
 }
 
 
@@ -1054,11 +1067,19 @@ function preload() {
     this.load.image("button_grooming_enable", "png/button_grooming_enable.png", {frameWidth: 500, frameHeight: 500});
     this.load.image("button_grooming_unable", "png/button_grooming_unable.png", {frameWidth: 500, frameHeight: 500});
     this.load.image("button_grooming_pointerover", "png/button_grooming_pointerover.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_levelup_enable", "png/button_levelup_enable.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_levelup_unable", "png/button_levelup_unable.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_levelup_pointerover", "png/button_levelup_pointerover.png", {frameWidth: 500, frameHeight: 500});
 
-    //sound
+
+    //music
     this.load.audio("bgm1", "mp3/Morning_2.mp3");
     this.load.audio("bgm2", "mp3/Roll_Roll_Roll.mp3");
-    this.load.audio("bgm3", "mp3/boukenki.mp3");
+    this.load.audio("bgm3", "mp3/amaoto.mp3");
+
+    //sound
+    this.load.audio("button_on", "sound/button_on.mp3");
+    this.load.audio("button_select", "sound/button_select.mp3");
 
     //dropdownlist
     //https://rexrainbow.github.io/phaser3-rex-notes/docs/site/ui-menu/
@@ -1184,7 +1205,9 @@ function create() {
     button_feeding.scaleX = button_feeding.scaleX * 0.1;
     button_feeding.scaleY = button_feeding.scaleY * 0.1;
     button_feeding.setInteractive({useHandCursor: true});
+    button_feeding.on('pointerdown', () => sound_button_on.play() );
     button_feeding.on('pointerdown', () => contract_feeding(summoner) );
+    button_feeding.on('pointerover', () => sound_button_select.play());
     button_feeding.on('pointerover', () => button_feeding.setTexture("button_feeding_pointerover"));
     button_feeding.on('pointerout', () => button_feeding.setTexture("button_feeding"));
 
@@ -1192,7 +1215,9 @@ function create() {
     button_grooming.scaleX = button_grooming.scaleX * 0.1;
     button_grooming.scaleY = button_grooming.scaleY * 0.1;
     button_grooming.setInteractive({useHandCursor: true});
+    button_grooming.on('pointerdown', () => sound_button_on.play() );
     button_grooming.on('pointerdown', () => contract_grooming(summoner) );
+    button_grooming.on('pointerover', () => sound_button_select.play());
     button_grooming.on('pointerover', () => button_grooming.setTexture("button_grooming_pointerover"));
     button_grooming.on('pointerout', () => button_grooming.setTexture("button_grooming"));
     button_grooming.disableInteractive();
@@ -1201,7 +1226,9 @@ function create() {
     button_crafting.scaleX = button_crafting.scaleX * 0.1;
     button_crafting.scaleY = button_crafting.scaleY * 0.1;
     button_crafting.setInteractive({useHandCursor: true});
+    button_crafting.on('pointerdown', () => sound_button_on.play() );
     button_crafting.on('pointerdown', () => contract_start_crafting(summoner) );
+    button_crafting.on('pointerover', () => sound_button_select.play());
     button_crafting.on('pointerover', () => button_crafting.setTexture("button_crafting_pointerover"));
     button_crafting.on('pointerout', () => button_crafting.setTexture("button_crafting_enable"));
     button_crafting.disableInteractive();
@@ -1210,7 +1237,9 @@ function create() {
     button_mining.scaleX = button_mining.scaleX * 0.1;
     button_mining.scaleY = button_mining.scaleY * 0.1;
     button_mining.setInteractive({useHandCursor: true});
+    button_mining.on('pointerdown', () => sound_button_on.play() );
     button_mining.on('pointerdown', () => contract_start_mining(summoner) );
+    button_mining.on('pointerover', () => sound_button_select.play());
     button_mining.on('pointerover', () => button_mining.setTexture("button_mining_pointerover"));
     button_mining.on('pointerout', () => button_mining.setTexture("button_mining_enable"));
     button_mining.disableInteractive();
@@ -1219,15 +1248,36 @@ function create() {
     button_farming.scaleX = button_farming.scaleX * 0.1;
     button_farming.scaleY = button_farming.scaleY * 0.1;
     button_farming.setInteractive({useHandCursor: true});
+    button_farming.on('pointerdown', () => sound_button_on.play() );
     button_farming.on('pointerdown', () => contract_start_farming(summoner) );
+    button_farming.on('pointerover', () => sound_button_select.play());
     button_farming.on('pointerover', () => button_farming.setTexture("button_farming_pointerover"));
     button_farming.on('pointerout', () => button_farming.setTexture("button_farming_enable"));
     button_farming.disableInteractive();
+
+    button_levelup = this.add.sprite(770,260, "button_levelup_unable");
+    button_levelup.scaleX = button_levelup.scaleX * 0.07;
+    button_levelup.scaleY = button_levelup.scaleY * 0.07;
+    button_levelup.setInteractive({useHandCursor: true});
+    button_levelup.on('pointerdown', () => sound_button_on.play() );
+    button_levelup.on('pointerdown', () => contract_level_up(summoner) );
+    button_levelup.on('pointerover', () => sound_button_select.play());
+    button_levelup.on('pointerover', () => button_levelup.setTexture("button_levelup_pointerover"));
+    button_levelup.on('pointerout', () => button_levelup.setTexture("button_levelup_enable"));
+    button_levelup.disableInteractive();
+
+
+    //sound out of focus
+    this.sound.pauseOnBlur = false
 
     //bgm
     bgm1 = this.sound.add("bgm1", {volume:0.2, loop:true});
     bgm2 = this.sound.add("bgm2", {volume:0.2, loop:true});
     bgm3 = this.sound.add("bgm3", {volume:0.2, loop:true});
+
+    //sound
+    sound_button_select = this.sound.add("button_select", {volume:0.2});
+    sound_button_on = this.sound.add("button_on", {volume:0.2});
 
     //summoner
     murasakisan = new Murasakisan(this, 300 + Math.random()*200, 400 + Math.random()*100);
@@ -1236,7 +1286,6 @@ function create() {
 
     //button_text
     new Button(30, 10, 'Level Up', this, () => contract_level_up(summoner));
-
 
     //status window color fill
     let status_back = this.add.graphics();
@@ -1295,8 +1344,8 @@ function create() {
     //craft item dropdown list
     let options = [
         " > SELECT ITEM < ",
-        "Ms. Astar (100/10)",
-        "Music Box (100/10)"
+        "Ms. Astar (1000/100)",
+        "Music Box (3000/300)"
     ];
     craft_item_list = CreateDropDownList(this, 500, 65, options)
         .layout()
@@ -1329,6 +1378,8 @@ function update() {
 
         //level up
         if (local_level > previous_local_level) {
+            //update radarchart
+            radarchart(this, local_strength, local_dexterity, local_intelligence, local_luck);
         }else 
 
         //feeding check
@@ -1393,12 +1444,12 @@ function update() {
         let now_time = Date.now() / 1000;
         let age_time = Math.round(now_time - local_birth_time);
         let mode = murasakisan.get_mode;
-        let base = 86400 /2 /10;
+        let base = 86400 / 2 / SPEED;
         //satiety
         satiety = Math.round( (base - (now_time - local_last_feeding_time)) / base * 100 );
         if (satiety < 0) { satiety = 0; }
         if (satiety > 100) { satiety = 100; }
-        let base2 = 86400 * 3 /10;
+        let base2 = 86400 * 3 / SPEED;
         //happy
         happy = Math.round( (base2 - (now_time - local_last_grooming_time)) / base2 * 100 );
         if (happy < 0) { happy = 0; }
@@ -1408,7 +1459,7 @@ function update() {
         if (exp > 100) { exp = 100; }
 
         //update text
-        let age = Math.round( age_time / 86400 * 10 ) / 10;
+        let age = Math.round( age_time * SPEED * 10 / 86400 ) / 10;
         text_summoner.setText   ("id: " + summoner);
         text_level.setText      ("Lv: " + local_level);
         text_age_time.setText   ("age: " + age + " d");
@@ -1561,9 +1612,21 @@ function update() {
 
         }
 
+        if (previous_local_exp != local_exp) {
+            //level-up check
+            if (local_exp / local_next_exp_required >= 1) {
+                button_levelup.setTexture("button_levelup_enable");
+                button_levelup.setInteractive();
+            }else {
+                button_levelup.setTexture("button_levelup_unable");
+                button_levelup.disableInteractive();
+            }
+        }
+
         previous_local_mining_status = local_mining_status;
         previous_local_farming_status = local_farming_status;
         previous_local_crafting_status = local_crafting_status;
+        previous_local_exp = local_exp;
 
     }
 

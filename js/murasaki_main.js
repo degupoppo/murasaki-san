@@ -1,4 +1,4 @@
-const contract_address_murasaki_main = "0xc80B38F74bffde50311B283950A253CE8f8d9C90";
+const contract_address_murasaki_main = "0x425D2d173C43AC92e4aEc694A64fbA847E9F3134";
 const abi_murasaki_main = [
 	{
 		"anonymous": false,
@@ -247,6 +247,19 @@ const abi_murasaki_main = [
 			}
 		],
 		"name": "set_base_sec",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_address",
+				"type": "address"
+			}
+		],
+		"name": "set_codex_address",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -744,6 +757,19 @@ const abi_murasaki_main = [
 		"type": "function"
 	},
 	{
+		"inputs": [],
+		"name": "codex_address",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
 		"inputs": [
 			{
 				"internalType": "uint32",
@@ -947,6 +973,25 @@ const abi_murasaki_main = [
 				"internalType": "uint8",
 				"name": "",
 				"type": "uint8"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint32",
+				"name": "_summoner",
+				"type": "uint32"
+			}
+		],
+		"name": "get_items",
+		"outputs": [
+			{
+				"internalType": "uint32[64]",
+				"name": "",
+				"type": "uint32[64]"
 			}
 		],
 		"stateMutability": "view",
@@ -1450,6 +1495,25 @@ const abi_murasaki_main = [
 		"inputs": [
 			{
 				"internalType": "uint32",
+				"name": "_summoner",
+				"type": "uint32"
+			}
+		],
+		"name": "tokenURI",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint32",
 				"name": "",
 				"type": "uint32"
 			}
@@ -1493,25 +1557,6 @@ const abi_murasaki_main = [
 			}
 		],
 		"name": "total_mining_sec",
-		"outputs": [
-			{
-				"internalType": "uint32",
-				"name": "",
-				"type": "uint32"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint32",
-				"name": "",
-				"type": "uint32"
-			}
-		],
-		"name": "vitality",
 		"outputs": [
 			{
 				"internalType": "uint32",

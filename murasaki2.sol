@@ -1,12 +1,19 @@
 
 /***
 
+codex: 0x75988207eb57E54781e5E2CA1ec538d6653046AE
 ToDo
 
-    Luckの補正の実装
-        feeding/grooming時に+αでexp得る確率
-        stop mining/farming時に+αでcoin/material得る確率
-        crafting時に割引で行える確率
+    リファクタリング
+        容量限界に付き、コードのスリム化 or 別コントラ化
+        coin, materialをそれぞれ別にするか
+        summonerパラメータのstruct化
+        exp_next_requiredなどはライブラリ化して別コントラとするか
+
+    item, pet NFTの譲渡の実装
+        update関数の実装
+            mm側に用意し, mcとmpのowner_summonerおよびwallet onwerをすべてチェックしてfalseを0に置換する
+        1つのpet/itemが2つ以上のsummonerに紐付け可能なことを回避する実装を考える
 
     itemの補正方法の修正
         1つ所持するとステータス+1もしくは+2の補正で
@@ -18,6 +25,8 @@ ToDo
         12 + 12 + 12 + 12 + 12 = 60？
 
     ワールドダイスの実装
+        mmに係数を追加
+            ワールドダイスコントラからしか書き換えられないようにする
         クラフト品とする, 少し高めのコスト設定
         すべての補正+1～20%
         utc 0時以降, その日の分を振れる
@@ -33,22 +42,19 @@ ToDo
         summonerの行動によって結果がかわる
         1ヶ月で最大成長ぐらいか
 
-    item, pet NFTの譲渡の実装
-        update関数の実装
-            mm側に用意し, mcとmpのowner_summonerおよびwallet onwerをすべてチェックしてfalseを0に置換する
+ok  Luckの補正の実装
+        feeding/grooming時に+αでexp得る確率
+        stop mining/farming時に+αでcoin/material得る確率
+        crafting時に割引で行える確率
 
-    1つのpet/itemが2つ以上のsummonerに紐付け可能なことを回避する実装を考える
+ok  Vitステータスの削除
 
-    Vitステータスの削除
-
-    summonerパラメータのstruct化
-
-    URIの実装
+ok  URIの実装
         rarity方式にするか
         murasakiアイコン＋levelにするか
         base64等のURI関数の実装
 
-    ok mining, farming, craftingの要求レベルの実装
+ok  mining, farming, craftingの要求レベルの実装
 
 ***/
 
@@ -720,7 +726,7 @@ contract Murasaki_Main is ERC721, Ownable{
     mapping(uint32 => uint32) public strength;
     mapping(uint32 => uint32) public dexterity;
     mapping(uint32 => uint32) public intelligence;
-    mapping(uint32 => uint32) public vitality;
+    //mapping(uint32 => uint32) public vitality;
     mapping(uint32 => uint32) public luck;
     mapping(uint32 => uint32) public birth_time;
     mapping(uint32 => uint32) public last_feeding_time;
@@ -752,6 +758,7 @@ contract Murasaki_Main is ERC721, Ownable{
     uint8 public price = 0 ether;
     address public murasaki_craft_address;
     address public murasaki_pet_address;
+    address public codex_address;
     uint32 public speed = 1;
 
     //set variants, only owner
@@ -770,6 +777,9 @@ contract Murasaki_Main is ERC721, Ownable{
     function set_speed(uint32 _speed) public onlyOwner {
         speed = _speed;
     }
+    function set_codex_address(address _address) public onlyOwner {
+        codex_address = _address;
+    }
 
     //withdraw, only owner
     function withdraw(address rec)public onlyOwner{
@@ -782,7 +792,8 @@ contract Murasaki_Main is ERC721, Ownable{
         li_status[0] = ctype[_summoner];
         li_status[1] = strength[_summoner];
         li_status[2] = dexterity[_summoner];
-        li_status[3] = vitality[_summoner];
+        //li_status[3] = vitality[_summoner];
+        li_status[3] = 0;
         li_status[4] = intelligence[_summoner];
         li_status[5] = luck[_summoner];
         li_status[6] = birth_time[_summoner];
@@ -818,7 +829,7 @@ contract Murasaki_Main is ERC721, Ownable{
         level[_next_summoner] = 1;
         strength[_next_summoner] = 500;
         dexterity[_next_summoner] = 500;
-        vitality[_next_summoner] = 500;
+        //vitality[_next_summoner] = 500;
         intelligence[_next_summoner] = 500;
         luck[_next_summoner] = 500;
         coin[_next_summoner] = 0;
@@ -860,6 +871,10 @@ contract Murasaki_Main is ERC721, Ownable{
         if (_delta_sec >= (base_sec / 2)) {
             _delta_sec = base_sec / 2;
         }
+        Codex rd = Codex(codex_address);
+        if (rd.d100(_summoner) <= luck[_summoner]/100) {
+            _delta_sec * 2;
+        }
         exp[_summoner] += _delta_sec * speed / 100;
         last_feeding_time[_summoner] = _now;
     }
@@ -868,10 +883,10 @@ contract Murasaki_Main is ERC721, Ownable{
         uint32 _delta_sec = _now - last_feeding_time[_summoner];
         //if (_delta_sec >= (base_sec * 1)) {
         //    _delta_sec = base_sec * 1;
-        if (_delta_sec >= (base_sec / 2)) {
-            _delta_sec = base_sec / 2;
+        if (_delta_sec >= (base_sec / 2 /speed)) {
+            _delta_sec = base_sec / 2 /speed;
         }
-        uint32 _satiety = 100 * (base_sec - _delta_sec) / base_sec;
+        uint32 _satiety = 100 * ((base_sec/2 /speed) - _delta_sec) / (base_sec/2 /speed);
         return _satiety;
     }
 
@@ -884,6 +899,10 @@ contract Murasaki_Main is ERC721, Ownable{
         if (_delta_sec >= (base_sec * 3)) {
             _delta_sec = base_sec * 3;
         }
+        Codex rd = Codex(codex_address);
+        if (rd.d100(_summoner) <= luck[_summoner]/100) {
+            _delta_sec * 2;
+        }
         exp[_summoner] += _delta_sec * speed / 100 ;
         last_grooming_time_plus_working_time[_summoner] = _now;
         last_grooming_time[_summoner] = _now;
@@ -891,10 +910,10 @@ contract Murasaki_Main is ERC721, Ownable{
     function calc_happy(uint32 _summoner) public view returns (uint32) {
         uint32 _now = uint32(block.timestamp);
         uint32 _delta_sec = _now - last_grooming_time[_summoner];
-        if (_delta_sec >= (base_sec * 3)) {
-            _delta_sec = base_sec * 3;
+        if (_delta_sec >= (base_sec * 3 /speed)) {
+            _delta_sec = base_sec * 3 /speed;
         }
-        uint32 _happy = 100 * ((base_sec*3) - _delta_sec) / (base_sec*3);
+        uint32 _happy = 100 * ((base_sec*3 /speed) - _delta_sec) / (base_sec*3 /speed);
         return _happy;
     }
 
@@ -913,6 +932,12 @@ contract Murasaki_Main is ERC721, Ownable{
         require(mining_status[_summoner] == 1);
         uint32 _now = uint32(block.timestamp);
         uint32 _delta = calc_coin(_summoner);
+        //luck modification
+        Codex rd = Codex(codex_address);
+        if (rd.d100(_summoner) <= luck[_summoner]/100) {
+            _delta * 2;
+        }
+        //add coin
         coin[_summoner] += _delta;
         uint32 _delta_sec = _now - mining_start_time[_summoner];
         total_mining_sec[_summoner] += _delta_sec;
@@ -924,7 +949,7 @@ contract Murasaki_Main is ERC721, Ownable{
         require(mining_status[_summoner] == 1);
         uint32 _now = uint32(block.timestamp);
         uint32 _delta = (_now - mining_start_time[_summoner]) * speed / 100;
-        _delta += (_delta * strength[_summoner]) / 100;    //status modification
+        _delta += (_delta * strength[_summoner]/100) / 100;    //status modification
         _delta += (_delta * level[_summoner]) / 100;    //level modification
         uint8 _mining_items = count_mining_items(_summoner);
         _delta += (_delta * _mining_items) / 100;   //item modification
@@ -957,6 +982,10 @@ contract Murasaki_Main is ERC721, Ownable{
         require(farming_status[_summoner] == 1);
         uint32 _now = uint32(block.timestamp);
         uint32 _delta = calc_material(_summoner);
+        Codex rd = Codex(codex_address);
+        if (rd.d100(_summoner) <= luck[_summoner]/100) {
+            _delta * 2;
+        }
         material[_summoner] += _delta;
         uint32 _delta_sec = _now - farming_start_time[_summoner];
         total_farming_sec[_summoner] += _delta_sec;
@@ -968,7 +997,7 @@ contract Murasaki_Main is ERC721, Ownable{
         require(farming_status[_summoner] == 1);
         uint32 _now = uint32(block.timestamp);
         uint32 _delta = (_now - farming_start_time[_summoner]) * speed / 1000;
-        _delta += (_delta * dexterity[_summoner]) / 100;   //status modification
+        _delta += (_delta * dexterity[_summoner]/100) / 100;   //status modification
         _delta += (_delta * level[_summoner]) / 100;   //level modification
         return _delta;
     }
@@ -1029,8 +1058,8 @@ contract Murasaki_Main is ERC721, Ownable{
         crafting_start_time[_summoner] = _now;
     }
     function stop_crafting(uint32 _summoner) public {
-        require(_isApprovedOrOwner(msg.sender, _summoner), "owner error");
-        require(crafting_status[_summoner] == 1, "status error");
+        require(_isApprovedOrOwner(msg.sender, _summoner));
+        require(crafting_status[_summoner] == 1);
         uint32 _now = uint32(block.timestamp);
         uint32 _delta_sec = (_now - crafting_start_time[_summoner]);
         uint8 _item_type = crafting_item_type[_summoner];
@@ -1058,7 +1087,7 @@ contract Murasaki_Main is ERC721, Ownable{
         }
     }
     function calc_crafting(uint32 _summoner) public view returns (uint32) {
-        require(crafting_status[_summoner] == 1, "status error");
+        require(crafting_status[_summoner] == 1);
         uint32 _now = uint32(block.timestamp);
         uint8 _item_type = crafting_item_type[_summoner];
         uint32 _delta_time = (_now - crafting_start_time[_summoner]) * speed;
@@ -1166,6 +1195,51 @@ contract Murasaki_Main is ERC721, Ownable{
             next_exp_required[_summoner] = 190000;
         }
     }
+
+    function toString(uint256 value) internal pure returns (string memory) {
+    // Inspired by OraclizeAPI's implementation - MIT license
+    // https://github.com/oraclize/ethereum-api/blob/b42146b063c7d6ee1358846c198246239e9360e8/oraclizeAPI_0.4.25.sol
+        if (value == 0) {
+            return "0";
+        }
+        uint256 temp = value;
+        uint256 digits;
+        while (temp != 0) {
+            digits++;
+            temp /= 10;
+        }
+        bytes memory buffer = new bytes(digits);
+        while (value != 0) {
+            digits -= 1;
+            buffer[digits] = bytes1(uint8(48 + uint256(value % 10)));
+            value /= 10;
+        }
+        return string(buffer);
+    }
+
+    function tokenURI (uint32 _summoner) public view returns (string memory) {
+        string[9] memory parts;
+        parts[0] = '<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin meet" viewBox="0 0 350 350"><style>.base { fill: white; font-family: serif; font-size: 14px; }</style><rect width="100%" height="100%" fill="black" /><text x="10" y="20" class="base">';
+
+        parts[1] = string(abi.encodePacked("type", " ", toString(ctype[_summoner])));
+        parts[2] = '</text><text x="10" y="40" class="base">';
+
+        parts[3] = string(abi.encodePacked("birth time", " ", toString(birth_time[_summoner])));
+        parts[4] = '</text><text x="10" y="60" class="base">';
+
+        parts[5] = string(abi.encodePacked("level", " ", toString(level[_summoner])));
+        parts[6] = '</text><text x="10" y="80" class="base">';
+
+        parts[7] = string(abi.encodePacked("status", " ", toString(strength[_summoner]), " ", toString(dexterity[_summoner]), " ", toString(intelligence[_summoner]), " ", toString(luck[_summoner])));
+        parts[8] = '</text></svg>';
+
+        string memory output = string(abi.encodePacked(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7], parts[8]));
+        
+        string memory json = Base64.encode(bytes(string(abi.encodePacked('{"name": "summoner #', toString(_summoner), '", "description": "Murasaki-san", "image": "data:image/svg+xml;base64,', Base64.encode(bytes(output)), '"}'))));
+        output = string(abi.encodePacked('data:application/json;base64,', json));
+        return output;        
+    }
+
 }
 
 
@@ -1196,60 +1270,61 @@ contract Murasaki_Craft is ERC721, Ownable{
         //0:dummy
         0,
         //1-16: mining item
-        1000,
-        3000,
-        6000,
-        10000,
-        15000,
-        21000,
-        28000,
-        36000,
-        45000,
-        55000,
-        66000,
-        78000,
-        91000,
-        105000,
-        120000,
-        136000,
+        100000,
+        300000,
+        600000,
+        1000000,
+        1500000,
+        2100000,
+        2800000,
+        3600000,
+        4500000,
+        5500000,
+        6600000,
+        7800000,
+        9100000,
+        10500000,
+        12000000,
+        13600000,
         //17-32: farming item
-        1000,
-        3000,
-        6000,
-        10000,
-        15000,
-        21000,
-        28000,
-        36000,
-        45000,
-        55000,
-        66000,
-        78000,
-        91000,
-        105000,
-        120000,
-        136000,
+        100000,
+        300000,
+        600000,
+        1000000,
+        1500000,
+        2100000,
+        2800000,
+        3600000,
+        4500000,
+        5500000,
+        6600000,
+        7800000,
+        9100000,
+        10500000,
+        12000000,
+        13600000,
         //33-48: crafting item
-        1000,
-        3000,
-        6000,
-        10000,
-        15000,
-        21000,
-        28000,
-        36000,
-        45000,
-        55000,
-        66000,
-        78000,
-        91000,
-        105000,
-        120000,
-        136000,
+        100000,
+        300000,
+        600000,
+        1000000,
+        1500000,
+        2100000,
+        2800000,
+        3600000,
+        4500000,
+        5500000,
+        6600000,
+        7800000,
+        9100000,
+        10500000,
+        12000000,
+        13600000,
         //49: pet
-        1000,
+        100000,
+        //50: ,musicbox
+        300000,
         //50-63: unreserved
-        1000,
         1000,
         1000,
         1000,
@@ -1269,60 +1344,61 @@ contract Murasaki_Craft is ERC721, Ownable{
         //0:dummy
         0,
         //1-16: mining item
-        100,
-        300,
-        600,
         1000,
-        1500,
-        2100,
-        2800,
-        3600,
-        4500,
-        5500,
-        6600,
-        7800,
-        9100,
-        10500,
-        12000,
-        13600,
+        3000,
+        6000,
+        10000,
+        15000,
+        21000,
+        28000,
+        36000,
+        45000,
+        55000,
+        66000,
+        78000,
+        91000,
+        105000,
+        120000,
+        136000,
         //17-32: farming item
-        100,
-        300,
-        600,
         1000,
-        1500,
-        2100,
-        2800,
-        3600,
-        4500,
-        5500,
-        6600,
-        7800,
-        9100,
-        10500,
-        12000,
-        13600,
+        3000,
+        6000,
+        10000,
+        15000,
+        21000,
+        28000,
+        36000,
+        45000,
+        55000,
+        66000,
+        78000,
+        91000,
+        105000,
+        120000,
+        136000,
         //33-48: crafting item
-        100,
-        300,
-        600,
         1000,
-        1500,
-        2100,
-        2800,
-        3600,
-        4500,
-        5500,
-        6600,
-        7800,
-        9100,
-        10500,
-        12000,
-        13600,
+        3000,
+        6000,
+        10000,
+        15000,
+        21000,
+        28000,
+        36000,
+        45000,
+        55000,
+        66000,
+        78000,
+        91000,
+        105000,
+        120000,
+        136000,
         //49: pet
-        100,
+        1000,
+        //50: muscibox
+        3000,
         //50-63: unreserved
-        100,
         100,
         100,
         100,
@@ -1342,60 +1418,61 @@ contract Murasaki_Craft is ERC721, Ownable{
         //0:dummy
         0,
         //1-16: mining item
-        10,
-        30,
-        60,
         100,
-        150,
-        210,
-        280,
-        360,
-        450,
-        550,
-        660,
-        780,
-        910,
-        1050,
-        1200,
-        1360,
+        300,
+        600,
+        1000,
+        1500,
+        2100,
+        2800,
+        3600,
+        4500,
+        5500,
+        6600,
+        7800,
+        9100,
+        10500,
+        12000,
+        13600,
         //17-32: farming item
-        10,
-        30,
-        60,
         100,
-        150,
-        210,
-        280,
-        360,
-        450,
-        550,
-        660,
-        780,
-        910,
-        1050,
-        1200,
-        1360,
+        300,
+        600,
+        1000,
+        1500,
+        2100,
+        2800,
+        3600,
+        4500,
+        5500,
+        6600,
+        7800,
+        9100,
+        10500,
+        12000,
+        13600,
         //33-48: crafting item
-        10,
-        30,
-        60,
         100,
-        150,
-        210,
-        280,
-        360,
-        450,
-        550,
-        660,
-        780,
-        910,
-        1050,
-        1200,
-        1360,
+        300,
+        600,
+        1000,
+        1500,
+        2100,
+        2800,
+        3600,
+        4500,
+        5500,
+        6600,
+        7800,
+        9100,
+        10500,
+        12000,
+        13600,
         //49: pet
-        10,
+        100,
+        //50: musicbox
+        300,
         //50-63: unreserved
-        10,
         10,
         10,
         10,
@@ -1622,6 +1699,123 @@ contract Murasaki_Pet is ERC721, Ownable{
         return _delta;
     }
 
+}
+
+
+/// [MIT License]
+/// @title Base64
+/// @notice Provides a function for encoding some bytes in base64
+/// @author Brecht Devos <brecht@loopring.org>
+library Base64 {
+    bytes internal constant TABLE = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+    /// @notice Encodes some bytes to the base64 representation
+    function encode(bytes memory data) internal pure returns (string memory) {
+        uint256 len = data.length;
+        if (len == 0) return "";
+
+        // multiply by 4/3 rounded up
+        uint256 encodedLen = 4 * ((len + 2) / 3);
+
+        // Add some extra buffer at the end
+        bytes memory result = new bytes(encodedLen + 32);
+
+        bytes memory table = TABLE;
+
+        assembly {
+            let tablePtr := add(table, 1)
+            let resultPtr := add(result, 32)
+
+            for {
+                let i := 0
+            } lt(i, len) {
+
+            } {
+                i := add(i, 3)
+                let input := and(mload(add(data, i)), 0xffffff)
+
+                let out := mload(add(tablePtr, and(shr(18, input), 0x3F)))
+                out := shl(8, out)
+                out := add(out, and(mload(add(tablePtr, and(shr(12, input), 0x3F))), 0xFF))
+                out := shl(8, out)
+                out := add(out, and(mload(add(tablePtr, and(shr(6, input), 0x3F))), 0xFF))
+                out := shl(8, out)
+                out := add(out, and(mload(add(tablePtr, and(input, 0x3F))), 0xFF))
+                out := shl(224, out)
+
+                mstore(resultPtr, out)
+
+                resultPtr := add(resultPtr, 4)
+            }
+
+            switch mod(len, 3)
+            case 1 {
+                mstore(sub(resultPtr, 2), shl(240, 0x3d3d))
+            }
+            case 2 {
+                mstore(sub(resultPtr, 1), shl(248, 0x3d))
+            }
+
+            mstore(result, encodedLen)
+        }
+
+        return string(result);
+    }
+}
+
+
+contract Codex {
+    string constant public index = "Base";
+    string constant public class = "Random";
+    
+    function d100(uint _summoner) external view returns (uint) {
+        return dn(_summoner, 100);
+    }
+    
+    function d20(uint _summoner) external view returns (uint) {
+        return dn(_summoner, 20);
+    }
+    
+    function d12(uint _summoner) external view returns (uint) {
+        return dn(_summoner, 12);
+    }
+    
+    function d10(uint _summoner) external view returns (uint) {
+        return dn(_summoner, 10);
+    }
+    
+    function d8(uint _summoner) external view returns (uint) {
+        return dn(_summoner, 8);
+    }
+    
+    function d6(uint _summoner) external view returns (uint) {
+        return dn(_summoner, 6);
+    }
+    
+    function d4(uint _summoner) external view returns (uint) {
+        return dn(_summoner, 4);
+    }
+    
+    function dn(uint _summoner, uint _number) public view returns (uint) {
+        return _seed(_summoner) % _number;
+    }
+    
+    function _random(string memory input) internal pure returns (uint256) {
+        return uint256(keccak256(abi.encodePacked(input)));
+    }
+    
+    function _seed(uint _summoner) internal view returns (uint rand) {
+        rand = _random(
+            string(
+                abi.encodePacked(
+                    block.timestamp,
+                    blockhash(block.number - 1),
+                    _summoner,
+                    msg.sender
+                )
+            )
+        );
+    }
 }
 
 
