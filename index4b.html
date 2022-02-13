@@ -709,7 +709,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
                 this.submode = 2;
             }
         }else if (this.submode == 2) {
-            this.anims.play("murasaki_farming", true);
+            this.anims.play("murasaki_crafting", true);
         }
     }
     update(){
@@ -723,7 +723,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         else if (this.mode == "mining") {this.mining();}
         else if (this.mode == "hugging") {this.hugging();}
         else if (this.mode == "farming") {this.farming();}
-        else if (this.mode == "crafting") {this.farming();}
+        else if (this.mode == "crafting") {this.crafting();}
     }
 }
 
@@ -1059,6 +1059,7 @@ function preload() {
     this.load.spritesheet("murasaki_hugging", "png/murasaki_hugging.png", {frameWidth: 370, frameHeight: 320});
     this.load.spritesheet("murasaki_farming", "png/murasaki_farming.png", {frameWidth: 370, frameHeight: 320});
     this.load.spritesheet("murasaki_grooming", "png/murasaki_grooming.png", {frameWidth: 720, frameHeight: 622});
+    this.load.spritesheet("murasaki_crafting", "png/murasaki_crafting.png", {frameWidth: 370, frameHeight: 320});
     this.load.spritesheet("murasaki_working_left", "png/murasaki_working_left.png", {frameWidth: 370, frameHeight: 320});
     this.load.spritesheet("murasaki_working_right", "png/murasaki_working_right.png", {frameWidth: 370, frameHeight: 320});
     this.load.spritesheet("murasaki_click", "png/murasaki_click.png", {frameWidth: 370, frameHeight: 320});
@@ -1193,6 +1194,12 @@ function create() {
     this.anims.create({
         key: "murasaki_grooming",
         frames: this.anims.generateFrameNumbers("murasaki_grooming", {start:0, end:1}),
+        frameRate: 1,
+        repeat: -1
+    });
+    this.anims.create({
+        key: "murasaki_crafting",
+        frames: this.anims.generateFrameNumbers("murasaki_crafting", {start:0, end:1}),
         frameRate: 1,
         repeat: -1
     });
