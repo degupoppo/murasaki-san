@@ -371,6 +371,16 @@ async function contract_start_crafting(summoner) {
         item_type = 50;
     }else if (item_text == "Violin (1000/100)") {
         item_type = 33;
+    }else if (item_text == "item17 (1000/100)") {
+        item_type = 17;
+    }else if (item_text == "item18 (3000/300)") {
+        item_type = 18;
+    }else if (item_text == "item19 (6000/600)") {
+        item_type = 19;
+    }else if (item_text == "item20 (10000/1000)") {
+        item_type = 20;
+    }else if (item_text == "item21 (15000/1500)") {
+        item_type = 21;
     }else {
         item_type = 1;
     }
@@ -1102,6 +1112,11 @@ function preload() {
     //items
     this.load.image("item_musicbox", "png/item_musicbox.png", {frameWidth: 300, frameHeight: 300});
     this.load.image("item_violin", "png/item_violin.png", {frameWidth: 600, frameHeight: 600});
+    this.load.image("item_17", "png/item_17.png", {frameWidth: 300, frameHeight: 300});
+    this.load.image("item_18", "png/item_18.png", {frameWidth: 300, frameHeight: 300});
+    this.load.image("item_19", "png/item_19.png", {frameWidth: 300, frameHeight: 300});
+    this.load.image("item_20", "png/item_20.png", {frameWidth: 300, frameHeight: 300});
+    this.load.image("item_21", "png/item_21.png", {frameWidth: 300, frameHeight: 300});
 
 }
 
@@ -1357,7 +1372,12 @@ function create() {
         " > SELECT ITEM < ",
         "Ms. Astar (1000/100)",
         "Music Box (3000/300)",
-        "Violin (1000/100)"
+        "Violin (1000/100)",
+        "item17 (1000/100)",
+        "item18 (3000/100)",
+        "item19 (6000/100)",
+        "item20 (10000/100)",
+        "item21 (15000/100)",
     ];
     craft_item_list = CreateDropDownList(this, 500, 65, options)
         .layout()
@@ -1644,6 +1664,7 @@ function update() {
 
     }
 
+    //item control
     if (turn % 301 == 0 && local_items != previous_local_items) {
         
         //if (local_items[1] != 0 && local_items_flag[1] != true) {
@@ -1652,6 +1673,36 @@ function update() {
             item_violin.scaleX = item_violin.scaleX * 0.15;
             item_violin.scaleY = item_violin.scaleY * 0.15;
             local_items_flag[33] = true;
+        }
+        if (local_items[17] != 0 && local_items_flag[17] != true) {
+            item_17 = this.add.sprite(150,550, "item_17");
+            item_17.scaleX = item_17.scaleX * 0.25;
+            item_17.scaleY = item_17.scaleY * 0.25;
+            local_items_flag[17] = true;
+        }
+        if (local_items[18] != 0 && local_items_flag[18] != true) {
+            item_18 = this.add.sprite(200,550, "item_18");
+            item_18.scaleX = item_18.scaleX * 0.25;
+            item_18.scaleY = item_18.scaleY * 0.25;
+            local_items_flag[18] = true;
+        }
+        if (local_items[19] != 0 && local_items_flag[19] != true) {
+            item_19 = this.add.sprite(250,550, "item_19");
+            item_19.scaleX = item_19.scaleX * 0.25;
+            item_19.scaleY = item_19.scaleY * 0.25;
+            local_items_flag[19] = true;
+        }
+        if (local_items[20] != 0 && local_items_flag[20] != true) {
+            item_20 = this.add.sprite(300,550, "item_20");
+            item_20.scaleX = item_20.scaleX * 0.25;
+            item_20.scaleY = item_20.scaleY * 0.25;
+            local_items_flag[20] = true;
+        }
+        if (local_items[21] != 0 && local_items_flag[21] != true) {
+            item_21 = this.add.sprite(350,550, "item_21");
+            item_21.scaleX = item_21.scaleX * 0.25;
+            item_21.scaleY = item_21.scaleY * 0.25;
+            local_items_flag[21] = true;
         }
 
         previous_local_items = local_items;
