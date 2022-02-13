@@ -48,17 +48,19 @@ ok! しゅっきん！（お仕事へ移動中）
 
 ToDo
 
-    coin/material送金UIの実装
+    summoner所持item
+        所持itemの検索
+        所持itemのスプライト表示
+
+    summoner設定のページの実装
+        coin/material送金UIの実装
+        所持item一覧と, summonerへのセット, 移動の実装
 
     ステータス表示の実装
         coin, materialの表記をどうするか
 
     BGMと効果音の追加
         効果音の吟味と割り当て
-
-    summoner所持item
-        所持itemの検索
-        所持itemのスプライト表示
 
     craftingのUI実装
      ok item_idの選択方法
@@ -163,6 +165,10 @@ let previous_local_crafting_status;
 let previous_local_exp;
 
 let bgm = 0;
+
+let local_items;
+let previous_local_items;
+let local_items_flag = new Array(64).fill(0);
 
 let SPEED = 24;
 
@@ -275,6 +281,8 @@ async function contract_update_status(summoner) {
         */
     }
     local_musicbox = await contract.methods.items(summoner, 50).call();
+    local_items = await contract.methods.get_items(summoner).call();
+    console.log(local_items);
 }
 
 //send feeding
@@ -361,6 +369,8 @@ async function contract_start_crafting(summoner) {
         item_type = 49;
     }else if (item_text == "Music Box (3000/300)") {
         item_type = 50;
+    }else if (item_text == "Violin (1000/100)") {
+        item_type = 33;
     }else {
         item_type = 1;
     }
@@ -1091,6 +1101,7 @@ function preload() {
 
     //items
     this.load.image("item_musicbox", "png/item_musicbox.png", {frameWidth: 300, frameHeight: 300});
+    this.load.image("item_violin", "png/item_violin.png", {frameWidth: 600, frameHeight: 600});
 
 }
 
@@ -1345,11 +1356,14 @@ function create() {
     let options = [
         " > SELECT ITEM < ",
         "Ms. Astar (1000/100)",
-        "Music Box (3000/300)"
+        "Music Box (3000/300)",
+        "Violin (1000/100)"
     ];
     craft_item_list = CreateDropDownList(this, 500, 65, options)
         .layout()
     text_craft_item = this.add.text(200, 200, "", font_arg);
+
+    
 
 }
 
@@ -1628,6 +1642,20 @@ function update() {
         previous_local_crafting_status = local_crafting_status;
         previous_local_exp = local_exp;
 
+    }
+
+    //item control
+    if (turn % 301 == 0 && local_items != previous_local_items) {
+        
+        //if (local_items[1] != 0 && local_items_flag[1] != true) {
+        if (local_items[33] != 0 && local_items_flag[33] != true) {
+            item_violin = this.add.sprite(750,380, "item_violin");
+            item_violin.scaleX = item_violin.scaleX * 0.15;
+            item_violin.scaleY = item_violin.scaleY * 0.15;
+            local_items_flag[33] = true;
+        }
+
+        previous_local_items = local_items;
     }
 
     //update dynamic status from contract to local

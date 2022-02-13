@@ -4,6 +4,17 @@
 codex: 0x75988207eb57E54781e5E2CA1ec538d6653046AE
 ToDo
 
+    itemのrarity設定
+        +1-2の範囲で補正を変える
+        +2補正のアイテムはd20=20とかレアにする
+        補正値をmm側で参照するシステムが一番の難点か
+    
+    バランス調整
+        Lv1上がる日数
+        1日に得られるcoin
+        1日に得られるmaterial
+        craftに費やす日数
+
     リファクタリング
         容量限界に付き、コードのスリム化 or 別コントラ化
         coin, materialをそれぞれ別にするか
@@ -868,8 +879,8 @@ contract Murasaki_Main is ERC721, Ownable{
         uint32 _delta_sec = _now - last_feeding_time[_summoner];
         //if (_delta_sec >= (base_sec * 1)) {
         //    _delta_sec = base_sec * 1;
-        if (_delta_sec >= (base_sec / 2)) {
-            _delta_sec = base_sec / 2;
+        if (_delta_sec >= (base_sec / 2 /speed)) {
+            _delta_sec = base_sec / 2 /speed;
         }
         Codex rd = Codex(codex_address);
         if (rd.d100(_summoner) <= luck[_summoner]/100) {
@@ -896,8 +907,8 @@ contract Murasaki_Main is ERC721, Ownable{
         require(mining_status[_summoner] == 0 && farming_status[_summoner] == 0 && crafting_status[_summoner] == 0);
         uint32 _now = uint32(block.timestamp);
         uint32 _delta_sec = _now - last_grooming_time_plus_working_time[_summoner];
-        if (_delta_sec >= (base_sec * 3)) {
-            _delta_sec = base_sec * 3;
+        if (_delta_sec >= (base_sec * 3 /speed)) {
+            _delta_sec = base_sec * 3 /speed;
         }
         Codex rd = Codex(codex_address);
         if (rd.d100(_summoner) <= luck[_summoner]/100) {
