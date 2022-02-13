@@ -13,8 +13,16 @@
     <script src="js/murasaki_pet.js"></script>
     <script src="js/dropdownlist.js"></script>
     <style type="text/css">
-        body {
-            margin: 0;
+body {
+          margin: 0;
+          padding: 0;
+          /*image-rendering: optimizeSpeed;              /* Older versions of FF */
+          /*image-rendering: -moz-crisp-edges;           /* FF 6.0+ */
+          /*image-rendering: -webkit-optimize-contrast;  /* Webkit (non standard naming) */
+          /*image-rendering: -o-crisp-edges;             /* OS X & Windows Opera (12.02+) */
+          /*image-rendering: crisp-edges;                /* Possible future browsers. */
+          /*-ms-interpolation-mode: nearest-neighbor;    /* IE (non standard naming) */
+          /*image-rendering: pixelated;                  /* Chrome 41 */
         }
     </style>
 </head>
@@ -23,6 +31,12 @@
 
 
 <!---
+
+        body {
+            margin: 0;
+        }
+
+
 
 picture
     背景
@@ -1030,7 +1044,8 @@ let config = {
         update: update
     },
     render: {
-        pixelArt: false
+        //pixelArt: true,
+        //antialias: false
     },
     //resolution: 5,
 };
@@ -1314,8 +1329,9 @@ function create() {
 
     //summoner
     murasakisan = new Murasakisan(this, 300 + Math.random()*200, 400 + Math.random()*100);
-    murasakisan.scaleX = murasakisan.scaleX * 0.3;
-    murasakisan.scaleY = murasakisan.scaleY * 0.3;
+    //murasakisan.scaleX = murasakisan.scaleX * 0.3;
+    //murasakisan.scaleY = murasakisan.scaleY * 0.3;
+    murasakisan.setScale(0.3);
 
     //button_text
     new Button(30, 10, 'Level Up', this, () => contract_level_up(summoner));
