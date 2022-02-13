@@ -982,7 +982,7 @@ function music() {
     }else {
         bgm.stop();
         flag_music = 0;
-        item_musicbox.anims.play("item_musicbox", false);
+        item_musicbox.anims.stop();
     }
 }
 
