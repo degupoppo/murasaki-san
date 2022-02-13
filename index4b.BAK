@@ -385,7 +385,7 @@ async function contract_start_crafting(summoner) {
         item_type = 50;
     }else if (item_text == "Violin (1000/100)") {
         item_type = 33;
-    }else if (item_text == "item17 (1000/100)") {
+    }else if (item_text == "Vase (1000/100)") {
         item_type = 17;
     }else if (item_text == "item18 (3000/300)") {
         item_type = 18;
@@ -978,9 +978,11 @@ function music() {
         //bgm = array[Math.floor(Math.random() * array.length)];
         bgm.play();
         flag_music = 1;
+        item_musicbox.anims.play("item_musicbox", true);
     }else {
         bgm.stop();
         flag_music = 0;
+        item_musicbox.anims.play("item_musicbox", false);
     }
 }
 
@@ -1126,9 +1128,10 @@ function preload() {
     });
 
     //items
-    this.load.image("item_musicbox", "png/item_musicbox.png", {frameWidth: 370, frameHeight: 320});
+    //this.load.image("item_musicbox", "png/item_musicbox.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("item_musicbox", "png/item_musicbox.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("item_violin", "png/item_violin.png", {frameWidth: 600, frameHeight: 600});
-    this.load.image("item_17", "png/item_17.png", {frameWidth: 300, frameHeight: 300});
+    this.load.image("item_vase", "png/item_vase.png", {frameWidth: 300, frameHeight: 300});
     this.load.image("item_18", "png/item_18.png", {frameWidth: 300, frameHeight: 300});
     this.load.image("item_19", "png/item_19.png", {frameWidth: 300, frameHeight: 300});
     this.load.image("item_20", "png/item_20.png", {frameWidth: 300, frameHeight: 300});
@@ -1239,6 +1242,12 @@ function create() {
     this.anims.create({
         key: "pet_normal",
         frames: this.anims.generateFrameNumbers("pet_normal", {start:0, end:1}),
+        frameRate: 1,
+        repeat: -1
+    });
+    this.anims.create({
+        key: "item_musicbox",
+        frames: this.anims.generateFrameNumbers("item_musicbox", {start:0, end:1}),
         frameRate: 1,
         repeat: -1
     });
@@ -1396,7 +1405,7 @@ function create() {
         "Ms. Astar (1000/100)",
         "Music Box (3000/300)",
         "Violin (1000/100)",
-        "item17 (1000/100)",
+        "Vase (1000/100)",
         "item18 (3000/300)",
         "item19 (6000/600)",
         "item20 (10000/1000)",
@@ -1576,7 +1585,7 @@ function update() {
         //musicbox
         if (local_musicbox > 0) {
             if (flag_musicbox == 0) {
-                item_musicbox = this.add.sprite(750,550, "item_musicbox");
+                item_musicbox = this.add.sprite(750,530, "item_musicbox");
                 item_musicbox.scaleX = item_musicbox.scaleX * 0.3;
                 item_musicbox.scaleY = item_musicbox.scaleY * 0.3;
                 item_musicbox.setInteractive({useHandCursor: true});
@@ -1698,9 +1707,9 @@ function update() {
             local_items_flag[33] = true;
         }
         if (local_items[17] != 0 && local_items_flag[17] != true) {
-            item_17 = this.add.sprite(150,550, "item_17");
-            item_17.scaleX = item_17.scaleX * 0.25;
-            item_17.scaleY = item_17.scaleY * 0.25;
+            item_17 = this.add.sprite(400,120, "item_vase");
+            item_17.scaleX = item_17.scaleX * 0.20;
+            item_17.scaleY = item_17.scaleY * 0.20;
             local_items_flag[17] = true;
         }
         if (local_items[18] != 0 && local_items_flag[18] != true) {
