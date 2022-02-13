@@ -978,11 +978,12 @@ function music() {
         //bgm = array[Math.floor(Math.random() * array.length)];
         bgm.play();
         flag_music = 1;
-        item_musicbox.anims.play("item_musicbox", true);
+        item_musicbox.anims.play("item_musicbox_on", true);
     }else {
         bgm.stop();
         flag_music = 0;
-        item_musicbox.anims.pause(item_musicbox.anims.currentAnim.frames[0]);
+        //item_musicbox.anims.pause(item_musicbox.anims.currentAnim.frames[0]);
+        item_musicbox.anims.play("item_musicbox_off", true);
     }
 }
 
@@ -1246,8 +1247,14 @@ function create() {
         repeat: -1
     });
     this.anims.create({
-        key: "item_musicbox",
-        frames: this.anims.generateFrameNumbers("item_musicbox", {start:0, end:1}),
+        key: "item_musicbox_on",
+        frames: this.anims.generateFrameNumbers("item_musicbox", {start:1, end:2}),
+        frameRate: 1,
+        repeat: -1
+    });
+    this.anims.create({
+        key: "item_musicbox_off",
+        frames: this.anims.generateFrameNumbers("item_musicbox", {start:0, end:0}),
         frameRate: 1,
         repeat: -1
     });
@@ -1585,6 +1592,8 @@ function update() {
         //musicbox
         if (local_musicbox > 0) {
             if (flag_musicbox == 0) {
+                //item_musicbox = this.add.sprite(750,530, "item_musicbox_off");
+                //item_musicbox = this.add.sprite(750,530, "item_musicbox_off");
                 item_musicbox = this.add.sprite(750,530, "item_musicbox");
                 item_musicbox.scaleX = item_musicbox.scaleX * 0.3;
                 item_musicbox.scaleY = item_musicbox.scaleY * 0.3;
