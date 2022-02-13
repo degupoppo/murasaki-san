@@ -723,7 +723,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         else if (this.mode == "mining") {this.mining();}
         else if (this.mode == "hugging") {this.hugging();}
         else if (this.mode == "farming") {this.farming();}
-        else if (this.mode == "crafting") {this.farming();}
+        else if (this.mode == "crafting") {this.crafting();}
     }
 }
 
@@ -1476,7 +1476,7 @@ function update() {
             murasakisan.submode = 0;
             murasakisan.count = 0;
             murasakisan.target_x = 500;
-            murasakisan.target_y = 250;
+            murasakisan.target_y = 280;
         }else if (local_crafting_status == 0 & murasakisan.mode == "crafting") {
             murasakisan.set_mode = "resting";
         }
