@@ -1126,7 +1126,7 @@ function preload() {
     });
 
     //items
-    this.load.image("item_musicbox", "png/item_musicbox.png", {frameWidth: 300, frameHeight: 300});
+    this.load.image("item_musicbox", "png/item_musicbox.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("item_violin", "png/item_violin.png", {frameWidth: 600, frameHeight: 600});
     this.load.image("item_17", "png/item_17.png", {frameWidth: 300, frameHeight: 300});
     this.load.image("item_18", "png/item_18.png", {frameWidth: 300, frameHeight: 300});
@@ -1331,7 +1331,7 @@ function create() {
     murasakisan = new Murasakisan(this, 300 + Math.random()*200, 400 + Math.random()*100);
     //murasakisan.scaleX = murasakisan.scaleX * 0.3;
     //murasakisan.scaleY = murasakisan.scaleY * 0.3;
-    murasakisan.setScale(0.35);
+    murasakisan.setScale(0.3);
 
     //button_text
     new Button(30, 10, 'Level Up', this, () => contract_level_up(summoner));
@@ -1577,8 +1577,8 @@ function update() {
         if (local_musicbox > 0) {
             if (flag_musicbox == 0) {
                 item_musicbox = this.add.sprite(750,550, "item_musicbox");
-                item_musicbox.scaleX = item_musicbox.scaleX * 0.2;
-                item_musicbox.scaleY = item_musicbox.scaleY * 0.2;
+                item_musicbox.scaleX = item_musicbox.scaleX * 0.3;
+                item_musicbox.scaleY = item_musicbox.scaleY * 0.3;
                 item_musicbox.setInteractive({useHandCursor: true});
                 item_musicbox.on('pointerdown', () => music() );
                 flag_musicbox = 1;
