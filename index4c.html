@@ -16,13 +16,6 @@
 body {
           margin: 0;
           padding: 0;
-          /*image-rendering: optimizeSpeed;              /* Older versions of FF */
-          /*image-rendering: -moz-crisp-edges;           /* FF 6.0+ */
-          /*image-rendering: -webkit-optimize-contrast;  /* Webkit (non standard naming) */
-          /*image-rendering: -o-crisp-edges;             /* OS X & Windows Opera (12.02+) */
-          /*image-rendering: crisp-edges;                /* Possible future browsers. */
-          /*-ms-interpolation-mode: nearest-neighbor;    /* IE (non standard naming) */
-          /*image-rendering: pixelated;                  /* Chrome 41 */
         }
     </style>
 </head>
@@ -160,7 +153,7 @@ let happy;
 let local_coin_calc;
 let local_material_calc;
 let local_crafting_calc;
-let local_pet;
+//let local_pet;
 let local_pet_mining_status;
 let local_pet_mining_start_time;
 let local_pet_coin_calc;
@@ -171,7 +164,7 @@ let local_musicbox;
 
 let flag_pet = 0;       //0:not crafted, 1:crafted
 let flag_music = 0;
-let flag_musicbox = 0;
+//let flag_musicbox = 0;
 
 let previous_local_mining_status;
 let previous_local_farming_status;
@@ -185,6 +178,7 @@ let previous_local_items;
 let local_items_flag = new Array(64).fill(0);
 
 let SPEED = 24;
+
 
 
 // html
@@ -281,20 +275,6 @@ async function contract_update_status(summoner) {
     }else if (local_crafting_status == 1) {
         local_crafting_calc = await contract.methods.calc_crafting(summoner).call();
     }
-    //pet check
-    //TODO: call whole items list, then view at type 49
-    local_pet = await contract.methods.items(summoner, 49).call();
-    if (local_pet != 0) {
-        /* NEED to update contract!
-        let contract_pet = await get_contract_pet(web3);
-        res = await contract_pet.methods.get_status(summoner).call();
-        local_pet_mining_status = res[0];
-        local_pet_mining_start_time = res[1];
-        local_pet_farming_status = res[2];
-        local_pet_farming_start_time = res[3];
-        */
-    }
-    local_musicbox = await contract.methods.items(summoner, 50).call();
     local_items = await contract.methods.get_items(summoner).call();
     console.log(local_items);
 }
@@ -342,14 +322,6 @@ async function contract_start_mining(summoner) {
         contract.methods.stop_mining(summoner).send({from:wallet});
     }
 }
-/*
-async function contract_stop_mining(summoner) {
-    let web3 = await connect();
-    let contract = await get_contract(web3);
-    let wallet = await get_wallet(web3);
-    contract.methods.stop_mining(summoner).send({from:wallet});
-}
-*/
 
 //farming
 async function contract_start_farming(summoner) {
@@ -362,14 +334,6 @@ async function contract_start_farming(summoner) {
         contract.methods.stop_farming(summoner).send({from:wallet});
     }
 }
-/*
-async function contract_stop_farming(summoner) {
-    let web3 = await connect();
-    let contract = await get_contract(web3);
-    let wallet = await get_wallet(web3);
-    contract.methods.stop_farming(summoner).send({from:wallet});
-}
-*/
 
 //crafting
 async function contract_start_crafting(summoner) {
@@ -405,14 +369,6 @@ async function contract_start_crafting(summoner) {
         contract.methods.stop_crafting(summoner).send({from:wallet});
     }
 }
-/*
-async function contract_stop_crafting(summoner) {
-    let web3 = await connect();
-    let contract = await get_contract(web3);
-    let wallet = await get_wallet(web3);
-    contract.methods.stop_crafting(summoner).send({from:wallet});
-}
-*/
 
 //get items
 async function contract_get_items(summoner) {
@@ -497,12 +453,12 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             //out of area check
             if (this.x < 100 && this.moving_degree > 90 && this.moving_degree <270) {
                 this.moving_degree -= 180;
-            }else if (this.x > 700 && (this.moving_degree < 90 || this.moving_degree > 270)) {
+            }else if (this.x > 1100 && (this.moving_degree < 90 || this.moving_degree > 270)) {
                 this.moving_degree -= 180;
             }
-            if (this.y > 500 && this.moving_degree > 180) {
+            if (this.y > 860 && this.moving_degree > 180) {
                 this.moving_degree = 360 - this.moving_degree;
-            }else if (this.y < 300 && this.moving_degree < 180) {
+            }else if (this.y < 500 && this.moving_degree < 180) {
                 this.moving_degree = 360 - this.moving_degree;
             }
             //minus check
@@ -1421,19 +1377,19 @@ function update() {
 
     //increment turn
     turn += 1;
+    text_turn.setText("turn = " + turn);
 
-    if (local_level == 0) {
-    }else {
-        text_turn.setText("turn = " + turn);
-        //update character
+    //update summoner
+    if (local_level != 0) {
         murasakisan.update();
-        if (flag_pet == 1) {
-            pet.update();
-        }
+    }
+    //update pet
+    if (flag_pet == 1) {
+        pet.update();
     }
 
-    //update calculation status
-    if (turn % 100 == 0) {
+    //===== status =====
+    if (turn == 1 || turn % 100 == 0) {
 
         //level up
         if (local_level > previous_local_level) {
@@ -1552,39 +1508,14 @@ function update() {
         }else {
             text_working_calc.setText("");
         }
-
-        //pet
-        if (local_pet > 0) {
-            text_pet.setText("pet_id = " + local_pet);
-            if (flag_pet == 0) {
-                pet = new Pet(this, 300 + Math.random()*200, 400 + Math.random()*100);
-                pet.scaleX = pet.scaleX * 0.1;
-                pet.scaleY = pet.scaleY * 0.1;
-                flag_pet = 1;
-            }
-        } else{
-            text_pet.setText("pet_id = not yet crafted");
-        }
-
-        //musicbox
-        if (local_musicbox > 0) {
-            if (flag_musicbox == 0) {
-                item_musicbox = this.add.sprite(1200,848, "item_musicbox");
-                item_musicbox.scaleX = item_musicbox.scaleX * 0.4;
-                item_musicbox.scaleY = item_musicbox.scaleY * 0.4;
-                item_musicbox.setInteractive({useHandCursor: true});
-                item_musicbox.on('pointerdown', () => music() );
-                flag_musicbox = 1;
-            }
-        }
         
         previous_local_last_feeding_time = local_last_feeding_time;
         previous_local_last_grooming_time = local_last_grooming_time;
         previous_local_level = local_level;
     }
 
-    //flag management & button activation
-    if (turn % 250 == 0) {
+    //===== button =====
+    if (turn == 1 || turn % 100 == 10) {
 
         if (
             previous_local_mining_status != local_mining_status ||
@@ -1678,40 +1609,62 @@ function update() {
         previous_local_exp = local_exp;
     }
 
-    //item control
-    if (turn % 301 == 0 && local_items != previous_local_items) {
-        
-        //if (local_items[1] != 0 && local_items_flag[1] != true) {
+    //===== item =====
+    if (turn % 100 == 20 && local_items != previous_local_items) {
+        //49:Ms. Astar
+        if (local_items[49] != 0 && local_items_flag[49] != true) {
+            pet = new Pet(this, 300 + Math.random()*200, 400 + Math.random()*100);
+            pet.scaleX = pet.scaleX * 0.1;
+            pet.scaleY = pet.scaleY * 0.1;
+            local_items_flag[49] = true;
+            flag_pet = 1;
+            console.log(0);
+        }
+        //50:musicbox
+        if (local_items[50] != 0 && local_items_flag[50] != true) {
+            item_musicbox = this.add.sprite(1200,848, "item_musicbox");
+            item_musicbox.scaleX = item_musicbox.scaleX * 0.4;
+            item_musicbox.scaleY = item_musicbox.scaleY * 0.4;
+            item_musicbox.setInteractive({useHandCursor: true});
+            item_musicbox.on('pointerdown', () => music() );
+            local_items_flag[50] = true;
+        }
+        //33:violin
         if (local_items[33] != 0 && local_items_flag[33] != true) {
             item_violin = this.add.sprite(1200,608, "item_violin");
             item_violin.scaleX = item_violin.scaleX * 0.24;
             item_violin.scaleY = item_violin.scaleY * 0.24;
             local_items_flag[33] = true;
         }
+        //17:vase
         if (local_items[17] != 0 && local_items_flag[17] != true) {
             item_17 = this.add.sprite(640,192, "item_vase");
             item_17.scaleX = item_17.scaleX * 0.32;
             item_17.scaleY = item_17.scaleY * 0.32;
             local_items_flag[17] = true;
         }
+        //18
         if (local_items[18] != 0 && local_items_flag[18] != true) {
             item_18 = this.add.sprite(320,880, "item_18");
             item_18.scaleX = item_18.scaleX * 0.4;
             item_18.scaleY = item_18.scaleY * 0.4;
             local_items_flag[18] = true;
         }
+        //19
         if (local_items[19] != 0 && local_items_flag[19] != true) {
             item_19 = this.add.sprite(400,880, "item_19");
             item_19.scaleX = item_19.scaleX * 0.4;
             item_19.scaleY = item_19.scaleY * 0.4;
             local_items_flag[19] = true;
         }
+        //20
         if (local_items[20] != 0 && local_items_flag[20] != true) {
             item_20 = this.add.sprite(480,880, "item_20");
             item_20.scaleX = item_20.scaleX * 0.4;
             item_20.scaleY = item_20.scaleY * 0.4;
             local_items_flag[20] = true;
         }
+        //21
         if (local_items[21] != 0 && local_items_flag[21] != true) {
             item_21 = this.add.sprite(560,880, "item_21");
             item_21.scaleX = item_21.scaleX * 0.4;
@@ -1721,8 +1674,8 @@ function update() {
         previous_local_items = local_items;
     }
 
-    //update dynamic status from contract to local
-    if (turn % 201 == 0) {
+    //===== contract =====
+    if (turn % 300 == 90) {
         //update dynamic_status
         //summoner = document.getElementById("summoner").value;
         contract_update_status(summoner);
@@ -1744,7 +1697,75 @@ function update() {
 
 //garbedge
 //--------------------------------------------------------------------------------------------------------
+        /*
+        //pet
+        if (local_pet > 0) {
+            text_pet.setText("pet_id = " + local_pet);
+            if (flag_pet == 0) {
+                pet = new Pet(this, 300 + Math.random()*200, 400 + Math.random()*100);
+                pet.scaleX = pet.scaleX * 0.1;
+                pet.scaleY = pet.scaleY * 0.1;
+                flag_pet = 1;
+            }
+        } else{
+            text_pet.setText("pet_id = not yet crafted");
+        }
 
+        //musicbox
+        if (local_musicbox > 0) {
+            if (flag_musicbox == 0) {
+                item_musicbox = this.add.sprite(1200,848, "item_musicbox");
+                item_musicbox.scaleX = item_musicbox.scaleX * 0.4;
+                item_musicbox.scaleY = item_musicbox.scaleY * 0.4;
+                item_musicbox.setInteractive({useHandCursor: true});
+                item_musicbox.on('pointerdown', () => music() );
+                flag_musicbox = 1;
+            }
+        }
+        */
+
+/*
+async function contract_stop_farming(summoner) {
+    let web3 = await connect();
+    let contract = await get_contract(web3);
+    let wallet = await get_wallet(web3);
+    contract.methods.stop_farming(summoner).send({from:wallet});
+}
+*/
+
+    /*
+    //pet check
+    //TODO: call whole items list, then view at type 49
+    local_pet = await contract.methods.items(summoner, 49).call();
+    if (local_pet != 0) {
+        /* NEED to update contract!
+        let contract_pet = await get_contract_pet(web3);
+        res = await contract_pet.methods.get_status(summoner).call();
+        local_pet_mining_status = res[0];
+        local_pet_mining_start_time = res[1];
+        local_pet_farming_status = res[2];
+        local_pet_farming_start_time = res[3];
+    }
+    local_musicbox = await contract.methods.items(summoner, 50).call();
+    */
+
+/*
+async function contract_stop_mining(summoner) {
+    let web3 = await connect();
+    let contract = await get_contract(web3);
+    let wallet = await get_wallet(web3);
+    contract.methods.stop_mining(summoner).send({from:wallet});
+}
+*/
+
+/*
+async function contract_stop_crafting(summoner) {
+    let web3 = await connect();
+    let contract = await get_contract(web3);
+    let wallet = await get_wallet(web3);
+    contract.methods.stop_crafting(summoner).send({from:wallet});
+}
+*/
 
 
 --->
