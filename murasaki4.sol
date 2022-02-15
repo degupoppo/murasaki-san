@@ -733,6 +733,36 @@ contract Murasaki_Main is ERC721, Ownable{
     string constant public name = "House of Murasaki-san";
     string constant public symbol = "HMS";
 
+    struct summoners {
+        uint8 class;
+        uint32 strength;
+        uint32 dexterity;
+        uint32 intelligence;
+        uint32 luck;
+        uint32 birth_time;
+        uint32 last_feeding_time;
+        uint32 last_grooming_time;
+        uint32 coin;
+        uint32 material;
+        uint8 mining_status;
+        uint32 mining_start_time;
+        uint8 farming_status;
+        uint32 farming_start_time;
+        uint8 crafting_item_type;
+        uint32 exp;
+        uint8 level;
+        uint32 next_exp_required;
+        uint32 total_mining_sec;
+        uint32 total_farming_sec;
+        uint32 total_crafting_sec;
+        uint32 last_total_mining_sec;
+        uint32 last_total_farming_sec;
+        uint32 last_total_crafting_sec;
+        uint32 last_level_up_time;
+        uint32 last_grooming_time_plus_working_time;
+        uint32[64] items;
+
+    /*
     mapping(uint32 => uint8) public ctype;
     mapping(uint32 => uint32) public strength;
     mapping(uint32 => uint32) public dexterity;
@@ -763,13 +793,15 @@ contract Murasaki_Main is ERC721, Ownable{
     mapping(uint32 => uint32) public last_level_up_time;
     mapping(uint32 => uint32) public last_grooming_time_plus_working_time;
     mapping(uint32 => uint32[64]) public items;
+    */
 
-    uint32 public next_summoner;
-    uint32 public base_sec = 86400;
-    uint8 public price = 0 ether;
     address public murasaki_craft_address;
     address public murasaki_pet_address;
     address public codex_address;
+
+    uint32 public next_summoner = 0;
+    uint32 public base_sec = 86400;
+    uint8 public price = 0 ether;
     uint32 public speed = 1;
 
     //set variants, only owner
@@ -800,6 +832,27 @@ contract Murasaki_Main is ERC721, Ownable{
     //call status
     function get_status(uint32 _summoner) public view returns (uint32[20] memory) {
         uint32[20] memory li_status;
+        li_status[0] = summoners[_summoner].class;
+        li_status[1] = summoners[_summoner].strength;
+        li_status[2] = summoners[_summoner].dexterity;
+        li_status[3] = 0
+        li_status[4] = summoners[_summoner].intelligence;
+        li_status[5] = summoners[_summoner].luck;
+        li_status[6] = summoners[_summoner].birth_time;
+        li_status[7] = summoners[_summoner].last_feeding_time;
+        li_status[8] = summoners[_summoner].last_grooming_time;
+        li_status[9] = summoners[_summoner].coin;
+        li_status[10] = summoners[_summoner].material;
+        li_status[11] = summoners[_summoner].mining_status;
+        li_status[12] = summoners[_summoner].mining_start_time;
+        li_status[13] = summoners[_summoner].farming_status;
+        li_status[14] = summoners[_summoner].farming_start_time;
+        li_status[15] = summoners[_summoner].crafting_status;
+        li_status[16] = summoners[_summoner].crafting_start_time;
+        li_status[17] = summoners[_summoner].exp;
+        li_status[18] = summoners[_summoner].level;
+        li_status[19] = summoners[_summoner].next_exp_required;
+        /*        
         li_status[0] = ctype[_summoner];
         li_status[1] = strength[_summoner];
         li_status[2] = dexterity[_summoner];
@@ -821,12 +874,14 @@ contract Murasaki_Main is ERC721, Ownable{
         li_status[17] = exp[_summoner];
         li_status[18] = level[_summoner];
         li_status[19] = next_exp_required[_summoner];
+        */
         return li_status;
     }
 
     //call items as array
     function get_items(uint32 _summoner) public view returns (uint32[64] memory) {
-        return items[_summoner];
+        return summoners[_summoner].items;
+        //return items[_summoner];
     }
 
     //summon
@@ -835,6 +890,8 @@ contract Murasaki_Main is ERC721, Ownable{
         require(0 <= _ctype && _ctype <= 10);
         uint32 _now = uint32(block.timestamp);
         uint32 _next_summoner = next_summoner;
+        
+        
         ctype[_next_summoner] = _ctype;
         //initial status values
         level[_next_summoner] = 1;

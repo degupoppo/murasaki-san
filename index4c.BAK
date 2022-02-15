@@ -60,8 +60,11 @@ ToDo
         所持itemのスプライト表示
 
     summoner設定のページの実装
-        coin/material送金UIの実装
-        所持item一覧と, summonerへのセット, 移動の実装
+        summonerの選択
+        summonerのステータス表示
+        summonerの所持item表示
+        summoner間のcoin/material送信
+        summoner間のitem移動
 
     ステータス表示の実装
         coin, materialの表記をどうするか
@@ -775,7 +778,7 @@ class Pet extends Phaser.GameObjects.Sprite{
             }
             if (this.y > 860 && this.moving_degree > 180) {
                 this.moving_degree = 360 - this.moving_degree;
-            }else if (this.y < 300 && this.moving_degree < 180) {
+            }else if (this.y < 500 && this.moving_degree < 180) {
                 this.moving_degree = 360 - this.moving_degree;
             }
             //minus check
