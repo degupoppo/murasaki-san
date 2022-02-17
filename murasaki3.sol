@@ -20,6 +20,35 @@ ToDo
         coin, materialをそれぞれ別にするか
         summonerパラメータのstruct化
         exp_next_requiredなどはライブラリ化して別コントラとするか
+        strageとlogicを別にする
+        普遍的なstatic statusと書き換えるdynamic statusを別コントラとする
+            static, summoner:
+                id
+                class
+                birth_time
+                crafted_wallet
+            static, item:
+                id
+                type
+                crafted_time
+                crafted_summoner
+                crafted_wallet
+        つまり, strage contractはstatic status, dynamic statusの2種類
+            static statusの方にERC721を紐付ける
+        logical contractはテーマごとに別々に
+            strageは一切保存させない
+            approve mappingを作る
+                mapping address bool で, approveならばtrue
+                function呼び出し時にapproveアドレスを参照させる
+                approveアドレスを書き換える関数を作っておく, owner only権限
+        strage contractはlogical contractからのsendのみすべて許可する
+        logical contract側でownなどをその都度チェックする
+            基本的には, ERC721のownを参照でよいか
+
+    たまご化の実装
+        一定時間放置していると卵化する
+        もとに戻すにはLv x 10程度のAstarが必要
+        working中はどうする？
 
     item, pet NFTの譲渡の実装
         update関数の実装
