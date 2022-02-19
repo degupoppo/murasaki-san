@@ -35,7 +35,7 @@
     <font size="1" color="#c71585">(version 0.4.0a)</font><br>
     <br>
     <br>
-    <font size="2"><a href="index4c.html?summoner=0">> Demo Preview Here <</a></font><br>
+    <font size="2"><a href="index5b.html?summoner=0">> Demo Preview Here <</a></font><br>
     <br>
     <font size="2">Summon your Murasaki-San</font><br>
     <font size="2">type:</font>
@@ -91,7 +91,7 @@ let summoner = -1;
 async function connect() {
     const web3 = await new Web3(window.ethereum);
     window.ethereum.enable();
-    /*
+    
     window.ethereum.request({
         method: 'wallet_addEthereumChain',
         params: [{
@@ -104,11 +104,10 @@ async function connect() {
                 decimals: 18
             },
             //rpcUrls: ["https://rpc.shibuya.astar.network:8545"],
-            rpcUrls: ["https://kapipo.com:9933"],
+            rpcUrls: ["http://153.121.47.127:9933"],
             blockExplorerUrls: ['https://blockscout.com/shibuya'],
         }]
     });
-    */
     return web3;
 }
 
@@ -171,7 +170,7 @@ async function button_update_summoners() {
 //update summoner
 function button_select_summoner() {
     summoner = document.getElementById("summoner").value;
-    window.location.href = "index4c.html?summoner=" + summoner;
+    window.location.href = "index5b.html?summoner=" + summoner;
 }
 
 //send coin
