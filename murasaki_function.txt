@@ -1,0 +1,204 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.7;
+
+
+//---------------------------------------------------------------------------------------------------------------------
+//Ownable
+
+/**
+ * @dev Provides information about the current execution context, including the
+ * sender of the transaction and its data. While these are generally available
+ * via msg.sender and msg.data, they should not be accessed in such a direct
+ * manner, since when dealing with meta-transactions the account sending and
+ * paying for execution may not be the actual sender (as far as an application
+ * is concerned).
+ *
+ * This contract is only required for intermediate, library-like contracts.
+ */
+abstract contract Context {
+    function _msgSender() internal view virtual returns (address) {
+        return msg.sender;
+    }
+
+    function _msgData() internal view virtual returns (bytes calldata) {
+        return msg.data;
+    }
+}
+
+/**
+ * @dev Contract module which provides a basic access control mechanism, where
+ * there is an account (an owner) that can be granted exclusive access to
+ * specific functions.
+ *
+ * By default, the owner account will be the one that deploys the contract. This
+ * can later be changed with {transferOwnership}.
+ *
+ * This module is used through inheritance. It will make available the modifier
+ * `onlyOwner`, which can be applied to your functions to restrict their use to
+ * the owner.
+ */
+abstract contract Ownable is Context {
+    address private _owner;
+    RandomDataGuard internal _rdg;
+    string internal _planetsBaseURI;
+
+    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+
+    /**
+     * @dev Initializes the contract setting the deployer as the initial owner.
+     */
+    constructor() {
+        _setOwner(_msgSender());
+    }
+
+    /**
+     * @dev Returns the address of the current owner.
+     */
+    function owner() public view virtual returns (address) {
+        return _owner;
+    }
+
+    /**
+     * @dev Throws if called by any account other than the owner.
+     */
+    modifier onlyOwner() {
+        require(owner() == _msgSender(), "Ownable: caller is not the owner");
+        _;
+    }
+    
+    function setRDG(address rdg)public virtual onlyOwner {
+        _rdg = RandomDataGuard(rdg);    
+    }
+
+    function setBaseURI(string memory pBaseURI)public virtual onlyOwner {
+        _planetsBaseURI = pBaseURI;    
+    }
+
+    /**
+     * @dev Transfers ownership of the contract to a new account (`newOwner`).
+     * Can only be called by the current owner.
+     */
+    function transferOwnership(address newOwner) public virtual onlyOwner {
+        require(newOwner != address(0), "Ownable: new owner is the zero address");
+        _setOwner(newOwner);
+    }
+
+    function _setOwner(address newOwner) private {
+        address oldOwner = _owner;
+        _owner = newOwner;
+        emit OwnershipTransferred(oldOwner, newOwner);
+    }
+}
+
+interface RandomDataGuard {
+    function randomGuard(uint256 random) external view returns(uint256);
+}
+
+
+//---------------------------------------------------------------------------------------------------------------------
+//Murasaki Function
+
+contract Murasaki_Function is Ownable {
+
+    //address
+    address public murasaki_strage_address;
+    address public murasaki_main_address;
+
+    //variants
+    uint32 public base_sec = 86400;
+    uint32 public speed = 1;
+
+    //admin
+    function set_base_sec(uint32 _base_sec) public onlyOwner {
+        base_sec = _base_sec;
+    }
+    function set_speed(uint32 _speed) public onlyOwner {
+        speed = _speed;
+    }
+    function set_murasaki_strage_address(address _address) public onlyOwner {
+        murasaki_strage_address = _address;
+    }
+    function set_murasaki_main_address(address _address) public onlyOwner {
+        murasaki_main_address = _address;
+    }
+
+    //contract
+    Murasaki_Main mm = Murasaki_Main(murasaki_main_address);
+    Murasaki_Strage ms = Murasaki_Strage(murasaki_strage_address);
+
+    //summon
+    function summon(uint32 _summoner) external payable {
+        require(msg.sender == murasaki_main_address);
+        uint32 _now = uint32(block.timestamp);
+        ms.set_level(_summoner, 1);
+        ms.set_exp(_summoner, 0);
+        ms.set_strength(_summoner, 500);
+        ms.set_dexterity(_summoner, 500);
+        ms.set_intelligence(_summoner, 500);
+        ms.set_luck(_summoner, 500);
+        ms.set_next_exp_required(_summoner, 1000);
+        ms.set_last_level_up_time(_summoner, _now);
+        ms.set_coin(_summoner, 0);
+        ms.set_material(_summoner, 0);
+        ms.set_last_feeding_time(_summoner, _now - 43200);
+        ms.set_last_grooming_time(_summoner, _now - 43200);
+        ms.set_mining_status(_summoner, 0);
+        ms.set_minint_start_time(_summoner, 0);
+        ms.set_farming_status(_summoner, 0);
+        ms.set_farming_start_time(_summoner, 0);
+        ms.set_crafting_status(_summoner, 0);
+        ms.set_crafting_start_time(_summoner, 0);
+        ms.set_crafting_item_type(_summoner, 0);
+        ms.set_total_mining_sec(_summoner, 0);
+        ms.set_total_farming_sec(_summoner, 0);
+        ms.set_total_crafting_sec(_summoner, 0);
+        ms.set_last_total_mining_sec(_summoner, 0);
+        ms.set_last_total_farming_sec(_summoner, 0);
+        ms.set_last_total_crafting_sec(_summoner, 0);
+        ms.set_last_grooming_time_plus_working_time(_summoner, _now - 43200);        
+    }
+
+    /*
+    //feeding
+    function feeding(uint32 _summoner) public {
+    }
+    function calc_feeding(uint32 _summoner) public view return (uint32) {
+    }
+
+    //grooming
+    function grooming(uint32 _summoner) public {
+    }
+    function calc_grooming(uint32 _summoner) public view return (uint32) {
+    }
+
+    //mining
+    function start_mining(uint32 _summoner) public {
+    }
+    function stop_mining(uint32 _summoner) public {
+    }
+    function calc_mining(uint32 _summoner) public view returns (uint32) {
+    }
+
+    //farming
+    function start_farming(uint32 _summoner) public {
+    }
+    function stop_farming(uint32 _summoner) public {
+    }
+    function calc_farming(uint32 _summoner) public view returns (uint32) {
+    }
+
+    //crafting
+    function start_crafting(uint32 _summoner) public {
+    }
+    function stop_crafting(uint32 _summoner) public {
+    }
+    function calc_crafting(uint32 _summoner) public view returns (uint32) {
+    }
+
+    //levelup
+    function level_up(uint32 _summoner) public {
+    }
+    */
+
+}
+
