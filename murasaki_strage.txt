@@ -2,6 +2,7 @@
 pragma solidity ^0.8.7;
 
 
+
 //---------------------------------------------------------------------------------------------------------------------
 //Ownable
 
@@ -95,6 +96,7 @@ interface RandomDataGuard {
 }
 
 
+
 //---------------------------------------------------------------------------------------------------------------------
 //Murasaki Strage
 
@@ -137,123 +139,115 @@ contract Murasaki_Strage is Ownable {
     //permitted address
     address public murasaki_function_address;
 
-    //variants
-    uint32 public base_sec = 86400;
-    uint32 public speed = 1;
-
     //admin
-    function set_murasaki_function_address(address _address) public onlyOwner {
+    function _set_murasaki_function_address(address _address) external onlyOwner {
         murasaki_function_address = _address;
     }
 
     //set status
-    function set_level(uint32 _summoner, uint32 _value) public {
+    function set_level(uint32 _summoner, uint32 _value) external {
         require(msg.sender == murasaki_function_address);
         level[_summoner] = _value;
     }
-    function set_exp(uint32 _summoner, uint32 _value) public {
+    function set_exp(uint32 _summoner, uint32 _value) external {
         require(msg.sender == murasaki_function_address);
         exp[_summoner] = _value;
     }
-    function set_strength(uint32 _summoner, uint32 _value) public {
+    function set_strength(uint32 _summoner, uint32 _value) external {
         require(msg.sender == murasaki_function_address);
         strength[_summoner] = _value;
     }
-    function set_dexterity(uint32 _summoner, uint32 _value) public {
+    function set_dexterity(uint32 _summoner, uint32 _value) external {
         require(msg.sender == murasaki_function_address);
         dexterity[_summoner] = _value;
     }
-    function set_intelligence(uint32 _summoner, uint32 _value) public {
+    function set_intelligence(uint32 _summoner, uint32 _value) external {
         require(msg.sender == murasaki_function_address);
         intelligence[_summoner] = _value;
     }
-    function set_luck(uint32 _summoner, uint32 _value) public {
+    function set_luck(uint32 _summoner, uint32 _value) external {
         require(msg.sender == murasaki_function_address);
         luck[_summoner] = _value;
     }
-    function set_next_exp_required(uint32 _summoner, uint32 _value) public {
+    function set_next_exp_required(uint32 _summoner, uint32 _value) external {
         require(msg.sender == murasaki_function_address);
         next_exp_required[_summoner] = _value;
     }
-    function set_last_level_up_time(uint32 _summoner, uint32 _value) public {
+    function set_last_level_up_time(uint32 _summoner, uint32 _value) external {
         require(msg.sender == murasaki_function_address);
         last_level_up_time[_summoner] = _value;
     }
-    function set_coin(uint32 _summoner, uint32 _value) public {
+    function set_coin(uint32 _summoner, uint32 _value) external {
         require(msg.sender == murasaki_function_address);
         coin[_summoner] = _value;
     }
-    function set_material(uint32 _summoner, uint32 _value) public {
+    function set_material(uint32 _summoner, uint32 _value) external {
         require(msg.sender == murasaki_function_address);
         material[_summoner] = _value;
     }
-    function set_last_feeding_time(uint32 _summoner, uint32 _value) public {
+    function set_last_feeding_time(uint32 _summoner, uint32 _value) external {
         require(msg.sender == murasaki_function_address);
         last_feeding_time[_summoner] = _value;
     }
-    function set_last_grooming_time(uint32 _summoner, uint32 _value) public {
+    function set_last_grooming_time(uint32 _summoner, uint32 _value) external {
         require(msg.sender == murasaki_function_address);
         last_grooming_time[_summoner] = _value;
     }
-    function set_mining_status(uint32 _summoner, uint32 _value) public {
+    function set_mining_status(uint32 _summoner, uint32 _value) external {
         require(msg.sender == murasaki_function_address);
         mining_status[_summoner] = _value;
     }
-    function set_mining_start_time(uint32 _summoner, uint32 _value) public {
+    function set_mining_start_time(uint32 _summoner, uint32 _value) external {
         require(msg.sender == murasaki_function_address);
         mining_start_time[_summoner] = _value;
     }
-    function set_farming_status(uint32 _summoner, uint32 _value) public {
+    function set_farming_status(uint32 _summoner, uint32 _value) external {
         require(msg.sender == murasaki_function_address);
         farming_status[_summoner] = _value;
     }
-    function set_farming_start_time(uint32 _summoner, uint32 _value) public {
+    function set_farming_start_time(uint32 _summoner, uint32 _value) external {
         require(msg.sender == murasaki_function_address);
         farming_start_time[_summoner] = _value;
     }
-    function set_crafting_status(uint32 _summoner, uint32 _value) public {
+    function set_crafting_status(uint32 _summoner, uint32 _value) external {
         require(msg.sender == murasaki_function_address);
         crafting_status[_summoner] = _value;
     }
-    function set_crafting_start_time(uint32 _summoner, uint32 _value) public {
+    function set_crafting_start_time(uint32 _summoner, uint32 _value) external {
         require(msg.sender == murasaki_function_address);
         crafting_start_time[_summoner] = _value;
     }
-    function set_crafting_item_type(uint32 _summoner, uint32 _value) public {
+    function set_crafting_item_type(uint32 _summoner, uint32 _value) external {
         require(msg.sender == murasaki_function_address);
         crafting_item_type[_summoner] = _value;
     }
-    function set_total_mining_sec(uint32 _summoner, uint32 _value) public {
+    function set_total_mining_sec(uint32 _summoner, uint32 _value) external {
         require(msg.sender == murasaki_function_address);
         total_mining_sec[_summoner] = _value;
     }
-    function set_total_farming_sec(uint32 _summoner, uint32 _value) public {
+    function set_total_farming_sec(uint32 _summoner, uint32 _value) external {
         require(msg.sender == murasaki_function_address);
         total_farming_sec[_summoner] = _value;
     }
-    function set_total_crafting_sec(uint32 _summoner, uint32 _value) public {
+    function set_total_crafting_sec(uint32 _summoner, uint32 _value) external {
         require(msg.sender == murasaki_function_address);
         total_crafting_sec[_summoner] = _value;
     }
-    function set_last_total_mining_sec(uint32 _summoner, uint32 _value) public {
+    function set_last_total_mining_sec(uint32 _summoner, uint32 _value) external {
         require(msg.sender == murasaki_function_address);
         last_total_mining_sec[_summoner] = _value;
     }
-    function set_last_total_farming_sec(uint32 _summoner, uint32 _value) public {
+    function set_last_total_farming_sec(uint32 _summoner, uint32 _value) external {
         require(msg.sender == murasaki_function_address);
         last_total_farming_sec[_summoner] = _value;
     }
-    function set_last_total_crafting_sec(uint32 _summoner, uint32 _value) public {
+    function set_last_total_crafting_sec(uint32 _summoner, uint32 _value) external {
         require(msg.sender == murasaki_function_address);
         last_total_crafting_sec[_summoner] = _value;
     }
-    function set_last_grooming_time_plus_working_time(uint32 _summoner, uint32 _value) public {
+    function set_last_grooming_time_plus_working_time(uint32 _summoner, uint32 _value) external {
         require(msg.sender == murasaki_function_address);
         last_grooming_time_plus_working_time[_summoner] = _value;
     }
 
 }
-
-
-
-
