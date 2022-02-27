@@ -32,7 +32,11 @@
             DCで補正するか
                 3dを最低として、intelligenceとLvに応じてDCを減少させてゆく
                 後半itemは初期ステータスでは30dなど不可能ではないが非現実的な難度にする
-        bot対策
+
+    bot対策
+        summonにコスト
+        summoner間のcoin, materialのtransferにコスト
+        itemのtransferにコスト？（NFTなので普通にtransferされると難しいか）
 
     バランス調整
         Lv1上がる日数
