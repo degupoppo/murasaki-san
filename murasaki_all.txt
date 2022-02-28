@@ -2,7 +2,62 @@
 //------------------------------------------------------------------------------------------------------------------
 /***
 
-    バランス再考
+    NTTのburn機能の実装
+
+    bot対策
+        大量のwalletを運用した効率プレイへの対策
+            基本的にすべてを防ぐことはできない
+            一方で、全く有害でもない
+                理論的な最低価格をはじき出してくれるNPCとして利用することも出来るため
+            summoner間のやり取りに手数料をかけることで、
+                bot化による効率プレイの最低料金を設ける
+                手数料の合計値がそのアイテムの最低料金
+            一般プレイヤーは「体験」のために労力を投資する
+            一方で、金銭的リターンのためにプレイするプレイヤーは
+                botの効率プレイにまさることはできない。
+                ここをどうするか。
+                しかし、効率的にリターンを得ようとするプレイヤーはほぼbotと同義か
+            やはり、「体験」のためにプレイしているプレイヤーに有害でないかどうかを重点に考える
+                最低価格で資源やアイテムが手に入ることは有益
+                作ったアイテムを売りに出して買い手が付けばなお良い
+                    botterと張り合ったら負けるが、botterが氾濫するほど成熟すればそれはそれで良い経済
+                自分の頑張りが「体験」として帰ってくるシステムにしたい
+                    売りに出しても買い手が付かないのは寂しい
+                botterにも全部達成できないほど、クラフト可能なitemの種類を増やすか
+                    自分だけが作れるレアアイテム、など
+                    特殊な素材を要求する上位アイテムなど
+        summonにコスト
+        summoner間のcoin, materialのtransferにコスト
+        itemのtransferにコスト？（NFTなので普通にtransferされると難しいか）
+        NFTをsummoner間でtransferすることに対する対策
+            coin/materialのtransferにはコストを設定できるが、
+            NFTは共通インターフェイスで自由に移動できるため対策が難しい
+            NFT化して1キャラに集中→効率化が可能となってしまう
+            active化を導入し、active化にコストを必要とするか？
+                activeしているitemのみ表示され、ステータスに影響する
+                balanceOf_activated_item_typeのmappingが必要か
+
+    ゆっくりと成長する木の実装
+        item type = 50ぐらいの専用スロット
+        成長するまで何が生えるかわからない
+        summonerの行動によって結果がかわる
+        1ヶ月で最大成長ぐらいか
+
+    マーケットプレイスの実装
+        ERC721に準じるもので良さそう
+            rarityのマーケットが参考になるか
+        itemのみ売買可能
+        所持item一覧の実装
+        売りに出しているitem一覧の実装
+        売買マージンの導入
+        coin, materialのまとめ売り
+
+    NFTステーキングの実装
+        ステーキング専用の高価なitemを作る
+        このitemは作った後にstakingすることで何かしらのリワードが得られる
+            ゲーム内の通貨か、Astarか
+
+ ok バランス再考
         itemクラフトによるお部屋とsummonerのアップグレードがゲーム性の本質
         このゲーム性をバランス調整の中心に据える
             何日でitemクラフトを完了させるのか
@@ -20,25 +75,20 @@
                 必要な時間を減らしてゆくのか（初期では事実上不可能な程の時間）
             →この当たりを先に決めてから、それを目標にステータス上昇と補正値を調整してゆく
         基本バランス項目
-            ・1年間で作製可能なアイテム数　→　1週間（5～7日）
+            ・1年間で作製可能なアイテム数　→　50個～60個（365÷7≒50個）
                 コストに3日、クラフトに3日、これが基準
                 初期アイテムのコストは安くなるが、クラフト3日は減らない
                 初期アイテムを作り続ければ、後期アイテム用のコストが手に入らずジレンマになるか
-            ・1個のアイテム作製にトータルで必要な"日数"　→　50個～60個（365÷7≒50個）
+            ・1個のアイテム作製にトータルで必要な"日数"　→　1週間（5～7日）
                 後半アイテムもここの最低ラインを割り込まないように解禁してゆく
         アイテムの「解禁」方法を考える
-            コストのインフレはaveで+100%/y, 特化で+200%/y程度
+            コストのインフレはaveで+100%/y, 特化で+200-300%/y程度
                 そのため10倍や20倍などの高いコストを後半アイテムにつけられない
             DCで補正するか
                 3dを最低として、intelligenceとLvに応じてDCを減少させてゆく
                 後半itemは初期ステータスでは30dなど不可能ではないが非現実的な難度にする
 
-    bot対策
-        summonにコスト
-        summoner間のcoin, materialのtransferにコスト
-        itemのtransferにコスト？（NFTなので普通にtransferされると難しいか）
-
-    バランス調整
+ ok バランス調整
         Lv1上がる日数
         1日に得られるcoin
         1日に得られるmaterial
@@ -59,25 +109,6 @@
             3日程度をリミットに収束するよう数式を考える
             逆に、strとdexは線形インフレでよいか
             後半のほうがレベルが上がりにくくなるので、自然と鈍化する
-
-    ゆっくりと成長する木の実装
-        item type = 50ぐらいの専用スロット
-        成長するまで何が生えるかわからない
-        summonerの行動によって結果がかわる
-        1ヶ月で最大成長ぐらいか
-
-    マーケットプレイスの実装
-        ERC721に準じるもので良さそう
-            rarityのマーケットが参考になるか
-        itemのみ売買可能
-        所持item一覧の実装
-        売りに出しているitem一覧の実装
-        売買マージンの導入
-
-    NFTステーキングの実装
-        ステーキング専用の高価なitemを作る
-        このitemは作った後にstakingすることで何かしらのリワードが得られる
-            ゲーム内の通貨か、Astarか
 
  ok コントラクトフレームワーク
         大きく分けて3つ
@@ -1088,6 +1119,12 @@ contract Murasaki_Main is Badge, Ownable{
         return _summoning_summoner;
     }
 
+    //burn
+    function burn(uint32 _summoner) external {
+        require(ownerOf(_summoner) == msg.sender);
+        Badge._burn(_summoner);
+    }
+
     //URI
     //Inspired by OraclizeAPI's implementation - MIT license
     //https://github.com/oraclize/ethereum-api/blob/b42146b063c7d6ee1358846c198246239e9360e8/oraclizeAPI_0.4.25.sol
@@ -1487,6 +1524,7 @@ contract Murasaki_Function_Summon_and_LevelUp is Ownable {
         Murasaki_Strage ms = Murasaki_Strage(murasaki_strage_address);
         uint32 PRICE = ms.PRICE();
         uint32 BASE_SEC = ms.BASE_SEC();
+        uint32 SPEED = ms.SPEED();
         require(msg.value >= PRICE);
         require(0 <= _class && _class <= 11);
         //summon on mm, mint NTT
@@ -1503,8 +1541,8 @@ contract Murasaki_Function_Summon_and_LevelUp is Ownable {
         ms.set_last_level_up_time(_summoner, _now);
         ms.set_coin(_summoner, 0);
         ms.set_material(_summoner, 0);
-        ms.set_last_feeding_time(_summoner, _now - BASE_SEC/4);
-        ms.set_last_grooming_time(_summoner, _now - BASE_SEC/4);
+        ms.set_last_feeding_time(_summoner, _now - BASE_SEC/4); //***TODO***
+        ms.set_last_grooming_time(_summoner, _now - BASE_SEC/4);  //***TODO***
         ms.set_mining_status(_summoner, 0);
         ms.set_mining_start_time(_summoner, 0);
         ms.set_farming_status(_summoner, 0);
@@ -1518,7 +1556,7 @@ contract Murasaki_Function_Summon_and_LevelUp is Ownable {
         ms.set_last_total_mining_sec(_summoner, 0);
         ms.set_last_total_farming_sec(_summoner, 0);
         ms.set_last_total_crafting_sec(_summoner, 0);
-        ms.set_last_grooming_time_plus_working_time(_summoner, _now - BASE_SEC/4);
+        ms.set_last_grooming_time_plus_working_time(_summoner, _now - BASE_SEC/4); //***TODO***
     }
 
     //level-up
@@ -1537,10 +1575,10 @@ contract Murasaki_Function_Summon_and_LevelUp is Ownable {
              - ms.last_total_mining_sec(_summoner)
              - ms.last_total_farming_sec(_summoner)
              - ms.last_total_crafting_sec(_summoner);
-        uint32 _percent_mining = 400 * (ms.last_total_mining_sec(_summoner) + _resting_sec/4) / _base_sec;
-        uint32 _percent_farming = 400 * (ms.last_total_farming_sec(_summoner) + _resting_sec/4) / _base_sec;
-        uint32 _percent_crafting = 400 * (ms.last_total_crafting_sec(_summoner) + _resting_sec/4) / _base_sec;
-        uint32 _percent_resting = 400 * (_resting_sec/4) / _base_sec;
+        uint32 _percent_mining = 500 * (ms.last_total_mining_sec(_summoner) + _resting_sec/4) / _base_sec;
+        uint32 _percent_farming = 500 * (ms.last_total_farming_sec(_summoner) + _resting_sec/4) / _base_sec;
+        uint32 _percent_crafting = 500 * (ms.last_total_crafting_sec(_summoner) + _resting_sec/4) / _base_sec;
+        uint32 _percent_resting = 500 * (_resting_sec/4) / _base_sec;
         //status addition
         ms.set_strength(_summoner, ms.strength(_summoner) + _percent_mining);
         ms.set_dexterity(_summoner, ms.dexterity(_summoner) + _percent_farming);
@@ -1686,7 +1724,8 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable {
         require(not_petrified(_summoner));
         require(ms.mining_status(_summoner) == 0 && ms.farming_status(_summoner) == 0 && ms.crafting_status(_summoner) == 0);
         uint32 _now = uint32(block.timestamp);
-        uint32 _happy = mfs.calc_happy(_summoner);
+        //uint32 _happy = mfs.calc_happy(_summoner);
+        uint32 _happy = calc_happy_real(_summoner);
         uint32 _exp_add = 3000 * (100 - _happy) / 100;
         //luck challenge
         if (mfs.d100(_summoner) <= ms.luck(_summoner)/100) {
@@ -1695,7 +1734,24 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable {
         uint32 _exp = ms.exp(_summoner) + _exp_add;
         ms.set_exp(_summoner, _exp);
         ms.set_last_grooming_time(_summoner, _now);
+        ms.set_last_grooming_time_plus_working_time(_summoner, _now);
         return _exp_add;
+    }
+    //calc happy, modified with working_time
+    function calc_happy_real(uint32 _summoner) internal view returns (uint32) {
+        Murasaki_Strage ms = Murasaki_Strage(murasaki_strage_address);
+        uint32 SPEED = ms.SPEED();
+        uint32 BASE_SEC = ms.BASE_SEC();
+        uint32 _now = uint32(block.timestamp);
+        uint32 _delta_sec = _now - ms.last_grooming_time_plus_working_time(_summoner);  //working_time
+        uint32 _base = BASE_SEC *3 /SPEED;
+        uint32 _happy;
+        if (_delta_sec >= _base) {
+            _happy = 0;
+        }else {
+            _happy = 100 * (_base - _delta_sec) / _base;
+        }
+        return _happy;
     }
 }
 
@@ -1783,7 +1839,7 @@ contract Murasaki_Function_Mining_and_Farming is Ownable {
         uint32 _rolled_dice = wd.get_rolled_dice(_summoner);
         _mod += _rolled_dice;
         //1 point = 4%
-        _mod *= 2;
+        _mod *= 5;
         //boost
         _delta += _delta * _mod / 100;
         return _delta;
@@ -1850,7 +1906,7 @@ contract Murasaki_Function_Mining_and_Farming is Ownable {
         uint32 SPEED = ms.SPEED();
         require(ms.farming_status(_summoner) == 1);
         uint32 _now = uint32(block.timestamp);
-        uint32 _delta = (_now - ms.farming_start_time(_summoner)) * SPEED / 1000;
+        uint32 _delta = (_now - ms.farming_start_time(_summoner)) * SPEED / 100;
         //status and item boost
         uint32 _mod = ms.dexterity(_summoner)/100 + ms.level(_summoner) + count_farming_items(msg.sender);
         //world dice boost
@@ -1858,7 +1914,7 @@ contract Murasaki_Function_Mining_and_Farming is Ownable {
         uint32 _rolled_dice = wd.get_rolled_dice(_summoner);
         _mod += _rolled_dice;
         //1 point = 4%
-        _mod *= 2;
+        _mod *= 5;
         //boost
         _delta += _delta * _mod / 100;
         return _delta;
@@ -1925,9 +1981,9 @@ contract Murasaki_Function_Crafting is Ownable {
         //check coin and material
         //Murasaki_Craft mc = Murasaki_Craft(murasaki_craft_address);
         //uint32[3] memory _dc_table = mc.get_item_dc(_item_type);
-        uint32[3] memory _dc_table = get_item_dc(_item_type);
-        uint32 _coin = _dc_table[1];
-        uint32 _material = _dc_table[2];
+        uint32[4] memory _dc_table = get_item_dc(_item_type);
+        uint32 _coin = _dc_table[2];
+        uint32 _material = _dc_table[3];
         require(ms.coin(_summoner) >= _coin && ms.material(_summoner) >= _material);
         //start crafting
         ms.set_coin(_summoner, ms.coin(_summoner) - _coin);
@@ -1964,16 +2020,69 @@ contract Murasaki_Function_Crafting is Ownable {
             mc.craft(_item_type, _summoner, msg.sender);
         }
     }
+    function get_modified_dc(uint32 _summoner, uint32 _item_type) public view returns (uint32) {
+        Murasaki_Strage ms = Murasaki_Strage(murasaki_strage_address);
+        uint32[4] memory _dc_table = get_item_dc(_item_type);
+        //get dc
+        uint32 _level = _dc_table[0];
+        uint32 _dc = _dc_table[1];
+        //status boost
+        uint32 _mod = ms.intelligence(_summoner)/100 + ms.level(_summoner) + count_crafting_items(msg.sender);
+        //world dice boost
+        World_Dice wd = World_Dice(world_dice_address);
+        uint32 _rolled_dice = wd.get_rolled_dice(_summoner);
+        _mod += _rolled_dice;
+        //modify dc, y = a/b * x, y >= 3000
+        _dc = _dc - (_dc - 3000) / (75 * _level / 10) * _mod;
+        if (_dc < 3000) {
+            _dc = 3000;
+        }
+        return _dc;
+    }
     function calc_crafting(uint32 _summoner) public view returns (uint32) {
         Murasaki_Strage ms = Murasaki_Strage(murasaki_strage_address);
         require(ms.crafting_status(_summoner) == 1);
         uint32 SPEED = ms.SPEED();
         uint32 _now = uint32(block.timestamp);
         uint32 _item_type = ms.crafting_item_type(_summoner);
-        uint32 _delta_time = ( _now - ms.crafting_start_time(_summoner) ) * SPEED;
+
+        /*
         //dc
-        //Murasaki_Craft mc = Murasaki_Craft(murasaki_craft_address);
-        //uint32[3] memory _dc_table = mc.get_item_dc(_item_type);
+        uint32[4] memory _dc_table = get_item_dc(_item_type);
+        uint32 _level = _dc_table[0];
+        uint32 _dc = _dc_table[1];
+        //status boost
+        uint32 _mod = ms.intelligence(_summoner)/100 + ms.level(_summoner) + count_crafting_items(msg.sender);
+        //world dice boost
+        World_Dice wd = World_Dice(world_dice_address);
+        uint32 _rolled_dice = wd.get_rolled_dice(_summoner);
+        _mod += _rolled_dice;
+        //modify dc, y = a/b * x, y >= 3000
+        _dc = _dc - (_dc - 3000) / (75 * _level / 10) * _mod;
+        if (_dc < 3000) {
+            _dc = 3000;
+        }
+        //calc remaining time
+        */
+
+        //get modified dc
+        uint32 _dc = get_modified_dc(_summoner, _item_type);
+        //calc remaining sec
+        uint32 BASE_SEC = ms.BASE_SEC();
+        uint32 _dc_sec = _dc * BASE_SEC / 1000;   //1000dc = 1day = 86400sec
+
+        //calc remining sec
+        uint32 _delta_time = ( _now - ms.crafting_start_time(_summoner) ) * SPEED;
+        uint32 _remining_time;
+        if (_delta_time >= _dc_sec) {
+            _remining_time = 0;
+        }else {
+            _remining_time = _dc_sec - _delta_time;
+        }
+        return _remining_time;
+
+        /*
+        //dc
         uint32[3] memory _dc_table = get_item_dc(_item_type);
         uint32 _dc = _dc_table[0];
         //status boost
@@ -1996,6 +2105,8 @@ contract Murasaki_Function_Crafting is Ownable {
             _delta = _dc - _delta_time;
         }
         return _delta;
+        */
+
     }
     function count_crafting_items(address _address) public view returns (uint32) {
         //Murasaki_Craft mc = Murasaki_Craft(murasaki_craft_address);
@@ -2014,237 +2125,324 @@ contract Murasaki_Function_Crafting is Ownable {
     }
 
     //get item dc
+    function get_item_dc(uint32 _item_type) public view returns (uint32[4] memory) {
+        uint32 _level = level_table[_item_type];
+        uint32 _dc = dc_table[_item_type];
+        uint32 _coin = coin_table[_item_type];
+        uint32 _material = material_table[_item_type];
+        return [_level, _dc, _coin, _material];
+    }
+    /*
     function get_item_dc(uint32 _item_type) public view returns (uint32[3] memory) {
         uint32 _dc = dc_table[_item_type];
         uint32 _coin = coin_table[_item_type];
         uint32 _material = material_table[_item_type];
         return [_dc, _coin, _material];
     }
+    */
+
+    //item level
+    uint32[64] public level_table = [
+        //0:dummy
+        0,
+        //1-16: mining item
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        //17-32: farming item
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        //33-48: crafting item
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        //49: pet
+        1,
+        //50: ,musicbox
+        1,
+        //51: ,world dice
+        1,
+        //52-63: unreserved
+        99,
+        99,
+        99,
+        99,
+        99,
+        99,
+        99,
+        99,
+        99,
+        99,
+        99,
+        99
+    ];
 
     //item dc
     uint32[64] public dc_table = [
         //0:dummy
         0,
         //1-16: mining item
-        100000,
-        300000,
-        600000,
-        1000000,
-        1500000,
-        2100000,
-        2800000,
-        3600000,
-        4500000,
-        5500000,
-        6600000,
-        7800000,
-        9100000,
-        10500000,
-        12000000,
-        13600000,
+        3000,
+        6000,
+        10000,
+        15000,
+        21000,
+        28000,
+        36000,
+        45000,
+        55000,
+        66000,
+        78000,
+        91000,
+        105000,
+        120000,
+        136000,
+        153000,
         //17-32: farming item
-        100000,
-        300000,
-        600000,
-        1000000,
-        1500000,
-        2100000,
-        2800000,
-        3600000,
-        4500000,
-        5500000,
-        6600000,
-        7800000,
-        9100000,
-        10500000,
-        12000000,
-        13600000,
+        3000,
+        6000,
+        10000,
+        15000,
+        21000,
+        28000,
+        36000,
+        45000,
+        55000,
+        66000,
+        78000,
+        91000,
+        105000,
+        120000,
+        136000,
+        153000,
         //33-48: crafting item
-        100000,
-        300000,
-        600000,
-        1000000,
-        1500000,
-        2100000,
-        2800000,
-        3600000,
-        4500000,
-        5500000,
-        6600000,
-        7800000,
-        9100000,
-        10500000,
-        12000000,
-        13600000,
+        3000,
+        6000,
+        10000,
+        15000,
+        21000,
+        28000,
+        36000,
+        45000,
+        55000,
+        66000,
+        78000,
+        91000,
+        105000,
+        120000,
+        136000,
+        153000,
         //49: pet
-        100000,
+        3000,
         //50: ,musicbox
-        300000,
+        3000,
         //51: ,world dice
-        300000,
+        3000,
         //52-63: unreserved
-        1000,
-        1000,
-        1000,
-        1000,
-        1000,
-        1000,
-        1000,
-        1000,
-        1000,
-        1000,
-        1000,
-        1000
+        9999999,
+        9999999,
+        9999999,
+        9999999,
+        9999999,
+        9999999,
+        9999999,
+        9999999,
+        9999999,
+        9999999,
+        9999999,
+        9999999
     ];
+
     //item coin
     uint32[64] public coin_table = [
         //0:dummy
         0,
         //1-16: mining item
-        1000,
         3000,
-        6000,
-        10000,
-        15000,
-        21000,
-        28000,
-        36000,
-        45000,
-        55000,
-        66000,
-        78000,
-        91000,
-        105000,
-        120000,
-        136000,
+        3600,
+        4050,
+        4500,
+        4950,
+        5400,
+        5850,
+        6300,
+        6750,
+        7200,
+        7650,
+        8100,
+        8550,
+        9000,
+        9450,
+        9900,
         //17-32: farming item
-        1000,
-        3000,
-        6000,
-        10000,
-        15000,
-        21000,
-        28000,
-        36000,
-        45000,
-        55000,
-        66000,
-        78000,
-        91000,
-        105000,
-        120000,
-        136000,
+        300,
+        360,
+        405,
+        450,
+        495,
+        540,
+        585,
+        630,
+        675,
+        720,
+        765,
+        810,
+        855,
+        900,
+        945,
+        990,
         //33-48: crafting item
-        1000,
-        3000,
-        6000,
-        10000,
-        15000,
-        21000,
-        28000,
-        36000,
-        45000,
-        55000,
-        66000,
-        78000,
-        91000,
-        105000,
-        120000,
-        136000,
+        1500,
+        1800,
+        2025,
+        2250,
+        2475,
+        2700,
+        2925,
+        3150,
+        3375,
+        3600,
+        3825,
+        4050,
+        4275,
+        4500,
+        4725,
+        4950,
         //49: pet
         1000,
         //50: muscibox
-        3000,
+        1000,
         //51: world dice
-        3000,
+        1000,
         //52-63: unreserved
-        100,
-        100,
-        100,
-        100,
-        100,
-        100,
-        100,
-        100,
-        100,
-        100,
-        100,
-        100
+        99999,
+        99999,
+        99999,
+        99999,
+        99999,
+        99999,
+        99999,
+        99999,
+        99999,
+        99999,
+        99999,
+        99999
     ];
+
     //item material
     uint32[64] public material_table = [
         //0:dummy
         0,
         //1-16: mining item
-        100,
         300,
-        600,
-        1000,
-        1500,
-        2100,
-        2800,
-        3600,
-        4500,
-        5500,
-        6600,
-        7800,
-        9100,
-        10500,
-        12000,
-        13600,
+        360,
+        405,
+        450,
+        495,
+        540,
+        585,
+        630,
+        675,
+        720,
+        765,
+        810,
+        855,
+        900,
+        945,
+        990,
         //17-32: farming item
-        100,
-        300,
-        600,
-        1000,
-        1500,
-        2100,
-        2800,
+        3000,
         3600,
+        4050,
         4500,
-        5500,
-        6600,
-        7800,
-        9100,
-        10500,
-        12000,
-        13600,
+        4950,
+        5400,
+        5850,
+        6300,
+        6750,
+        7200,
+        7650,
+        8100,
+        8550,
+        9000,
+        9450,
+        9900,
         //33-48: crafting item
-        100,
-        300,
-        600,
-        1000,
         1500,
-        2100,
-        2800,
+        1800,
+        2025,
+        2250,
+        2475,
+        2700,
+        2925,
+        3150,
+        3375,
         3600,
+        3825,
+        4050,
+        4275,
         4500,
-        5500,
-        6600,
-        7800,
-        9100,
-        10500,
-        12000,
-        13600,
+        4725,
+        4950,
         //49: pet
-        100,
+        1000,
         //50: musicbox
-        300,
+        1000,
         //51: world dice
-        600,
+        1000,
         //50-63: unreserved
-        10,
-        10,
-        10,
-        10,
-        10,
-        10,
-        10,
-        10,
-        10,
-        10,
-        10,
-        10
+        99999,
+        99999,
+        99999,
+        99999,
+        99999,
+        99999,
+        99999,
+        99999,
+        99999,
+        99999,
+        99999,
+        99999
     ];
 
 }
