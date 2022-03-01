@@ -1463,13 +1463,38 @@ function create() {
     //craft_window ***TODO***
     function open_window_craft (scene) {
         window_craft = scene.add.image(640, 480, "window");
-        button_craft_close = new Button(800, 800, 'Test', scene, () => close_window_craft(scene));
+        //button_craft_close = new Button(800, 800, 'Test', scene, () => close_window_craft(scene));
+        button_craft_close = scene.add.text(1000,700, "Close").setFontSize(30).setFontFamily("Arial").setInteractive();
+        button_craft_close.on("pointerdown", function (pointer) {
+            window_craft.destroy();
+            button_craft_close.destroy();
+            button_item1.destroy();
+        }, scene);
+        button_item1 = scene.add.text(200,400, "item1").setFontSize(30).setFontFamily("Arial").setInteractive();
+        button_item1.on("pointerdown", function (pointer) {
+            selected_item = 1;
+            window_craft.destroy();
+            button_craft_close.destroy();
+            button_item1.destroy();
+        }, scene);
+
+        button_item2 = scene.add.text(200,450, "item2").setFontSize(30).setFontFamily("Arial").setInteractive();
+        button_item2.on("pointerdown", () => close_window_craft(2) )
+
+        function close_window_craft(_selected_item) {
+            window_craft.destroy();
+            button_craft_close.destroy();
+            button_item1.destroy();
+            button_item2.destroy();
+            selected_item = _selected_item;
+        }
+        console.log(selected_item);
+
     }
-    function close_window_craft (scene) {
-        window_craft.destroy();
-        button_craft_close.visible = false;
-    }
+
+
     new Button(20, 60, 'Test', this, () => open_window_craft(this));
+
     //button_craft_close = new Button(20, 100, 'Test', this, () => close_window_craft(this));
     
 }
