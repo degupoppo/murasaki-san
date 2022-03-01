@@ -54,6 +54,14 @@ ok! しゅっきん！（お仕事へ移動中）
 
 ToDo
 
+    初期画面の実装
+        Now Loading
+        まだ
+
+    craftのUI実装
+        4種類, 合計64個のアイテムを選択するメニューを実装する
+        アイテム選択後、コストと日数の表示を実装する
+
     level-up可能なときに再読込するとボタンがデアクティブ化するバグ修正
     最初にパラメータが反映されないバグ修正
 
@@ -247,104 +255,102 @@ async function connect() {
 }
 
 //get wallet
-async function get_wallet(web3) {
-    const wallet = await web3.eth.getAccounts();
+async function get_wallet() {
+    let web3 = await connect();
+    let wallet = await web3.eth.getAccounts();
     return wallet[0];
+}
+
+//get summoner of wallet
+async function contract_get_summoner_of_wallet() {
+    let web3 = await connect();
+    let wallet = await get_wallet(web3);
+    let contract_mm = await new web3.eth.Contract(abi_murasaki_main, contract_murasaki_main);
+    let _summoner = await contract_mm.methods.tokenOf(wallet).call();  //have not summoned yet: 0
+    console.log(wallet, summoner);
+    summoner = _summoner;
 }
 
 //update local status reading from contract
 async function contract_update_status(_summoner) {
     let web3 = await connect();
-    /*
+    let wallet = await get_wallet(web3);
+
     //murasaki_main
-    let contract = await new web3.eth.Contract(abi_murasaki_main, contract_murasaki_main);
-    let local_id = await contract.methods.id(_summoner).call();
-    let local_ctype = await contract.methods.class(_summoner).call();
-    let local_birth_time = await contract.methods.summoned_time(_summoner).call();
-    */
+    let contract_mm = await new web3.eth.Contract(abi_murasaki_main, contract_murasaki_main);
+    //local_id = await contract_mm.methods.id(_summoner).call();
+    local_ctype = await contract_mm.methods.class(_summoner).call();
+    local_birth_time = await contract_mm.methods.summoned_time(_summoner).call();
+
     //murasaki_strage
-    let contract = await new web3.eth.Contract(abi_murasaki_strage, contract_murasaki_strage);
-    local_level = await contract.methods.level(_summoner).call();
-    local_exp = await contract.methods.exp(_summoner).call();
-    local_strength = await contract.methods.strength(_summoner).call() / 100;
-    local_dexterity = await contract.methods.dexterity(_summoner).call() / 100;
-    local_intelligence = await contract.methods.intelligence(_summoner).call() / 100;
-    local_luck = await contract.methods.luck(_summoner).call() / 100;
-    local_last_feeding_time = await contract.methods.last_feeding_time(_summoner).call();
-    local_last_grooming_time = await contract.methods.last_grooming_time(_summoner).call();
-    local_coin = await contract.methods.coin(_summoner).call();
-    local_material = await contract.methods.material(_summoner).call();
-    local_mining_status = await contract.methods.mining_status(_summoner).call();
-    local_mining_start_time = await contract.methods.mining_start_time(_summoner).call();
-    local_farming_status = await contract.methods.farming_status(_summoner).call();
-    local_farming_start_time = await contract.methods.farming_start_time(_summoner).call();
-    local_crafting_status = await contract.methods.crafting_status(_summoner).call();
-    local_crafting_start_time = await contract.methods.crafting_start_time(_summoner).call();
-    local_next_exp_required = await contract.methods.next_exp_required(_summoner).call();
+    let contract_ms = await new web3.eth.Contract(abi_murasaki_strage, contract_murasaki_strage);
+    local_level = await contract_ms.methods.level(_summoner).call();
+    local_exp = await contract_ms.methods.exp(_summoner).call();
+    local_strength = await contract_ms.methods.strength(_summoner).call() / 100;
+    local_dexterity = await contract_ms.methods.dexterity(_summoner).call() / 100;
+    local_intelligence = await contract_ms.methods.intelligence(_summoner).call() / 100;
+    local_luck = await contract_ms.methods.luck(_summoner).call() / 100;
+    local_last_feeding_time = await contract_ms.methods.last_feeding_time(_summoner).call();
+    local_last_grooming_time = await contract_ms.methods.last_grooming_time(_summoner).call();
+    local_coin = await contract_ms.methods.coin(_summoner).call();
+    local_material = await contract_ms.methods.material(_summoner).call();
+    local_mining_status = await contract_ms.methods.mining_status(_summoner).call();
+    local_mining_start_time = await contract_ms.methods.mining_start_time(_summoner).call();
+    local_farming_status = await contract_ms.methods.farming_status(_summoner).call();
+    local_farming_start_time = await contract_ms.methods.farming_start_time(_summoner).call();
+    local_crafting_status = await contract_ms.methods.crafting_status(_summoner).call();
+    local_crafting_start_time = await contract_ms.methods.crafting_start_time(_summoner).call();
+    local_next_exp_required = await contract_ms.methods.next_exp_required(_summoner).call();
+    console.log(
+        local_level, 
+        local_exp, 
+        local_strength, 
+        local_dexterity, 
+        local_intelligence, 
+        local_luck, 
+        local_last_feeding_time, 
+        local_last_grooming_time,
+        local_coin,
+        local_material,
+        local_mining_status,
+        local_mining_start_time,
+        local_farming_status,
+        local_farming_start_time,
+        local_crafting_status,
+        local_crafting_start_time,
+        local_next_exp_required
+    )
 
-    /*
-    id
-    class
-    summoned_time
-    level
-    exp
-    strength
-    dexterity
-    intelligence
-    luck
-    last_feeding_time
-    last_grooming_time
-    coin
-    material
-    mining_status
-    mining_start_time
-    farming_status
-    farming_start_time
-    crafting_status
-    crafting_start_time
-    next_exp_required
-    */
-
-    /*
-    let contract = await get_contract(web3);
-    let res = await contract.methods.get_status(summoner).call();
-    console.log(res);   
-    local_ctype = res[0];
-    local_strength = res[1] /100;
-    local_dexterity = res[2] /100;
-    //local_vitality = res[3] /100;
-    local_intelligence = res[4] /100;
-    local_luck = res[5] /100;
-    local_birth_time = res[6];
-    local_last_feeding_time = res[7];
-    local_last_grooming_time = res[8];
-    local_coin = res[9];
-    local_material = res[10];
-    local_mining_status = res[11];
-    local_mining_start_time = res[12];
-    local_farming_status = res[13];
-    local_farming_start_time = res[14];
-    local_crafting_status = res[15];
-    local_crafting_start_time = res[16];
-    local_exp = res[17];
-    local_level = res[18];
-    local_next_exp_required = res[19];
-    //progression status
+    //mining, farming, crafting
+    let contract_mfmf = await new web3.eth.Contract(abi_murasaki_function_mining_and_farming, contract_murasaki_function_mining_and_farming);
+    let contract_mfc = await new web3.eth.Contract(abi_murasaki_function_crafting, contract_murasaki_function_crafting);
     if (local_mining_status == 1){
-        local_coin_calc = await contract.methods.calc_coin(summoner).call();
+        local_coin_calc = await contract_mfmf.methods.calc_mining(_summoner).call();
     }else if (local_farming_status == 1) {
-        local_material_calc = await contract.methods.calc_material(summoner).call();
+        local_material_calc = await contract_mfmf.methods.calc_farming(_summoner).call();
     }else if (local_crafting_status == 1) {
-        local_crafting_calc = await contract.methods.calc_crafting(summoner).call();
+        local_crafting_calc = await contract_mfc.methods.calc_crafting(_summoner).call();
     }
-    local_items = await contract.methods.get_items(summoner).call();
-    console.log(local_items);
-    */
 
+    //item
+    try {
+        let _owner = await contract_mm.methods.ownerOf(_summoner).call();
+        let contract_mfs = await new web3.eth.Contract(abi_murasaki_function_share, contract_murasaki_function_share);
+        local_items = await contract_mfs.methods.get_balance_of_type_array(_owner).call();
+    } catch(error) {
+        console.log("no owner, not summoned yet?");
+    }
+    console.log(local_items);
 }
 
 
 //summon
+async function contract_summon(_class) {
+    let web3 = await connect();
+    let contract = await new web3.eth.Contract(abi_murasaki_function_summon_and_levelup, contract_murasaki_function_summon_and_levelup);
+    let wallet = await get_wallet(web3);
+    contract.methods.summon(_class).send({from:wallet});
+}
 
 //levelup
 async function contract_level_up(_summoner) {
@@ -407,76 +413,16 @@ async function contract_crafting(_summoner) {
     }
 }
 
+//get item dc
+async function contract_get_item_dc(item_type) {
+    let web3 = await connect();
+    let contract = await new web3.eth.Contract(abi_murasaki_function_crafting, contract_murasaki_function_crafting);
+    let wallet = await get_wallet(web3);
+    let item_dc = await contract.methods.get_item_dc(item_type).call();
+    return item_dc;
+}
 
 /*
-
-//prepare contract, need abi_contract.js
-async function get_contract(web3) {
-    const contract = await new web3.eth.Contract(abi_murasaki_main, contract_address_murasaki_main);
-    return contract;
-}
-
-//prepare contract, pet
-async function get_contract_pet(web3) {
-    const contract = await new web3.eth.Contract(abi_murasaki_pet, contract_address_murasaki_pet);
-    return contract;
-}
-
-//send feeding
-async function contract_feeding(summoner) {
-    let web3 = await connect();
-    let contract = await get_contract(web3);
-    let wallet = await get_wallet(web3);
-    contract.methods.feeding(summoner).send({from:wallet});
-}
-
-//send grooming
-async function contract_grooming(summoner) {
-    let web3 = await connect();
-    let contract = await get_contract(web3);
-    let wallet = await get_wallet(web3);
-    contract.methods.grooming(summoner).send({from:wallet});
-}
-
-//send level_up
-async function contract_level_up(summoner) {
-    let web3 = await connect();
-    let contract = await get_contract(web3);
-    let wallet = await get_wallet(web3);
-    contract.methods.level_up(summoner).send({from:wallet});
-}
-
-//summon
-async function contract_summon(ctype) {
-    let web3 = await connect();
-    let contract = await get_contract(web3);
-    let wallet = await get_wallet(web3);
-    contract.methods.summon(ctype).send({from:wallet});
-}
-
-//mining
-async function contract_start_mining(summoner) {
-    let web3 = await connect();
-    let contract = await get_contract(web3);
-    let wallet = await get_wallet(web3);
-    if (local_mining_status == 0) {
-        contract.methods.start_mining(summoner).send({from:wallet});
-    }else {
-        contract.methods.stop_mining(summoner).send({from:wallet});
-    }
-}
-
-//farming
-async function contract_start_farming(summoner) {
-    let web3 = await connect();
-    let contract = await get_contract(web3);
-    let wallet = await get_wallet(web3);
-    if (local_farming_status == 0) {
-        contract.methods.start_farming(summoner).send({from:wallet});
-    }else {
-        contract.methods.stop_farming(summoner).send({from:wallet});
-    }
-}
 
 //crafting
 async function contract_start_crafting(summoner) {
@@ -513,16 +459,6 @@ async function contract_start_crafting(summoner) {
     }
 }
 
-
-//get items
-async function contract_get_items(summoner) {
-    let web3 = await connect();
-    let contract = await get_contract(web3);
-    let wallet = await get_wallet(web3);
-    let items = await contract.methods.items(summoner,49).call();
-    console.log(items);
-}
-
 //get item dcs
 async function contract_get_item_dc(item_type) {
     let web3 = await connect();
@@ -531,6 +467,7 @@ async function contract_get_item_dc(item_type) {
     let item_dc = await contract.methods.get_item_dc(item_type).call();
     return item_dc;
 }
+
 */
 
 
@@ -1242,6 +1179,9 @@ function preload() {
     this.load.image("item_20", "png/item_20.png", {frameWidth: 300, frameHeight: 300});
     this.load.image("item_21", "png/item_21.png", {frameWidth: 300, frameHeight: 300});
 
+    //window
+    this.load.image("window", "png/window.png");
+
 }
 
 
@@ -1519,6 +1459,19 @@ function create() {
     craft_item_list = CreateDropDownList(this, 800, 104, options)
         .layout()
     text_craft_item = this.add.text(320, 320, "", font_arg);
+
+    //craft_window
+    function open_window_craft (scene) {
+        window_craft = scene.add.image(640, 480, "window");
+        button_craft_close = new Button(800, 800, 'Test', scene, () => close_window_craft(scene));
+    }
+    function close_window_craft (scene) {
+        window_craft.destroy();
+        button_craft_close.visible = false;
+    }
+    new Button(20, 60, 'Test', this, () => open_window_craft(this));
+    //button_craft_close = new Button(20, 100, 'Test', this, () => close_window_craft(this));
+    
 }
 
 
@@ -1544,7 +1497,8 @@ function update() {
     if (turn == 1 || turn % 100 == 0) {
 
         //level up
-        if (local_level > previous_local_level || !(local_strength > 1) || !(local_dexterity > 1) || !(local_intelligence > 1) || !(local_luck > 1)) {
+        //***TODO***
+        if (local_level > previous_local_level) {
             //update radarchart
             radarchart(this, 1136, 192, 80, local_strength, local_dexterity, local_intelligence, local_luck);
         }else 
@@ -1828,9 +1782,13 @@ function update() {
 
     //===== contract =====
     if (turn % 300 == 90) {
-        //update dynamic_status
-        //summoner = document.getElementById("summoner").value;
-        contract_update_status(summoner);
+        //get summoner
+        if (summoner == -1) {
+            contract_get_summoner_of_wallet(web3);
+        }else {
+            //update dynamic_status
+            contract_update_status(summoner);
+        }
     }
 }
 
@@ -1849,75 +1807,7 @@ function update() {
 
 //garbedge
 //--------------------------------------------------------------------------------------------------------
-        /*
-        //pet
-        if (local_pet > 0) {
-            text_pet.setText("pet_id = " + local_pet);
-            if (flag_pet == 0) {
-                pet = new Pet(this, 300 + Math.random()*200, 400 + Math.random()*100);
-                pet.scaleX = pet.scaleX * 0.1;
-                pet.scaleY = pet.scaleY * 0.1;
-                flag_pet = 1;
-            }
-        } else{
-            text_pet.setText("pet_id = not yet crafted");
-        }
 
-        //musicbox
-        if (local_musicbox > 0) {
-            if (flag_musicbox == 0) {
-                item_musicbox = this.add.sprite(1200,848, "item_musicbox");
-                item_musicbox.scaleX = item_musicbox.scaleX * 0.4;
-                item_musicbox.scaleY = item_musicbox.scaleY * 0.4;
-                item_musicbox.setInteractive({useHandCursor: true});
-                item_musicbox.on('pointerdown', () => music() );
-                flag_musicbox = 1;
-            }
-        }
-        */
-
-/*
-async function contract_stop_farming(summoner) {
-    let web3 = await connect();
-    let contract = await get_contract(web3);
-    let wallet = await get_wallet(web3);
-    contract.methods.stop_farming(summoner).send({from:wallet});
-}
-*/
-
-    /*
-    //pet check
-    //TODO: call whole items list, then view at type 49
-    local_pet = await contract.methods.items(summoner, 49).call();
-    if (local_pet != 0) {
-        /* NEED to update contract!
-        let contract_pet = await get_contract_pet(web3);
-        res = await contract_pet.methods.get_status(summoner).call();
-        local_pet_mining_status = res[0];
-        local_pet_mining_start_time = res[1];
-        local_pet_farming_status = res[2];
-        local_pet_farming_start_time = res[3];
-    }
-    local_musicbox = await contract.methods.items(summoner, 50).call();
-    */
-
-/*
-async function contract_stop_mining(summoner) {
-    let web3 = await connect();
-    let contract = await get_contract(web3);
-    let wallet = await get_wallet(web3);
-    contract.methods.stop_mining(summoner).send({from:wallet});
-}
-*/
-
-/*
-async function contract_stop_crafting(summoner) {
-    let web3 = await connect();
-    let contract = await get_contract(web3);
-    let wallet = await get_wallet(web3);
-    contract.methods.stop_crafting(summoner).send({from:wallet});
-}
-*/
 
 
 --->

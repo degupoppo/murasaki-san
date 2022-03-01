@@ -1388,6 +1388,17 @@ contract Murasaki_Function_Share is Ownable {
         //return mc.balance_of_type[_wallet];
     }
 
+    /*
+    //call items as array from summoner
+    function get_balance_of_type_array_from_summoner(uint32 _summoner) external view returns (uint32[128] memory) {
+        Murasaki_Main mm = Murasaki_Main(murasaki_main_address);
+        address _owner = mm.ownerOf(_summoner);
+        Murasaki_Craft mc = Murasaki_Craft(murasaki_craft_address);
+        return mc.get_balance_of_type(_owner);
+        //return mc.balance_of_type[_wallet];
+    }
+    */
+
     //transfer coin, material
     function transfer_coin(uint32 _summoner_from, uint32 _summoner_to, uint32 _coin) external {
         Murasaki_Main mm = Murasaki_Main(murasaki_main_address);
