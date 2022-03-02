@@ -54,13 +54,18 @@ ok! しゅっきん！（お仕事へ移動中）
 
 ToDo
 
-    初期画面の実装
-        Now Loading
-        まだ
-
     craftのUI実装
         4種類, 合計64個のアイテムを選択するメニューを実装する
         アイテム選択後、コストと日数の表示を実装する
+            補正後の必要日数を表示する
+            d, m, secで表示形式を整える
+        進捗情報の整備
+            d, m, secで表示形式を整える
+            プログレッシングバーを実装する
+
+    初期画面の実装
+        Now Loading
+        まだ
 
     level-up可能なときに再読込するとボタンがデアクティブ化するバグ修正
     最初にパラメータが反映されないバグ修正
@@ -192,7 +197,11 @@ let previous_local_items;
 let local_items_flag = new Array(64).fill(0);
 
 let SPEED = 24;
+let BASE_SEC = 86400;
 
+//using global variants
+let global_selected_crafting_item = 0;
+let global_selected_crafting_item_dc;
 
 
 // html
@@ -405,11 +414,14 @@ async function contract_crafting(_summoner) {
     let web3 = await connect();
     let contract = await new web3.eth.Contract(abi_murasaki_function_crafting, contract_murasaki_function_crafting);
     let wallet = await get_wallet(web3);
-    let _item_type = 1;
-    if (local_crafting_status == 0) {
-        contract.methods.start_crafting(_summoner, _item_type).send({from:wallet});
-    }else {
-        contract.methods.stop_crafting(_summoner).send({from:wallet});
+    //let _item_type = 1;
+    let _item_type = global_selected_crafting_item;
+    if (_item_type != 0) {
+        if (local_crafting_status == 0) {
+            contract.methods.start_crafting(_summoner, _item_type).send({from:wallet});
+        }else {
+            contract.methods.stop_crafting(_summoner).send({from:wallet});
+        }
     }
 }
 
@@ -417,9 +429,15 @@ async function contract_crafting(_summoner) {
 async function contract_get_item_dc(item_type) {
     let web3 = await connect();
     let contract = await new web3.eth.Contract(abi_murasaki_function_crafting, contract_murasaki_function_crafting);
-    let wallet = await get_wallet(web3);
+    //let wallet = await get_wallet(web3);
     let item_dc = await contract.methods.get_item_dc(item_type).call();
     return item_dc;
+}
+async function contract_get_modified_dc(_summoner, _item_type) {
+    let web3 = await connect();
+    let contract = await new web3.eth.Contract(abi_murasaki_function_crafting, contract_murasaki_function_crafting);
+    let _modified_dc = await contract.methods.get_modified_dc(_summoner, _item_type).call();
+    return _modified_dc;
 }
 
 /*
@@ -1458,45 +1476,184 @@ function create() {
     ];
     craft_item_list = CreateDropDownList(this, 800, 104, options)
         .layout()
-    text_craft_item = this.add.text(320, 320, "", font_arg);
+    text_craft_item = this.add.text(700, 130, "", font_arg);
+
 
     //craft_window ***TODO***
+    //select crafting_item_type
+
+    new Button(20, 60, 'Open Crafting Window', this, () => open_window_craft(this));
+
     function open_window_craft (scene) {
-        window_craft = scene.add.image(640, 480, "window");
-        //button_craft_close = new Button(800, 800, 'Test', scene, () => close_window_craft(scene));
-        button_craft_close = scene.add.text(1000,700, "Close").setFontSize(30).setFontFamily("Arial").setInteractive();
-        button_craft_close.on("pointerdown", function (pointer) {
-            window_craft.destroy();
-            button_craft_close.destroy();
-            button_item1.destroy();
-        }, scene);
-        button_item1 = scene.add.text(200,400, "item1").setFontSize(30).setFontFamily("Arial").setInteractive();
-        button_item1.on("pointerdown", function (pointer) {
-            selected_item = 1;
-            window_craft.destroy();
-            button_craft_close.destroy();
-            button_item1.destroy();
-        }, scene);
 
-        button_item2 = scene.add.text(200,450, "item2").setFontSize(30).setFontFamily("Arial").setInteractive();
-        button_item2.on("pointerdown", () => close_window_craft(2); )
-
-        function close_window_craft(_selected_item) {
-            window_craft.destroy();
-            button_craft_close.destroy();
-            button_item1.destroy();
-            button_item2.destroy();
-            selected_item = _selected_item;
+        //function, closing: destroy group and update selecte_item
+        async function close_crafting_window(_item) {
+            //update selected item
+            global_selected_crafting_item = _item;
+            //destroy group
+            group_window_crafting.destroy(true);
+            //update selected item dc
+            global_selected_crafting_item_dc = await get_cost_of_item(_item);
+            console.log("selected_item:", global_selected_crafting_item, global_selected_crafting_item_dc);
+            //update text_craft_item
+            let _level = global_selected_crafting_item_dc[0]
+            //text_craft_item.setText("time= " + _dc + ", ohana = " + _coin + ", kusa = " + _material);
+            if (_level > 0) {
+                //let _dc = global_selected_crafting_item_dc[1];
+                let _dc = await get_modified_dc(summoner, _item);
+                let _total_sec = _dc / 1000 * BASE_SEC;
+                let _day = Math.floor(_total_sec / 86400);
+                let _hr = Math.floor(_total_sec % 86400 / 3600);
+                let _min = Math.floor(_total_sec % 3600 / 60);
+                //let _sec = _total_sec %  60;
+                let _coin = global_selected_crafting_item_dc[2];
+                let _material = global_selected_crafting_item_dc[3];
+                //text_craft_item.setText(_coin + " ohana / " + _material + " kusa / " + _day + "day " + _hr + "hr " + _min + "min " + Math.trunc(_sec) + "sec");
+                text_craft_item.setText(_coin + " ohana / " + _material + " kusa / " + _day + "d:" + _hr + "h:" + _min + "m");
+            } else {
+                text_craft_item.setText("");
+            }
         }
-        console.log(selected_item);
 
-    }
+        //function, get cost of item
+        async function get_cost_of_item(_item) {
+            let _dc_table = await contract_get_item_dc(_item);
+            return _dc_table;
+        }
 
+        //function, get modified dc
+        async function get_modified_dc(_summoner, _item_type) {
+            let _modified_dc = await contract_get_modified_dc(_summoner, _item_type);
+            console.log(_modified_dc);
+            return _modified_dc;
+        }
 
-    new Button(20, 60, 'Test', this, () => open_window_craft(this));
+        //function, create button
+        function create_button(_x, _y, _text, _item_type, scene) {
+            let obj = scene.add.text(_x, _y, _text)
+                .setFontSize(30).setFontFamily("Arial").setFill('#000000')
+                .setInteractive({useHandCursor: true})
+                .on("pointerdown", () => close_crafting_window(_item_type) )
+                .on("pointerover", () => obj.setStyle({ fontSize: 30, fontFamily: "Arial", fill: '#ffff00' }))
+                .on("pointerout", () => obj.setStyle({ fontSize: 30, fontFamily: "Arial", fill: '#000000' }))
+            return obj;
+        }
 
-    //button_craft_close = new Button(20, 100, 'Test', this, () => close_window_craft(this));
-    
+        //create window
+        window_crafting = scene.add.sprite(640, 480, "window");
+
+        //create button
+        button_crafting_close = create_button(1070, 790, "Cancel", 0, scene);
+        let _x = 150;
+        let _y = 110;
+        let _y_add = 40;
+        //mining_item
+        button_crafting_item1  = create_button(_x, _y + _y_add *  1, "item1",  1,  scene);
+        button_crafting_item2  = create_button(_x, _y + _y_add *  2, "item2",  2,  scene);
+        button_crafting_item3  = create_button(_x, _y + _y_add *  3, "item3",  3,  scene);
+        button_crafting_item4  = create_button(_x, _y + _y_add *  4, "item4",  4,  scene);
+        button_crafting_item5  = create_button(_x, _y + _y_add *  5, "item5",  5,  scene);
+        button_crafting_item6  = create_button(_x, _y + _y_add *  6, "item6",  6,  scene);
+        button_crafting_item7  = create_button(_x, _y + _y_add *  7, "item7",  7,  scene);
+        button_crafting_item8  = create_button(_x, _y + _y_add *  8, "item8",  8,  scene);
+        button_crafting_item9  = create_button(_x, _y + _y_add *  9, "item9",  9,  scene);
+        button_crafting_item10 = create_button(_x, _y + _y_add * 10, "item10", 10, scene);
+        button_crafting_item11 = create_button(_x, _y + _y_add * 11, "item11", 11, scene);
+        button_crafting_item12 = create_button(_x, _y + _y_add * 12, "item12", 12, scene);
+        button_crafting_item13 = create_button(_x, _y + _y_add * 13, "item13", 13, scene);
+        button_crafting_item14 = create_button(_x, _y + _y_add * 14, "item14", 14, scene);
+        button_crafting_item15 = create_button(_x, _y + _y_add * 15, "item15", 15, scene);
+        button_crafting_item16 = create_button(_x, _y + _y_add * 16, "item16", 16, scene);
+        //farming_item
+        _x = 500;
+        button_crafting_item17 = create_button(_x, _y + _y_add *  1, "item17", 17, scene);
+        button_crafting_item18 = create_button(_x, _y + _y_add *  2, "item18", 18, scene);
+        button_crafting_item19 = create_button(_x, _y + _y_add *  3, "item19", 19, scene);
+        button_crafting_item20 = create_button(_x, _y + _y_add *  4, "item20", 20, scene);
+        button_crafting_item21 = create_button(_x, _y + _y_add *  5, "item21", 21, scene);
+        button_crafting_item22 = create_button(_x, _y + _y_add *  6, "item22", 22, scene);
+        button_crafting_item23 = create_button(_x, _y + _y_add *  7, "item23", 23, scene);
+        button_crafting_item24 = create_button(_x, _y + _y_add *  8, "item24", 24, scene);
+        button_crafting_item25 = create_button(_x, _y + _y_add *  9, "item25", 25, scene);
+        button_crafting_item26 = create_button(_x, _y + _y_add * 10, "item26", 26, scene);
+        button_crafting_item27 = create_button(_x, _y + _y_add * 11, "item27", 27, scene);
+        button_crafting_item28 = create_button(_x, _y + _y_add * 12, "item28", 28, scene);
+        button_crafting_item29 = create_button(_x, _y + _y_add * 13, "item29", 29, scene);
+        button_crafting_item30 = create_button(_x, _y + _y_add * 14, "item30", 30, scene);
+        button_crafting_item31 = create_button(_x, _y + _y_add * 15, "item31", 31, scene);
+        button_crafting_item32 = create_button(_x, _y + _y_add * 16, "item32", 32, scene);
+        //farming_item
+        _x = 850;
+        button_crafting_item33 = create_button(_x, _y + _y_add *  1, "item33", 33, scene);
+        button_crafting_item34 = create_button(_x, _y + _y_add *  2, "item34", 34, scene);
+        button_crafting_item35 = create_button(_x, _y + _y_add *  3, "item35", 35, scene);
+        button_crafting_item36 = create_button(_x, _y + _y_add *  4, "item36", 36, scene);
+        button_crafting_item37 = create_button(_x, _y + _y_add *  5, "item37", 37, scene);
+        button_crafting_item38 = create_button(_x, _y + _y_add *  6, "item38", 38, scene);
+        button_crafting_item39 = create_button(_x, _y + _y_add *  7, "item39", 39, scene);
+        button_crafting_item40 = create_button(_x, _y + _y_add *  8, "item40", 40, scene);
+        button_crafting_item41 = create_button(_x, _y + _y_add *  9, "item41", 41, scene);
+        button_crafting_item42 = create_button(_x, _y + _y_add * 10, "item42", 42, scene);
+        button_crafting_item43 = create_button(_x, _y + _y_add * 11, "item43", 43, scene);
+        button_crafting_item44 = create_button(_x, _y + _y_add * 12, "item44", 44, scene);
+        button_crafting_item45 = create_button(_x, _y + _y_add * 13, "item45", 45, scene);
+        button_crafting_item46 = create_button(_x, _y + _y_add * 14, "item46", 46, scene);
+        button_crafting_item47 = create_button(_x, _y + _y_add * 15, "item47", 47, scene);
+        button_crafting_item48 = create_button(_x, _y + _y_add * 16, "item48", 48, scene);
+
+        //create group
+        group_window_crafting = scene.add.group();
+        group_window_crafting.add(window_crafting);
+        group_window_crafting.add(button_crafting_close);
+        group_window_crafting.add(button_crafting_item1);
+        group_window_crafting.add(button_crafting_item2);
+        group_window_crafting.add(button_crafting_item3);
+        group_window_crafting.add(button_crafting_item4);
+        group_window_crafting.add(button_crafting_item5);
+        group_window_crafting.add(button_crafting_item6);
+        group_window_crafting.add(button_crafting_item7);
+        group_window_crafting.add(button_crafting_item8);
+        group_window_crafting.add(button_crafting_item9);
+        group_window_crafting.add(button_crafting_item10);
+        group_window_crafting.add(button_crafting_item11);
+        group_window_crafting.add(button_crafting_item12);
+        group_window_crafting.add(button_crafting_item13);
+        group_window_crafting.add(button_crafting_item14);
+        group_window_crafting.add(button_crafting_item15);
+        group_window_crafting.add(button_crafting_item16);
+        group_window_crafting.add(button_crafting_item17);
+        group_window_crafting.add(button_crafting_item18);
+        group_window_crafting.add(button_crafting_item19);
+        group_window_crafting.add(button_crafting_item20);
+        group_window_crafting.add(button_crafting_item21);
+        group_window_crafting.add(button_crafting_item22);
+        group_window_crafting.add(button_crafting_item23);
+        group_window_crafting.add(button_crafting_item24);
+        group_window_crafting.add(button_crafting_item25);
+        group_window_crafting.add(button_crafting_item26);
+        group_window_crafting.add(button_crafting_item27);
+        group_window_crafting.add(button_crafting_item28);
+        group_window_crafting.add(button_crafting_item29);
+        group_window_crafting.add(button_crafting_item30);
+        group_window_crafting.add(button_crafting_item31);
+        group_window_crafting.add(button_crafting_item32);
+        group_window_crafting.add(button_crafting_item33);
+        group_window_crafting.add(button_crafting_item34);
+        group_window_crafting.add(button_crafting_item35);
+        group_window_crafting.add(button_crafting_item36);
+        group_window_crafting.add(button_crafting_item37);
+        group_window_crafting.add(button_crafting_item38);
+        group_window_crafting.add(button_crafting_item39);
+        group_window_crafting.add(button_crafting_item40);
+        group_window_crafting.add(button_crafting_item41);
+        group_window_crafting.add(button_crafting_item42);
+        group_window_crafting.add(button_crafting_item43);
+        group_window_crafting.add(button_crafting_item44);
+        group_window_crafting.add(button_crafting_item45);
+        group_window_crafting.add(button_crafting_item46);
+        group_window_crafting.add(button_crafting_item47);
+        group_window_crafting.add(button_crafting_item48);
+    }    
 }
 
 
@@ -1632,7 +1789,14 @@ function update() {
             text_working_calc.setText("+ " + local_material_calc + " material");
         }else if (mode == "crafting") {
             if (local_crafting_calc > 0) {
-                text_working_calc.setText(local_crafting_calc + " sec left");
+                text_craft_item.setText("");    //***TODO:***
+                //calc remining time
+                let _total_sec = local_crafting_calc;
+                let _day = Math.floor(_total_sec / 86400);
+                let _hr = Math.floor(_total_sec % 86400 / 3600);
+                let _min = Math.floor(_total_sec % 3600 / 60);
+                //text_working_calc.setText(local_crafting_calc + " sec left");
+                text_working_calc.setText(_day + "d:" + _hr + "h:" + _min + " remining");
             } else{
                 text_working_calc.setText("Completed!");
             }
@@ -1814,6 +1978,9 @@ function update() {
             //update dynamic_status
             contract_update_status(summoner);
         }
+
+        //console.log(global_selected_crafting_item, global_selected_crafting_item_dc);
+
     }
 }
 
