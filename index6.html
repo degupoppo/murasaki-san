@@ -196,7 +196,7 @@ let local_items;
 let previous_local_items;
 let local_items_flag = new Array(64).fill(0);
 
-let SPEED = 24;
+let SPEED = 10;
 let BASE_SEC = 86400;
 
 //using global variants
@@ -416,12 +416,10 @@ async function contract_crafting(_summoner) {
     let wallet = await get_wallet(web3);
     //let _item_type = 1;
     let _item_type = global_selected_crafting_item;
-    if (_item_type != 0) {
-        if (local_crafting_status == 0) {
-            contract.methods.start_crafting(_summoner, _item_type).send({from:wallet});
-        }else {
-            contract.methods.stop_crafting(_summoner).send({from:wallet});
-        }
+    if (local_crafting_status == 0) {
+        contract.methods.start_crafting(_summoner, _item_type).send({from:wallet});
+    }else {
+        contract.methods.stop_crafting(_summoner).send({from:wallet});
     }
 }
 

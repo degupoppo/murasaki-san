@@ -196,7 +196,7 @@ let local_items;
 let previous_local_items;
 let local_items_flag = new Array(64).fill(0);
 
-let SPEED = 24;
+let SPEED = 10;
 let BASE_SEC = 86400;
 
 //using global variants
@@ -416,12 +416,12 @@ async function contract_crafting(_summoner) {
     let wallet = await get_wallet(web3);
     //let _item_type = 1;
     let _item_type = global_selected_crafting_item;
-    if (_item_type != 0) {
-        if (local_crafting_status == 0) {
+    if (local_crafting_status == 0) {
+        if (_item_type != 0) {
             contract.methods.start_crafting(_summoner, _item_type).send({from:wallet});
-        }else {
-            contract.methods.stop_crafting(_summoner).send({from:wallet});
         }
+    }else {
+        contract.methods.stop_crafting(_summoner).send({from:wallet});
     }
 }
 
@@ -1796,7 +1796,7 @@ function update() {
                 let _hr = Math.floor(_total_sec % 86400 / 3600);
                 let _min = Math.floor(_total_sec % 3600 / 60);
                 //text_working_calc.setText(local_crafting_calc + " sec left");
-                text_working_calc.setText(_day + "d:" + _hr + "h:" + _min + " remining");
+                text_working_calc.setText(_day + "d:" + _hr + "h:" + _min + "m remining");
             } else{
                 text_working_calc.setText("Completed!");
             }
