@@ -64,6 +64,7 @@ ToDo
             補正後の必要日数を表示する
             d, m, secで表示形式を整える
         進捗情報の整備
+            クラフト中アイテムの表示
             d, m, secで表示形式を整える
             プログレッシングバーを実装する
 
@@ -1421,6 +1422,63 @@ function create() {
 
     function open_window_craft (scene) {
 
+        //array, item_name
+        let array_item_name = [
+            //0
+            "dummy",
+            //1-16
+            "item1",
+            "item2",
+            "item3",
+            "item4",
+            "item5",
+            "item6",
+            "item7",
+            "item8",
+            "item9",
+            "item10",
+            "item11",
+            "item12",
+            "item13",
+            "item14",
+            "item15",
+            "item16",
+            //17-32
+            "Flowerpot",
+            "item18",
+            "item19",
+            "item20",
+            "item21",
+            "item22",
+            "item23",
+            "item24",
+            "item25",
+            "item26",
+            "item27",
+            "item28",
+            "item29",
+            "item30",
+            "item31",
+            "item32",
+            //33-48
+            "Violin",
+            "Musicbox",
+            "item35",
+            "item36",
+            "item37",
+            "item38",
+            "item39",
+            "item40",
+            "item41",
+            "item42",
+            "item43",
+            "item44",
+            "item45",
+            "item46",
+            "item47",
+            "item48",
+        ]
+
         //function, closing: destroy group and update selecte_item
         async function close_crafting_window(_item) {
             //update selected item
@@ -1483,6 +1541,13 @@ function create() {
         let _y = 110;
         let _y_add = 40;
         //mining_item
+        for (var i = 1; i <= 16; i++) {
+            //use eval to create dynamic variants
+            //button_crafting_item1  = create_button(_x, _y + _y_add *  1, "[" + local_items[1] + "] " + array_item_name[1],  1,  scene);
+            //eval("button_crafting_item" + i + " = create_button(_x, _y + _y_add *  " + i + ", array_item_name[" + i + "],  " + i + ",  scene);")
+            eval("button_crafting_item${i}  = create_button(_x, _y + _y_add *  ${i}, '[' + local_items[${i}] + '] ' + array_item_name[${i}],  ${i},  scene);")
+        }
+        /*
         button_crafting_item1  = create_button(_x, _y + _y_add *  1, "item1",  1,  scene);
         button_crafting_item2  = create_button(_x, _y + _y_add *  2, "item2",  2,  scene);
         button_crafting_item3  = create_button(_x, _y + _y_add *  3, "item3",  3,  scene);
@@ -1499,9 +1564,10 @@ function create() {
         button_crafting_item14 = create_button(_x, _y + _y_add * 14, "item14", 14, scene);
         button_crafting_item15 = create_button(_x, _y + _y_add * 15, "item15", 15, scene);
         button_crafting_item16 = create_button(_x, _y + _y_add * 16, "item16", 16, scene);
+        */
         //farming_item
         _x = 500;
-        button_crafting_item17 = create_button(_x, _y + _y_add *  1, "Vase", 17, scene);
+        button_crafting_item17 = create_button(_x, _y + _y_add *  1, "[" + local_items[17] + "] " + array_item_name[17], 17, scene);
         item17_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  1, "item_vase").setScale(0.08);
         button_crafting_item18 = create_button(_x, _y + _y_add *  2, "item18", 18, scene);
         button_crafting_item19 = create_button(_x, _y + _y_add *  3, "item19", 19, scene);
