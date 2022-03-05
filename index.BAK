@@ -1145,10 +1145,10 @@ function preload() {
     this.load.spritesheet("item_musicbox", "png/item_musicbox.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("item_violin", "png/item_violin.png", {frameWidth: 600, frameHeight: 600});
     this.load.image("item_vase", "png/item_vase.png", {frameWidth: 300, frameHeight: 300});
-    this.load.image("item_18", "png/item_18.png", {frameWidth: 300, frameHeight: 300});
-    this.load.image("item_19", "png/item_19.png", {frameWidth: 300, frameHeight: 300});
-    this.load.image("item_20", "png/item_20.png", {frameWidth: 300, frameHeight: 300});
-    this.load.image("item_21", "png/item_21.png", {frameWidth: 300, frameHeight: 300});
+    this.load.image("item_dummy", "png/item_18.png", {frameWidth: 300, frameHeight: 300});
+    //this.load.image("item_19", "png/item_19.png", {frameWidth: 300, frameHeight: 300});
+    //this.load.image("item_20", "png/item_20.png", {frameWidth: 300, frameHeight: 300});
+    //this.load.image("item_21", "png/item_21.png", {frameWidth: 300, frameHeight: 300});
 
     //window
     this.load.image("window", "png/window.png");
@@ -1537,7 +1537,7 @@ function create() {
 
         //create item list text
         button_crafting_close = create_button(1070, 790, "Cancel", 0, scene);
-        let _x = 150;
+        let _x = 170;
         let _y = 110;
         let _y_add = 40;
         //mining_item
@@ -1545,7 +1545,7 @@ function create() {
             //use eval to create dynamic variants
             //button_crafting_item1  = create_button(_x, _y + _y_add *  1, "[" + local_items[1] + "] " + array_item_name[1],  1,  scene);
             //eval("button_crafting_item" + i + " = create_button(_x, _y + _y_add *  " + i + ", array_item_name[" + i + "],  " + i + ",  scene);")
-            eval("button_crafting_item${i}  = create_button(_x, _y + _y_add *  ${i}, '[' + local_items[${i}] + '] ' + array_item_name[${i}],  ${i},  scene);")
+            eval(`button_crafting_item${i}  = create_button(_x, _y + _y_add *  ${i}, '[' + local_items[${i}] + '] ' + array_item_name[${i}],  ${i},  scene);`)
         }
         /*
         button_crafting_item1  = create_button(_x, _y + _y_add *  1, "item1",  1,  scene);
@@ -1566,7 +1566,12 @@ function create() {
         button_crafting_item16 = create_button(_x, _y + _y_add * 16, "item16", 16, scene);
         */
         //farming_item
-        _x = 500;
+        _x = 520;
+        for (var i = 17; i <= 32; i++) {
+            eval(`button_crafting_item${i}  = create_button(_x, _y + _y_add *  ${i-16}, '[' + local_items[${i}] + '] ' + array_item_name[${i}],  ${i},  scene);`)
+        }
+        item17_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  1, "item_vase").setScale(0.08);
+        /*
         button_crafting_item17 = create_button(_x, _y + _y_add *  1, "[" + local_items[17] + "] " + array_item_name[17], 17, scene);
         item17_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  1, "item_vase").setScale(0.08);
         button_crafting_item18 = create_button(_x, _y + _y_add *  2, "item18", 18, scene);
@@ -1584,8 +1589,15 @@ function create() {
         button_crafting_item30 = create_button(_x, _y + _y_add * 14, "item30", 30, scene);
         button_crafting_item31 = create_button(_x, _y + _y_add * 15, "item31", 31, scene);
         button_crafting_item32 = create_button(_x, _y + _y_add * 16, "item32", 32, scene);
-        //farming_item
-        _x = 850;
+        */
+        //crafting_item
+        _x = 870;
+        for (var i = 33; i <= 48; i++) {
+            eval(`button_crafting_item${i}  = create_button(_x, _y + _y_add *  ${i-32}, '[' + local_items[${i}] + '] ' + array_item_name[${i}],  ${i},  scene);`)
+        }
+        item33_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  1, "item_violin").setScale(0.08);
+        item34_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  2, "item_musicbox").setScale(0.12);
+        /*
         button_crafting_item33 = create_button(_x, _y + _y_add *  1, "Violin", 33, scene);
         item33_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  1, "item_violin").setScale(0.08);
         button_crafting_item34 = create_button(_x, _y + _y_add *  2, "Music Box", 34, scene);
@@ -1604,6 +1616,7 @@ function create() {
         button_crafting_item46 = create_button(_x, _y + _y_add * 14, "item46", 46, scene);
         button_crafting_item47 = create_button(_x, _y + _y_add * 15, "item47", 47, scene);
         button_crafting_item48 = create_button(_x, _y + _y_add * 16, "item48", 48, scene);
+        */
 
         //create group
         group_window_crafting = scene.add.group();
