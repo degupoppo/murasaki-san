@@ -1,7 +1,11 @@
 
 //------------------------------------------------------------------------------------------------------------------
 
+
 /***
+
+wd  0x0676CBB011E7fAbCB38b9A2242d40D725aAC4d2b
+
 
     bot対策
         大量のwalletを運用した効率プレイへの対策
@@ -1442,10 +1446,10 @@ contract Murasaki_Function_Summon_and_LevelUp is Ownable {
              - ms.last_total_mining_sec(_summoner)
              - ms.last_total_farming_sec(_summoner)
              - ms.last_total_crafting_sec(_summoner);
-        uint32 _percent_mining = 500 * (ms.last_total_mining_sec(_summoner) + _resting_sec/4) / _base_sec;
-        uint32 _percent_farming = 500 * (ms.last_total_farming_sec(_summoner) + _resting_sec/4) / _base_sec;
-        uint32 _percent_crafting = 500 * (ms.last_total_crafting_sec(_summoner) + _resting_sec/4) / _base_sec;
-        uint32 _percent_resting = 500 * (_resting_sec/4) / _base_sec;
+        uint32 _percent_mining = 200 * (ms.last_total_mining_sec(_summoner) + _resting_sec/4) / _base_sec;
+        uint32 _percent_farming = 200 * (ms.last_total_farming_sec(_summoner) + _resting_sec/4) / _base_sec;
+        uint32 _percent_crafting = 200 * (ms.last_total_crafting_sec(_summoner) + _resting_sec/4) / _base_sec;
+        uint32 _percent_resting = 200 * (_resting_sec/4) / _base_sec;
         //status addition
         ms.set_strength(_summoner, ms.strength(_summoner) + _percent_mining);
         ms.set_dexterity(_summoner, ms.dexterity(_summoner) + _percent_farming);
@@ -1857,13 +1861,20 @@ contract Murasaki_Function_Crafting is Ownable {
         World_Dice wd = World_Dice(world_dice_address);
         uint32 _rolled_dice = wd.get_rolled_dice(_summoner);
         _mod += _rolled_dice;
-        //modify dc, y = a/b * x, y >= 3000
-        //_dc = _dc - (_dc - 3000) / (75 * _level / 10) * _mod;
-        _dc = _dc - (_dc - 3000) / (75 * _level / 10) * _mod/100;
-        if (_dc < 3000) {
-            _dc = 3000;
+        //initial point = 400 (1Lv*100, 3INT*100)
+        //point per level = 150 (1Lv*100 + 0.5INT*100)
+        //minimum dc = 3000 (3 days)
+        // _mod_dc = _dc - ( _dc / (_level * 150) ) * (_mod - 400) >= 3000
+        // _delta = (_mod - 400) / (_level * 150) * _dc
+        // _mod_dc = _dc - _delta >= 3000
+        uint32 _delta = (_mod - 400) / (_level * 150) * _dc;
+        uint32 _mod_dc;
+        if (_dc < 3000 + _delta) {
+            _mod_dc = 3000;
+        } else {
+            _mod_dc = _dc - _delta;
         }
-        return _dc;
+        return _mod_dc;
     }
     function calc_crafting(uint32 _summoner) public view returns (uint32) {
         Murasaki_Strage ms = Murasaki_Strage(murasaki_strage_address);

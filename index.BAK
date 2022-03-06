@@ -1487,7 +1487,6 @@ function create() {
             group_window_crafting.destroy(true);
             //update selected item dc
             global_selected_crafting_item_dc = await get_cost_of_item(_item);
-            console.log("selected_item:", global_selected_crafting_item, global_selected_crafting_item_dc);
             //update text_craft_item
             let _level = global_selected_crafting_item_dc[0]
             //text_craft_item.setText("time= " + _dc + ", ohana = " + _coin + ", kusa = " + _material);
@@ -1503,6 +1502,8 @@ function create() {
                 let _material = global_selected_crafting_item_dc[3];
                 //text_craft_item.setText(_coin + " ohana / " + _material + " kusa / " + _day + "day " + _hr + "hr " + _min + "min " + Math.trunc(_sec) + "sec");
                 text_craft_item.setText(_coin + " ohana / " + _material + " kusa / " + _day + "d:" + _hr + "h:" + _min + "m");
+                console.log("selected_item:", global_selected_crafting_item, global_selected_crafting_item_dc);
+                console.log("modified_dc:", _dc);
             } else {
                 text_craft_item.setText("");
             }
@@ -1533,7 +1534,7 @@ function create() {
         }
 
         //create window
-        window_crafting = scene.add.sprite(640, 480, "window");
+        window_crafting = scene.add.sprite(640, 480, "window").setInteractive();
 
         //create item list text
         button_crafting_close = create_button(1070, 790, "Cancel", 0, scene);
