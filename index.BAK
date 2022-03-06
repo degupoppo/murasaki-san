@@ -1369,6 +1369,7 @@ function create() {
 
     //button_text
     new Button(20, 20, 'Connect Wallet', this, () => connect());
+    new Button(20, 40, 'Summon', this, () => contract_summon(1));
 
     //status window color fill
     let status_back = this.add.graphics();
@@ -1487,6 +1488,7 @@ function create() {
             group_window_crafting.destroy(true);
             //update selected item dc
             global_selected_crafting_item_dc = await get_cost_of_item(_item);
+            console.log("selected_item:", global_selected_crafting_item, global_selected_crafting_item_dc);
             //update text_craft_item
             let _level = global_selected_crafting_item_dc[0]
             //text_craft_item.setText("time= " + _dc + ", ohana = " + _coin + ", kusa = " + _material);
@@ -1502,7 +1504,6 @@ function create() {
                 let _material = global_selected_crafting_item_dc[3];
                 //text_craft_item.setText(_coin + " ohana / " + _material + " kusa / " + _day + "day " + _hr + "hr " + _min + "min " + Math.trunc(_sec) + "sec");
                 text_craft_item.setText(_coin + " ohana / " + _material + " kusa / " + _day + "d:" + _hr + "h:" + _min + "m");
-                console.log("selected_item:", global_selected_crafting_item, global_selected_crafting_item_dc);
                 console.log("modified_dc:", _dc);
             } else {
                 text_craft_item.setText("");
