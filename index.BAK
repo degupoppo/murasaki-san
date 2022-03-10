@@ -54,6 +54,11 @@ ok! しゅっきん！（お仕事へ移動中）
 
 ToDo
 
+    初期画面の実装
+        Now Loading
+        まだsummonしていない場合はsummonボタンの表示
+        まだsummonしていない場合はsummonerを非表示にする？
+
     updateの整備
         update_timeのみを高頻度でcallして監視し
         update_timeが変わったときに全データをcallして取得し、ローカル変数を書き換える
@@ -67,10 +72,6 @@ ToDo
             クラフト中アイテムの表示
             d, m, secで表示形式を整える
             プログレッシングバーを実装する
-
-    初期画面の実装
-        Now Loading
-        まだ
 
     level-up可能なときに再読込するとボタンがデアクティブ化するバグ修正
     最初にパラメータが反映されないバグ修正
@@ -148,7 +149,7 @@ ToDo
 const version = "0.2.0";
 let turn = 0;
 
-let local_ctype;
+let local_class;
 let local_strength;
 let local_dexterity;
 //let local_vitality;
@@ -296,7 +297,7 @@ async function contract_update_status(_summoner) {
     //murasaki_main
     let contract_mm = await new web3.eth.Contract(abi_murasaki_main, contract_murasaki_main);
     //local_id = await contract_mm.methods.id(_summoner).call();
-    local_ctype = await contract_mm.methods.class(_summoner).call();
+    local_class = await contract_mm.methods.class(_summoner).call();
     local_birth_time = await contract_mm.methods.summoned_time(_summoner).call();
 
     //murasaki_strage
@@ -1533,7 +1534,7 @@ function create() {
         }
 
         //create window
-        window_crafting = scene.add.sprite(640, 480, "window");
+        window_crafting = scene.add.sprite(640, 480, "window").setInteractive();
 
         //create item list text
         button_crafting_close = create_button(1070, 790, "Cancel", 0, scene);
@@ -1811,7 +1812,7 @@ function update() {
         text_age_time.setText   ("age: " + age + " d");
 
         //degub text
-        text_type.setText       ("type = " + local_ctype);
+        text_type.setText       ("type = " + local_class);
         text_exp.setText        ("exp= " + local_exp);
         text_turn.setText       ("turn = " + turn);
         text_mode.setText       ("mode = " + mode);
