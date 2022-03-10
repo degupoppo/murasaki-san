@@ -1370,6 +1370,7 @@ function create() {
 
     //button_text
     new Button(20, 20, 'Connect Wallet', this, () => connect());
+    new Button(20, 40, 'Summon', this, () => contract_summon(1));
 
     //status window color fill
     let status_back = this.add.graphics();
@@ -1504,6 +1505,7 @@ function create() {
                 let _material = global_selected_crafting_item_dc[3];
                 //text_craft_item.setText(_coin + " ohana / " + _material + " kusa / " + _day + "day " + _hr + "hr " + _min + "min " + Math.trunc(_sec) + "sec");
                 text_craft_item.setText(_coin + " ohana / " + _material + " kusa / " + _day + "d:" + _hr + "h:" + _min + "m");
+                console.log("modified_dc:", _dc);
             } else {
                 text_craft_item.setText("");
             }
