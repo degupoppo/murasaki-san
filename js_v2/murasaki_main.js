@@ -1,4 +1,4 @@
-const contract_murasaki_main = "0x6E079f343Ed17a35F4603bf7c4b1C41966cA08aB";
+const contract_murasaki_main = "0x223917A2038615479642150227a15062576C2b30";
 const abi_murasaki_main = [
 	{
 		"anonymous": false,
@@ -132,16 +132,15 @@ const abi_murasaki_main = [
 				"internalType": "uint32",
 				"name": "_class",
 				"type": "uint32"
-			}
-		],
-		"name": "summon",
-		"outputs": [
+			},
 			{
 				"internalType": "uint32",
-				"name": "",
+				"name": "_seed",
 				"type": "uint32"
 			}
 		],
+		"name": "summon",
+		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
 	},
@@ -248,6 +247,25 @@ const abi_murasaki_main = [
 				"internalType": "address",
 				"name": "",
 				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint32",
+				"name": "",
+				"type": "uint32"
+			}
+		],
+		"name": "seed",
+		"outputs": [
+			{
+				"internalType": "uint32",
+				"name": "",
+				"type": "uint32"
 			}
 		],
 		"stateMutability": "view",

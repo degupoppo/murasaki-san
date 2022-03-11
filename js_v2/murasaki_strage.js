@@ -1,4 +1,4 @@
-const contract_murasaki_strage = "0x7b291152296cE86a5b4989821B184F16E5d3E50E";
+const contract_murasaki_strage = "0x7bdC1774983Ab26816350Cc9c59A30E7982b920E";
 const abi_murasaki_strage = [
 	{
 		"anonymous": false,
@@ -147,6 +147,19 @@ const abi_murasaki_strage = [
 		"inputs": [
 			{
 				"internalType": "uint32",
+				"name": "_day_petrified",
+				"type": "uint32"
+			}
+		],
+		"name": "set_day_petrified",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint32",
 				"name": "_summoner",
 				"type": "uint32"
 			},
@@ -229,6 +242,24 @@ const abi_murasaki_strage = [
 			}
 		],
 		"name": "set_intelligence",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint32",
+				"name": "_summoner",
+				"type": "uint32"
+			},
+			{
+				"internalType": "bool",
+				"name": "_bool",
+				"type": "bool"
+			}
+		],
+		"name": "set_isActive",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -470,9 +501,9 @@ const abi_murasaki_strage = [
 	{
 		"inputs": [
 			{
-				"internalType": "uint8",
+				"internalType": "uint32",
 				"name": "_price",
-				"type": "uint8"
+				"type": "uint32"
 			}
 		],
 		"name": "set_price",
@@ -548,6 +579,24 @@ const abi_murasaki_strage = [
 			}
 		],
 		"name": "set_total_mining_sec",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint32",
+				"name": "_summoner",
+				"type": "uint32"
+			},
+			{
+				"internalType": "uint32",
+				"name": "_value",
+				"type": "uint32"
+			}
+		],
+		"name": "set_update_time",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -681,6 +730,19 @@ const abi_murasaki_strage = [
 		"type": "function"
 	},
 	{
+		"inputs": [],
+		"name": "DAY_PETRIFIED",
+		"outputs": [
+			{
+				"internalType": "uint32",
+				"name": "",
+				"type": "uint32"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
 		"inputs": [
 			{
 				"internalType": "uint32",
@@ -770,6 +832,25 @@ const abi_murasaki_strage = [
 				"internalType": "uint32",
 				"name": "",
 				"type": "uint32"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint32",
+				"name": "",
+				"type": "uint32"
+			}
+		],
+		"name": "isActive",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
 			}
 		],
 		"stateMutability": "view",
@@ -1146,6 +1227,25 @@ const abi_murasaki_strage = [
 			}
 		],
 		"name": "total_mining_sec",
+		"outputs": [
+			{
+				"internalType": "uint32",
+				"name": "",
+				"type": "uint32"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint32",
+				"name": "",
+				"type": "uint32"
+			}
+		],
+		"name": "update_time",
 		"outputs": [
 			{
 				"internalType": "uint32",

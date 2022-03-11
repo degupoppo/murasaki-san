@@ -6,6 +6,19 @@
 
 wd  0x0676CBB011E7fAbCB38b9A2242d40D725aAC4d2b
 
+    nameの実装
+        strageに保存するか、別の専用コントラを設けるか
+        重複なしの場合はrarity_nameの様な専用コントラが必要
+        NFTではなくNTTが良いか。
+        重複判定、walletごとの所持の有無の機能を実装した別コントラを作る
+            所持の有無はNTT規格がそのまま使えそう
+            重複判定はrarity_nameのアルゴリズムを参考にする
+        コストはどうするか
+            coinとmaterialを少々要求で良いか
+        名前の付け直しはどうするか
+            burnしてNTT再発行で良さそう
+        クラフト品とするのが良いか
+            肖像画アイテムクラフト時に名前を入力、など。
 
     bot対策
         大量のwalletを運用した効率プレイへの対策
@@ -1021,7 +1034,7 @@ contract Murasaki_Strage is Ownable {
 
     //global variants
     uint32 public BASE_SEC = 86400;
-    uint32 public SPEED = 10;
+    uint32 public SPEED = 1000; //100=100%
     uint32 public PRICE = 0 ether;
     uint32 public DAY_PETRIFIED = 365;
 
@@ -1323,7 +1336,7 @@ contract Murasaki_Function_Share is Ownable {
         uint32 BASE_SEC = ms.BASE_SEC();
         uint32 _now = uint32(block.timestamp);
         uint32 _delta_sec = _now - ms.last_feeding_time(_summoner);
-        uint32 _base = BASE_SEC /2 /SPEED;
+        uint32 _base = BASE_SEC /2 *100/SPEED;
         uint32 _satiety;
         if (_delta_sec >= _base) {
             _satiety = 0;
@@ -1340,7 +1353,7 @@ contract Murasaki_Function_Share is Ownable {
         uint32 BASE_SEC = ms.BASE_SEC();
         uint32 _now = uint32(block.timestamp);
         uint32 _delta_sec = _now - ms.last_grooming_time(_summoner);
-        uint32 _base = BASE_SEC *3 /SPEED;
+        uint32 _base = BASE_SEC *3 *100/SPEED;
         uint32 _happy;
         if (_delta_sec >= _base) {
             _happy = 0;
@@ -1616,7 +1629,7 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable {
         uint32 DAY_PETRIFIED = ms.DAY_PETRIFIED();
         uint32 _now = uint32(block.timestamp);
         uint32 _delta_sec = _now - ms.last_feeding_time(_summoner);
-        if ( _delta_sec >= BASE_SEC * DAY_PETRIFIED / SPEED) {
+        if ( _delta_sec >= BASE_SEC * DAY_PETRIFIED *100/SPEED) {
             return false;
         }else {
             return true;
@@ -1665,7 +1678,7 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable {
         uint32 BASE_SEC = ms.BASE_SEC();
         uint32 _now = uint32(block.timestamp);
         uint32 _delta_sec = _now - ms.last_grooming_time_plus_working_time(_summoner);  //working_time
-        uint32 _base = BASE_SEC *3 /SPEED;
+        uint32 _base = BASE_SEC *3 *100/SPEED;
         uint32 _happy;
         if (_delta_sec >= _base) {
             _happy = 0;
@@ -1746,7 +1759,7 @@ contract Murasaki_Function_Mining_and_Farming is Ownable {
         uint32 SPEED = ms.SPEED();
         require(ms.mining_status(_summoner) == 1);
         uint32 _now = uint32(block.timestamp);
-        uint32 _delta = (_now - ms.mining_start_time(_summoner)) * SPEED / 100;
+        uint32 _delta = (_now - ms.mining_start_time(_summoner)) * SPEED/100 / 100;
         //status, level, item boost
         //uint32 _mod = ms.strength(_summoner)/100 + ms.level(_summoner) + count_mining_items(msg.sender);
         uint32 _mod = ms.strength(_summoner) + ms.level(_summoner)*100 + count_mining_items(msg.sender);
@@ -1767,10 +1780,14 @@ contract Murasaki_Function_Mining_and_Farming is Ownable {
         uint32 _mining_items = 0;
         for (uint i = 1; i <= 16; i++) {
             if (_balance_of_type[i+64] > 0) {
-                _mining_items += 200 + (_balance_of_type[i+64] - 1) * 20;   // +10%/one_additional_item
+                //_mining_items += 200 + (_balance_of_type[i+64] - 1) * 20;
+                _mining_items += 200;
             }else if (_balance_of_type[i] > 0) {
-                _mining_items += 100 + (_balance_of_type[i] - 1) * 10;
+                //_mining_items += 100 + (_balance_of_type[i] - 1) * 10;
+                _mining_items += 100;
             }
+            //+10% per one additional item
+            _mining_items += (_balance_of_type[i+64] - 1) * 20 + (_balance_of_type[i] - 1) * 10;
         }
         return _mining_items;
     }
@@ -1818,7 +1835,7 @@ contract Murasaki_Function_Mining_and_Farming is Ownable {
         uint32 SPEED = ms.SPEED();
         require(ms.farming_status(_summoner) == 1);
         uint32 _now = uint32(block.timestamp);
-        uint32 _delta = (_now - ms.farming_start_time(_summoner)) * SPEED / 100;
+        uint32 _delta = (_now - ms.farming_start_time(_summoner)) * SPEED/100 / 100;
         //status and item boost
         //uint32 _mod = ms.dexterity(_summoner)/100 + ms.level(_summoner) + count_farming_items(msg.sender);
         uint32 _mod = ms.dexterity(_summoner) + ms.level(_summoner)*100 + count_farming_items(msg.sender);
@@ -1839,10 +1856,14 @@ contract Murasaki_Function_Mining_and_Farming is Ownable {
         uint32 _farming_items = 0;
         for (uint i = 17; i <= 32; i++) {
             if (_balance_of_type[i+64] > 0) {
-                _farming_items += 200 + (_balance_of_type[i+64] - 1) * 20;   // +10%/one_additional_item
+                //_farming_items += 200 + (_balance_of_type[i+64] - 1) * 20;   // +10%/one_additional_item
+                _farming_items += 200;
             }else if (_balance_of_type[i] > 0) {
-                _farming_items += 100 + (_balance_of_type[i] - 1) * 10;
+                //_farming_items += 100 + (_balance_of_type[i] - 1) * 10;
+                _farming_items += 100;
             }
+            //+10% per one additional item
+            _farming_items += (_balance_of_type[i+64] - 1) * 20 + (_balance_of_type[i] - 1) * 10;
         }
         return _farming_items;
     }
@@ -1948,7 +1969,8 @@ contract Murasaki_Function_Crafting is Ownable {
         // _mod_dc = _dc - ( _dc / (_level * 150) ) * (_mod - 400) >= 3000
         // _delta = (_mod - 400) / (_level * 150) * _dc
         // _mod_dc = _dc - _delta >= 3000
-        uint32 _delta = (_mod - 400) / (_level * 150) * _dc;
+        //uint32 _delta = (_mod - 400) / (_level * 150) * _dc;
+        uint32 _delta = _dc * (_mod - 400) / (_level * 150);    //at last division
         uint32 _mod_dc;
         if (_dc < 3000 + _delta) {
             _mod_dc = 3000;
@@ -1971,7 +1993,7 @@ contract Murasaki_Function_Crafting is Ownable {
         uint32 _dc_sec = _dc * BASE_SEC / 1000;   //1000dc = 1day = 86400sec
 
         //calc remining sec
-        uint32 _delta_time = ( _now - ms.crafting_start_time(_summoner) ) * SPEED;
+        uint32 _delta_time = ( _now - ms.crafting_start_time(_summoner) ) * SPEED/100;
         uint32 _remining_time;
         if (_delta_time >= _dc_sec) {
             _remining_time = 0;
@@ -1987,10 +2009,14 @@ contract Murasaki_Function_Crafting is Ownable {
         uint32 _crafting_items = 0;
         for (uint i = 33; i <= 48; i++) {
             if (_balance_of_type[i+64] > 0) {
-                _crafting_items += 200 + (_balance_of_type[i+64] - 1) * 20;   // +10%/one_additional_item
+                //_crafting_items += 200 + (_balance_of_type[i+64] - 1) * 20;
+                _crafting_items += 200;
             }else if (_balance_of_type[i] > 0) {
-                _crafting_items += 100 + (_balance_of_type[i] - 1) * 10;
+                //_crafting_items += 100 + (_balance_of_type[i] - 1) * 10;
+                _crafting_items += 100;
             }
+            //+10% per one additional item
+            _crafting_items += (_balance_of_type[i+64] - 1) * 20 + (_balance_of_type[i] - 1) * 10;
         }
         return _crafting_items;
     }
@@ -2451,12 +2477,12 @@ contract World_Dice is Ownable {
         address _owner = mfs.get_owner(_summoner);
         require(mfs.get_balance_of_type_specific(_owner, 51) > 0);
         uint32 _now = uint32(block.timestamp);
-        require(_now - last_dice_roll_time[_summoner] >= (ms.BASE_SEC() *9/10) / ms.SPEED());
+        require(_now - last_dice_roll_time[_summoner] >= (ms.BASE_SEC() *9/10) *100/ms.SPEED());
         //dice roll
-        uint32 _dice_roll = mfs.d20(_summoner) * 100;
+        uint32 _dice_roll = mfs.d20(_summoner) * 10;
         //luck challenge
         if (mfs.d100(_summoner) <= ms.luck(_summoner)/100) {
-            _dice_roll = 20 * 100;  //critical
+            _dice_roll = 20 * 10;  //critical
         }
         rolled_dice[_summoner] = _dice_roll;
         last_dice_roll_time[_summoner] = _now;
@@ -2468,7 +2494,7 @@ contract World_Dice is Ownable {
         Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
         uint32 _now = uint32(block.timestamp);
         //ignore past rolled dice before BASE_SEC
-        if(_now - last_dice_roll_time[_summoner] >= ms.BASE_SEC() / ms.SPEED()) {
+        if(_now - last_dice_roll_time[_summoner] >= ms.BASE_SEC() *100/ms.SPEED()) {
             return 0;
         } else{
             return rolled_dice[_summoner];

@@ -1,4 +1,4 @@
-const contract_murasaki_function_feeding_and_grooming = "0x0fdc24349fE9629f1394C2c7C1A6C608122F4eA4";
+const contract_murasaki_function_feeding_and_grooming = "0x85763259177097A7dD2e1Edb4b3d910deFb0d695";
 const abi_murasaki_function_feeding_and_grooming = [
 	{
 		"anonymous": false,
@@ -28,19 +28,6 @@ const abi_murasaki_function_feeding_and_grooming = [
 			}
 		],
 		"name": "_set1_murasaki_function_share_address",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "_address",
-				"type": "address"
-			}
-		],
-		"name": "_set2_murasaki_strage_address",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -151,19 +138,6 @@ const abi_murasaki_function_feeding_and_grooming = [
 	{
 		"inputs": [],
 		"name": "murasaki_function_share_address",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "murasaki_strage_address",
 		"outputs": [
 			{
 				"internalType": "address",

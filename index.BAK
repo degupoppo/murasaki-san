@@ -27,6 +27,7 @@
 <body>
 
 
+
 <!---
 
 picture
@@ -54,39 +55,15 @@ ok! しゅっきん！（お仕事へ移動中）
 
 ToDo
 
-    初期画面の実装
-        Now Loading
-        まだsummonしていない場合はsummonボタンの表示
-        まだsummonしていない場合はsummonerを非表示にする？
+    Petの実装
 
-    updateの整備
-        update_timeのみを高頻度でcallして監視し
-        update_timeが変わったときに全データをcallして取得し、ローカル変数を書き換える
-
-    craftのUI実装
-        4種類, 合計64個のアイテムを選択するメニューを実装する
-        アイテム選択後、コストと日数の表示を実装する
-            補正後の必要日数を表示する
-            d, m, secで表示形式を整える
-        進捗情報の整備
-            クラフト中アイテムの表示
-            d, m, secで表示形式を整える
-            プログレッシングバーを実装する
-
-    level-up可能なときに再読込するとボタンがデアクティブ化するバグ修正
-    最初にパラメータが反映されないバグ修正
-
-    summoner所持item
-        所持itemの検索
-        所持itemのスプライト表示
-
-    summoner設定のページの実装
-        summonerの選択
-        summonerのステータス表示
-        summonerの所持item表示
-        summoner間のcoin/material送信
-        summoner間のitem移動
-        summonerに紐付けられていない所持itemの移動
+    UIの洗練
+        Item選択ウィンドウ
+            シャボン玉がバラバラアニメーションで出てきてふわふわ浮いてるUI
+            実装難しそうだが
+        Summonウィンドウ
+        システムメッセージの表示方法
+            アニメーションなどで演出する
 
     ステータス表示の実装
         coin, materialの表記をどうするか
@@ -94,50 +71,49 @@ ToDo
     BGMと効果音の追加
         効果音の吟味と割り当て
 
-    craftingのUI実装
-     ok item_idの選択方法
-     ok craftのstart/stopボタン
-     ok 選択アイテムのコスト表示
-        成功/失敗の表現
-
-    petのUI実装
-     ok pet所持の有無を監視
-        petの絵の用意
-        pet関数の実装
-            moving
-            resting
-            mining
-            farming
-            moving_working
-        petへのstart mining/farmingとstopの実装
-
-    BGMと効果音の追加
-        効果音の吟味と割り当て完了
-     ok BGMのON/OFFボタンの実装
-     ok 効果音の実装
-     ok クラフト可能なミュージックボックスの実装
-
-    ステータス表示の実装
-     ok 数値＋視覚情報
-     ok STR, DEX等のメーターをどうするか
-            レーダーチャート？
-                三角形のレーダーチャート + Luck表記
-        coin, materialの表記をどうするか
-
-    summoner所持item
-        所持itemの検索
-        所持itemのスプライト表示
-
-    資源のバランスと差別化
-        coinとmaterialの差別化
-
-    色を変える
+    summonerごとにユニークなシンボルの考案
         phaser3での色彩変化
         もしくは手動での色彩変化済み画像の用意
         あるいは、ユニークな色のアクセサリー
 
+ ok レーダーチャートの修正
+        itemによるステータス補正を別の色で重ねて表示させる
+
+Item案
+    Pet
+        動き回るキャラクター
+        miningとfarmingを1/2～1/4の効率で行ってくれる
+        成長はしない
+    tree
+        双葉→大木と時間経過で成長する
+        ステータス補正は変化しない
+        どういう木に成長するかはseed依存でランダム
+    name
+        クラフト品として実装する
+        クラフト成功時にnameを入力する
+        肖像画か、name tagかどちらにするか
+        設定したnameの表示箇所・表示方法も考える
+        表札でよいか
+        表札クラフト時に、NTTでnameを別に発行する
+            やはり表札がNFTで移動できるためややこしい
+            nameは別でNTTで発行し、NFTの表札はnameのNTTを表示するUIにする
+    Dice
+        クラフト後に振れるようになる
+        出た目で24時間ボーナスを得る
+    MusicBox
+        クリックで音楽が流れるオブジェクト
+    Food
+        Feeding時にランダムで選ばれる食べ物
+    LightSwitch
+        クリックで部屋の明るさを変える電気スイッチ
+    花瓶
+    リボン
+        summon時に選択できる色＝class毎のリボン
+        
 
 --->
+
+
 
 <script type="text/javascript">
 
@@ -152,7 +128,6 @@ let turn = 0;
 let local_class;
 let local_strength;
 let local_dexterity;
-//let local_vitality;
 let local_intelligence;
 let local_luck;
 let local_birth_time;
@@ -172,7 +147,7 @@ let local_crafting_start_time;
 let previous_local_last_feeding_time;
 let previous_local_last_grooming_time;
 let previous_local_level;
-let summoner = -1;
+let summoner = 0;
 let satiety;
 let happy;
 let local_coin_calc;
@@ -284,67 +259,77 @@ async function contract_update_summoner_of_wallet() {
     let wallet = await get_wallet(web3);
     let contract_mm = await new web3.eth.Contract(abi_murasaki_main, contract_murasaki_main);
     let _summoner = await contract_mm.methods.tokenOf(wallet).call();  //have not summoned yet: 0
-    console.log(wallet, summoner);
-    summoner = _summoner;
-    //return _summoner
+    if (_summoner == 0) {
+        console.log("MSG: You have not summoned any summoners yet", wallet);
+        text_system_message.setText("You have not summoned Murasaki-san yet.");
+    } else {
+        //check isActive
+        let contract_ms = await new web3.eth.Contract(abi_murasaki_strage, contract_murasaki_strage);
+        let _isActive = await contract_ms.methods.isActive(_summoner).call();
+        if (_isActive == false) {
+            console.log("MSG: You have burned summoner:", wallet, _summoner);
+        } else {
+            console.log("MSG: You have summoner:", wallet, _summoner);
+            summoner = _summoner;
+        }
+    }
 }
 
 //update local status reading from contract
 async function contract_update_status(_summoner) {
+
     let web3 = await connect();
     let wallet = await get_wallet(web3);
 
-    //murasaki_main
+    //contract
     let contract_mm = await new web3.eth.Contract(abi_murasaki_main, contract_murasaki_main);
-    //local_id = await contract_mm.methods.id(_summoner).call();
-    local_class = await contract_mm.methods.class(_summoner).call();
-    local_birth_time = await contract_mm.methods.summoned_time(_summoner).call();
-
-    //murasaki_strage
     let contract_ms = await new web3.eth.Contract(abi_murasaki_strage, contract_murasaki_strage);
-    local_level = await contract_ms.methods.level(_summoner).call();
-    local_exp = await contract_ms.methods.exp(_summoner).call();
-    local_strength = await contract_ms.methods.strength(_summoner).call() / 100;
-    local_dexterity = await contract_ms.methods.dexterity(_summoner).call() / 100;
-    local_intelligence = await contract_ms.methods.intelligence(_summoner).call() / 100;
-    local_luck = await contract_ms.methods.luck(_summoner).call() / 100;
-    local_last_feeding_time = await contract_ms.methods.last_feeding_time(_summoner).call();
-    local_last_grooming_time = await contract_ms.methods.last_grooming_time(_summoner).call();
-    local_coin = await contract_ms.methods.coin(_summoner).call();
-    local_material = await contract_ms.methods.material(_summoner).call();
-    local_mining_status = await contract_ms.methods.mining_status(_summoner).call();
-    local_mining_start_time = await contract_ms.methods.mining_start_time(_summoner).call();
-    local_farming_status = await contract_ms.methods.farming_status(_summoner).call();
-    local_farming_start_time = await contract_ms.methods.farming_start_time(_summoner).call();
-    local_crafting_status = await contract_ms.methods.crafting_status(_summoner).call();
-    local_crafting_start_time = await contract_ms.methods.crafting_start_time(_summoner).call();
-    local_next_exp_required = await contract_ms.methods.next_exp_required(_summoner).call();
-    console.log(
-        local_level, 
-        local_exp, 
-        local_strength, 
-        local_dexterity, 
-        local_intelligence, 
-        local_luck, 
-        local_last_feeding_time, 
-        local_last_grooming_time,
-        local_coin,
-        local_material,
-        local_mining_status,
-        local_mining_start_time,
-        local_farming_status,
-        local_farming_start_time,
-        local_crafting_status,
-        local_crafting_start_time,
-        local_next_exp_required
-    )
+    let contract_mfs = await new web3.eth.Contract(abi_murasaki_function_share, contract_murasaki_function_share);
+    let contract_mfc = await new web3.eth.Contract(abi_murasaki_function_crafting, contract_murasaki_function_crafting);
+    let contract_mfmf = await new web3.eth.Contract(abi_murasaki_function_mining_and_farming, contract_murasaki_function_mining_and_farming);
 
-    //global variants
+    //check isActive
+    let _isActive = await contract_ms.methods.isActive(_summoner).call();
+    if (_isActive == false) {
+        console.log("MSG: This summoner has been burned:", _summoner);
+        text_system_message.setText("This Murasaki-san is not available.");
+        return 0;
+    }
+
+    //call global variants ***TODO***
     SPEED = await contract_ms.methods.SPEED().call();
+    //SPEED = await contract_ms.methods.SPEED().call() / 100;   //220311: speed was modified as 100%=x1
+
+    //call status from ms
+    let _dynamic_status = await contract_mfs.methods.get_dynamic_status_array(_summoner).call();
+    let _static_status = await contract_mfs.methods.get_static_status_array(_summoner).call();
+    console.log("status:", _dynamic_status);
+
+    //update static status
+    local_class = _static_status[0];
+    local_birth_time = _static_status[1];
+
+    //update local variants
+    local_level = _dynamic_status[0];
+    local_exp = _dynamic_status[1];
+    local_strength = _dynamic_status[2]/100;
+    local_dexterity = _dynamic_status[3]/100;
+    local_intelligence = _dynamic_status[4]/100;
+    local_luck = _dynamic_status[5]/100;
+    local_next_exp_required = _dynamic_status[6];
+    //7: last_level_up_time
+    local_coin = _dynamic_status[8];
+    local_material = _dynamic_status[9];
+    local_last_feeding_time = _dynamic_status[10];
+    local_last_grooming_time = _dynamic_status[11];
+    local_mining_status = _dynamic_status[12];
+    local_mining_start_time = _dynamic_status[13];
+    local_farming_status = _dynamic_status[14];
+    local_farming_start_time = _dynamic_status[15];
+    local_crafting_status = _dynamic_status[16];
+    local_crafting_start_time = _dynamic_status[17];
 
     //mining, farming, crafting
-    let contract_mfmf = await new web3.eth.Contract(abi_murasaki_function_mining_and_farming, contract_murasaki_function_mining_and_farming);
-    let contract_mfc = await new web3.eth.Contract(abi_murasaki_function_crafting, contract_murasaki_function_crafting);
     if (local_mining_status == 1){
         local_coin_calc = await contract_mfmf.methods.calc_mining(_summoner).call();
     }else if (local_farming_status == 1) {
@@ -354,16 +339,10 @@ async function contract_update_status(_summoner) {
     }
 
     //item
-    try {
-        let _owner = await contract_mm.methods.ownerOf(_summoner).call();
-        let contract_mfs = await new web3.eth.Contract(abi_murasaki_function_share, contract_murasaki_function_share);
-        local_items = await contract_mfs.methods.get_balance_of_type_array(_owner).call();
-    } catch(error) {
-        console.log("no owner, not summoned yet?");
-    }
-    console.log(local_items);
+    let _owner = await contract_mm.methods.ownerOf(_summoner).call();
+    local_items = await contract_mfs.methods.get_balance_of_type_array(_owner).call();
+    console.log("items:", local_items);
 }
-
 
 //summon
 async function contract_summon(_class) {
@@ -448,6 +427,20 @@ async function contract_get_modified_dc(_summoner, _item_type) {
     let contract = await new web3.eth.Contract(abi_murasaki_function_crafting, contract_murasaki_function_crafting);
     let _modified_dc = await contract.methods.get_modified_dc(_summoner, _item_type).call();
     return _modified_dc;
+}
+
+//calc item
+async function contract_get_item_count(_summoner) {
+    let web3 = await connect();
+    let contract_mm = await new web3.eth.Contract(abi_murasaki_main, contract_murasaki_main);
+    let contract_mfmf = await new web3.eth.Contract(abi_murasaki_function_mining_and_farming, contract_murasaki_function_mining_and_farming);
+    let contract_mfc = await new web3.eth.Contract(abi_murasaki_function_crafting, contract_murasaki_function_crafting);
+    let _owner = await contract_mm.methods.ownerOf(_summoner).call();
+    let _mining_item_count = await contract_mfmf.methods.count_mining_items(_owner).call();
+    let _farming_item_count = await contract_mfmf.methods.count_farming_items(_owner).call();
+    let _crafting_item_count = await contract_mfc.methods.count_crafting_items(_owner).call();
+    let _luck_item_count = 0;
+    return [Number(_mining_item_count)/100, Number(_farming_item_count)/100, Number(_crafting_item_count)/100, _luck_item_count];
 }
 
 
@@ -1007,7 +1000,7 @@ function music() {
 }
 
 //rader chart
-function radarchart(scene, x0, y0, r, str, dex, int, luk) {
+function radarchart(scene, x0, y0, r, str, dex, int, luk, str_item, dex_item, int_item, luk_item) {
     //position
     //let x0 = 923;
     //let y0 = 156;
@@ -1023,6 +1016,10 @@ function radarchart(scene, x0, y0, r, str, dex, int, luk) {
     let y3 = r * luk/base;
     let x4 = -r * int/base;
     let y4 = 0;
+    let y1i = -r * (str+str_item)/base;
+    let x2i = r * (dex+dex_item)/base;
+    let y3i = r * (luk+luk_item)/base;
+    let x4i = -r * (int+int_item)/base;
     //remove old chart
     try {
         radar1.setVisible(false);
@@ -1033,6 +1030,7 @@ function radarchart(scene, x0, y0, r, str, dex, int, luk) {
         radar6.setVisible(false);
         radar7.setVisible(false);
         radar8.setVisible(false);
+        radar9.setVisible(false);
     } catch(error) {
     }
     //draw
@@ -1040,12 +1038,21 @@ function radarchart(scene, x0, y0, r, str, dex, int, luk) {
     radar1 = scene.add.polygon(x0+r, y0+r, [0,-r,r,0,0,r,-r,0], 0xc0c0c0, 0.4);
     radar2 = scene.add.polygon(x0+r*0.75, y0+r*0.75, [0,-r*0.75,r*0.75,0,0,r*0.75,-r*0.75,0], 0xc0c0c0, 0.4);
     radar3 = scene.add.polygon(x0+r/2, y0+r/2, [0,-r/2,r/2,0,0,r/2,-r/2,0], 0xc0c0c0, 0.4);
-    radar4 = scene.add.polygon(x0+(-x4+x2)/2, y0+(-y1+y3)/2, [x1,y1,x2,y2,x3,y3,x4,y4], 0xffff00, 1);
+    radar4 = scene.add.polygon(x0+(-x4i+x2i)/2, y0+(-y1i+y3i)/2, [x1,y1i,x2i,y2,x3,y3i,x4i,y4], 0xffd700, 1);
+    radar5 = scene.add.polygon(x0+(-x4+x2)/2, y0+(-y1+y3)/2, [x1,y1,x2,y2,x3,y3,x4,y4], 0xffff00, 1);
     let font_arg = {font: "17px Arial", fill: "#000000"};
-    radar5 = scene.add.text(x0-10, y0-r-15, "STR"+"\n"+str, font_arg);
-    radar6 = scene.add.text(x0+r, y0-6, "DEX"+"\n"+dex, font_arg);
-    radar7 = scene.add.text(x0-10, y0+r-5, "LUK"+"\n"+luk, font_arg);
-    radar8 = scene.add.text(x0-r-15, y0-6, "INT"+"\n"+int, font_arg);
+    radar6 = scene.add.text(x0-10, y0-r-15, "STR"+"\n"+str, font_arg);
+    radar7 = scene.add.text(x0+r, y0-6, "DEX"+"\n"+dex, font_arg);
+    radar8 = scene.add.text(x0-10, y0+r-5, "LUK"+"\n"+luk, font_arg);
+    radar9 = scene.add.text(x0-r-15, y0-6, "INT"+"\n"+int, font_arg);
+}
+async function draw_radarchart(scene) {
+        let _x = 1136;
+        let _y = 192;
+        let _r = 80;
+        let _res = await contract_get_item_count(summoner);
+        console.log(_res);
+        radarchart(scene, _x, _y, _r, local_strength, local_dexterity, local_intelligence, local_luck, _res[0], _res[1], _res[2], _res[3]);
 }
 
 
@@ -1370,7 +1377,7 @@ function create() {
 
     //button_text
     new Button(20, 20, 'Connect Wallet', this, () => connect());
-    new Button(20, 40, 'Summon', this, () => contract_summon(1));
+    new Button(20, 50, 'Summon', this, () => open_window_summon(this));
 
     //status window color fill
     let status_back = this.add.graphics();
@@ -1429,56 +1436,56 @@ function create() {
             //0
             "dummy",
             //1-16
-            "item1",
-            "item2",
-            "item3",
-            "item4",
-            "item5",
-            "item6",
-            "item7",
-            "item8",
-            "item9",
-            "item10",
-            "item11",
-            "item12",
-            "item13",
-            "item14",
-            "item15",
-            "item16",
+            "Mr. Astar",
+            "---",
+            "---",
+            "---",
+            "---",
+            "---",
+            "---",
+            "---",
+            "---",
+            "---",
+            "---",
+            "---",
+            "---",
+            "---",
+            "---",
+            "---",
             //17-32
             "Flowerpot",
-            "item18",
-            "item19",
-            "item20",
-            "item21",
-            "item22",
-            "item23",
-            "item24",
-            "item25",
-            "item26",
-            "item27",
-            "item28",
-            "item29",
-            "item30",
-            "item31",
-            "item32",
+            "---",
+            "---",
+            "---",
+            "---",
+            "---",
+            "---",
+            "---",
+            "---",
+            "---",
+            "---",
+            "---",
+            "---",
+            "---",
+            "---",
+            "---",
             //33-48
             "Violin",
-            "Musicbox",
-            "item35",
-            "item36",
-            "item37",
-            "item38",
-            "item39",
-            "item40",
-            "item41",
-            "item42",
-            "item43",
-            "item44",
-            "item45",
-            "item46",
-            "item47",
-            "item48",
+            "Music Box",
+            "---",
+            "---",
+            "---",
+            "---",
+            "---",
+            "---",
+            "---",
+            "---",
+            "---",
+            "---",
+            "---",
+            "---",
+            "---",
+            "---",
         ]
 
         //function, closing: destroy group and update selecte_item
@@ -1520,7 +1527,6 @@ function create() {
         //function, get modified dc
         async function get_modified_dc(_summoner, _item_type) {
             let _modified_dc = await contract_get_modified_dc(_summoner, _item_type);
-            console.log(_modified_dc);
             return _modified_dc;
         }
 
@@ -1543,83 +1549,35 @@ function create() {
         let _x = 170;
         let _y = 110;
         let _y_add = 40;
+        let _item_count = 0;
         //mining_item
         for (var i = 1; i <= 16; i++) {
             //use eval to create dynamic variants
             //button_crafting_item1  = create_button(_x, _y + _y_add *  1, "[" + local_items[1] + "] " + array_item_name[1],  1,  scene);
             //eval("button_crafting_item" + i + " = create_button(_x, _y + _y_add *  " + i + ", array_item_name[" + i + "],  " + i + ",  scene);")
-            eval(`button_crafting_item${i}  = create_button(_x, _y + _y_add *  ${i}, '[' + local_items[${i}] + '] ' + array_item_name[${i}],  ${i},  scene);`)
+            //_item_count = Number(local_items[i]) + Number(local_items[i+64]);
+            //eval(`button_crafting_item${i}  = create_button(_x, _y + _y_add *  ${i}, '[' + local_items[${i}] + '] ' + array_item_name[${i}],  ${i},  scene);`)
+            //eval(`button_crafting_item${i}  = create_button(_x, _y + _y_add *  ${i}, '[' + _item_count + '] ' + array_item_name[${i}],  ${i},  scene);`)
+            eval(`button_crafting_item${i}  = create_button(_x, _y + _y_add *  ${i}, '[' + local_items[${i}] + ',' + local_items[${i+64}] + '] ' + array_item_name[${i}],  ${i},  scene);`)
         }
-        /*
-        button_crafting_item1  = create_button(_x, _y + _y_add *  1, "item1",  1,  scene);
-        button_crafting_item2  = create_button(_x, _y + _y_add *  2, "item2",  2,  scene);
-        button_crafting_item3  = create_button(_x, _y + _y_add *  3, "item3",  3,  scene);
-        button_crafting_item4  = create_button(_x, _y + _y_add *  4, "item4",  4,  scene);
-        button_crafting_item5  = create_button(_x, _y + _y_add *  5, "item5",  5,  scene);
-        button_crafting_item6  = create_button(_x, _y + _y_add *  6, "item6",  6,  scene);
-        button_crafting_item7  = create_button(_x, _y + _y_add *  7, "item7",  7,  scene);
-        button_crafting_item8  = create_button(_x, _y + _y_add *  8, "item8",  8,  scene);
-        button_crafting_item9  = create_button(_x, _y + _y_add *  9, "item9",  9,  scene);
-        button_crafting_item10 = create_button(_x, _y + _y_add * 10, "item10", 10, scene);
-        button_crafting_item11 = create_button(_x, _y + _y_add * 11, "item11", 11, scene);
-        button_crafting_item12 = create_button(_x, _y + _y_add * 12, "item12", 12, scene);
-        button_crafting_item13 = create_button(_x, _y + _y_add * 13, "item13", 13, scene);
-        button_crafting_item14 = create_button(_x, _y + _y_add * 14, "item14", 14, scene);
-        button_crafting_item15 = create_button(_x, _y + _y_add * 15, "item15", 15, scene);
-        button_crafting_item16 = create_button(_x, _y + _y_add * 16, "item16", 16, scene);
-        */
+        item1_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  1, "pet_normal").setScale(0.08);
+
         //farming_item
         _x = 520;
         for (var i = 17; i <= 32; i++) {
-            eval(`button_crafting_item${i}  = create_button(_x, _y + _y_add *  ${i-16}, '[' + local_items[${i}] + '] ' + array_item_name[${i}],  ${i},  scene);`)
+            //eval(`button_crafting_item${i}  = create_button(_x, _y + _y_add *  ${i-16}, '[' + local_items[${i}] + '] ' + array_item_name[${i}],  ${i},  scene);`)
+            eval(`button_crafting_item${i}  = create_button(_x, _y + _y_add *  ${i-16}, '[' + local_items[${i}] + ',' + local_items[${i+64}] + '] ' + array_item_name[${i}],  ${i},  scene);`)
         }
         item17_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  1, "item_vase").setScale(0.08);
-        /*
-        button_crafting_item17 = create_button(_x, _y + _y_add *  1, "[" + local_items[17] + "] " + array_item_name[17], 17, scene);
-        item17_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  1, "item_vase").setScale(0.08);
-        button_crafting_item18 = create_button(_x, _y + _y_add *  2, "item18", 18, scene);
-        button_crafting_item19 = create_button(_x, _y + _y_add *  3, "item19", 19, scene);
-        button_crafting_item20 = create_button(_x, _y + _y_add *  4, "item20", 20, scene);
-        button_crafting_item21 = create_button(_x, _y + _y_add *  5, "item21", 21, scene);
-        button_crafting_item22 = create_button(_x, _y + _y_add *  6, "item22", 22, scene);
-        button_crafting_item23 = create_button(_x, _y + _y_add *  7, "item23", 23, scene);
-        button_crafting_item24 = create_button(_x, _y + _y_add *  8, "item24", 24, scene);
-        button_crafting_item25 = create_button(_x, _y + _y_add *  9, "item25", 25, scene);
-        button_crafting_item26 = create_button(_x, _y + _y_add * 10, "item26", 26, scene);
-        button_crafting_item27 = create_button(_x, _y + _y_add * 11, "item27", 27, scene);
-        button_crafting_item28 = create_button(_x, _y + _y_add * 12, "item28", 28, scene);
-        button_crafting_item29 = create_button(_x, _y + _y_add * 13, "item29", 29, scene);
-        button_crafting_item30 = create_button(_x, _y + _y_add * 14, "item30", 30, scene);
-        button_crafting_item31 = create_button(_x, _y + _y_add * 15, "item31", 31, scene);
-        button_crafting_item32 = create_button(_x, _y + _y_add * 16, "item32", 32, scene);
-        */
+
         //crafting_item
         _x = 870;
         for (var i = 33; i <= 48; i++) {
-            eval(`button_crafting_item${i}  = create_button(_x, _y + _y_add *  ${i-32}, '[' + local_items[${i}] + '] ' + array_item_name[${i}],  ${i},  scene);`)
+            //eval(`button_crafting_item${i}  = create_button(_x, _y + _y_add *  ${i-32}, '[' + local_items[${i}] + '] ' + array_item_name[${i}],  ${i},  scene);`)
+            eval(`button_crafting_item${i}  = create_button(_x, _y + _y_add *  ${i-32}, '[' + local_items[${i}] + ',' + local_items[${i+64}] + '] ' + array_item_name[${i}],  ${i},  scene);`)
         }
         item33_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  1, "item_violin").setScale(0.08);
         item34_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  2, "item_musicbox").setScale(0.12);
-        /*
-        button_crafting_item33 = create_button(_x, _y + _y_add *  1, "Violin", 33, scene);
-        item33_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  1, "item_violin").setScale(0.08);
-        button_crafting_item34 = create_button(_x, _y + _y_add *  2, "Music Box", 34, scene);
-        item34_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  2, "item_musicbox").setScale(0.12);
-        button_crafting_item35 = create_button(_x, _y + _y_add *  3, "item35", 35, scene);
-        button_crafting_item36 = create_button(_x, _y + _y_add *  4, "item36", 36, scene);
-        button_crafting_item37 = create_button(_x, _y + _y_add *  5, "item37", 37, scene);
-        button_crafting_item38 = create_button(_x, _y + _y_add *  6, "item38", 38, scene);
-        button_crafting_item39 = create_button(_x, _y + _y_add *  7, "item39", 39, scene);
-        button_crafting_item40 = create_button(_x, _y + _y_add *  8, "item40", 40, scene);
-        button_crafting_item41 = create_button(_x, _y + _y_add *  9, "item41", 41, scene);
-        button_crafting_item42 = create_button(_x, _y + _y_add * 10, "item42", 42, scene);
-        button_crafting_item43 = create_button(_x, _y + _y_add * 11, "item43", 43, scene);
-        button_crafting_item44 = create_button(_x, _y + _y_add * 12, "item44", 44, scene);
-        button_crafting_item45 = create_button(_x, _y + _y_add * 13, "item45", 45, scene);
-        button_crafting_item46 = create_button(_x, _y + _y_add * 14, "item46", 46, scene);
-        button_crafting_item47 = create_button(_x, _y + _y_add * 15, "item47", 47, scene);
-        button_crafting_item48 = create_button(_x, _y + _y_add * 16, "item48", 48, scene);
-        */
 
         //create group
         group_window_crafting = scene.add.group();
@@ -1673,9 +1631,81 @@ function create() {
         group_window_crafting.add(button_crafting_item46);
         group_window_crafting.add(button_crafting_item47);
         group_window_crafting.add(button_crafting_item48);
+        group_window_crafting.add(item1_icon);
         group_window_crafting.add(item17_icon);
         group_window_crafting.add(item33_icon);
         group_window_crafting.add(item34_icon);
+    }
+
+    //system message
+    text_system_message = this.add.text(400, 480, "", {
+        font: "32px Arial", 
+        fill: "#000000", 
+        backgroundColor: "#ffffff",
+        align: "center"
+    });
+
+    //summoning window
+    //button_summon = new Button(640, 400, '>>> Summon <<<', this, () => open_window_summon(this));
+    function open_window_summon(scene) {
+        //close window and summon
+        function close_window_summon(_class) {
+            group_window_summon.destroy(true);
+            if (_class >= 0) {
+                contract_summon(_class);
+                //button_summon.destroy();
+            }
+        }
+        //create button with color and class
+        function create_button(_x, _y, _text, _color, _class, scene) {
+            let obj = scene.add.text(_x, _y, _text)
+                .setFontSize(40).setFontFamily("Arial").setFill(_color)
+                .setInteractive({useHandCursor: true})
+                .on("pointerdown", () => close_window_summon(_class) )
+                .on("pointerover", () => obj.setStyle({ fontSize: 40, fontFamily: "Arial", fill: '#ffff00' }))
+                .on("pointerout", () => obj.setStyle({ fontSize: 40, fontFamily: "Arial", fill: _color }))
+            return obj;
+        }
+        //create window
+        window_summon = scene.add.sprite(640, 480, "window").setInteractive();
+        //create message
+        let _text = "Summoning your Murasaki-san.\nPlease choose your favorite color.\n(This does not affect any gameplays.)";
+        msg1 = scene.add.text(150, 150, _text)
+                .setFontSize(24).setFontFamily("Arial").setFill("#000000")
+        //create button
+        let _x = 200;
+        let _y = 280;
+        let _y_add = 70;
+        button0 = create_button(_x, _y+_y_add*0, "Red", "#E60012", 0, scene);
+        button1 = create_button(_x, _y+_y_add*1, "Orange", "#F39800", 1, scene);
+        button2 = create_button(_x, _y+_y_add*2, "Yello", "#FFF100", 2, scene);
+        button3 = create_button(_x, _y+_y_add*3, "Light Green", "#8FC31F", 3, scene);
+        button4 = create_button(_x, _y+_y_add*4, "Green", "#009944", 4, scene);
+        button5 = create_button(_x, _y+_y_add*5, "Deep Green", "#009E96", 5, scene);
+        button6 = create_button(_x+500, _y+_y_add*0, "Light Blue", "#00A0E9", 6, scene);
+        button7 = create_button(_x+500, _y+_y_add*1, "Blue", "#0068B7", 7, scene);
+        button8 = create_button(_x+500, _y+_y_add*2, "Deep Blue", "#1D2088", 8, scene);
+        button9 = create_button(_x+500, _y+_y_add*3, "Purple", "#920783", 9, scene);
+        button10 = create_button(_x+500, _y+_y_add*4, "Pink", "#E4007F", 10, scene);
+        button11 = create_button(_x+500, _y+_y_add*5, "Vivid Pink", "#E5004F", 11, scene);
+        button_cancel = create_button(1000, 750, "Cancel", "#000000", -1, scene);
+        //create group
+        group_window_summon = scene.add.group();
+        group_window_summon.add(window_summon);
+        group_window_summon.add(msg1);
+        group_window_summon.add(button0);
+        group_window_summon.add(button1);
+        group_window_summon.add(button2);
+        group_window_summon.add(button3);
+        group_window_summon.add(button4);
+        group_window_summon.add(button5);
+        group_window_summon.add(button6);
+        group_window_summon.add(button7);
+        group_window_summon.add(button8);
+        group_window_summon.add(button9);
+        group_window_summon.add(button10);
+        group_window_summon.add(button11);
+        group_window_summon.add(button_cancel);
     }
 }
 
@@ -1707,7 +1737,9 @@ function update() {
         //level up
         if (local_level > previous_local_level) {
             //update radarchart
-            radarchart(this, 1136, 192, 80, local_strength, local_dexterity, local_intelligence, local_luck);
+            //radarchart(this, 1136, 192, 80, local_strength, local_dexterity, local_intelligence, local_luck);
+            //radarchart(this, 1136, 192, 80, local_strength, local_dexterity, local_intelligence, local_luck,1,1,1,0);
+            draw_radarchart(this);
             if (local_level == 2) {
                 //enable mining button
                 button_mining.setTexture("button_mining_enable");
@@ -1765,6 +1797,7 @@ function update() {
             murasakisan.target_y = 672;
         }else if (local_mining_status == 0 & murasakisan.mode == "mining") {
             murasakisan.set_mode = "resting";
+            draw_radarchart(this);  //update radarchart
         }
 
         //farming check, continue
@@ -1965,12 +1998,15 @@ function update() {
 
     //===== item =====
     if (turn % 100 == 20 && local_items != previous_local_items) {
-        //49:Ms. Astar
-        if (local_items[49] != 0 && local_items_flag[49] != true) {
+        //1:Ms. Astar
+        if (
+                (local_items[1] != 0 && local_items_flag[1] != true) ||
+                (local_items[1+64] != 0 && local_items_flag[1] != true)
+            ) {
             pet = new Pet(this, 300 + Math.random()*200, 400 + Math.random()*100);
             pet.scaleX = pet.scaleX * 0.1;
             pet.scaleY = pet.scaleY * 0.1;
-            local_items_flag[49] = true;
+            local_items_flag[1] = true;
             flag_pet = 1;
             console.log(0);
         }
@@ -2030,8 +2066,9 @@ function update() {
 
     //===== contract =====
     if (turn % 300 == 90) {
+        text_system_message.setText("");
         //when no summoner argument, load summoner id from wallet
-        if (summoner == -1) {
+        if (summoner == 0) {
             //cant get summoner id directry, update summoner id is better.
             contract_update_summoner_of_wallet(web3);
         //when summoner is loaded, update summoner status
@@ -2058,6 +2095,85 @@ function update() {
 //garbedge
 //--------------------------------------------------------------------------------------------------------
 
+ ok summoner所持item
+        所持itemの検索
+        所持itemのスプライト表示
+
+ ok 資源のバランスと差別化
+        coinとmaterialの差別化
+
+ ok level-up可能なときに再読込するとボタンがデアクティブ化するバグ修正
+ ok 最初にパラメータが反映されないバグ修正
+
+ ok summoner所持item
+        所持itemの検索
+        所持itemのスプライト表示
+
+    craftingのUI実装
+     ok item_idの選択方法
+     ok craftのstart/stopボタン
+     ok 選択アイテムのコスト表示
+        成功/失敗の表現
+
+    petのUI実装
+     ok pet所持の有無を監視
+        petの絵の用意
+        pet関数の実装
+            moving
+            resting
+            mining
+            farming
+            moving_working
+        petへのstart mining/farmingとstopの実装
+
+    BGMと効果音の追加
+        効果音の吟味と割り当て完了
+     ok BGMのON/OFFボタンの実装
+     ok 効果音の実装
+     ok クラフト可能なミュージックボックスの実装
+
+    ステータス表示の実装
+     ok 数値＋視覚情報
+     ok STR, DEX等のメーターをどうするか
+            レーダーチャート？
+                三角形のレーダーチャート + Luck表記
+        coin, materialの表記をどうするか
+
+    updateの整備
+        update_timeのみを高頻度でcallして監視し
+        update_timeが変わったときに全データをcallして取得し、ローカル変数を書き換える
+
+ ok status取得方法の修正
+        contract関数の修正
+
+ ok 初期画面の実装
+        Now Loading
+        まだsummonしていない場合はsummonボタンの表示
+        まだsummonしていない場合はsummonerを非表示にする？
+ ok summon画面の実装
+        walletにsummonerが紐付けられていない場合のみsummonボタンの表示
+        色＝class選択画面の実装
+
+ ok craftのUI実装
+        4種類, 合計64個のアイテムを選択するメニューを実装する
+        アイテム選択後、コストと日数の表示を実装する
+            補正後の必要日数を表示する
+            d, m, secで表示形式を整える
+        進捗情報の整備
+            クラフト中アイテムの表示
+            d, m, secで表示形式を整える
+            プログレッシングバーを実装する
+        アイテム選択UIの洗練
+            無骨なウィンドウではなくアニメーション化などおめかしする
+            未所持のアイテムは黒い影絵にする
+
+ ng summoner設定のページの実装
+        summonerの選択
+        summonerのステータス表示
+        summonerの所持item表示
+        summoner間のcoin/material送信
+        summoner間のitem移動
+        summonerに紐付けられていない所持itemの移動
 
 
 --->

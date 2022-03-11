@@ -1,4 +1,4 @@
-const contract_murasaki_function_crafting = "0xd25e6fCD1E520AFA921F4040F0a7Eec3d1F0fc14";
+const contract_murasaki_function_crafting = "0xf8C546f45f3E3349FfD371962c4332ae7f30885d";
 const abi_murasaki_function_crafting = [
 	{
 		"anonymous": false,
@@ -28,45 +28,6 @@ const abi_murasaki_function_crafting = [
 			}
 		],
 		"name": "_set1_murasaki_function_share_address",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "_address",
-				"type": "address"
-			}
-		],
-		"name": "_set2_murasaki_strage_address",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "_address",
-				"type": "address"
-			}
-		],
-		"name": "_set3_murasaki_craft_address",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "_address",
-				"type": "address"
-			}
-		],
-		"name": "_set4_world_dice_address",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -137,6 +98,19 @@ const abi_murasaki_function_crafting = [
 			}
 		],
 		"name": "transferOwnership",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "rec",
+				"type": "address"
+			}
+		],
+		"name": "withdraw",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -300,19 +274,6 @@ const abi_murasaki_function_crafting = [
 	},
 	{
 		"inputs": [],
-		"name": "murasaki_craft_address",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
 		"name": "murasaki_function_share_address",
 		"outputs": [
 			{
@@ -326,33 +287,7 @@ const abi_murasaki_function_crafting = [
 	},
 	{
 		"inputs": [],
-		"name": "murasaki_strage_address",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
 		"name": "owner",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "world_dice_address",
 		"outputs": [
 			{
 				"internalType": "address",

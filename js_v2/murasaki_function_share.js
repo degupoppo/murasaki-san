@@ -1,4 +1,4 @@
-const contract_murasaki_function_share = "0x811959Ae2c8872049160f4472Dae2b216a675878";
+const contract_murasaki_function_share = "0x80aC067bF2B4687842588e2540E42F1b32a11a26";
 const abi_murasaki_function_share = [
 	{
 		"anonymous": false,
@@ -54,6 +54,19 @@ const abi_murasaki_function_share = [
 			}
 		],
 		"name": "_set3_murasaki_craft_address",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_address",
+				"type": "address"
+			}
+		],
+		"name": "_set4_world_dice_address",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -208,9 +221,9 @@ const abi_murasaki_function_share = [
 	{
 		"inputs": [
 			{
-				"internalType": "uint256",
+				"internalType": "uint32",
 				"name": "_summoner",
-				"type": "uint256"
+				"type": "uint32"
 			}
 		],
 		"name": "d10",
@@ -227,9 +240,9 @@ const abi_murasaki_function_share = [
 	{
 		"inputs": [
 			{
-				"internalType": "uint256",
+				"internalType": "uint32",
 				"name": "_summoner",
-				"type": "uint256"
+				"type": "uint32"
 			}
 		],
 		"name": "d100",
@@ -246,9 +259,9 @@ const abi_murasaki_function_share = [
 	{
 		"inputs": [
 			{
-				"internalType": "uint256",
+				"internalType": "uint32",
 				"name": "_summoner",
-				"type": "uint256"
+				"type": "uint32"
 			}
 		],
 		"name": "d12",
@@ -265,9 +278,9 @@ const abi_murasaki_function_share = [
 	{
 		"inputs": [
 			{
-				"internalType": "uint256",
+				"internalType": "uint32",
 				"name": "_summoner",
-				"type": "uint256"
+				"type": "uint32"
 			}
 		],
 		"name": "d20",
@@ -284,9 +297,9 @@ const abi_murasaki_function_share = [
 	{
 		"inputs": [
 			{
-				"internalType": "uint256",
+				"internalType": "uint32",
 				"name": "_summoner",
-				"type": "uint256"
+				"type": "uint32"
 			}
 		],
 		"name": "d4",
@@ -303,9 +316,9 @@ const abi_murasaki_function_share = [
 	{
 		"inputs": [
 			{
-				"internalType": "uint256",
+				"internalType": "uint32",
 				"name": "_summoner",
-				"type": "uint256"
+				"type": "uint32"
 			}
 		],
 		"name": "d6",
@@ -322,9 +335,9 @@ const abi_murasaki_function_share = [
 	{
 		"inputs": [
 			{
-				"internalType": "uint256",
+				"internalType": "uint32",
 				"name": "_summoner",
-				"type": "uint256"
+				"type": "uint32"
 			}
 		],
 		"name": "d8",
@@ -341,9 +354,9 @@ const abi_murasaki_function_share = [
 	{
 		"inputs": [
 			{
-				"internalType": "uint256",
+				"internalType": "uint32",
 				"name": "_summoner",
-				"type": "uint256"
+				"type": "uint32"
 			},
 			{
 				"internalType": "uint32",
@@ -371,6 +384,25 @@ const abi_murasaki_function_share = [
 			}
 		],
 		"name": "get_balance_of_type_array",
+		"outputs": [
+			{
+				"internalType": "uint32[128]",
+				"name": "",
+				"type": "uint32[128]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint32",
+				"name": "_summoner",
+				"type": "uint32"
+			}
+		],
+		"name": "get_balance_of_type_array_from_summoner",
 		"outputs": [
 			{
 				"internalType": "uint32[128]",
@@ -413,12 +445,50 @@ const abi_murasaki_function_share = [
 				"type": "uint32"
 			}
 		],
+		"name": "get_dynamic_status_array",
+		"outputs": [
+			{
+				"internalType": "uint32[30]",
+				"name": "",
+				"type": "uint32[30]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint32",
+				"name": "_summoner",
+				"type": "uint32"
+			}
+		],
 		"name": "get_owner",
 		"outputs": [
 			{
 				"internalType": "address",
 				"name": "",
 				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint32",
+				"name": "_summoner",
+				"type": "uint32"
+			}
+		],
+		"name": "get_static_status_array",
+		"outputs": [
+			{
+				"internalType": "uint32[5]",
+				"name": "",
+				"type": "uint32[5]"
 			}
 		],
 		"stateMutability": "view",
@@ -466,6 +536,38 @@ const abi_murasaki_function_share = [
 	{
 		"inputs": [],
 		"name": "owner",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint32",
+				"name": "_summoner",
+				"type": "uint32"
+			}
+		],
+		"name": "seed",
+		"outputs": [
+			{
+				"internalType": "uint32",
+				"name": "",
+				"type": "uint32"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "world_dice_address",
 		"outputs": [
 			{
 				"internalType": "address",

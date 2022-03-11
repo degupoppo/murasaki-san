@@ -1,4 +1,4 @@
-const contract_murasaki_function_mining_and_farming = "0xCCEaFC2B6f6376Bc8c483c593cEfA483Ee4089fa";
+const contract_murasaki_function_mining_and_farming = "0x42975D48cbd9EE3df5cfb45736db7A38E50996bA";
 const abi_murasaki_function_mining_and_farming = [
 	{
 		"anonymous": false,
@@ -28,32 +28,6 @@ const abi_murasaki_function_mining_and_farming = [
 			}
 		],
 		"name": "_set1_murasaki_function_share_address",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "_address",
-				"type": "address"
-			}
-		],
-		"name": "_set2_murasaki_strage_address",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "_address",
-				"type": "address"
-			}
-		],
-		"name": "_set3_world_dice_address",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -164,6 +138,19 @@ const abi_murasaki_function_mining_and_farming = [
 	{
 		"inputs": [
 			{
+				"internalType": "address",
+				"name": "rec",
+				"type": "address"
+			}
+		],
+		"name": "withdraw",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
 				"internalType": "uint32",
 				"name": "_summoner",
 				"type": "uint32"
@@ -252,33 +239,7 @@ const abi_murasaki_function_mining_and_farming = [
 	},
 	{
 		"inputs": [],
-		"name": "murasaki_strage_address",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
 		"name": "owner",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "world_dice_address",
 		"outputs": [
 			{
 				"internalType": "address",

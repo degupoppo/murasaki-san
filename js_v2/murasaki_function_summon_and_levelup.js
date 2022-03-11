@@ -1,4 +1,4 @@
-const contract_murasaki_function_summon_and_levelup = "0x7413F7433eEF8b57fEf09be0de6ea20201C98D54";
+const contract_murasaki_function_summon_and_levelup = "0x11dB4764D62be2C8ee8a1cc79a52bb67f2c5fbFf";
 const abi_murasaki_function_summon_and_levelup = [
 	{
 		"anonymous": false,
@@ -35,25 +35,12 @@ const abi_murasaki_function_summon_and_levelup = [
 	{
 		"inputs": [
 			{
-				"internalType": "address",
-				"name": "_address",
-				"type": "address"
+				"internalType": "uint32",
+				"name": "_summoner",
+				"type": "uint32"
 			}
 		],
-		"name": "_set2_murasaki_strage_address",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "_address",
-				"type": "address"
-			}
-		],
-		"name": "_set3_murasaki_main_address",
+		"name": "burn",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -139,32 +126,6 @@ const abi_murasaki_function_summon_and_levelup = [
 	{
 		"inputs": [],
 		"name": "murasaki_function_share_address",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "murasaki_main_address",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "murasaki_strage_address",
 		"outputs": [
 			{
 				"internalType": "address",
