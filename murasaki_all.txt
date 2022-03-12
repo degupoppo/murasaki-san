@@ -1780,14 +1780,19 @@ contract Murasaki_Function_Mining_and_Farming is Ownable {
         uint32 _mining_items = 0;
         for (uint i = 1; i <= 16; i++) {
             if (_balance_of_type[i+64] > 0) {
-                //_mining_items += 200 + (_balance_of_type[i+64] - 1) * 20;
+                //_crafting_items += 200 + (_balance_of_type[i+64] - 1) * 20;
                 _mining_items += 200;
             }else if (_balance_of_type[i] > 0) {
-                //_mining_items += 100 + (_balance_of_type[i] - 1) * 10;
+                //_crafting_items += 100 + (_balance_of_type[i] - 1) * 10;
                 _mining_items += 100;
             }
             //+10% per one additional item
-            _mining_items += (_balance_of_type[i+64] - 1) * 20 + (_balance_of_type[i] - 1) * 10;
+            if (_balance_of_type[i] >= 2) {
+                _mining_items += (_balance_of_type[i] - 1) * 10;
+            }
+            if (_balance_of_type[i+64] >= 2) {
+                _mining_items += (_balance_of_type[i+64] - 1) * 20;
+            }
         }
         return _mining_items;
     }
@@ -1856,14 +1861,19 @@ contract Murasaki_Function_Mining_and_Farming is Ownable {
         uint32 _farming_items = 0;
         for (uint i = 17; i <= 32; i++) {
             if (_balance_of_type[i+64] > 0) {
-                //_farming_items += 200 + (_balance_of_type[i+64] - 1) * 20;   // +10%/one_additional_item
+                //_crafting_items += 200 + (_balance_of_type[i+64] - 1) * 20;
                 _farming_items += 200;
             }else if (_balance_of_type[i] > 0) {
-                //_farming_items += 100 + (_balance_of_type[i] - 1) * 10;
+                //_crafting_items += 100 + (_balance_of_type[i] - 1) * 10;
                 _farming_items += 100;
             }
             //+10% per one additional item
-            _farming_items += (_balance_of_type[i+64] - 1) * 20 + (_balance_of_type[i] - 1) * 10;
+            if (_balance_of_type[i] >= 2) {
+                _farming_items += (_balance_of_type[i] - 1) * 10;
+            }
+            if (_balance_of_type[i+64] >= 2) {
+                _farming_items += (_balance_of_type[i+64] - 1) * 20;
+            }
         }
         return _farming_items;
     }
