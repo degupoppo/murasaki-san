@@ -1,4 +1,4 @@
-const contract_murasaki_function_share = "0x80aC067bF2B4687842588e2540E42F1b32a11a26";
+const contract_murasaki_function_share = "0x9DdE8F4B921b161F43b5BCAFD87e25366E3D5549";
 const abi_murasaki_function_share = [
 	{
 		"anonymous": false,

@@ -269,7 +269,7 @@ async function connect() {
     const web3 = await new Web3(window.ethereum);
     window.ethereum.enable();
 
-    /*
+    
     window.ethereum.request({
         method: 'wallet_addEthereumChain',
 
@@ -285,6 +285,7 @@ async function connect() {
             blockExplorerUrls: ['https://blockscout.com/shibuya'],
         }]
 
+        /*
         params: [{
             chainId: '0x51',  //4369
             chainName: 'private',
@@ -295,9 +296,9 @@ async function connect() {
             },
             rpcUrls: ["https://www.kapipo.com:9933"],
         }]
+        */
 
     });
-    */
 
     return web3;
 }
@@ -354,8 +355,8 @@ async function contract_update_status(_summoner) {
     }
 
     //call global variants ***TODO***
-    SPEED = await contract_ms.methods.SPEED().call();
-    //SPEED = await contract_ms.methods.SPEED().call() / 100;   //220311: speed was modified as 100%=x1
+    //SPEED = await contract_ms.methods.SPEED().call();
+    SPEED = await contract_ms.methods.SPEED().call() / 100;   //220311: speed was modified as 100%=x1
 
     //call status from ms
     let _dynamic_status = await contract_mfs.methods.get_dynamic_status_array(_summoner).call();

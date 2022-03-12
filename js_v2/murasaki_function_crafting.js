@@ -1,4 +1,4 @@
-const contract_murasaki_function_crafting = "0xf8C546f45f3E3349FfD371962c4332ae7f30885d";
+const contract_murasaki_function_crafting = "0x0E82D68370d0C95Adcf46AC68e1d111f4ee27b09";
 const abi_murasaki_function_crafting = [
 	{
 		"anonymous": false,

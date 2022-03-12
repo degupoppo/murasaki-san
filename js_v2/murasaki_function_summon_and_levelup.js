@@ -1,4 +1,4 @@
-const contract_murasaki_function_summon_and_levelup = "0x11dB4764D62be2C8ee8a1cc79a52bb67f2c5fbFf";
+const contract_murasaki_function_summon_and_levelup = "0x69e4496B8E2e32208b57aa8981a91E48014Fb821";
 const abi_murasaki_function_summon_and_levelup = [
 	{
 		"anonymous": false,

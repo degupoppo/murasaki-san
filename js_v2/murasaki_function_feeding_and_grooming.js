@@ -1,4 +1,4 @@
-const contract_murasaki_function_feeding_and_grooming = "0x85763259177097A7dD2e1Edb4b3d910deFb0d695";
+const contract_murasaki_function_feeding_and_grooming = "0x5d18ca97f1568B869826Cd2Ba2d745Deb8EA761b";
 const abi_murasaki_function_feeding_and_grooming = [
 	{
 		"anonymous": false,

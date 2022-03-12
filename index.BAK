@@ -269,7 +269,7 @@ async function connect() {
     const web3 = await new Web3(window.ethereum);
     window.ethereum.enable();
 
-    /*
+    
     window.ethereum.request({
         method: 'wallet_addEthereumChain',
 
@@ -284,7 +284,7 @@ async function connect() {
             rpcUrls: ["https://rpc.shibuya.astar.network:8545"],
             blockExplorerUrls: ['https://blockscout.com/shibuya'],
         }]
-
+        /*
         params: [{
             chainId: '0x51',  //4369
             chainName: 'private',
@@ -295,9 +295,9 @@ async function connect() {
             },
             rpcUrls: ["https://www.kapipo.com:9933"],
         }]
+        */
 
     });
-    */
 
     return web3;
 }
@@ -354,8 +354,8 @@ async function contract_update_status(_summoner) {
     }
 
     //call global variants ***TODO***
-    SPEED = await contract_ms.methods.SPEED().call();
-    //SPEED = await contract_ms.methods.SPEED().call() / 100;   //220311: speed was modified as 100%=x1
+    //SPEED = await contract_ms.methods.SPEED().call();
+    SPEED = await contract_ms.methods.SPEED().call() / 100;   //220311: speed was modified as 100%=x1
 
     //call status from ms
     let _dynamic_status = await contract_mfs.methods.get_dynamic_status_array(_summoner).call();
@@ -1577,7 +1577,7 @@ function create() {
     //===button_icon===
 
     //feeding
-    button_feeding = this.add.sprite(600,850, "button_feeding");
+    button_feeding = this.add.sprite(610,850, "button_feeding");
     button_feeding.scaleX = button_feeding.scaleX * 0.16;
     button_feeding.scaleY = button_feeding.scaleY * 0.16;
     button_feeding.setInteractive({useHandCursor: true});
