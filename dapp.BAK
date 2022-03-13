@@ -461,7 +461,7 @@ async function contract_farming(_summoner) {
 
 //crafting
 async function contract_crafting(_summoner) {
-    if (local_crafting_status == 0 && global_selected_crafting_item == 0) {
+    if (global_selected_crafting_item == 0) {
         return 0;
     }
     let web3 = await connect();

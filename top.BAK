@@ -39,11 +39,19 @@
         製作者が楽しめるものを作っている
     低インフレ
         1年で最大値
-
+    ポンジスキームではなく、長く付き合える作品をブロックチェーン上に作ってみたかった。
+        何よりも製作者達本人のために。
+        作るのが最も楽しく、プレイするのはその次に楽しいように。
+    非人力のbot対策として、初期コストに少しかけたが、それ以外はコストは必要ない。
+        下心として、dapps stakingへの登録が直近の目標。
 
 --->
 
+
+
 <head>
+
+
 
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -51,11 +59,14 @@
 
 <title>Simple.css Demo | Simple.css</title>
 <meta name="description" content="A showcase of Simple.css formatting in action and how to use it." />
-<link rel="stylesheet" href="https://cdn.simplecss.org/simple.css">
-<link rel="stylesheet" href="assets/css/style.css2">
+<link rel="stylesheet" href="assets/css/simple.css">
+<link rel="stylesheet" href="assets/css/style.css">
+
 
 <link rel="icon" href="png/icon.png" />
 <link rel="apple-touch-icon" href="png/icon.png">
+
+
 
 </head>
 
@@ -82,32 +93,138 @@
 <main>
 
 <p>
-    <center><font color=#ffff00>
-        This is NOT Play2Earn game yet,and we have NO Ponzi scheme tokens.<br>
-    </center></font>
+    <center><code class="language-plaintext highlighter-rouge">
+        We have NOT Play2Earn mechanism yet.<br>
+        NO pump-and-dump tokens and NO limited NFTs.<br>
+    </code></center>
 
 </p>
 
-<p>House of Murasaki-san project is a dApp game built on Astar Network. You can summon your Murasaki-san character and care them to grow. They can mine coins, farm materials, and craft NFT items.</p>
+<p>House of Murasaki-san project is a dApp game built on Astar Network. You can summon your Murasaki-san character and care them to grow. Murasaki-san can mine coins (not token), farm materials, and craft item NFTs.</p>
+
+<p><center>
+    You can <b><a href="/murasakisan/dapp.html?summoner=1">Demo Preview</a></b> before decide to summon your Murasaki-san.<br>
+    (Developer's character. No transactions are permitted.)
+</center></p>
 
 <h3 id="concept">Concept</h3>
-<p>Test...</p>
-<h3 id="system">System</h3>
-<p>Test...</p>
-<h3 id="action">Action</h3>
-<p>Test...</p>
+<p>blah-blah-blah...</p>
+
+<h3 id="system">Systems</h3>
+<p><ul>
+    <li>Murasaki-san is not NFT, but NTT (Non-Transferable Non-Fungible Token). Your wallet can have only one Murasaki-san NTT and this NTT can not be transfered to other wallet.</li>
+    <li>You can summon your Murasaki-san and linked to your wallet <b>with 10 $ASTR cost</b>. Your Murasaki-san will grow depending on your daily caring.</li>
+    <li>Crafted items are NFTs. You can transfer, sell and buy them. Marketplace of crafted items using $ASTR token will be opened (not yet).</li>
+    <li>House of Murasaki-san will become more lively as your Murasaki-san grows. There are no clear goals in this game.</li>
+</ul></p>
+
+<h3 id="action">Actions</h3>
+<p>You can take care of your Murasaki-san with these actions.</p>
+<p><ul>
+    <li><b>Feeding:</b> Recover the satiety and earn some exp. You can feeding at anytime. Exp gained depends only on time.</li>
+    <li><b>Grooming:</b> Recover the happy and earn some exp. You can grooming only when your Murasaki-san is not working. Exp gained depends on not-working time.</li>
+    <li><b>Level-up:</b> You can level-up your Murasaki-san when the exp bar is accumulated. Status points will increase depends on the behavior of your Murasaki-san.</li>
+    <li><b>Mining:</b> Working to earn Ohana coin. Coin gained depends on mainly Strength. Lv 2 is required.</li>
+    <li><b>Farming:</b> Working to earn Kusa material. Material gained depends on mainly Dexterity. Lv 2 is required.</li>
+    <li><b>Crafting:</b> Working to mint items (NFT). Ohana coin and Kusa material are needed to start crafting. Time needed to complete depends on mainly Intelligence. Lv 3 is required.</li>
+</ul></p>
+
 <h3 id="status">Status</h3>
-<p>Test...</p>
-<h3 id="item">Item</h3>
-<p>Test...</p>
+<p><table>
+  <thead>
+    <tr>
+      <th>Status</th>
+      <th>Discriptions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Level</td>
+      <td>Affects almost all action efficiencies.</td>
+    </tr>
+    <tr>
+      <td>Exp</td>
+      <td>Need to level-up. Be earned by feeding and grooming.</td>
+    </tr>
+    <tr>
+      <td>Strength</td>
+      <td>Affects mining efficiency. Increases by level-up.</td>
+    </tr>
+    <tr>
+      <td>Dexterity</td>
+      <td>Affects farming efficiency. Increases by level-up.</td>
+    </tr>
+    <tr>
+      <td>Intelligence</td>
+      <td>Affects crafting efficiency. Increases by level-up.</td>
+    </tr>
+    <tr>
+      <td>Luck</td>
+      <td>Affects critical judgment. Increases by level-up.<br>Critical success: earning x2 coin/material in mining/farming; crafting rare items; earning x2 exp in feeding/grooming.</td>
+    </tr>
+    <tr>
+      <td>Satiety</td>
+      <td>Decreases over time and reaches 0% in 12 hours. Be recovered by feeding. When below 20%, your Murasaki-san can not do anything.</td>
+    </tr>
+    <tr>
+      <td>Happy</td>
+      <td>Decreases over time and reaches 0% in 72 hours. Be recovered by grooming. When below 20%, your Murasaki-san can not do anything.</td>
+    </tr>
+  </tbody>
+</table></p>
+
+<h3 id="item">Items</h3>
+<p>Crafting items requires not cheap costs and time. Items make your House lively.</p>
+<p><table>
+  <thead>
+    <tr>
+      <th>Items</th>
+      <th>Discriptions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Mr. Astar</td>
+      <td>+1 Strength. Summon small pet in your house.</td>
+    </tr>
+    <tr>
+      <td>Music Box</td>
+      <td>+1 Intelligence. Set up Music box in your house. You can click to play music.</td>
+    </tr>
+    <tr>
+      <td>Violin</td>
+      <td>+1 Intelligence. Set up Violin in your house.</td>
+    </tr>
+  </tbody>
+</table></p>
+
+<h3 id="hint">Hints</h3>
+<p><ul>
+    <li>Status of Murasaki-san will increase depending to actions at level-up. Ex: more the more mining, the more strength will increase.</li>
+    <li>When you don't work your Murasaki-san, grooming will give a lot of exp.</li>
+    <li>If you leave your Murasaki-san for a long long time, Murasaki-san will be petrified. Once petrified, your Murasaki-san can not do anything. For incentives of dedication, we have set some cost for cure petrification.<br><b>CAUTION: To cure petrification, you need Lv x 10 $ASTR cost</b>.
+    <li>
+        You can look at other player's house in here:<br>
+        Murasaki-san ID: <input type="number" name="id" style="width:100px;">
+        <a href=""><button>Visit House</button></a> does not work yet
+    </li>
+</ul></p>
+
+<h3 id="future">Future Plans</h3>
+<p><ul>
+    <li>Market place of item NFTs using $ASTR token.</li>
+    <li>NFT staking (only concept ATM)</li>
+    <li>Application to Dapps Staking on Astar Network.</li>
+</ul></p>
+
 <h3 id="story">Back Story</h3>
-<p>Test...</p>
+<p>blah-blah-blah...</p>
 
 </main>
 
 <footer>
     <p>
-        Any donations would be greatly appreciated: 0x2F7448B62134e52C2f46454d0089Ae21B5248805<br>
+        Donation: 0x2F7448B62134e52C2f46454d0089Ae21B5248805<br>
     </p>
 </footer>
 
