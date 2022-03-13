@@ -50,24 +50,15 @@
 
 
 <head>
-
-
-
-<meta charset="utf-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>House of Murasaki-san</title>
-<meta name="description" content="A showcase of Simple.css formatting in action and how to use it." />
-<link rel="stylesheet" href="assets/css/simple.css">
-<link rel="stylesheet" href="assets/css/style.css">
-
-
-<link rel="icon" href="png/icon.png" />
-<link rel="apple-touch-icon" href="png/icon.png">
-
-
-
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>House of Murasaki-san</title>
+    <meta name="description" content="Murasaki-san is a pet living in your wallet on Astar Network." />
+    <link rel="stylesheet" href="assets/css/simple.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="icon" href="png/icon.png" />
+    <link rel="apple-touch-icon" href="png/icon.png">
 </head>
 
 <body>
