@@ -57,8 +57,8 @@
     <meta name="description" content="Murasaki-san is a pet living in your wallet on Astar Network." />
     <link rel="stylesheet" href="assets/css/simple.css">
     <link rel="stylesheet" href="assets/css/style.css">
-    <link rel="icon" href="png/icon.png" />
-    <link rel="apple-touch-icon" href="png/icon.png">
+    <link rel="icon" href="png/icon.PNG" />
+    <link rel="apple-touch-icon" href="png/icon.PNG">
 </head>
 
 <body>
@@ -155,17 +155,17 @@
     </tr>
     <tr>
       <td>Satiety</td>
-      <td>Decreases over time and reaches 0% in 12 hours. Be recovered by feeding. When below 20%, your Murasaki-san can not do anything.</td>
+      <td>Decreases over time and reaches 0% in 12 hours. Be recovered by feeding. When below 20%, your Murasaki-san can not start new working.</td>
     </tr>
     <tr>
       <td>Happy</td>
-      <td>Decreases over time and reaches 0% in 72 hours. Be recovered by grooming. When below 20%, your Murasaki-san can not do anything.</td>
+      <td>Decreases over time and reaches 0% in 72 hours. Be recovered by grooming. When below 20%, your Murasaki-san can not start new working.</td>
     </tr>
   </tbody>
 </table></p>
 
 <h3 id="item">Items</h3>
-<p>Crafting items requires not cheap costs and time. Items make your House lively.</p>
+<p>Crafting items requires not cheap costs and time. Items increase status and make your house more lively.</p>
 <p><table>
   <thead>
     <tr>
@@ -176,11 +176,11 @@
   <tbody>
     <tr>
       <td>Mr. Astar</td>
-      <td>+1 Strength. Summon small pet in your house.</td>
+      <td>+1 Strength. Summon a small pet in your house.</td>
     </tr>
     <tr>
       <td>Music Box</td>
-      <td>+1 Intelligence. Set up Music box in your house. You can click to play music.</td>
+      <td>+1 Intelligence. Set up a Music box in your house. You can click to play music.</td>
     </tr>
     <tr>
       <td>Violin</td>
