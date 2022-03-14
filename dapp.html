@@ -1959,7 +1959,7 @@ function update() {
         //update calculation_status
         let now_time = Date.now() / 1000;
         let age_time = Math.round(now_time - local_birth_time);
-        //let mode = murasakisan.get_mode;
+        let mode = murasakisan.get_mode;
         let base = 86400 / 2 / SPEED;
         //satiety
         satiety = Math.round( (base - (now_time - local_last_feeding_time)) / base * 100 );

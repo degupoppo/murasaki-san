@@ -1969,7 +1969,7 @@ function update() {
         text_satiety.setText(satiety + "%");
         //happy
         happy = Math.round( (base2 - (now_time - local_last_grooming_time)) / base2 * 100 );
-        //if (happy < 3) { happy = 3; }
+        if (happy < 0) { happy = 0; }
         if (happy > 100) { happy = 100; }
         text_happy.setText(happy + "%");
         //exp
