@@ -181,7 +181,8 @@ input[type="button"] {
   background: var(--accent);
   font-size: 1rem;
   color: var(--bg);
-  padding: 0.7rem 0.9rem;
+  //padding: 0.7rem 0.9rem;
+  padding: 0.4rem 0.9rem;
   margin: 0.5rem 0;
 }
 
@@ -350,7 +351,8 @@ select,
 input {
   font-size: inherit;
   font-family: inherit;
-  padding: 0.5rem;
+  //padding: 0.5rem;
+  padding: 0.2rem;
   margin-bottom: 0.5rem;
   color: var(--text);
   background: var(--bg);

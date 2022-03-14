@@ -1,2228 +1,267 @@
+<!doctype html>
+<html lang="en-GB">
 
 <!---
-//---header--------------------------------------------------------------------------------------------------------
 
-picture
+コンセプト
+    
 
-    背景
-ok! クリックアイコン（grooming, mining, farming, crafting）
-    クリックアイコン（crafting）
-    クリックアイコン（level-up）
-ok! しゅっきん！（お仕事へ移動中）
-    ごきげん！（お腹いっぱい＆ハッピーなときなど）
-    おなかへった・・・
-    ものづくりちゅう！（クラフト中）
-    ありがとう！（ご飯たべたあとなど）
-    クラフトアイテムたくさん（飼い主手伝う）
-    成功したよー！（クラフト成功時, mining終了時など）
-    失敗しちゃった・・・（クラフト失敗時など）
-    れべるあっぷ！
-    おんがくかんしょうちゅう～♪
-    マイニングアイテム案（STR系）
-        良いスコップ
-    ファーミングアイテム案（DEX系）
-        良いじょうろ
-    クラフティングアイテム案（INT系）
-        ミュージックボックス
+ゲームシステム概要
+    NTTについて
+    クラフト品とNFTについて
+    Not play2earn
+    no token
 
-ToDo
+行動説明
+    feeding
+    grooming
+    mining
+    farming
+    crafting
 
-    Petの実装
+ステータス説明
+    テーブルで説明
 
-    UIの洗練
-        Item選択ウィンドウ
-            シャボン玉がバラバラアニメーションで出てきてふわふわ浮いてるUI
-            実装難しそうだが
-        Summonウィンドウ
-        システムメッセージの表示方法
-            アニメーションなどで演出する
-        Item選択ボタンの表示・非表示
-            クラフト中アイテム名の表示
+アイテム説明
+    テーブルで説明
 
-    ステータス表示の実装
-        coin, materialの表記をどうするか
+ロードマップ
+    NFTマーケットプレイス
 
-    BGMと効果音の追加
-        効果音の吟味と割り当て
+制作話
+    むらさきさん誕生について
+        友人が書いた絵を動かしたかった
+        長くお世話できる成長するNFTを作りたかった
+        Rarityのsummonerコンセプト
+            expテーブルはrarityとDnD3.5を踏襲している
+    むらさきさんの名前の由来について
+    このゲームのコンセプトについて
+        製作者が楽しめるものを作っている
+    低インフレ
+        1年で最大値
+    ポンジスキームではなく、長く付き合える作品をブロックチェーン上に作ってみたかった。
+        何よりも製作者達本人のために。
+        作るのが最も楽しく、プレイするのはその次に楽しいように。
+    非人力のbot対策として、初期コストに少しかけたが、それ以外はコストは必要ない。
+        下心として、dapps stakingへの登録が直近の目標。
 
-    summonerごとにユニークなシンボルの考案
-        phaser3での色彩変化
-        もしくは手動での色彩変化済み画像の用意
-        あるいは、ユニークな色のアクセサリー
-
- ok レーダーチャートの修正
-        itemによるステータス補正を別の色で重ねて表示させる
-
-Item案
-    Pet
-        動き回るキャラクター
-        miningとfarmingを1/2～1/4の効率で行ってくれる
-        成長はしない
-    tree
-        双葉→大木と時間経過で成長する
-        ステータス補正は変化しない
-        どういう木に成長するかはseed依存でランダム
-    name
-        クラフト品として実装する
-        クラフト成功時にnameを入力する
-        肖像画か、name tagかどちらにするか
-        設定したnameの表示箇所・表示方法も考える
-        表札でよいか
-        表札クラフト時に、NTTでnameを別に発行する
-            やはり表札がNFTで移動できるためややこしい
-            nameは別でNTTで発行し、NFTの表札はnameのNTTを表示するUIにする
-    Dice
-        クラフト後に振れるようになる
-        出た目で24時間ボーナスを得る
-    MusicBox
-        クリックで音楽が流れるオブジェクト
-    Food
-        Feeding時にランダムで選ばれる食べ物
-    LightSwitch
-        クリックで部屋の明るさを変える電気スイッチ
-    花瓶
-    リボン
-        summon時に選択できる色＝class毎のリボン
+Doc
+    exp要求テーブル
+    itemのコスト/時間要求テーブル
+    mining/farmingによるcoin/material取得の計算式
+    craftingのrequired timeの計算式
+    Level-up時のstatus point加算の計算式
+    critical判定時の計算式と効果
 
 --->
 
-<!DOCTYPE html>
-<html lang="ja">
+
 
 <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="png" href="png/icon.PNG">
-    <title>House of Murasaki-San</title>
-    <script src="js/phaser.js"></script>
-    <script src="js/web3.min.js"></script>
-    <script src="js/dropdownlist.js"></script>
-    <script src="js_v2/murasaki_main.js"></script>
-    <script src="js_v2/murasaki_strage.js"></script>
-    <script src="js_v2/murasaki_function_crafting.js"></script>
-    <script src="js_v2/murasaki_function_feeding_and_grooming.js"></script>
-    <script src="js_v2/murasaki_function_mining_and_farming.js"></script>
-    <script src="js_v2/murasaki_function_share.js"></script>
-    <script src="js_v2/murasaki_function_summon_and_levelup.js"></script>
-    <style type="text/css">
-        body {
-            margin: 0;
-            padding: 0;
-        }
-    </style>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>House of Murasaki-san</title>
+    <meta name="description" content="Murasaki-san is a pet living in your wallet on Astar Network." />
+    <link rel="stylesheet" href="assets/css/simple.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="icon" href="png/icon.PNG" />
+    <link rel="apple-touch-icon" href="png/icon.PNG">
 </head>
 
 <body>
 
+<header>
+    <nav>
+      <a href="/murasakisan/" class="current">Home</a>
+      <a href="/murasakisan/dapp.html?summoner=1">Demo Preview</a>
+      <a href="/murasakisan/dapp.html" >Start Game</a>
+      <a href="https://twitter.com/degupoppo" >Twitter</a>
+    </nav>
+    <h1>
+        <img src="png/food_sweet_potato.png" width="40" height="40">
+        House of Murasaki-san
+        <img src="png/food_sweet_potato.png" width="40" height="40">
+    </h1>
+    <p>
+        Murasaki-san is a pet living in your wallet on <a href="https://astar.network/">Astar Network</a>.<br>
+        They will grow depending on your dedication and time.
+    </p>
+</header>
 
+<main>
+
+<p>
+    <center><code class="language-plaintext highlighter-rouge">
+        We have NOT easy Play2Earn mechanism.<br>
+        NO pump-and-dump tokens and NO limited NFTs.<br>
+    </code></center>
+
+</p>
+
+<p>House of Murasaki-san project is a dApp game built on Astar Network. You can summon your Murasaki-san character and care them to grow. Murasaki-san can mine coins (not token), farm materials, and craft item NFTs.</p>
+
+<p>
+    You can <b><a href="/murasakisan/dapp.html?summoner=1">Demo Preview</a></b> before summoning your Murasaki-san.<br>
+    (Developer's character. No transactions are permitted.)
+</p>
+
+<h3 id="concept">Concept</h3>
+<p>blah-blah-blah...</p>
+
+<h3 id="screen">The Game Screen</h3>
+<figure>
+  <img alt="Game screen" src="png/demo.jpg" />
+  <figcaption>Game screen</figcaption>
+</figure>
+
+<h3 id="system">Systems</h3>
+<p><ul>
+    <li>Murasaki-san is not NFT, but <a href="https://github.com/ethereum/EIPs/issues/1238">NTT (Non-Transferable Non-Fungible Token)</a>. Your wallet can have only one Murasaki-san NTT and this NTT can not be transfered to other wallet.</li>
+    <li>You can summon your Murasaki-san and linked to your wallet <b>with 10 $ASTR cost</b>. Your Murasaki-san will grow depending on your daily caring.</li>
+    <li>Crafted items are NFTs. You can transfer, sell and buy them. Marketplace of crafted items using $ASTR token will be opened (under development).</li>
+    <li>House of Murasaki-san will become more lively as your Murasaki-san grows. There are no clear goals in this game.</li>
+</ul></p>
+
+<h3 id="action">Actions</h3>
+<p>You can take care of your Murasaki-san with these actions.</p>
+<p><ul>
+    <li><b>Feeding:</b> Recover the satiety and earn some exp. You can feeding at anytime. Exp gained depends only on time.</li>
+    <li><b>Grooming:</b> Recover the happy and earn some exp. You can grooming only when your Murasaki-san is not working. Exp gained depends on not-working time.</li>
+    <li><b>Level-up:</b> You can level-up your Murasaki-san when the exp bar is accumulated. Status points will increase depends on the behavior of your Murasaki-san.</li>
+    <li><b>Mining:</b> Working to earn Ohana coin. Coin gained depends on mainly Strength. Lv 2 is required.</li>
+    <li><b>Farming:</b> Working to earn Kusa material. Material gained depends on mainly Dexterity. Lv 2 is required.</li>
+    <li><b>Crafting:</b> Working to mint items (NFT). Ohana coin and Kusa material are needed to start crafting. Time needed to complete depends on mainly Intelligence. Lv 3 is required.</li>
+</ul></p>
+
+<h3 id="status">Status</h3>
+<p><table>
+  <thead>
+    <tr>
+      <th>Status</th>
+      <th>Discriptions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Level</td>
+      <td>Affects almost all action efficiencies. Increases by level-up.</td>
+    </tr>
+    <tr>
+      <td>Exp</td>
+      <td>Need to level-up. Can be earned by feeding and grooming.</td>
+    </tr>
+    <tr>
+      <td>Strength</td>
+      <td>Affects mining efficiency. Increases by level-up and crafted items.</td>
+    </tr>
+    <tr>
+      <td>Dexterity</td>
+      <td>Affects farming efficiency. Increases by level-up and crafted items.</td>
+    </tr>
+    <tr>
+      <td>Intelligence</td>
+      <td>Affects crafting efficiency. Increases by level-up and crafted items.</td>
+    </tr>
+    <tr>
+      <td>Luck</td>
+      <td>Affects critical judgment. Increases by level-up.<br>Critical success: earning x2 coin/material in mining/farming; crafting rare items; earning x2 exp in feeding/grooming.</td>
+    </tr>
+    <tr>
+      <td>Satiety</td>
+      <td>Decreases over time and reaches 0% in 12 hours. Be recovered by feeding. When below 20%, your Murasaki-san can not start new working.</td>
+    </tr>
+    <tr>
+      <td>Happy</td>
+      <td>Decreases over time and reaches 0% in 72 hours. Be recovered by grooming. When below 20%, your Murasaki-san can not start new working.</td>
+    </tr>
+  </tbody>
+</table></p>
+
+<h3 id="item">Items</h3>
+<p>Crafting items require costs and time. Items increase status point and make your house more lively.</p>
+<p><table>
+  <thead>
+    <tr>
+      <th>Items</th>
+      <th>Discriptions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Mr. Astar</td>
+      <td>+1 Strength. Summon a small pet in your house.</td>
+    </tr>
+    <tr>
+      <td>Music Box</td>
+      <td>+1 Intelligence. Set up a Music box in your house. You can click to play music.</td>
+    </tr>
+    <tr>
+      <td>Violin</td>
+      <td>+1 Intelligence. Set up a Violin in your house.</td>
+    </tr>
+    <tr>
+      <td>Flowerpot</td>
+      <td>+1 Dexterity. Set up a Flowerpot in your house.</td>
+    </tr>
+  </tbody>
+</table></p>
+
+<h3 id="hint">Hints</h3>
+<p><ul>
+    <li>At the level-up, status point of Murasaki-san will increase depending to behavier. Ex: if you spent more time for mining, the more strength will increase.</li>
+    <li>The exp gained by grooming depends on not-working time. It means that if you did not make your Murasaki-san work, grooming will give a lot of exp to faster level-up.</li>
+    <li>If you leave your Murasaki-san for a long long time (about a month), Murasaki-san will be petrified with disappointment. Once petrified, your Murasaki-san can not do anything. For incentives of dedication, we have set some cost for cure petrification.<br><b>CAUTION: To cure petrification, you need Lv x 10 $ASTR cost</b>.
+    <li>
+        You can look at other player's house in here: <br>
+        Murasaki-san ID:&nbsp;
+        <input type="number" id="summoner" style="width:100px;">&nbsp;
+        <button onclick="button_select_summoner();">Visit House</button>
+    </li>
+</ul></p>
+
+<h3 id="future">Future Plans</h3>
+<p><ul>
+    <li>Development of all craftable items (total 48 types planned).</li>
+    <li>Market place of item NFTs using $ASTR token.</li>
+    <li>NFT staking of crafted items? (uncertain, only idea ATM)</li>
+    <li>Submission to Dapps Staking program on Astar Network.</li>
+</ul></p>
+
+<h3 id="contract">Contract Addresses</h3>
+<p>All contracts have been verified.</p>
+<p><ul>
+    <li>Main: 0xae778a945bF612b13E78eB1162E79a42e29A4036</li>
+    <li>Strage: 0x7ca3B2969B49D51C630a77b17b8e5E95A4f7b1d2</li>
+    <li>Craft: 0x5FD2daeC9d995De32cDbfb166d73f0bFdb9c5edF</li>
+    <li>Function1: 0x9DdE8F4B921b161F43b5BCAFD87e25366E3D5549</li>
+    <li>Function2: 0x69e4496B8E2e32208b57aa8981a91E48014Fb821</li>
+    <li>Function3: 0x5d18ca97f1568B869826Cd2Ba2d745Deb8EA761b</li>
+    <li>Function4: 0x8692C58A12dDef426EB20432aC3C5Ac4179cbEa0</li>
+    <li>Function5: 0xcEE3730D1CeEF8E466da20008f04698C2Da90539</li>
+    <li>Dice: 0xE11419a55727623802a29127EA04D9F2Cf4A8112</li>
+</ul></p>
+
+<h3 id="story">Back Story</h3>
+<p>blah-blah-blah...</p>
+
+</main>
+
+<footer>
+    <p>
+        Donation: 0x2F7448B62134e52C2f46454d0089Ae21B5248805<br>
+    </p>
+</footer>
 
 <script type="text/javascript">
-
-
-
-//---global variants-------------------------------------------------------------------------------------------------
-
-const version = "0.2.0";
-let turn = 0;
-
-//on chain static status
-let summoner = 0;
-let local_birth_time;
-
-//on chain global status
-let SPEED;
-let BASE_SEC = 86400;
-
-//on chain dynamic status
-let local_class;
-let local_strength;
-let local_dexterity;
-let local_intelligence;
-let local_luck;
-let local_level = 0;
-let local_last_feeding_time;
-let local_last_grooming_time;
-let local_coin;
-let local_exp;
-let local_mining_status;
-let local_mining_start_time;
-let local_next_exp_required;
-let local_material;
-let local_farming_status;
-let local_farming_start_time;
-let local_crafting_status;
-let local_crafting_start_time;
-let local_crafting_item_type = 0;
-let local_items;
-
-//local using variants
-let previous_local_last_feeding_time;
-let previous_local_last_grooming_time;
-let previous_local_level;
-let previous_local_mining_status;
-let previous_local_farming_status;
-let previous_local_crafting_status;
-let previous_local_exp;
-let previous_local_items;
-let satiety;
-let happy;
-let local_coin_calc;
-let local_material_calc;
-let local_crafting_calc;
-let flag_pet = 0;       //0:not crafted, 1:crafted
-let flag_music = 0;
-let bgm = 0;
-let local_items_flag = new Array(64).fill(0);
-let global_selected_crafting_item = 0;
-let global_selected_crafting_item_dc;
-
-/*
-let local_pet;
-let local_pet_mining_status;
-let local_pet_mining_start_time;
-let local_pet_coin_calc;
-let local_pet_farming_status;
-let local_pet_farming_start_time;
-let local_pet_material_calc;
-let local_musicbox;
-let flag_musicbox = 0;
-*/
-
-//array, item_name
-let array_item_name = [
-    //0
-    "dummy",
-    //1-16
-    "Mr. Astar",
-    "---",
-    "---",
-    "---",
-    "---",
-    "---",
-    "---",
-    "---",
-    "---",
-    "---",
-    "---",
-    "---",
-    "---",
-    "---",
-    "---",
-    "---",
-    //17-32
-    "Flowerpot",
-    "---",
-    "---",
-    "---",
-    "---",
-    "---",
-    "---",
-    "---",
-    "---",
-    "---",
-    "---",
-    "---",
-    "---",
-    "---",
-    "---",
-    "---",
-    //33-48
-    "Violin",
-    "Music Box",
-    "---",
-    "---",
-    "---",
-    "---",
-    "---",
-    "---",
-    "---",
-    "---",
-    "---",
-    "---",
-    "---",
-    "---",
-    "---",
-    "---",
-]
-
-
-//---html-----------------------------------------------------------------------------------------------------
-
-//get summoner from url parameter
-//https://www.tam-tam.co.jp/tipsnote/javascript/post9911.html
-var urlParam = location.search.substring(1);
-if(urlParam) {
-    var param = urlParam.split('&');
-    var paramArray = [];
-    for (i = 0; i < param.length; i++) {
-        var paramItem = param[i].split('=');
-        paramArray[paramItem[0]] = paramItem[1];
-    }
-    summoner = paramArray.summoner
+//update summoner
+function button_select_summoner() {
+    summoner = document.getElementById("summoner").value;
+    window.location.href = "dapp.html?summoner=" + summoner;
 }
-
-
-
-//---web3-----------------------------------------------------------------------------------------------------
-
-//connect to metamask
-async function connect() {
-    const web3 = await new Web3(window.ethereum);
-    window.ethereum.enable();
-
-    
-    window.ethereum.request({
-        method: 'wallet_addEthereumChain',
-
-        params: [{
-            chainId: '0x51',  //4369
-            chainName: 'Shibuya Testnet',
-            nativeCurrency: {
-                name: 'sby',
-                symbol: 'SBY',
-                decimals: 18
-            },
-            rpcUrls: ["https://rpc.shibuya.astar.network:8545"],
-            blockExplorerUrls: ['https://blockscout.com/shibuya'],
-        }]
-
-        /*
-        params: [{
-            chainId: '0x51',  //4369
-            chainName: 'private',
-            nativeCurrency: {
-                name: 'astl',
-                symbol: 'ASTL',
-                decimals: 18
-            },
-            rpcUrls: ["https://www.kapipo.com:9933"],
-        }]
-        */
-
-    });
-
-    return web3;
-}
-
-//get wallet
-async function get_wallet() {
-    let web3 = await connect();
-    let wallet = await web3.eth.getAccounts();
-    return wallet[0];
-}
-
-//update summoner of wallet
-async function contract_update_summoner_of_wallet() {
-    let web3 = await connect();
-    let wallet = await get_wallet(web3);
-    let contract_mm = await new web3.eth.Contract(abi_murasaki_main, contract_murasaki_main);
-    let _summoner = await contract_mm.methods.tokenOf(wallet).call();  //have not summoned yet: 0
-    if (_summoner == 0) {
-        console.log("MSG: You have not summoned any summoners yet", wallet);
-        text_system_message.setText("--- You have not summoned Murasaki-san yet ---");
-        text_summon.setText(">>> Summon your Murasaki-san <<<")
-    } else {
-        //check isActive
-        let contract_ms = await new web3.eth.Contract(abi_murasaki_strage, contract_murasaki_strage);
-        let _isActive = await contract_ms.methods.isActive(_summoner).call();
-        if (_isActive == false) {
-            console.log("MSG: You have burned summoner:", wallet, _summoner);
-        } else {
-            console.log("MSG: You have summoner:", wallet, _summoner);
-            summoner = _summoner;
-        }
-    }
-}
-
-//update local status reading from contract
-async function contract_update_status(_summoner) {
-
-    let web3 = await connect();
-    let wallet = await get_wallet(web3);
-
-    //contract
-    let contract_mm = await new web3.eth.Contract(abi_murasaki_main, contract_murasaki_main);
-    let contract_ms = await new web3.eth.Contract(abi_murasaki_strage, contract_murasaki_strage);
-    let contract_mfs = await new web3.eth.Contract(abi_murasaki_function_share, contract_murasaki_function_share);
-    let contract_mfc = await new web3.eth.Contract(abi_murasaki_function_crafting, contract_murasaki_function_crafting);
-    let contract_mfmf = await new web3.eth.Contract(abi_murasaki_function_mining_and_farming, contract_murasaki_function_mining_and_farming);
-
-    //check isActive
-    let _isActive = await contract_ms.methods.isActive(_summoner).call();
-    if (_isActive == false) {
-        console.log("MSG: This summoner has been burned:", _summoner);
-        text_system_message.setText("This Murasaki-san is not available.");
-        return 0;
-    }
-
-    //call global variants ***TODO***
-    //SPEED = await contract_ms.methods.SPEED().call();
-    SPEED = await contract_ms.methods.SPEED().call() / 100;   //220311: speed was modified as 100%=x1
-
-    //call status from ms
-    let _dynamic_status = await contract_mfs.methods.get_dynamic_status_array(_summoner).call();
-    let _static_status = await contract_mfs.methods.get_static_status_array(_summoner).call();
-    console.log("status:", _dynamic_status);
-
-    //update static status
-    local_class = _static_status[0];
-    local_birth_time = _static_status[1];
-
-    //update local variants
-    local_level = _dynamic_status[0];
-    local_exp = _dynamic_status[1];
-    local_strength = _dynamic_status[2]/100;
-    local_dexterity = _dynamic_status[3]/100;
-    local_intelligence = _dynamic_status[4]/100;
-    local_luck = _dynamic_status[5]/100;
-    local_next_exp_required = _dynamic_status[6];
-    //7: last_level_up_time
-    local_coin = _dynamic_status[8];
-    local_material = _dynamic_status[9];
-    local_last_feeding_time = _dynamic_status[10];
-    local_last_grooming_time = _dynamic_status[11];
-    local_mining_status = _dynamic_status[12];
-    local_mining_start_time = _dynamic_status[13];
-    local_farming_status = _dynamic_status[14];
-    local_farming_start_time = _dynamic_status[15];
-    local_crafting_status = _dynamic_status[16];
-    local_crafting_start_time = _dynamic_status[17];
-    local_crafting_item_type = _dynamic_status[18];
-
-    //mining, farming, crafting
-    if (local_mining_status == 1){
-        local_coin_calc = await contract_mfmf.methods.calc_mining(_summoner).call();
-    }else if (local_farming_status == 1) {
-        local_material_calc = await contract_mfmf.methods.calc_farming(_summoner).call();
-    }else if (local_crafting_status == 1) {
-        local_crafting_calc = await contract_mfc.methods.calc_crafting(_summoner).call();
-    }
-
-    //item
-    let _owner = await contract_mm.methods.ownerOf(_summoner).call();
-    local_items = await contract_mfs.methods.get_balance_of_type_array(_owner).call();
-    console.log("items:", local_items);
-}
-
-//summon
-async function contract_summon(_class) {
-    let web3 = await connect();
-    let contract = await new web3.eth.Contract(abi_murasaki_function_summon_and_levelup, contract_murasaki_function_summon_and_levelup);
-    let wallet = await get_wallet(web3);
-    contract.methods.summon(_class).send({from:wallet});
-}
-
-//levelup
-async function contract_level_up(_summoner) {
-    let web3 = await connect();
-    let contract = await new web3.eth.Contract(abi_murasaki_function_summon_and_levelup, contract_murasaki_function_summon_and_levelup);
-    let wallet = await get_wallet(web3);
-    contract.methods.level_up(_summoner).send({from:wallet});
-}
-
-//feeding
-async function contract_feeding(_summoner) {
-    let web3 = await connect();
-    let contract = await new web3.eth.Contract(abi_murasaki_function_feeding_and_grooming, contract_murasaki_function_feeding_and_grooming);
-    let wallet = await get_wallet(web3);
-    contract.methods.feeding(_summoner).send({from:wallet});
-}
-
-//grooming
-async function contract_grooming(_summoner) {
-    let web3 = await connect();
-    let contract = await new web3.eth.Contract(abi_murasaki_function_feeding_and_grooming, contract_murasaki_function_feeding_and_grooming);
-    let wallet = await get_wallet(web3);
-    contract.methods.grooming(_summoner).send({from:wallet});
-}
-
-//mining
-async function contract_mining(_summoner) {
-    let web3 = await connect();
-    let contract = await new web3.eth.Contract(abi_murasaki_function_mining_and_farming, contract_murasaki_function_mining_and_farming);
-    let wallet = await get_wallet(web3);
-    if (local_mining_status == 0) {
-        contract.methods.start_mining(_summoner).send({from:wallet});
-    }else {
-        contract.methods.stop_mining(_summoner).send({from:wallet});
-    }
-}
-
-//farming
-async function contract_farming(_summoner) {
-    let web3 = await connect();
-    let contract = await new web3.eth.Contract(abi_murasaki_function_mining_and_farming, contract_murasaki_function_mining_and_farming);
-    let wallet = await get_wallet(web3);
-    if (local_farming_status == 0) {
-        contract.methods.start_farming(_summoner).send({from:wallet});
-    }else {
-        contract.methods.stop_farming(_summoner).send({from:wallet});
-    }
-}
-
-//crafting
-async function contract_crafting(_summoner) {
-    if (global_selected_crafting_item == 0) {
-        return 0;
-    }
-    let web3 = await connect();
-    let contract = await new web3.eth.Contract(abi_murasaki_function_crafting, contract_murasaki_function_crafting);
-    let wallet = await get_wallet(web3);
-    //let _item_type = 1;
-    let _item_type = global_selected_crafting_item;
-    if (local_crafting_status == 0) {
-        contract.methods.start_crafting(_summoner, _item_type).send({from:wallet});
-    }else {
-        contract.methods.stop_crafting(_summoner).send({from:wallet});
-    }
-}
-
-//get item dc
-async function contract_get_item_dc(item_type) {
-    let web3 = await connect();
-    let contract = await new web3.eth.Contract(abi_murasaki_function_crafting, contract_murasaki_function_crafting);
-    //let wallet = await get_wallet(web3);
-    let item_dc = await contract.methods.get_item_dc(item_type).call();
-    return item_dc;
-}
-async function contract_get_modified_dc(_summoner, _item_type) {
-    let web3 = await connect();
-    let contract = await new web3.eth.Contract(abi_murasaki_function_crafting, contract_murasaki_function_crafting);
-    let _modified_dc = await contract.methods.get_modified_dc(_summoner, _item_type).call();
-    return _modified_dc;
-}
-
-//calc item
-async function contract_get_item_count(_summoner) {
-    let web3 = await connect();
-    let contract_mm = await new web3.eth.Contract(abi_murasaki_main, contract_murasaki_main);
-    let contract_mfmf = await new web3.eth.Contract(abi_murasaki_function_mining_and_farming, contract_murasaki_function_mining_and_farming);
-    let contract_mfc = await new web3.eth.Contract(abi_murasaki_function_crafting, contract_murasaki_function_crafting);
-    let _owner = await contract_mm.methods.ownerOf(_summoner).call();
-    let _mining_item_count = await contract_mfmf.methods.count_mining_items(_owner).call();
-    let _farming_item_count = await contract_mfmf.methods.count_farming_items(_owner).call();
-    let _crafting_item_count = await contract_mfc.methods.count_crafting_items(_owner).call();
-    let _luck_item_count = 0;
-    return [Number(_mining_item_count)/100, Number(_farming_item_count)/100, Number(_crafting_item_count)/100, _luck_item_count];
-}
-
-
-
-//---summoner-----------------------------------------------------------------------------------------------------
-class Murasakisan extends Phaser.GameObjects.Sprite{
-    constructor(scene, x, y){
-        super(scene, x, y, "murasaki_loading");
-        this.scene.add.existing(this);
-        this.anims.play("murasaki_loading", true);
-    	this.mode = "resting";
-        this.submode = 0;
-        this.count = 0;
-        this.dist = "right";
-        this.target_x = 0;
-        this.target_y = 0;
-        this.setInteractive()
-        this.on("pointerdown", function (pointer) {
-            this.on_click();
-        }, this);
-    }
-    set set_mode(mode){
-        this.mode = mode;
-        this.count = 0;
-    }
-    get get_mode(){
-        return this.mode;
-    }
-    on_click() {
-        if (this.mode == "resting" || this.mode == "moving") {
-            this.count = 0;
-            this.mode = "hugging";
-        }
-    }
-    resting(){
-	    this.count += 1;
-        if (this.count == 1) {
-            if (this.dist == "right"){
-                this.anims.play("murasaki_right", true);
-            }else if (this.dist == "left") {
-                this.anims.play("murasaki_left", true);
-            }
-            this.resting_count = 70 + Math.random() * 30;
-	    }else if (this.count >= this.resting_count){
-            let tmp = Math.random() * 100;
-            if (tmp <= 10) {
-                this.mode = "sleeping";
-                this.count = 0;
-            }else if (tmp <= 20 & happy <= 10) {
-                this.mode = "crying";
-                this.count = 0;
-            }else {
-                this.mode = "moving";
-                this.count = 0;
-            }
-        }
-    }
-    moving() {
-        this.count += 1;
-        //determine direction
-        if (this.count == 1){
-            //determine degree, 0-30, 150-210, 330-360
-            var li = [0,10,20,30,150,160,170,180,190,200,210,330,340,350]
-            this.moving_degree = li[Math.floor(Math.random() * li.length)];
-            //out of area check
-            if (this.x < 100 && this.moving_degree > 90 && this.moving_degree <270) {
-                this.moving_degree -= 180;
-            }else if (this.x > 1100 && (this.moving_degree < 90 || this.moving_degree > 270)) {
-                this.moving_degree -= 180;
-            }
-            if (this.y > 860 && this.moving_degree > 180) {
-                this.moving_degree = 360 - this.moving_degree;
-            }else if (this.y < 500 && this.moving_degree < 180) {
-                this.moving_degree = 360 - this.moving_degree;
-            }
-            //minus check
-            if (this.moving_degree < 0) {
-                this.moving_degree += 360;
-            }
-            //determine speed, count
-            this.moving_speed = 0.5 + Math.random() * 0.3;  //0.5-0.8
-            this.moving_count = 70 + Math.random() * 30;    //70-100
-            //determine left or right
-            if (this.moving_degree > 90 && this.moving_degree <= 270) {
-                this.dist = "left";
-                this.anims.play("murasaki_left", true);
-            }else {
-                this.dist = "right";
-                this.anims.play("murasaki_right", true);
-            }
-            //debug
-            //console.log(this.moving_degree, Math.sin(this.moving_degree * (Math.PI/180)), this.x, this.y);
-        //moving
-        }else if (this.count < this.moving_count) {
-            this.x += Math.cos(this.moving_degree * (Math.PI/180)) * this.moving_speed;
-            this.y -= Math.sin(this.moving_degree * (Math.PI/180)) * this.moving_speed;
-        //return to resting
-        }else if (this.count >= this.moving_count) {
-            this.mode = "resting";
-            this.count = 0;
-        }
-    }
-    //send: last_nutrition_time
-    feeding() {
-        this.count += 1;
-        if (this.submode == 0) {
-            //this.target_x = 600;
-            //this.target_y = 400;
-            let delta_x = this.target_x - this.x;
-            if (delta_x >0) {
-                this.dist = "right";
-                this.anims.play("murasaki_feeding_happy_right", true);
-            }else {
-                this.dist = "left";
-                this.anims.play("murasaki_feeding_happy_left", true);
-            }
-            this.submode = 1;
-        }else if (this.submode == 1) {
-            let delta_x = this.target_x - this.x;
-            let delta_y = this.target_y - this.y;
-            let delta_x2 = delta_x / (Math.abs(delta_x) + Math.abs(delta_y)) * 1.9;
-            let delta_y2 = delta_y / (Math.abs(delta_x) + Math.abs(delta_y)) * 1.9;
-            this.x += delta_x2;
-            this.y += delta_y2;
-            if (this.x > this.target_x-10 
-              && this.x < this.target_x+10 
-              && this.y > this.target_y-10 
-              && this.y < this.target_y+10) {
-                this.submode = 2;
-            }
-        }else if (this.submode == 2) {
-            this.anims.play("murasaki_feeding", true);
-            food.destroy();
-            this.count_limit = this.count + 1000;
-            this.submode = 3;
-        }else if (this.submode == 3) {
-            if (this.count >= this.count_limit) {
-                this.mode = "resting";
-                this.count = 0;
-            }
-        }
-    }
-    crying() {
-        this.count += 1;
-        if (this.count == 1){
-            this.anims.play("murasaki_crying", true);
-        }else if (this.count >= 500) {
-            this.mode = "resting";
-            this.count = 0;
-        }
-    }
-    sleeping() {
-        this.count += 1;
-        if (this.count == 1){
-            this.anims.play("murasaki_sleeping", true);
-        }else if (this.count >= 1000) {
-            this.mode = "resting";
-            this.count = 0;
-        }
-    }
-    //send: last_grooming_time
-    grooming() {
-        this.count += 1;
-        if (this.submode == 0) {
-            let delta_x = this.target_x - this.x;
-            if (delta_x >0) {
-                this.dist = "right";
-                this.anims.play("murasaki_feeding_happy_right", true);
-            }else {
-                this.dist = "left";
-                this.anims.play("murasaki_feeding_happy_left", true);
-            }
-            this.submode = 1;
-        }else if (this.submode == 1) {
-            let delta_x = this.target_x - this.x;
-            let delta_y = this.target_y - this.y;
-            let delta_x2 = delta_x / (Math.abs(delta_x) + Math.abs(delta_y)) * 1.9;
-            let delta_y2 = delta_y / (Math.abs(delta_x) + Math.abs(delta_y)) * 1.9;
-            this.x += delta_x2;
-            this.y += delta_y2;
-            if (this.x > this.target_x-10 
-              && this.x < this.target_x+10 
-              && this.y > this.target_y-10 
-              && this.y < this.target_y+10) {
-                this.submode = 2;
-            }
-        }else if (this.submode == 2) {
-            this.x = this.target_x;
-            this.y = this.target_y;
-            this.anims.play("murasaki_grooming", true);
-            this.count_limit = this.count + 1500;
-            this.submode = 3;
-        }else if (this.submode == 3) {
-            if (this.count >= this.count_limit) {
-                this.mode = "resting";
-                this.count = 0;
-            }
-        }
-    }
-    //cost: life, gain: coin
-    mining() {
-        this.count += 1;
-        if (this.submode == 0) {
-            let delta_x = this.target_x - this.x;
-            if (delta_x >0) {
-                this.dist = "right";
-                this.anims.play("murasaki_working_right", true);
-            }else {
-                this.dist = "left";
-                this.anims.play("murasaki_working_left", true);
-            }
-            this.submode = 1;
-        }else if (this.submode == 1) {
-            let delta_x = this.target_x - this.x;
-            let delta_y = this.target_y - this.y;
-            let delta_x2 = delta_x / (Math.abs(delta_x) + Math.abs(delta_y)) * 1.2;
-            let delta_y2 = delta_y / (Math.abs(delta_x) + Math.abs(delta_y)) * 1.2;
-            this.x += delta_x2;
-            this.y += delta_y2;
-            if (this.x > this.target_x-10 
-              && this.x < this.target_x+10 
-              && this.y > this.target_y-10 
-              && this.y < this.target_y+10) {
-                this.submode = 2;
-            }
-        }else if (this.submode == 2) {
-            this.anims.play("murasaki_mining", true);
-        }
-    }
-    hugging() {
-        this.count += 1;
-        if (this.count == 1){
-            this.anims.play("murasaki_click", true);
-        }else if (this.count >= 250) {
-            this.mode = "resting";
-            this.count = 0;
-        }
-    }
-    farming() {
-        this.count += 1;
-        if (this.submode == 0) {
-            let delta_x = this.target_x - this.x;
-            if (delta_x >0) {
-                this.dist = "right";
-                this.anims.play("murasaki_working_right", true);
-            }else {
-                this.dist = "left";
-                this.anims.play("murasaki_working_left", true);
-            }
-            this.submode = 1;
-        }else if (this.submode == 1) {
-            let delta_x = this.target_x - this.x;
-            let delta_y = this.target_y - this.y;
-            let delta_x2 = delta_x / (Math.abs(delta_x) + Math.abs(delta_y)) * 1.2;
-            let delta_y2 = delta_y / (Math.abs(delta_x) + Math.abs(delta_y)) * 1.2;
-            this.x += delta_x2;
-            this.y += delta_y2;
-            if (this.x > this.target_x-10 
-              && this.x < this.target_x+10 
-              && this.y > this.target_y-10 
-              && this.y < this.target_y+10) {
-                this.submode = 2;
-            }
-        }else if (this.submode == 2) {
-            this.anims.play("murasaki_farming", true);
-        }
-    }
-    crafting() {
-        this.count += 1;
-        if (this.submode == 0) {
-            let delta_x = this.target_x - this.x;
-            if (delta_x >0) {
-                this.dist = "right";
-                this.anims.play("murasaki_working_right", true);
-            }else {
-                this.dist = "left";
-                this.anims.play("murasaki_working_left", true);
-            }
-            this.submode = 1;
-        }else if (this.submode == 1) {
-            let delta_x = this.target_x - this.x;
-            let delta_y = this.target_y - this.y;
-            let delta_x2 = delta_x / (Math.abs(delta_x) + Math.abs(delta_y)) * 1.2;
-            let delta_y2 = delta_y / (Math.abs(delta_x) + Math.abs(delta_y)) * 1.2;
-            this.x += delta_x2;
-            this.y += delta_y2;
-            if (this.x > this.target_x-10 
-              && this.x < this.target_x+10 
-              && this.y > this.target_y-10 
-              && this.y < this.target_y+10) {
-                this.submode = 2;
-            }
-        }else if (this.submode == 2) {
-            this.anims.play("murasaki_crafting", true);
-        }
-    }
-    update(){
-        //console.log(this.version, this.mode, this.count);
-        if (this.mode == "resting") {this.resting();}
-        else if (this.mode == "moving") {this.moving();}
-        else if (this.mode == "feeding") {this.feeding();}
-        else if (this.mode == "crying") {this.crying();}
-        else if (this.mode == "sleeping") {this.sleeping();}
-        else if (this.mode == "grooming") {this.grooming();}
-        else if (this.mode == "mining") {this.mining();}
-        else if (this.mode == "hugging") {this.hugging();}
-        else if (this.mode == "farming") {this.farming();}
-        else if (this.mode == "crafting") {this.crafting();}
-    }
-}
-
-
-
-//---pet-----------------------------------------------------------------------------------------------------
-
-class Pet extends Phaser.GameObjects.Sprite{
-    constructor(scene, x, y){
-        super(scene, x, y, "pet_normal");
-        this.scene.add.existing(this);
-        this.anims.play("pet_normal", true);
-    	this.mode = "resting";
-        this.submode = 0;
-        this.count = 0;
-        this.dist = "right";
-        this.target_x = 0;
-        this.target_y = 0;
-        this.setInteractive()
-        this.on("pointerdown", function (pointer) {
-            this.on_click();
-        }, this);
-    }
-    set set_mode(mode){
-        this.mode = mode;
-        this.count = 0;
-    }
-    get get_mode(){
-        return this.mode;
-    }
-    on_click() {
-        /***
-        if (this.mode == "resting" || this.mode == "moving") {
-            this.count = 0;
-            this.mode = "hugging";
-        }
-        ***/
-    }
-    resting(){
-	    this.count += 1;
-        if (this.count == 1) {
-            if (this.dist == "right"){
-                this.anims.play("pet_normal", true);
-            }else if (this.dist == "left") {
-                this.anims.play("pet_normal", true);
-            }
-            this.resting_count = 100 + Math.random() * 30;
-	    }else if (this.count >= this.resting_count){
-            let tmp = Math.random() * 100;
-            this.mode = "moving";
-            this.count = 0;
-            /***
-            if (tmp <= 10) {
-                this.mode = "sleeping";
-                this.count = 0;
-            }else if (tmp <= 20 & happy <= 10) {
-                this.mode = "crying";
-                this.count = 0;
-            }else {
-                this.mode = "moving";
-                this.count = 0;
-            }
-            ***/
-        }
-    }
-    moving() {
-        this.count += 1;
-        //determine direction
-        if (this.count == 1){
-            //determine degree, 0-30, 150-210, 330-360
-            var li = [0,10,20,30,150,160,170,180,190,200,210,330,340,350]
-            this.moving_degree = li[Math.floor(Math.random() * li.length)];
-            //out of area check
-            if (this.x < 100 && this.moving_degree > 90 && this.moving_degree <270) {
-                this.moving_degree -= 180;
-            }else if (this.x > 1100 && (this.moving_degree < 90 || this.moving_degree > 270)) {
-                this.moving_degree -= 180;
-            }
-            if (this.y > 860 && this.moving_degree > 180) {
-                this.moving_degree = 360 - this.moving_degree;
-            }else if (this.y < 500 && this.moving_degree < 180) {
-                this.moving_degree = 360 - this.moving_degree;
-            }
-            //minus check
-            if (this.moving_degree < 0) {
-                this.moving_degree += 360;
-            }
-            //determine speed, count
-            this.moving_speed = 0.2 + Math.random() * 0.1;  //0.3-0.5
-            this.moving_count = 70 + Math.random() * 30;    //70-100
-            //determine left or right
-            if (this.moving_degree > 90 && this.moving_degree <= 270) {
-                this.dist = "left";
-                this.anims.play("pet_normal", true);
-            }else {
-                this.dist = "right";
-                this.anims.play("pet_normal", true);
-            }
-        //moving
-        }else if (this.count < this.moving_count) {
-            this.x += Math.cos(this.moving_degree * (Math.PI/180)) * this.moving_speed;
-            this.y -= Math.sin(this.moving_degree * (Math.PI/180)) * this.moving_speed;
-        //return to resting
-        }else if (this.count >= this.moving_count) {
-            this.mode = "resting";
-            this.count = 0;
-        }
-    }
-    sleeping() {
-        this.count += 1;
-        if (this.count == 1){
-            this.anims.play("murasaki_sleeping", true);
-        }else if (this.count >= 1000) {
-            this.mode = "resting";
-            this.count = 0;
-        }
-    }
-    //cost: life, gain: coin
-    mining() {
-        this.count += 1;
-        if (this.submode == 0) {
-            let delta_x = this.target_x - this.x;
-            if (delta_x >0) {
-                this.dist = "right";
-                this.anims.play("murasaki_working_right", true);
-            }else {
-                this.dist = "left";
-                this.anims.play("murasaki_working_left", true);
-            }
-            this.submode = 1;
-        }else if (this.submode == 1) {
-            let delta_x = this.target_x - this.x;
-            let delta_y = this.target_y - this.y;
-            let delta_x2 = delta_x / (Math.abs(delta_x) + Math.abs(delta_y)) * 0.8;
-            let delta_y2 = delta_y / (Math.abs(delta_x) + Math.abs(delta_y)) * 0.8;
-            this.x += delta_x2;
-            this.y += delta_y2;
-            if (this.x > this.target_x-10 
-              && this.x < this.target_x+10 
-              && this.y > this.target_y-10 
-              && this.y < this.target_y+10) {
-                this.submode = 2;
-            }
-        }else if (this.submode == 2) {
-            this.anims.play("murasaki_mining", true);
-        }
-    }
-    farming() {
-        this.count += 1;
-        if (this.submode == 0) {
-            let delta_x = this.target_x - this.x;
-            if (delta_x >0) {
-                this.dist = "right";
-                this.anims.play("murasaki_working_right", true);
-            }else {
-                this.dist = "left";
-                this.anims.play("murasaki_working_left", true);
-            }
-            this.submode = 1;
-        }else if (this.submode == 1) {
-            let delta_x = this.target_x - this.x;
-            let delta_y = this.target_y - this.y;
-            let delta_x2 = delta_x / (Math.abs(delta_x) + Math.abs(delta_y)) * 0.8;
-            let delta_y2 = delta_y / (Math.abs(delta_x) + Math.abs(delta_y)) * 0.8;
-            this.x += delta_x2;
-            this.y += delta_y2;
-            if (this.x > this.target_x-10 
-              && this.x < this.target_x+10 
-              && this.y > this.target_y-10 
-              && this.y < this.target_y+10) {
-                this.submode = 2;
-            }
-        }else if (this.submode == 2) {
-            this.anims.play("murasaki_farming", true);
-        }
-    }
-    update(){
-        //console.log(this.version, this.mode, this.count);
-        if (this.mode == "resting") {this.resting();}
-        else if (this.mode == "moving") {this.moving();}
-        else if (this.mode == "sleeping") {this.sleeping();}
-        else if (this.mode == "mining") {this.mining();}
-        else if (this.mode == "farming") {this.farming();}
-    }
-}
-
-
-
-//---accessory-----------------------------------------------------------------------------------------------------
-
-//bar
-function makeBar(scene, x, y, color) {
-    //draw the bar
-    let bar = scene.add.graphics();
-    //color the bar
-    bar.fillStyle(color, 1);
-    //fill the bar with a rectangle
-    bar.fillRect(0, 0, 150, 20);
-    //position the bar
-    bar.x = x;
-    bar.y = y;
-    //return the bar
-    return bar;
-}
-
-//button
-//TODO: send transaction
-class Button {
-    constructor(x, y, label, scene, callback) {
-        let fontsize = 24;
-        const button = scene.add.text(x, y, label)
-            .setFontSize(fontsize)
-            .setFontFamily("Arial")
-            .setFill("#000000")
-            //.setOrigin(0.5)
-            //.setPadding(10)
-            //.setStyle({ backgroundColor: '#111' })
-            .setInteractive({ useHandCursor: true })
-            .on('pointerdown', () => callback())
-            .on('pointerover', () => button.setStyle({ fontSize: fontsize, fontFamily: "Arial", fill: '#ffff00' }))
-            .on('pointerout', () => button.setStyle({ fontSize: fontsize, fontFamily: "Arial", fill: '#000000' }));
-    }
-}
-
-//music
-function music() {
-    if (flag_music == 0) {
-        if (bgm == bgm1) {
-            bgm = bgm2;
-        }else if (bgm == bgm2) {
-            bgm = bgm3;
-        }else {
-            bgm = bgm1;
-        }
-        //let array = [bgm1, bgm2, bgm3];
-        //bgm = array[Math.floor(Math.random() * array.length)];
-        bgm.play();
-        flag_music = 1;
-        item_musicbox.anims.play("item_musicbox_on", true);
-    }else {
-        bgm.stop();
-        flag_music = 0;
-        //item_musicbox.anims.pause(item_musicbox.anims.currentAnim.frames[0]);
-        item_musicbox.anims.play("item_musicbox_off", true);
-    }
-}
-
-//rader chart
-function radarchart(scene, x0, y0, r, str, dex, int, luk, str_item, dex_item, int_item, luk_item) {
-    //position
-    //let x0 = 923;
-    //let y0 = 156;
-    //let r = 50;
-    //base
-    let base = 30;
-    //calc (x,y) from status
-    let x1 = 0;
-    let y1 = -r * str/base;
-    let x2 = r * dex/base;
-    let y2 = 0;
-    let x3 = 0;
-    let y3 = r * luk/base;
-    let x4 = -r * int/base;
-    let y4 = 0;
-    let y1i = -r * (str+str_item)/base;
-    let x2i = r * (dex+dex_item)/base;
-    let y3i = r * (luk+luk_item)/base;
-    let x4i = -r * (int+int_item)/base;
-    //remove old chart
-    try {
-        radar1.setVisible(false);
-        radar2.setVisible(false);
-        radar3.setVisible(false);
-        radar4.setVisible(false);
-        radar5.setVisible(false);
-        radar6.setVisible(false);
-        radar7.setVisible(false);
-        radar8.setVisible(false);
-        radar9.setVisible(false);
-    } catch(error) {
-    }
-    //draw
-    //scene.add.graphics().fillStyle(0xc0c0c0, 1).fillCircle(x0, y0, r, 0.5);
-    radar1 = scene.add.polygon(x0+r, y0+r, [0,-r,r,0,0,r,-r,0], 0xc0c0c0, 0.4);
-    radar2 = scene.add.polygon(x0+r*0.75, y0+r*0.75, [0,-r*0.75,r*0.75,0,0,r*0.75,-r*0.75,0], 0xc0c0c0, 0.4);
-    radar3 = scene.add.polygon(x0+r/2, y0+r/2, [0,-r/2,r/2,0,0,r/2,-r/2,0], 0xc0c0c0, 0.4);
-    radar4 = scene.add.polygon(x0+(-x4i+x2i)/2, y0+(-y1i+y3i)/2, [x1,y1i,x2i,y2,x3,y3i,x4i,y4], 0xffd700, 1);
-    radar5 = scene.add.polygon(x0+(-x4+x2)/2, y0+(-y1+y3)/2, [x1,y1,x2,y2,x3,y3,x4,y4], 0xffff00, 1);
-    let font_arg = {font: "17px Arial", fill: "#000000"};
-    radar6 = scene.add.text(x0-10, y0-r-15, "STR"+"\n"+str, font_arg);
-    radar7 = scene.add.text(x0+r, y0-6, "DEX"+"\n"+dex, font_arg);
-    radar8 = scene.add.text(x0-10, y0+r-5, "LUK"+"\n"+luk, font_arg);
-    radar9 = scene.add.text(x0-r-15, y0-6, "INT"+"\n"+int, font_arg);
-}
-async function draw_radarchart(scene) {
-        let _x = 1136;
-        let _y = 120;
-        let _r = 80;
-        let _res = await contract_get_item_count(summoner);
-        console.log(_res);
-        radarchart(scene, _x, _y, _r, local_strength, local_dexterity, local_intelligence, local_luck, _res[0], _res[1], _res[2], _res[3]);
-}
-
-
-//window craft
-function open_window_craft (scene) {
-
-    //TOFIX: prevent loading error
-    if (local_level == 0) {
-        return 0;
-    }
-
-    //function, closing: destroy group and update selecte_item
-    async function close_crafting_window(_item) {
-        //update selected item
-        global_selected_crafting_item = _item;
-        //destroy group
-        group_window_crafting.destroy(true);
-        //update selected item dc
-        global_selected_crafting_item_dc = await get_cost_of_item(_item);
-        console.log("selected_item:", global_selected_crafting_item, global_selected_crafting_item_dc);
-        //update text_craft_item
-        let _level = global_selected_crafting_item_dc[0]
-        //text_craft_item.setText("time= " + _dc + ", ohana = " + _coin + ", kusa = " + _material);
-        if (_level > 0) {
-            //let _dc = global_selected_crafting_item_dc[1];
-            let _dc = await get_modified_dc(summoner, _item);
-            let _total_sec = _dc / 1000 * BASE_SEC;
-            let _day = Math.floor(_total_sec / 86400);
-            let _hr = Math.floor(_total_sec % 86400 / 3600);
-            let _min = Math.floor(_total_sec % 3600 / 60);
-            //let _sec = _total_sec %  60;
-            let _coin = global_selected_crafting_item_dc[2];
-            let _material = global_selected_crafting_item_dc[3];
-            //text_craft_item.setText(_coin + " ohana / " + _material + " kusa / " + _day + "day " + _hr + "hr " + _min + "min " + Math.trunc(_sec) + "sec");
-            text_craft_item.setText(_coin + " ohana / " + _material + " kusa / " + _day + "d:" + _hr + "h:" + _min + "m");
-            text_select_item.setText('"'+array_item_name[_item]+'"');
-            console.log("modified_dc:", _dc);
-        } else {
-            text_craft_item.setText("");
-            text_select_item.setText(">> Select Item <<");
-        }
-    }
-
-    //function, get cost of item
-    async function get_cost_of_item(_item) {
-        let _dc_table = await contract_get_item_dc(_item);
-        return _dc_table;
-    }
-
-    //function, get modified dc
-    async function get_modified_dc(_summoner, _item_type) {
-        let _modified_dc = await contract_get_modified_dc(_summoner, _item_type);
-        return _modified_dc;
-    }
-
-    //function, create button
-    function create_button(_x, _y, _text, _item_type, scene) {
-        let obj = scene.add.text(_x, _y, _text)
-            .setFontSize(30).setFontFamily("Arial").setFill('#000000')
-            .setInteractive({useHandCursor: true})
-            .on("pointerdown", () => close_crafting_window(_item_type) )
-            .on("pointerover", () => obj.setStyle({ fontSize: 30, fontFamily: "Arial", fill: '#ffff00' }))
-            .on("pointerout", () => obj.setStyle({ fontSize: 30, fontFamily: "Arial", fill: '#000000' }))
-        return obj;
-    }
-
-    //create window
-    window_crafting = scene.add.sprite(640, 480, "window").setInteractive();
-
-    //create item list text
-    button_crafting_close = create_button(1070, 790, "Cancel", 0, scene);
-    let _x = 170;
-    let _y = 110;
-    let _y_add = 40;
-    let _item_count = 0;
-    //mining_item
-    for (var i = 1; i <= 16; i++) {
-        //use eval to create dynamic variants
-        //button_crafting_item1  = create_button(_x, _y + _y_add *  1, "[" + local_items[1] + "] " + array_item_name[1],  1,  scene);
-        //eval("button_crafting_item" + i + " = create_button(_x, _y + _y_add *  " + i + ", array_item_name[" + i + "],  " + i + ",  scene);")
-        //_item_count = Number(local_items[i]) + Number(local_items[i+64]);
-        //eval(`button_crafting_item${i}  = create_button(_x, _y + _y_add *  ${i}, '[' + local_items[${i}] + '] ' + array_item_name[${i}],  ${i},  scene);`)
-        //eval(`button_crafting_item${i}  = create_button(_x, _y + _y_add *  ${i}, '[' + _item_count + '] ' + array_item_name[${i}],  ${i},  scene);`)
-        eval(`button_crafting_item${i}  = create_button(_x, _y + _y_add *  ${i}, '[' + local_items[${i}] + ',' + local_items[${i+64}] + '] ' + array_item_name[${i}],  ${i},  scene);`)
-    }
-    item1_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  1, "pet_normal").setScale(0.08);
-
-    //farming_item
-    _x = 520;
-    for (var i = 17; i <= 32; i++) {
-        //eval(`button_crafting_item${i}  = create_button(_x, _y + _y_add *  ${i-16}, '[' + local_items[${i}] + '] ' + array_item_name[${i}],  ${i},  scene);`)
-        eval(`button_crafting_item${i}  = create_button(_x, _y + _y_add *  ${i-16}, '[' + local_items[${i}] + ',' + local_items[${i+64}] + '] ' + array_item_name[${i}],  ${i},  scene);`)
-    }
-    item17_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  1, "item_vase").setScale(0.08);
-
-    //crafting_item
-    _x = 870;
-    for (var i = 33; i <= 48; i++) {
-        //eval(`button_crafting_item${i}  = create_button(_x, _y + _y_add *  ${i-32}, '[' + local_items[${i}] + '] ' + array_item_name[${i}],  ${i},  scene);`)
-        eval(`button_crafting_item${i}  = create_button(_x, _y + _y_add *  ${i-32}, '[' + local_items[${i}] + ',' + local_items[${i+64}] + '] ' + array_item_name[${i}],  ${i},  scene);`)
-    }
-    item33_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  1, "item_violin").setScale(0.08);
-    item34_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  2, "item_musicbox").setScale(0.12);
-
-    //create group
-    group_window_crafting = scene.add.group();
-    group_window_crafting.add(window_crafting);
-    group_window_crafting.add(button_crafting_close);
-    group_window_crafting.add(button_crafting_item1);
-    group_window_crafting.add(button_crafting_item2);
-    group_window_crafting.add(button_crafting_item3);
-    group_window_crafting.add(button_crafting_item4);
-    group_window_crafting.add(button_crafting_item5);
-    group_window_crafting.add(button_crafting_item6);
-    group_window_crafting.add(button_crafting_item7);
-    group_window_crafting.add(button_crafting_item8);
-    group_window_crafting.add(button_crafting_item9);
-    group_window_crafting.add(button_crafting_item10);
-    group_window_crafting.add(button_crafting_item11);
-    group_window_crafting.add(button_crafting_item12);
-    group_window_crafting.add(button_crafting_item13);
-    group_window_crafting.add(button_crafting_item14);
-    group_window_crafting.add(button_crafting_item15);
-    group_window_crafting.add(button_crafting_item16);
-    group_window_crafting.add(button_crafting_item17);
-    group_window_crafting.add(button_crafting_item18);
-    group_window_crafting.add(button_crafting_item19);
-    group_window_crafting.add(button_crafting_item20);
-    group_window_crafting.add(button_crafting_item21);
-    group_window_crafting.add(button_crafting_item22);
-    group_window_crafting.add(button_crafting_item23);
-    group_window_crafting.add(button_crafting_item24);
-    group_window_crafting.add(button_crafting_item25);
-    group_window_crafting.add(button_crafting_item26);
-    group_window_crafting.add(button_crafting_item27);
-    group_window_crafting.add(button_crafting_item28);
-    group_window_crafting.add(button_crafting_item29);
-    group_window_crafting.add(button_crafting_item30);
-    group_window_crafting.add(button_crafting_item31);
-    group_window_crafting.add(button_crafting_item32);
-    group_window_crafting.add(button_crafting_item33);
-    group_window_crafting.add(button_crafting_item34);
-    group_window_crafting.add(button_crafting_item35);
-    group_window_crafting.add(button_crafting_item36);
-    group_window_crafting.add(button_crafting_item37);
-    group_window_crafting.add(button_crafting_item38);
-    group_window_crafting.add(button_crafting_item39);
-    group_window_crafting.add(button_crafting_item40);
-    group_window_crafting.add(button_crafting_item41);
-    group_window_crafting.add(button_crafting_item42);
-    group_window_crafting.add(button_crafting_item43);
-    group_window_crafting.add(button_crafting_item44);
-    group_window_crafting.add(button_crafting_item45);
-    group_window_crafting.add(button_crafting_item46);
-    group_window_crafting.add(button_crafting_item47);
-    group_window_crafting.add(button_crafting_item48);
-    group_window_crafting.add(item1_icon);
-    group_window_crafting.add(item17_icon);
-    group_window_crafting.add(item33_icon);
-    group_window_crafting.add(item34_icon);
-}
-
-
-//window summon
-function open_window_summon(scene) {
-    //close window and summon
-    function close_window_summon(_class) {
-        group_window_summon.destroy(true);
-        if (_class >= 0) {
-            contract_summon(_class);
-            //button_summon.destroy();
-        }
-    }
-    //create button with color and class
-    function create_button(_x, _y, _text, _color, _class, scene) {
-        let obj = scene.add.text(_x, _y, _text)
-            .setFontSize(40).setFontFamily("Arial").setFill(_color)
-            .setInteractive({useHandCursor: true})
-            .on("pointerdown", () => close_window_summon(_class) )
-            .on("pointerover", () => obj.setStyle({ fontSize: 40, fontFamily: "Arial", fill: '#ffff00' }))
-            .on("pointerout", () => obj.setStyle({ fontSize: 40, fontFamily: "Arial", fill: _color }))
-        return obj;
-    }
-    //create window
-    window_summon = scene.add.sprite(640, 480, "window").setInteractive();
-    //create message
-    let _text = "Summoning your Murasaki-san.\nPlease choose your favorite color.\n(This does not affect any gameplays.)";
-    msg1 = scene.add.text(150, 150, _text)
-            .setFontSize(24).setFontFamily("Arial").setFill("#000000")
-    //create button
-    let _x = 200;
-    let _y = 280;
-    let _y_add = 70;
-    button0 = create_button(_x, _y+_y_add*0, "Red", "#E60012", 0, scene);
-    button1 = create_button(_x, _y+_y_add*1, "Orange", "#F39800", 1, scene);
-    button2 = create_button(_x, _y+_y_add*2, "Yello", "#FFF100", 2, scene);
-    button3 = create_button(_x, _y+_y_add*3, "Light Green", "#8FC31F", 3, scene);
-    button4 = create_button(_x, _y+_y_add*4, "Green", "#009944", 4, scene);
-    button5 = create_button(_x, _y+_y_add*5, "Deep Green", "#009E96", 5, scene);
-    button6 = create_button(_x+500, _y+_y_add*0, "Light Blue", "#00A0E9", 6, scene);
-    button7 = create_button(_x+500, _y+_y_add*1, "Blue", "#0068B7", 7, scene);
-    button8 = create_button(_x+500, _y+_y_add*2, "Deep Blue", "#1D2088", 8, scene);
-    button9 = create_button(_x+500, _y+_y_add*3, "Purple", "#920783", 9, scene);
-    button10 = create_button(_x+500, _y+_y_add*4, "Pink", "#E4007F", 10, scene);
-    button11 = create_button(_x+500, _y+_y_add*5, "Vivid Pink", "#E5004F", 11, scene);
-    button_cancel = create_button(1000, 750, "Cancel", "#000000", -1, scene);
-    //create group
-    group_window_summon = scene.add.group();
-    group_window_summon.add(window_summon);
-    group_window_summon.add(msg1);
-    group_window_summon.add(button0);
-    group_window_summon.add(button1);
-    group_window_summon.add(button2);
-    group_window_summon.add(button3);
-    group_window_summon.add(button4);
-    group_window_summon.add(button5);
-    group_window_summon.add(button6);
-    group_window_summon.add(button7);
-    group_window_summon.add(button8);
-    group_window_summon.add(button9);
-    group_window_summon.add(button10);
-    group_window_summon.add(button11);
-    group_window_summon.add(button_cancel);
-}
-
-
-
-//---main function-----------------------------------------------------------------------------------------------------
-
-let config = {
-    type: Phaser.AUTO,
-    width: 1280,
-    height: 960,
-    scale: {
-        mode: Phaser.Scale.FIT,
-        autoCenter: Phaser.Scale.CENTER_BOTH
-    },
-    scene: {
-        preload: preload,
-        create: create,
-        update: update
-    },
-    render: {
-        //pixelArt: true,
-        //antialias: false
-    },
-};
-let game = new Phaser.Game(config);
-
-
-
-//---preload-----------------------------------------------------------------------------------------------------
-function preload() {
-
-    //back
-    this.load.image("back", "png/back3.png");
-
-    //murasaki-san
-    this.load.spritesheet("murasaki_right", "png/murasaki_right.png", {frameWidth: 370, frameHeight: 320});
-    this.load.spritesheet("murasaki_left", "png/murasaki_left.png", {frameWidth: 370, frameHeight: 320});
-    this.load.spritesheet("murasaki_sleeping", "png/murasaki_sleeping.png", {frameWidth: 370, frameHeight: 320});
-    this.load.spritesheet("murasaki_feeding", "png/murasaki_feeding.png", {frameWidth: 370, frameHeight: 320});
-    this.load.spritesheet("murasaki_feeding_happy_right", 
-        "png/murasaki_feeding_happy_right.png", {frameWidth: 370, frameHeight: 320});
-    this.load.spritesheet("murasaki_feeding_happy_left", 
-        "png/murasaki_feeding_happy_left.png", {frameWidth: 370, frameHeight: 320});
-    this.load.spritesheet("murasaki_crying", "png/murasaki_crying.png", {frameWidth: 370, frameHeight: 320});
-    this.load.spritesheet("murasaki_mining", "png/murasaki_mining.png", {frameWidth: 370, frameHeight: 320});
-    this.load.spritesheet("murasaki_hugging", "png/murasaki_hugging.png", {frameWidth: 370, frameHeight: 320});
-    this.load.spritesheet("murasaki_farming", "png/murasaki_farming.png", {frameWidth: 370, frameHeight: 320});
-    this.load.spritesheet("murasaki_grooming", "png/murasaki_grooming.png", {frameWidth: 720, frameHeight: 622});
-    this.load.spritesheet("murasaki_crafting", "png/murasaki_crafting.png", {frameWidth: 370, frameHeight: 320});
-    this.load.spritesheet("murasaki_working_left", "png/murasaki_working_left.png", {frameWidth: 370, frameHeight: 320});
-    this.load.spritesheet("murasaki_working_right", "png/murasaki_working_right.png", {frameWidth: 370, frameHeight: 320});
-    this.load.spritesheet("murasaki_click", "png/murasaki_click.png", {frameWidth: 370, frameHeight: 320});
-    this.load.spritesheet("murasaki_loading", "png/murasaki_loading.png", {frameWidth: 370, frameHeight: 320});
-
-    //icon button
-    this.load.image("button_feeding", "png/button_feeding.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("button_feeding_pointerover", "png/button_feeding_pointerover.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("food_sweet_potato", "png/food_sweet_potato.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("item_bear", "png/item_bear.png", {frameWidth: 720, frameHeight: 622});
-    this.load.spritesheet("pet_normal", "png/pet_normal.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("button_mining_enable", "png/button_mining_enable.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("button_mining_unable", "png/button_mining_unable.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("button_mining_pointerover", "png/button_mining_pointerover.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("button_mining_working", "png/button_mining_working.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("button_mining_pointerover_stop", "png/button_mining_pointerover_stop.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("button_farming_enable", "png/button_farming_enable.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("button_farming_unable", "png/button_farming_unable.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("button_farming_pointerover", "png/button_farming_pointerover.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("button_farming_working", "png/button_farming_working.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("button_farming_pointerover_stop", "png/button_farming_pointerover_stop.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("button_crafting_enable", "png/button_crafting_enable.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("button_crafting_unable", "png/button_crafting_unable.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("button_crafting_pointerover", "png/button_crafting_pointerover.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("button_crafting_working", "png/button_crafting_working.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("button_crafting_pointerover_stop", "png/button_crafting_pointerover_stop.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("button_grooming_enable", "png/button_grooming_enable.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("button_grooming_unable", "png/button_grooming_unable.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("button_grooming_pointerover", "png/button_grooming_pointerover.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("button_levelup_enable", "png/button_levelup_enable.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("button_levelup_unable", "png/button_levelup_unable.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("button_levelup_pointerover", "png/button_levelup_pointerover.png", {frameWidth: 500, frameHeight: 500});
-
-    //music
-    this.load.audio("bgm1", "mp3/Morning_2.mp3");
-    this.load.audio("bgm2", "mp3/Roll_Roll_Roll.mp3");
-    this.load.audio("bgm3", "mp3/amaoto.mp3");
-
-    //sound
-    this.load.audio("button_on", "sound/button_on.mp3");
-    this.load.audio("button_select", "sound/button_select.mp3");
-
-    //items
-    this.load.spritesheet("item_musicbox", "png/item_musicbox.png", {frameWidth: 370, frameHeight: 320});
-    this.load.image("item_violin", "png/item_violin.png", {frameWidth: 600, frameHeight: 600});
-    this.load.image("item_vase", "png/item_vase.png", {frameWidth: 300, frameHeight: 300});
-    this.load.image("item_dummy", "png/item_18.png", {frameWidth: 300, frameHeight: 300});
-    //this.load.image("item_19", "png/item_19.png", {frameWidth: 300, frameHeight: 300});
-    //this.load.image("item_20", "png/item_20.png", {frameWidth: 300, frameHeight: 300});
-    //this.load.image("item_21", "png/item_21.png", {frameWidth: 300, frameHeight: 300});
-
-    //window
-    this.load.image("window", "png/window.png");
-}
-
-
-
-//---create-----------------------------------------------------------------------------------------------------
-
-function create() {
-
-    //===back image===
-
-    this.add.image(640, 480, "back");
-
-    //===animation murasaki===
-
-    this.anims.create({
-        key: "murasaki_right",
-        frames: this.anims.generateFrameNumbers("murasaki_right", {start:0, end:3}),
-        frameRate: 2,
-        repeat: -1
-    });
-    this.anims.create({
-        key: "murasaki_left",
-        frames: this.anims.generateFrameNumbers("murasaki_left", {start:0, end:3}),
-        frameRate: 2,
-        repeat: -1
-    });
-    this.anims.create({
-        key: "murasaki_sleeping",
-        frames: this.anims.generateFrameNumbers("murasaki_sleeping", {start:0, end:1}),
-        frameRate: 1,
-        repeat: -1
-    });
-    this.anims.create({
-        key: "murasaki_feeding",
-        frames: this.anims.generateFrameNumbers("murasaki_feeding", {start:0, end:1}),
-        frameRate: 1,
-        repeat: -1
-    });
-    this.anims.create({
-        key: "murasaki_feeding_happy_right",
-        frames: this.anims.generateFrameNumbers("murasaki_feeding_happy_right", {start:0, end:1}),
-        frameRate: 1,
-        repeat: -1
-    });
-    this.anims.create({
-        key: "murasaki_feeding_happy_left",
-        frames: this.anims.generateFrameNumbers("murasaki_feeding_happy_left", {start:0, end:1}),
-        frameRate: 1,
-        repeat: -1
-    });
-    this.anims.create({
-        key: "murasaki_crying",
-        frames: this.anims.generateFrameNumbers("murasaki_crying", {start:0, end:1}),
-        frameRate: 1,
-        repeat: -1
-    });
-    this.anims.create({
-        key: "murasaki_mining",
-        frames: this.anims.generateFrameNumbers("murasaki_mining", {start:0, end:1}),
-        frameRate: 1,
-        repeat: -1
-    });
-    this.anims.create({
-        key: "murasaki_hugging",
-        frames: this.anims.generateFrameNumbers("murasaki_hugging", {start:0, end:1}),
-        frameRate: 1,
-        repeat: -1
-    });
-    this.anims.create({
-        key: "murasaki_farming",
-        frames: this.anims.generateFrameNumbers("murasaki_farming", {start:0, end:1}),
-        frameRate: 1,
-        repeat: -1
-    });
-    this.anims.create({
-        key: "murasaki_grooming",
-        frames: this.anims.generateFrameNumbers("murasaki_grooming", {start:0, end:1}),
-        frameRate: 1,
-        repeat: -1
-    });
-    this.anims.create({
-        key: "murasaki_crafting",
-        frames: this.anims.generateFrameNumbers("murasaki_crafting", {start:0, end:1}),
-        frameRate: 1,
-        repeat: -1
-    });
-    this.anims.create({
-        key: "murasaki_working_left",
-        frames: this.anims.generateFrameNumbers("murasaki_working_left", {start:0, end:1}),
-        frameRate: 1,
-        repeat: -1
-    });
-    this.anims.create({
-        key: "murasaki_working_right",
-        frames: this.anims.generateFrameNumbers("murasaki_working_right", {start:0, end:1}),
-        frameRate: 1,
-        repeat: -1
-    });
-    this.anims.create({
-        key: "murasaki_click",
-        frames: this.anims.generateFrameNumbers("murasaki_click", {start:0, end:1}),
-        frameRate: 1,
-        repeat: -1
-    });
-
-    //===animation others===
-
-    this.anims.create({
-        key: "pet_normal",
-        frames: this.anims.generateFrameNumbers("pet_normal", {start:0, end:1}),
-        frameRate: 1,
-        repeat: -1
-    });
-    this.anims.create({
-        key: "item_musicbox_on",
-        frames: this.anims.generateFrameNumbers("item_musicbox", {start:1, end:2}),
-        frameRate: 1,
-        repeat: -1
-    });
-    this.anims.create({
-        key: "item_musicbox_off",
-        frames: this.anims.generateFrameNumbers("item_musicbox", {start:0, end:0}),
-        frameRate: 1,
-        repeat: -1
-    });
-    this.anims.create({
-        key: "murasaki_loading",
-        frames: this.anims.generateFrameNumbers("murasaki_loading", {start:0, end:1}),
-        frameRate: 1,
-        repeat: -1
-    });
-    
-    //===item_bear===
-
-    item_bear = this.add.sprite(1000,400, "item_bear");
-    item_bear.scaleX = item_bear.scaleX * 0.45;
-    item_bear.scaleY = item_bear.scaleY * 0.45;
-
-    //===button_icon===
-
-    //feeding
-    button_feeding = this.add.sprite(610,850, "button_feeding");
-    button_feeding.scaleX = button_feeding.scaleX * 0.16;
-    button_feeding.scaleY = button_feeding.scaleY * 0.16;
-    button_feeding.setInteractive({useHandCursor: true});
-    button_feeding.on('pointerdown', () => sound_button_on.play() );
-    button_feeding.on('pointerdown', () => contract_feeding(summoner) );
-    button_feeding.on('pointerover', () => sound_button_select.play());
-    button_feeding.on('pointerover', () => button_feeding.setTexture("button_feeding_pointerover"));
-    button_feeding.on('pointerout', () => button_feeding.setTexture("button_feeding"));
-
-    //grooming
-    button_grooming = this.add.sprite(1150,400, "button_grooming_unable");
-    button_grooming.scaleX = button_grooming.scaleX * 0.16;
-    button_grooming.scaleY = button_grooming.scaleY * 0.16;
-    button_grooming.setInteractive({useHandCursor: true});
-    button_grooming.on('pointerdown', () => sound_button_on.play() );
-    button_grooming.on('pointerdown', () => contract_grooming(summoner) );
-    button_grooming.on('pointerover', () => sound_button_select.play());
-    button_grooming.on('pointerover', () => button_grooming.setTexture("button_grooming_pointerover"));
-    button_grooming.on('pointerout', () => button_grooming.setTexture("button_grooming"));
-    button_grooming.disableInteractive();
-
-    //crafting
-    button_crafting = this.add.sprite(700,150, "button_crafting_unable");
-    button_crafting.scaleX = button_crafting.scaleX * 0.16;
-    button_crafting.scaleY = button_crafting.scaleY * 0.16;
-    button_crafting.setInteractive({useHandCursor: true});
-    button_crafting.on('pointerdown', () => sound_button_on.play() );
-    button_crafting.on('pointerdown', () => contract_crafting(summoner) );
-    button_crafting.on('pointerover', () => sound_button_select.play());
-    button_crafting.on('pointerover', () => button_crafting.setTexture("button_crafting_pointerover"));
-    button_crafting.on('pointerout', () => button_crafting.setTexture("button_crafting_enable"));
-    button_crafting.disableInteractive();
-
-    //mining
-    button_mining = this.add.sprite(50,700, "button_mining_unable");
-    button_mining.scaleX = button_mining.scaleX * 0.16;
-    button_mining.scaleY = button_mining.scaleY * 0.16;
-    button_mining.setInteractive({useHandCursor: true});
-    button_mining.on('pointerdown', () => sound_button_on.play() );
-    button_mining.on('pointerdown', () => contract_mining(summoner) );
-    button_mining.on('pointerover', () => sound_button_select.play());
-    button_mining.on('pointerover', () => button_mining.setTexture("button_mining_pointerover"));
-    button_mining.on('pointerout', () => button_mining.setTexture("button_mining_enable"));
-    button_mining.disableInteractive();
-
-    //farming
-    button_farming = this.add.sprite(300,150, "button_farming_unable");
-    button_farming.scaleX = button_farming.scaleX * 0.16;
-    button_farming.scaleY = button_farming.scaleY * 0.16;
-    button_farming.setInteractive({useHandCursor: true});
-    button_farming.on('pointerdown', () => sound_button_on.play() );
-    button_farming.on('pointerdown', () => contract_farming(summoner) );
-    button_farming.on('pointerover', () => sound_button_select.play());
-    button_farming.on('pointerover', () => button_farming.setTexture("button_farming_pointerover"));
-    button_farming.on('pointerout', () => button_farming.setTexture("button_farming_enable"));
-    button_farming.disableInteractive();
-
-    //levelup
-    button_levelup = this.add.sprite(1232,200, "button_levelup_unable");
-    button_levelup.scaleX = button_levelup.scaleX * 0.11;
-    button_levelup.scaleY = button_levelup.scaleY * 0.11;
-    button_levelup.setInteractive({useHandCursor: true});
-    button_levelup.on('pointerdown', () => sound_button_on.play() );
-    button_levelup.on('pointerdown', () => contract_level_up(summoner) );
-    button_levelup.on('pointerover', () => sound_button_select.play());
-    button_levelup.on('pointerover', () => button_levelup.setTexture("button_levelup_pointerover"));
-    button_levelup.on('pointerout', () => button_levelup.setTexture("button_levelup_enable"));
-    button_levelup.disableInteractive();
-
-    //===music===
-
-    //sound out of focus
-    this.sound.pauseOnBlur = false
-    bgm1 = this.sound.add("bgm1", {volume:0.2, loop:true});
-    bgm2 = this.sound.add("bgm2", {volume:0.2, loop:true});
-    bgm3 = this.sound.add("bgm3", {volume:0.2, loop:true});
-
-    //sound
-    sound_button_select = this.sound.add("button_select", {volume:0.2});
-    sound_button_on = this.sound.add("button_on", {volume:0.2});
-
-    //===create summoner===
-
-    murasakisan = new Murasakisan(this, 500 + Math.random()*200, 640 + Math.random()*100);
-    murasakisan.setScale(0.45);
-
-    //===button===
-
-    //button_text
-    //new Button(20, 20, 'Connect Wallet', this, () => connect());
-    //new Button(20, 50, '>>> Summon <<<', this, () => open_window_summon(this));
-    text_summon = this.add.text(500, 450, "", {font: "24px Arial", fill: "#000000"})
-        .setInteractive({useHandCursor: true})
-        .on("pointerdown", () => open_window_summon(this) )
-        .on("pointerover", () => text_summon.setStyle({ fontSize: 24, fontFamily: "Arial", fill: '#ffff00' }))
-        .on("pointerout", () => text_summon.setStyle({ fontSize: 24, fontFamily: "Arial", fill: '#000000' }));
-
-    //===status===
-
-    //status window color fill
-    //let status_back = this.add.graphics();
-    //status_back.fillStyle(0xffffff, 1).fillRect(1024, 5, 336, 448);
-    //status_back.alpha = 0.5;
-
-    //status window
-    let font_arg = {font: "18px Arial", fill: "#000"};
-    text_summoner =     this.add.text(1040, 10, "***", font_arg);
-    text_level =        this.add.text(1040, 26, "***", font_arg);
-    text_age_time =     this.add.text(1180, 10, "***", font_arg);
-
-    //debug status
-    text_type =         this.add.text(16, 864, "***", font_arg);
-    text_turn =         this.add.text(16, 880, "***", font_arg);
-    text_mode =         this.add.text(16, 896, "***", font_arg);
-    //text_pet =          this.add.text(16, 912, "***", font_arg);
-    text_speed =        this.add.text(16, 912, "***", font_arg);
-    text_exp =          this.add.text(16, 928, "***", font_arg);
-
-    //bar
-    //satiety
-    //this.add.text(10, 10, "Satiety:", font_arg);
-    icon_satiety = this.add.sprite(20,20, "button_feeding");
-    icon_satiety.setScale(0.07);
-    bar_satiety_back = makeBar(this, 50, 10, 0xffc0cb);
-    bar_satiety_back.scaleX = 1;
-    bar_satiety = makeBar(this, 50, 10, 0xff4500);
-    bar_satiety.scaleX = 0;
-
-    //happy
-    //this.add.text(1040, 845, "Happy:", font_arg);
-    icon_happy = this.add.sprite(240,20, "button_grooming_enable");
-    icon_happy.setScale(0.07);
-    bar_happy_back = makeBar(this, 270, 10, 0xadd8e6);
-    bar_happy_back.scaleX = 1;
-    bar_happy = makeBar(this, 270, 10, 0x4169e1);
-    bar_happy.scaleX = 0;
-
-    //exp
-    //this.add.text(1040, 870, "Exp:", font_arg);
-    this.add.text(450, 10, "Exp:", font_arg);
-    bar_exp_back = makeBar(this, 490, 10, 0x90ee90);
-    bar_exp_back.scaleX = 1;
-    bar_exp = makeBar(this, 490, 10, 0x228b22);
-    bar_exp.scaleX = 0;
-
-    //coin, material
-    text_coin = this.add.text(660, 10, "***", {font: "17px Arial", fill: "#000", backgroundColor: "#ffff00"});
-    text_material = this.add.text(780, 10, "***", {font: "17px Arial", fill: "#000", backgroundColor: "#7cfc00"});
-
-    //===etc===
-
-    //working progression text
-    text_working_calc = this.add.text(0, 0, "", font_arg);
-
-    //craft_window ***TODO***
-    //select crafting_item_type
-    //new Button(750, 120, '[Select Item]', this, () => open_window_craft(this));
-    text_select_item = this.add.text(750, 120, ">> Select Item <<", {font: "30px Arial", fill: "#000"})
-                .setFontSize(24).setFontFamily("Arial").setFill('#000000')
-                .setInteractive({useHandCursor: true})
-                .on("pointerdown", () => open_window_craft(this) )
-                .on("pointerover", () => text_select_item.setStyle({ fontSize: 24, fontFamily: "Arial", fill: '#ffff00' }))
-                .on("pointerout", () => text_select_item.setStyle({ fontSize: 24, fontFamily: "Arial", fill: '#000000' }));
-    text_craft_item = this.add.text(750, 150, "", font_arg)
-                .setInteractive({useHandCursor: true})
-                .on("pointerdown", () => open_window_craft(this) )
-
-    //system message
-    text_system_message = this.add.text(380, 400, "", {
-        font: "32px Arial", 
-        fill: "#000000", 
-        backgroundColor: "#ffffff",
-        align: "center"
-    });
-}
-
-
-
-//---update-----------------------------------------------------------------------------------------------------
-function update() {
-
-    //increment turn
-    turn += 1;
-    text_turn.setText("turn = " + turn);
-
-    //update summoner
-    if (local_level != 0) {
-    //if (summoner != -1) {
-        murasakisan.update();
-    }
-    //update pet
-    if (flag_pet == 1) {
-        pet.update();
-    }
-
-    //===== status =====
-    if (turn % 100 == 0) {
-
-        console.log(Math.round(game.input.mousePointer.x), Math.round(game.input.mousePointer.y));
-
-        //levelup, feeding, grooming
-
-        //level up
-        if (local_level > previous_local_level) {
-            //update radarchart
-            //radarchart(this, 1136, 192, 80, local_strength, local_dexterity, local_intelligence, local_luck);
-            //radarchart(this, 1136, 192, 80, local_strength, local_dexterity, local_intelligence, local_luck,1,1,1,0);
-            draw_radarchart(this);
-            if (local_level == 2) {
-                //enable mining button
-                button_mining.setTexture("button_mining_enable");
-                button_mining.on('pointerover', () => button_mining.setTexture("button_mining_pointerover"));
-                button_mining.on('pointerout', () => button_mining.setTexture("button_mining_enable"));
-                button_mining.setInteractive();
-                //enable farming button
-                button_farming.setTexture("button_farming_enable");
-                button_farming.on('pointerover', () => button_farming.setTexture("button_farming_pointerover"));
-                button_farming.on('pointerout', () => button_farming.setTexture("button_farming_enable"));
-                button_farming.setInteractive();
-            }
-            if (local_level == 3) {
-                //enable mining button
-                button_crafting.setTexture("button_crafting_enable");
-                button_crafting.on('pointerover', () => button_crafting.setTexture("button_crafting_pointerover"));
-                button_crafting.on('pointerout', () => button_crafting.setTexture("button_crafting_enable"));
-                button_crafting.setInteractive();
-            }
-        }
-
-        //feeding check, continue
-        else if (local_last_feeding_time > previous_local_last_feeding_time){
-            murasakisan.set_mode = "feeding";
-            murasakisan.submode = 0;
-            murasakisan.count = 0;
-            murasakisan.target_x = 600;
-            murasakisan.target_y = 730;
-            if (typeof food !== "undefined") {
-                food.destroy();
-                //food.visible = false;
-            }
-            food = this.add.sprite(600,730, "food_sweet_potato");
-            food.scaleX = food.scaleX * 0.16;
-            food.scaleY = food.scaleY * 0.16;
-        }
-
-        //grooming check, continue
-        else if (local_last_grooming_time > previous_local_last_grooming_time){
-            murasakisan.set_mode = "grooming";
-            murasakisan.submode = 0;
-            murasakisan.count = 0;
-            murasakisan.target_x = 1000;
-            murasakisan.target_y = 400;
-        }
-
-        //mining, farming, crafting
-
-        //mining check
-        if (local_mining_status == 1 & murasakisan.mode != "mining" & murasakisan.mode != "feeding"){
-            murasakisan.set_mode = "mining";
-            murasakisan.submode = 0;
-            murasakisan.count = 0;
-            murasakisan.target_x = 100;
-            murasakisan.target_y = 800;
-        }else if (local_mining_status == 0 & murasakisan.mode == "mining") {
-            murasakisan.set_mode = "resting";
-            draw_radarchart(this);  //update radarchart
-        }
-
-        //farming check, continue
-        else if (local_farming_status == 1 & murasakisan.mode != "farming" & murasakisan.mode != "feeding"){
-            murasakisan.set_mode = "farming";
-            murasakisan.submode = 0;
-            murasakisan.count = 0;
-            murasakisan.target_x = 450;
-            murasakisan.target_y = 300;
-        }else if (local_farming_status == 0 & murasakisan.mode == "farming") {
-            murasakisan.set_mode = "resting";
-        }
-
-        //crafting check, continue
-        else if (local_crafting_status == 1 & murasakisan.mode != "crafting" & murasakisan.mode != "feeding"){
-            murasakisan.set_mode = "crafting";
-            murasakisan.submode = 0;
-            murasakisan.count = 0;
-            murasakisan.target_x = 730;
-            murasakisan.target_y = 300;
-            text_select_item.setText('"'+array_item_name[local_crafting_item_type]+'"')
-        }else if (local_crafting_status == 0 & murasakisan.mode == "crafting") {
-            murasakisan.set_mode = "resting";
-            text_select_item.setText(">> Select Item <<")
-        }
-
-        //update calculation_status
-        let now_time = Date.now() / 1000;
-        let age_time = Math.round(now_time - local_birth_time);
-        let mode = murasakisan.get_mode;
-        let base = 86400 / 2 / SPEED;
-        //satiety
-        satiety = Math.round( (base - (now_time - local_last_feeding_time)) / base * 100 );
-        if (satiety < 3) { satiety = 3; }
-        if (satiety > 100) { satiety = 100; }
-        let base2 = 86400 * 3 / SPEED;
-        //happy
-        happy = Math.round( (base2 - (now_time - local_last_grooming_time)) / base2 * 100 );
-        if (happy < 3) { happy = 3; }
-        if (happy > 100) { happy = 100; }
-        //exp
-        let exp = (local_exp / local_next_exp_required) * 100;
-        if (exp > 100) { exp = 100; }
-
-        //update text
-        //let age = Math.round( age_time * SPEED * 10 / 86400 ) / 10;
-        let age = Math.round( age_time * SPEED / 86400 );
-        text_summoner.setText   ("ID: " + summoner);
-        text_level.setText      ("Lv: " + local_level);
-        text_age_time.setText   ("Age: " + age + "d");
-
-        //degub text
-        text_type.setText       ("type = " + local_class);
-        text_exp.setText        ("exp= " + local_exp);
-        text_turn.setText       ("turn = " + turn);
-        text_mode.setText       ("mode = " + mode);
-        text_speed.setText      ("speed = " + SPEED);
-
-        //coin & material
-        text_coin.setText("Ohana: " + local_coin);
-        text_material.setText("Kusa: " + local_material);
-
-        //update bar
-        bar_satiety.scaleX = satiety / 100;
-        bar_happy.scaleX = happy / 100;
-        bar_exp.scaleX = exp / 100;
-
-        //update progression status
-        if (mode == "mining") {
-            text_working_calc.setText("+ " + local_coin_calc + " coin");
-        }else if (mode == "farming") {
-            text_working_calc.setText("+ " + local_material_calc + " material");
-        }else if (mode == "crafting") {
-            if (local_crafting_calc > 0) {
-                text_craft_item.setText("");    //***TODO:***
-                //calc remining time
-                let _total_sec = local_crafting_calc;
-                let _day = Math.floor(_total_sec / 86400);
-                let _hr = Math.floor(_total_sec % 86400 / 3600);
-                let _min = Math.floor(_total_sec % 3600 / 60);
-                //text_working_calc.setText(local_crafting_calc + " sec left");
-                text_working_calc.setText(_day + "d:" + _hr + "h:" + _min + "m remining");
-            } else{
-                text_working_calc.setText("Completed!");
-            }
-        }else {
-            text_working_calc.setText("");
-        }
-        
-        previous_local_last_feeding_time = local_last_feeding_time;
-        previous_local_last_grooming_time = local_last_grooming_time;
-        previous_local_level = local_level;
-    }
-
-    //===== button =====
-    if (turn % 100 == 10) {
-
-        if (
-            previous_local_mining_status != local_mining_status ||
-            previous_local_farming_status != local_farming_status ||
-            previous_local_crafting_status != local_crafting_status
-            ) {
-
-            //grooming
-            if (local_farming_status == 1 || local_crafting_status == 1 || local_mining_status == 1) {
-                button_grooming.setTexture("button_grooming_unable");
-                button_grooming.disableInteractive();
-            }else {
-                button_grooming.setTexture("button_grooming_enable");
-                button_grooming.on('pointerover', () => button_grooming.setTexture("button_grooming_pointerover"));
-                button_grooming.on('pointerout', () => button_grooming.setTexture("button_grooming_enable"));
-                button_grooming.setInteractive();
-            }
-
-            //mining
-            if (local_farming_status == 1 || local_crafting_status == 1 || local_level <= 1) {
-                button_mining.setTexture("button_mining_unable");
-                button_mining.disableInteractive();
-            }else if (local_mining_status == 1) {
-                button_mining.setTexture("button_mining_working");
-                button_mining.on('pointerover', () => button_mining.setTexture("button_mining_pointerover_stop"));
-                button_mining.on('pointerout', () => button_mining.setTexture("button_mining_working"));
-                button_mining.setInteractive();
-                text_working_calc.x = 100;
-                text_working_calc.y = 660;
-            }else {
-                button_mining.setTexture("button_mining_enable");
-                button_mining.on('pointerover', () => button_mining.setTexture("button_mining_pointerover"));
-                button_mining.on('pointerout', () => button_mining.setTexture("button_mining_enable"));
-                button_mining.setInteractive();
-            }
-
-            //farming
-            if (local_mining_status == 1 || local_crafting_status == 1 || local_level <= 1) {
-                button_farming.setTexture("button_farming_unable");
-                button_farming.disableInteractive();
-            }else if (local_farming_status == 1) {
-                button_farming.setTexture("button_farming_working");
-                button_farming.on('pointerover', () => button_farming.setTexture("button_farming_pointerover_stop"));
-                button_farming.on('pointerout', () => button_farming.setTexture("button_farming_working"));
-                button_farming.setInteractive();
-                text_working_calc.x = 350;
-                text_working_calc.y = 120;
-            }else {
-                button_farming.setTexture("button_farming_enable");
-                button_farming.on('pointerover', () => button_farming.setTexture("button_farming_pointerover"));
-                button_farming.on('pointerout', () => button_farming.setTexture("button_farming_enable"));
-                button_farming.setInteractive();
-            }
-
-            //crafting
-            if (local_mining_status == 1 || local_farming_status == 1 || local_level <= 2) {
-                button_crafting.setTexture("button_crafting_unable");
-                button_crafting.disableInteractive();
-            }else if (local_crafting_status == 1) {
-                button_crafting.setTexture("button_crafting_working");
-                button_crafting.on('pointerover', () => button_crafting.setTexture("button_crafting_pointerover_stop"));
-                button_crafting.on('pointerout', () => button_crafting.setTexture("button_crafting_working"));
-                button_crafting.setInteractive();
-                text_working_calc.x = 750;
-                text_working_calc.y = 150;
-            }else {
-                button_crafting.setTexture("button_crafting_enable");
-                button_crafting.on('pointerover', () => button_crafting.setTexture("button_crafting_pointerover"));
-                button_crafting.on('pointerout', () => button_crafting.setTexture("button_crafting_enable"));
-                button_crafting.setInteractive();
-            }
-
-            //levelup button
-            //active when not working and exp > next_exp
-            if (local_exp / local_next_exp_required >= 1 
-                && button_levelup.texture.key == "button_levelup_unable"
-                && local_mining_status == 0 && local_farming_status == 0 && local_crafting_status == 0
-            ) {
-                button_levelup.setTexture("button_levelup_enable");
-                button_levelup.setInteractive();
-            } else {
-                button_levelup.setTexture("button_levelup_unable");
-                button_levelup.disableInteractive();
-            }
-        }
-
-        //level-up button triggered by exp change
-        if (previous_local_exp != local_exp) {
-            //level-up check
-            if (local_exp / local_next_exp_required >= 1) {
-                button_levelup.setTexture("button_levelup_enable");
-                button_levelup.setInteractive();
-            }else {
-                button_levelup.setTexture("button_levelup_unable");
-                button_levelup.disableInteractive();
-            }
-        }
-
-        //update previsou parameters
-        previous_local_mining_status = local_mining_status;
-        previous_local_farming_status = local_farming_status;
-        previous_local_crafting_status = local_crafting_status;
-        previous_local_exp = local_exp;
-    }
-
-    //===== item =====
-    if (turn % 100 == 20 && local_items != previous_local_items) {
-        //1:Ms. Astar
-        if (
-                (local_items[1] != 0 && local_items_flag[1] != true) ||
-                (local_items[1+64] != 0 && local_items_flag[1] != true)
-            ) {
-            pet = new Pet(this, 300 + Math.random()*200, 400 + Math.random()*100);
-            pet.scaleX = pet.scaleX * 0.1;
-            pet.scaleY = pet.scaleY * 0.1;
-            local_items_flag[1] = true;
-            flag_pet = 1;
-            console.log(0);
-        }
-        //50:musicbox
-        if (local_items[34] != 0 && local_items_flag[34] != true) {
-            item_musicbox = this.add.sprite(1200,848, "item_musicbox");
-            item_musicbox.scaleX = item_musicbox.scaleX * 0.4;
-            item_musicbox.scaleY = item_musicbox.scaleY * 0.4;
-            item_musicbox.setInteractive({useHandCursor: true});
-            item_musicbox.on('pointerdown', () => music() );
-            local_items_flag[34] = true;
-        }
-        //33:violin
-        if (local_items[33] != 0 && local_items_flag[33] != true) {
-            item_violin = this.add.sprite(1200,608, "item_violin");
-            item_violin.scaleX = item_violin.scaleX * 0.24;
-            item_violin.scaleY = item_violin.scaleY * 0.24;
-            local_items_flag[33] = true;
-        }
-        //17:vase
-        if (local_items[17] != 0 && local_items_flag[17] != true) {
-            item_17 = this.add.sprite(640,192, "item_vase");
-            item_17.scaleX = item_17.scaleX * 0.32;
-            item_17.scaleY = item_17.scaleY * 0.32;
-            local_items_flag[17] = true;
-        }
-        //18
-        if (local_items[18] != 0 && local_items_flag[18] != true) {
-            item_18 = this.add.sprite(320,880, "item_18");
-            item_18.scaleX = item_18.scaleX * 0.4;
-            item_18.scaleY = item_18.scaleY * 0.4;
-            local_items_flag[18] = true;
-        }
-        //19
-        if (local_items[19] != 0 && local_items_flag[19] != true) {
-            item_19 = this.add.sprite(400,880, "item_19");
-            item_19.scaleX = item_19.scaleX * 0.4;
-            item_19.scaleY = item_19.scaleY * 0.4;
-            local_items_flag[19] = true;
-        }
-        //20
-        if (local_items[20] != 0 && local_items_flag[20] != true) {
-            item_20 = this.add.sprite(480,880, "item_20");
-            item_20.scaleX = item_20.scaleX * 0.4;
-            item_20.scaleY = item_20.scaleY * 0.4;
-            local_items_flag[20] = true;
-        }
-        //21
-        if (local_items[21] != 0 && local_items_flag[21] != true) {
-            item_21 = this.add.sprite(560,880, "item_21");
-            item_21.scaleX = item_21.scaleX * 0.4;
-            item_21.scaleY = item_21.scaleY * 0.4;
-            local_items_flag[21] = true;
-        }
-        previous_local_items = local_items;
-    }
-
-    //===== contract =====
-    if (turn % 300 == 90) {
-        text_system_message.setText("");
-        //when no summoner argument, load summoner id from wallet
-        if (summoner == 0) {
-            //cant get summoner id directry, update summoner id is better.
-            contract_update_summoner_of_wallet(web3);
-        //when summoner is loaded, update summoner status
-        } else {
-            //update dynamic_status
-            contract_update_status(summoner);
-            text_summon.setText("");
-        }
-    }
-}
-
-
-
 </script>
 
 
 
 </body>
 </html>
-
-
-
-<!---
-//---garbadge-----------------------------------------------------------------------------------------------------
-
- ok summoner所持item
-        所持itemの検索
-        所持itemのスプライト表示
-
- ok 資源のバランスと差別化
-        coinとmaterialの差別化
-
- ok level-up可能なときに再読込するとボタンがデアクティブ化するバグ修正
- ok 最初にパラメータが反映されないバグ修正
-
- ok summoner所持item
-        所持itemの検索
-        所持itemのスプライト表示
-
-    craftingのUI実装
-     ok item_idの選択方法
-     ok craftのstart/stopボタン
-     ok 選択アイテムのコスト表示
-        成功/失敗の表現
-
-    petのUI実装
-     ok pet所持の有無を監視
-        petの絵の用意
-        pet関数の実装
-            moving
-            resting
-            mining
-            farming
-            moving_working
-        petへのstart mining/farmingとstopの実装
-
-    BGMと効果音の追加
-        効果音の吟味と割り当て完了
-     ok BGMのON/OFFボタンの実装
-     ok 効果音の実装
-     ok クラフト可能なミュージックボックスの実装
-
-    ステータス表示の実装
-     ok 数値＋視覚情報
-     ok STR, DEX等のメーターをどうするか
-            レーダーチャート？
-                三角形のレーダーチャート + Luck表記
-        coin, materialの表記をどうするか
-
-    updateの整備
-        update_timeのみを高頻度でcallして監視し
-        update_timeが変わったときに全データをcallして取得し、ローカル変数を書き換える
-
- ok status取得方法の修正
-        contract関数の修正
-
- ok 初期画面の実装
-        Now Loading
-        まだsummonしていない場合はsummonボタンの表示
-        まだsummonしていない場合はsummonerを非表示にする？
- ok summon画面の実装
-        walletにsummonerが紐付けられていない場合のみsummonボタンの表示
-        色＝class選択画面の実装
-
- ok craftのUI実装
-        4種類, 合計64個のアイテムを選択するメニューを実装する
-        アイテム選択後、コストと日数の表示を実装する
-            補正後の必要日数を表示する
-            d, m, secで表示形式を整える
-        進捗情報の整備
-            クラフト中アイテムの表示
-            d, m, secで表示形式を整える
-            プログレッシングバーを実装する
-        アイテム選択UIの洗練
-            無骨なウィンドウではなくアニメーション化などおめかしする
-            未所持のアイテムは黒い影絵にする
-
- ng summoner設定のページの実装
-        summonerの選択
-        summonerのステータス表示
-        summonerの所持item表示
-        summoner間のcoin/material送信
-        summoner間のitem移動
-        summonerに紐付けられていない所持itemの移動
-
-
---->

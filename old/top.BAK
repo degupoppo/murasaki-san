@@ -93,13 +93,19 @@
 
 <p>House of Murasaki-san project is a dApp game built on Astar Network. You can summon your Murasaki-san character and care them to grow. Murasaki-san can mine coins (not token), farm materials, and craft item NFTs.</p>
 
-<p><center>
+<p>
     You can <b><a href="/murasakisan/dapp.html?summoner=1">Demo Preview</a></b> before decide to summon your Murasaki-san.<br>
     (Developer's character. No transactions are permitted.)
-</center></p>
+</p>
 
 <h3 id="concept">Concept</h3>
 <p>blah-blah-blah...</p>
+
+<h3 id="screen">The Game Screen</h3>
+<figure>
+  <img alt="Game screen" src="png/demo.jpg" />
+  <figcaption>Game screen</figcaption>
+</figure>
 
 <h3 id="system">Systems</h3>
 <p><ul>
@@ -139,15 +145,15 @@
     </tr>
     <tr>
       <td>Strength</td>
-      <td>Affects mining efficiency. Increases by level-up.</td>
+      <td>Affects mining efficiency. Increases by level-up and crafted items.</td>
     </tr>
     <tr>
       <td>Dexterity</td>
-      <td>Affects farming efficiency. Increases by level-up.</td>
+      <td>Affects farming efficiency. Increases by level-up and crafted items.</td>
     </tr>
     <tr>
       <td>Intelligence</td>
-      <td>Affects crafting efficiency. Increases by level-up.</td>
+      <td>Affects crafting efficiency. Increases by level-up and crafted items.</td>
     </tr>
     <tr>
       <td>Luck</td>
@@ -165,7 +171,7 @@
 </table></p>
 
 <h3 id="item">Items</h3>
-<p>Crafting items requires not cheap costs and time. Items increase status and make your house more lively.</p>
+<p>Crafting items require costs and time. Items increase status point and make your house more lively.</p>
 <p><table>
   <thead>
     <tr>
@@ -184,7 +190,7 @@
     </tr>
     <tr>
       <td>Violin</td>
-      <td>+1 Intelligence. Set up Violin in your house.</td>
+      <td>+1 Intelligence. Set up a Violin in your house.</td>
     </tr>
   </tbody>
 </table></p>
@@ -195,17 +201,33 @@
     <li>When you don't work your Murasaki-san, grooming will give a lot of exp.</li>
     <li>If you leave your Murasaki-san for a long long time, Murasaki-san will be petrified. Once petrified, your Murasaki-san can not do anything. For incentives of dedication, we have set some cost for cure petrification.<br><b>CAUTION: To cure petrification, you need Lv x 10 $ASTR cost</b>.
     <li>
-        You can look at other player's house in here:<br>
-        Murasaki-san ID: <input type="number" name="id" style="width:100px;">
-        <a href=""><button>Visit House</button></a> does not work yet
+        You can look at other player's house in here: <br>
+        Murasaki-san ID:&nbsp;
+        <input type="number" id="summoner" style="width:100px;">&nbsp;
+        <button onclick="button_select_summoner();">Visit House</button>
     </li>
 </ul></p>
 
 <h3 id="future">Future Plans</h3>
 <p><ul>
+    <li>Addition of craftable items (total 48 types planned).</li>
     <li>Market place of item NFTs using $ASTR token.</li>
     <li>NFT staking (only concept ATM)</li>
     <li>Application to Dapps Staking on Astar Network.</li>
+</ul></p>
+
+<h3 id="contract">Contract Addresses</h3>
+<p>All contracts have been verified.</p>
+<p><ul>
+    <li>Main: 0xae778a945bF612b13E78eB1162E79a42e29A4036</li>
+    <li>Strage: 0x7ca3B2969B49D51C630a77b17b8e5E95A4f7b1d2</li>
+    <li>Craft: 0x5FD2daeC9d995De32cDbfb166d73f0bFdb9c5edF</li>
+    <li>Function1: 0x9DdE8F4B921b161F43b5BCAFD87e25366E3D5549</li>
+    <li>Function2: 0x69e4496B8E2e32208b57aa8981a91E48014Fb821</li>
+    <li>Function3: 0x5d18ca97f1568B869826Cd2Ba2d745Deb8EA761b</li>
+    <li>Function4: 0x8692C58A12dDef426EB20432aC3C5Ac4179cbEa0</li>
+    <li>Function5: 0xcEE3730D1CeEF8E466da20008f04698C2Da90539</li>
+    <li>Dice: 0xE11419a55727623802a29127EA04D9F2Cf4A8112</li>
 </ul></p>
 
 <h3 id="story">Back Story</h3>
@@ -218,6 +240,16 @@
         Donation: 0x2F7448B62134e52C2f46454d0089Ae21B5248805<br>
     </p>
 </footer>
+
+<script type="text/javascript">
+//update summoner
+function button_select_summoner() {
+    summoner = document.getElementById("summoner").value;
+    window.location.href = "dapp.html?summoner=" + summoner;
+}
+</script>
+
+
 
 </body>
 </html>

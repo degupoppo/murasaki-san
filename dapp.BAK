@@ -24,8 +24,21 @@ ok! しゅっきん！（お仕事へ移動中）
         良いじょうろ
     クラフティングアイテム案（INT系）
         ミュージックボックス
-
 ToDo
+
+    アクション時に得られたexp, coin, materialの表示
+        クリティカル成功時の演出の実装
+
+    経済の深慮
+        マケプレ解説はRMTと同義
+            RMTによるバランス崩壊の問題をよく調べる
+            これを防ぐか、または利用する方法を考える
+            Andreの意見では、効率的なプレイヤー＝Bot＝NPCなので
+                うまくゲーム経済へ組み込むことを考えてみる
+        今回のbotは多walletで回してマケプレを経ずにアイテムを集中させるプレイヤー
+            itemがNFTであるので、個人的なtransferは禁止しにくい
+            itemを大量に出品するのは別に構わない。
+                Rarityを見ていても適正な価格に落ち着くだろう。
 
     アイコンの作成
         Satiety：おにぎり？
@@ -35,15 +48,24 @@ ToDo
         Exp
         Lv：数字を大きくわかりやすく
 
-    同期時間表示の実装
-        update_status成功時の_nowを記録
-            _nowとの差を小さく表示など
-        何秒前か、具体的な時間か
-
     Item補正値の表示の実装
-        レーダーチャートに基本値＋アイテム値で表示
+        レーダーチャートに基本値＋アイテム値で表示？
 
     Petの実装
+
+    Nameの実装
+        専用NTTコントラの実装
+        クラフトによってNTTをmint
+        Nameをmint済みだと_modに+100（+1 Lv相当）
+        表札をクラフトするとnameが表示される
+
+    市場の実装
+        市場入場券をクラフトするとマケプレへ入場可能
+
+    Daycareの実装
+        Rarityのdaycareを参考に
+        0.1 ASTR/day等のコストを要求する
+        withdray, set_cost関数を忘れずに実装する
 
     UIの洗練
         Item選択ウィンドウ
@@ -66,18 +88,26 @@ ToDo
         もしくは手動での色彩変化済み画像の用意
         あるいは、ユニークな色のアクセサリー
 
+ ok 同期時間表示の実装
+        update_status成功時の_nowを記録
+            _nowとの差を小さく表示など
+        何秒前か、具体的な時間か
+
  ok レーダーチャートの修正
         itemによるステータス補正を別の色で重ねて表示させる
 
 Item案
+
     Pet
         動き回るキャラクター
         miningとfarmingを1/2～1/4の効率で行ってくれる
         成長はしない
+
     tree
         双葉→大木と時間経過で成長する
         ステータス補正は変化しない
         どういう木に成長するかはseed依存でランダム
+
     name
         クラフト品として実装する
         クラフト成功時にnameを入力する
@@ -87,16 +117,22 @@ Item案
         表札クラフト時に、NTTでnameを別に発行する
             やはり表札がNFTで移動できるためややこしい
             nameは別でNTTで発行し、NFTの表札はnameのNTTを表示するUIにする
+
     Dice
         クラフト後に振れるようになる
         出た目で24時間ボーナスを得る
+
     MusicBox
         クリックで音楽が流れるオブジェクト
+
     Food
         Feeding時にランダムで選ばれる食べ物
+
     LightSwitch
         クリックで部屋の明るさを変える電気スイッチ
+
     花瓶
+
     リボン
         summon時に選択できる色＝class毎のリボン
 
@@ -109,9 +145,9 @@ Item案
     <meta charset="UTF-8" />
     <link rel="icon" type="png" href="png/icon.PNG">
     <title>House of Murasaki-San</title>
-    <script src="js/phaser.js"></script>
-    <script src="js/web3.min.js"></script>
-    <script src="js/dropdownlist.js"></script>
+    <script src="js_v2/phaser.js"></script>
+    <script src="js_v2/web3.min.js"></script>
+    <script src="js_v2/dropdownlist.js"></script>
     <script src="js_v2/murasaki_main.js"></script>
     <script src="js_v2/murasaki_strage.js"></script>
     <script src="js_v2/murasaki_function_crafting.js"></script>
@@ -149,38 +185,38 @@ let SPEED;
 let BASE_SEC = 86400;
 
 //on chain dynamic status
-let local_class;
-let local_strength;
-let local_dexterity;
-let local_intelligence;
-let local_luck;
+let local_class = 0;
+let local_strength = 0;
+let local_dexterity = 0;
+let local_intelligence = 0;
+let local_luck = 0;
 let local_level = 0;
-let local_last_feeding_time;
-let local_last_grooming_time;
-let local_coin;
-let local_exp;
-let local_mining_status;
-let local_mining_start_time;
-let local_next_exp_required;
-let local_material;
-let local_farming_status;
-let local_farming_start_time;
-let local_crafting_status;
-let local_crafting_start_time;
+let local_last_feeding_time = 0;
+let local_last_grooming_time = 0;
+let local_coin = 0;
+let local_exp = 0;
+let local_mining_status = 0;
+let local_mining_start_time = 0;
+let local_next_exp_required = 0;
+let local_material = 0;
+let local_farming_status = 0;
+let local_farming_start_time = 0;
+let local_crafting_status = 0;
+let local_crafting_start_time = 0;
 let local_crafting_item_type = 0;
 let local_items;
 
 //local using variants
 let previous_local_last_feeding_time;
 let previous_local_last_grooming_time;
-let previous_local_level;
+let previous_local_level = 0;
 let previous_local_mining_status;
 let previous_local_farming_status;
 let previous_local_crafting_status;
 let previous_local_exp;
 let previous_local_items;
-let satiety;
-let happy;
+let satiety = 0;
+let happy = 0;
 let local_coin_calc;
 let local_material_calc;
 let local_crafting_calc;
@@ -190,6 +226,7 @@ let bgm = 0;
 let local_items_flag = new Array(64).fill(0);
 let global_selected_crafting_item = 0;
 let global_selected_crafting_item_dc;
+let last_sync_time = 0;
 
 /*
 let local_pet;
@@ -417,6 +454,9 @@ async function contract_update_status(_summoner) {
     let _owner = await contract_mm.methods.ownerOf(_summoner).call();
     local_items = await contract_mfs.methods.get_balance_of_type_array(_owner).call();
     console.log("items:", local_items);
+
+    //update last_sync_time
+    last_sync_time = Date.now();
 }
 
 //summon
@@ -1713,7 +1753,6 @@ function create() {
     text_speed =        this.add.text(16, 912, "***", font_arg);
     text_exp =          this.add.text(16, 928, "***", font_arg);
 
-    //bar
     //satiety
     //this.add.text(10, 10, "Satiety:", font_arg);
     icon_satiety = this.add.sprite(20,20, "button_feeding");
@@ -1722,6 +1761,7 @@ function create() {
     bar_satiety_back.scaleX = 1;
     bar_satiety = makeBar(this, 50, 10, 0xff4500);
     bar_satiety.scaleX = 0;
+    text_satiety = this.add.text(55, 11, "0%", {font: "17px Arial", fill: "#ffffff"});
 
     //happy
     //this.add.text(1040, 845, "Happy:", font_arg);
@@ -1731,6 +1771,7 @@ function create() {
     bar_happy_back.scaleX = 1;
     bar_happy = makeBar(this, 270, 10, 0x4169e1);
     bar_happy.scaleX = 0;
+    text_happy = this.add.text(275, 11, "0%", {font: "17px Arial", fill: "#ffffff"});
 
     //exp
     //this.add.text(1040, 870, "Exp:", font_arg);
@@ -1739,10 +1780,14 @@ function create() {
     bar_exp_back.scaleX = 1;
     bar_exp = makeBar(this, 490, 10, 0x228b22);
     bar_exp.scaleX = 0;
+    text_exp_bar = this.add.text(495, 11, "0 / 0", {font: "17px Arial", fill: "#ffffff"});
 
     //coin, material
     text_coin = this.add.text(660, 10, "***", {font: "17px Arial", fill: "#000", backgroundColor: "#ffff00"});
     text_material = this.add.text(780, 10, "***", {font: "17px Arial", fill: "#000", backgroundColor: "#7cfc00"});
+
+    //sync_time
+    text_sync_time = this.add.text(1150, 935, "***", {font: "14px Arial", fill: "#727171"});
 
     //===etc===
 
@@ -1790,8 +1835,18 @@ function update() {
         pet.update();
     }
 
+    //===== sync time =====
+    if (turn % 20 == 0) {
+        if (last_sync_time == 0) {
+            text_sync_time.setText("try syncing...");
+        } else {
+            let _delta = Math.round( (Date.now() - last_sync_time) / 1000 );
+            text_sync_time.setText("sync before: " + _delta);
+        }
+    }
+
     //===== status =====
-    if (turn % 100 == 0) {
+    if (turn % 150 == 0) {
 
         console.log(Math.round(game.input.mousePointer.x), Math.round(game.input.mousePointer.y));
 
@@ -1800,8 +1855,6 @@ function update() {
         //level up
         if (local_level > previous_local_level) {
             //update radarchart
-            //radarchart(this, 1136, 192, 80, local_strength, local_dexterity, local_intelligence, local_luck);
-            //radarchart(this, 1136, 192, 80, local_strength, local_dexterity, local_intelligence, local_luck,1,1,1,0);
             draw_radarchart(this);
             if (local_level == 2) {
                 //enable mining button
@@ -1897,13 +1950,16 @@ function update() {
         if (satiety < 3) { satiety = 3; }
         if (satiety > 100) { satiety = 100; }
         let base2 = 86400 * 3 / SPEED;
+        text_satiety.setText(satiety + "%");
         //happy
         happy = Math.round( (base2 - (now_time - local_last_grooming_time)) / base2 * 100 );
         if (happy < 3) { happy = 3; }
         if (happy > 100) { happy = 100; }
+        text_happy.setText(happy + "%");
         //exp
         let exp = (local_exp / local_next_exp_required) * 100;
         if (exp > 100) { exp = 100; }
+        text_exp_bar.setText(local_exp + " / " + local_next_exp_required);
 
         //update text
         //let age = Math.round( age_time * SPEED * 10 / 86400 ) / 10;
@@ -1956,7 +2012,7 @@ function update() {
     }
 
     //===== button =====
-    if (turn % 100 == 10) {
+    if (turn % 150 == 10) {
 
         if (
             previous_local_mining_status != local_mining_status ||
@@ -2063,7 +2119,7 @@ function update() {
     }
 
     //===== item =====
-    if (turn % 100 == 20 && local_items != previous_local_items) {
+    if (turn % 150 == 20 && local_items != previous_local_items) {
         //1:Ms. Astar
         if (
                 (local_items[1] != 0 && local_items_flag[1] != true) ||
