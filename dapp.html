@@ -1963,13 +1963,13 @@ function update() {
         let base = 86400 / 2 / SPEED;
         //satiety
         satiety = Math.round( (base - (now_time - local_last_feeding_time)) / base * 100 );
-        //if (satiety < 3) { satiety = 3; }
+        if (satiety < 0) { satiety = 0; }
         if (satiety > 100) { satiety = 100; }
         let base2 = 86400 * 3 / SPEED;
         text_satiety.setText(satiety + "%");
         //happy
         happy = Math.round( (base2 - (now_time - local_last_grooming_time)) / base2 * 100 );
-        //if (happy < 3) { happy = 3; }
+        if (happy < 0) { happy = 0; }
         if (happy > 100) { happy = 100; }
         text_happy.setText(happy + "%");
         //exp
