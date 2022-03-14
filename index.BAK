@@ -4,6 +4,7 @@
 <!---
 
 コンセプト
+    低インフレ率の育成ゲーム
     
 
 ゲームシステム概要
@@ -106,7 +107,7 @@ Doc
     (Developer's character. No transactions are permitted.)
 </p>
 
-<h3 id="concept">Concept</h3>
+<h3 id="concept">The Concept</h3>
 <p>blah-blah-blah...</p>
 
 <h3 id="screen">The Game Screen</h3>
@@ -228,7 +229,7 @@ Doc
     <li>Submission to Dapps Staking program on Astar Network.</li>
 </ul></p>
 
-<h3 id="contract">Contract Addresses</h3>
+<h3 id="contract">Contract Address</h3>
 <p>All contracts have been verified.</p>
 <p><ul>
     <li>Main: 0xae778a945bF612b13E78eB1162E79a42e29A4036</li>

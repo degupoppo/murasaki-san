@@ -195,13 +195,13 @@ let local_last_feeding_time = 0;
 let local_last_grooming_time = 0;
 let local_coin = 0;
 let local_exp = 0;
-let local_mining_status = 0;
+let local_mining_status;
 let local_mining_start_time = 0;
 let local_next_exp_required = 0;
 let local_material = 0;
-let local_farming_status = 0;
+let local_farming_status;
 let local_farming_start_time = 0;
-let local_crafting_status = 0;
+let local_crafting_status;
 let local_crafting_start_time = 0;
 let local_crafting_item_type = 0;
 let local_items;
@@ -210,10 +210,12 @@ let local_items;
 let previous_local_last_feeding_time;
 let previous_local_last_grooming_time;
 let previous_local_level = 0;
-let previous_local_mining_status;
-let previous_local_farming_status;
-let previous_local_crafting_status;
+let previous_local_mining_status = -1;
+let previous_local_farming_status = -1;
+let previous_local_crafting_status = -1;
 let previous_local_exp;
+let previous_local_coin;
+let previous_local_material;
 let previous_local_items;
 let satiety = 0;
 let happy = 0;
@@ -227,6 +229,7 @@ let local_items_flag = new Array(64).fill(0);
 let global_selected_crafting_item = 0;
 let global_selected_crafting_item_dc;
 let last_sync_time = 0;
+let mode = "";
 
 /*
 let local_pet;
@@ -1746,12 +1749,11 @@ function create() {
     text_age_time =     this.add.text(1180, 10, "***", font_arg);
 
     //debug status
-    text_type =         this.add.text(16, 864, "***", font_arg);
-    text_turn =         this.add.text(16, 880, "***", font_arg);
-    text_mode =         this.add.text(16, 896, "***", font_arg);
+    //text_type =         this.add.text(16, 896, "***", font_arg);
+    text_speed =        this.add.text(16, 928, "***", font_arg);
     //text_pet =          this.add.text(16, 912, "***", font_arg);
-    text_speed =        this.add.text(16, 912, "***", font_arg);
-    text_exp =          this.add.text(16, 928, "***", font_arg);
+    //text_turn =         this.add.text(16, 880, "***", font_arg);
+    //text_exp =          this.add.text(16, 928, "***", font_arg);
 
     //satiety
     //this.add.text(10, 10, "Satiety:", font_arg);
@@ -1780,7 +1782,7 @@ function create() {
     bar_exp_back.scaleX = 1;
     bar_exp = makeBar(this, 490, 10, 0x228b22);
     bar_exp.scaleX = 0;
-    text_exp_bar = this.add.text(495, 11, "0 / 0", {font: "17px Arial", fill: "#ffffff"});
+    text_exp = this.add.text(495, 11, "0 / 0", {font: "17px Arial", fill: "#ffffff"});
 
     //coin, material
     text_coin = this.add.text(660, 10, "***", {font: "17px Arial", fill: "#000", backgroundColor: "#ffff00"});
@@ -1788,6 +1790,12 @@ function create() {
 
     //sync_time
     text_sync_time = this.add.text(1150, 935, "***", {font: "14px Arial", fill: "#727171"});
+
+    //turn
+    text_turn = this.add.text(1150, 923, "***", {font: "14px Arial", fill: "#727171"});
+
+    //mode
+    text_mode = this.add.text(1150, 908, "***", {font: "14px Arial", fill: "#727171"});
 
     //===etc===
 
@@ -1823,7 +1831,7 @@ function update() {
 
     //increment turn
     turn += 1;
-    text_turn.setText("turn = " + turn);
+    text_turn.setText("turn: " + turn);
 
     //update summoner
     if (local_level != 0) {
@@ -1837,8 +1845,10 @@ function update() {
 
     //===== sync time =====
     if (turn % 20 == 0) {
+        text_mode.setText(murasakisan.get_mode);
+        //text_turn.setText("turn = " + turn);
         if (last_sync_time == 0) {
-            text_sync_time.setText("try syncing...");
+            text_sync_time.setText("syncing...");
         } else {
             let _delta = Math.round( (Date.now() - last_sync_time) / 1000 );
             text_sync_time.setText("sync before: " + _delta);
@@ -1943,23 +1953,23 @@ function update() {
         //update calculation_status
         let now_time = Date.now() / 1000;
         let age_time = Math.round(now_time - local_birth_time);
-        let mode = murasakisan.get_mode;
+        //let mode = murasakisan.get_mode;
         let base = 86400 / 2 / SPEED;
         //satiety
         satiety = Math.round( (base - (now_time - local_last_feeding_time)) / base * 100 );
-        if (satiety < 3) { satiety = 3; }
+        //if (satiety < 3) { satiety = 3; }
         if (satiety > 100) { satiety = 100; }
         let base2 = 86400 * 3 / SPEED;
         text_satiety.setText(satiety + "%");
         //happy
         happy = Math.round( (base2 - (now_time - local_last_grooming_time)) / base2 * 100 );
-        if (happy < 3) { happy = 3; }
+        //if (happy < 3) { happy = 3; }
         if (happy > 100) { happy = 100; }
         text_happy.setText(happy + "%");
         //exp
         let exp = (local_exp / local_next_exp_required) * 100;
         if (exp > 100) { exp = 100; }
-        text_exp_bar.setText(local_exp + " / " + local_next_exp_required);
+        text_exp.setText(local_exp + " / " + local_next_exp_required);
 
         //update text
         //let age = Math.round( age_time * SPEED * 10 / 86400 ) / 10;
@@ -1969,11 +1979,11 @@ function update() {
         text_age_time.setText   ("Age: " + age + "d");
 
         //degub text
-        text_type.setText       ("type = " + local_class);
-        text_exp.setText        ("exp= " + local_exp);
-        text_turn.setText       ("turn = " + turn);
-        text_mode.setText       ("mode = " + mode);
-        text_speed.setText      ("speed = " + SPEED);
+        //text_type.setText       ("type = " + local_class);
+        //text_exp.setText        ("exp= " + local_exp);
+        //text_turn.setText       ("turn = " + turn);
+        //text_mode.setText(mode);
+        text_speed.setText("speed: x" + SPEED);
 
         //coin & material
         text_coin.setText("Ohana: " + local_coin);
@@ -2009,6 +2019,8 @@ function update() {
         previous_local_last_feeding_time = local_last_feeding_time;
         previous_local_last_grooming_time = local_last_grooming_time;
         previous_local_level = local_level;
+        previsou_local_coin = local_coin;
+        previsou_local_material = local_coin;
     }
 
     //===== button =====
@@ -2033,6 +2045,7 @@ function update() {
 
             //mining
             if (local_farming_status == 1 || local_crafting_status == 1 || local_level <= 1) {
+                console.log(1111111111111111 + ":" + local_mining_status);
                 button_mining.setTexture("button_mining_unable");
                 button_mining.disableInteractive();
             }else if (local_mining_status == 1) {
@@ -2130,7 +2143,6 @@ function update() {
             pet.scaleY = pet.scaleY * 0.1;
             local_items_flag[1] = true;
             flag_pet = 1;
-            console.log(0);
         }
         //50:musicbox
         if (local_items[34] != 0 && local_items_flag[34] != true) {
