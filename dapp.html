@@ -417,7 +417,7 @@ async function contract_update_status(_summoner) {
     //call status from ms
     let _dynamic_status = await contract_mfs.methods.get_dynamic_status_array(_summoner).call();
     let _static_status = await contract_mfs.methods.get_static_status_array(_summoner).call();
-    console.log("status:", _dynamic_status);
+    //console.log("status:", _dynamic_status);
 
     //update static status
     local_class = _static_status[0];
@@ -456,7 +456,7 @@ async function contract_update_status(_summoner) {
     //item
     let _owner = await contract_mm.methods.ownerOf(_summoner).call();
     local_items = await contract_mfs.methods.get_balance_of_type_array(_owner).call();
-    console.log("items:", local_items);
+    console.log("status:", _dynamic_status, "items:", local_items);
 
     //update last_sync_time
     last_sync_time = Date.now();
@@ -1496,6 +1496,10 @@ function preload() {
 
     //window
     this.load.image("window", "png/window.png");
+
+    //icon
+    this.load.image("icon_kusa", "png/icon_kusa.png", {frameWidth: 318, frameHeight: 466});
+    this.load.image("icon_ohana", "png/icon_ohana.png", {frameWidth: 182, frameHeight: 171});
 }
 
 
@@ -1750,7 +1754,7 @@ function create() {
 
     //debug status
     //text_type =         this.add.text(16, 896, "***", font_arg);
-    text_speed =        this.add.text(16, 928, "***", font_arg);
+    text_speed =        this.add.text(10, 930, "***", font_arg);
     //text_pet =          this.add.text(16, 912, "***", font_arg);
     //text_turn =         this.add.text(16, 880, "***", font_arg);
     //text_exp =          this.add.text(16, 928, "***", font_arg);
@@ -1777,25 +1781,27 @@ function create() {
 
     //exp
     //this.add.text(1040, 870, "Exp:", font_arg);
-    this.add.text(450, 10, "Exp:", font_arg);
-    bar_exp_back = makeBar(this, 490, 10, 0x90ee90);
+    this.add.text(440, 10, "Exp:", font_arg);
+    bar_exp_back = makeBar(this, 480, 10, 0x90ee90);
     bar_exp_back.scaleX = 1;
-    bar_exp = makeBar(this, 490, 10, 0x228b22);
+    bar_exp = makeBar(this, 480, 10, 0x228b22);
     bar_exp.scaleX = 0;
-    text_exp = this.add.text(495, 11, "0 / 0", {font: "17px Arial", fill: "#ffffff"});
+    text_exp = this.add.text(485, 11, "0 / 0", {font: "17px Arial", fill: "#ffffff"});
 
-    //coin, material
-    text_coin = this.add.text(660, 10, "***", {font: "17px Arial", fill: "#000", backgroundColor: "#ffff00"});
-    text_material = this.add.text(780, 10, "***", {font: "17px Arial", fill: "#000", backgroundColor: "#7cfc00"});
+    //coin
+    icon_ohana = this.add.sprite(675,20, "icon_ohana");
+    icon_ohana.setScale(0.12);
+    text_coin = this.add.text(690, 10, "***", {font: "17px Arial", fill: "#000", backgroundColor: "#ffff00"});
 
-    //sync_time
-    text_sync_time = this.add.text(1150, 935, "***", {font: "14px Arial", fill: "#727171"});
+    //material
+    icon_kusa = this.add.sprite(820, 20, "icon_kusa");
+    icon_kusa.setScale(0.06);
+    text_material = this.add.text(835, 10, "***", {font: "17px Arial", fill: "#000", backgroundColor: "#7cfc00"});
 
-    //turn
-    text_turn = this.add.text(1150, 923, "***", {font: "14px Arial", fill: "#727171"});
-
-    //mode
+    //debug info
     text_mode = this.add.text(1150, 908, "***", {font: "14px Arial", fill: "#727171"});
+    text_turn = this.add.text(1150, 923, "***", {font: "14px Arial", fill: "#727171"});
+    text_sync_time = this.add.text(1150, 935, "***", {font: "14px Arial", fill: "#727171"});
 
     //===etc===
 
