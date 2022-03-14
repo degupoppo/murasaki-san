@@ -26,8 +26,17 @@ ok! しゅっきん！（お仕事へ移動中）
         ミュージックボックス
 ToDo
 
+    walletアドレスの表示
+        ついでにIDの表示
+        他人のID覗き見時はどうするか
+            your walletとowner walletは別にするか？
+
     アクション時に得られたexp, coin, materialの表示
         クリティカル成功時の演出の実装
+
+    Lv表示の洗練
+        最も重要な情報なのでできるだけ目立つように
+        もはや専用アイコンにでもするか？
 
     経済の深慮
         マケプレ解説はRMTと同義
@@ -230,6 +239,7 @@ let global_selected_crafting_item = 0;
 let global_selected_crafting_item_dc;
 let last_sync_time = 0;
 let mode = "";
+let text_wallet;
 
 /*
 let local_pet;
@@ -363,6 +373,7 @@ async function connect() {
 async function get_wallet() {
     let web3 = await connect();
     let wallet = await web3.eth.getAccounts();
+    text_wallet.setText("id: " + summoner + ", wallet: " + wallet[0]);
     return wallet[0];
 }
 
@@ -1166,7 +1177,7 @@ function radarchart(scene, x0, y0, r, str, dex, int, luk, str_item, dex_item, in
 }
 async function draw_radarchart(scene) {
         let _x = 1136;
-        let _y = 120;
+        let _y = 110;
         let _r = 80;
         let _res = await contract_get_item_count(summoner);
         console.log(_res);
@@ -1500,6 +1511,10 @@ function preload() {
     //icon
     this.load.image("icon_kusa", "png/icon_kusa.png", {frameWidth: 318, frameHeight: 466});
     this.load.image("icon_ohana", "png/icon_ohana.png", {frameWidth: 182, frameHeight: 171});
+    this.load.image("icon_age", "png/icon_age.png", {frameWidth: 225, frameHeight: 225});
+
+    //level_back
+    this.load.image("back_level", "png/back_level.png", {frameWidth: 500, frameHeight: 500});
 }
 
 
@@ -1700,7 +1715,7 @@ function create() {
     button_farming.disableInteractive();
 
     //levelup
-    button_levelup = this.add.sprite(1232,200, "button_levelup_unable");
+    button_levelup = this.add.sprite(1220, 30, "button_levelup_unable");
     button_levelup.scaleX = button_levelup.scaleX * 0.11;
     button_levelup.scaleY = button_levelup.scaleY * 0.11;
     button_levelup.setInteractive({useHandCursor: true});
@@ -1748,60 +1763,79 @@ function create() {
 
     //status window
     let font_arg = {font: "18px Arial", fill: "#000"};
-    text_summoner =     this.add.text(1040, 10, "***", font_arg);
-    text_level =        this.add.text(1040, 26, "***", font_arg);
-    text_age_time =     this.add.text(1180, 10, "***", font_arg);
+    //text_summoner =     this.add.text(1040, 10, "***", font_arg);
+    //text_level =        this.add.text(1040, 26, "***", {font: "24px Verdana", fill: "#E60012"});
+
+    //age
+    text_age_time =     this.add.text(1215, 190, "***", font_arg);
+    icon_age = this.add.sprite(1200,200, "icon_age");
+    icon_age.setScale(0.09);
 
     //debug status
     //text_type =         this.add.text(16, 896, "***", font_arg);
-    text_speed =        this.add.text(10, 930, "***", font_arg);
+    text_speed =        this.add.text(10, 910, "***", font_arg);
     //text_pet =          this.add.text(16, 912, "***", font_arg);
     //text_turn =         this.add.text(16, 880, "***", font_arg);
     //text_exp =          this.add.text(16, 928, "***", font_arg);
 
     //satiety
     //this.add.text(10, 10, "Satiety:", font_arg);
-    icon_satiety = this.add.sprite(20,20, "button_feeding");
+    icon_satiety = this.add.sprite(30,20, "button_feeding");
     icon_satiety.setScale(0.07);
-    bar_satiety_back = makeBar(this, 50, 10, 0xffc0cb);
+    //bar_satiety_back = makeBar(this, 50, 10, 0xffc0cb);
+    bar_satiety_back = makeBar(this, 55, 10, 0xF8C5AC);
     bar_satiety_back.scaleX = 1;
-    bar_satiety = makeBar(this, 50, 10, 0xff4500);
+    //bar_satiety = makeBar(this, 50, 10, 0xff4500);
+    bar_satiety = makeBar(this, 55, 10, 0xE60012);
     bar_satiety.scaleX = 0;
-    text_satiety = this.add.text(55, 11, "0%", {font: "17px Arial", fill: "#ffffff"});
+    text_satiety = this.add.text(60, 11, "0%", {font: "17px Arial", fill: "#ffffff"});
 
     //happy
     //this.add.text(1040, 845, "Happy:", font_arg);
-    icon_happy = this.add.sprite(240,20, "button_grooming_enable");
+    icon_happy = this.add.sprite(245,20, "button_grooming_enable");
     icon_happy.setScale(0.07);
-    bar_happy_back = makeBar(this, 270, 10, 0xadd8e6);
+    //bar_happy_back = makeBar(this, 270, 10, 0xadd8e6);
+    bar_happy_back = makeBar(this, 270, 10, 0xFCE2BA);
     bar_happy_back.scaleX = 1;
-    bar_happy = makeBar(this, 270, 10, 0x4169e1);
+    //bar_happy = makeBar(this, 270, 10, 0x4169e1);
+    bar_happy = makeBar(this, 270, 10, 0xF39800);
     bar_happy.scaleX = 0;
     text_happy = this.add.text(275, 11, "0%", {font: "17px Arial", fill: "#ffffff"});
 
     //exp
     //this.add.text(1040, 870, "Exp:", font_arg);
     this.add.text(440, 10, "Exp:", font_arg);
-    bar_exp_back = makeBar(this, 480, 10, 0x90ee90);
+    //bar_exp_back = makeBar(this, 480, 10, 0x90ee90);
+    bar_exp_back = makeBar(this, 480, 10, 0xBBCCE9);
     bar_exp_back.scaleX = 1;
-    bar_exp = makeBar(this, 480, 10, 0x228b22);
+    //bar_exp = makeBar(this, 480, 10, 0x228b22);
+    bar_exp = makeBar(this, 480, 10, 0x0068B7);
     bar_exp.scaleX = 0;
     text_exp = this.add.text(485, 11, "0 / 0", {font: "17px Arial", fill: "#ffffff"});
 
     //coin
-    icon_ohana = this.add.sprite(675,20, "icon_ohana");
+    icon_ohana = this.add.sprite(670,20, "icon_ohana");
     icon_ohana.setScale(0.12);
-    text_coin = this.add.text(690, 10, "***", {font: "17px Arial", fill: "#000", backgroundColor: "#ffff00"});
+    text_coin = this.add.text(685, 10, "***", {font: "17px Arial", fill: "#000", backgroundColor: "#FFF200"});
 
     //material
-    icon_kusa = this.add.sprite(820, 20, "icon_kusa");
+    icon_kusa = this.add.sprite(815, 20, "icon_kusa");
     icon_kusa.setScale(0.06);
-    text_material = this.add.text(835, 10, "***", {font: "17px Arial", fill: "#000", backgroundColor: "#7cfc00"});
+    text_material = this.add.text(830, 10, "***", {font: "17px Arial", fill: "#000", backgroundColor: "#D7E7AF"});
 
     //debug info
     text_mode = this.add.text(1150, 908, "***", {font: "14px Arial", fill: "#727171"});
     text_turn = this.add.text(1150, 923, "***", {font: "14px Arial", fill: "#727171"});
     text_sync_time = this.add.text(1150, 935, "***", {font: "14px Arial", fill: "#727171"});
+
+    //wallet
+    text_wallet = this.add.text(10, 940, "***", {font: "14px Arial", fill: "#727171"});
+
+    //level
+    back_level = this.add.image(1050, 30, "back_level");
+    back_level.scaleX = back_level.scaleX * 0.11;
+    back_level.scaleY = back_level.scaleY * 0.11;
+    text_level = this.add.text(1050, 37, "0", {font: "bold 26px Verdana", fill: "#E5004F"}).setOrigin(0.5);
 
     //===etc===
 
@@ -1864,7 +1898,8 @@ function update() {
     //===== status =====
     if (turn % 150 == 0) {
 
-        console.log(Math.round(game.input.mousePointer.x), Math.round(game.input.mousePointer.y));
+        //DEBUG: mouse pointer
+        //console.log(Math.round(game.input.mousePointer.x), Math.round(game.input.mousePointer.y));
 
         //levelup, feeding, grooming
 
@@ -1980,9 +2015,11 @@ function update() {
         //update text
         //let age = Math.round( age_time * SPEED * 10 / 86400 ) / 10;
         let age = Math.round( age_time * SPEED / 86400 );
-        text_summoner.setText   ("ID: " + summoner);
-        text_level.setText      ("Lv: " + local_level);
-        text_age_time.setText   ("Age: " + age + "d");
+        //text_summoner.setText   ("ID: " + summoner);
+        //text_level.setText      ("Lv: " + local_level);
+        text_level.setText(local_level);
+        //text_age_time.setText   ("Age: " + age + "d");
+        text_age_time.setText(age + "d");
 
         //degub text
         //text_type.setText       ("type = " + local_class);
@@ -1996,15 +2033,15 @@ function update() {
         text_material.setText("Kusa: " + local_material);
 
         //update bar
-        bar_satiety.scaleX = satiety / 100;
-        bar_happy.scaleX = happy / 100;
+        bar_satiety.scaleX = (satiety) / 100;
+        bar_happy.scaleX = (happy) / 100;
         bar_exp.scaleX = exp / 100;
 
         //update progression status
         if (_mode == "mining") {
-            text_working_calc.setText("+ " + local_coin_calc + " coin");
+            text_working_calc.setText("+ " + local_coin_calc + " Ohana");
         }else if (_mode == "farming") {
-            text_working_calc.setText("+ " + local_material_calc + " material");
+            text_working_calc.setText("+ " + local_material_calc + " Kusa");
         }else if (_mode == "crafting") {
             if (local_crafting_calc > 0) {
                 text_craft_item.setText("");    //***TODO:***
