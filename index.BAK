@@ -58,6 +58,96 @@ Doc
 
 
 
+<script src="js_v2/web3.min.js"></script>
+<script src="js_v2/bulletin_board.js"></script>
+<script type="text/javascript">
+
+    //update summoner
+    function button_select_summoner() {
+        summoner = document.getElementById("summoner").value;
+        window.location.href = "dapp.html?summoner=" + summoner;
+    }
+
+    //connect to metamask
+    async function connect() {
+        const web3 = await new Web3(window.ethereum);
+        window.ethereum.enable();
+        window.ethereum.request({
+            method: 'wallet_addEthereumChain',
+
+            params: [{
+                chainId: '0x51',  //4369
+                chainName: 'Shibuya Testnet',
+                nativeCurrency: {
+                    name: 'sby',
+                    symbol: 'SBY',
+                    decimals: 18
+                },
+                rpcUrls: ["https://rpc.shibuya.astar.network:8545"],
+                blockExplorerUrls: ['https://blockscout.com/shibuya'],
+            }]
+        });
+        return web3;
+    }
+
+    //get wallet
+    async function get_wallet() {
+        let web3 = await connect();
+        let wallet = await web3.eth.getAccounts();
+        return wallet[0];
+    }
+
+    //write message
+    async function contract_write_message(_message) {
+        let web3 = await connect();
+        let contract = await new web3.eth.Contract(abi_bulletin_board, contract_bulletin_board);
+        let wallet = await get_wallet(web3);
+        contract.methods.write_message(_message).send({from:wallet});
+    }
+    function write_message() {
+        let _message = document.getElementById("message").value;
+        contract_write_message(_message);
+    }
+
+    //read message
+    async function contract_read_message(_count) {
+        let web3 = await connect();
+        let contract = await new web3.eth.Contract(abi_bulletin_board, contract_bulletin_board);
+        let wallet = await get_wallet(web3);
+        let _message = await contract.methods.read_recent_messages(_count).call(); 
+        //console.log(_message);
+        return _message;
+    }
+
+    //show messages
+    async function show_messages() {
+        let _res;
+        let _count;
+        //reset text
+        messages.innerHTML = "";
+        for (let i = 1; i <= 10; i++) {
+            _res = await contract_read_message(i);
+            //when count=0, stop
+            _count = _res[0];
+            if (_count == 0) {
+                i--
+                return 0;
+            }
+            if (_res[2] == "0x0000000000000000000000000000000000000000") {
+                continue;
+            }
+            messages.innerHTML += "<p>";
+            messages.innerHTML += "<font color='blue'>" + _res[1] + " / " + _res[2].substring(0,10) +"... :</font>";
+            messages.innerHTML += "<br>";
+            messages.innerHTML += _res[3];
+            messages.innerHTML += "</p>";
+        }
+    }
+
+</script>
+
+
+
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -71,6 +161,8 @@ Doc
 </head>
 
 <body>
+
+
 
 <header>
     <nav>
@@ -110,7 +202,7 @@ Doc
 <h3 id="concept">The Concept</h3>
 <p>blah-blah-blah...</p>
 
-<h3 id="screen">The Game Screen</h3>
+<h3 id="screen">Game Screen</h3>
 <figure>
   <img alt="Game screen" src="png/demo.jpg" />
   <figcaption>Game screen</figcaption>
@@ -214,7 +306,7 @@ Doc
     <li>The exp gained by grooming depends on not-working time. It means that if you did not make your Murasaki-san work, grooming will give a lot of exp to faster level-up.</li>
     <li>If you leave your Murasaki-san for a long long time (about a month), Murasaki-san will be petrified with disappointment. Once petrified, your Murasaki-san can not do anything. For incentives of dedication, we have set some cost for cure petrification.<br><b>CAUTION: To cure petrification, you need Lv x 10 $ASTR cost</b>.
     <li>
-        You can look at other player's house in here: <br>
+        IF you know the Murasaki-san ID, you can look at the friend's house in here: <br>
         Murasaki-san ID:&nbsp;
         <input type="number" id="summoner" style="width:100px;">&nbsp;
         <button onclick="button_select_summoner();">Visit House</button>
@@ -246,6 +338,22 @@ Doc
 <h3 id="story">Back Story</h3>
 <p>blah-blah-blah...</p>
 
+<h3 id="bbs">Bulletin Board</h3>
+<p>
+    This is a bulletin board using blockchain during trial operation.<br>
+    You need some gas cost to write message here.
+</p>
+<p>
+    <label><b>Message:</b></label>&nbsp;
+    <input type="text" id="message">
+    <button onclick="write_message();">Write</button>
+    <button onclick="show_messages();">Reload</button>
+</p>
+<p><div id="messages" class="box"></div></p>
+<script type="text/javascript">
+    show_messages();
+</script>
+
 </main>
 
 <footer>
@@ -253,16 +361,6 @@ Doc
         Donation: 0x2F7448B62134e52C2f46454d0089Ae21B5248805<br>
     </p>
 </footer>
-
-<script type="text/javascript">
-//update summoner
-function button_select_summoner() {
-    summoner = document.getElementById("summoner").value;
-    window.location.href = "dapp.html?summoner=" + summoner;
-}
-</script>
-
-
 
 </body>
 </html>

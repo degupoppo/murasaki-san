@@ -2446,3 +2446,55 @@ contract World_Dice is Ownable {
         }
     }
 }
+
+
+
+//---------------------------------------------------------------------------------------------------------------------
+//BBS
+
+contract Bulletin_Board is Ownable {
+
+    /*
+    //address
+    address public murasaki_function_share_address;
+    function _set1_murasaki_function_share_address(address _address) external onlyOwner {
+        murasaki_function_share_address = _address;
+    }
+    */
+
+    //variants
+    mapping(uint32 => address) public writer;
+    mapping(uint32 => string) public message;
+    mapping(uint32 => uint32) public date_writed;
+    uint32 public next_message = 1;
+
+    function write_message(string memory _message) external {
+        writer[next_message] = msg.sender;
+        message[next_message] = _message;
+        date_writed[next_message] = uint32(block.timestamp);
+        next_message++;
+    }
+
+    function read_latest_messages() external view returns (uint32, address, string memory) {
+        return (date_writed[next_message-1], writer[next_message-1], message[next_message-1]);
+    }
+
+    function read_messages(uint32 _number) external view returns (uint32, address, string memory) {
+        return (date_writed[_number], writer[_number], message[_number]);
+    }
+
+    function read_recent_messages(uint32 _count) external view returns (uint32, uint32, address, string memory) {
+        return (
+            next_message - _count, 
+            date_writed[next_message - _count], 
+            writer[next_message - _count], 
+            message[next_message - _count]
+        );
+    }
+
+    function delete_message(uint32 _number) external onlyOwner {
+        writer[_number] = 0x0000000000000000000000000000000000000000;
+        message[_number] = "[DELETED]";
+        date_writed[_number] = 0;
+    }
+}

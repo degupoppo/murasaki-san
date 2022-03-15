@@ -60,3 +60,8 @@ nav a.current {
   stroke: currentColor;
   fill: currentColor;
 }
+
+.box {
+    inline-size: 700px;
+    overflow-wrap: break-word;
+}
