@@ -1842,7 +1842,7 @@ function create() {
         .on("pointerdown", () => open_window_summon(this) )
         .on("pointerover", () => text_summon.setStyle({ fontSize: 24, fontFamily: "Arial", fill: '#ffff00' }))
         .on("pointerout", () => text_summon.setStyle({ fontSize: 24, fontFamily: "Arial", fill: '#000000' }));
-    new Button(10, 880, 'Burn', this, () => contract_burn(summoner));
+    new Button(10, 880, 'Kill', this, () => contract_burn(summoner));
 
     //===status===
 
