@@ -6,7 +6,7 @@ ToDo
 
     微調整
         groomingの位置合わせ
-        画像の差し替え
+        目をいじった画像の差し替え
 
     Item選択ウィンドウ
         シャボン玉がバラバラアニメーションで出てきてふわふわ浮いてるUI
@@ -1459,6 +1459,7 @@ function open_window_summon(scene) {
 //---main function-----------------------------------------------------------------------------------------------------
 
 let config = {
+    //type: Phaser.AUTO,
     type: Phaser.AUTO,
     width: 1280,
     height: 960,
