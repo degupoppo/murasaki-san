@@ -175,7 +175,7 @@ ok! しゅっきん！（お仕事へ移動中）
     <meta charset="UTF-8" />
     <link rel="icon" type="png" href="png/icon.PNG">
     <title>House of Murasaki-San</title>
-    <script src="js_v2/phaser.js"></script>
+    <script src="js_v2/phaser.min.js"></script>
     <script src="js_v2/web3.min.js"></script>
     <script src="js_v2/dropdownlist.js"></script>
     <script src="js_v2/murasaki_main.js"></script>
