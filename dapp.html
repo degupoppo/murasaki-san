@@ -2,41 +2,44 @@
 <!---
 //---header--------------------------------------------------------------------------------------------------------
 
-picture
-
-    背景
-ok! クリックアイコン（grooming, mining, farming, crafting）
-    クリックアイコン（crafting）
-    クリックアイコン（level-up）
-ok! しゅっきん！（お仕事へ移動中）
-    ごきげん！（お腹いっぱい＆ハッピーなときなど）
-    おなかへった・・・
-    ものづくりちゅう！（クラフト中）
-    ありがとう！（ご飯たべたあとなど）
-    クラフトアイテムたくさん（飼い主手伝う）
-    成功したよー！（クラフト成功時, mining終了時など）
-    失敗しちゃった・・・（クラフト失敗時など）
-    れべるあっぷ！
-    おんがくかんしょうちゅう～♪
-    マイニングアイテム案（STR系）
-        良いスコップ
-    ファーミングアイテム案（DEX系）
-        良いじょうろ
-    クラフティングアイテム案（INT系）
-        ミュージックボックス
 ToDo
-
-    walletアドレスの表示
-        ついでにIDの表示
-        他人のID覗き見時はどうするか
-            your walletとowner walletは別にするか？
 
     アクション時に得られたexp, coin, materialの表示
         クリティカル成功時の演出の実装
 
-    Lv表示の洗練
-        最も重要な情報なのでできるだけ目立つように
-        もはや専用アイコンにでもするか？
+    文字表示をできるだけアイコンに置換する
+        アイテムクラフトのコストをアイコン化
+        クラフト残り時間をアイコン化
+        birth timeのアイコン選別
+
+    Item補正値の表示の実装
+        レーダーチャートに基本値＋アイテム値で表示？
+
+    Item選択ボタンの表示・非表示の整備
+        ボタン非表示、クラフト前、クラフト中の挙動の整理
+        クラフト中アイテム名の表示
+
+    Summonウィンドウの洗練
+
+    Item選択ウィンドウ
+        シャボン玉がバラバラアニメーションで出てきてふわふわ浮いてるUI
+        実装難しそうだが
+
+    システムメッセージの表示方法
+        アニメーションなどで演出する
+
+    Petの実装
+        アニメーションの完備
+        複数種類のpet所有時のコード整備
+            Mr. ASTR
+            Ms. DOT
+            ひよこ, など
+
+    Nameの実装
+        専用NTTコントラの実装
+        クラフトによってNTTをmint
+        Nameをmint済みだと_modに+100（+1 Lv相当）
+        表札をクラフトするとnameが表示される
 
     経済の深慮
         マケプレ解説はRMTと同義
@@ -49,25 +52,6 @@ ToDo
             itemを大量に出品するのは別に構わない。
                 Rarityを見ていても適正な価格に落ち着くだろう。
 
-    アイコンの作成
-        Satiety：おにぎり？
-        Happy: くま？ハート？
-        お花
-        草
-        Exp
-        Lv：数字を大きくわかりやすく
-
-    Item補正値の表示の実装
-        レーダーチャートに基本値＋アイテム値で表示？
-
-    Petの実装
-
-    Nameの実装
-        専用NTTコントラの実装
-        クラフトによってNTTをmint
-        Nameをmint済みだと_modに+100（+1 Lv相当）
-        表札をクラフトするとnameが表示される
-
     市場の実装
         市場入場券をクラフトするとマケプレへ入場可能
 
@@ -76,26 +60,35 @@ ToDo
         0.1 ASTR/day等のコストを要求する
         withdray, set_cost関数を忘れずに実装する
 
-    UIの洗練
-        Item選択ウィンドウ
-            シャボン玉がバラバラアニメーションで出てきてふわふわ浮いてるUI
-            実装難しそうだが
-        Summonウィンドウ
-        システムメッセージの表示方法
-            アニメーションなどで演出する
-        Item選択ボタンの表示・非表示
-            クラフト中アイテム名の表示
-
-    ステータス表示の実装
-        coin, materialの表記をどうするか
-
-    BGMと効果音の追加
+    効果音の追加
         効果音の吟味と割り当て
+        working時にじゃまにならない程度に環境音を鳴らす
+        行動開始時・終了時の効果音を考える
 
     summonerごとにユニークなシンボルの考案
         phaser3での色彩変化
         もしくは手動での色彩変化済み画像の用意
         あるいは、ユニークな色のアクセサリー
+
+ ok ステータス表示の実装
+        coin, materialの表記をどうするか
+
+ ok アイコンの作成
+        Satiety：おにぎり？
+        Happy: くま？ハート？
+        お花
+        草
+        Exp
+        Lv：数字を大きくわかりやすく
+
+ ok Lv表示の洗練
+        最も重要な情報なのでできるだけ目立つように
+        もはや専用アイコンにでもするか？
+
+ ok walletアドレスの表示
+        ついでにIDの表示
+        他人のID覗き見時はどうするか
+            your walletとowner walletは別にするか？
 
  ok 同期時間表示の実装
         update_status成功時の_nowを記録
@@ -144,6 +137,29 @@ Item案
 
     リボン
         summon時に選択できる色＝class毎のリボン
+
+picture
+
+    背景
+ok! クリックアイコン（grooming, mining, farming, crafting）
+    クリックアイコン（crafting）
+    クリックアイコン（level-up）
+ok! しゅっきん！（お仕事へ移動中）
+    ごきげん！（お腹いっぱい＆ハッピーなときなど）
+    おなかへった・・・
+    ものづくりちゅう！（クラフト中）
+    ありがとう！（ご飯たべたあとなど）
+    クラフトアイテムたくさん（飼い主手伝う）
+    成功したよー！（クラフト成功時, mining終了時など）
+    失敗しちゃった・・・（クラフト失敗時など）
+    れべるあっぷ！
+    おんがくかんしょうちゅう～♪
+    マイニングアイテム案（STR系）
+        良いスコップ
+    ファーミングアイテム案（DEX系）
+        良いじょうろ
+    クラフティングアイテム案（INT系）
+        ミュージックボックス
 
 --->
 
@@ -309,6 +325,7 @@ let array_item_name = [
     "---",
     "---",
 ]
+
 
 
 //---html-----------------------------------------------------------------------------------------------------
@@ -479,6 +496,14 @@ async function contract_summon(_class) {
     let contract = await new web3.eth.Contract(abi_murasaki_function_summon_and_levelup, contract_murasaki_function_summon_and_levelup);
     let wallet = await get_wallet(web3);
     contract.methods.summon(_class).send({from:wallet});
+}
+
+//burn
+async function contract_burn(_summoner) {
+    let web3 = await connect();
+    let contract = await new web3.eth.Contract(abi_murasaki_function_summon_and_levelup, contract_murasaki_function_summon_and_levelup);
+    let wallet = await get_wallet(web3);
+    contract.methods.burn(_summoner).send({from:wallet});
 }
 
 //levelup
@@ -1715,7 +1740,8 @@ function create() {
     button_farming.disableInteractive();
 
     //levelup
-    button_levelup = this.add.sprite(1220, 30, "button_levelup_unable");
+    //button_levelup = this.add.sprite(1220, 30, "button_levelup_unable");
+    button_levelup = this.add.sprite(1220, 30, "back_level");
     button_levelup.scaleX = button_levelup.scaleX * 0.11;
     button_levelup.scaleY = button_levelup.scaleY * 0.11;
     button_levelup.setInteractive({useHandCursor: true});
@@ -1723,7 +1749,10 @@ function create() {
     button_levelup.on('pointerdown', () => contract_level_up(summoner) );
     button_levelup.on('pointerover', () => sound_button_select.play());
     button_levelup.on('pointerover', () => button_levelup.setTexture("button_levelup_pointerover"));
+    button_levelup.on('pointerover', () => text_level.setText(""));
+    //button_levelup.on('pointerout', () => button_levelup.setTexture("button_levelup_enable"));
     button_levelup.on('pointerout', () => button_levelup.setTexture("button_levelup_enable"));
+    button_levelup.on('pointerout', () => text_level.setText(local_level));
     button_levelup.disableInteractive();
 
     //===music===
@@ -1753,6 +1782,7 @@ function create() {
         .on("pointerdown", () => open_window_summon(this) )
         .on("pointerover", () => text_summon.setStyle({ fontSize: 24, fontFamily: "Arial", fill: '#ffff00' }))
         .on("pointerout", () => text_summon.setStyle({ fontSize: 24, fontFamily: "Arial", fill: '#000000' }));
+    new Button(10, 880, 'Burn', this, () => contract_burn(summoner));
 
     //===status===
 
@@ -1767,8 +1797,8 @@ function create() {
     //text_level =        this.add.text(1040, 26, "***", {font: "24px Verdana", fill: "#E60012"});
 
     //age
-    text_age_time =     this.add.text(1215, 190, "***", font_arg);
-    icon_age = this.add.sprite(1200,200, "icon_age");
+    text_age_time =     this.add.text(1220, 62, "***", font_arg);
+    icon_age = this.add.sprite(1205,72, "icon_age");
     icon_age.setScale(0.09);
 
     //debug status
@@ -1832,10 +1862,10 @@ function create() {
     text_wallet = this.add.text(10, 940, "***", {font: "14px Arial", fill: "#727171"});
 
     //level
-    back_level = this.add.image(1050, 30, "back_level");
-    back_level.scaleX = back_level.scaleX * 0.11;
-    back_level.scaleY = back_level.scaleY * 0.11;
-    text_level = this.add.text(1050, 37, "0", {font: "bold 26px Verdana", fill: "#E5004F"}).setOrigin(0.5);
+    //back_level = this.add.image(1050, 30, "back_level");
+    //back_level.scaleX = back_level.scaleX * 0.11;
+    //back_level.scaleY = back_level.scaleY * 0.11;
+    text_level = this.add.text(1220, 37, "0", {font: "bold 26px Verdana", fill: "#E5004F"}).setOrigin(0.5);
 
     //===etc===
 
@@ -2017,9 +2047,13 @@ function update() {
         let age = Math.round( age_time * SPEED / 86400 );
         //text_summoner.setText   ("ID: " + summoner);
         //text_level.setText      ("Lv: " + local_level);
-        text_level.setText(local_level);
         //text_age_time.setText   ("Age: " + age + "d");
         text_age_time.setText(age + "d");
+
+        //level
+        if (button_levelup.texture.key != "button_levelup_pointerover") {
+            text_level.setText(local_level);
+        }
 
         //degub text
         //text_type.setText       ("type = " + local_class);
@@ -2088,7 +2122,6 @@ function update() {
 
             //mining
             if (local_farming_status == 1 || local_crafting_status == 1 || local_level <= 1) {
-                console.log(1111111111111111 + ":" + local_mining_status);
                 button_mining.setTexture("button_mining_unable");
                 button_mining.disableInteractive();
             }else if (local_mining_status == 1) {
@@ -2141,31 +2174,55 @@ function update() {
                 button_crafting.setInteractive();
             }
 
+            /*
             //levelup button
             //active when not working and exp > next_exp
             if (local_exp / local_next_exp_required >= 1 
-                && button_levelup.texture.key == "button_levelup_unable"
+                //&& button_levelup.texture.key == "button_levelup_unable"
+                && button_levelup.texture.key == "back_level"
                 && local_mining_status == 0 && local_farming_status == 0 && local_crafting_status == 0
             ) {
                 button_levelup.setTexture("button_levelup_enable");
                 button_levelup.setInteractive();
             } else {
-                button_levelup.setTexture("button_levelup_unable");
+                //button_levelup.setTexture("button_levelup_unable");
+                button_levelup.setTexture("back_level");
                 button_levelup.disableInteractive();
             }
+            */
         }
 
         //level-up button triggered by exp change
+        if (local_exp / local_next_exp_required >= 1 
+            && local_mining_status == 0 && local_farming_status == 0 && local_crafting_status == 0
+            //&& button_levelup.texture.key == "button_levelup_unable"
+            && button_levelup.texture.key == "back_level" 
+            && button_levelup.texture.key != "button_levelup_pointerover"
+        ) {
+            button_levelup.setTexture("button_levelup_enable");
+            button_levelup.setInteractive();
+        } else if (local_exp / local_next_exp_required < 1) {
+            //button_levelup.setTexture("button_levelup_unable");
+            button_levelup.setTexture("back_level");
+            button_levelup.disableInteractive();
+        }
+        /*
         if (previous_local_exp != local_exp) {
             //level-up check
-            if (local_exp / local_next_exp_required >= 1) {
+            if (local_exp / local_next_exp_required >= 1 
+                //&& button_levelup.texture.key == "button_levelup_unable"
+                && button_levelup.texture.key == "back_level"
+                && local_mining_status == 0 && local_farming_status == 0 && local_crafting_status == 0
+            ) {
                 button_levelup.setTexture("button_levelup_enable");
                 button_levelup.setInteractive();
-            }else {
-                button_levelup.setTexture("button_levelup_unable");
+            } else {
+                //button_levelup.setTexture("button_levelup_unable");
+                button_levelup.setTexture("back_level");
                 button_levelup.disableInteractive();
             }
         }
+        */
 
         //update previsou parameters
         previous_local_mining_status = local_mining_status;

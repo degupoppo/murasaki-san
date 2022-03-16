@@ -130,7 +130,6 @@ Doc
             //when count=0, stop
             _count = _res[0];
             if (_count == 0) {
-                i--
                 return 0;
             }
             if (_res[2] == "0x0000000000000000000000000000000000000000") {
@@ -167,9 +166,10 @@ Doc
 <header>
     <nav>
       <a href="/murasakisan/" class="current">Home</a>
+      <a href="/murasakisan/dapp.html" ><b>Start Game</b></a>
       <a href="/murasakisan/dapp.html?summoner=1">Demo Preview</a>
-      <a href="/murasakisan/dapp.html" >Start Game</a>
       <a href="https://twitter.com/degupoppo" >Twitter</a>
+      <a href="https://github.com/degupoppo/murasakisan/" >GitHub</a>
     </nav>
     <h1>
         <img src="png/food_sweet_potato.png" width="40" height="40">
