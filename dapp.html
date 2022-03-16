@@ -4,26 +4,11 @@
 
 ToDo
 
-    アクション時に得られたexp, coin, materialの表示
-        クリティカル成功時の演出の実装
-
-    文字表示をできるだけアイコンに置換する
-        アイテムクラフトのコストをアイコン化
-        クラフト残り時間をアイコン化
-        birth timeのアイコン選別
-
-    Item補正値の表示の実装
-        レーダーチャートに基本値＋アイテム値で表示？
-
-    Item選択ボタンの表示・非表示の整備
-        ボタン非表示、クラフト前、クラフト中の挙動の整理
-        クラフト中アイテム名の表示
-
-    Summonウィンドウの洗練
-
     Item選択ウィンドウ
         シャボン玉がバラバラアニメーションで出てきてふわふわ浮いてるUI
         実装難しそうだが
+
+    Summonウィンドウの洗練
 
     システムメッセージの表示方法
         アニメーションなどで演出する
@@ -69,6 +54,22 @@ ToDo
         phaser3での色彩変化
         もしくは手動での色彩変化済み画像の用意
         あるいは、ユニークな色のアクセサリー
+
+ ok Item選択ボタンの表示・非表示の整備
+        ボタン非表示、クラフト前、クラフト中の挙動の整理
+        クラフト中アイテム名の表示
+
+ ok 文字表示をできるだけアイコンに置換する
+        アイテムクラフトのコストをアイコン化
+        クラフト残り時間をアイコン化
+     ok birth timeのアイコン選別
+     ok mining/farming中のearn textにもアイコンを使用
+
+ ok Item補正値の表示の実装
+        レーダーチャートに基本値＋アイテム値で表示？
+
+ ok アクション時に得られたexp, coin, materialの表示
+        クリティカル成功時の演出の実装
 
  ok ステータス表示の実装
         coin, materialの表記をどうするか
@@ -1195,10 +1196,10 @@ function radarchart(scene, x0, y0, r, str, dex, int, luk, str_item, dex_item, in
     radar4 = scene.add.polygon(x0+(-x4i+x2i)/2, y0+(-y1i+y3i)/2, [x1,y1i,x2i,y2,x3,y3i,x4i,y4], 0xffd700, 1);
     radar5 = scene.add.polygon(x0+(-x4+x2)/2, y0+(-y1+y3)/2, [x1,y1,x2,y2,x3,y3,x4,y4], 0xffff00, 1);
     let font_arg = {font: "17px Arial", fill: "#000000"};
-    radar6 = scene.add.text(x0-10, y0-r-15, "STR"+"\n"+str, font_arg);
-    radar7 = scene.add.text(x0+r, y0-6, "DEX"+"\n"+dex, font_arg);
-    radar8 = scene.add.text(x0-10, y0+r-5, "LUK"+"\n"+luk, font_arg);
-    radar9 = scene.add.text(x0-r-15, y0-6, "INT"+"\n"+int, font_arg);
+    radar6 = scene.add.text(x0-10, y0-r-15, "STR"+"\n"+(str+str_item), font_arg);
+    radar7 = scene.add.text(x0+r, y0-6, "DEX"+"\n"+(dex+dex_item), font_arg);
+    radar8 = scene.add.text(x0-10, y0+r-5, "LUK"+"\n"+(luk+luk_item), font_arg);
+    radar9 = scene.add.text(x0-r-15, y0-6, "INT"+"\n"+(int+int_item), font_arg);
 }
 async function draw_radarchart(scene) {
         let _x = 1136;
@@ -1220,10 +1221,14 @@ function open_window_craft (scene) {
 
     //function, closing: destroy group and update selecte_item
     async function close_crafting_window(_item) {
-        //update selected item
-        global_selected_crafting_item = _item;
         //destroy group
         group_window_crafting.destroy(true);
+        //during crafting, return 0
+        if (local_crafting_status == 1) {
+            return 0;
+        }
+        //update selected item
+        global_selected_crafting_item = _item;
         //update selected item dc
         global_selected_crafting_item_dc = await get_cost_of_item(_item);
         console.log("selected_item:", global_selected_crafting_item, global_selected_crafting_item_dc);
@@ -1241,11 +1246,24 @@ function open_window_craft (scene) {
             let _coin = global_selected_crafting_item_dc[2];
             let _material = global_selected_crafting_item_dc[3];
             //text_craft_item.setText(_coin + " ohana / " + _material + " kusa / " + _day + "day " + _hr + "hr " + _min + "min " + Math.trunc(_sec) + "sec");
-            text_craft_item.setText(_coin + " ohana / " + _material + " kusa / " + _day + "d:" + _hr + "h:" + _min + "m");
+            //text_craft_item.setText(_coin + " ohana / " + _material + " kusa / " + _day + "d:" + _hr + "h:" + _min + "m");
+            text_crafting_selected_item_ohana.setText(_coin);
+            text_crafting_selected_item_kusa.setText(_material);
+            text_crafting_selected_item_time.setText(_day + "d:" + _hr + "h:" + _min + "m");
+            icon_crafting_ohana.visible = true;
+            icon_crafting_kusa.visible = true;
+            icon_crafting_time.visible = true;
+            //text_craft_item.setText(_coin + " ohana / " + _material + " kusa / " + _day + "d:" + _hr + "h:" + _min + "m");
             text_select_item.setText('"'+array_item_name[_item]+'"');
             console.log("modified_dc:", _dc);
         } else {
-            text_craft_item.setText("");
+            //text_craft_item.setText("");
+            text_crafting_selected_item_ohana.setText("");
+            text_crafting_selected_item_kusa.setText("");
+            text_crafting_selected_item_time.setText("");
+            icon_crafting_ohana.visible = false;
+            icon_crafting_kusa.visible = false;
+            icon_crafting_time.visible = false;
             text_select_item.setText(">> Select Item <<");
         }
     }
@@ -1536,7 +1554,8 @@ function preload() {
     //icon
     this.load.image("icon_kusa", "png/icon_kusa.png", {frameWidth: 318, frameHeight: 466});
     this.load.image("icon_ohana", "png/icon_ohana.png", {frameWidth: 182, frameHeight: 171});
-    this.load.image("icon_age", "png/icon_age.png", {frameWidth: 225, frameHeight: 225});
+    this.load.image("icon_age", "png/icon_age.png", {frameWidth: 300, frameHeight: 325});
+    this.load.image("icon_clock", "png/icon_clock.png", {frameWidth: 225, frameHeight: 225});
 
     //level_back
     this.load.image("back_level", "png/back_level.png", {frameWidth: 500, frameHeight: 500});
@@ -1714,6 +1733,30 @@ function create() {
     button_crafting.on('pointerover', () => button_crafting.setTexture("button_crafting_pointerover"));
     button_crafting.on('pointerout', () => button_crafting.setTexture("button_crafting_enable"));
     button_crafting.disableInteractive();
+    //---select item
+    //icon_ohana
+    icon_crafting_ohana = this.add.sprite(760, 165, "icon_ohana");
+    icon_crafting_ohana.setScale(0.12);
+    icon_crafting_ohana.visible = false;
+    //icon_kusa
+    icon_crafting_kusa = this.add.sprite(830, 165, "icon_kusa");
+    icon_crafting_kusa.setScale(0.06);
+    icon_crafting_kusa.visible = false;
+    //icon_clock
+    icon_crafting_time = this.add.sprite(900, 165, "icon_clock");
+    icon_crafting_time.setScale(0.09);
+    icon_crafting_time.visible = false;
+    //text
+    text_crafting_selected_item_ohana = this.add.text(772, 155, "", {font: "18px Arial", fill: "#000"});
+    text_crafting_selected_item_kusa = this.add.text(842, 155, "", {font: "18px Arial", fill: "#000"});
+    text_crafting_selected_item_time = this.add.text(914, 155, "", {font: "18px Arial", fill: "#000"});
+    //---craftimg info
+    //icon_clock
+    icon_crafting_time_remining = this.add.sprite(760,165, "icon_clock");
+    icon_crafting_time_remining.setScale(0.09);
+    icon_crafting_time_remining.visible = false;
+    //text
+    text_crafting_calc = this.add.text(775, 155, "", {font: "18px Arial", fill: "#000"});
 
     //mining
     button_mining = this.add.sprite(50,700, "button_mining_unable");
@@ -1726,6 +1769,12 @@ function create() {
     button_mining.on('pointerover', () => button_mining.setTexture("button_mining_pointerover"));
     button_mining.on('pointerout', () => button_mining.setTexture("button_mining_enable"));
     button_mining.disableInteractive();
+    //icon
+    icon_mining = this.add.sprite(105,680, "icon_ohana");
+    icon_mining.setScale(0.12);
+    icon_mining.visible = false;
+    //text
+    text_mining_calc = this.add.text(115, 670, "", {font: "18px Arial", fill: "#000"});
 
     //farming
     button_farming = this.add.sprite(300,150, "button_farming_unable");
@@ -1738,6 +1787,12 @@ function create() {
     button_farming.on('pointerover', () => button_farming.setTexture("button_farming_pointerover"));
     button_farming.on('pointerout', () => button_farming.setTexture("button_farming_enable"));
     button_farming.disableInteractive();
+    //icon
+    icon_farming = this.add.sprite(355,130, "icon_kusa");
+    icon_farming.setScale(0.06);
+    icon_farming.visible = false;
+    //text
+    text_farming_calc = this.add.text(370, 120, "", {font: "18px Arial", fill: "#000"});
 
     //levelup
     //button_levelup = this.add.sprite(1220, 30, "button_levelup_unable");
@@ -1797,9 +1852,10 @@ function create() {
     //text_level =        this.add.text(1040, 26, "***", {font: "24px Verdana", fill: "#E60012"});
 
     //age
-    text_age_time =     this.add.text(1220, 62, "***", font_arg);
+    text_age_time =     this.add.text(1218, 62, "***", font_arg);
     icon_age = this.add.sprite(1205,72, "icon_age");
-    icon_age.setScale(0.09);
+    //icon_age.setScale(0.09);
+    icon_age.setScale(0.06);
 
     //debug status
     //text_type =         this.add.text(16, 896, "***", font_arg);
@@ -1842,16 +1898,22 @@ function create() {
     bar_exp = makeBar(this, 480, 10, 0x0068B7);
     bar_exp.scaleX = 0;
     text_exp = this.add.text(485, 11, "0 / 0", {font: "17px Arial", fill: "#ffffff"});
+    text_exp_earned = this.add.text(480, 33, "", {font: "17px Arial", fill: "#000000"});
+    text_exp_earned_count = 0;
 
     //coin
     icon_ohana = this.add.sprite(670,20, "icon_ohana");
     icon_ohana.setScale(0.12);
     text_coin = this.add.text(685, 10, "***", {font: "17px Arial", fill: "#000", backgroundColor: "#FFF200"});
+    text_coin_earned = this.add.text(685, 33, "", {font: "17px Arial", fill: "#000000"});
+    text_coin_earned_count = 0;
 
     //material
     icon_kusa = this.add.sprite(815, 20, "icon_kusa");
     icon_kusa.setScale(0.06);
     text_material = this.add.text(830, 10, "***", {font: "17px Arial", fill: "#000", backgroundColor: "#D7E7AF"});
+    text_material_earned = this.add.text(830, 33, "", {font: "17px Arial", fill: "#000000"});
+    text_material_earned_count = 0;
 
     //debug info
     text_mode = this.add.text(1150, 908, "***", {font: "14px Arial", fill: "#727171"});
@@ -1875,11 +1937,11 @@ function create() {
     //craft_window ***TODO***
     //select crafting_item_type
     //new Button(750, 120, '[Select Item]', this, () => open_window_craft(this));
-    text_select_item = this.add.text(750, 120, ">> Select Item <<", {font: "30px Arial", fill: "#000"})
+    text_select_item = this.add.text(750, 120, ">> Select Item <<", {font: "30px Arial", fill: "#000", backgroundColor: "#ecd9ff"})
                 .setFontSize(24).setFontFamily("Arial").setFill('#000000')
                 .setInteractive({useHandCursor: true})
                 .on("pointerdown", () => open_window_craft(this) )
-                .on("pointerover", () => text_select_item.setStyle({ fontSize: 24, fontFamily: "Arial", fill: '#ffff00' }))
+                .on("pointerover", () => text_select_item.setStyle({ fontSize: 24, fontFamily: "Arial", fill: '#d19dff' }))
                 .on("pointerout", () => text_select_item.setStyle({ fontSize: 24, fontFamily: "Arial", fill: '#000000' }));
     text_craft_item = this.add.text(750, 150, "", font_arg)
                 .setInteractive({useHandCursor: true})
@@ -1931,6 +1993,20 @@ function update() {
         //DEBUG: mouse pointer
         //console.log(Math.round(game.input.mousePointer.x), Math.round(game.input.mousePointer.y));
 
+        //earned text
+        text_exp_earned_count -= 1;
+        if (text_exp_earned_count == 0) {
+            text_exp_earned.setText("");
+        }
+        text_coin_earned_count -= 1;
+        if (text_coin_earned_count == 0) {
+            text_coin_earned.setText("");
+        }
+        text_material_earned_count -= 1;
+        if (text_material_earned_count == 0) {
+            text_material_earned.setText("");
+        }
+
         //levelup, feeding, grooming
 
         //level up
@@ -1972,6 +2048,9 @@ function update() {
             food = this.add.sprite(600,730, "food_sweet_potato");
             food.scaleX = food.scaleX * 0.16;
             food.scaleY = food.scaleY * 0.16;
+            let _delta = local_exp - previous_local_exp;
+            text_exp_earned.setText("+" + _delta);
+            text_exp_earned_count = 5;
         }
 
         //grooming check, continue
@@ -1981,6 +2060,9 @@ function update() {
             murasakisan.count = 0;
             murasakisan.target_x = 1000;
             murasakisan.target_y = 400;
+            let _delta = local_exp - previous_local_exp;
+            text_exp_earned.setText("+" + _delta);
+            text_exp_earned_count = 5;
         }
 
         //mining, farming, crafting
@@ -1994,7 +2076,16 @@ function update() {
             murasakisan.target_y = 800;
         }else if (local_mining_status == 0 & murasakisan.mode == "mining") {
             murasakisan.set_mode = "resting";
-            draw_radarchart(this);  //update radarchart
+            //earning text
+            let _delta = local_coin - previous_local_coin;
+            if (_delta >= local_coin_calc * 1.5) {
+                text_coin_earned.setText("+" + _delta + " lucky♪");
+            } else {
+                text_coin_earned.setText("+" + _delta);
+            }
+            text_coin_earned_count = 5;
+            //icon invisible
+            icon_mining.visible = false;
         }
 
         //farming check, continue
@@ -2006,6 +2097,16 @@ function update() {
             murasakisan.target_y = 300;
         }else if (local_farming_status == 0 & murasakisan.mode == "farming") {
             murasakisan.set_mode = "resting";
+            //earning text
+            let _delta = local_material - previous_local_material;
+            if (_delta >= local_material_calc * 1.5) {
+                text_material_earned.setText("+" + _delta + " lucky♪");
+            } else {
+                text_material_earned.setText("+" + _delta);
+            }
+            text_material_earned_count = 5;
+            //icon invisible
+            icon_farming.visible = false;
         }
 
         //crafting check, continue
@@ -2019,6 +2120,9 @@ function update() {
         }else if (local_crafting_status == 0 & murasakisan.mode == "crafting") {
             murasakisan.set_mode = "resting";
             text_select_item.setText(">> Select Item <<")
+            draw_radarchart(this);  //update radarchart
+            //icon invisible
+            icon_crafting_time_remining.visible = false;
         }
 
         //update calculation_status
@@ -2040,7 +2144,11 @@ function update() {
         //exp
         let exp = (local_exp / local_next_exp_required) * 100;
         if (exp > 100) { exp = 100; }
-        text_exp.setText(local_exp + " / " + local_next_exp_required);
+        if (local_exp > local_next_exp_required) {
+            text_exp.setText(local_next_exp_required + " / " + local_next_exp_required);
+        } else {
+            text_exp.setText(local_exp + " / " + local_next_exp_required);
+        }
 
         //update text
         //let age = Math.round( age_time * SPEED * 10 / 86400 ) / 10;
@@ -2073,31 +2181,46 @@ function update() {
 
         //update progression status
         if (_mode == "mining") {
-            text_working_calc.setText("+ " + local_coin_calc + " Ohana");
+            //text_working_calc.setText("+ " + local_coin_calc + " Ohana");
+            icon_mining.visible = true;
+            text_mining_calc.setText("+ " + local_coin_calc + " Ohana");
         }else if (_mode == "farming") {
-            text_working_calc.setText("+ " + local_material_calc + " Kusa");
+            //text_working_calc.setText("+ " + local_material_calc + " Kusa");
+            icon_farming.visible = true;
+            text_farming_calc.setText("+ " + local_material_calc + " Kusa");
         }else if (_mode == "crafting") {
+            icon_crafting_time_remining.visible = true;
             if (local_crafting_calc > 0) {
-                text_craft_item.setText("");    //***TODO:***
+                //TOFIX: invisible selecte item info
+                text_crafting_selected_item_ohana.setText("");
+                text_crafting_selected_item_kusa.setText("");
+                text_crafting_selected_item_time.setText("");
+                icon_crafting_ohana.visible = false;
+                icon_crafting_kusa.visible = false;
+                icon_crafting_time.visible = false;
+                //text_craft_item.setText("");    //***TODO:***
                 //calc remining time
                 let _total_sec = local_crafting_calc;
                 let _day = Math.floor(_total_sec / 86400);
                 let _hr = Math.floor(_total_sec % 86400 / 3600);
                 let _min = Math.floor(_total_sec % 3600 / 60);
                 //text_working_calc.setText(local_crafting_calc + " sec left");
-                text_working_calc.setText(_day + "d:" + _hr + "h:" + _min + "m remining");
+                text_crafting_calc.setText(_day + "d:" + _hr + "h:" + _min + "m remining");
             } else{
-                text_working_calc.setText("Completed!");
+                text_crafting_calc.setText("Completed!");
             }
         }else {
-            text_working_calc.setText("");
+            text_mining_calc.setText("");
+            text_farming_calc.setText("");
+            text_crafting_calc.setText("");
         }
         
         previous_local_last_feeding_time = local_last_feeding_time;
         previous_local_last_grooming_time = local_last_grooming_time;
         previous_local_level = local_level;
-        previsou_local_coin = local_coin;
-        previsou_local_material = local_coin;
+        previous_local_coin = local_coin;
+        previous_local_material = local_material;
+        previous_local_exp = local_exp;
     }
 
     //===== button =====
@@ -2129,8 +2252,8 @@ function update() {
                 button_mining.on('pointerover', () => button_mining.setTexture("button_mining_pointerover_stop"));
                 button_mining.on('pointerout', () => button_mining.setTexture("button_mining_working"));
                 button_mining.setInteractive();
-                text_working_calc.x = 100;
-                text_working_calc.y = 660;
+                //text_working_calc.x = 100;
+                //text_working_calc.y = 660;
             }else {
                 button_mining.setTexture("button_mining_enable");
                 button_mining.on('pointerover', () => button_mining.setTexture("button_mining_pointerover"));
@@ -2147,8 +2270,8 @@ function update() {
                 button_farming.on('pointerover', () => button_farming.setTexture("button_farming_pointerover_stop"));
                 button_farming.on('pointerout', () => button_farming.setTexture("button_farming_working"));
                 button_farming.setInteractive();
-                text_working_calc.x = 350;
-                text_working_calc.y = 120;
+                //text_working_calc.x = 350;
+                //text_working_calc.y = 120;
             }else {
                 button_farming.setTexture("button_farming_enable");
                 button_farming.on('pointerover', () => button_farming.setTexture("button_farming_pointerover"));
@@ -2228,7 +2351,6 @@ function update() {
         previous_local_mining_status = local_mining_status;
         previous_local_farming_status = local_farming_status;
         previous_local_crafting_status = local_crafting_status;
-        previous_local_exp = local_exp;
     }
 
     //===== item =====
