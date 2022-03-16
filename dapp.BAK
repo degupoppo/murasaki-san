@@ -1937,7 +1937,7 @@ function create() {
     //===etc===
 
     //working progression text
-    text_working_calc = this.add.text(0, 0, "", font_arg);
+    //text_working_calc = this.add.text(0, 0, "", font_arg);
 
     //craft_window ***TODO***
     //select crafting_item_type
@@ -2293,8 +2293,8 @@ function update() {
                 button_crafting.on('pointerover', () => button_crafting.setTexture("button_crafting_pointerover_stop"));
                 button_crafting.on('pointerout', () => button_crafting.setTexture("button_crafting_working"));
                 button_crafting.setInteractive();
-                text_working_calc.x = 750;
-                text_working_calc.y = 150;
+                //text_working_calc.x = 750;
+                //text_working_calc.y = 150;
             }else {
                 button_crafting.setTexture("button_crafting_enable");
                 button_crafting.on('pointerover', () => button_crafting.setTexture("button_crafting_pointerover"));
