@@ -8,6 +8,9 @@ ToDo
         groomingの位置合わせ
         目をいじった画像の差し替え
 
+    ロード画面の実装
+        シーンを追加する方法を試す
+
     Item選択ウィンドウ
         シャボン玉がバラバラアニメーションで出てきてふわふわ浮いてるUI
         実装難しそうだが
@@ -1564,6 +1567,32 @@ function preload() {
 
     //level_back
     this.load.image("back_level", "png/back_level.png", {frameWidth: 500, frameHeight: 500});
+
+    //loading
+    let progressBar = this.add.graphics();
+    let progressBox = this.add.graphics();
+    progressBox.fillStyle(0x222222, 0.8);
+    progressBox.fillRect(480, 450, 320, 50);
+    let progressText = this.add.text(490,520,"", {font: "20px monospace", fill: "#DCDDDD"}); 
+    let progressText_loading = this.add.text(490,420, "Loading...", {font: "20px monospace", fill: "#DCDDDD"});
+    let percentText = this.add.text(510, 465, "", {font: "20px monospace", fill: "#DCDDDD"});
+    this.load.on("progress", function(value) {
+        console.log(value);
+        progressBar.clear();
+        progressBar.fillStyle(0xffffff, 1);
+        progressBar.fillRect(490, 460, 300 * value, 30);
+        percentText.setText( Math.round(value * 100) + "%");
+    });
+    this.load.on("fileprogress", function(file) {
+        console.log(file.src);
+        progressText.setText("Loading asset: " + file.src);
+    });
+    this.load.on("complete", function() {
+        console.log("complete");
+        progressBar.destroy();
+        progressBox.destroy();
+    });
+
 }
 
 
@@ -1835,8 +1864,6 @@ function create() {
     //===button===
 
     //button_text
-    //new Button(20, 20, 'Connect Wallet', this, () => connect());
-    //new Button(20, 50, '>>> Summon <<<', this, () => open_window_summon(this));
     text_summon = this.add.text(500, 450, "", {font: "24px Arial", fill: "#000000"})
         .setInteractive({useHandCursor: true})
         .on("pointerdown", () => open_window_summon(this) )
@@ -1846,60 +1873,42 @@ function create() {
 
     //===status===
 
-    //status window color fill
-    //let status_back = this.add.graphics();
-    //status_back.fillStyle(0xffffff, 1).fillRect(1024, 5, 336, 448);
-    //status_back.alpha = 0.5;
-
-    //status window
     let font_arg = {font: "18px Arial", fill: "#000"};
-    //text_summoner =     this.add.text(1040, 10, "***", font_arg);
-    //text_level =        this.add.text(1040, 26, "***", {font: "24px Verdana", fill: "#E60012"});
 
     //age
     text_age_time =     this.add.text(1218, 62, "***", font_arg);
     icon_age = this.add.sprite(1205,72, "icon_age");
-    //icon_age.setScale(0.09);
     icon_age.setScale(0.06);
 
-    //debug status
-    //text_type =         this.add.text(16, 896, "***", font_arg);
+    //debug info
     text_speed =        this.add.text(10, 910, "***", font_arg);
-    //text_pet =          this.add.text(16, 912, "***", font_arg);
-    //text_turn =         this.add.text(16, 880, "***", font_arg);
-    //text_exp =          this.add.text(16, 928, "***", font_arg);
+    text_mode = this.add.text(1150, 908, "***", {font: "14px Arial", fill: "#727171"});
+    text_turn = this.add.text(1150, 923, "***", {font: "14px Arial", fill: "#727171"});
+    text_sync_time = this.add.text(1150, 935, "***", {font: "14px Arial", fill: "#727171"});
+    text_wallet = this.add.text(10, 940, "***", {font: "14px Arial", fill: "#727171"});
 
     //satiety
-    //this.add.text(10, 10, "Satiety:", font_arg);
     icon_satiety = this.add.sprite(30,20, "button_feeding");
     icon_satiety.setScale(0.07);
-    //bar_satiety_back = makeBar(this, 50, 10, 0xffc0cb);
     bar_satiety_back = makeBar(this, 55, 10, 0xF8C5AC);
     bar_satiety_back.scaleX = 1;
-    //bar_satiety = makeBar(this, 50, 10, 0xff4500);
     bar_satiety = makeBar(this, 55, 10, 0xE60012);
     bar_satiety.scaleX = 0;
     text_satiety = this.add.text(60, 11, "0%", {font: "17px Arial", fill: "#ffffff"});
 
     //happy
-    //this.add.text(1040, 845, "Happy:", font_arg);
     icon_happy = this.add.sprite(245,20, "button_grooming_enable");
     icon_happy.setScale(0.07);
-    //bar_happy_back = makeBar(this, 270, 10, 0xadd8e6);
     bar_happy_back = makeBar(this, 270, 10, 0xFCE2BA);
     bar_happy_back.scaleX = 1;
-    //bar_happy = makeBar(this, 270, 10, 0x4169e1);
     bar_happy = makeBar(this, 270, 10, 0xF39800);
     bar_happy.scaleX = 0;
     text_happy = this.add.text(275, 11, "0%", {font: "17px Arial", fill: "#ffffff"});
 
     //exp
-    //this.add.text(1040, 870, "Exp:", font_arg);
     this.add.text(440, 10, "Exp:", font_arg);
-    //bar_exp_back = makeBar(this, 480, 10, 0x90ee90);
     bar_exp_back = makeBar(this, 480, 10, 0xBBCCE9);
     bar_exp_back.scaleX = 1;
-    //bar_exp = makeBar(this, 480, 10, 0x228b22);
     bar_exp = makeBar(this, 480, 10, 0x0068B7);
     bar_exp.scaleX = 0;
     text_exp = this.add.text(485, 11, "0 / 0", {font: "17px Arial", fill: "#ffffff"});
@@ -1920,24 +1929,10 @@ function create() {
     text_material_earned = this.add.text(830, 33, "", {font: "17px Arial", fill: "#000000"});
     text_material_earned_count = 0;
 
-    //debug info
-    text_mode = this.add.text(1150, 908, "***", {font: "14px Arial", fill: "#727171"});
-    text_turn = this.add.text(1150, 923, "***", {font: "14px Arial", fill: "#727171"});
-    text_sync_time = this.add.text(1150, 935, "***", {font: "14px Arial", fill: "#727171"});
-
-    //wallet
-    text_wallet = this.add.text(10, 940, "***", {font: "14px Arial", fill: "#727171"});
-
     //level
-    //back_level = this.add.image(1050, 30, "back_level");
-    //back_level.scaleX = back_level.scaleX * 0.11;
-    //back_level.scaleY = back_level.scaleY * 0.11;
     text_level = this.add.text(1220, 37, "0", {font: "bold 26px Verdana", fill: "#E5004F"}).setOrigin(0.5);
 
     //===etc===
-
-    //working progression text
-    //text_working_calc = this.add.text(0, 0, "", font_arg);
 
     //craft_window ***TODO***
     //select crafting_item_type
@@ -1972,7 +1967,6 @@ function update() {
 
     //update summoner
     if (local_level != 0) {
-    //if (summoner != -1) {
         murasakisan.update();
     }
     //update pet
@@ -1983,7 +1977,6 @@ function update() {
     //===== sync time =====
     if (turn % 20 == 0) {
         text_mode.setText(murasakisan.get_mode);
-        //text_turn.setText("turn = " + turn);
         if (last_sync_time == 0) {
             text_sync_time.setText("syncing...");
         } else {
@@ -2048,7 +2041,6 @@ function update() {
             murasakisan.target_y = 730;
             if (typeof food !== "undefined") {
                 food.destroy();
-                //food.visible = false;
             }
             food = this.add.sprite(600,730, "food_sweet_potato");
             food.scaleX = food.scaleX * 0.16;
@@ -2156,11 +2148,7 @@ function update() {
         }
 
         //update text
-        //let age = Math.round( age_time * SPEED * 10 / 86400 ) / 10;
         let age = Math.round( age_time * SPEED / 86400 );
-        //text_summoner.setText   ("ID: " + summoner);
-        //text_level.setText      ("Lv: " + local_level);
-        //text_age_time.setText   ("Age: " + age + "d");
         text_age_time.setText(age + "d");
 
         //level
@@ -2168,11 +2156,7 @@ function update() {
             text_level.setText(local_level);
         }
 
-        //degub text
-        //text_type.setText       ("type = " + local_class);
-        //text_exp.setText        ("exp= " + local_exp);
-        //text_turn.setText       ("turn = " + turn);
-        //text_mode.setText(mode);
+        //degub info
         text_speed.setText("speed: x" + SPEED);
 
         //coin & material
@@ -2180,9 +2164,11 @@ function update() {
         text_material.setText("Kusa: " + local_material);
 
         //update bar
-        bar_satiety.scaleX = (satiety) / 100;
-        bar_happy.scaleX = (happy) / 100;
-        bar_exp.scaleX = exp / 100;
+        if (satiety && happy && exp) {
+            bar_satiety.scaleX = satiety / 100;
+            bar_happy.scaleX = happy / 100;
+            bar_exp.scaleX = exp / 100;
+        }
 
         //update progression status
         if (_mode == "mining") {
@@ -2301,23 +2287,6 @@ function update() {
                 button_crafting.on('pointerout', () => button_crafting.setTexture("button_crafting_enable"));
                 button_crafting.setInteractive();
             }
-
-            /*
-            //levelup button
-            //active when not working and exp > next_exp
-            if (local_exp / local_next_exp_required >= 1 
-                //&& button_levelup.texture.key == "button_levelup_unable"
-                && button_levelup.texture.key == "back_level"
-                && local_mining_status == 0 && local_farming_status == 0 && local_crafting_status == 0
-            ) {
-                button_levelup.setTexture("button_levelup_enable");
-                button_levelup.setInteractive();
-            } else {
-                //button_levelup.setTexture("button_levelup_unable");
-                button_levelup.setTexture("back_level");
-                button_levelup.disableInteractive();
-            }
-            */
         }
 
         //level-up button triggered by exp change
@@ -2334,23 +2303,6 @@ function update() {
             button_levelup.setTexture("back_level");
             button_levelup.disableInteractive();
         }
-        /*
-        if (previous_local_exp != local_exp) {
-            //level-up check
-            if (local_exp / local_next_exp_required >= 1 
-                //&& button_levelup.texture.key == "button_levelup_unable"
-                && button_levelup.texture.key == "back_level"
-                && local_mining_status == 0 && local_farming_status == 0 && local_crafting_status == 0
-            ) {
-                button_levelup.setTexture("button_levelup_enable");
-                button_levelup.setInteractive();
-            } else {
-                //button_levelup.setTexture("button_levelup_unable");
-                button_levelup.setTexture("back_level");
-                button_levelup.disableInteractive();
-            }
-        }
-        */
 
         //update previsou parameters
         previous_local_mining_status = local_mining_status;
