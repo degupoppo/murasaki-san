@@ -165,7 +165,7 @@ ok! しゅっきん！（お仕事へ移動中）
         良いじょうろ
     クラフティングアイテム案（INT系）
         ミュージックボックス
- aa
+ aaa
 --->
 
 <!DOCTYPE html>
@@ -495,10 +495,12 @@ async function contract_update_status(_summoner) {
     last_sync_time = Date.now();
 
     //update wallet text
+    let _wallet1 = _owner.substring(0,8);
+    let _wallet2 = _owner.slice(-8);
     if (_owner != wallet) {
-        text_wallet.setText("id: " + summoner + ", owner: " + _owner.substring(0,15) + "..., not your character");
+        text_wallet.setText("id: " + summoner + ", owner: " + _wallet1 + "..." + _wallet2);
     } else {
-        text_wallet.setText("id: " + summoner + ", owner: " + _owner.substring(0,15) + "...");
+        text_wallet.setText("id: " + summoner + ", owner: " + _wallet1 + "..." + _wallet2);
     }
 }
 

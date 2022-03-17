@@ -1227,6 +1227,7 @@ contract Murasaki_Function_Share is Ownable {
     address public murasaki_strage_address;
     address public murasaki_craft_address;
     address public world_dice_address;
+    address public tiny_heart_address;
 
     //address set, admin
     function _set1_murasaki_main_address(address _address) external onlyOwner {
@@ -1240,6 +1241,9 @@ contract Murasaki_Function_Share is Ownable {
     }
     function _set4_world_dice_address(address _address) external onlyOwner {
         world_dice_address = _address;
+    }
+    function _set5_tiny_heart_address(address _address) external onlyOwner {
+        tiny_heart_address = _address;
     }
 
     //check owner of summoner
@@ -1985,13 +1989,26 @@ contract Murasaki_Function_Crafting is Ownable {
         return [_level, _dc, _coin, _material];
     }
 
-    /***TODO***
-    //tiny heart
-    function create_tiny_heart() {
+    //tiny heart ***TODO*** public -> internal, called from craft()
+    function create_tiny_heart(uint32 _created_item, uint32 _created_summoner) public {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
-        
+        Murasaki_Main mm = Murasaki_Main(mfs.murasaki_main_address());
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        Tiny_Heart th = Tiny_Heart(mfs.tiny_heart_address());
+        address _created_wallet = mm.ownerOf(_created_summoner);
+        uint32 _seed = mfs.seed(_created_summoner);
+        uint32 _count_summoners = mm.next_summoner() - 1;
+        uint32 _to_summoner = mfs.dn(_created_summoner,  _count_summoners) + 1; 
+        address _to_wallet = mm.ownerOf(_to_summoner);
+        if (
+            _to_wallet != 0x0000000000000000000000000000000000000000
+            && ms.level(_to_summoner) >= 3
+            && mfs.calc_satiety(_to_summoner) >= 20
+            && mfs.calc_happy(_to_summoner) >= 20
+        ) {
+            th.create(_created_item, _created_summoner, _created_wallet, _seed, _to_wallet);
+        }
     }
-    */
 
     //item level
     uint32[64] public level_table = [
