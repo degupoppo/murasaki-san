@@ -1990,6 +1990,7 @@ contract Murasaki_Function_Crafting is Ownable {
     }
 
     //tiny heart ***TODO*** public -> internal, called from craft()
+    //***TODO*** insert into craft()
     function create_tiny_heart(uint32 _created_item, uint32 _created_summoner) public {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Main mm = Murasaki_Main(mfs.murasaki_main_address());
