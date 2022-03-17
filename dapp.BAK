@@ -4,16 +4,55 @@
 
 ToDo
 
+    プレイヤー間のコミュニケーション方法の実装
+        案1, 何かしらのアイテムをクラフトすると、ランダムに誰かにもNFTがmintされる
+            葉っぱ？おはな？
+            貯めると何が起こる？
+        案2, 手紙のようなものをクラフトし、クラフト成功時に宛先IDとメッセージを書き込める
+            受け取った手紙を検索して画面に表示するのが難しいか
+            外部データベース必須になりそう
+            あるいはastarscanに該当するものが公開されればapiでNFTのIDを持ってこれるか
+        具体的なメッセージが送れると荒れるので、非言語表現が可能な程度に留める
+            ♪、ハート、星、など。
+            誰から送られたかだけわかるようにする。
+            はてぶのスターみたいな感じ？
+            スターをクラフトして誰かに送る、など。
+            送るインセンティブと、集めるインセンティブを考えたい。
+            例えば、スターには種類があって、色ごとに集めると何かしら、など。
+            人からもらったスターでしかLukが上がらない、など。
+            botを避けるため、単一wallet由来のスターの効果は重複しない、など。
+            luckを上げるためには、たくさんの別の人からstarを送られないと行けない。
+            スターを集めるインセンティブ：Luck上昇
+            スターを送るインセンティブ：なに？？
+                自分で得たスターは自分には効果を及ぼさない。
+                誰かに渡したときにLuckに+0.1される。
+                誰から貰ったかは不明な方が面白いか。
+        案, 誰かがitemをcraftしたら1個発生するハート
+            それまでに存在するsummonerにランダムでtransferされる
+                burnを判別できないのでburnにも行くが無視
+            ハートを受け取るとluckに+0.01？+0.05？
+            ハートはNFTなので売り買い移動自由
+            誰がmint主かはハートに刻まれる
+            貯金箱をクラフトしたらハートを可視化できる？
+                効果を得るのも貯金箱クラフトしてから？
+            最終的に48アイテム/summonerなので、50個/summoner程度が平均的な最大値
+                もちろん、市場で買い占めればもっと増えるが。
+                0.01なら x50 = +0.5
+                0.05なら x50 = +2.5
+                レベルアップによる最大値は+0.5なので、2.5は5レベル分
+                この当たりを最大値とするか。10個で1レベル分、0.5%確率アップ。
+            Lv3以上、happyが20%以上のとき受取完了できる
+                条件を満たさないと立ち消え
+
     微調整
         groomingの位置合わせ
         目をいじった画像の差し替え
 
-    ロード画面の実装
-        シーンを追加する方法を試す
-
     Item選択ウィンドウ
         シャボン玉がバラバラアニメーションで出てきてふわふわ浮いてるUI
         実装難しそうだが
+        48種類なので、48個のシャボン玉を飛ばすのは非現実的
+        やはり大きなウィンドウが扱いやすいか。
 
     Summonウィンドウの洗練
 
@@ -32,6 +71,7 @@ ToDo
         クラフトによってNTTをmint
         Nameをmint済みだと_modに+100（+1 Lv相当）
         表札をクラフトするとnameが表示される
+        phaser3におけるテキスト入力と内容取得の実装
 
     経済の深慮
         マケプレ解説はRMTと同義
@@ -61,50 +101,6 @@ ToDo
         phaser3での色彩変化
         もしくは手動での色彩変化済み画像の用意
         あるいは、ユニークな色のアクセサリー
-
- ok Item選択ボタンの表示・非表示の整備
-        ボタン非表示、クラフト前、クラフト中の挙動の整理
-        クラフト中アイテム名の表示
-
- ok 文字表示をできるだけアイコンに置換する
-        アイテムクラフトのコストをアイコン化
-        クラフト残り時間をアイコン化
-     ok birth timeのアイコン選別
-     ok mining/farming中のearn textにもアイコンを使用
-
- ok Item補正値の表示の実装
-        レーダーチャートに基本値＋アイテム値で表示？
-
- ok アクション時に得られたexp, coin, materialの表示
-        クリティカル成功時の演出の実装
-
- ok ステータス表示の実装
-        coin, materialの表記をどうするか
-
- ok アイコンの作成
-        Satiety：おにぎり？
-        Happy: くま？ハート？
-        お花
-        草
-        Exp
-        Lv：数字を大きくわかりやすく
-
- ok Lv表示の洗練
-        最も重要な情報なのでできるだけ目立つように
-        もはや専用アイコンにでもするか？
-
- ok walletアドレスの表示
-        ついでにIDの表示
-        他人のID覗き見時はどうするか
-            your walletとowner walletは別にするか？
-
- ok 同期時間表示の実装
-        update_status成功時の_nowを記録
-            _nowとの差を小さく表示など
-        何秒前か、具体的な時間か
-
- ok レーダーチャートの修正
-        itemによるステータス補正を別の色で重ねて表示させる
 
 Item案
 
@@ -398,7 +394,7 @@ async function connect() {
 async function get_wallet() {
     let web3 = await connect();
     let wallet = await web3.eth.getAccounts();
-    text_wallet.setText("id: " + summoner + ", wallet: " + wallet[0]);
+    //text_wallet.setText("id: " + summoner + ", wallet: " + wallet[0]);
     return wallet[0];
 }
 
@@ -496,6 +492,13 @@ async function contract_update_status(_summoner) {
 
     //update last_sync_time
     last_sync_time = Date.now();
+
+    //update wallet text
+    if (_owner != wallet) {
+        text_wallet.setText("id: " + summoner + ", owner: " + _owner.substring(0,15) + "..., not your character");
+    } else {
+        text_wallet.setText("id: " + summoner + ", owner: " + _owner.substring(0,15) + "...");
+    }
 }
 
 //summon
@@ -1568,7 +1571,8 @@ function preload() {
     //level_back
     this.load.image("back_level", "png/back_level.png", {frameWidth: 500, frameHeight: 500});
 
-    //loading
+    //loading screen
+    //https://gamedevacademy.org/creating-a-preloading-screen-in-phaser-3/?a=13
     let progressBar = this.add.graphics();
     let progressBox = this.add.graphics();
     progressBox.fillStyle(0x222222, 0.8);
@@ -1591,8 +1595,10 @@ function preload() {
         console.log("complete");
         progressBar.destroy();
         progressBox.destroy();
+        progressText.destroy();
+        progressText_loading.destroy();
+        percentText.destroy();
     });
-
 }
 
 
@@ -2141,7 +2147,7 @@ function update() {
         //exp
         let exp = (local_exp / local_next_exp_required) * 100;
         if (exp > 100) { exp = 100; }
-        if (local_exp > local_next_exp_required) {
+        if (Number(local_exp) > Number(local_next_exp_required)) {
             text_exp.setText(local_next_exp_required + " / " + local_next_exp_required);
         } else {
             text_exp.setText(local_exp + " / " + local_next_exp_required);
@@ -2164,7 +2170,7 @@ function update() {
         text_material.setText("Kusa: " + local_material);
 
         //update bar
-        if (satiety && happy && exp) {
+        if (satiety >= 0 && happy >= 0 && exp >= 0) {
             bar_satiety.scaleX = satiety / 100;
             bar_happy.scaleX = happy / 100;
             bar_exp.scaleX = exp / 100;
@@ -2487,5 +2493,51 @@ function update() {
         summoner間のitem移動
         summonerに紐付けられていない所持itemの移動
 
+ ok ロード画面の実装
+        シーンを追加する方法を試す
+
+ ok Item選択ボタンの表示・非表示の整備
+        ボタン非表示、クラフト前、クラフト中の挙動の整理
+        クラフト中アイテム名の表示
+
+ ok 文字表示をできるだけアイコンに置換する
+        アイテムクラフトのコストをアイコン化
+        クラフト残り時間をアイコン化
+     ok birth timeのアイコン選別
+     ok mining/farming中のearn textにもアイコンを使用
+
+ ok Item補正値の表示の実装
+        レーダーチャートに基本値＋アイテム値で表示？
+
+ ok アクション時に得られたexp, coin, materialの表示
+        クリティカル成功時の演出の実装
+
+ ok ステータス表示の実装
+        coin, materialの表記をどうするか
+
+ ok アイコンの作成
+        Satiety：おにぎり？
+        Happy: くま？ハート？
+        お花
+        草
+        Exp
+        Lv：数字を大きくわかりやすく
+
+ ok Lv表示の洗練
+        最も重要な情報なのでできるだけ目立つように
+        もはや専用アイコンにでもするか？
+
+ ok walletアドレスの表示
+        ついでにIDの表示
+        他人のID覗き見時はどうするか
+            your walletとowner walletは別にするか？
+
+ ok 同期時間表示の実装
+        update_status成功時の_nowを記録
+            _nowとの差を小さく表示など
+        何秒前か、具体的な時間か
+
+ ok レーダーチャートの修正
+        itemによるステータス補正を別の色で重ねて表示させる
 
 --->
