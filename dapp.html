@@ -4,6 +4,18 @@
 
 ToDo
 
+    他人のsummonerへのfeedingを可能にする実装
+        他のsummonerへもfeedingだけは可能とする
+        インセンティブとして、得られるexpの1-5%を自分も得られる。
+        feedingされた方のペナルティはなし（100% exp得られる）。
+        大量feeding botを防ぐために、他人のfeedingは1時間に1回程度にする。
+            last_feeding_time_otherを実装
+            feeding()にownerチェックを実装
+                非owner時は自分のsummonerの検索と、expへの追加を実装
+
+    クラフト成功時にランダムに配られるtiny heartの実装
+        
+
     プレイヤー間のコミュニケーション方法の実装
         案1, 何かしらのアイテムをクラフトすると、ランダムに誰かにもNFTがmintされる
             葉っぱ？おはな？
@@ -619,9 +631,11 @@ async function contract_get_item_count(_summoner) {
 //---summoner-----------------------------------------------------------------------------------------------------
 class Murasakisan extends Phaser.GameObjects.Sprite{
     constructor(scene, x, y){
-        super(scene, x, y, "murasaki_loading");
+        //super(scene, x, y, "murasaki_loading");
+        super(scene, x, y, "murasaki_sleeping");
         this.scene.add.existing(this);
-        this.anims.play("murasaki_loading", true);
+        //this.anims.play("murasaki_loading", true);
+        this.anims.play("murasaki_sleeping", true);
     	this.mode = "resting";
         this.submode = 0;
         this.count = 0;
@@ -1589,6 +1603,10 @@ function preload() {
         progressBar.fillStyle(0xffffff, 1);
         progressBar.fillRect(490, 460, 300 * value, 30);
         percentText.setText( Math.round(value * 100) + "%");
+        if (value == 1) {
+            progressText_loading.setText("Completed!");
+            progressText.setText("");
+        }
     });
     this.load.on("fileprogress", function(file) {
         console.log(file.src);
@@ -1963,6 +1981,15 @@ function create() {
         backgroundColor: "#ffffff",
         align: "center"
     });
+
+    //first sync test
+    text_sync_first = this.add.text(
+        murasakisan.x - 100, 
+        murasakisan.y - 50, 
+        "synchronizing...zzz...", 
+        {fontSize: 20, fontFamily: "Arial", fill: '#000000'}
+    );
+
 }
 
 
@@ -1988,9 +2015,11 @@ function update() {
         text_mode.setText(murasakisan.get_mode);
         if (last_sync_time == 0) {
             text_sync_time.setText("syncing...");
+            //text_sync_first.setText("Synchronizing...");
         } else {
             let _delta = Math.round( (Date.now() - last_sync_time) / 1000 );
             text_sync_time.setText("sync before: " + _delta);
+            text_sync_first.setText("");
         }
     }
 
@@ -2334,7 +2363,7 @@ function update() {
         }
         //50:musicbox
         if (local_items[34] != 0 && local_items_flag[34] != true) {
-            item_musicbox = this.add.sprite(1200,848, "item_musicbox");
+            item_musicbox = this.add.sprite(1200,840, "item_musicbox");
             item_musicbox.scaleX = item_musicbox.scaleX * 0.4;
             item_musicbox.scaleY = item_musicbox.scaleY * 0.4;
             item_musicbox.setInteractive({useHandCursor: true});
@@ -2350,9 +2379,9 @@ function update() {
         }
         //17:vase
         if (local_items[17] != 0 && local_items_flag[17] != true) {
-            item_17 = this.add.sprite(640,192, "item_vase");
-            item_17.scaleX = item_17.scaleX * 0.32;
-            item_17.scaleY = item_17.scaleY * 0.32;
+            item_17 = this.add.sprite(850,270, "item_vase");
+            item_17.scaleX = item_17.scaleX * 0.20;
+            item_17.scaleY = item_17.scaleY * 0.20;
             local_items_flag[17] = true;
         }
         //18
