@@ -1604,8 +1604,8 @@ function preload() {
         progressBar.fillRect(490, 460, 300 * value, 30);
         percentText.setText( Math.round(value * 100) + "%");
         if (value == 1) {
-            progressText_loading.setText("Calling Murasaki-san...");
-            progressText.setText("complete");
+            progressText_loading.setText("Completed!");
+            progressText.setText("Visitting house...");
         }
     });
     this.load.on("fileprogress", function(file) {

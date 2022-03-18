@@ -1605,7 +1605,7 @@ function preload() {
         percentText.setText( Math.round(value * 100) + "%");
         if (value == 1) {
             progressText_loading.setText("Completed!");
-            progressText.setText("");
+            progressText.setText("Visitting now...");
         }
     });
     this.load.on("fileprogress", function(file) {
