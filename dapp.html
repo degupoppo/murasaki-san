@@ -1986,7 +1986,7 @@ function create() {
     text_sync_first = this.add.text(
         murasakisan.x - 100, 
         murasakisan.y - 50, 
-        "synchronizing...zzz...", 
+        "connecting...zzz...", 
         {fontSize: 20, fontFamily: "Arial", fill: '#000000'}
     );
 
@@ -2328,7 +2328,8 @@ function update() {
         }
 
         //level-up button triggered by exp change
-        if (local_exp / local_next_exp_required >= 1 
+        if (
+            local_exp / local_next_exp_required >= 1 
             && local_mining_status == 0 && local_farming_status == 0 && local_crafting_status == 0
             //&& button_levelup.texture.key == "button_levelup_unable"
             && button_levelup.texture.key == "back_level" 
@@ -2336,7 +2337,11 @@ function update() {
         ) {
             button_levelup.setTexture("button_levelup_enable");
             button_levelup.setInteractive();
-        } else if (local_exp / local_next_exp_required < 1) {
+        } else if (
+            button_levelup.texture.key != "back_level" 
+            &&local_exp / local_next_exp_required < 1
+            || local_mining_status == 1 || local_farming_status == 1 || local_crafting_status == 1
+        ) {
             //button_levelup.setTexture("button_levelup_unable");
             button_levelup.setTexture("back_level");
             button_levelup.disableInteractive();
