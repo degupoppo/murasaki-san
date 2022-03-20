@@ -516,6 +516,12 @@ async function contract_update_status(_summoner) {
     }
 }
 
+//update_all
+async function contract_update_all() {
+    await contract_update_summoner_of_wallet();
+    await contract_update_status(summoner);
+}
+
 //summon
 async function contract_summon(_class) {
     let web3 = await connect();
@@ -2421,12 +2427,13 @@ function update() {
     }
 
     //===== contract =====
-    if (turn % 300 == 90) {
+    if (turn % 300 == 80) {
         text_system_message.setText("");
         //when no summoner argument, load summoner id from wallet
         if (summoner == 0) {
             //cant get summoner id directry, update summoner id is better.
-            contract_update_summoner_of_wallet(web3);
+            //contract_update_summoner_of_wallet(web3);
+            contract_update_all();
         //when summoner is loaded, update summoner status
         } else {
             //update dynamic_status
