@@ -1,4 +1,4 @@
-const contract_murasaki_function_share = "0x9DdE8F4B921b161F43b5BCAFD87e25366E3D5549";
+const contract_murasaki_function_share = "0x8D358e956784Aa70bd2e6Fe23767A36F5203f9eb";
 const abi_murasaki_function_share = [
 	{
 		"anonymous": false,
@@ -67,6 +67,19 @@ const abi_murasaki_function_share = [
 			}
 		],
 		"name": "_set4_world_dice_address",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_address",
+				"type": "address"
+			}
+		],
+		"name": "_set5_tiny_heart_address",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -560,6 +573,19 @@ const abi_murasaki_function_share = [
 				"internalType": "uint32",
 				"name": "",
 				"type": "uint32"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "tiny_heart_address",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
 			}
 		],
 		"stateMutability": "view",

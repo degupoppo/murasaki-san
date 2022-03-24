@@ -1,4 +1,4 @@
-const contract_murasaki_function_feeding_and_grooming = "0x5d18ca97f1568B869826Cd2Ba2d745Deb8EA761b";
+const contract_murasaki_function_feeding_and_grooming = "0x5eE3087593E8836e4c697a8b20545b7B61145e44";
 const abi_murasaki_function_feeding_and_grooming = [
 	{
 		"anonymous": false,
@@ -54,13 +54,7 @@ const abi_murasaki_function_feeding_and_grooming = [
 			}
 		],
 		"name": "feeding",
-		"outputs": [
-			{
-				"internalType": "uint32",
-				"name": "",
-				"type": "uint32"
-			}
-		],
+		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
 	},

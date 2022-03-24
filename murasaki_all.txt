@@ -1016,7 +1016,7 @@ contract Murasaki_Main is Badge, Ownable{
         parts[6] = '</text></svg>';
         string memory output = 
             string(abi.encodePacked(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6]));
-        string memory json = Base64.encode(bytes(string(abi.encodePacked('{"name": "summoner #', toString(_summoner), '", "description": "House of Murasaki-san. Murasaki-san is a pet living in your wallet. They grow with your dedication. https://www.murasaki-san.com/", "image": "data:image/svg+xml;base64,', Base64.encode(bytes(output)), '"}'))));
+        string memory json = Base64.encode(bytes(string(abi.encodePacked('{"name": "summoner #', toString(_summoner), '", "description": "House of Murasaki-san. Murasaki-san is a pet living in your wallet. They grow with your dedication. https://murasaki-san.com/", "image": "data:image/svg+xml;base64,', Base64.encode(bytes(output)), '"}'))));
         output = string(abi.encodePacked('data:application/json;base64,', json));
         return output;
     }
@@ -1571,6 +1571,7 @@ contract Murasaki_Function_Summon_and_LevelUp is Ownable {
 }
 
 //=========================================================================================================
+//0x8D358e956784Aa70bd2e6Fe23767A36F5203f9eb
 
 contract Murasaki_Function_Feeding_and_Grooming is Ownable {
 
@@ -1586,10 +1587,12 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable {
     }
 
     //feeding
-    function feeding(uint32 _summoner) external returns (uint32){
+    //***TODO*** limit to feed other summoners, ex: 1hr
+    //function feeding(uint32 _summoner) external returns (uint32){
+    function feeding(uint32 _summoner) external {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
-        require(mfs.check_owner(_summoner, msg.sender));
+        //require(mfs.check_owner(_summoner, msg.sender));
         require(not_petrified(_summoner));
         uint32 _now = uint32(block.timestamp);
         uint32 _satiety = mfs.calc_satiety(_summoner);
@@ -1601,7 +1604,14 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable {
         uint32 _exp = ms.exp(_summoner) + _exp_add;
         ms.set_exp(_summoner, _exp);
         ms.set_last_feeding_time(_summoner, _now);
-        return _exp_add;
+        //owner check, gain some exp when not your summoner
+        Murasaki_Main mm = Murasaki_Main(mfs.murasaki_main_address());
+        uint32 _summoner_yours = mm.tokenOf(msg.sender);
+        if (_summoner_yours != 0 && _summoner != _summoner_yours) {
+            uint32 _exp_yours = ms.exp(_summoner_yours);
+            ms.set_exp(_summoner_yours, _exp_yours + _exp_add / 50);
+        }
+        //return _exp_add;
     }
 
     //petrification, debends on only feeding
@@ -1674,6 +1684,7 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable {
 }
 
 //=========================================================================================================
+//0x5eE3087593E8836e4c697a8b20545b7B61145e44
 
 contract Murasaki_Function_Mining_and_Farming is Ownable {
 
@@ -1845,6 +1856,7 @@ contract Murasaki_Function_Mining_and_Farming is Ownable {
 }
 
 //=========================================================================================================
+//0xAdc4891018940c9ce95CF0F8d029B4F293D2a353
 
 contract Murasaki_Function_Crafting is Ownable {
 
@@ -1904,8 +1916,11 @@ contract Murasaki_Function_Crafting is Ownable {
             }
             //craft
             Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
+            uint32 _next_item = mc.next_item();
             uint32 _seed = mfs.seed(_summoner);
             mc.craft(_item_type, _summoner, msg.sender, _seed);
+            //generate tiny heart
+            create_tiny_heart(_next_item, _summoner);
         }
     }
     function get_modified_dc(uint32 _summoner, uint32 _item_type) public view returns (uint32) {
@@ -1990,25 +2005,33 @@ contract Murasaki_Function_Crafting is Ownable {
     }
 
     //tiny heart ***TODO*** public -> internal, called from craft()
-    //***TODO*** insert into craft()
-    function create_tiny_heart(uint32 _created_item, uint32 _created_summoner) public {
+    //choice random summoner and transfer tiny heart to it
+    //when not active summoner was selected, msg.sender will get it instedlly.
+    function create_tiny_heart(uint32 _created_item, uint32 _created_summoner) internal {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Main mm = Murasaki_Main(mfs.murasaki_main_address());
         Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
         Tiny_Heart th = Tiny_Heart(mfs.tiny_heart_address());
-        address _created_wallet = mm.ownerOf(_created_summoner);
-        uint32 _seed = mfs.seed(_created_summoner);
+        //get random _to_summoner
         uint32 _count_summoners = mm.next_summoner() - 1;
-        uint32 _to_summoner = mfs.dn(_created_summoner,  _count_summoners) + 1; 
-        address _to_wallet = mm.ownerOf(_to_summoner);
+        uint32 _to_summoner = mfs.dn(_created_summoner, _count_summoners) + 1;
+        //check _to_summoner: when not active summoner, transfer to msg.sender
+        bool _isActive = ms.isActive(_to_summoner);
+        address _to_wallet;
         if (
-            _to_wallet != 0x0000000000000000000000000000000000000000
+            _isActive == true
             && ms.level(_to_summoner) >= 3
             && mfs.calc_satiety(_to_summoner) >= 20
             && mfs.calc_happy(_to_summoner) >= 20
         ) {
-            th.create(_created_item, _created_summoner, _created_wallet, _seed, _to_wallet);
+            _to_wallet = mm.ownerOf(_to_summoner);
+        } else {
+            _to_wallet = msg.sender;
         }
+        //create tiny heart
+        uint32 _seed = mfs.seed(_created_summoner);
+        address _created_wallet = mm.ownerOf(_created_summoner);
+        th.create(_created_item, _created_summoner, _created_wallet, _seed, _to_wallet);
     }
 
     //item level
@@ -2411,7 +2434,7 @@ contract Murasaki_Craft is ERC721, Ownable{
         parts[8] = '</text></svg>';
         string memory output = 
             string(abi.encodePacked(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7], parts[8]));
-        string memory json = Base64.encode(bytes(string(abi.encodePacked('{"name": "summoner #', toString(_item), '", "description": "House of Murasaki-san. Murasaki-san is a pet living in your wallet. They grow with your dedication. https://www.murasaki-san.com/", "image": "data:image/svg+xml;base64,', Base64.encode(bytes(output)), '"}'))));
+        string memory json = Base64.encode(bytes(string(abi.encodePacked('{"name": "summoner #', toString(_item), '", "description": "House of Murasaki-san. Murasaki-san is a pet living in your wallet. They grow with your dedication. https://murasaki-san.com/", "image": "data:image/svg+xml;base64,', Base64.encode(bytes(output)), '"}'))));
         output = string(abi.encodePacked('data:application/json;base64,', json));
         return output;
     }
@@ -2426,6 +2449,7 @@ contract Murasaki_Craft is ERC721, Ownable{
 
 //---------------------------------------------------------------------------------------------------------------------
 //world dice
+//0x84c003134E20c5a93859F5b1d601bf9FAF0c417A
 
 contract World_Dice is Ownable {
 
@@ -2529,6 +2553,7 @@ contract Bulletin_Board is Ownable {
 
 //---------------------------------------------------------------------------------------------------------------------
 //Tiny heart
+//0x6dB63DfCcD06887f27cf6c3D0B6812DDb0Cb4490
 
 contract Tiny_Heart is ERC721, Ownable{
 
@@ -2561,7 +2586,7 @@ contract Tiny_Heart is ERC721, Ownable{
         uint32 _seed, 
         address _to_wallet
     ) external {
-        //require(msg.sender == murasaki_function_address);
+        require(msg.sender == murasaki_function_address);
         uint32 _now = uint32(block.timestamp);
         uint32 _crafting_heart = next_heart;
         hearts[_crafting_heart] = heart(_created_item, _now, _created_summoner, _created_wallet);
@@ -2570,7 +2595,6 @@ contract Tiny_Heart is ERC721, Ownable{
         _safeMint(_to_wallet, _crafting_heart);
     }  
 
-    /*
     //URI
     //Inspired by OraclizeAPI's implementation - MIT license
     //https://github.com/oraclize/ethereum-api/blob/b42146b063c7d6ee1358846c198246239e9360e8/oraclizeAPI_0.4.25.sol
@@ -2602,9 +2626,7 @@ contract Tiny_Heart is ERC721, Ownable{
         parts[3] = string(abi.encodePacked("created summoner", " ", toString(hearts[_heart].created_summoner)));
         parts[4] = '</text><text x="10" y="60" class="base">';
         parts[5] = string(abi.encodePacked("created time", " ", toString(hearts[_heart].created_time)));
-        parts[6] = '</text><text x="10" y="80" class="base">';
-        parts[7] = string(abi.encodePacked("created wallet", " ", toString(hearts[_heart].created_wallet)));
-        parts[8] = '</text></svg>';
+        parts[6] = '</text></svg>';
         string memory output = string(abi.encodePacked(
             parts[0], 
             parts[1], 
@@ -2612,15 +2634,11 @@ contract Tiny_Heart is ERC721, Ownable{
             parts[3], 
             parts[4], 
             parts[5], 
-            parts[6], 
-            parts[7], 
-            parts[8]
+            parts[6]
         ));
-        string memory json = Base64.encode(bytes(string(abi.encodePacked('{"name": "summoner #', toString(_item), '", "description": "House of Murasaki-san. Murasaki-san is a pet living in your wallet. They grow with your dedication. https://www.murasaki-san.com/", "image": "data:image/svg+xml;base64,', Base64.encode(bytes(output)), '"}'))));
+        string memory json = Base64.encode(bytes(string(abi.encodePacked('{"name": "heart #', toString(_heart), '", "description": "House of Murasaki-san. Murasaki-san is a pet living in your wallet. They grow with your dedication. https://murasaki-san.com/", "image": "data:image/svg+xml;base64,', Base64.encode(bytes(output)), '"}'))));
         output = string(abi.encodePacked('data:application/json;base64,', json));
         return output;
     }
-    */
-
 }
 

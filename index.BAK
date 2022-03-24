@@ -165,9 +165,9 @@ Doc
 
 <header>
     <nav>
-      <a href="/murasakisan/" class="current">Home</a>
-      <a href="/murasakisan/dapp.html" ><b>Play Game</b></a>
-      <a href="/murasakisan/dapp.html?summoner=1">Demo Preview</a>
+      <a href="/" class="current">Home</a>
+      <a href="/dapp.html" ><b>Play Game</b></a>
+      <a href="/dapp.html?summoner=1">Demo Preview</a>
       <a href="https://twitter.com/degupoppo" >Twitter</a>
       <a href="https://github.com/degupoppo/murasakisan/" >GitHub</a>
     </nav>
@@ -188,6 +188,7 @@ Doc
     <center><code class="language-plaintext highlighter-rouge">
         We have NOT easy Play2Earn mechanism.<br>
         NO pump-and-dump tokens and NO limited NFTs.<br>
+        All you needs are 10 $ASTR and some gas cost.<br>
     </code></center>
 
 </p>

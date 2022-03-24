@@ -1229,10 +1229,10 @@ function radarchart(scene, x0, y0, r, str, dex, int, luk, str_item, dex_item, in
     radar4 = scene.add.polygon(x0+(-x4i+x2i)/2, y0+(-y1i+y3i)/2, [x1,y1i,x2i,y2,x3,y3i,x4i,y4], 0xffd700, 1);
     radar5 = scene.add.polygon(x0+(-x4+x2)/2, y0+(-y1+y3)/2, [x1,y1,x2,y2,x3,y3,x4,y4], 0xffff00, 1);
     let font_arg = {font: "17px Arial", fill: "#000000"};
-    radar6 = scene.add.text(x0-10, y0-r-15, "STR"+"\n"+(str+str_item), font_arg);
-    radar7 = scene.add.text(x0+r, y0-6, "DEX"+"\n"+(dex+dex_item), font_arg);
-    radar8 = scene.add.text(x0-10, y0+r-5, "LUK"+"\n"+(luk+luk_item), font_arg);
-    radar9 = scene.add.text(x0-r-15, y0-6, "INT"+"\n"+(int+int_item), font_arg);
+    radar6 = scene.add.text(x0-10, y0-r-15, "STR"+"\n"+Math.round( (str+str_item)*100 )/100, font_arg);
+    radar7 = scene.add.text(x0+r, y0-6, "DEX"+"\n"+Math.round( (dex+dex_item)*100 )/100, font_arg);
+    radar8 = scene.add.text(x0-10, y0+r-5, "LUK"+"\n"+Math.round( (luk+luk_item)*100 )/100, font_arg);
+    radar9 = scene.add.text(x0-r-15, y0-6, "INT"+"\n"+Math.round( (int+int_item)*100 )/100, font_arg);
 }
 async function draw_radarchart(scene) {
         let _x = 1136;
@@ -1992,7 +1992,7 @@ function create() {
     text_sync_first = this.add.text(
         murasakisan.x - 100, 
         murasakisan.y - 50, 
-        "connecting...zzz...", 
+        "connecting to Astar...", 
         {fontSize: 20, fontFamily: "Arial", fill: '#000000'}
     );
 
@@ -2024,7 +2024,7 @@ function update() {
             //text_sync_first.setText("Synchronizing...");
         } else {
             let _delta = Math.round( (Date.now() - last_sync_time) / 1000 );
-            text_sync_time.setText("sync before: " + _delta);
+            text_sync_time.setText("synced: " + _delta + "s");
             text_sync_first.setText("");
         }
     }
@@ -2427,7 +2427,7 @@ function update() {
     }
 
     //===== contract =====
-    if (turn % 300 == 100) {
+    if (turn % 300 == 80) {
         text_system_message.setText("");
         //when no summoner argument, load summoner id from wallet
         if (summoner == 0) {
