@@ -197,6 +197,7 @@ ok! しゅっきん！（お仕事へ移動中）
     <script src="js_v2/murasaki_function_mining_and_farming.js"></script>
     <script src="js_v2/murasaki_function_share.js"></script>
     <script src="js_v2/murasaki_function_summon_and_levelup.js"></script>
+    <script src="js_v2/tiny_heart.js"></script>
     <style type="text/css">
         body {
             margin: 0;
@@ -247,6 +248,7 @@ let local_crafting_status;
 let local_crafting_start_time = 0;
 let local_crafting_item_type = 0;
 let local_items;
+let local_hear = 0;
 
 //local using variants
 let previous_local_last_feeding_time;
@@ -446,6 +448,7 @@ async function contract_update_status(_summoner) {
     let contract_mfs = await new web3.eth.Contract(abi_murasaki_function_share, contract_murasaki_function_share);
     let contract_mfc = await new web3.eth.Contract(abi_murasaki_function_crafting, contract_murasaki_function_crafting);
     let contract_mfmf = await new web3.eth.Contract(abi_murasaki_function_mining_and_farming, contract_murasaki_function_mining_and_farming);
+    let contract_th = await new web3.eth.Contract(abi_tiny_heart, contract_tiny_heart);
 
     //check isActive
     let _isActive = await contract_ms.methods.isActive(_summoner).call();
@@ -514,6 +517,9 @@ async function contract_update_status(_summoner) {
     } else {
         text_wallet.setText("id: " + summoner + ", owner: " + _wallet1 + "..." + _wallet2);
     }
+
+    //heart
+    local_heart = await contract_th.methods.balanceOf(_owner).call();
 }
 
 //update_all
@@ -1590,6 +1596,7 @@ function preload() {
     this.load.image("icon_ohana", "png/icon_ohana.png", {frameWidth: 182, frameHeight: 171});
     this.load.image("icon_age", "png/icon_age.png", {frameWidth: 300, frameHeight: 325});
     this.load.image("icon_clock", "png/icon_clock.png", {frameWidth: 225, frameHeight: 225});
+    this.load.image("icon_heart", "png/icon_heart.png", {frameWidth: 230, frameHeight: 220});
 
     //level_back
     this.load.image("back_level", "png/back_level.png", {frameWidth: 500, frameHeight: 500});
@@ -1965,6 +1972,11 @@ function create() {
     //level
     text_level = this.add.text(1220, 37, "0", {font: "bold 26px Verdana", fill: "#E5004F"}).setOrigin(0.5);
 
+    //heart
+    icon_heart = this.add.sprite(960, 18, "icon_heart");
+    icon_heart.setScale(0.12);
+    text_heart = this.add.text(975, 10, "***", {font: "17px Arial", fill: "#000", backgroundColor: "#FDEEED"});
+
     //===etc===
 
     //craft_window ***TODO***
@@ -2024,7 +2036,7 @@ function update() {
             //text_sync_first.setText("Synchronizing...");
         } else {
             let _delta = Math.round( (Date.now() - last_sync_time) / 1000 );
-            text_sync_time.setText("synced: " + _delta + "s");
+            text_sync_time.setText("synced: " + _delta + "s ago");
             text_sync_first.setText("");
         }
     }
@@ -2249,6 +2261,9 @@ function update() {
             text_farming_calc.setText("");
             text_crafting_calc.setText("");
         }
+        
+        //heart
+        text_heart.setText("Heart: " + local_heart);
         
         previous_local_last_feeding_time = local_last_feeding_time;
         previous_local_last_grooming_time = local_last_grooming_time;
