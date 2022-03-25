@@ -4,6 +4,12 @@
 
 ToDo
 
+    Nameクライムの実装
+        Nameボタンはどこに配置するか
+        決めたNameはどこに表示するか
+            ネームタグ、表札、自画像等のクラフト後？
+            
+
     他人のsummonerへのfeedingを可能にする実装
         他のsummonerへもfeedingだけは可能とする
         インセンティブとして、得られるexpの1-5%を自分も得られる。
@@ -13,8 +19,7 @@ ToDo
             feeding()にownerチェックを実装
                 非owner時は自分のsummonerの検索と、expへの追加を実装
 
-    クラフト成功時にランダムに配られるtiny heartの実装
-        
+    クラフト成功時にランダムに配られるtiny heartの実装    
 
     プレイヤー間のコミュニケーション方法の実装
         案1, 何かしらのアイテムをクラフトすると、ランダムに誰かにもNFTがmintされる
@@ -248,7 +253,9 @@ let local_crafting_status;
 let local_crafting_start_time = 0;
 let local_crafting_item_type = 0;
 let local_items;
-let local_hear = 0;
+let local_heart = 0;
+let local_wallet;
+let local_owner;
 
 //local using variants
 let previous_local_last_feeding_time;
@@ -509,17 +516,12 @@ async function contract_update_status(_summoner) {
     //update last_sync_time
     last_sync_time = Date.now();
 
-    //update wallet text
-    let _wallet1 = _owner.substring(0,8);
-    let _wallet2 = _owner.slice(-8);
-    if (_owner != wallet) {
-        text_wallet.setText("id: " + summoner + ", owner: " + _wallet1 + "..." + _wallet2 + ", not your character");
-    } else {
-        text_wallet.setText("id: " + summoner + ", owner: " + _wallet1 + "..." + _wallet2);
-    }
-
     //heart
     local_heart = await contract_th.methods.balanceOf(_owner).call();
+
+    //update wallet
+    local_wallet = wallet;
+    local_owner = _owner;
 }
 
 //update_all
@@ -1246,7 +1248,8 @@ async function draw_radarchart(scene) {
         let _r = 80;
         let _res = await contract_get_item_count(summoner);
         console.log(_res);
-        radarchart(scene, _x, _y, _r, local_strength, local_dexterity, local_intelligence, local_luck, _res[0], _res[1], _res[2], _res[3]);
+        //radarchart(scene, _x, _y, _r, local_strength, local_dexterity, local_intelligence, local_luck, _res[0], _res[1], _res[2], _res[3]);
+        radarchart(scene, _x, _y, _r, local_strength, local_dexterity, local_intelligence, local_luck, _res[0], _res[1], _res[2], local_heart*5/100);
 }
 
 
@@ -1511,6 +1514,10 @@ let config = {
         //pixelArt: true,
         //antialias: false
     },
+    parent: 'phaser-container',
+    dom: {
+        createContainer: true
+    },
 };
 let game = new Phaser.Game(config);
 
@@ -1587,6 +1594,7 @@ function preload() {
     //this.load.image("item_19", "png/item_19.png", {frameWidth: 300, frameHeight: 300});
     //this.load.image("item_20", "png/item_20.png", {frameWidth: 300, frameHeight: 300});
     //this.load.image("item_21", "png/item_21.png", {frameWidth: 300, frameHeight: 300});
+    this.load.image("item_kanban", "png/item_kanban2.png", {frameWidth: 1000, frameHeight: 475});
 
     //window
     this.load.image("window", "png/window.png");
@@ -1633,6 +1641,14 @@ function preload() {
         progressText_loading.destroy();
         percentText.destroy();
     });
+
+    //input text
+    this.load.scenePlugin({
+        key: 'rexuiplugin',
+        url: "js_v2/rexuiplugin.min.js",
+        sceneKey: 'rexUI'
+    });
+	this.load.plugin('rextexteditplugin', 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rextexteditplugin.min.js', true)
 }
 
 
@@ -1977,6 +1993,11 @@ function create() {
     icon_heart.setScale(0.12);
     text_heart = this.add.text(975, 10, "***", {font: "17px Arial", fill: "#000", backgroundColor: "#FDEEED"});
 
+    //kanban
+    item_kanban = this.add.sprite(85, 75, "item_kanban");
+    item_kanban.setScale(0.14);
+    text_kanban = this.add.text(85, 80, "fumafumamo", {font: "bold 17px Arial", fill: "#ffffff"}).setOrigin(0.5);
+	text_kanban.setInteractive().on('pointerdown', () => {this.rexUI.edit(text_kanban)})
     //===etc===
 
     //craft_window ***TODO***
@@ -2007,6 +2028,18 @@ function create() {
         "connecting to Astar...", 
         {fontSize: 20, fontFamily: "Arial", fill: '#000000'}
     );
+
+	text_test = this.add.text(200, 200, 'Hello World', {fixedWidth:150, fixedHeight:24, backgroundColor:"#ffff00"})
+        .setFontSize(20)
+        .setFontFamily("Bold Arial")
+        .setFill("#000000")
+        .setOrigin(0.5);
+
+//, { fixedWidth: 150, fixedHeight: 36, fill:"#000000", backgroundColor: "#ffff00" })
+//	text_test.setOrigin(0.5)
+	text_test.setInteractive().on('pointerdown', () => {
+		this.rexUI.edit(text_test)
+	})
 
 }
 
@@ -2264,6 +2297,18 @@ function update() {
         
         //heart
         text_heart.setText("Heart: " + local_heart);
+
+        //wallet text
+        let _owner1 = local_owner.substring(0,8);
+        let _owner2 = local_owner.slice(-8);
+        let _text = "";
+        _text += "id: " + summoner + ", ";
+        _text += "name: " + "unnamed" + ", ";
+        _text += "owner: " + _owner1 + "..." + _owner2 + ", ";
+        if (local_owner != local_wallet) {
+            _text += "not owned by you.";
+        }
+        text_wallet.setText(_text);
         
         previous_local_last_feeding_time = local_last_feeding_time;
         previous_local_last_grooming_time = local_last_grooming_time;

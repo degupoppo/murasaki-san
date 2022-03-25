@@ -7,6 +7,9 @@
     heart補正の実装
         luck参照時にheart補正を加える
         補正値をどうするか。+0.01？0.02？0.05？
+        0.05で。およそ100個得ると+5.00の補正
+            Lv10で最大+5の補正なので、このくらいが妥当か。
+        ほぼすべてのfunctionが再デプロになるので、すげ替える。
 
     NFTのtransferへのコスト設定
         murasaki_craft内でtransferをoverriderする
@@ -1232,6 +1235,7 @@ contract Murasaki_Function_Share is Ownable {
     address public murasaki_craft_address;
     address public world_dice_address;
     address public tiny_heart_address;
+    address public murasaki_name_address;
 
     //address set, admin
     function _set1_murasaki_main_address(address _address) external onlyOwner {
@@ -1248,6 +1252,9 @@ contract Murasaki_Function_Share is Ownable {
     }
     function _set5_tiny_heart_address(address _address) external onlyOwner {
         tiny_heart_address = _address;
+    }
+    function _set6_murasaki_name_address(address _address) external onlyOwner {
+        murasaki_name_address = _address;
     }
 
     //check owner of summoner
@@ -1386,6 +1393,16 @@ contract Murasaki_Function_Share is Ownable {
         address _owner = mm.ownerOf(_summoner);
         uint32 _heart = uint32(th.balanceOf(_owner));
         return _heart;
+    }
+
+    //call_name_from_summoner
+    function call_name_from_summoner(uint32 _summoner) external view returns (string memory) {
+        Murasaki_Name mn = Murasaki_Name(murasaki_name_address);
+        Murasaki_Main mm = Murasaki_Main(murasaki_main_address);
+        address _owner = mm.ownerOf(_summoner);
+        uint32 _name_id = mn.tokenOf(_owner);
+        string memory _name_str = mn.names(_name_id);
+        return _name_str;
     }
 
     //random
@@ -1611,7 +1628,9 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable {
         uint32 _satiety = mfs.calc_satiety(_summoner);
         uint32 _exp_add = 500 * (100 - _satiety) / 100;
         //luck challenge
-        if (mfs.d100(_summoner) <= ms.luck(_summoner)/100) {
+        uint32 _luck_mod = ms.luck(_summoner) + mfs.calc_heart(_summoner) * 5;
+        if (mfs.d100(_summoner) <= _luck_mod/100) {
+        //if (mfs.d100(_summoner) <= ms.luck(_summoner)/100) {
             _exp_add = _exp_add *2;
         }
         uint32 _exp = ms.exp(_summoner) + _exp_add;
@@ -1668,7 +1687,9 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable {
         uint32 _happy = calc_happy_real(_summoner);
         uint32 _exp_add = 3000 * (100 - _happy) / 100;
         //luck challenge
-        if (mfs.d100(_summoner) <= ms.luck(_summoner)/100) {
+        uint32 _luck_mod = ms.luck(_summoner) + mfs.calc_heart(_summoner) * 5;
+        if (mfs.d100(_summoner) <= _luck_mod/100) {
+        //if (mfs.d100(_summoner) <= ms.luck(_summoner)/100) {
             _exp_add = _exp_add *2;
         }
         uint32 _exp = ms.exp(_summoner) + _exp_add;
@@ -1732,7 +1753,9 @@ contract Murasaki_Function_Mining_and_Farming is Ownable {
         uint32 _now = uint32(block.timestamp);
         uint32 _delta = calc_mining(_summoner);
         //luck modification
-        if (mfs.d100(_summoner) <= ms.luck(_summoner)/100) {
+        uint32 _luck_mod = ms.luck(_summoner) + mfs.calc_heart(_summoner) * 5;
+        if (mfs.d100(_summoner) <= _luck_mod/100) {
+        //if (mfs.d100(_summoner) <= ms.luck(_summoner)/100) {
             _delta = _delta *2;
         }
         //add coin
@@ -1809,7 +1832,9 @@ contract Murasaki_Function_Mining_and_Farming is Ownable {
         uint32 _now = uint32(block.timestamp);
         uint32 _delta = calc_farming(_summoner);
         //luck modification
-        if (mfs.d100(_summoner) <= ms.luck(_summoner)/100) {
+        uint32 _luck_mod = ms.luck(_summoner) + mfs.calc_heart(_summoner) * 5;
+        if (mfs.d100(_summoner) <= _luck_mod/100) {
+        //if (mfs.d100(_summoner) <= ms.luck(_summoner)/100) {
             _delta = _delta *2;
         }
         //add coin
@@ -1924,7 +1949,9 @@ contract Murasaki_Function_Crafting is Ownable {
         ms.set_crafting_status(_summoner, 0);   //before tx, required status must be updated
         if (_calc_crafting == 0) {
             //rare challenge
-            if (mfs.d100(_summoner) <= ms.luck(_summoner)/100) {
+            uint32 _luck_mod = ms.luck(_summoner) + mfs.calc_heart(_summoner) * 5;
+            if (mfs.d100(_summoner) <= _luck_mod/100) {
+            //if (mfs.d100(_summoner) <= ms.luck(_summoner)/100) {
                 _item_type += 64;
             }
             //craft
@@ -2489,7 +2516,9 @@ contract World_Dice is Ownable {
         //dice roll
         uint32 _dice_roll = mfs.d20(_summoner) * 10;
         //luck challenge
-        if (mfs.d100(_summoner) <= ms.luck(_summoner)/100) {
+        uint32 _luck_mod = ms.luck(_summoner) + mfs.calc_heart(_summoner) * 5;
+        if (mfs.d100(_summoner) <= _luck_mod/100) {
+        //if (mfs.d100(_summoner) <= ms.luck(_summoner)/100) {
             _dice_roll = 20 * 10;  //critical
         }
         rolled_dice[_summoner] = _dice_roll;
@@ -2654,4 +2683,145 @@ contract Tiny_Heart is ERC721, Ownable{
         return output;
     }
 }
+
+
+
+//---------------------------------------------------------------------------------------------------------------------
+//Murasaki Name
+
+contract Murasaki_Name is Badge, Ownable{
+
+    //address
+    address public murasaki_function_address;
+    function _set_murasaki_function_address(address _address) public onlyOwner {
+        murasaki_function_address = _address;
+    }
+
+    //names
+    string constant internal _name = "Murasaki Names";
+    string constant internal _symbol = "MN";
+    constructor(
+    ) Badge(_name, _symbol) {}
+
+    //static status
+    mapping(uint32 => string) public names;
+    mapping(uint32 => uint32) public minted_time;
+    mapping(uint32 => uint32) public seed;
+    mapping(string => bool) public isMinted;
+
+    //variants
+    uint32 public next_name = 1;
+
+    //mint
+    function mint(address _owner, string memory _name_str, uint32 _seed) external {
+        require(msg.sender == murasaki_function_address);
+        uint32 _now = uint32(block.timestamp);
+        uint32 _minting_name_id = next_name;
+        names[_minting_name_id] = _name_str;
+        minted_time[_minting_name_id] = _now;
+        seed[_minting_name_id] = _seed;
+        //mint
+        next_name++;
+        isMinted[_name_str] = true;
+        _mint(_owner, _minting_name_id);
+    }
+
+    //burn
+    function burn(uint32 _name_id) external {
+        require(msg.sender == murasaki_function_address);
+        string memory _name_str = names[_name_id];
+        isMinted[_name_str] = false;
+        Badge._burn(_name_id);
+    }
+}
+
+
+
+//---------------------------------------------------------------------------------------------------------------------
+//Murasaki Function Name
+
+contract Murasaki_Function_Name is Ownable {
+
+    //address
+    address public murasaki_function_share_address;
+    function _set1_murasaki_function_share_address(address _address) external onlyOwner {
+        murasaki_function_share_address = _address;
+    }
+
+    //admin, withdraw
+    function withdraw(address rec)public onlyOwner{
+        payable(rec).transfer(address(this).balance);
+    }
+
+    //mint
+    function mint(uint32 _summoner, string memory _name_str) external {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Name mn = Murasaki_Name(mfs.murasaki_name_address());
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        //owner check
+        require(mfs.check_owner(_summoner, msg.sender));
+        //name check
+        require(validate_name(_name_str));
+        require(mn.isMinted(_name_str) == false);
+        //level check
+        require(ms.level(_summoner) >= 3);
+        //cost check
+        uint32 _coin = 100;
+        uint32 _material = 100;
+        require(ms.coin(_summoner) >= _coin && ms.material(_summoner) >= _material);
+        //pay cost
+        ms.set_coin(_summoner, ms.coin(_summoner) - _coin);
+        ms.set_material(_summoner, ms.material(_summoner) - _material);
+        //mint
+        uint32 _seed = mfs.seed(_summoner);
+        mn.mint(msg.sender, _name_str, _seed);
+    }
+
+    //burn
+    function burn(uint32 _summoner) external {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Name mn = Murasaki_Name(mfs.murasaki_name_address());
+        require(mfs.check_owner(_summoner, msg.sender));
+        address _owner = mfs.get_owner(_summoner);
+        uint32 _name_id = mn.tokenOf(_owner);
+        require(_name_id > 0);
+        mn.burn(_name_id);
+    }
+
+    //call_name_from_summoner
+    function call_name_from_summoner(uint32 _summoner) external view returns (string memory) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Name mn = Murasaki_Name(mfs.murasaki_name_address());
+        address _owner = mfs.get_owner(_summoner);
+        uint32 _name_id = mn.tokenOf(_owner);
+        string memory _name_str = mn.names(_name_id);
+        return _name_str;
+    }
+
+    // from rarity_names
+    // indentifying large and small capital
+    // @dev Check if the name string is valid (Alphanumeric and spaces without leading or trailing space)
+    function validate_name(string memory str) public pure returns (bool){
+        bytes memory b = bytes(str);
+        if(b.length < 1) return false;
+        if(b.length > 25) return false; // Cannot be longer than 25 characters
+        if(b[0] == 0x20) return false; // Leading space
+        if (b[b.length - 1] == 0x20) return false; // Trailing space
+        bytes1 last_char = b[0];
+        for(uint i; i<b.length; i++){
+            bytes1 char = b[i];
+            if (char == 0x20 && last_char == 0x20) return false; // Cannot contain continous spaces
+            if(
+                !(char >= 0x30 && char <= 0x39) && //9-0
+                !(char >= 0x41 && char <= 0x5A) && //A-Z
+                !(char >= 0x61 && char <= 0x7A) && //a-z
+                !(char == 0x20) //space
+            )
+                return false;
+            last_char = char;
+        }
+        return true;
+    }
+}
+
 
