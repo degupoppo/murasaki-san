@@ -2062,7 +2062,7 @@ contract Murasaki_Function_Crafting is Ownable {
             _isActive == true
             && ms.level(_to_summoner) >= 3
             && mfs.calc_satiety(_to_summoner) >= 20
-            && mfs.calc_happy(_to_summoner) >= 20
+            //&& mfs.calc_happy(_to_summoner) >= 20
         ) {
             _to_wallet = mm.ownerOf(_to_summoner);
         } else {

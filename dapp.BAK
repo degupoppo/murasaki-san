@@ -2029,6 +2029,7 @@ function create() {
         {fontSize: 20, fontFamily: "Arial", fill: '#000000'}
     );
 
+    /*
 	text_test = this.add.text(200, 200, 'Hello World', {fixedWidth:150, fixedHeight:24, backgroundColor:"#ffff00"})
         .setFontSize(20)
         .setFontFamily("Bold Arial")
@@ -2040,6 +2041,7 @@ function create() {
 	text_test.setInteractive().on('pointerdown', () => {
 		this.rexUI.edit(text_test)
 	})
+    */
 
 }
 
