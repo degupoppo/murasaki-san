@@ -4,6 +4,10 @@
 
 /***
 
+    heart補正の実装
+        luck参照時にheart補正を加える
+        補正値をどうするか。+0.01？0.02？0.05？
+
     NFTのtransferへのコスト設定
         murasaki_craft内でtransferをoverriderする
         costを実装しておき後から設定できるようにする
@@ -1373,6 +1377,15 @@ contract Murasaki_Function_Share is Ownable {
             _happy = 100 * (_base - _delta_sec) / _base;
         }
         return _happy;
+    }
+
+    //calc heart
+    function calc_heart(uint32 _summoner) public view returns (uint32) {
+        Tiny_Heart th = Tiny_Heart(tiny_heart_address);
+        Murasaki_Main mm = Murasaki_Main(murasaki_main_address);
+        address _owner = mm.ownerOf(_summoner);
+        uint32 _heart = uint32(th.balanceOf(_owner));
+        return _heart;
     }
 
     //random
