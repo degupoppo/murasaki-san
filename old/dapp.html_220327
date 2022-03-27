@@ -4,11 +4,21 @@
 
 ToDo
 
-    Nameクライムの実装
-        Nameボタンはどこに配置するか
-        決めたNameはどこに表示するか
-            ネームタグ、表札、自画像等のクラフト後？
-            
+    Nameは看板をクラフト後にmint出来るように変更する
+
+    サウンドの洗練
+        有効サウンドの選別
+        各アクションにできるだけサウンドを導入する
+
+    UIの洗練
+        ウィンドウの整備
+        システムメッセージの整備
+        数字加算のアニメーション化
+        バー増加のアニメーション化
+        名前クライムのボタン化
+        Summonウィンドウの洗練
+        システムメッセージの表示方法
+            アニメーションなどで演出する
 
     他人のsummonerへのfeedingを可能にする実装
         他のsummonerへもfeedingだけは可能とする
@@ -18,49 +28,6 @@ ToDo
             last_feeding_time_otherを実装
             feeding()にownerチェックを実装
                 非owner時は自分のsummonerの検索と、expへの追加を実装
-
-    クラフト成功時にランダムに配られるtiny heartの実装    
-
-    プレイヤー間のコミュニケーション方法の実装
-        案1, 何かしらのアイテムをクラフトすると、ランダムに誰かにもNFTがmintされる
-            葉っぱ？おはな？
-            貯めると何が起こる？
-        案2, 手紙のようなものをクラフトし、クラフト成功時に宛先IDとメッセージを書き込める
-            受け取った手紙を検索して画面に表示するのが難しいか
-            外部データベース必須になりそう
-            あるいはastarscanに該当するものが公開されればapiでNFTのIDを持ってこれるか
-        具体的なメッセージが送れると荒れるので、非言語表現が可能な程度に留める
-            ♪、ハート、星、など。
-            誰から送られたかだけわかるようにする。
-            はてぶのスターみたいな感じ？
-            スターをクラフトして誰かに送る、など。
-            送るインセンティブと、集めるインセンティブを考えたい。
-            例えば、スターには種類があって、色ごとに集めると何かしら、など。
-            人からもらったスターでしかLukが上がらない、など。
-            botを避けるため、単一wallet由来のスターの効果は重複しない、など。
-            luckを上げるためには、たくさんの別の人からstarを送られないと行けない。
-            スターを集めるインセンティブ：Luck上昇
-            スターを送るインセンティブ：なに？？
-                自分で得たスターは自分には効果を及ぼさない。
-                誰かに渡したときにLuckに+0.1される。
-                誰から貰ったかは不明な方が面白いか。
-        案, 誰かがitemをcraftしたら1個発生するハート
-            それまでに存在するsummonerにランダムでtransferされる
-                burnを判別できないのでburnにも行くが無視
-            ハートを受け取るとluckに+0.01？+0.05？
-            ハートはNFTなので売り買い移動自由
-            誰がmint主かはハートに刻まれる
-            貯金箱をクラフトしたらハートを可視化できる？
-                効果を得るのも貯金箱クラフトしてから？
-            最終的に48アイテム/summonerなので、50個/summoner程度が平均的な最大値
-                もちろん、市場で買い占めればもっと増えるが。
-                0.01なら x50 = +0.5
-                0.05なら x50 = +2.5
-                レベルアップによる最大値は+0.5なので、2.5は5レベル分
-                この当たりを最大値とするか。10個で1レベル分、0.5%確率アップ。
-            Lv3以上、happyが20%以上のとき受取完了できる
-                条件を満たさないと立ち消え
-            誰が、いつ、何のアイテムをクラフトしたときのハートかがNFTに刻み込まれる
 
     微調整
         groomingの位置合わせ
@@ -72,24 +39,12 @@ ToDo
         48種類なので、48個のシャボン玉を飛ばすのは非現実的
         やはり大きなウィンドウが扱いやすいか。
 
-    Summonウィンドウの洗練
-
-    システムメッセージの表示方法
-        アニメーションなどで演出する
-
     Petの実装
         アニメーションの完備
         複数種類のpet所有時のコード整備
             Mr. ASTR
             Ms. DOT
             ひよこ, など
-
-    Nameの実装
-        専用NTTコントラの実装
-        クラフトによってNTTをmint
-        Nameをmint済みだと_modに+100（+1 Lv相当）
-        表札をクラフトするとnameが表示される
-        phaser3におけるテキスト入力と内容取得の実装
 
     経済の深慮
         マケプレ解説はRMTと同義
@@ -257,6 +212,7 @@ let local_items;
 let local_heart = 0;
 let local_wallet;
 let local_owner = "0x0000000000000000000000000000000000000000";
+let local_name_str = "(unnamed)";
 
 //local using variants
 let previous_local_last_feeding_time;
@@ -269,6 +225,7 @@ let previous_local_exp;
 let previous_local_coin;
 let previous_local_material;
 let previous_local_items;
+let previous_local_name_str;
 let satiety = 0;
 let happy = 0;
 let local_coin_calc;
@@ -457,6 +414,7 @@ async function contract_update_status(_summoner) {
     let contract_mfc = await new web3.eth.Contract(abi_murasaki_function_crafting, contract_murasaki_function_crafting);
     let contract_mfmf = await new web3.eth.Contract(abi_murasaki_function_mining_and_farming, contract_murasaki_function_mining_and_farming);
     let contract_th = await new web3.eth.Contract(abi_tiny_heart, contract_tiny_heart);
+    let contract_mn = await new web3.eth.Contract(abi_murasaki_function_name, contract_murasaki_function_name);
 
     //check isActive
     let _isActive = await contract_ms.methods.isActive(_summoner).call();
@@ -514,15 +472,18 @@ async function contract_update_status(_summoner) {
     local_items = await contract_mfs.methods.get_balance_of_type_array(_owner).call();
     console.log("status:", _dynamic_status, "items:", local_items);
 
-    //update last_sync_time
-    last_sync_time = Date.now();
-
     //heart
     local_heart = await contract_th.methods.balanceOf(_owner).call();
 
     //update wallet
     local_wallet = wallet;
     local_owner = _owner;
+
+    //name
+    local_name_str = await contract_mn.methods.call_name_from_summoner(_summoner).call();
+
+    //update last_sync_time
+    last_sync_time = Date.now();
 }
 
 //update_all
@@ -785,6 +746,9 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             this.count_limit = this.count + 1000;
             this.submode = 3;
         }else if (this.submode == 3) {
+            if (this.count % 200 == 0) {
+                sound_happy.play();
+            }
             if (this.count >= this.count_limit) {
                 this.mode = "resting";
                 this.count = 0;
@@ -1594,6 +1558,12 @@ function preload() {
     //sound
     this.load.audio("button_on", "sound/button_on.mp3");
     this.load.audio("button_select", "sound/button_select.mp3");
+    this.load.audio("feeding", "sound/feeding.mp3");
+    this.load.audio("grooming", "sound/grooming.mp3");
+    this.load.audio("mining", "sound/mining.mp3");
+    this.load.audio("farming", "sound/farming.mp3");
+    this.load.audio("crafting", "sound/crafting.mp3");
+    this.load.audio("happy", "sound/happy.mp3");
 
     //items
     this.load.spritesheet("item_musicbox", "png/item_musicbox.png", {frameWidth: 370, frameHeight: 320});
@@ -1920,6 +1890,12 @@ function create() {
     //sound
     sound_button_select = this.sound.add("button_select", {volume:0.2});
     sound_button_on = this.sound.add("button_on", {volume:0.2});
+    sound_feeding = this.sound.add("feeding", {volume:0.2});
+    sound_grooming = this.sound.add("grooming", {volume:0.2});
+    sound_mining = this.sound.add("mining", {volume:0.2});
+    sound_farming = this.sound.add("farming", {volume:0.2});
+    sound_crafting = this.sound.add("crafting", {volume:0.2});
+    sound_happy = this.sound.add("happy", {volume:0.2});
 
     //===create summoner===
 
@@ -2002,14 +1978,31 @@ function create() {
     icon_heart.setScale(0.12);
     text_heart = this.add.text(975, 10, "***", {font: "17px Arial", fill: "#000", backgroundColor: "#FDEEED"});
 
-    //kanban
+    //name
     item_kanban = this.add.sprite(85, 75, "item_kanban");
     item_kanban.setScale(0.14);
-    text_kanban = this.add.text(85, 80, "fumafumamo", {font: "17px Arial", fill: "#ffffff"}).setOrigin(0.5);
+    text_kanban = this.add.text(85, 80, "", {font: "17px Arial", fill: "#ffffff"}).setOrigin(0.5);
 	text_kanban.setInteractive().on('pointerdown', () => {this.rexUI.edit(text_kanban)})
-    text_mint_name = this.add.text(170, 72, "mint name", {font: "17px Arial", fill: "#000000"});
-    //text_mint_name.setInteractive().on("pointerdown", () => {contract_mint_name(summoner, text_kanban.text)});
-    text_mint_name.setInteractive().on("pointerdown", () => {contract_mint_name(1, "test")});
+    text_mint_name = this.add.text(165, 60, "[MINT NAME]", {font: "17px Arial", fill: "#000000"})
+        .setInteractive({useHandCursor: true})
+        .on("pointerover", () => text_mint_name.setStyle({ fontSize: 17, fontFamily: "Arial", fill: '#ffff00' }))
+        .on("pointerout", () => text_mint_name.setStyle({ fontSize: 17, fontFamily: "Arial", fill: '#000000' }));
+    text_mint_name.setInteractive().on("pointerdown", () => {contract_mint_name(summoner, text_kanban.text)});
+    //text_mint_name.visible = false;
+    icon_name_ohana = this.add.sprite(175, 90, "icon_ohana");
+    icon_name_ohana.setScale(0.12);
+    text_name_ohana = this.add.text(185, 82, "100", {font: "17px Arial", fill: "#000000"});
+    icon_name_kusa = this.add.sprite(225, 90, "icon_kusa");
+    icon_name_kusa.setScale(0.06);
+    text_name_kusa = this.add.text(235, 82, "100", {font: "17px Arial", fill: "#000000"});
+    //group
+    group_mint_name = this.add.group();
+    group_mint_name.add(text_mint_name);
+    group_mint_name.add(icon_name_ohana);
+    group_mint_name.add(text_name_ohana);
+    group_mint_name.add(icon_name_kusa);
+    group_mint_name.add(text_name_kusa);
+    group_mint_name.setVisible(false);
 
     //===etc===
 
@@ -2153,6 +2146,7 @@ function update() {
             let _delta = local_exp - previous_local_exp;
             text_exp_earned.setText("+" + _delta);
             text_exp_earned_count = 5;
+            sound_feeding.play();
         }
 
         //grooming check, continue
@@ -2165,6 +2159,7 @@ function update() {
             let _delta = local_exp - previous_local_exp;
             text_exp_earned.setText("+" + _delta);
             text_exp_earned_count = 5;
+            sound_grooming.play();
         }
 
         //mining, farming, crafting
@@ -2176,6 +2171,7 @@ function update() {
             murasakisan.count = 0;
             murasakisan.target_x = 100;
             murasakisan.target_y = 800;
+            sound_mining.play();
         }else if (local_mining_status == 0 & murasakisan.mode == "mining") {
             murasakisan.set_mode = "resting";
             //earning text
@@ -2197,6 +2193,7 @@ function update() {
             murasakisan.count = 0;
             murasakisan.target_x = 450;
             murasakisan.target_y = 300;
+            sound_farming.play();
         }else if (local_farming_status == 0 & murasakisan.mode == "farming") {
             murasakisan.set_mode = "resting";
             //earning text
@@ -2219,6 +2216,7 @@ function update() {
             murasakisan.target_x = 730;
             murasakisan.target_y = 300;
             text_select_item.setText('"'+array_item_name[local_crafting_item_type]+'"')
+            sound_crafting.play();
         }else if (local_crafting_status == 0 & murasakisan.mode == "crafting") {
             murasakisan.set_mode = "resting";
             text_select_item.setText(">> Select Item <<")
@@ -2314,24 +2312,42 @@ function update() {
         //heart
         text_heart.setText("Heart: " + local_heart);
         
+        //name
+        if (previous_local_name_str != local_name_str || previous_local_level != local_level) {
+            let _name_str;
+            if (local_name_str == "" && local_level >= 3) {
+                _name_str = "(enter name)";
+                text_kanban.setInteractive();
+                //text_mint_name.visible = true;
+                group_mint_name.setVisible(true);
+            } else {
+                _name_str = local_name_str;
+                text_kanban.disableInteractive();
+                //text_mint_name.visible = false;
+                group_mint_name.setVisible(false);
+            }
+            text_kanban.setText(_name_str);
+        }
+        
         //wallet text
-        let _owner1 = local_owner.substring(0,8);
-        let _owner2 = local_owner.slice(-8);
+        let _owner1 = local_owner.substring(0,5);
+        let _owner2 = local_owner.slice(-4);
         let _text = "";
         _text += "id: " + summoner + ", ";
-        _text += "name: " + "unnamed" + ", ";
+        _text += "name: " + local_name_str + ", ";
         _text += "owner: " + _owner1 + "..." + _owner2 + ", ";
         if (local_owner != local_wallet && local_owner != "0x0000000000000000000000000000000000000000") {
             _text += "not owned by you.";
         }
         text_wallet.setText(_text);
-        
+
         previous_local_last_feeding_time = local_last_feeding_time;
         previous_local_last_grooming_time = local_last_grooming_time;
         previous_local_level = local_level;
         previous_local_coin = local_coin;
         previous_local_material = local_material;
         previous_local_exp = local_exp;
+        previous_local_name_str = local_name_str;
     }
 
     //===== button =====
@@ -2473,16 +2489,16 @@ function update() {
         }
         //18
         if (local_items[18] != 0 && local_items_flag[18] != true) {
-            item_18 = this.add.sprite(320,880, "item_18");
-            item_18.scaleX = item_18.scaleX * 0.4;
-            item_18.scaleY = item_18.scaleY * 0.4;
+            item_18 = this.add.sprite(320,880, "item_dummy");
+            item_18.scaleX = item_18.scaleX * 0.2;
+            item_18.scaleY = item_18.scaleY * 0.2;
             local_items_flag[18] = true;
         }
         //19
         if (local_items[19] != 0 && local_items_flag[19] != true) {
             item_19 = this.add.sprite(400,880, "item_19");
-            item_19.scaleX = item_19.scaleX * 0.4;
-            item_19.scaleY = item_19.scaleY * 0.4;
+            item_19.scaleX = item_19.scaleX * 0.2;
+            item_19.scaleY = item_19.scaleY * 0.2;
             local_items_flag[19] = true;
         }
         //20
@@ -2659,5 +2675,62 @@ function update() {
 
  ok レーダーチャートの修正
         itemによるステータス補正を別の色で重ねて表示させる
+
+ ok クラフト成功時にランダムに配られるtiny heartの実装    
+
+ ok プレイヤー間のコミュニケーション方法の実装
+        案1, 何かしらのアイテムをクラフトすると、ランダムに誰かにもNFTがmintされる
+            葉っぱ？おはな？
+            貯めると何が起こる？
+        案2, 手紙のようなものをクラフトし、クラフト成功時に宛先IDとメッセージを書き込める
+            受け取った手紙を検索して画面に表示するのが難しいか
+            外部データベース必須になりそう
+            あるいはastarscanに該当するものが公開されればapiでNFTのIDを持ってこれるか
+        具体的なメッセージが送れると荒れるので、非言語表現が可能な程度に留める
+            ♪、ハート、星、など。
+            誰から送られたかだけわかるようにする。
+            はてぶのスターみたいな感じ？
+            スターをクラフトして誰かに送る、など。
+            送るインセンティブと、集めるインセンティブを考えたい。
+            例えば、スターには種類があって、色ごとに集めると何かしら、など。
+            人からもらったスターでしかLukが上がらない、など。
+            botを避けるため、単一wallet由来のスターの効果は重複しない、など。
+            luckを上げるためには、たくさんの別の人からstarを送られないと行けない。
+            スターを集めるインセンティブ：Luck上昇
+            スターを送るインセンティブ：なに？？
+                自分で得たスターは自分には効果を及ぼさない。
+                誰かに渡したときにLuckに+0.1される。
+                誰から貰ったかは不明な方が面白いか。
+        案, 誰かがitemをcraftしたら1個発生するハート
+            それまでに存在するsummonerにランダムでtransferされる
+                burnを判別できないのでburnにも行くが無視
+            ハートを受け取るとluckに+0.01？+0.05？
+            ハートはNFTなので売り買い移動自由
+            誰がmint主かはハートに刻まれる
+            貯金箱をクラフトしたらハートを可視化できる？
+                効果を得るのも貯金箱クラフトしてから？
+            最終的に48アイテム/summonerなので、50個/summoner程度が平均的な最大値
+                もちろん、市場で買い占めればもっと増えるが。
+                0.01なら x50 = +0.5
+                0.05なら x50 = +2.5
+                レベルアップによる最大値は+0.5なので、2.5は5レベル分
+                この当たりを最大値とするか。10個で1レベル分、0.5%確率アップ。
+            Lv3以上、happyが20%以上のとき受取完了できる
+                条件を満たさないと立ち消え
+            誰が、いつ、何のアイテムをクラフトしたときのハートかがNFTに刻み込まれる
+
+ ok Nameの実装
+        専用NTTコントラの実装
+        クラフトによってNTTをmint
+        Nameをmint済みだと_modに+100（+1 Lv相当）
+        表札をクラフトするとnameが表示される
+        phaser3におけるテキスト入力と内容取得の実装
+
+ ok Nameクライムの実装
+        Nameボタンはどこに配置するか
+        決めたNameはどこに表示するか
+            ネームタグ、表札、自画像等のクラフト後？
+        要求コスト、要求レベルの表示と実装
+
 
 --->

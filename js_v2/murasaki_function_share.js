@@ -1,4 +1,4 @@
-const contract_murasaki_function_share = "0x8D358e956784Aa70bd2e6Fe23767A36F5203f9eb";
+const contract_murasaki_function_share = "0xa7811c0fA0e08A9C7af232F9B8ED2556196F5508";
 const abi_murasaki_function_share = [
 	{
 		"anonymous": false,
@@ -87,84 +87,12 @@ const abi_murasaki_function_share = [
 	{
 		"inputs": [
 			{
-				"internalType": "string",
-				"name": "pBaseURI",
-				"type": "string"
-			}
-		],
-		"name": "setBaseURI",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
 				"internalType": "address",
-				"name": "rdg",
+				"name": "_address",
 				"type": "address"
 			}
 		],
-		"name": "setRDG",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint32",
-				"name": "_summoner_from",
-				"type": "uint32"
-			},
-			{
-				"internalType": "uint32",
-				"name": "_summoner_to",
-				"type": "uint32"
-			},
-			{
-				"internalType": "uint32",
-				"name": "_coin",
-				"type": "uint32"
-			}
-		],
-		"name": "transfer_coin",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint32",
-				"name": "_summoner_from",
-				"type": "uint32"
-			},
-			{
-				"internalType": "uint32",
-				"name": "_summoner_to",
-				"type": "uint32"
-			},
-			{
-				"internalType": "uint32",
-				"name": "_material",
-				"type": "uint32"
-			}
-		],
-		"name": "transfer_material",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "newOwner",
-				"type": "address"
-			}
-		],
-		"name": "transferOwnership",
+		"name": "_set6_murasaki_name_address",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -196,12 +124,50 @@ const abi_murasaki_function_share = [
 				"type": "uint32"
 			}
 		],
+		"name": "calc_heart",
+		"outputs": [
+			{
+				"internalType": "uint32",
+				"name": "",
+				"type": "uint32"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint32",
+				"name": "_summoner",
+				"type": "uint32"
+			}
+		],
 		"name": "calc_satiety",
 		"outputs": [
 			{
 				"internalType": "uint32",
 				"name": "",
 				"type": "uint32"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint32",
+				"name": "_summoner",
+				"type": "uint32"
+			}
+		],
+		"name": "call_name_from_summoner",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
 			}
 		],
 		"stateMutability": "view",
@@ -535,6 +501,19 @@ const abi_murasaki_function_share = [
 	},
 	{
 		"inputs": [],
+		"name": "murasaki_name_address",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
 		"name": "murasaki_strage_address",
 		"outputs": [
 			{
@@ -579,6 +558,32 @@ const abi_murasaki_function_share = [
 		"type": "function"
 	},
 	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "pBaseURI",
+				"type": "string"
+			}
+		],
+		"name": "setBaseURI",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "rdg",
+				"type": "address"
+			}
+		],
+		"name": "setRDG",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
 		"inputs": [],
 		"name": "tiny_heart_address",
 		"outputs": [
@@ -589,6 +594,65 @@ const abi_murasaki_function_share = [
 			}
 		],
 		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "newOwner",
+				"type": "address"
+			}
+		],
+		"name": "transferOwnership",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint32",
+				"name": "_summoner_from",
+				"type": "uint32"
+			},
+			{
+				"internalType": "uint32",
+				"name": "_summoner_to",
+				"type": "uint32"
+			},
+			{
+				"internalType": "uint32",
+				"name": "_coin",
+				"type": "uint32"
+			}
+		],
+		"name": "transfer_coin",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint32",
+				"name": "_summoner_from",
+				"type": "uint32"
+			},
+			{
+				"internalType": "uint32",
+				"name": "_summoner_to",
+				"type": "uint32"
+			},
+			{
+				"internalType": "uint32",
+				"name": "_material",
+				"type": "uint32"
+			}
+		],
+		"name": "transfer_material",
+		"outputs": [],
+		"stateMutability": "nonpayable",
 		"type": "function"
 	},
 	{

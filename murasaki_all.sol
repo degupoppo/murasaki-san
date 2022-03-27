@@ -4,7 +4,12 @@
 
 /***
 
-    heart補正の実装
+    補正の上限の設定
+        将来的でよいか
+        heartは100個以上無効
+        str/dex/int/luckも50以上無効、など
+
+ ok heart補正の実装
         luck参照時にheart補正を加える
         補正値をどうするか。+0.01？0.02？0.05？
         0.05で。およそ100個得ると+5.00の補正
@@ -26,7 +31,7 @@
         ただし、NFTのtransferのUIを開放してしまうと、
             大体の人がmulti walletの有利さに気づいてしまうだろう。
 
-    nameの実装
+ ok nameの実装
         strageに保存するか、別の専用コントラを設けるか
         重複なしの場合はrarity_nameの様な専用コントラが必要
         NFTではなくNTTが良いか。
@@ -949,6 +954,7 @@ library Base64 {
 
 //---------------------------------------------------------------------------------------------------------------------
 //Murasaki Main
+//0xae778a945bF612b13E78eB1162E79a42e29A4036
 
 contract Murasaki_Main is Badge, Ownable{
 
@@ -1033,6 +1039,7 @@ contract Murasaki_Main is Badge, Ownable{
 
 //---------------------------------------------------------------------------------------------------------------------
 //Murasaki Strage
+//0x7ca3B2969B49D51C630a77b17b8e5E95A4f7b1d2
 
 contract Murasaki_Strage is Ownable {
 
@@ -1334,6 +1341,8 @@ contract Murasaki_Function_Share is Ownable {
         return mc.get_balance_of_type(_owner);
     }
 
+    /*
+    //***TODO*** craftable coin/material bag NFT, mint to spend coin/material, burn to gein coin/material
     //transfer coin, material
     function transfer_coin(uint32 _summoner_from, uint32 _summoner_to, uint32 _coin) external {
         Murasaki_Main mm = Murasaki_Main(murasaki_main_address);
@@ -1351,6 +1360,7 @@ contract Murasaki_Function_Share is Ownable {
         ms.set_material(_summoner_from, ms.material(_summoner_from) - _material);
         ms.set_material(_summoner_to, ms.material(_summoner_to) + _material);
     }
+    */
 
     //calc satiety
     function calc_satiety(uint32 _summoner) public view returns (uint32) {
@@ -1601,7 +1611,6 @@ contract Murasaki_Function_Summon_and_LevelUp is Ownable {
 }
 
 //=========================================================================================================
-//0x8D358e956784Aa70bd2e6Fe23767A36F5203f9eb
 
 contract Murasaki_Function_Feeding_and_Grooming is Ownable {
 
@@ -1718,7 +1727,6 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable {
 }
 
 //=========================================================================================================
-//0x5eE3087593E8836e4c697a8b20545b7B61145e44
 
 contract Murasaki_Function_Mining_and_Farming is Ownable {
 
@@ -1894,7 +1902,6 @@ contract Murasaki_Function_Mining_and_Farming is Ownable {
 }
 
 //=========================================================================================================
-//0xAdc4891018940c9ce95CF0F8d029B4F293D2a353
 
 contract Murasaki_Function_Crafting is Ownable {
 
@@ -2805,13 +2812,15 @@ contract Murasaki_Function_Name is Ownable {
     function validate_name(string memory str) public pure returns (bool){
         bytes memory b = bytes(str);
         if(b.length < 1) return false;
-        if(b.length > 25) return false; // Cannot be longer than 25 characters
+        //if(b.length > 25) return false; // Cannot be longer than 25 characters
+        if(b.length > 12) return false; // Cannot be longer than 12 characters
         if(b[0] == 0x20) return false; // Leading space
         if (b[b.length - 1] == 0x20) return false; // Trailing space
         bytes1 last_char = b[0];
         for(uint i; i<b.length; i++){
             bytes1 char = b[i];
-            if (char == 0x20 && last_char == 0x20) return false; // Cannot contain continous spaces
+            //if (char == 0x20 && last_char == 0x20) return false; // Cannot contain continous spaces
+            if (char == 0x20) return false; // Cannot contain any spaces
             if(
                 !(char >= 0x30 && char <= 0x39) && //9-0
                 !(char >= 0x41 && char <= 0x5A) && //A-Z
