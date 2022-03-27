@@ -806,6 +806,9 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             this.count_limit = this.count + 1500;
             this.submode = 3;
         }else if (this.submode == 3) {
+            if (this.count % 200 == 0) {
+                sound_happy.play();
+            }
             if (this.count >= this.count_limit) {
                 this.mode = "resting";
                 this.count = 0;
