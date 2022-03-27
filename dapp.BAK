@@ -202,6 +202,7 @@ ok! しゅっきん！（お仕事へ移動中）
     <script src="js_v2/murasaki_function_mining_and_farming.js"></script>
     <script src="js_v2/murasaki_function_share.js"></script>
     <script src="js_v2/murasaki_function_summon_and_levelup.js"></script>
+    <script src="js_v2/murasaki_function_name.js"></script>
     <script src="js_v2/tiny_heart.js"></script>
     <style type="text/css">
         body {
@@ -638,6 +639,14 @@ async function contract_get_item_count(_summoner) {
     let _crafting_item_count = await contract_mfc.methods.count_crafting_items(_owner).call();
     let _luck_item_count = 0;
     return [Number(_mining_item_count)/100, Number(_farming_item_count)/100, Number(_crafting_item_count)/100, _luck_item_count];
+}
+
+//mint name
+async function contract_mint_name(_summoner, _name_str) {
+    let web3 = await connect();
+    let contract = await new web3.eth.Contract(abi_murasaki_function_name, contract_murasaki_function_name);
+    let wallet = await get_wallet(web3);
+    contract.methods.mint(_summoner, _name_str).send({from:wallet});
 }
 
 
@@ -1996,8 +2005,12 @@ function create() {
     //kanban
     item_kanban = this.add.sprite(85, 75, "item_kanban");
     item_kanban.setScale(0.14);
-    text_kanban = this.add.text(85, 80, "fumafumamo", {font: "bold 17px Arial", fill: "#ffffff"}).setOrigin(0.5);
+    text_kanban = this.add.text(85, 80, "fumafumamo", {font: "17px Arial", fill: "#ffffff"}).setOrigin(0.5);
 	text_kanban.setInteractive().on('pointerdown', () => {this.rexUI.edit(text_kanban)})
+    text_mint_name = this.add.text(170, 72, "mint name", {font: "17px Arial", fill: "#000000"});
+    //text_mint_name.setInteractive().on("pointerdown", () => {contract_mint_name(summoner, text_kanban.text)});
+    text_mint_name.setInteractive().on("pointerdown", () => {contract_mint_name(1, "test")});
+
     //===etc===
 
     //craft_window ***TODO***
@@ -2081,6 +2094,7 @@ function update() {
 
         //DEBUG: mouse pointer
         //console.log(Math.round(game.input.mousePointer.x), Math.round(game.input.mousePointer.y));
+        //console.log(text_kanban.text);
 
         //earned text
         text_exp_earned_count -= 1;
@@ -2299,7 +2313,6 @@ function update() {
         
         //heart
         text_heart.setText("Heart: " + local_heart);
-
         
         //wallet text
         let _owner1 = local_owner.substring(0,8);
@@ -2312,7 +2325,6 @@ function update() {
             _text += "not owned by you.";
         }
         text_wallet.setText(_text);
-        
         
         previous_local_last_feeding_time = local_last_feeding_time;
         previous_local_last_grooming_time = local_last_grooming_time;
