@@ -748,7 +748,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             this.count_limit = this.count + 1000;
             this.submode = 3;
         }else if (this.submode == 3) {
-            if (this.count % 200 == 0) {
+            if (this.count % 200 == 10) {
                 sound_happy.play();
             }
             if (this.count >= this.count_limit) {
@@ -808,7 +808,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             this.count_limit = this.count + 1500;
             this.submode = 3;
         }else if (this.submode == 3) {
-            if (this.count % 200 == 0) {
+            if (this.count % 200 == 10) {
                 sound_happy.play();
             }
             if (this.count >= this.count_limit) {
@@ -845,6 +845,9 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             }
         }else if (this.submode == 2) {
             this.anims.play("murasaki_mining", true);
+            if (this.count % 400 == 10) {
+                sound_mining_during.play();
+            }
         }
     }
     hugging() {
@@ -1507,8 +1510,11 @@ function preload() {
     this.load.audio("feeding", "sound/feeding.mp3");
     this.load.audio("grooming", "sound/grooming.mp3");
     this.load.audio("mining", "sound/mining.mp3");
+    this.load.audio("mining_during", "sound/mining_during.mp3");
     this.load.audio("farming", "sound/farming.mp3");
+    this.load.audio("farming_during", "sound/farming_during.mp3");
     this.load.audio("crafting", "sound/crafting.mp3");
+    this.load.audio("crafting_during", "sound/crafting_during.mp3");
     this.load.audio("happy", "sound/happy.mp3");
 
     //items
@@ -1839,8 +1845,11 @@ function create() {
     sound_feeding = this.sound.add("feeding", {volume:0.2});
     sound_grooming = this.sound.add("grooming", {volume:0.2});
     sound_mining = this.sound.add("mining", {volume:0.2});
+    sound_mining_during = this.sound.add("mining_during", {volume:0.2});
     sound_farming = this.sound.add("farming", {volume:0.2});
+    sound_farming_during = this.sound.add("farming_during", {volume:0.2});
     sound_crafting = this.sound.add("crafting", {volume:0.2});
+    sound_crafting_during = this.sound.add("crafting_during", {volume:0.01});
     sound_happy = this.sound.add("happy", {volume:0.2});
 
     //===create summoner===
