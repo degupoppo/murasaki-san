@@ -223,9 +223,9 @@ let previous_local_level = 0;
 let previous_local_mining_status;
 let previous_local_farming_status;
 let previous_local_crafting_status;
-let previous_local_exp = 0;
-let previous_local_coin = 0;
-let previous_local_material = 0;
+let previous_local_exp;
+let previous_local_coin;
+let previous_local_material;
 let previous_local_items;
 let previous_local_name_str;
 let satiety = 0;
@@ -242,13 +242,6 @@ let global_selected_crafting_item_dc;
 let last_sync_time = 0;
 let mode = "";
 let text_wallet;
-let screen_coin = 0;
-let screen_coin_delta = 0;
-let screen_material = 0;
-let screen_material_delta = 0;
-let screen_exp = 0;
-let screen_exp_delta = 0;
-let count_update = 0;
 
 /*
 let local_pet;
@@ -493,7 +486,6 @@ async function contract_update_status(_summoner) {
 
     //update last_sync_time
     last_sync_time = Date.now();
-    count_update += 1;
 }
 
 //update_all
@@ -2004,15 +1996,27 @@ function create() {
         "connecting to Astar...", 
         {fontSize: 20, fontFamily: "Arial", fill: '#000000'}
     );
+
+    /*
+	text_test = this.add.text(200, 200, 'Hello World', {fixedWidth:150, fixedHeight:24, backgroundColor:"#ffff00"})
+        .setFontSize(20)
+        .setFontFamily("Bold Arial")
+        .setFill("#000000")
+        .setOrigin(0.5);
+
+//, { fixedWidth: 150, fixedHeight: 36, fill:"#000000", backgroundColor: "#ffff00" })
+//	text_test.setOrigin(0.5)
+	text_test.setInteractive().on('pointerdown', () => {
+		this.rexUI.edit(text_test)
+	})
+    */
+
 }
 
 
 
 //---update-----------------------------------------------------------------------------------------------------
-
 function update() {
-
-
 
     //increment turn
     turn += 1;
@@ -2028,7 +2032,6 @@ function update() {
     }
 
     //===== sync time =====
-
     if (turn % 20 == 0) {
         text_mode.setText(murasakisan.get_mode);
         if (last_sync_time == 0) {
@@ -2041,284 +2044,28 @@ function update() {
         }
     }
 
-    //===== numerics and bars =====
-
-    if (turn % 2 == 0) {
-        if (screen_coin_delta != 0) {
-            let _p = (100 - screen_coin_easing)/100;
-            if (_p < 1) {
-                let _easing = 1 - Math.pow(1 - _p, 4);  //easeOutQuart: https://easings.net/ja#easeOutQuart
-                let _screen_coin = screen_coin + screen_coin_delta * _easing;
-                text_coin.setText("Ohana: " + Math.round(_screen_coin) );
-                screen_coin_easing -= 1;
-            } else {
-                text_coin.setText("Ohana: " + local_coin);
-                screen_coin_delta = 0;
-            }
-        }
-        if (screen_material_delta != 0) {
-            let _p = (100 - screen_material_easing)/100;
-            if (_p < 1) {
-                let _easing = 1 - Math.pow(1 - _p, 4);  //easeOutQuart: https://easings.net/ja#easeOutQuart
-                let _screen_material = screen_material + screen_material_delta * _easing;
-                text_material.setText("Kusa: " + Math.round(_screen_material) );
-                screen_material_easing -= 1;
-            } else {
-                text_material.setText("Kusa: " + local_material);
-                screen_material_delta = 0;
-            }
-        }
-        if (screen_exp_delta != 0) {
-            let _p = (100 - screen_exp_easing)/100;
-            if (_p < 1) {
-                let _easing = 1 - Math.pow(1 - _p, 4);  //easeOutQuart: https://easings.net/ja#easeOutQuart
-                let _screen_exp = screen_exp + screen_exp_delta * _easing;
-                text_exp.setText(Math.round(_screen_exp) + " / " + local_next_exp_required);
-                screen_exp_easing -= 1;
-            } else {
-                text_exp.setText(local_exp + " / " + local_next_exp_required);
-                screen_exp_delta = 0;
-            }
-        }
-    }
-
-    //===== update parameters with animation =====
-
+    //===== status =====
     if (turn % 150 == 0) {
 
-        //coin
-        if (previous_local_coin != local_coin) {
-            //count animation
-            screen_coin_delta = local_coin - previous_local_coin;
-            screen_coin_easing = 100;
-            //earning text
-            if (count_update > 1) {
-                let _delta = local_coin - previous_local_coin;
-                if (_delta >= local_coin_calc * 1.5) {
-                    text_coin_earned.setText("+" + _delta + " lucky♪");
-                } else {
-                    text_coin_earned.setText("+" + _delta);
-                }
-                text_coin_earned_count = 5;
-            }
+        //DEBUG: mouse pointer
+        //console.log(Math.round(game.input.mousePointer.x), Math.round(game.input.mousePointer.y));
+        //console.log(text_kanban.text);
+
+        //earned text
+        text_exp_earned_count -= 1;
+        if (text_exp_earned_count == 0) {
+            text_exp_earned.setText("");
         }
-        //earning text clean-up
-        if (text_coin_earned_count > 0) {
-            text_coin_earned_count -= 1;
-            if (text_coin_earned_count == 0) {
-                text_coin_earned.setText("");
-            }
+        text_coin_earned_count -= 1;
+        if (text_coin_earned_count == 0) {
+            text_coin_earned.setText("");
+        }
+        text_material_earned_count -= 1;
+        if (text_material_earned_count == 0) {
+            text_material_earned.setText("");
         }
 
-        //material
-        if (previous_local_material != local_material) {
-            //count animation
-            screen_material_delta = local_material - previous_local_material;
-            screen_material_easing = 100;
-            //earning text
-            if (count_update > 1) {
-                let _delta = local_material - previous_local_material;
-                if (_delta >= local_material_calc * 1.5) {
-                    text_material_earned.setText("+" + _delta + " lucky♪");
-                } else {
-                    text_material_earned.setText("+" + _delta);
-                }
-                text_material_earned_count = 5;
-            }
-        }
-        //earning text clean-up
-        if (text_material_earned_count > 0) {
-            text_material_earned_count -= 1;
-            if (text_material_earned_count == 0) {
-                text_material_earned.setText("");
-            }
-        }
-
-        //exp
-        if (previous_local_exp != local_exp) {
-            //count animation
-            screen_exp_delta = local_exp - previous_local_exp;
-            screen_exp_easing = 100;
-            //earning text
-            if (count_update > 1) {
-                let _delta = local_exp - previous_local_exp;
-                text_exp_earned.setText("+" + _delta);
-                text_exp_earned_count = 5;
-            }
-        }
-        //earning text clean-up
-        if (text_exp_earned_count > 0) {
-            text_exp_earned_count -= 1;
-            if (text_exp_earned_count == 0) {
-                text_exp_earned.setText("");
-            }
-        }
-
-        /*
-        //update earned text
-        if (text_exp_earned_count > 0) {
-            text_exp_earned_count -= 1;
-            if (text_exp_earned_count == 0) {
-                text_exp_earned.setText("");
-            }
-        }
-        if (text_material_earned_count > 0) {
-            text_material_earned_count -= 1;
-            if (text_material_earned_count == 0) {
-                text_material_earned.setText("");
-            }
-        }
-        */
-
-        //update calculation_status
-        let now_time = Date.now() / 1000;
-        let age_time = Math.round(now_time - local_birth_time);
-
-        //satiety
-        let base = 86400 / 2 / SPEED;
-        satiety = Math.round( (base - (now_time - local_last_feeding_time)) / base * 100 );
-        if (satiety < 0) { satiety = 0; }
-        if (satiety > 100) { satiety = 100; }
-        text_satiety.setText(satiety + "%");
-
-        //happy
-        let base2 = 86400 * 3 / SPEED;
-        happy = Math.round( (base2 - (now_time - local_last_grooming_time)) / base2 * 100 );
-        if (happy < 0) { happy = 0; }
-        if (happy > 100) { happy = 100; }
-        text_happy.setText(happy + "%");
-
-        //exp
-        let exp = (local_exp / local_next_exp_required) * 100;
-        if (exp > 100) { exp = 100; }
-        /****
-        if (Number(local_exp) > Number(local_next_exp_required)) {
-            text_exp.setText(local_next_exp_required + " / " + local_next_exp_required);
-        } else {
-            text_exp.setText(local_exp + " / " + local_next_exp_required);
-        }
-        */
-
-        //update bar
-        if (satiety >= 0 && happy >= 0 && exp >= 0) {
-            bar_satiety.scaleX = satiety / 100;
-            bar_happy.scaleX = happy / 100;
-            bar_exp.scaleX = exp / 100;
-        }
-
-        //coin & material
-        //text_coin.setText("Ohana: " + screen_coin);
-        //text_material.setText("Kusa: " + local_material);
-
-/*
-            //earning text
-            let _delta = local_material - previous_local_material;
-            if (_delta >= local_material_calc * 1.5) {
-                text_material_earned.setText("+" + _delta + " lucky♪");
-            } else {
-                text_material_earned.setText("+" + _delta);
-            }
-            text_material_earned_count = 5;
-
-
-            let _delta = local_exp - previous_local_exp;
-            text_exp_earned.setText("+" + _delta);
-            text_exp_earned_count = 5;
-*/
-
-        previous_local_coin = local_coin;
-        previous_local_material = local_material;
-        previous_local_exp = local_exp;
-    }
-
-    //===== update parameters without animation =====
-
-    if (turn % 150 == 10) {
-
-        //age
-        let now_time = Date.now() / 1000;
-        let age_time = Math.round(now_time - local_birth_time);
-        let age = Math.round( age_time * SPEED / 86400 );
-        text_age_time.setText(age + "d");
-
-        //level
-        if (button_levelup.texture.key != "button_levelup_pointerover") {
-            text_level.setText(local_level);
-        }
-
-        //degub info
-        text_speed.setText("speed: x" + SPEED);
-
-        //heart
-        text_heart.setText("Heart: " + local_heart);
-
-        //update progression status
-        let _mode = murasakisan.get_mode;
-        if (_mode == "mining") {
-            icon_mining.visible = true;
-            text_mining_calc.setText("+ " + local_coin_calc + " Ohana");
-        }else if (_mode == "farming") {
-            icon_farming.visible = true;
-            text_farming_calc.setText("+ " + local_material_calc + " Kusa");
-        }else if (_mode == "crafting") {
-            icon_crafting_time_remining.visible = true;
-            if (local_crafting_calc > 0) {
-                //TOFIX: invisible selecte item info
-                text_crafting_selected_item_ohana.setText("");
-                text_crafting_selected_item_kusa.setText("");
-                text_crafting_selected_item_time.setText("");
-                icon_crafting_ohana.visible = false;
-                icon_crafting_kusa.visible = false;
-                icon_crafting_time.visible = false;
-                //calc remining time
-                let _total_sec = local_crafting_calc;
-                let _day = Math.floor(_total_sec / 86400);
-                let _hr = Math.floor(_total_sec % 86400 / 3600);
-                let _min = Math.floor(_total_sec % 3600 / 60);
-                text_crafting_calc.setText(_day + "d:" + _hr + "h:" + _min + "m remining");
-            } else{
-                text_crafting_calc.setText("Completed!");
-            }
-        }else {
-            text_mining_calc.setText("");
-            text_farming_calc.setText("");
-            text_crafting_calc.setText("");
-        }
-        
-        //name
-        if (previous_local_name_str != local_name_str || previous_local_level != local_level) {
-            let _name_str;
-            if (local_name_str == "" && local_level >= 3) {
-                _name_str = "(enter name)";
-                text_kanban.setInteractive();
-                group_mint_name.setVisible(true);
-            } else {
-                _name_str = local_name_str;
-                text_kanban.disableInteractive();
-                //text_mint_name.visible = false;
-                group_mint_name.setVisible(false);
-            }
-            text_kanban.setText(_name_str);
-        }
-        
-        //wallet text
-        let _owner1 = local_owner.substring(0,5);
-        let _owner2 = local_owner.slice(-4);
-        let _text = "";
-        _text += "id: " + summoner + ", ";
-        _text += "name: " + local_name_str + ", ";
-        _text += "owner: " + _owner1 + "..." + _owner2 + ", ";
-        if (local_owner != local_wallet && local_owner != "0x0000000000000000000000000000000000000000") {
-            _text += "not owned by you.";
-        }
-        text_wallet.setText(_text);
-
-        previous_local_name_str = local_name_str;
-    }
-
-    //===== check mode change =====
-
-    if (turn % 150 == 20) {
+        //levelup, feeding, grooming
 
         //level up
         if (local_level > previous_local_level) {
@@ -2343,9 +2090,10 @@ function update() {
                 button_crafting.on('pointerout', () => button_crafting.setTexture("button_crafting_enable"));
                 button_crafting.setInteractive();
             }
+        }
 
         //feeding check, continue
-        } else if (local_last_feeding_time > previous_local_last_feeding_time){
+        else if (local_last_feeding_time > previous_local_last_feeding_time){
             murasakisan.set_mode = "feeding";
             murasakisan.submode = 0;
             murasakisan.count = 0;
@@ -2357,17 +2105,26 @@ function update() {
             food = this.add.sprite(600,730, "food_sweet_potato");
             food.scaleX = food.scaleX * 0.16;
             food.scaleY = food.scaleY * 0.16;
+            let _delta = local_exp - previous_local_exp;
+            text_exp_earned.setText("+" + _delta);
+            text_exp_earned_count = 5;
             sound_feeding.play();
+        }
 
         //grooming check, continue
-        } else if (local_last_grooming_time > previous_local_last_grooming_time){
+        else if (local_last_grooming_time > previous_local_last_grooming_time){
             murasakisan.set_mode = "grooming";
             murasakisan.submode = 0;
             murasakisan.count = 0;
             murasakisan.target_x = 1000;
             murasakisan.target_y = 400;
+            let _delta = local_exp - previous_local_exp;
+            text_exp_earned.setText("+" + _delta);
+            text_exp_earned_count = 5;
             sound_grooming.play();
         }
+
+        //mining, farming, crafting
 
         //mining check
         if (local_mining_status == 1 & murasakisan.mode != "mining" & murasakisan.mode != "feeding"){
@@ -2379,11 +2136,20 @@ function update() {
             sound_mining.play();
         }else if (local_mining_status == 0 & murasakisan.mode == "mining") {
             murasakisan.set_mode = "resting";
+            //earning text
+            let _delta = local_coin - previous_local_coin;
+            if (_delta >= local_coin_calc * 1.5) {
+                text_coin_earned.setText("+" + _delta + " lucky♪");
+            } else {
+                text_coin_earned.setText("+" + _delta);
+            }
+            text_coin_earned_count = 5;
             //icon invisible
             icon_mining.visible = false;
+        }
 
         //farming check, continue
-        } else if (local_farming_status == 1 & murasakisan.mode != "farming" & murasakisan.mode != "feeding"){
+        else if (local_farming_status == 1 & murasakisan.mode != "farming" & murasakisan.mode != "feeding"){
             murasakisan.set_mode = "farming";
             murasakisan.submode = 0;
             murasakisan.count = 0;
@@ -2392,11 +2158,20 @@ function update() {
             sound_farming.play();
         }else if (local_farming_status == 0 & murasakisan.mode == "farming") {
             murasakisan.set_mode = "resting";
+            //earning text
+            let _delta = local_material - previous_local_material;
+            if (_delta >= local_material_calc * 1.5) {
+                text_material_earned.setText("+" + _delta + " lucky♪");
+            } else {
+                text_material_earned.setText("+" + _delta);
+            }
+            text_material_earned_count = 5;
             //icon invisible
             icon_farming.visible = false;
+        }
 
         //crafting check, continue
-        } else if (local_crafting_status == 1 & murasakisan.mode != "crafting" & murasakisan.mode != "feeding"){
+        else if (local_crafting_status == 1 & murasakisan.mode != "crafting" & murasakisan.mode != "feeding"){
             murasakisan.set_mode = "crafting";
             murasakisan.submode = 0;
             murasakisan.count = 0;
@@ -2412,14 +2187,133 @@ function update() {
             icon_crafting_time_remining.visible = false;
         }
 
+        //update calculation_status
+        let now_time = Date.now() / 1000;
+        let age_time = Math.round(now_time - local_birth_time);
+        let _mode = murasakisan.get_mode;
+        let base = 86400 / 2 / SPEED;
+        //satiety
+        satiety = Math.round( (base - (now_time - local_last_feeding_time)) / base * 100 );
+        if (satiety < 0) { satiety = 0; }
+        if (satiety > 100) { satiety = 100; }
+        let base2 = 86400 * 3 / SPEED;
+        text_satiety.setText(satiety + "%");
+        //happy
+        happy = Math.round( (base2 - (now_time - local_last_grooming_time)) / base2 * 100 );
+        if (happy < 0) { happy = 0; }
+        if (happy > 100) { happy = 100; }
+        text_happy.setText(happy + "%");
+        //exp
+        let exp = (local_exp / local_next_exp_required) * 100;
+        if (exp > 100) { exp = 100; }
+        if (Number(local_exp) > Number(local_next_exp_required)) {
+            text_exp.setText(local_next_exp_required + " / " + local_next_exp_required);
+        } else {
+            text_exp.setText(local_exp + " / " + local_next_exp_required);
+        }
+
+        //update text
+        let age = Math.round( age_time * SPEED / 86400 );
+        text_age_time.setText(age + "d");
+
+        //level
+        if (button_levelup.texture.key != "button_levelup_pointerover") {
+            text_level.setText(local_level);
+        }
+
+        //degub info
+        text_speed.setText("speed: x" + SPEED);
+
+        //coin & material
+        text_coin.setText("Ohana: " + local_coin);
+        text_material.setText("Kusa: " + local_material);
+
+        //update bar
+        if (satiety >= 0 && happy >= 0 && exp >= 0) {
+            bar_satiety.scaleX = satiety / 100;
+            bar_happy.scaleX = happy / 100;
+            bar_exp.scaleX = exp / 100;
+        }
+
+        //update progression status
+        if (_mode == "mining") {
+            //text_working_calc.setText("+ " + local_coin_calc + " Ohana");
+            icon_mining.visible = true;
+            text_mining_calc.setText("+ " + local_coin_calc + " Ohana");
+        }else if (_mode == "farming") {
+            //text_working_calc.setText("+ " + local_material_calc + " Kusa");
+            icon_farming.visible = true;
+            text_farming_calc.setText("+ " + local_material_calc + " Kusa");
+        }else if (_mode == "crafting") {
+            icon_crafting_time_remining.visible = true;
+            if (local_crafting_calc > 0) {
+                //TOFIX: invisible selecte item info
+                text_crafting_selected_item_ohana.setText("");
+                text_crafting_selected_item_kusa.setText("");
+                text_crafting_selected_item_time.setText("");
+                icon_crafting_ohana.visible = false;
+                icon_crafting_kusa.visible = false;
+                icon_crafting_time.visible = false;
+                //text_craft_item.setText("");    //***TODO:***
+                //calc remining time
+                let _total_sec = local_crafting_calc;
+                let _day = Math.floor(_total_sec / 86400);
+                let _hr = Math.floor(_total_sec % 86400 / 3600);
+                let _min = Math.floor(_total_sec % 3600 / 60);
+                //text_working_calc.setText(local_crafting_calc + " sec left");
+                text_crafting_calc.setText(_day + "d:" + _hr + "h:" + _min + "m remining");
+            } else{
+                text_crafting_calc.setText("Completed!");
+            }
+        }else {
+            text_mining_calc.setText("");
+            text_farming_calc.setText("");
+            text_crafting_calc.setText("");
+        }
+        
+        //heart
+        text_heart.setText("Heart: " + local_heart);
+        
+        //name
+        if (previous_local_name_str != local_name_str || previous_local_level != local_level) {
+            let _name_str;
+            if (local_name_str == "" && local_level >= 3) {
+                _name_str = "(enter name)";
+                text_kanban.setInteractive();
+                //text_mint_name.visible = true;
+                group_mint_name.setVisible(true);
+            } else {
+                _name_str = local_name_str;
+                text_kanban.disableInteractive();
+                //text_mint_name.visible = false;
+                group_mint_name.setVisible(false);
+            }
+            text_kanban.setText(_name_str);
+        }
+        
+        //wallet text
+        let _owner1 = local_owner.substring(0,5);
+        let _owner2 = local_owner.slice(-4);
+        let _text = "";
+        _text += "id: " + summoner + ", ";
+        _text += "name: " + local_name_str + ", ";
+        _text += "owner: " + _owner1 + "..." + _owner2 + ", ";
+        if (local_owner != local_wallet && local_owner != "0x0000000000000000000000000000000000000000") {
+            _text += "not owned by you.";
+        }
+        text_wallet.setText(_text);
+
         previous_local_last_feeding_time = local_last_feeding_time;
         previous_local_last_grooming_time = local_last_grooming_time;
         previous_local_level = local_level;
+        previous_local_coin = local_coin;
+        previous_local_material = local_material;
+        previous_local_exp = local_exp;
+        previous_local_name_str = local_name_str;
     }
 
-    //===== check button activation =====
-
-    if (turn % 150 == 30) {
+    //===== button =====
+    if (turn % 150 == 10) {
 
         if (
             previous_local_mining_status != local_mining_status ||
@@ -2519,9 +2413,8 @@ function update() {
         previous_local_crafting_status = local_crafting_status;
     }
 
-    //===== check item =====
-
-    if (turn % 150 == 40 && local_items != previous_local_items) {
+    //===== item =====
+    if (turn % 150 == 20 && local_items != previous_local_items) {
         //1:Ms. Astar
         if (
                 (local_items[1] != 0 && local_items_flag[1] != true) ||
@@ -2587,8 +2480,7 @@ function update() {
         previous_local_items = local_items;
     }
 
-    //===== update onchain data =====
-
+    //===== contract =====
     if (turn % 300 == 80) {
         text_system_message.setText("");
         //when no summoner argument, load summoner id from wallet
@@ -2619,6 +2511,188 @@ function update() {
 <!---
 //---garbadge-----------------------------------------------------------------------------------------------------
 
+ ok summoner所持item
+        所持itemの検索
+        所持itemのスプライト表示
+
+ ok 資源のバランスと差別化
+        coinとmaterialの差別化
+
+ ok level-up可能なときに再読込するとボタンがデアクティブ化するバグ修正
+ ok 最初にパラメータが反映されないバグ修正
+
+ ok summoner所持item
+        所持itemの検索
+        所持itemのスプライト表示
+
+    craftingのUI実装
+     ok item_idの選択方法
+     ok craftのstart/stopボタン
+     ok 選択アイテムのコスト表示
+        成功/失敗の表現
+
+    petのUI実装
+     ok pet所持の有無を監視
+        petの絵の用意
+        pet関数の実装
+            moving
+            resting
+            mining
+            farming
+            moving_working
+        petへのstart mining/farmingとstopの実装
+
+    BGMと効果音の追加
+        効果音の吟味と割り当て完了
+     ok BGMのON/OFFボタンの実装
+     ok 効果音の実装
+     ok クラフト可能なミュージックボックスの実装
+
+    ステータス表示の実装
+     ok 数値＋視覚情報
+     ok STR, DEX等のメーターをどうするか
+            レーダーチャート？
+                三角形のレーダーチャート + Luck表記
+        coin, materialの表記をどうするか
+
+    updateの整備
+        update_timeのみを高頻度でcallして監視し
+        update_timeが変わったときに全データをcallして取得し、ローカル変数を書き換える
+
+ ok status取得方法の修正
+        contract関数の修正
+
+ ok 初期画面の実装
+        Now Loading
+        まだsummonしていない場合はsummonボタンの表示
+        まだsummonしていない場合はsummonerを非表示にする？
+ ok summon画面の実装
+        walletにsummonerが紐付けられていない場合のみsummonボタンの表示
+        色＝class選択画面の実装
+
+ ok craftのUI実装
+        4種類, 合計64個のアイテムを選択するメニューを実装する
+        アイテム選択後、コストと日数の表示を実装する
+            補正後の必要日数を表示する
+            d, m, secで表示形式を整える
+        進捗情報の整備
+            クラフト中アイテムの表示
+            d, m, secで表示形式を整える
+            プログレッシングバーを実装する
+        アイテム選択UIの洗練
+            無骨なウィンドウではなくアニメーション化などおめかしする
+            未所持のアイテムは黒い影絵にする
+
+ ng summoner設定のページの実装
+        summonerの選択
+        summonerのステータス表示
+        summonerの所持item表示
+        summoner間のcoin/material送信
+        summoner間のitem移動
+        summonerに紐付けられていない所持itemの移動
+
+ ok ロード画面の実装
+        シーンを追加する方法を試す
+
+ ok Item選択ボタンの表示・非表示の整備
+        ボタン非表示、クラフト前、クラフト中の挙動の整理
+        クラフト中アイテム名の表示
+
+ ok 文字表示をできるだけアイコンに置換する
+        アイテムクラフトのコストをアイコン化
+        クラフト残り時間をアイコン化
+     ok birth timeのアイコン選別
+     ok mining/farming中のearn textにもアイコンを使用
+
+ ok Item補正値の表示の実装
+        レーダーチャートに基本値＋アイテム値で表示？
+
+ ok アクション時に得られたexp, coin, materialの表示
+        クリティカル成功時の演出の実装
+
+ ok ステータス表示の実装
+        coin, materialの表記をどうするか
+
+ ok アイコンの作成
+        Satiety：おにぎり？
+        Happy: くま？ハート？
+        お花
+        草
+        Exp
+        Lv：数字を大きくわかりやすく
+
+ ok Lv表示の洗練
+        最も重要な情報なのでできるだけ目立つように
+        もはや専用アイコンにでもするか？
+
+ ok walletアドレスの表示
+        ついでにIDの表示
+        他人のID覗き見時はどうするか
+            your walletとowner walletは別にするか？
+
+ ok 同期時間表示の実装
+        update_status成功時の_nowを記録
+            _nowとの差を小さく表示など
+        何秒前か、具体的な時間か
+
+ ok レーダーチャートの修正
+        itemによるステータス補正を別の色で重ねて表示させる
+
+ ok クラフト成功時にランダムに配られるtiny heartの実装    
+
+ ok プレイヤー間のコミュニケーション方法の実装
+        案1, 何かしらのアイテムをクラフトすると、ランダムに誰かにもNFTがmintされる
+            葉っぱ？おはな？
+            貯めると何が起こる？
+        案2, 手紙のようなものをクラフトし、クラフト成功時に宛先IDとメッセージを書き込める
+            受け取った手紙を検索して画面に表示するのが難しいか
+            外部データベース必須になりそう
+            あるいはastarscanに該当するものが公開されればapiでNFTのIDを持ってこれるか
+        具体的なメッセージが送れると荒れるので、非言語表現が可能な程度に留める
+            ♪、ハート、星、など。
+            誰から送られたかだけわかるようにする。
+            はてぶのスターみたいな感じ？
+            スターをクラフトして誰かに送る、など。
+            送るインセンティブと、集めるインセンティブを考えたい。
+            例えば、スターには種類があって、色ごとに集めると何かしら、など。
+            人からもらったスターでしかLukが上がらない、など。
+            botを避けるため、単一wallet由来のスターの効果は重複しない、など。
+            luckを上げるためには、たくさんの別の人からstarを送られないと行けない。
+            スターを集めるインセンティブ：Luck上昇
+            スターを送るインセンティブ：なに？？
+                自分で得たスターは自分には効果を及ぼさない。
+                誰かに渡したときにLuckに+0.1される。
+                誰から貰ったかは不明な方が面白いか。
+        案, 誰かがitemをcraftしたら1個発生するハート
+            それまでに存在するsummonerにランダムでtransferされる
+                burnを判別できないのでburnにも行くが無視
+            ハートを受け取るとluckに+0.01？+0.05？
+            ハートはNFTなので売り買い移動自由
+            誰がmint主かはハートに刻まれる
+            貯金箱をクラフトしたらハートを可視化できる？
+                効果を得るのも貯金箱クラフトしてから？
+            最終的に48アイテム/summonerなので、50個/summoner程度が平均的な最大値
+                もちろん、市場で買い占めればもっと増えるが。
+                0.01なら x50 = +0.5
+                0.05なら x50 = +2.5
+                レベルアップによる最大値は+0.5なので、2.5は5レベル分
+                この当たりを最大値とするか。10個で1レベル分、0.5%確率アップ。
+            Lv3以上、happyが20%以上のとき受取完了できる
+                条件を満たさないと立ち消え
+            誰が、いつ、何のアイテムをクラフトしたときのハートかがNFTに刻み込まれる
+
+ ok Nameの実装
+        専用NTTコントラの実装
+        クラフトによってNTTをmint
+        Nameをmint済みだと_modに+100（+1 Lv相当）
+        表札をクラフトするとnameが表示される
+        phaser3におけるテキスト入力と内容取得の実装
+
+ ok Nameクライムの実装
+        Nameボタンはどこに配置するか
+        決めたNameはどこに表示するか
+            ネームタグ、表札、自画像等のクラフト後？
+        要求コスト、要求レベルの表示と実装
 
 
 --->
