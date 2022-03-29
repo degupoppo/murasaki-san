@@ -228,8 +228,6 @@ let previous_local_coin = 0;
 let previous_local_material = 0;
 let previous_local_items;
 let previous_local_name_str;
-let satiety = 0;
-let happy = 0;
 let local_coin_calc;
 let local_material_calc;
 let local_crafting_calc;
@@ -249,6 +247,14 @@ let screen_material_delta = 0;
 let screen_exp = 0;
 let screen_exp_delta = 0;
 let count_update = 0;
+let happy = 0;
+let previous_happy = 0;
+let satiety = 0;
+let previous_satiety = 0;
+let screen_happy = 0;
+let screen_happy_delta = 0;
+let screen_satiety = 0;
+let screen_satiety_delta = 0;
 
 /*
 let local_pet;
@@ -434,38 +440,36 @@ async function contract_update_status(_summoner) {
     }
 
     //call global variants ***TODO***
-    //SPEED = await contract_ms.methods.SPEED().call();
     SPEED = await contract_ms.methods.SPEED().call() / 100;   //220311: speed was modified as 100%=x1
 
     //call status from ms
     let _dynamic_status = await contract_mfs.methods.get_dynamic_status_array(_summoner).call();
     let _static_status = await contract_mfs.methods.get_static_status_array(_summoner).call();
-    //console.log("status:", _dynamic_status);
 
     //update static status
     local_class = _static_status[0];
     local_birth_time = _static_status[1];
 
     //update local variants
-    local_level = _dynamic_status[0];
+    local_level = Number(_dynamic_status[0]);
     local_exp = Number(_dynamic_status[1]);
-    local_strength = _dynamic_status[2]/100;
-    local_dexterity = _dynamic_status[3]/100;
-    local_intelligence = _dynamic_status[4]/100;
-    local_luck = _dynamic_status[5]/100;
-    local_next_exp_required = _dynamic_status[6];
+    local_strength = Number(_dynamic_status[2])/100;
+    local_dexterity = Number(_dynamic_status[3])/100;
+    local_intelligence = Number(_dynamic_status[4])/100;
+    local_luck = Number(_dynamic_status[5])/100;
+    local_next_exp_required = Number(_dynamic_status[6]);
     //7: last_level_up_time
     local_coin = Number(_dynamic_status[8]);
     local_material = Number(_dynamic_status[9]);
-    local_last_feeding_time = _dynamic_status[10];
-    local_last_grooming_time = _dynamic_status[11];
-    local_mining_status = _dynamic_status[12];
-    local_mining_start_time = _dynamic_status[13];
-    local_farming_status = _dynamic_status[14];
-    local_farming_start_time = _dynamic_status[15];
-    local_crafting_status = _dynamic_status[16];
-    local_crafting_start_time = _dynamic_status[17];
-    local_crafting_item_type = _dynamic_status[18];
+    local_last_feeding_time = Number(_dynamic_status[10]);
+    local_last_grooming_time = Number(_dynamic_status[11]);
+    local_mining_status = Number(_dynamic_status[12]);
+    local_mining_start_time = Number(_dynamic_status[13]);
+    local_farming_status = Number(_dynamic_status[14]);
+    local_farming_start_time = Number(_dynamic_status[15]);
+    local_crafting_status = Number(_dynamic_status[16]);
+    local_crafting_start_time = Number(_dynamic_status[17]);
+    local_crafting_item_type = Number(_dynamic_status[18]);
 
     //mining, farming, crafting
     if (local_mining_status == 1){
@@ -1929,14 +1933,14 @@ function create() {
     //coin
     icon_ohana = this.add.sprite(670,20, "icon_ohana");
     icon_ohana.setScale(0.12);
-    text_coin = this.add.text(685, 10, "***", {font: "17px Arial", fill: "#000", backgroundColor: "#FFF200"});
+    text_coin = this.add.text(685, 10, "Ohana: 0", {font: "17px Arial", fill: "#000", backgroundColor: "#FFF200"});
     text_coin_earned = this.add.text(685, 33, "", {font: "17px Arial", fill: "#000000"});
     text_coin_earned_count = 0;
 
     //material
     icon_kusa = this.add.sprite(815, 20, "icon_kusa");
     icon_kusa.setScale(0.06);
-    text_material = this.add.text(830, 10, "***", {font: "17px Arial", fill: "#000", backgroundColor: "#D7E7AF"});
+    text_material = this.add.text(830, 10, "Kusa: 0", {font: "17px Arial", fill: "#000", backgroundColor: "#D7E7AF"});
     text_material_earned = this.add.text(830, 33, "", {font: "17px Arial", fill: "#000000"});
     text_material_earned_count = 0;
 
@@ -2012,8 +2016,6 @@ function create() {
 
 function update() {
 
-
-
     //increment turn
     turn += 1;
     text_turn.setText("turn: " + turn);
@@ -2085,16 +2087,54 @@ function update() {
                 bar_exp.scaleX = _bar_exp / 100;
                 screen_exp_easing -= 1;
             } else {
-                text_exp.setText(local_exp + " / " + local_next_exp_required);
+                if (local_exp > local_next_exp_required) {
+                    text_exp.setText(local_next_exp_required + " / " + local_next_exp_required);
+                } else {
+                    text_exp.setText(local_exp + " / " + local_next_exp_required);
+                }
                 //bar
                 let _bar_exp = local_exp / local_next_exp_required * 100;
+                if (_bar_exp > 100) {_bar_exp = 100;}
                 bar_exp.scaleX = _bar_exp / 100;
                 screen_exp_delta = 0;
             }
         }
+        
+        //satiety
+        if (screen_satiety_delta != 0) {
+            let _p = (100 - screen_satiety_easing)/100;
+            if (_p < 1) {
+                let _easing = 1 - Math.pow(1 - _p, 4);
+                let _screen_satiety = screen_satiety + screen_satiety_delta * _easing;
+                text_satiety.setText(Math.round(_screen_satiety) + "%");
+                screen_satiety_easing -= 1;
+                //bar
+                bar_satiety.scaleX = _screen_satiety / 100;
+            } else {
+                text_satiety.setText(Math.round(satiety) + "%");
+                //bar
+                bar_satiety.scaleX = satiety / 100;
+                screen_satiety_delta = 0;
+            }
+        }
 
-
-
+        //happy
+        if (screen_happy_delta != 0) {
+            let _p = (100 - screen_happy_easing)/100;
+            if (_p < 1) {
+                let _easing = 1 - Math.pow(1 - _p, 4);
+                let _screen_happy = screen_happy + screen_happy_delta * _easing;
+                text_happy.setText(Math.round(_screen_happy) + "%");
+                screen_happy_easing -= 1;
+                //bar
+                bar_happy.scaleX = _screen_happy / 100;
+            } else {
+                text_happy.setText(Math.round(happy) + "%");
+                //bar
+                bar_happy.scaleX = happy / 100;
+                screen_happy_delta = 0;
+            }
+        }
     }
 
     //===== update parameters with animation =====
@@ -2155,7 +2195,11 @@ function update() {
         if (previous_local_exp != local_exp) {
             //count animation
             screen_exp = previous_local_exp;
-            screen_exp_delta = local_exp - previous_local_exp;
+            if (local_exp > local_next_exp_required) {
+                screen_exp_delta = local_next_exp_required - previous_local_exp;
+            } else {
+                screen_exp_delta = local_exp - previous_local_exp;
+            }
             screen_exp_easing = 100;
             //earning text
             if (count_update > 1) {
@@ -2172,10 +2216,41 @@ function update() {
             }
         }
 
-
-        //update calculation_status
+        //update time
         let now_time = Date.now() / 1000;
-        let age_time = Math.round(now_time - local_birth_time);
+
+        //satiety
+        let base_satiety = 86400 / 2 / SPEED;
+        satiety = Math.round( (base_satiety - (now_time - local_last_feeding_time)) / base_satiety * 100 );
+        if (satiety < 0) { satiety = 0; }
+        if (satiety > 100) { satiety = 100; }
+        if (satiety != previous_satiety) {
+            screen_satiety = previous_satiety;
+            screen_satiety_delta = satiety - previous_satiety;
+            screen_satiety_easing = 100;
+        }
+
+        //happy
+        let base_happy = 86400 * 3 / SPEED;
+        happy = Math.round( (base_happy - (now_time - local_last_grooming_time)) / base_happy * 100 );
+        if (happy < 0) { happy = 0; }
+        if (happy > 100) { happy = 100; }
+        if (happy != previous_happy) {
+            screen_happy = previous_happy;
+            screen_happy_delta = happy - previous_happy;
+            screen_happy_easing = 100;
+        }
+
+        previous_happy = happy;
+        previous_satiety = satiety;
+        previous_local_coin = local_coin;
+        previous_local_material = local_material;
+        previous_local_exp = local_exp;
+
+        /*
+        //exp
+        let exp = (local_exp / local_next_exp_required) * 100;
+        if (exp > 100) { exp = 100; }
 
         //satiety
         let base = 86400 / 2 / SPEED;
@@ -2184,29 +2259,6 @@ function update() {
         if (satiety > 100) { satiety = 100; }
         text_satiety.setText(satiety + "%");
 
-        //happy
-        let base2 = 86400 * 3 / SPEED;
-        happy = Math.round( (base2 - (now_time - local_last_grooming_time)) / base2 * 100 );
-        if (happy < 0) { happy = 0; }
-        if (happy > 100) { happy = 100; }
-        text_happy.setText(happy + "%");
-
-        //exp
-        let exp = (local_exp / local_next_exp_required) * 100;
-        if (exp > 100) { exp = 100; }
-
-        //update bar
-        if (satiety >= 0 && happy >= 0 && exp >= 0) {
-            bar_satiety.scaleX = satiety / 100;
-            bar_happy.scaleX = happy / 100;
-            //bar_exp.scaleX = exp / 100;
-        }
-
-        previous_local_coin = local_coin;
-        previous_local_material = local_material;
-        previous_local_exp = local_exp;
-
-        /*
         //update earned text
         if (text_exp_earned_count > 0) {
             text_exp_earned_count -= 1;
