@@ -448,15 +448,15 @@ async function contract_update_status(_summoner) {
 
     //update local variants
     local_level = _dynamic_status[0];
-    local_exp = _dynamic_status[1];
+    local_exp = Number(_dynamic_status[1]);
     local_strength = _dynamic_status[2]/100;
     local_dexterity = _dynamic_status[3]/100;
     local_intelligence = _dynamic_status[4]/100;
     local_luck = _dynamic_status[5]/100;
     local_next_exp_required = _dynamic_status[6];
     //7: last_level_up_time
-    local_coin = _dynamic_status[8];
-    local_material = _dynamic_status[9];
+    local_coin = Number(_dynamic_status[8]);
+    local_material = Number(_dynamic_status[9]);
     local_last_feeding_time = _dynamic_status[10];
     local_last_grooming_time = _dynamic_status[11];
     local_mining_status = _dynamic_status[12];
@@ -2041,9 +2041,11 @@ function update() {
         }
     }
 
-    //===== numerics and bars =====
+    //===== numeric animation =====
 
     if (turn % 2 == 0) {
+
+        //coin
         if (screen_coin_delta != 0) {
             let _p = (100 - screen_coin_easing)/100;
             if (_p < 1) {
@@ -2056,6 +2058,8 @@ function update() {
                 screen_coin_delta = 0;
             }
         }
+
+        //material
         if (screen_material_delta != 0) {
             let _p = (100 - screen_material_easing)/100;
             if (_p < 1) {
@@ -2068,18 +2072,29 @@ function update() {
                 screen_material_delta = 0;
             }
         }
+
+        //exp
         if (screen_exp_delta != 0) {
             let _p = (100 - screen_exp_easing)/100;
             if (_p < 1) {
                 let _easing = 1 - Math.pow(1 - _p, 4);  //easeOutQuart: https://easings.net/ja#easeOutQuart
                 let _screen_exp = screen_exp + screen_exp_delta * _easing;
                 text_exp.setText(Math.round(_screen_exp) + " / " + local_next_exp_required);
+                //bar
+                let _bar_exp = _screen_exp / local_next_exp_required * 100;
+                bar_exp.scaleX = _bar_exp / 100;
                 screen_exp_easing -= 1;
             } else {
                 text_exp.setText(local_exp + " / " + local_next_exp_required);
+                //bar
+                let _bar_exp = local_exp / local_next_exp_required * 100;
+                bar_exp.scaleX = _bar_exp / 100;
                 screen_exp_delta = 0;
             }
         }
+
+
+
     }
 
     //===== update parameters with animation =====
@@ -2089,6 +2104,7 @@ function update() {
         //coin
         if (previous_local_coin != local_coin) {
             //count animation
+            screen_coin = previous_local_coin;
             screen_coin_delta = local_coin - previous_local_coin;
             screen_coin_easing = 100;
             //earning text
@@ -2113,6 +2129,7 @@ function update() {
         //material
         if (previous_local_material != local_material) {
             //count animation
+            screen_material = previous_local_material;
             screen_material_delta = local_material - previous_local_material;
             screen_material_easing = 100;
             //earning text
@@ -2137,6 +2154,7 @@ function update() {
         //exp
         if (previous_local_exp != local_exp) {
             //count animation
+            screen_exp = previous_local_exp;
             screen_exp_delta = local_exp - previous_local_exp;
             screen_exp_easing = 100;
             //earning text
@@ -2154,21 +2172,6 @@ function update() {
             }
         }
 
-        /*
-        //update earned text
-        if (text_exp_earned_count > 0) {
-            text_exp_earned_count -= 1;
-            if (text_exp_earned_count == 0) {
-                text_exp_earned.setText("");
-            }
-        }
-        if (text_material_earned_count > 0) {
-            text_material_earned_count -= 1;
-            if (text_material_earned_count == 0) {
-                text_material_earned.setText("");
-            }
-        }
-        */
 
         //update calculation_status
         let now_time = Date.now() / 1000;
@@ -2191,26 +2194,43 @@ function update() {
         //exp
         let exp = (local_exp / local_next_exp_required) * 100;
         if (exp > 100) { exp = 100; }
-        /****
-        if (Number(local_exp) > Number(local_next_exp_required)) {
-            text_exp.setText(local_next_exp_required + " / " + local_next_exp_required);
-        } else {
-            text_exp.setText(local_exp + " / " + local_next_exp_required);
-        }
-        */
 
         //update bar
         if (satiety >= 0 && happy >= 0 && exp >= 0) {
             bar_satiety.scaleX = satiety / 100;
             bar_happy.scaleX = happy / 100;
-            bar_exp.scaleX = exp / 100;
+            //bar_exp.scaleX = exp / 100;
+        }
+
+        previous_local_coin = local_coin;
+        previous_local_material = local_material;
+        previous_local_exp = local_exp;
+
+        /*
+        //update earned text
+        if (text_exp_earned_count > 0) {
+            text_exp_earned_count -= 1;
+            if (text_exp_earned_count == 0) {
+                text_exp_earned.setText("");
+            }
+        }
+        if (text_material_earned_count > 0) {
+            text_material_earned_count -= 1;
+            if (text_material_earned_count == 0) {
+                text_material_earned.setText("");
+            }
+        }
+
+        if (Number(local_exp) > Number(local_next_exp_required)) {
+            text_exp.setText(local_next_exp_required + " / " + local_next_exp_required);
+        } else {
+            text_exp.setText(local_exp + " / " + local_next_exp_required);
         }
 
         //coin & material
         //text_coin.setText("Ohana: " + screen_coin);
         //text_material.setText("Kusa: " + local_material);
 
-/*
             //earning text
             let _delta = local_material - previous_local_material;
             if (_delta >= local_material_calc * 1.5) {
@@ -2224,11 +2244,8 @@ function update() {
             let _delta = local_exp - previous_local_exp;
             text_exp_earned.setText("+" + _delta);
             text_exp_earned_count = 5;
-*/
+        */
 
-        previous_local_coin = local_coin;
-        previous_local_material = local_material;
-        previous_local_exp = local_exp;
     }
 
     //===== update parameters without animation =====
