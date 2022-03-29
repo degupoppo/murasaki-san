@@ -444,15 +444,16 @@ async function contract_update_status(_summoner) {
     }
 
     //call global variants ***TODO***
-    SPEED = await contract_ms.methods.SPEED().call() / 100;   //220311: speed was modified as 100%=x1
+    SPEED = await contract_ms.methods.SPEED().call();   //220311: speed was modified as 100%=x1
+    SPEED = Number(SPEED) / 100;
 
     //call status from ms
     let _dynamic_status = await contract_mfs.methods.get_dynamic_status_array(_summoner).call();
     let _static_status = await contract_mfs.methods.get_static_status_array(_summoner).call();
 
     //update static status
-    local_class = _static_status[0];
-    local_birth_time = _static_status[1];
+    local_class = Number(_static_status[0]);
+    local_birth_time = Number(_static_status[1]);
 
     //update local variants
     local_level = Number(_dynamic_status[0]);
@@ -478,10 +479,13 @@ async function contract_update_status(_summoner) {
     //mining, farming, crafting
     if (local_mining_status == 1){
         local_coin_calc = await contract_mfmf.methods.calc_mining(_summoner).call();
+        local_coin_calc = Number(local_coin_calc);
     }else if (local_farming_status == 1) {
         local_material_calc = await contract_mfmf.methods.calc_farming(_summoner).call();
+        local_material_calc = Number(local_material_calc);
     }else if (local_crafting_status == 1) {
         local_crafting_calc = await contract_mfc.methods.calc_crafting(_summoner).call();
+        local_crafting_calc = Number(local_crafting_calc);
     }
 
     //item
@@ -491,6 +495,7 @@ async function contract_update_status(_summoner) {
 
     //heart
     local_heart = await contract_th.methods.balanceOf(_owner).call();
+    local_heart = Number(local_heart);
 
     //update wallet
     local_wallet = wallet;
@@ -1444,11 +1449,12 @@ function open_window_summon(scene) {
 let config = {
     //type: Phaser.AUTO,
     type: Phaser.CANVAS,
-    width: 1280,
-    height: 960,
+    parent: "game",
     scale: {
         mode: Phaser.Scale.FIT,
-        autoCenter: Phaser.Scale.CENTER_BOTH
+        autoCenter: Phaser.Scale.CENTER_BOTH,
+        width: 1280,
+        height: 960,
     },
     scene: {
         preload: preload,
@@ -1890,7 +1896,12 @@ function create() {
         .on("pointerdown", () => open_window_summon(this) )
         .on("pointerover", () => text_summon.setStyle({ fontSize: 24, fontFamily: "Arial", fill: '#ffff00' }))
         .on("pointerout", () => text_summon.setStyle({ fontSize: 24, fontFamily: "Arial", fill: '#000000' }));
-    new Button(10, 880, 'Kill', this, () => contract_burn(summoner));
+    //new Button(10, 880, 'Kill', this, () => contract_burn(summoner));
+    new Button(10, 840, 'Rotate', this, () => {
+        this.scale.setGameSize(960,1280);
+        this.cameras.main.rotation = 90 * Math.PI / 180;
+        this.cameras.main.centerOn(640,480);
+    });
 
     //===status===
 
