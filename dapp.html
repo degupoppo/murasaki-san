@@ -1906,10 +1906,17 @@ function create() {
         .on("pointerover", () => text_summon.setStyle({ fontSize: 24, fontFamily: "Arial", fill: '#ffff00' }))
         .on("pointerout", () => text_summon.setStyle({ fontSize: 24, fontFamily: "Arial", fill: '#000000' }));
     //new Button(10, 880, 'Kill', this, () => contract_burn(summoner));
-    new Button(10, 840, 'Rotate', this, () => {
-        this.scale.setGameSize(960,1280);
-        this.cameras.main.rotation = 90 * Math.PI / 180;
-        this.cameras.main.centerOn(640,480);
+    new Button(10, 870, '[Rorate]', this, () => {
+        console.log(this.sys.game.scale.gameSize._width);
+        if (this.sys.game.scale.gameSize._width == 1280) {
+            this.scale.setGameSize(960,1280);
+            this.cameras.main.rotation = 90 * Math.PI / 180;
+            this.cameras.main.centerOn(640,480);
+        } else {
+            this.scale.setGameSize(1280,960);
+            this.cameras.main.rotation = 0;
+            this.cameras.main.centerOn(640,480);
+        }
     });
 
     //===status===
@@ -2177,10 +2184,14 @@ function update() {
             //earning text
             if (count_update > 1) {
                 let _delta = local_coin - previous_local_coin;
+                let _sign = "";
+                if (_delta > 0) {
+                    _sign = "+";
+                }
                 if (_delta >= local_coin_calc * 1.5) {
-                    text_coin_earned.setText("+" + _delta + " lucky♪");
+                    text_coin_earned.setText(_sign + _delta + " lucky♪");
                 } else {
-                    text_coin_earned.setText("+" + _delta);
+                    text_coin_earned.setText(_sign + _delta);
                 }
                 text_coin_earned_count = 5;
             }
@@ -2202,10 +2213,14 @@ function update() {
             //earning text
             if (count_update > 1) {
                 let _delta = local_material - previous_local_material;
+                let _sign = ""; //no need when minus
+                if (_delta > 0) {
+                    _sign = "+";
+                }
                 if (_delta >= local_material_calc * 1.5) {
-                    text_material_earned.setText("+" + _delta + " lucky♪");
+                    text_material_earned.setText(_sign + _delta + " lucky♪");
                 } else {
-                    text_material_earned.setText("+" + _delta);
+                    text_material_earned.setText(_sign + _delta);
                 }
                 text_material_earned_count = 5;
             }
