@@ -11,6 +11,10 @@ ToDo
         各アクションにできるだけサウンドを導入する
         mining/farming/craftingのduringサウンドの実装
         earn時のサウンドの実装
+        サウンド案
+            動作開始時
+            動作終了時
+            動作中
 
     UIの洗練
         ウィンドウの整備
@@ -1535,6 +1539,7 @@ function preload() {
     this.load.audio("crafting", "sound/crafting.mp3");
     this.load.audio("crafting_during", "sound/crafting_during.mp3");
     this.load.audio("happy", "sound/happy.mp3");
+    this.load.audio("earn", "sound/earn.wav");
 
     //items
     this.load.spritesheet("item_musicbox", "png/item_musicbox.png", {frameWidth: 370, frameHeight: 320});
@@ -1870,6 +1875,7 @@ function create() {
     sound_crafting = this.sound.add("crafting", {volume:0.2});
     sound_crafting_during = this.sound.add("crafting_during", {volume:0.05});
     sound_happy = this.sound.add("happy", {volume:0.2});
+    sound_earn = this.sound.add("earn", {volume:0.2});
 
     //===create summoner===
 
@@ -2035,7 +2041,6 @@ function update() {
         text_mode.setText(murasakisan.get_mode);
         if (last_sync_time == 0) {
             text_sync_time.setText("syncing...");
-            //text_sync_first.setText("Synchronizing...");
         } else {
             let _delta = Math.round( (Date.now() - last_sync_time) / 1000 );
             text_sync_time.setText("synced: " + _delta + "s ago");
@@ -2079,7 +2084,7 @@ function update() {
         if (screen_exp_delta != 0) {
             let _p = (100 - screen_exp_easing)/100;
             if (_p < 1) {
-                let _easing = 1 - Math.pow(1 - _p, 4);  //easeOutQuart: https://easings.net/ja#easeOutQuart
+                let _easing = 1 - Math.pow(1 - _p, 4); 
                 let _screen_exp = screen_exp + screen_exp_delta * _easing;
                 text_exp.setText(Math.round(_screen_exp) + " / " + local_next_exp_required);
                 //bar
@@ -2089,8 +2094,10 @@ function update() {
             } else {
                 if (local_exp > local_next_exp_required) {
                     text_exp.setText(local_next_exp_required + " / " + local_next_exp_required);
+                    screen_exp = local_next_exp_required;   //***TODO*** not best
                 } else {
                     text_exp.setText(local_exp + " / " + local_next_exp_required);
+                    screen_exp = local_exp;   //***TODO*** not best
                 }
                 //bar
                 let _bar_exp = local_exp / local_next_exp_required * 100;
@@ -2191,8 +2198,8 @@ function update() {
             }
         }
 
-        //exp
-        if (previous_local_exp != local_exp) {
+        //exp   //***TODO*** not best
+        if (previous_local_exp != local_exp && screen_exp < local_next_exp_required) {
             //count animation
             screen_exp = previous_local_exp;
             if (local_exp > local_next_exp_required) {
@@ -2246,58 +2253,6 @@ function update() {
         previous_local_coin = local_coin;
         previous_local_material = local_material;
         previous_local_exp = local_exp;
-
-        /*
-        //exp
-        let exp = (local_exp / local_next_exp_required) * 100;
-        if (exp > 100) { exp = 100; }
-
-        //satiety
-        let base = 86400 / 2 / SPEED;
-        satiety = Math.round( (base - (now_time - local_last_feeding_time)) / base * 100 );
-        if (satiety < 0) { satiety = 0; }
-        if (satiety > 100) { satiety = 100; }
-        text_satiety.setText(satiety + "%");
-
-        //update earned text
-        if (text_exp_earned_count > 0) {
-            text_exp_earned_count -= 1;
-            if (text_exp_earned_count == 0) {
-                text_exp_earned.setText("");
-            }
-        }
-        if (text_material_earned_count > 0) {
-            text_material_earned_count -= 1;
-            if (text_material_earned_count == 0) {
-                text_material_earned.setText("");
-            }
-        }
-
-        if (Number(local_exp) > Number(local_next_exp_required)) {
-            text_exp.setText(local_next_exp_required + " / " + local_next_exp_required);
-        } else {
-            text_exp.setText(local_exp + " / " + local_next_exp_required);
-        }
-
-        //coin & material
-        //text_coin.setText("Ohana: " + screen_coin);
-        //text_material.setText("Kusa: " + local_material);
-
-            //earning text
-            let _delta = local_material - previous_local_material;
-            if (_delta >= local_material_calc * 1.5) {
-                text_material_earned.setText("+" + _delta + " lucky♪");
-            } else {
-                text_material_earned.setText("+" + _delta);
-            }
-            text_material_earned_count = 5;
-
-
-            let _delta = local_exp - previous_local_exp;
-            text_exp_earned.setText("+" + _delta);
-            text_exp_earned_count = 5;
-        */
-
     }
 
     //===== update parameters without animation =====
@@ -2450,6 +2405,7 @@ function update() {
             murasakisan.set_mode = "resting";
             //icon invisible
             icon_mining.visible = false;
+            sound_earn.play();
 
         //farming check, continue
         } else if (local_farming_status == 1 & murasakisan.mode != "farming" & murasakisan.mode != "feeding"){
@@ -2463,6 +2419,7 @@ function update() {
             murasakisan.set_mode = "resting";
             //icon invisible
             icon_farming.visible = false;
+            sound_earn.play();
 
         //crafting check, continue
         } else if (local_crafting_status == 1 & murasakisan.mode != "crafting" & murasakisan.mode != "feeding"){
@@ -2479,6 +2436,7 @@ function update() {
             draw_radarchart(this);  //update radarchart
             //icon invisible
             icon_crafting_time_remining.visible = false;
+            sound_earn.play();
         }
 
         previous_local_last_feeding_time = local_last_feeding_time;
