@@ -26,15 +26,6 @@ ToDo
         システムメッセージの表示方法
             アニメーションなどで演出する
 
-    他人のsummonerへのfeedingを可能にする実装
-        他のsummonerへもfeedingだけは可能とする
-        インセンティブとして、得られるexpの1-5%を自分も得られる。
-        feedingされた方のペナルティはなし（100% exp得られる）。
-        大量feeding botを防ぐために、他人のfeedingは1時間に1回程度にする。
-            last_feeding_time_otherを実装
-            feeding()にownerチェックを実装
-                非owner時は自分のsummonerの検索と、expへの追加を実装
-
     微調整
         groomingの位置合わせ
         目をいじった画像の差し替え
@@ -70,11 +61,6 @@ ToDo
         Rarityのdaycareを参考に
         0.1 ASTR/day等のコストを要求する
         withdray, set_cost関数を忘れずに実装する
-
-    効果音の追加
-        効果音の吟味と割り当て
-        working時にじゃまにならない程度に環境音を鳴らす
-        行動開始時・終了時の効果音を考える
 
     summonerごとにユニークなシンボルの考案
         phaser3での色彩変化
@@ -143,7 +129,21 @@ ok! しゅっきん！（お仕事へ移動中）
         良いじょうろ
     クラフティングアイテム案（INT系）
         ミュージックボックス
- aaa
+
+ ok 効果音の追加
+        効果音の吟味と割り当て
+        working時にじゃまにならない程度に環境音を鳴らす
+        行動開始時・終了時の効果音を考える
+
+ ok 他人のsummonerへのfeedingを可能にする実装
+        他のsummonerへもfeedingだけは可能とする
+        インセンティブとして、得られるexpの1-5%を自分も得られる。
+        feedingされた方のペナルティはなし（100% exp得られる）。
+        大量feeding botを防ぐために、他人のfeedingは1時間に1回程度にする。
+            last_feeding_time_otherを実装
+            feeding()にownerチェックを実装
+                非owner時は自分のsummonerの検索と、expへの追加を実装
+
 --->
 
 <!DOCTYPE html>
@@ -1444,17 +1444,20 @@ function open_window_summon(scene) {
 
 
 
-//---main function-----------------------------------------------------------------------------------------------------
+//---config-----------------------------------------------------------------------------------------------------
 
 let config = {
     //type: Phaser.AUTO,
     type: Phaser.CANVAS,
     parent: "game",
+    //backgroundColor: "FADCE9",
+    backgroundColor: "F4B4D0",
     scale: {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH,
         width: 1280,
         height: 960,
+        fps: 30,
     },
     scene: {
         preload: preload,
@@ -1470,6 +1473,7 @@ let config = {
         createContainer: true
     },
 };
+
 let game = new Phaser.Game(config);
 
 
@@ -1574,15 +1578,20 @@ function preload() {
     //https://gamedevacademy.org/creating-a-preloading-screen-in-phaser-3/?a=13
     let progressBar = this.add.graphics();
     let progressBox = this.add.graphics();
-    progressBox.fillStyle(0x222222, 0.8);
+    //progressBox.fillStyle(0x222222, 0.8);
+    progressBox.fillStyle(0xFDEFF5, 0.4);
     progressBox.fillRect(480, 450, 320, 50);
-    let progressText = this.add.text(490,520,"", {font: "20px monospace", fill: "#DCDDDD"}); 
-    let progressText_loading = this.add.text(490,420, "Loading...", {font: "20px monospace", fill: "#DCDDDD"});
-    let percentText = this.add.text(510, 465, "", {font: "20px monospace", fill: "#DCDDDD"});
+    //let progressText = this.add.text(490,520,"", {font: "20px monospace", fill: "#DCDDDD"}); 
+    //let progressText_loading = this.add.text(490,420, "Loading...", {font: "20px monospace", fill: "#DCDDDD"});
+    //let percentText = this.add.text(510, 465, "", {font: "20px monospace", fill: "#DCDDDD"});
+    let progressText = this.add.text(490,520,"", {font: "20px monospace", fill: "#3D3D3D"}); 
+    let progressText_loading = this.add.text(490,420, "Loading...", {font: "20px monospace", fill: "#3D3D3D"});
+    let percentText = this.add.text(510, 465, "", {font: "20px monospace", fill: "#3D3D3D"});
     this.load.on("progress", function(value) {
         console.log(value);
         progressBar.clear();
-        progressBar.fillStyle(0xffffff, 1);
+        //progressBar.fillStyle(0xffffff, 1);
+        progressBar.fillStyle(0xE62E8B, 1);
         progressBar.fillRect(490, 460, 300 * value, 30);
         percentText.setText( Math.round(value * 100) + "%");
         if (value == 1) {
