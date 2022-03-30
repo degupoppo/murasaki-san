@@ -1183,20 +1183,20 @@ function radarchart(scene, x0, y0, r, str, dex, int, luk, str_item, dex_item, in
     }
     //draw
     //scene.add.graphics().fillStyle(0xc0c0c0, 1).fillCircle(x0, y0, r, 0.5);
-    radar1 = scene.add.polygon(x0+r, y0+r, [0,-r,r,0,0,r,-r,0], 0xc0c0c0, 0.4);
-    radar2 = scene.add.polygon(x0+r*0.75, y0+r*0.75, [0,-r*0.75,r*0.75,0,0,r*0.75,-r*0.75,0], 0xc0c0c0, 0.4);
-    radar3 = scene.add.polygon(x0+r/2, y0+r/2, [0,-r/2,r/2,0,0,r/2,-r/2,0], 0xc0c0c0, 0.4);
-    radar4 = scene.add.polygon(x0+(-x4i+x2i)/2, y0+(-y1i+y3i)/2, [x1,y1i,x2i,y2,x3,y3i,x4i,y4], 0xffd700, 1);
-    radar5 = scene.add.polygon(x0+(-x4+x2)/2, y0+(-y1+y3)/2, [x1,y1,x2,y2,x3,y3,x4,y4], 0xffff00, 1);
+    radar1 = scene.add.polygon(x0+r, y0+r, [0,-r,r,0,0,r,-r,0], 0xDADADA, 0.4);
+    radar2 = scene.add.polygon(x0+r*0.75, y0+r*0.75, [0,-r*0.75,r*0.75,0,0,r*0.75,-r*0.75,0], 0xDADADA, 0.4);
+    radar3 = scene.add.polygon(x0+r/2, y0+r/2, [0,-r/2,r/2,0,0,r/2,-r/2,0], 0xDADADA, 0.4);
+    radar4 = scene.add.polygon(x0+(-x4i+x2i)/2, y0+(-y1i+y3i)/2, [x1,y1i,x2i,y2,x3,y3i,x4i,y4], 0xF9C270, 1);
+    radar5 = scene.add.polygon(x0+(-x4+x2)/2, y0+(-y1+y3)/2, [x1,y1,x2,y2,x3,y3,x4,y4], 0xFFF67F, 1);
     let font_arg = {font: "17px Arial", fill: "#000000"};
-    radar6 = scene.add.text(x0-10, y0-r-15, "STR"+"\n"+Math.round( (str+str_item)*100 )/100, font_arg);
-    radar7 = scene.add.text(x0+r, y0-6, "DEX"+"\n"+Math.round( (dex+dex_item)*100 )/100, font_arg);
-    radar8 = scene.add.text(x0-10, y0+r-5, "LUK"+"\n"+Math.round( (luk+luk_item)*100 )/100, font_arg);
-    radar9 = scene.add.text(x0-r-15, y0-6, "INT"+"\n"+Math.round( (int+int_item)*100 )/100, font_arg);
+    radar6 = scene.add.text(x0-15, y0-r-25, "STR"+"\n"+Math.round( (str+str_item)*100 )/100, font_arg);
+    radar7 = scene.add.text(x0+r-5, y0-10, "DEX"+"\n"+Math.round( (dex+dex_item)*100 )/100, font_arg);
+    radar8 = scene.add.text(x0-15, y0+r-5, "LUK"+"\n"+Math.round( (luk+luk_item)*100 )/100, font_arg);
+    radar9 = scene.add.text(x0-r-20, y0-10, "INT"+"\n"+Math.round( (int+int_item)*100 )/100, font_arg);
 }
 async function draw_radarchart(scene) {
         let _x = 1136;
-        let _y = 110;
+        let _y = 115;
         let _r = 80;
         let _res = await contract_get_item_count(summoner);
         console.log(_res);
@@ -1484,7 +1484,7 @@ let game = new Phaser.Game(config);
 function preload() {
 
     //back
-    this.load.image("back", "png/back3.png");
+    this.load.image("back", "png/back4.png");
 
     //murasaki-san
     this.load.spritesheet("murasaki_right", "png/murasaki_right.png", {frameWidth: 370, frameHeight: 320});
@@ -1590,7 +1590,6 @@ function preload() {
     let progressText_loading = this.add.text(490,420, "Loading...", {font: "20px monospace", fill: "#3D3D3D"});
     let percentText = this.add.text(510, 465, "", {font: "20px monospace", fill: "#3D3D3D"});
     this.load.on("progress", function(value) {
-        console.log(value);
         progressBar.clear();
         //progressBar.fillStyle(0xffffff, 1);
         progressBar.fillStyle(0xE62E8B, 1);
@@ -1602,11 +1601,9 @@ function preload() {
         }
     });
     this.load.on("fileprogress", function(file) {
-        console.log(file.src);
         progressText.setText("Loading asset: " + file.src);
     });
     this.load.on("complete", function() {
-        console.log("complete");
         progressBar.destroy();
         progressBox.destroy();
         progressText.destroy();
@@ -1858,7 +1855,7 @@ function create() {
 
     //levelup
     //button_levelup = this.add.sprite(1220, 30, "button_levelup_unable");
-    button_levelup = this.add.sprite(1220, 30, "back_level");
+    button_levelup = this.add.sprite(1220, 35, "back_level");
     button_levelup.scaleX = button_levelup.scaleX * 0.11;
     button_levelup.scaleY = button_levelup.scaleY * 0.11;
     button_levelup.setInteractive({useHandCursor: true});
@@ -1908,12 +1905,13 @@ function create() {
         .on("pointerover", () => text_summon.setStyle({ fontSize: 24, fontFamily: "Arial", fill: '#ffff00' }))
         .on("pointerout", () => text_summon.setStyle({ fontSize: 24, fontFamily: "Arial", fill: '#000000' }));
     //new Button(10, 880, 'Kill', this, () => contract_burn(summoner));
-    new Button(10, 870, '[Rorate]', this, () => {
+    new Button(10, 870, '[Rotate]', this, () => {
         console.log(this.sys.game.scale.gameSize._width);
         if (this.sys.game.scale.gameSize._width == 1280) {
             this.scale.setGameSize(960,1280);
             this.cameras.main.rotation = 90 * Math.PI / 180;
             this.cameras.main.centerOn(640,480);
+            this.scale.startFullscreen();
         } else {
             this.scale.setGameSize(1280,960);
             this.cameras.main.rotation = 0;
@@ -1926,8 +1924,8 @@ function create() {
     let font_arg = {font: "18px Arial", fill: "#000"};
 
     //age
-    text_age_time =     this.add.text(1218, 62, "***", font_arg);
-    icon_age = this.add.sprite(1205,72, "icon_age");
+    text_age_time =     this.add.text(1213, 67, "***", font_arg);
+    icon_age = this.add.sprite(1200,77, "icon_age");
     icon_age.setScale(0.06);
 
     //debug info
@@ -1938,54 +1936,54 @@ function create() {
     text_wallet = this.add.text(10, 940, "***", {font: "14px Arial", fill: "#727171"});
 
     //satiety
-    icon_satiety = this.add.sprite(30,20, "button_feeding");
+    icon_satiety = this.add.sprite(30,25, "button_feeding");
     icon_satiety.setScale(0.07);
-    bar_satiety_back = makeBar(this, 55, 10, 0xF8C5AC);
+    bar_satiety_back = makeBar(this, 55, 15, 0xF8C5AC);
     bar_satiety_back.scaleX = 1;
-    bar_satiety = makeBar(this, 55, 10, 0xE60012);
+    bar_satiety = makeBar(this, 55, 15, 0xE60012);
     bar_satiety.scaleX = 0;
-    text_satiety = this.add.text(60, 11, "0%", {font: "17px Arial", fill: "#ffffff"});
+    text_satiety = this.add.text(60, 16, "0%", {font: "17px Arial", fill: "#ffffff"});
 
     //happy
-    icon_happy = this.add.sprite(245,20, "button_grooming_enable");
+    icon_happy = this.add.sprite(245,25, "button_grooming_enable");
     icon_happy.setScale(0.07);
-    bar_happy_back = makeBar(this, 270, 10, 0xFCE2BA);
+    bar_happy_back = makeBar(this, 270, 15, 0xFCE2BA);
     bar_happy_back.scaleX = 1;
-    bar_happy = makeBar(this, 270, 10, 0xF39800);
+    bar_happy = makeBar(this, 270, 15, 0xF39800);
     bar_happy.scaleX = 0;
-    text_happy = this.add.text(275, 11, "0%", {font: "17px Arial", fill: "#ffffff"});
+    text_happy = this.add.text(275, 16, "0%", {font: "17px Arial", fill: "#ffffff"});
 
     //exp
-    this.add.text(440, 10, "Exp:", font_arg);
-    bar_exp_back = makeBar(this, 480, 10, 0xBBCCE9);
+    this.add.text(440, 15, "Exp:", font_arg);
+    bar_exp_back = makeBar(this, 480, 15, 0xBBCCE9);
     bar_exp_back.scaleX = 1;
-    bar_exp = makeBar(this, 480, 10, 0x0068B7);
+    bar_exp = makeBar(this, 480, 15, 0x0068B7);
     bar_exp.scaleX = 0;
-    text_exp = this.add.text(485, 11, "0 / 0", {font: "17px Arial", fill: "#ffffff"});
-    text_exp_earned = this.add.text(480, 33, "", {font: "17px Arial", fill: "#000000"});
+    text_exp = this.add.text(485, 16, "0 / 0", {font: "17px Arial", fill: "#ffffff"});
+    text_exp_earned = this.add.text(480, 38, "", {font: "17px Arial", fill: "#000000"});
     text_exp_earned_count = 0;
 
     //coin
-    icon_ohana = this.add.sprite(670,20, "icon_ohana");
+    icon_ohana = this.add.sprite(670,25, "icon_ohana");
     icon_ohana.setScale(0.12);
-    text_coin = this.add.text(685, 10, "Ohana: 0", {font: "17px Arial", fill: "#000", backgroundColor: "#FFF200"});
-    text_coin_earned = this.add.text(685, 33, "", {font: "17px Arial", fill: "#000000"});
+    text_coin = this.add.text(685, 15, "Ohana: 0", {font: "17px Arial", fill: "#000", backgroundColor: "#FFF200"});
+    text_coin_earned = this.add.text(685, 38, "", {font: "17px Arial", fill: "#000000"});
     text_coin_earned_count = 0;
 
     //material
-    icon_kusa = this.add.sprite(815, 20, "icon_kusa");
+    icon_kusa = this.add.sprite(815, 25, "icon_kusa");
     icon_kusa.setScale(0.06);
-    text_material = this.add.text(830, 10, "Kusa: 0", {font: "17px Arial", fill: "#000", backgroundColor: "#D7E7AF"});
-    text_material_earned = this.add.text(830, 33, "", {font: "17px Arial", fill: "#000000"});
+    text_material = this.add.text(830, 15, "Kusa: 0", {font: "17px Arial", fill: "#000", backgroundColor: "#D7E7AF"});
+    text_material_earned = this.add.text(830, 38, "", {font: "17px Arial", fill: "#000000"});
     text_material_earned_count = 0;
 
     //level
-    text_level = this.add.text(1220, 37, "0", {font: "bold 26px Verdana", fill: "#E5004F"}).setOrigin(0.5);
+    text_level = this.add.text(1220, 42, "0", {font: "bold 26px Verdana", fill: "#E5004F"}).setOrigin(0.5);
 
     //heart
-    icon_heart = this.add.sprite(960, 18, "icon_heart");
+    icon_heart = this.add.sprite(960, 23, "icon_heart");
     icon_heart.setScale(0.12);
-    text_heart = this.add.text(975, 10, "***", {font: "17px Arial", fill: "#000", backgroundColor: "#FDEEED"});
+    text_heart = this.add.text(975, 15, "***", {font: "17px Arial", fill: "#000", backgroundColor: "#FDEEED"});
 
     //name
     item_kanban = this.add.sprite(85, 75, "item_kanban");
@@ -2050,6 +2048,8 @@ function create() {
 //---update-----------------------------------------------------------------------------------------------------
 
 function update() {
+
+    //this.scale.startFullscreen();
 
     //increment turn
     turn += 1;
