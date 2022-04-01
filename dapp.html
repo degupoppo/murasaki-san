@@ -235,7 +235,7 @@ let previous_local_level = 0;
 let previous_local_mining_status;
 let previous_local_farming_status;
 let previous_local_crafting_status;
-let previous_local_exp = 0;
+let previous_local_exp = 0.01;
 let previous_local_coin = 0;
 let previous_local_material = 0;
 let previous_local_items;
@@ -1160,7 +1160,7 @@ function radarchart(scene, x0, y0, r, str, dex, int, luk, str_item, dex_item, in
     //let y0 = 156;
     //let r = 50;
     //base
-    let base = 30;
+    let base = 25;
     //calc (x,y) from status
     let x1 = 0;
     let y1 = -r * str/base;
@@ -2242,7 +2242,10 @@ function update() {
         }
 
         //exp   //***TODO*** not best
-        if (previous_local_exp != local_exp && screen_exp < local_next_exp_required) {
+        if (
+            previous_local_exp != local_exp 
+            && screen_exp < local_next_exp_required
+        ) {
             //count animation
             screen_exp = previous_local_exp;
             if (local_exp > local_next_exp_required) {
@@ -2323,7 +2326,10 @@ function update() {
         let _mode = murasakisan.get_mode;
         if (_mode == "mining") {
             icon_mining.visible = true;
-            text_mining_calc.setText("+ " + local_coin_calc + " Ohana");
+            //text_mining_calc.setText("+ " + local_coin_calc + " Ohana");
+            let _delta = (now_time - local_mining_start_time);
+            let _daily_earn = local_coin_calc / _delta * 8640;
+            text_mining_calc.setText("+ " + local_coin_calc + " Ohana\n  (" + Math.round(_daily_earn/10)*10 + " /d)");
         }else if (_mode == "farming") {
             icon_farming.visible = true;
             text_farming_calc.setText("+ " + local_material_calc + " Kusa");

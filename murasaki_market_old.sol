@@ -1,15 +1,18 @@
 /**
- *Submitted for verification at FtmScan.com on 2021-09-09
+ *Submitted for verification at FtmScan.com on 2021-10-01
 0x0F9B8dD449A958563213Be539Ce13BF6a3751Bd3
 */
 
+//on Shibuya
+//0x01c2C65FFBb99045788717BD465E3C17e5A1df53
+
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.3;
+pragma solidity 0.8.7;
 
 
 
-// Part: OpenZeppelin/openzeppelin-contracts@4.3.0/EnumerableSet
+// Part: EnumerableSet
 
 /**
  * @dev Library for managing
@@ -96,7 +99,8 @@ library EnumerableSet {
                 // Move the last value to the index where the value to delete is
                 set._values[toDeleteIndex] = lastvalue;
                 // Update the index for the moved value
-                set._indexes[lastvalue] = valueIndex; // Replace lastvalue's index to valueIndex
+                set._indexes[lastvalue] = valueIndex;
+                // Replace lastvalue's index to valueIndex
             }
 
             // Delete the slot where the moved value was stored
@@ -364,7 +368,7 @@ library EnumerableSet {
     }
 }
 
-// Part: OpenZeppelin/openzeppelin-contracts@4.3.0/IERC165
+// Part: IERC165
 
 /**
  * @dev Interface of the ERC165 standard, as defined in the
@@ -387,7 +391,7 @@ interface IERC165 {
     function supportsInterface(bytes4 interfaceId) external view returns (bool);
 }
 
-// Part: OpenZeppelin/openzeppelin-contracts@4.3.0/IERC721Receiver
+// Part: IERC721Receiver
 
 /**
  * @title ERC721 token receiver interface
@@ -412,7 +416,7 @@ interface IERC721Receiver {
     ) external returns (bytes4);
 }
 
-// Part: OpenZeppelin/openzeppelin-contracts@4.3.0/Initializable
+// Part: Initializable
 
 /**
  * @dev This is a base contract to aid in writing upgradeable contracts, or any kind of contract that will be deployed
@@ -457,7 +461,7 @@ abstract contract Initializable {
     }
 }
 
-// Part: OpenZeppelin/openzeppelin-contracts@4.3.0/ERC721Holder
+// Part: ERC721Holder
 
 /**
  * @dev Implementation of the {IERC721Receiver} interface.
@@ -481,7 +485,7 @@ contract ERC721Holder is IERC721Receiver {
     }
 }
 
-// Part: OpenZeppelin/openzeppelin-contracts@4.3.0/IERC721
+// Part: IERC721
 
 /**
  * @dev Required interface of an ERC721 compliant contract.
@@ -624,13 +628,19 @@ interface IERC721 is IERC165 {
 interface Murasaki_Function_Share {
     function murasaki_craft_address() external view returns (address);
 }
+interface Murasaki_Craft {
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 tokenId
+    ) external;
+}
 
-// File: SummonerMarket.sol
-
+/// get from rarity_free_market and modified by @degupoppo
+// File: rarity_free_market.sol
 /// @dev Summoner market to allow trading of summoners
-/// @author swit.eth (@nomorebear) + nipun (@nipun_pit) + jade (@jade_arin)
-/// modified by @degupoppo
-contract Murasaki_Market_Item is Initializable, ERC721Holder {
+/// @author matnad.eth (@mat_nadler) with credit to swit.eth (@nomorebear) + nipun (@nipun_pit) + jade (@jade_arin)
+contract Murasaki_Item_Market is Initializable, ERC721Holder {
 
     //address
     address public murasaki_function_share_address;
@@ -638,138 +648,199 @@ contract Murasaki_Market_Item is Initializable, ERC721Holder {
         murasaki_function_share_address = _address;
     }
 
-  using EnumerableSet for EnumerableSet.UintSet;
+    using EnumerableSet for EnumerableSet.UintSet;
 
-  event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
-  event List(uint indexed id, address indexed lister, uint price);
-  event Unlist(uint indexed id, address indexed lister);
-  event Buy(uint indexed id, address indexed seller, address indexed buyer, uint price, uint fee);
-  event SetFeeBps(uint feeBps);
+    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+    event List(uint indexed id, address indexed lister, uint price);
+    event Unlist(uint indexed id, address indexed lister);
+    event Buy(uint indexed id, address indexed seller, address indexed buyer, uint price, uint fee);
+    event SetFeeBps(uint feeBps);
 
-  IERC721 public rarity;
-  uint public feeBps;
-  address public owner;
-  uint private lock;
-  EnumerableSet.UintSet private set;
-  mapping(address => EnumerableSet.UintSet) private mySet;
+    //IERC721 public rm = IERC721(0xce761D788DF608BD21bdd59d6f4B54b2e27F25Bb);
+    uint public fee_bps = 100;
+    address public owner = msg.sender;
+    uint private lock = 1;
+    EnumerableSet.UintSet private all_listings;
+    mapping(address => EnumerableSet.UintSet) private user_listings;
 
-  mapping(uint => uint) public prices;
-  mapping(uint => address) public listers;
+    mapping(uint => uint) public prices;
+    mapping(uint => address) public listers;
 
-  modifier nonReentrant() {
-    require(lock == 1, '!lock');
-    lock = 2;
-    _;
-    lock = 1;
-  }
-  modifier onlyOwner() {
-    require(owner == msg.sender, '!owner');
-    _;
-  }
+    modifier nonReentrant() {
+        require(lock == 1, '!lock');
+        lock = 2;
+        _;
+        lock = 1;
+    }
+    modifier onlyOwner() {
+        require(owner == msg.sender, '!owner');
+        _;
+    }
 
-  /// @dev Initializes the contract. Can only be called once.
-  function initialize(IERC721 _rarity, uint _feeBps) external initializer {
-    lock = 1;
-    owner = msg.sender;
-    rarity = _rarity;
-    feeBps = _feeBps;
-    emit OwnershipTransferred(address(0), msg.sender);
-    emit SetFeeBps(_feeBps);
-  }
+    /*
+    function test() view external returns (address) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        return mfs.murasaki_craft_address();
+    }
+    */
 
-  /// @dev Transfers ownership to a new address.
-  function transferOwnership(address _owner) external onlyOwner {
-    owner = _owner;
-    emit OwnershipTransferred(msg.sender, _owner);
-  }
+    /*
+    /// @dev Initializes the contract. Can only be called once.
+    ///      Approves Adventuretime: Summoners can still be levelled and daycare works.
+    function initialize(uint _fee_bps) external initializer {
+        lock = 1;
+        owner = msg.sender;
+        rm.setApprovalForAll(0x0D4C98901563ca730332e841EDBCB801fe9F2551, true);
+        fee_bps = _fee_bps;
+        emit OwnershipTransferred(address(0), msg.sender);
+        emit SetFeeBps(_fee_bps);
+    }
+    */
 
-  /// @dev Updates fee. Only callable by owner.
-  function setFeeBps(uint _feeBps) external onlyOwner {
-    feeBps = _feeBps;
-    emit SetFeeBps(_feeBps);
-  }
+    /// @dev Transfers ownership to a new address.
+    function transfer_ownership(address _owner) external onlyOwner {
+        owner = _owner;
+        emit OwnershipTransferred(msg.sender, _owner);
+    }
 
-  /// @dev Lists the given summoner. This contract will take custody until bought / unlisted.
-  function list(uint summonerId, uint price) external nonReentrant {
-    require(price > 0, 'bad price');
-    require(prices[summonerId] == 0, 'already listed');
-    rarity.safeTransferFrom(msg.sender, address(this), summonerId);
-    prices[summonerId] = price;
-    listers[summonerId] = msg.sender;
-    set.add(summonerId);
-    mySet[msg.sender].add(summonerId);
-    emit List(summonerId, msg.sender, price);
-  }
+    /// @dev Updates fee. Only callable by owner.
+    function set_fee_bps(uint _fee_bps) external onlyOwner {
+        fee_bps = _fee_bps;
+        emit SetFeeBps(_fee_bps);
+    }
 
-  /// @dev Unlists the given summoner. Must be the lister.
-  function unlist(uint summonerId) external nonReentrant {
-    require(prices[summonerId] > 0, 'not listed');
-    require(listers[summonerId] == msg.sender, 'not lister');
-    prices[summonerId] = 0;
-    listers[summonerId] = address(0);
-    rarity.safeTransferFrom(address(this), msg.sender, summonerId);
-    set.remove(summonerId);
-    mySet[msg.sender].remove(summonerId);
-    emit Unlist(summonerId, msg.sender);
-  }
+    /// @dev Lists the given summoner. This contract will take custody until bought / unlisted.
+    function list(uint32 _item, uint price) external nonReentrant {
+        require(price > 0, 'bad price');
+        require(prices[_item] == 0, 'already listed');
+        //rm.safeTransferFrom(msg.sender, address(this), summoner);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
+        mc.safeTransferFrom(msg.sender, address(this), _item);
+        prices[_item] = price;
+        listers[_item] = msg.sender;
+        all_listings.add(_item);
+        user_listings[msg.sender].add(_item);
+        emit List(_item, msg.sender, price);
+    }
 
-  /// @dev Buys the given summoner. Must pay the exact correct prirce.
-  function buy(uint summonerId) external payable nonReentrant {
-    uint price = prices[summonerId];
-    require(price > 0, 'not listed');
-    require(msg.value == price, 'bad msg.value');
-    uint fee = (price * feeBps) / 10000;
-    uint get = price - fee;
-    address lister = listers[summonerId];
-    prices[summonerId] = 0;
-    listers[summonerId] = address(0);
-    rarity.safeTransferFrom(address(this), msg.sender, summonerId);
-    payable(lister).transfer(get);
-    set.remove(summonerId);
-    mySet[lister].remove(summonerId);
-    emit Buy(summonerId, lister, msg.sender, price, fee);
-  }
+    /*
+    /// @dev List multiple summoners. Skips invalid summoners instead of reverting.
+    function list_multiple(uint[] calldata _summoners, uint[] calldata _prices) external nonReentrant {
+        require(_summoners.length == _prices.length, 'list lengths different');
+        for (uint i = 0; i < _summoners.length; i++) {
+            uint price = _prices[i];
+            uint summoner = _summoners[i];
+            if (price > 0 && prices[summoner] == 0) {
+                rm.safeTransferFrom(msg.sender, address(this), summoner);
+                prices[summoner] = price;
+                listers[summoner] = msg.sender;
+                all_listings.add(summoner);
+                user_listings[msg.sender].add(summoner);
+                emit List(summoner, msg.sender, price);
+            }
+        }
+    }
+    */
 
-  /// @dev Withdraw trading fees. Only called by owner.
-  function withdraw(uint amount) external onlyOwner {
-    payable(msg.sender).transfer(amount == 0 ? address(this).balance : amount);
-  }
+    /// @dev Unlists the given summoner. Must be the lister.
+    function unlist(uint32 _item) external nonReentrant {
+        require(prices[_item] > 0, '!listed');
+        require(listers[_item] == msg.sender, '!lister');
+        prices[_item] = 0;
+        listers[_item] = address(0);
+        //rm.safeTransferFrom(address(this), msg.sender, summoner);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
+        mc.safeTransferFrom(address(this), msg.sender, _item);
+        all_listings.remove(_item);
+        user_listings[msg.sender].remove(_item);
+        emit Unlist(_item, msg.sender);
+    }
 
-  /// @dev Returns list the total number of listed summoners.
-  function listLength() external view returns (uint) {
-    return set.length();
-  }
+    /*
+    /// @dev Unlists multiple summoners. Must be the lister. Skips instead of reverting.
+    function unlist_multiple(uint[] calldata summoners) external nonReentrant {
+        for (uint i = 0; i < summoners.length; i++) {
+            uint summoner = summoners[i];
+            if (prices[summoner] > 0 && listers[summoner] == msg.sender) {
+                prices[summoner] = 0;
+                listers[summoner] = address(0);
+                rm.safeTransferFrom(address(this), msg.sender, summoner);
+                all_listings.remove(summoner);
+                user_listings[msg.sender].remove(summoner);
+                emit Unlist(summoner, msg.sender);
+            }
+        }
+    }
+    */
 
-  /// @dev Returns the ids and the prices of the listed summoners.
-  function listsAt(uint start, uint count)
+    /// @dev Buys the given summoner. Must pay the exact correct prirce.
+    function buy(uint32 _item) external payable nonReentrant {
+        uint price = prices[_item];
+        require(price > 0, '!listed');
+        require(msg.value == price, 'bad msg.value');
+        uint fee = (price * fee_bps) / 10000;
+        uint get = price - fee;
+        address lister = listers[_item];
+        prices[_item] = 0;
+        listers[_item] = address(0);
+        //rm.safeTransferFrom(address(this), msg.sender, summoner);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
+        mc.safeTransferFrom(address(this), msg.sender, _item);
+        payable(lister).transfer(get);
+        all_listings.remove(_item);
+        user_listings[lister].remove(_item);
+        emit Buy(_item, lister, msg.sender, price, fee);
+    }
+
+    /// @dev Withdraw trading fees. Only called by owner.
+    /*
+    function withdraw(uint amount) external onlyOwner {
+        payable(msg.sender).transfer(amount == 0 ? address(this).balance : amount);
+    }
+    */
+    function withdraw(address rec)public onlyOwner{
+        payable(rec).transfer(address(this).balance);
+    }
+
+    /// @dev Returns list the total number of listed summoners.
+    function number_of_listings() external view returns (uint) {
+        return all_listings.length();
+    }
+
+    /// @dev Returns the ids and the prices of the listed summoners.
+    function listings_at(uint start, uint count)
     external
     view
-    returns (uint[] memory rIds, uint[] memory rPrices)
-  {
-    rIds = new uint[](count);
-    rPrices = new uint[](count);
-    for (uint idx = 0; idx < count; idx++) {
-      rIds[idx] = set.at(start + idx);
-      rPrices[idx] = prices[rIds[idx]];
+    returns (uint[] memory listed_ids, uint[] memory listed_prices)
+    {
+        listed_ids = new uint[](count);
+        listed_prices = new uint[](count);
+        for (uint idx = 0; idx < count; idx++) {
+            listed_ids[idx] = all_listings.at(start + idx);
+            listed_prices[idx] = prices[listed_ids[idx]];
+        }
     }
-  }
 
-  /// @dev Returns list the total number of listed summoners of the given user.
-  function myListLength(address user) external view returns (uint) {
-    return mySet[user].length();
-  }
-
-  /// @dev Returns the ids and the prices of the listed summoners of the given user.
-  function myListsAt(
-    address user,
-    uint start,
-    uint count
-  ) external view returns (uint[] memory rIds, uint[] memory rPrices) {
-    rIds = new uint[](count);
-    rPrices = new uint[](count);
-    for (uint idx = 0; idx < count; idx++) {
-      rIds[idx] = mySet[user].at(start + idx);
-      rPrices[idx] = prices[rIds[idx]];
+    /// @dev Returns list the total number of listed summoners of the given user.
+    function my_number_of_listings(address user) external view returns (uint) {
+        return user_listings[user].length();
     }
-  }
+
+    /// @dev Returns the ids and the prices of the listed summoners of the given user.
+    function my_listings_at(
+        address user,
+        uint start,
+        uint count
+    ) external view returns (uint[] memory listed_ids, uint[] memory listed_prices) {
+        listed_ids = new uint[](count);
+        listed_prices = new uint[](count);
+        for (uint idx = 0; idx < count; idx++) {
+            listed_ids[idx] = user_listings[user].at(start + idx);
+            listed_prices[idx] = prices[listed_ids[idx]];
+        }
+    }
+
 }

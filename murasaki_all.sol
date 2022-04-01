@@ -1790,9 +1790,11 @@ contract Murasaki_Function_Mining_and_Farming is Ownable {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
         uint32 SPEED = ms.SPEED();
+        uint32 BASE_SEC = ms.BASE_SEC();
         require(ms.mining_status(_summoner) == 1);
         uint32 _now = uint32(block.timestamp);
-        uint32 _delta = (_now - ms.mining_start_time(_summoner)) * SPEED/100 / 100;
+        uint32 _delta = (_now - ms.mining_start_time(_summoner)) * SPEED/100;   //sec
+        _delta = _delta * 1000 / BASE_SEC; // 1 day = +1000
         //status, level, item boost
         uint32 _mod = ms.strength(_summoner) + ms.level(_summoner)*100 + count_mining_items(msg.sender);
         //world dice boost
@@ -1871,7 +1873,8 @@ contract Murasaki_Function_Mining_and_Farming is Ownable {
         uint32 SPEED = ms.SPEED();
         require(ms.farming_status(_summoner) == 1);
         uint32 _now = uint32(block.timestamp);
-        uint32 _delta = (_now - ms.farming_start_time(_summoner)) * SPEED/100 / 100;
+        uint32 _delta = (_now - ms.farming_start_time(_summoner)) * SPEED/100;  //sec
+        _delta = _delta * 1000 / BASE_SEC; // 1 day = +1000
         //status and item boost
         uint32 _mod = ms.dexterity(_summoner) + ms.level(_summoner)*100 + count_farming_items(msg.sender);
         //world dice boost
@@ -1996,7 +1999,8 @@ contract Murasaki_Function_Crafting is Ownable {
         // _delta = (_mod - 400) / (_level * 150) * _dc
         // _mod_dc = _dc - _delta >= 3000
         //uint32 _delta = (_mod - 400) / (_level * 150) * _dc;  //original concept law, but not good
-        uint32 _delta = _dc * (_mod - 400) / (_level * 150);    //division must be on the last
+        //uint32 _delta = _dc * (_mod - 400) / (_level * 150);    //division should be done last
+        uint32 _delta = _dc * (_mod - 400) / (_level * 300);    //150 -> 300, 220401
         uint32 _mod_dc;
         if (_dc < 3000 + _delta) {
             _mod_dc = 3000;
