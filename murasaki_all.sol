@@ -959,6 +959,364 @@ library Base64 {
 
 
 //---------------------------------------------------------------------------------------------------------------------
+//EnumerableSet
+
+/**
+ * @dev Library for managing
+ * https://en.wikipedia.org/wiki/Set_(abstract_data_type)[sets] of primitive
+ * types.
+ *
+ * Sets have the following properties:
+ *
+ * - Elements are added, removed, and checked for existence in constant time
+ * (O(1)).
+ * - Elements are enumerated in O(n). No guarantees are made on the ordering.
+ *
+ * ```
+ * contract Example {
+ *     // Add the library methods
+ *     using EnumerableSet for EnumerableSet.AddressSet;
+ *
+ *     // Declare a set state variable
+ *     EnumerableSet.AddressSet private mySet;
+ * }
+ * ```
+ *
+ * As of v3.3.0, sets of type `bytes32` (`Bytes32Set`), `address` (`AddressSet`)
+ * and `uint256` (`UintSet`) are supported.
+ */
+library EnumerableSet {
+    // To implement this library for multiple types with as little code
+    // repetition as possible, we write it in terms of a generic Set type with
+    // bytes32 values.
+    // The Set implementation uses private functions, and user-facing
+    // implementations (such as AddressSet) are just wrappers around the
+    // underlying Set.
+    // This means that we can only create new EnumerableSets for types that fit
+    // in bytes32.
+
+    struct Set {
+        // Storage of set values
+        bytes32[] _values;
+        // Position of the value in the `values` array, plus 1 because index 0
+        // means a value is not in the set.
+        mapping(bytes32 => uint256) _indexes;
+    }
+
+    /**
+     * @dev Add a value to a set. O(1).
+     *
+     * Returns true if the value was added to the set, that is if it was not
+     * already present.
+     */
+    function _add(Set storage set, bytes32 value) private returns (bool) {
+        if (!_contains(set, value)) {
+            set._values.push(value);
+            // The value is stored at length-1, but we add 1 to all indexes
+            // and use 0 as a sentinel value
+            set._indexes[value] = set._values.length;
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * @dev Removes a value from a set. O(1).
+     *
+     * Returns true if the value was removed from the set, that is if it was
+     * present.
+     */
+    function _remove(Set storage set, bytes32 value) private returns (bool) {
+        // We read and store the value's index to prevent multiple reads from the same storage slot
+        uint256 valueIndex = set._indexes[value];
+
+        if (valueIndex != 0) {
+            // Equivalent to contains(set, value)
+            // To delete an element from the _values array in O(1), we swap the element to delete with the last one in
+            // the array, and then remove the last element (sometimes called as 'swap and pop').
+            // This modifies the order of the array, as noted in {at}.
+
+            uint256 toDeleteIndex = valueIndex - 1;
+            uint256 lastIndex = set._values.length - 1;
+
+            if (lastIndex != toDeleteIndex) {
+                bytes32 lastvalue = set._values[lastIndex];
+
+                // Move the last value to the index where the value to delete is
+                set._values[toDeleteIndex] = lastvalue;
+                // Update the index for the moved value
+                set._indexes[lastvalue] = valueIndex; // Replace lastvalue's index to valueIndex
+            }
+
+            // Delete the slot where the moved value was stored
+            set._values.pop();
+
+            // Delete the index for the deleted slot
+            delete set._indexes[value];
+
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * @dev Returns true if the value is in the set. O(1).
+     */
+    function _contains(Set storage set, bytes32 value) private view returns (bool) {
+        return set._indexes[value] != 0;
+    }
+
+    /**
+     * @dev Returns the number of values on the set. O(1).
+     */
+    function _length(Set storage set) private view returns (uint256) {
+        return set._values.length;
+    }
+
+    /**
+     * @dev Returns the value stored at position `index` in the set. O(1).
+     *
+     * Note that there are no guarantees on the ordering of values inside the
+     * array, and it may change when more values are added or removed.
+     *
+     * Requirements:
+     *
+     * - `index` must be strictly less than {length}.
+     */
+    function _at(Set storage set, uint256 index) private view returns (bytes32) {
+        return set._values[index];
+    }
+
+    /**
+     * @dev Return the entire set in an array
+     *
+     * WARNING: This operation will copy the entire storage to memory, which can be quite expensive. This is designed
+     * to mostly be used by view accessors that are queried without any gas fees. Developers should keep in mind that
+     * this function has an unbounded cost, and using it as part of a state-changing function may render the function
+     * uncallable if the set grows to a point where copying to memory consumes too much gas to fit in a block.
+     */
+    function _values(Set storage set) private view returns (bytes32[] memory) {
+        return set._values;
+    }
+
+    // Bytes32Set
+
+    struct Bytes32Set {
+        Set _inner;
+    }
+
+    /**
+     * @dev Add a value to a set. O(1).
+     *
+     * Returns true if the value was added to the set, that is if it was not
+     * already present.
+     */
+    function add(Bytes32Set storage set, bytes32 value) internal returns (bool) {
+        return _add(set._inner, value);
+    }
+
+    /**
+     * @dev Removes a value from a set. O(1).
+     *
+     * Returns true if the value was removed from the set, that is if it was
+     * present.
+     */
+    function remove(Bytes32Set storage set, bytes32 value) internal returns (bool) {
+        return _remove(set._inner, value);
+    }
+
+    /**
+     * @dev Returns true if the value is in the set. O(1).
+     */
+    function contains(Bytes32Set storage set, bytes32 value) internal view returns (bool) {
+        return _contains(set._inner, value);
+    }
+
+    /**
+     * @dev Returns the number of values in the set. O(1).
+     */
+    function length(Bytes32Set storage set) internal view returns (uint256) {
+        return _length(set._inner);
+    }
+
+    /**
+     * @dev Returns the value stored at position `index` in the set. O(1).
+     *
+     * Note that there are no guarantees on the ordering of values inside the
+     * array, and it may change when more values are added or removed.
+     *
+     * Requirements:
+     *
+     * - `index` must be strictly less than {length}.
+     */
+    function at(Bytes32Set storage set, uint256 index) internal view returns (bytes32) {
+        return _at(set._inner, index);
+    }
+
+    /**
+     * @dev Return the entire set in an array
+     *
+     * WARNING: This operation will copy the entire storage to memory, which can be quite expensive. This is designed
+     * to mostly be used by view accessors that are queried without any gas fees. Developers should keep in mind that
+     * this function has an unbounded cost, and using it as part of a state-changing function may render the function
+     * uncallable if the set grows to a point where copying to memory consumes too much gas to fit in a block.
+     */
+    function values(Bytes32Set storage set) internal view returns (bytes32[] memory) {
+        return _values(set._inner);
+    }
+
+    // AddressSet
+
+    struct AddressSet {
+        Set _inner;
+    }
+
+    /**
+     * @dev Add a value to a set. O(1).
+     *
+     * Returns true if the value was added to the set, that is if it was not
+     * already present.
+     */
+    function add(AddressSet storage set, address value) internal returns (bool) {
+        return _add(set._inner, bytes32(uint256(uint160(value))));
+    }
+
+    /**
+     * @dev Removes a value from a set. O(1).
+     *
+     * Returns true if the value was removed from the set, that is if it was
+     * present.
+     */
+    function remove(AddressSet storage set, address value) internal returns (bool) {
+        return _remove(set._inner, bytes32(uint256(uint160(value))));
+    }
+
+    /**
+     * @dev Returns true if the value is in the set. O(1).
+     */
+    function contains(AddressSet storage set, address value) internal view returns (bool) {
+        return _contains(set._inner, bytes32(uint256(uint160(value))));
+    }
+
+    /**
+     * @dev Returns the number of values in the set. O(1).
+     */
+    function length(AddressSet storage set) internal view returns (uint256) {
+        return _length(set._inner);
+    }
+
+    /**
+     * @dev Returns the value stored at position `index` in the set. O(1).
+     *
+     * Note that there are no guarantees on the ordering of values inside the
+     * array, and it may change when more values are added or removed.
+     *
+     * Requirements:
+     *
+     * - `index` must be strictly less than {length}.
+     */
+    function at(AddressSet storage set, uint256 index) internal view returns (address) {
+        return address(uint160(uint256(_at(set._inner, index))));
+    }
+
+    /**
+     * @dev Return the entire set in an array
+     *
+     * WARNING: This operation will copy the entire storage to memory, which can be quite expensive. This is designed
+     * to mostly be used by view accessors that are queried without any gas fees. Developers should keep in mind that
+     * this function has an unbounded cost, and using it as part of a state-changing function may render the function
+     * uncallable if the set grows to a point where copying to memory consumes too much gas to fit in a block.
+     */
+    function values(AddressSet storage set) internal view returns (address[] memory) {
+        bytes32[] memory store = _values(set._inner);
+        address[] memory result;
+
+        assembly {
+            result := store
+        }
+
+        return result;
+    }
+
+    // UintSet
+
+    struct UintSet {
+        Set _inner;
+    }
+
+    /**
+     * @dev Add a value to a set. O(1).
+     *
+     * Returns true if the value was added to the set, that is if it was not
+     * already present.
+     */
+    function add(UintSet storage set, uint256 value) internal returns (bool) {
+        return _add(set._inner, bytes32(value));
+    }
+
+    /**
+     * @dev Removes a value from a set. O(1).
+     *
+     * Returns true if the value was removed from the set, that is if it was
+     * present.
+     */
+    function remove(UintSet storage set, uint256 value) internal returns (bool) {
+        return _remove(set._inner, bytes32(value));
+    }
+
+    /**
+     * @dev Returns true if the value is in the set. O(1).
+     */
+    function contains(UintSet storage set, uint256 value) internal view returns (bool) {
+        return _contains(set._inner, bytes32(value));
+    }
+
+    /**
+     * @dev Returns the number of values on the set. O(1).
+     */
+    function length(UintSet storage set) internal view returns (uint256) {
+        return _length(set._inner);
+    }
+
+    /**
+     * @dev Returns the value stored at position `index` in the set. O(1).
+     *
+     * Note that there are no guarantees on the ordering of values inside the
+     * array, and it may change when more values are added or removed.
+     *
+     * Requirements:
+     *
+     * - `index` must be strictly less than {length}.
+     */
+    function at(UintSet storage set, uint256 index) internal view returns (uint256) {
+        return uint256(_at(set._inner, index));
+    }
+
+    /**
+     * @dev Return the entire set in an array
+     *
+     * WARNING: This operation will copy the entire storage to memory, which can be quite expensive. This is designed
+     * to mostly be used by view accessors that are queried without any gas fees. Developers should keep in mind that
+     * this function has an unbounded cost, and using it as part of a state-changing function may render the function
+     * uncallable if the set grows to a point where copying to memory consumes too much gas to fit in a block.
+     */
+    function values(UintSet storage set) internal view returns (uint256[] memory) {
+        bytes32[] memory store = _values(set._inner);
+        uint256[] memory result;
+
+        assembly {
+            result := store
+        }
+
+        return result;
+    }
+}
+
+
+
+//---------------------------------------------------------------------------------------------------------------------
 //Murasaki Main
 //0xae778a945bF612b13E78eB1162E79a42e29A4036
 
@@ -1334,13 +1692,13 @@ contract Murasaki_Function_Share is Ownable {
     }
 
     //call items as array
-    function get_balance_of_type_array(address _wallet) external view returns (uint32[128] memory) {
+    function get_balance_of_type_array(address _wallet) external view returns (uint32[256] memory) {
         Murasaki_Craft mc = Murasaki_Craft(murasaki_craft_address);
         return mc.get_balance_of_type(_wallet);
     }
 
     //call items as array from summoner
-    function get_balance_of_type_array_from_summoner(uint32 _summoner) external view returns (uint32[128] memory) {
+    function get_balance_of_type_array_from_summoner(uint32 _summoner) external view returns (uint32[256] memory) {
         Murasaki_Main mm = Murasaki_Main(murasaki_main_address);
         address _owner = mm.ownerOf(_summoner);
         Murasaki_Craft mc = Murasaki_Craft(murasaki_craft_address);
@@ -1809,7 +2167,7 @@ contract Murasaki_Function_Mining_and_Farming is Ownable {
     }
     function count_mining_items(address _address) public view returns (uint32) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
-        uint32[128] memory _balance_of_type = mfs.get_balance_of_type_array(_address);
+        uint32[256] memory _balance_of_type = mfs.get_balance_of_type_array(_address);
         uint32 _mining_items = 0;
         for (uint i = 1; i <= 16; i++) {
             if (_balance_of_type[i+64] > 0) {
@@ -1871,6 +2229,7 @@ contract Murasaki_Function_Mining_and_Farming is Ownable {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
         uint32 SPEED = ms.SPEED();
+        uint32 BASE_SEC = ms.BASE_SEC();
         require(ms.farming_status(_summoner) == 1);
         uint32 _now = uint32(block.timestamp);
         uint32 _delta = (_now - ms.farming_start_time(_summoner)) * SPEED/100;  //sec
@@ -1890,7 +2249,7 @@ contract Murasaki_Function_Mining_and_Farming is Ownable {
     function count_farming_items(address _address) public view returns (uint32) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         //Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
-        uint32[128] memory _balance_of_type = mfs.get_balance_of_type_array(_address);
+        uint32[256] memory _balance_of_type = mfs.get_balance_of_type_array(_address);
         uint32 _farming_items = 0;
         for (uint i = 17; i <= 32; i++) {
             if (_balance_of_type[i+64] > 0) {
@@ -2033,7 +2392,7 @@ contract Murasaki_Function_Crafting is Ownable {
     }
     function count_crafting_items(address _address) public view returns (uint32) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
-        uint32[128] memory _balance_of_type = mfs.get_balance_of_type_array(_address);
+        uint32[256] memory _balance_of_type = mfs.get_balance_of_type_array(_address);
         uint32 _crafting_items = 0;
         for (uint i = 33; i <= 48; i++) {
             if (_balance_of_type[i+64] > 0) {
@@ -2409,6 +2768,9 @@ contract Murasaki_Craft is ERC721, Ownable{
         murasaki_function_address = _address;
     }
 
+    using EnumerableSet for EnumerableSet.UintSet;
+    mapping(address => EnumerableSet.UintSet) private mySet;
+
     //name
     string constant public name = "Murasaki Craft";
     string constant public symbol = "MC";
@@ -2422,7 +2784,7 @@ contract Murasaki_Craft is ERC721, Ownable{
         address crafted_wallet;
     }
     mapping(uint256 => item) public items;
-    mapping(address => uint32[128]) public balance_of_type;
+    mapping(address => uint32[256]) public balance_of_type;
     mapping(uint32 => uint32) public seed;
 
     //override ERC721 transfer, 
@@ -2435,6 +2797,8 @@ contract Murasaki_Craft is ERC721, Ownable{
         uint32 _item_type = items[tokenId].item_type;
         balance_of_type[from][_item_type] -= 1;
         balance_of_type[to][_item_type] += 1;
+        mySet[from].remove(tokenId);
+        mySet[to].add(tokenId);
     }
 
     //override ERC721 burn
@@ -2443,6 +2807,7 @@ contract Murasaki_Craft is ERC721, Ownable{
         uint32 _item_type = items[tokenId].item_type;
         address _owner = ERC721.ownerOf(tokenId);
         balance_of_type[_owner][_item_type] -= 1;
+        mySet[msg.sender].remove(tokenId);
     }
 
     //craft
@@ -2453,9 +2818,27 @@ contract Murasaki_Craft is ERC721, Ownable{
         items[_crafting_item] = item(_item_type, _now, _summoner, _wallet);
         balance_of_type[_wallet][_item_type] += 1;  //balanceOf each item type
         seed[_crafting_item] = _seed;
+        mySet[_wallet].add(_crafting_item);
         next_item++;
         _safeMint(_wallet, _crafting_item);
     }  
+
+    /// @dev Returns list the total number of listed summoners of the given user.
+    function myListLength(address user) external view returns (uint) {
+        return mySet[user].length();
+    }
+
+    /// @dev Returns the ids and the prices of the listed summoners of the given user.
+    function myListsAt(
+        address user,
+        uint start,
+        uint count
+    ) external view returns (uint[] memory rIds) {
+        rIds = new uint[](count);
+        for (uint idx = 0; idx < count; idx++) {
+            rIds[idx] = mySet[user].at(start + idx);
+        }
+    }
 
     //URI
     //Inspired by OraclizeAPI's implementation - MIT license
@@ -2497,7 +2880,7 @@ contract Murasaki_Craft is ERC721, Ownable{
     }
 
     //call items as array, need to write in Craft contract
-    function get_balance_of_type(address _wallet) public view returns (uint32[128] memory) {
+    function get_balance_of_type(address _wallet) public view returns (uint32[256] memory) {
         return balance_of_type[_wallet];
     }
 }
@@ -2622,6 +3005,9 @@ contract Tiny_Heart is ERC721, Ownable{
         murasaki_function_address = _address;
     }
 
+    using EnumerableSet for EnumerableSet.UintSet;
+    mapping(address => EnumerableSet.UintSet) private mySet;
+
     //name
     string constant public name = "Tiny Heart";
     string constant public symbol = "TH";
@@ -2637,12 +3023,29 @@ contract Tiny_Heart is ERC721, Ownable{
     mapping(uint256 => heart) public hearts;
     mapping(uint32 => uint32) public seed;
 
+    //override ERC721 transfer, 
+    function _transfer(
+        address from,
+        address to,
+        uint256 tokenId
+    ) internal virtual override {
+        ERC721._transfer(from, to, tokenId);
+        mySet[from].remove(tokenId);
+        mySet[to].add(tokenId);
+    }
+
+    //override ERC721 burn
+    function _burn(uint256 tokenId) internal virtual override {
+        ERC721._burn(tokenId);
+        mySet[msg.sender].remove(tokenId);
+    }
+
     //create
     function create(
         uint32 _created_item, 
         uint32 _created_summoner, 
         address _created_wallet, 
-        uint32 _seed, 
+        uint32 _seed,
         address _to_wallet
     ) external {
         require(msg.sender == murasaki_function_address);
@@ -2651,8 +3054,26 @@ contract Tiny_Heart is ERC721, Ownable{
         hearts[_crafting_heart] = heart(_created_item, _now, _created_summoner, _created_wallet);
         seed[_crafting_heart] = _seed;
         next_heart++;
+        mySet[_to_wallet].add(_crafting_heart);
         _safeMint(_to_wallet, _crafting_heart);
     }  
+
+    /// @dev Returns list the total number of listed summoners of the given user.
+    function myListLength(address user) external view returns (uint) {
+        return mySet[user].length();
+    }
+
+    /// @dev Returns the ids and the prices of the listed summoners of the given user.
+    function myListsAt(
+        address user,
+        uint start,
+        uint count
+    ) external view returns (uint[] memory rIds) {
+        rIds = new uint[](count);
+        for (uint idx = 0; idx < count; idx++) {
+            rIds[idx] = mySet[user].at(start + idx);
+        }
+    }
 
     //URI
     //Inspired by OraclizeAPI's implementation - MIT license
