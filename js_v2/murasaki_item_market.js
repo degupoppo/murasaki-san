@@ -1,4 +1,4 @@
-const contract_murasaki_item_market = "0x01c2C65FFBb99045788717BD465E3C17e5A1df53";
+const contract_murasaki_item_market = "0xC1d3e77D454da67e088ea4eB57fBaB071882120f";
 const abi_murasaki_item_market = [
 	{
 		"anonymous": false,
@@ -141,7 +141,7 @@ const abi_murasaki_item_market = [
 	},
 	{
 		"inputs": [],
-		"name": "fee_bps",
+		"name": "feeBps",
 		"outputs": [
 			{
 				"internalType": "uint256",
@@ -168,6 +168,19 @@ const abi_murasaki_item_market = [
 		"name": "list",
 		"outputs": [],
 		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "listLength",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
 		"type": "function"
 	},
 	{
@@ -202,16 +215,16 @@ const abi_murasaki_item_market = [
 				"type": "uint256"
 			}
 		],
-		"name": "listings_at",
+		"name": "listsAt",
 		"outputs": [
 			{
 				"internalType": "uint256[]",
-				"name": "listed_ids",
+				"name": "rIds",
 				"type": "uint256[]"
 			},
 			{
 				"internalType": "uint256[]",
-				"name": "listed_prices",
+				"name": "rPrices",
 				"type": "uint256[]"
 			}
 		],
@@ -237,6 +250,25 @@ const abi_murasaki_item_market = [
 				"internalType": "address",
 				"name": "user",
 				"type": "address"
+			}
+		],
+		"name": "myListLength",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "user",
+				"type": "address"
 			},
 			{
 				"internalType": "uint256",
@@ -249,49 +281,17 @@ const abi_murasaki_item_market = [
 				"type": "uint256"
 			}
 		],
-		"name": "my_listings_at",
+		"name": "myListsAt",
 		"outputs": [
 			{
 				"internalType": "uint256[]",
-				"name": "listed_ids",
+				"name": "rIds",
 				"type": "uint256[]"
 			},
 			{
 				"internalType": "uint256[]",
-				"name": "listed_prices",
+				"name": "rPrices",
 				"type": "uint256[]"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "user",
-				"type": "address"
-			}
-		],
-		"name": "my_number_of_listings",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "number_of_listings",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
 			}
 		],
 		"stateMutability": "view",
@@ -367,11 +367,11 @@ const abi_murasaki_item_market = [
 		"inputs": [
 			{
 				"internalType": "uint256",
-				"name": "_fee_bps",
+				"name": "_feeBps",
 				"type": "uint256"
 			}
 		],
-		"name": "set_fee_bps",
+		"name": "setFeeBps",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -384,7 +384,7 @@ const abi_murasaki_item_market = [
 				"type": "address"
 			}
 		],
-		"name": "transfer_ownership",
+		"name": "transferOwnership",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"

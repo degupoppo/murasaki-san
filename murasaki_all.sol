@@ -4,7 +4,14 @@
 
 /***
 
-    ItemとHeartのカウント化
+    Itemレア度の設定
+        Common, Uncommon, Rareの3段階？
+        Common x 3 -> Uncommonのupgradeクラフトを実装する
+        Uncommonはクラフト時にLuk%で出現する
+        Rareはupgradeでしか出現しない
+        Common, Uncommon, Rareによる補正の実装
+
+ ok ItemとHeartのカウント化
         rarity_marketのコードを流用する
         とりあえずmintしまくってlist表示の動作確認を独立で行う
         market.htmlへと組み込む。
