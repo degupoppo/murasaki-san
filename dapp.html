@@ -2272,7 +2272,11 @@ function update() {
             //earning text
             if (count_update > 1) {
                 let _delta = local_exp - previous_local_exp;
-                text_exp_earned.setText("+" + _delta);
+                let _sign = ""; //no need when minus
+                if (_delta > 0) {
+                    _sign = "+";
+                }
+                text_exp_earned.setText(_sign + _delta);
                 text_exp_earned_count = 5;
             }
         }
@@ -2347,7 +2351,10 @@ function update() {
             text_mining_calc.setText("+ " + local_coin_calc + " Ohana\n  (" + Math.round(_daily_earn/10)*10 + " /d)");
         }else if (_mode == "farming") {
             icon_farming.visible = true;
-            text_farming_calc.setText("+ " + local_material_calc + " Kusa");
+            //text_farming_calc.setText("+ " + local_material_calc + " Kusa");
+            let _delta = (now_time - local_farming_start_time);
+            let _daily_earn = local_material_calc / _delta * 8640;
+            text_farming_calc.setText("+ " + local_material_calc + " Kusa\n  (" + Math.round(_daily_earn/10)*10 + " /d)");
         }else if (_mode == "crafting") {
             icon_crafting_time_remining.visible = true;
             if (local_crafting_calc > 0) {
