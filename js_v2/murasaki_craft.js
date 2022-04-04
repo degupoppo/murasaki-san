@@ -1,4 +1,4 @@
-const contract_murasaki_craft = "0x5FD2daeC9d995De32cDbfb166d73f0bFdb9c5edF";
+const contract_murasaki_craft = "0x8f90Bc525AC28632d6247F4bCf639b636a93D519";
 const abi_murasaki_craft = [
 	{
 		"anonymous": false,
@@ -121,6 +121,19 @@ const abi_murasaki_craft = [
 			}
 		],
 		"name": "approve",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "tokenId",
+				"type": "uint256"
+			}
+		],
+		"name": "burn",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -338,9 +351,9 @@ const abi_murasaki_craft = [
 		"name": "get_balance_of_type",
 		"outputs": [
 			{
-				"internalType": "uint32[128]",
+				"internalType": "uint32[256]",
 				"name": "",
-				"type": "uint32[128]"
+				"type": "uint32[256]"
 			}
 		],
 		"stateMutability": "view",
@@ -431,6 +444,54 @@ const abi_murasaki_craft = [
 				"internalType": "address",
 				"name": "",
 				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "user",
+				"type": "address"
+			}
+		],
+		"name": "myListLength",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "user",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "start",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "count",
+				"type": "uint256"
+			}
+		],
+		"name": "myListsAt",
+		"outputs": [
+			{
+				"internalType": "uint256[]",
+				"name": "rIds",
+				"type": "uint256[]"
 			}
 		],
 		"stateMutability": "view",

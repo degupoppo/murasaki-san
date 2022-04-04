@@ -25,7 +25,7 @@ ToDo
 
 <script src="js_v2/web3.min.js"></script>
 <script src="js_v2/murasaki_item_market.js"></script>
-<script src="js_v2/murasaki_craft2.js"></script>
+<script src="js_v2/murasaki_craft.js"></script>
 <script src="js_v2/big-number.js"></script>
 
 <script type="text/javascript">
@@ -58,21 +58,91 @@ ToDo
         return wallet[0];
     }
 
-    //get items of wallet
-    async function update_myItems() {
+    //get items on market
+    async function update_onMarketItems() {
+        let web3 = await connect();
+        let wallet = await get_wallet(web3);
+        //contract
+        let contract = await new web3.eth.Contract(abi_murasaki_item_market, contract_murasaki_item_market);
+        let contract_mc = await new web3.eth.Contract(abi_murasaki_craft, contract_murasaki_craft);
+        let ListLength = await contract.methods.listLength().call();
+        let ListsAt = await contract.methods.listsAt(0, ListLength).call();
+        for (let i = 0; i < ListLength; i++) {
+            let _item = ListsAt[0][i];
+            let _price = ListsAt[1][i];
+            let _items = await contract_mc.methods.items(_item).call();
+            let _item_type = _items[0];
+            let _crafted_summoner = _items[2];
+            let _html = "";
+            _html += "<tr><td><center>"
+            _html += _item;
+            _html += "</center></td><td><center>";
+            _html += _item_type;
+            _html += "</center></td><td><center>";
+            _html += _crafted_summoner;
+            _html += "</center></td><td id='" + "input_price_" + _item + "'><center><b>";
+            _html += (Math.round(_price/(10**18)*100)/100).toFixed(2);
+            _html += "</b></center></td><td><center>";
+            _html += "<button onclick='buy_item(" + _item + "," + _price + ");'>";
+            _html += "Buy";
+            _html += "</button>";
+            _html += "</center></td></tr>";
+            tbody_sellingItems.innerHTML += _html;
+        }
+        //after loading, activate JQuery CSS
+        $(document).ready(function(){
+           $('#table_onMarketItems').DataTable();
+        });
+    }
+
+    //get selling items of listed
+    async function update_sellingItems() {
+        let web3 = await connect();
+        let wallet = await get_wallet(web3);
+        //contract
+        let contract = await new web3.eth.Contract(abi_murasaki_item_market, contract_murasaki_item_market);
+        let contract_mc = await new web3.eth.Contract(abi_murasaki_craft, contract_murasaki_craft);
+        let myListLength = await contract.methods.myListLength(wallet).call();
+        let myListsAt = await contract.methods.myListsAt(wallet, 0, myListLength).call();
+        for (let i = 0; i < myListLength; i++) {
+            let _item = myListsAt[0][i];
+            let _price = myListsAt[1][i];
+            let _items = await contract_mc.methods.items(_item).call();
+            let _item_type = _items[0];
+            let _crafted_summoner = _items[2];
+            let _html = "";
+            _html += "<tr><td><center>"
+            _html += _item;
+            _html += "</center></td><td><center>";
+            _html += _item_type;
+            _html += "</center></td><td><center>";
+            _html += _crafted_summoner;
+            _html += "</center></td><td><center><b>";
+            _html += (Math.round(_price/(10**18)*100)/100).toFixed(2);
+            _html += "</b></center></td><td><center>";
+            _html += "<button onclick='unlist_item(" + _item + ");'>";
+            _html += "Unlist";
+            _html += "</button>";
+            _html += "</center></td></tr>";
+            tbody_listedItems.innerHTML += _html;
+        }
+        //after loading, activate JQuery CSS
+        $(document).ready(function(){
+           $('#talbe_sellingItems').DataTable();
+        });
+    }
+
+    //get items of users
+    async function update_userItems() {
         let web3 = await connect();
         let wallet = await get_wallet(web3);
         //contract
         let contract = await new web3.eth.Contract(abi_murasaki_craft, contract_murasaki_craft);
         let myListLength = await contract.methods.myListLength(wallet).call();
         let myListsAt = await contract.methods.myListsAt(wallet, 0, myListLength).call();
-        //console.log(myListsAt);
-        let _items;
-        tbody_myItems.innerHTML = "";
         for (let i = 0; i < myListLength; i++) {
             let _item = myListsAt[i];
             _items = await contract.methods.items(_item).call();
-            //console.log(_item, _items);
             let _item_type = _items[0];
             let _crafted_time = _items[1];
             let _crafted_summoner = _items[2];
@@ -98,109 +168,12 @@ ToDo
             _html += "List";
             _html += "</button>";
             _html += "</center></td></tr>";
-            //console.log(_html);
             tbody_myItems.innerHTML += _html;
         }
         //after loading, activate JQuery CSS
         $(document).ready(function(){
-           $('#table_myItems').DataTable();
+           $('#table_userItems').DataTable();
         });
-    }
-
-    //get items of listed
-    async function update_listedItems() {
-        let web3 = await connect();
-        let wallet = await get_wallet(web3);
-        //contract
-        let contract = await new web3.eth.Contract(abi_murasaki_item_market, contract_murasaki_item_market);
-        let contract_mc = await new web3.eth.Contract(abi_murasaki_craft, contract_murasaki_craft);
-        let myListLength = await contract.methods.myListLength(wallet).call();
-        let myListsAt = await contract.methods.myListsAt(wallet, 0, myListLength).call();
-        //console.log(myListLength, myListsAt);
-        //console.log(myListsAt[0]);
-        let _items;
-        tbody_listedItems.innerHTML = "";
-        for (let i = 0; i < myListLength; i++) {
-            let _item = myListsAt[0][i];
-            let _price = myListsAt[1][i];
-            let _items = await contract_mc.methods.items(_item).call();
-            let _item_type = _items[0];
-            let _html = "";
-            _html += "<tr><td><center>"
-            _html += _item;
-            _html += "</center></td><td><center>";
-            _html += _item_type;
-            _html += "</center></td><td><center>";
-            _html += (Math.round(_price/(10**18)*100)/100).toFixed(2);
-            _html += "</center></td><td><center>";
-            _html += "<button onclick='unlist_item(" + _item + ");'>";
-            _html += "Unlist";
-            _html += "</button>";
-            _html += "</center></td></tr>";
-            //console.log(_html);
-            tbody_listedItems.innerHTML += _html;
-        }
-        //after loading, activate JQuery CSS
-        $(document).ready(function(){
-           $('#table_listedItems').DataTable();
-        });
-    }
-
-    //get items of selling
-    async function update_sellingItems() {
-        let web3 = await connect();
-        let wallet = await get_wallet(web3);
-        //contract
-        let contract = await new web3.eth.Contract(abi_murasaki_item_market, contract_murasaki_item_market);
-        let contract_mc = await new web3.eth.Contract(abi_murasaki_craft, contract_murasaki_craft);
-        let ListLength = await contract.methods.listLength().call();
-        let ListsAt = await contract.methods.listsAt(0, ListLength).call();
-        let _items;
-        tbody_sellingItems.innerHTML = "";
-        for (let i = 0; i < ListLength; i++) {
-            let _item = ListsAt[0][i];
-            let _price = ListsAt[1][i];
-            let _items = await contract_mc.methods.items(_item).call();
-            let _item_type = _items[0];
-            let _crafted_summoner = _items[2];
-            let _html = "";
-            _html += "<tr><td><center>"
-            _html += _item;
-            _html += "</center></td><td><center>";
-            _html += _item_type;
-            _html += "</center></td><td><center>";
-            _html += _crafted_summoner;
-            _html += "</center></td><td id='" + "input_price_" + _item + "'><center>";
-            _html += (Math.round(_price/(10**18)*100)/100).toFixed(2);
-            _html += "</center></td><td><center>";
-            _html += "<button onclick='buy_item(" + _item + "," + _price + ");'>";
-            _html += "Buy";
-            _html += "</button>";
-            _html += "</center></td></tr>";
-            //console.log(_html);
-            tbody_sellingItems.innerHTML += _html;
-        }
-        //after loading, activate JQuery CSS
-        $(document).ready(function(){
-           $('#table_sellingItems').DataTable();
-        });
-    }
-
-    //list item
-    async function list_item(_item) {
-        let web3 = await connect();
-        let wallet = await get_wallet(web3);
-        let _price = new BigNumber(document.getElementById("input_price_"+_item).value * 10**18);
-        let contract = await new web3.eth.Contract(abi_murasaki_item_market, contract_murasaki_item_market);
-        await contract.methods.list(_item, _price).send({from:wallet});
-    }
-
-    //unlist item
-    async function unlist_item(_item) {
-        let web3 = await connect();
-        let wallet = await get_wallet(web3);
-        let contract = await new web3.eth.Contract(abi_murasaki_item_market, contract_murasaki_item_market);
-        await contract.methods.unlist(_item).send({from:wallet});
     }
 
     //buy item
@@ -211,11 +184,50 @@ ToDo
         await contract.methods.buy(_item).send({from: wallet, value: _price});
     }
 
+    //unlist item
+    async function unlist_item(_item) {
+        let web3 = await connect();
+        let wallet = await get_wallet(web3);
+        let contract = await new web3.eth.Contract(abi_murasaki_item_market, contract_murasaki_item_market);
+        await contract.methods.unlist(_item).send({from:wallet});
+    }
+
+    //list item
+    async function list_item(_item) {
+        let web3 = await connect();
+        let wallet = await get_wallet(web3);
+        let _price = new BigNumber(document.getElementById("input_price_"+_item).value * 10**18);
+        let contract = await new web3.eth.Contract(abi_murasaki_item_market, contract_murasaki_item_market);
+        await contract.methods.list(_item, _price).send({from:wallet});
+    }
+    
+    //approve
+    async function approve() {
+        let web3 = await connect();
+        let wallet = await get_wallet(web3);
+        let contract = await new web3.eth.Contract(abi_murasaki_craft, contract_murasaki_craft);
+        //console.log(await contract.methods.isApprovedForAll(wallet, contract_murasaki_item_market).call());
+        await contract.methods.setApprovalForAll(contract_murasaki_item_market, true).send({from:wallet});
+    }
+    
+    //check_approve
+    async function check_approve() {
+        let web3 = await connect();
+        let wallet = await get_wallet(web3);
+        let contract = await new web3.eth.Contract(abi_murasaki_craft, contract_murasaki_craft);
+        let _res = await contract.methods.isApprovedForAll(wallet, contract_murasaki_item_market).call();
+        console.log(_res);
+        if (_res == true) {
+            document.getElementById("button_approve").disabled = true;
+            document.getElementById("button_approve").firstChild.data = "Approved";
+        }
+    }
+
 </script>
 
 <head>
 	<meta charset="UTF-8">
-	<title>DataTables example</title>
+	<title>Murasaki-san Item Market</title>
 	<link rel="stylesheet" type="text/css" href="./market/datatables.min.css"/>
 	<script type="text/javascript" language="javascript" src="./market/jquery-3.6.0.min.js"></script>
 	<script type="text/javascript" language="javascript" src="./market/datatables.min.js"></script>
@@ -227,58 +239,89 @@ ToDo
 
 <body>
 
-    <h3>Buy item</h3>
-	<table id="table_sellingItems" class="display">
-		<thead>
-			<tr>
-				<th style="width:50px;"><center>item_id</center></th>
-				<th><center>item_type</center></th>
-				<th><center>crafted_by</center></th>
-				<th><center>Price ($ASTR)</center></th>
-				<th></th>
-			</tr>
-		</thead>
-		<tbody id="tbody_sellingItems">
-		</tbody>
+<header>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/dapp.html" ><b>Play the Game</b></a>
+      <a href="/market.html" class="current"><b>Item Market</b></a>
+      <a href="/dapp.html?summoner=1">Demo Preview</a>
+      <a href="https://twitter.com/degupoppo" >Twitter</a>
+      <a href="https://github.com/degupoppo/murasakisan/" >GitHub</a>
+    </nav>
+    <h1>
+        <img src="png/food_sweet_potato.png" width="40" height="40">
+        House of Murasaki-san
+        <img src="png/food_sweet_potato.png" width="40" height="40">
+    </h1>
+    <p>
+        Murasaki-san is a pet living in your wallet on <a href="https://astar.network/">Astar Network</a>.<br>
+        They will grow depending on your dedication and time.
+    </p>
+</header>
+
+<main>
+
+<p>
+    <center><code class="language-plaintext highlighter-rouge">
+        You can buy and sell crafted item NFTs here.<br>
+        All transaction fee is 1.00%. <br>
+    </code></center>
+</p>
+
+    <h3>Item Market</h3>
+	<table id="table_onMarketItems" class="display">
+		<thead><tr>
+			<th style="width:50px;"><center>item_id</center></th>
+			<th><center>item_type</center></th>
+			<th><center>crafted_by</center></th>
+			<th><center>Price ($ASTR)</center></th>
+			<th><center>action</center></th>
+		</tr></thead>
+		<tbody id="tbody_sellingItems"></tbody>
 	</table>
 
-    <h3>List your item</h3>
-	<table id="table_myItems" class="display">
-		<thead>
-			<tr>
-				<th style="width:50px;"><center>item_id</center></th>
-				<th><center>item_type</center></th>
-				<th><center>crafted_at</center></th>
-				<th><center>crafted_by</center></th>
-				<th><center>sell Price ($ASTR)</center></th>
-			</tr>
-		</thead>
-		<tbody id="tbody_myItems">
-		</tbody>
+    <h3>Your Sellings</h3>
+	<table id="talbe_sellingItems" class="display">
+		<thead><tr>
+			<th style="width:50px;"><center>item_id</center></th>
+			<th><center>item_type</center></th>
+			<th><center>crafted_by</center></th>
+			<th><center>Price ($ASTR)</center></th>
+			<th><center>action</center></th>
+		</tr></thead>
+		<tbody id="tbody_listedItems"></tbody>
 	</table>
-	
-	
-    <h3>Unlist item</h3>
-	<table id="table_listedItems" class="display">
-		<thead>
-			<tr>
-				<th style="width:50px;"><center>item_id</center></th>
-				<th><center>item_type</center></th>
-				<th><center>listed_price</center></th>
-				<th><center>unlist</center></th>
-			</tr>
-		</thead>
-		<tbody id="tbody_listedItems">
-		</tbody>
+
+    <h3>Your Items</h3>
+    <p><code class="language-plaintext highlighter-rouge">
+        Before selling, please approve the Market Contract:
+        <button id="button_approve" onclick='approve();'>Approve</button><br>
+    </code></p>
+	<table id="table_userItems" class="display">
+	    <thead><tr>
+            <th style="width:50px;"><center>item_id</center></th>
+            <th><center>item_type</center></th>
+            <th><center>crafted_at</center></th>
+            <th><center>crafted_by</center></th>
+            <th><center>selling Price ($ASTR)</center></th>
+        </tr></thead>
+        <tbody id="tbody_myItems"></tbody>
 	</table>
-<br>
-<br>
-<br>
-<script>
-    update_sellingItems();
-    update_myItems();
-    update_listedItems();
-</script>
+
+    <script>
+        update_onMarketItems();
+        update_sellingItems();
+        update_userItems();
+        check_approve();
+    </script>
+
+</main>
+
+<footer>
+    <p>
+        Donation: 0x2F7448B62134e52C2f46454d0089Ae21B5248805<br>
+    </p>
+</footer>
 
 </body>
 </html>

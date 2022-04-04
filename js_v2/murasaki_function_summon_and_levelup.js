@@ -1,4 +1,4 @@
-const contract_murasaki_function_summon_and_levelup = "0xF79a9e0b3BFB3D2a507478f30E8677A4C6226FC6";
+const contract_murasaki_function_summon_and_levelup = "0x9F5d379251bD53Aa7fA1b29118fBB63c78c11Bb0";
 const abi_murasaki_function_summon_and_levelup = [
 	{
 		"anonymous": false,
@@ -56,32 +56,6 @@ const abi_murasaki_function_summon_and_levelup = [
 		"name": "level_up",
 		"outputs": [],
 		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "murasaki_function_share_address",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "owner",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
 		"type": "function"
 	},
 	{
@@ -147,6 +121,32 @@ const abi_murasaki_function_summon_and_levelup = [
 		"name": "withdraw",
 		"outputs": [],
 		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "murasaki_function_share_address",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "owner",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
 		"type": "function"
 	}
 ]

@@ -4,59 +4,15 @@
 
 /***
 
-    Itemレア度の設定
-        Common, Uncommon, Rareの3段階？
-        Common x 3 -> Uncommonのupgradeクラフトを実装する
-        Uncommonはクラフト時にLuk%で出現する
-        Rareはupgradeでしか出現しない
-        Common, Uncommon, Rareによる補正の実装
-
- ok ItemとHeartのカウント化
-        rarity_marketのコードを流用する
-        とりあえずmintしまくってlist表示の動作確認を独立で行う
-        market.htmlへと組み込む。
-        以上が完成してからメインに組み込む。
+    素材boxの実装
+        1000単位、10000単位を消費してクラフト→NFTアイテム化
+        NFTアイテムを消費して+1000, +10000素材を加算
+        193以降の自由枠を使用する
 
     補正の上限の設定
         将来的でよいか
         heartは100個以上無効
         str/dex/int/luckも50以上無効、など
-
- ok heart補正の実装
-        luck参照時にheart補正を加える
-        補正値をどうするか。+0.01？0.02？0.05？
-        0.05で。およそ100個得ると+5.00の補正
-            Lv10で最大+5の補正なので、このくらいが妥当か。
-        ほぼすべてのfunctionが再デプロになるので、すげ替える。
-
-    NFTのtransferへのコスト設定
-        murasaki_craft内でtransferをoverriderする
-        costを実装しておき後から設定できるようにする
-        限られたmsg.senderからのtransferはコストがかからないようにもoverrideしておく
-        今後、multi walletによるアイテム集中型botが問題になった際は、
-            直コンのtransferにはcostを掛け、
-            マケプレcontractによるtransferにはcost無視とする。
-        botterが沸かなければ杞憂に終わるだろう。
-        summonにコストを設けているので、そこまでのmulti-walletはやりにくいはず
-            10 wallet程度までは許容するか
-        また、「ちょっとあれ貸して」と気軽にやり取り出来る程度には
-            NFTの特性を利用したい。
-        ただし、NFTのtransferのUIを開放してしまうと、
-            大体の人がmulti walletの有利さに気づいてしまうだろう。
-
- ok nameの実装
-        strageに保存するか、別の専用コントラを設けるか
-        重複なしの場合はrarity_nameの様な専用コントラが必要
-        NFTではなくNTTが良いか。
-        重複判定、walletごとの所持の有無の機能を実装した別コントラを作る
-            所持の有無はNTT規格がそのまま使えそう
-            重複判定はrarity_nameのアルゴリズムを参考にする
-        コストはどうするか
-            coinとmaterialを少々要求で良いか
-        名前の付け直しはどうするか
-            burnしてNTT再発行で良さそう
-        クラフト品とするのが良いか
-            肖像画アイテムクラフト時に名前を入力、など。
 
     bot対策
         大量のwalletを運用した効率プレイへの対策
@@ -91,13 +47,95 @@
                 activeしているitemのみ表示され、ステータスに影響する
                 balanceOf_activated_item_typeのmappingが必要か
 
-    ゆっくりと成長する木の実装
+    NFTステーキングの実装
+        ステーキング専用の高価なitemを作る
+        このitemは作った後にstakingすることで何かしらのリワードが得られる
+            ゲーム内の通貨か、Astarか
+
+ ok upgrade深慮
+        costは必要とするか
+            コストのみの要求にするか
+            1000/1000ぐらいが妥当か
+        クラフトタイムは設定するか
+            タイム設定すると、start後にNFT動かしたときの例外処理が面倒か
+            よって、即時完了にする
+        item選択のUIを実装する
+
+ ok TinyHeartのMurasakiCraftへの統合
+        craft可能なitemは64個
+        レア度3段階で64 * 3 = 192までが予約枠
+        193～255の62枠が自由枠
+        thは別コントラとするのではなく、この予約枠を使用する
+        そうすると、Item Marketも同一コントラで一元管理できて便利
+        193番を使用
+
+ ok Itemレア度の設定
+        Common, Uncommon, Rareの3段階？
+        Common x 3 -> Uncommonのupgradeクラフトを実装する
+        Uncommonはクラフト時にLuk%で出現する
+        Rareはupgradeでしか出現しない
+        Common, Uncommon, Rareによる補正の実装
+
+ ok upgradeの実装
+        coin, material, 下位item 3つを消費させる
+        下位itemの指定はどうするか
+            ランダムで消費か
+            IDの大きい順に消費か
+            IDを選択可能にするか
+
+ ok ItemとHeartのカウント化
+        rarity_marketのコードを流用する
+        とりあえずmintしまくってlist表示の動作確認を独立で行う
+        market.htmlへと組み込む。
+        以上が完成してからメインに組み込む。
+
+ ok heart補正の実装
+        luck参照時にheart補正を加える
+        補正値をどうするか。+0.01？0.02？0.05？
+        0.05で。およそ100個得ると+5.00の補正
+            Lv10で最大+5の補正なので、このくらいが妥当か。
+        ほぼすべてのfunctionが再デプロになるので、すげ替える。
+
+ ng NFTのtransferへのコスト設定
+        murasaki_craft内でtransferをoverriderする
+        costを実装しておき後から設定できるようにする
+        限られたmsg.senderからのtransferはコストがかからないようにもoverrideしておく
+        今後、multi walletによるアイテム集中型botが問題になった際は、
+            直コンのtransferにはcostを掛け、
+            マケプレcontractによるtransferにはcost無視とする。
+        botterが沸かなければ杞憂に終わるだろう。
+        summonにコストを設けているので、そこまでのmulti-walletはやりにくいはず
+            10 wallet程度までは許容するか
+        また、「ちょっとあれ貸して」と気軽にやり取り出来る程度には
+            NFTの特性を利用したい。
+        ただし、NFTのtransferのUIを開放してしまうと、
+            大体の人がmulti walletの有利さに気づいてしまうだろう。
+
+ ok nameの実装
+        strageに保存するか、別の専用コントラを設けるか
+        重複なしの場合はrarity_nameの様な専用コントラが必要
+        NFTではなくNTTが良いか。
+        重複判定、walletごとの所持の有無の機能を実装した別コントラを作る
+            所持の有無はNTT規格がそのまま使えそう
+            重複判定はrarity_nameのアルゴリズムを参考にする
+        コストはどうするか
+            coinとmaterialを少々要求で良いか
+        名前の付け直しはどうするか
+            burnしてNTT再発行で良さそう
+        クラフト品とするのが良いか
+            肖像画アイテムクラフト時に名前を入力、など。
+
+ ng ゆっくりと成長する木の実装
         item type = 50ぐらいの専用スロット
         成長するまで何が生えるかわからない
         summonerの行動によって結果がかわる
         1ヶ月で最大成長ぐらいか
+        itemにわるふるだけでOK
+            コントラ側でやることはあまりない
+            ランダム性はseedが使える
+            あとはUIの問題か
 
-    マーケットプレイスの実装
+ ok マーケットプレイスの実装
         ERC721に準じるもので良さそう
             rarityのマーケットが参考になるか
         itemのみ売買可能
@@ -105,11 +143,6 @@
         売りに出しているitem一覧の実装
         売買マージンの導入
         coin, materialのまとめ売り
-
-    NFTステーキングの実装
-        ステーキング専用の高価なitemを作る
-        このitemは作った後にstakingすることで何かしらのリワードが得られる
-            ゲーム内の通貨か、Astarか
 
  ok item補正の微調整
         同じitem_typeを2つ以上保有しているときは+10%上乗せする
@@ -1612,7 +1645,7 @@ contract Murasaki_Function_Share is Ownable {
     address public murasaki_strage_address;
     address public murasaki_craft_address;
     address public world_dice_address;
-    address public tiny_heart_address;
+    //address public tiny_heart_address;
     address public murasaki_name_address;
 
     //address set, admin
@@ -1628,9 +1661,9 @@ contract Murasaki_Function_Share is Ownable {
     function _set4_world_dice_address(address _address) external onlyOwner {
         world_dice_address = _address;
     }
-    function _set5_tiny_heart_address(address _address) external onlyOwner {
-        tiny_heart_address = _address;
-    }
+    //function _set5_tiny_heart_address(address _address) external onlyOwner {
+    //    tiny_heart_address = _address;
+    //}
     function _set6_murasaki_name_address(address _address) external onlyOwner {
         murasaki_name_address = _address;
     }
@@ -1693,7 +1726,7 @@ contract Murasaki_Function_Share is Ownable {
     //craft
 
     //get balance of type
-    function get_balance_of_type_specific(address _wallet, uint32 _item_type) external view returns (uint32) {
+    function get_balance_of_type_specific(address _wallet, uint32 _item_type) public view returns (uint32) {
         Murasaki_Craft mc = Murasaki_Craft(murasaki_craft_address);
         return mc.balance_of_type(_wallet, _item_type);
     }
@@ -1769,10 +1802,11 @@ contract Murasaki_Function_Share is Ownable {
 
     //calc heart
     function calc_heart(uint32 _summoner) public view returns (uint32) {
-        Tiny_Heart th = Tiny_Heart(tiny_heart_address);
+        //Tiny_Heart th = Tiny_Heart(tiny_heart_address);
         Murasaki_Main mm = Murasaki_Main(murasaki_main_address);
         address _owner = mm.ownerOf(_summoner);
-        uint32 _heart = uint32(th.balanceOf(_owner));
+        uint32 _heart = get_balance_of_type_specific(_owner, 193);
+        //uint32 _heart = uint32(th.balanceOf(_owner));
         return _heart;
     }
 
@@ -2177,7 +2211,9 @@ contract Murasaki_Function_Mining_and_Farming is Ownable {
         uint32[256] memory _balance_of_type = mfs.get_balance_of_type_array(_address);
         uint32 _mining_items = 0;
         for (uint i = 1; i <= 16; i++) {
-            if (_balance_of_type[i+64] > 0) {
+            if (_balance_of_type[i+128] > 0) {
+                _mining_items += 300;
+            }else if (_balance_of_type[i+64] > 0) {
                 _mining_items += 200;
             }else if (_balance_of_type[i] > 0) {
                 _mining_items += 100;
@@ -2259,7 +2295,9 @@ contract Murasaki_Function_Mining_and_Farming is Ownable {
         uint32[256] memory _balance_of_type = mfs.get_balance_of_type_array(_address);
         uint32 _farming_items = 0;
         for (uint i = 17; i <= 32; i++) {
-            if (_balance_of_type[i+64] > 0) {
+            if (_balance_of_type[i+128] > 0) {
+                _farming_items += 300;
+            }else if (_balance_of_type[i+64] > 0) {
                 _farming_items += 200;
             }else if (_balance_of_type[i] > 0) {
                 _farming_items += 100;
@@ -2338,11 +2376,12 @@ contract Murasaki_Function_Crafting is Ownable {
             }
             //craft
             Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
-            uint32 _next_item = mc.next_item();
+            //uint32 _next_item = mc.next_item();
             uint32 _seed = mfs.seed(_summoner);
             mc.craft(_item_type, _summoner, msg.sender, _seed);
             //generate tiny heart
-            create_tiny_heart(_next_item, _summoner);
+            //create_tiny_heart(_next_item, _summoner);
+            create_tiny_heart(_summoner);
         }
     }
     function get_modified_dc(uint32 _summoner, uint32 _item_type) public view returns (uint32) {
@@ -2402,7 +2441,9 @@ contract Murasaki_Function_Crafting is Ownable {
         uint32[256] memory _balance_of_type = mfs.get_balance_of_type_array(_address);
         uint32 _crafting_items = 0;
         for (uint i = 33; i <= 48; i++) {
-            if (_balance_of_type[i+64] > 0) {
+            if (_balance_of_type[i+128] > 0) {
+                _crafting_items += 300;
+            }else if (_balance_of_type[i+64] > 0) {
                 _crafting_items += 200;
             }else if (_balance_of_type[i] > 0) {
                 _crafting_items += 100;
@@ -2427,7 +2468,8 @@ contract Murasaki_Function_Crafting is Ownable {
         return [_level, _dc, _coin, _material];
     }
 
-    //tiny heart ***TODO*** public -> internal, called from craft()
+    /*
+    //tiny heart
     //choice random summoner and transfer tiny heart to it
     //when not active summoner was selected, msg.sender will get it instedlly.
     function create_tiny_heart(uint32 _created_item, uint32 _created_summoner) internal {
@@ -2455,6 +2497,80 @@ contract Murasaki_Function_Crafting is Ownable {
         uint32 _seed = mfs.seed(_created_summoner);
         address _created_wallet = mm.ownerOf(_created_summoner);
         th.create(_created_item, _created_summoner, _created_wallet, _seed, _to_wallet);
+    }
+    */
+
+    //tiny heart
+    //convert to main mc version, item_type 193 = tinyheart
+    //choice random summoner and transfer tiny heart to it
+    //when not active summoner was selected, msg.sender will get it instedlly.
+    //function create_tiny_heart(uint32 _created_item, uint32 _created_summoner) internal {
+    function create_tiny_heart(uint32 _created_summoner) internal {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Main mm = Murasaki_Main(mfs.murasaki_main_address());
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
+        //Tiny_Heart th = Tiny_Heart(mfs.tiny_heart_address());
+        //get random _to_summoner
+        uint32 _count_summoners = mm.next_summoner() - 1;
+        uint32 _to_summoner = mfs.dn(_created_summoner, _count_summoners) + 1;
+        //check _to_summoner: when not active summoner, transfer to msg.sender
+        bool _isActive = ms.isActive(_to_summoner);
+        address _to_wallet;
+        if (
+            _isActive == true
+            && ms.level(_to_summoner) >= 3
+            && mfs.calc_satiety(_to_summoner) >= 20
+            && mfs.calc_happy(_to_summoner) >= 20
+        ) {
+            _to_wallet = mm.ownerOf(_to_summoner);
+        } else {
+            _to_wallet = msg.sender;
+        }
+        //create tiny heart
+        uint32 _seed = mfs.seed(_created_summoner);
+        //address _created_wallet = mm.ownerOf(_created_summoner);
+        mc.craft(193, _created_summoner, _to_wallet, _seed);
+        //th.create(_created_item, _created_summoner, _created_wallet, _seed, _to_wallet);
+    }
+
+    //upgrade item
+    //***TODO***
+    //cost? time? UI?
+    function upgrade_item(uint32 _summoner, uint32 _item1, uint32 _item2, uint32 _item3) internal {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        //check summoner owner
+        require(mfs.check_owner(_summoner, msg.sender));
+        //check and spend cost
+        uint32 _coin = 1000;
+        uint32 _material = 1000;
+        require(ms.coin(_summoner) >= _coin && ms.material(_summoner) >= _material);
+        ms.set_coin(_summoner, ms.coin(_summoner) - _coin);
+        ms.set_material(_summoner, ms.material(_summoner) - _material);
+        //check item owner
+        require(
+            mc.ownerOf(_item1) == msg.sender
+            && mc.ownerOf(_item2) == msg.sender
+            && mc.ownerOf(_item3) == msg.sender
+        );
+        //check item_type
+        (uint32 _item_type1, , ,) = mc.items(_item1);
+        (uint32 _item_type2, , ,) = mc.items(_item2);
+        (uint32 _item_type3, , ,) = mc.items(_item3);
+        require(_item_type1 <= 128);
+    	require(
+    	    _item_type2 == _item_type1
+    	    && _item_type3 == _item_type1
+    	);
+        //burn lower rank items
+        mc.burn(_item1);
+        mc.burn(_item2);
+        mc.burn(_item3);
+        //mint upper rank item
+        uint32 _seed = mfs.seed(_summoner);
+        mc.craft(_item_type1 + 64, _summoner, msg.sender, _seed);
     }
 
     //item level
@@ -2816,6 +2932,9 @@ contract Murasaki_Craft is ERC721, Ownable{
         balance_of_type[_owner][_item_type] -= 1;
         mySet[msg.sender].remove(tokenId);
     }
+    function burn(uint256 tokenId) external {
+        _burn(tokenId);
+    }
 
     //craft
     function craft(uint32 _item_type, uint32 _summoner, address _wallet, uint32 _seed) external {
@@ -3003,7 +3122,7 @@ contract Bulletin_Board is Ownable {
 //---------------------------------------------------------------------------------------------------------------------
 //Tiny heart
 //0x6dB63DfCcD06887f27cf6c3D0B6812DDb0Cb4490
-
+/*
 contract Tiny_Heart is ERC721, Ownable{
 
     //address
@@ -3045,6 +3164,9 @@ contract Tiny_Heart is ERC721, Ownable{
     function _burn(uint256 tokenId) internal virtual override {
         ERC721._burn(tokenId);
         mySet[msg.sender].remove(tokenId);
+    }
+    function burn(uint256 tokenId) external {
+        _burn(tokenId);
     }
 
     //create
@@ -3128,6 +3250,7 @@ contract Tiny_Heart is ERC721, Ownable{
         return output;
     }
 }
+*/
 
 
 

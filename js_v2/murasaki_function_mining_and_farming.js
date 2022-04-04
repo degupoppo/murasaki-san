@@ -1,4 +1,4 @@
-const contract_murasaki_function_mining_and_farming = "0xbe2EA1D133479819c23293a3C6f37D2A57a47D3c";
+const contract_murasaki_function_mining_and_farming = "0x385025fd577B063D38A7087853d1F903F843D4E3";
 const abi_murasaki_function_mining_and_farming = [
 	{
 		"anonymous": false,

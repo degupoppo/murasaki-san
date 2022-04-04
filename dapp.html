@@ -4,6 +4,14 @@
 
 ToDo
 
+    時間経過で成長する木の実装
+        farming itemに割り振る
+        双葉　→　低木　→　背の高い木
+            植木鉢に収まるように？
+        seedか、summonerのclassを参照して色や形を決める
+        大体半年で最大成長するように。
+        その他、お花とかも双葉→草→花と成長させるか
+
     summonのpay実装
 
     アイテムを買うインセンティブの再考
@@ -154,6 +162,9 @@ ok! しゅっきん！（お仕事へ移動中）
             feeding()にownerチェックを実装
                 非owner時は自分のsummonerの検索と、expへの追加を実装
 
+    <script src="js_v2/tiny_heart.js"></script>
+    <script src="js_v2/dropdownlist.js"></script>
+
 --->
 
 <!DOCTYPE html>
@@ -165,7 +176,6 @@ ok! しゅっきん！（お仕事へ移動中）
     <title>House of Murasaki-San</title>
     <script src="js_v2/phaser.min.js"></script>
     <script src="js_v2/web3.min.js"></script>
-    <script src="js_v2/dropdownlist.js"></script>
     <script src="js_v2/murasaki_main.js"></script>
     <script src="js_v2/murasaki_strage.js"></script>
     <script src="js_v2/murasaki_function_crafting.js"></script>
@@ -174,7 +184,6 @@ ok! しゅっきん！（お仕事へ移動中）
     <script src="js_v2/murasaki_function_share.js"></script>
     <script src="js_v2/murasaki_function_summon_and_levelup.js"></script>
     <script src="js_v2/murasaki_function_name.js"></script>
-    <script src="js_v2/tiny_heart.js"></script>
     <style type="text/css">
         body {
             margin: 0;
@@ -442,14 +451,16 @@ async function contract_update_status(_summoner) {
     let contract_mfs = await new web3.eth.Contract(abi_murasaki_function_share, contract_murasaki_function_share);
     let contract_mfc = await new web3.eth.Contract(abi_murasaki_function_crafting, contract_murasaki_function_crafting);
     let contract_mfmf = await new web3.eth.Contract(abi_murasaki_function_mining_and_farming, contract_murasaki_function_mining_and_farming);
-    let contract_th = await new web3.eth.Contract(abi_tiny_heart, contract_tiny_heart);
+    //let contract_th = await new web3.eth.Contract(abi_tiny_heart, contract_tiny_heart);
     let contract_mn = await new web3.eth.Contract(abi_murasaki_function_name, contract_murasaki_function_name);
 
     //check isActive
     let _isActive = await contract_ms.methods.isActive(_summoner).call();
     if (_isActive == false) {
         console.log("MSG: This summoner has been burned:", _summoner);
-        text_system_message.setText("This Murasaki-san is not available.");
+        if (_summoner != 0) {
+            text_system_message.setText("This Murasaki-san is not available.");
+        }
         return 0;
     }
 
@@ -504,7 +515,8 @@ async function contract_update_status(_summoner) {
     console.log("status:", _dynamic_status, "items:", local_items);
 
     //heart
-    local_heart = await contract_th.methods.balanceOf(_owner).call();
+    //local_heart = await contract_th.methods.balanceOf(_owner).call();
+    local_heart = local_items[193];
     local_heart = Number(local_heart);
 
     //update wallet
@@ -1907,11 +1919,12 @@ function create() {
     //===button===
 
     //button_text
-    text_summon = this.add.text(500, 450, "", {font: "24px Arial", fill: "#000000"})
+    text_summon = this.add.text(640, 480, "", {font: "30px Arial", fill: "#E62E8B", backgroundColor: "#FDEFF5"})
+        .setOrigin(0.5)
         .setInteractive({useHandCursor: true})
         .on("pointerdown", () => open_window_summon(this) )
-        .on("pointerover", () => text_summon.setStyle({ fontSize: 24, fontFamily: "Arial", fill: '#ffff00' }))
-        .on("pointerout", () => text_summon.setStyle({ fontSize: 24, fontFamily: "Arial", fill: '#000000' }));
+        .on("pointerover", () => text_summon.setStyle({ fontSize: 30, fontFamily: "Arial", fill: '#0000ff' }))
+        .on("pointerout", () => text_summon.setStyle({ fontSize: 30, fontFamily: "Arial", fill: '#E62E8B' }));
     //new Button(10, 880, 'Kill', this, () => contract_burn(summoner));
     new Button(10, 870, '[Rotate]', this, () => {
         console.log(this.sys.game.scale.gameSize._width);
@@ -2035,12 +2048,12 @@ function create() {
                 .on("pointerdown", () => open_window_craft(this) )
 
     //system message
-    text_system_message = this.add.text(380, 400, "", {
+    text_system_message = this.add.text(640, 420, "", {
         font: "32px Arial", 
         fill: "#000000", 
         backgroundColor: "#ffffff",
         align: "center"
-    });
+    }).setOrigin(0.5);
 
     //first sync test
     text_sync_first = this.add.text(

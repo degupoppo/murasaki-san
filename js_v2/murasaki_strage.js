@@ -1,4 +1,4 @@
-const contract_murasaki_strage = "0x7ca3B2969B49D51C630a77b17b8e5E95A4f7b1d2";
+const contract_murasaki_strage = "0x3C641DAC5b274Ed220b9288F94022EAcc72Ca0dA";
 const abi_murasaki_strage = [
 	{
 		"anonymous": false,
