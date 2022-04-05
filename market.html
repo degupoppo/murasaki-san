@@ -28,6 +28,7 @@ ToDo
 <script src="js_v2/murasaki_craft.js"></script>
 <script src="js_v2/big-number.js"></script>
 <script src="js_v2/array_item_name.js"></script>
+<script src="js_v2/murasaki_main.js"></script>
 
 <script type="text/javascript">
 
@@ -224,6 +225,18 @@ ToDo
             document.getElementById("button_approve").firstChild.data = "Approved";
         }
     }
+    
+    //transfer item
+    async function transfer_item() {
+        let web3 = await connect();
+        let wallet = await get_wallet(web3);
+        let contract_mm = await new web3.eth.Contract(abi_murasaki_main, contract_murasaki_main);
+        let _item = document.getElementById("transfer_item_id").value;
+        let _to_summoner = document.getElementById("transfer_summoner").value;
+        let _to_wallet = await contract_mm.methods.ownerOf(_to_summoner).call();
+        let contract = await new web3.eth.Contract(abi_murasaki_craft, contract_murasaki_craft);
+        contract.methods.safeTransferFrom(wallet, _to_wallet, _item).send({from:wallet});
+    }
 
 </script>
 
@@ -252,23 +265,16 @@ ToDo
     </nav>
     <h1>
         <img src="png/food_sweet_potato.png" width="40" height="40">
-        House of Murasaki-san
+        Item Market Place
         <img src="png/food_sweet_potato.png" width="40" height="40">
     </h1>
-    <p>
-        Murasaki-san is a pet living in your wallet on <a href="https://astar.network/">Astar Network</a>.<br>
-        They will grow depending on your dedication and time.
-    </p>
+    <p><code class="language-plaintext highlighter-rouge">
+        You can buy and sell crafted item NFTs here.<br>
+        All transaction fees are 1%. <br>
+    </p></code>
 </header>
 
 <main>
-
-<p>
-    <center><code class="language-plaintext highlighter-rouge">
-        You can buy and sell crafted item NFTs here.<br>
-        All transaction fee is 1.00%. <br>
-    </code></center>
-</p>
 
     <h3>Item Market</h3>
 	<table id="table_onMarketItems" class="display">
@@ -309,6 +315,13 @@ ToDo
         </tr></thead>
         <tbody id="tbody_myItems"></tbody>
 	</table>
+	<br>
+	<p>
+	<b>Send your items to other Murasaki-san:</b><br>
+    &nbsp;&nbsp;&nbsp;item_id: <input type="number" id="transfer_item_id" style="width:80px;">
+    &nbsp;&nbsp;to Murasaki-san: <input type="number" id="transfer_summoner" style="width:80px;">
+    &nbsp;&nbsp;<button onclick="transfer_item();">Send Item</button>
+    </p>
 
     <script>
         update_onMarketItems();
