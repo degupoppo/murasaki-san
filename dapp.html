@@ -1663,7 +1663,7 @@ function preload() {
     this.load.image("window", "png/window.png");
 
     //icon
-    this.load.image("icon_kusa", "png/icon_kusa.png", {frameWidth: 318, frameHeight: 466});
+    this.load.image("icon_kusa", "png/icon_kusa.png", {frameWidth: 350, frameHeight: 350});
     this.load.image("icon_ohana", "png/icon_ohana.png", {frameWidth: 182, frameHeight: 171});
     this.load.image("icon_age", "png/icon_age.png", {frameWidth: 300, frameHeight: 325});
     this.load.image("icon_clock", "png/icon_clock.png", {frameWidth: 225, frameHeight: 225});
@@ -1966,7 +1966,7 @@ function create() {
     button_farming.disableInteractive();
     //icon
     icon_farming = this.add.sprite(355,130, "icon_kusa");
-    icon_farming.setScale(0.06);
+    icon_farming.setScale(0.09);
     icon_farming.visible = false;
     //text
     text_farming_calc = this.add.text(370, 120, "", {font: "18px Arial", fill: "#000"});
@@ -2000,9 +2000,9 @@ function create() {
     sound_button_on = this.sound.add("button_on", {volume:0.2});
     sound_feeding = this.sound.add("feeding", {volume:0.1});
     sound_grooming = this.sound.add("grooming", {volume:0.1});
-    sound_mining = this.sound.add("mining", {volume:0.2});
+    sound_mining = this.sound.add("mining", {volume:0.1});
     sound_mining_during = this.sound.add("mining_during", {volume:0.1});
-    sound_farming = this.sound.add("farming", {volume:0.2});
+    sound_farming = this.sound.add("farming", {volume:0.1});
     sound_farming_during = this.sound.add("farming_during", {volume:0.2});
     sound_crafting = this.sound.add("crafting", {volume:0.2});
     sound_crafting_during = this.sound.add("crafting_during", {volume:0.1});
@@ -2102,7 +2102,7 @@ function create() {
 
     //material
     icon_kusa = this.add.sprite(815, 25, "icon_kusa");
-    icon_kusa.setScale(0.06);
+    icon_kusa.setScale(0.09);
     text_material = this.add.text(830, 15, "Kusa: 0", {font: "17px Arial", fill: "#000", backgroundColor: "#D7E7AF"});
     text_material_earned = this.add.text(830, 38, "", {font: "17px Arial", fill: "#000000"});
     text_material_earned_count = 0;
