@@ -1461,8 +1461,8 @@ contract Murasaki_Strage is Ownable {
     //global variants
     uint32 public BASE_SEC = 86400;
     uint32 public SPEED = 1000; //100=100%
-    uint32 public PRICE = 0 ether;
-    uint32 public DAY_PETRIFIED = 365;
+    uint32 public PRICE = 0;    //uin32, cannnot ether, need to recalc 10**18 in methods
+    uint32 public DAY_PETRIFIED = 30;
 
     //dynamic, status
     mapping(uint32 => uint32) public level;
@@ -1889,7 +1889,7 @@ contract Murasaki_Function_Summon_and_LevelUp is Ownable {
         uint32 PRICE = ms.PRICE();
         uint32 BASE_SEC = ms.BASE_SEC();
         //uint32 SPEED = ms.SPEED();
-        require(msg.value >= PRICE);
+        require(msg.value >= PRICE * 10**18);
         require(0 <= _class && _class <= 11);
         //summon on mm, mint NTT
         uint32 _summoner = mm.next_summoner();
@@ -2081,7 +2081,7 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable {
         uint32 PRICE = ms.PRICE();
         require(mfs.check_owner(_summoner, msg.sender));
         require(!not_petrified(_summoner));
-        uint _price = ms.level(_summoner) * PRICE;
+        uint _price = ms.level(_summoner) * PRICE * 10**18;
         require(msg.value >= _price);
         uint32 _now = uint32(block.timestamp);
         ms.set_last_feeding_time(_summoner, _now);

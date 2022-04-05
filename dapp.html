@@ -15,7 +15,8 @@ ToDo
         大体半年で最大成長するように。
         その他、お花とかも双葉→草→花と成長させるか
 
-    summonのpay実装
+ ok summonのpay実装
+        ms.PRICEを参照してpayするよう修正する
 
     アイテムを買うインセンティブの再考
         買うより自分で作る方が楽しそう
@@ -528,6 +529,9 @@ async function contract_update_status(_summoner) {
 
     //name
     local_name_str = await contract_mn.methods.call_name_from_summoner(_summoner).call();
+    
+    //petrification
+    
 
     //update last_sync_time
     last_sync_time = Date.now();
@@ -544,8 +548,11 @@ async function contract_update_all() {
 async function contract_summon(_class) {
     let web3 = await connect();
     let contract = await new web3.eth.Contract(abi_murasaki_function_summon_and_levelup, contract_murasaki_function_summon_and_levelup);
+    let contract_ms = await new web3.eth.Contract(abi_murasaki_strage, contract_murasaki_strage);
+    let _price = await contract_ms.methods.PRICE().call();
+    _price = Number(_price) * 10**18;
     let wallet = await get_wallet(web3);
-    contract.methods.summon(_class).send({from:wallet});
+    contract.methods.summon(_class).send({from:wallet, value:_price});
 }
 
 //burn
