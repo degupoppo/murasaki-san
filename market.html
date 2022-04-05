@@ -27,6 +27,7 @@ ToDo
 <script src="js_v2/murasaki_item_market.js"></script>
 <script src="js_v2/murasaki_craft.js"></script>
 <script src="js_v2/big-number.js"></script>
+<script src="js_v2/array_item_name.js"></script>
 
 <script type="text/javascript">
 
@@ -77,7 +78,8 @@ ToDo
             _html += "<tr><td><center>"
             _html += _item;
             _html += "</center></td><td><center>";
-            _html += _item_type;
+            //_html += _item_type;
+            _html += array_item_name[_item_type];
             _html += "</center></td><td><center>";
             _html += _crafted_summoner;
             _html += "</center></td><td id='" + "input_price_" + _item + "'><center><b>";
@@ -114,7 +116,7 @@ ToDo
             _html += "<tr><td><center>"
             _html += _item;
             _html += "</center></td><td><center>";
-            _html += _item_type;
+            _html += array_item_name[_item_type];
             _html += "</center></td><td><center>";
             _html += _crafted_summoner;
             _html += "</center></td><td><center><b>";
@@ -154,7 +156,7 @@ ToDo
             _html += "<tr><td><center>"
             _html += _item;
             _html += "</center></td><td><center>";
-            _html += _item_type;
+            _html += array_item_name[_item_type];
             _html += "</center></td><td><center>";
             _html += _crafted_time;
             _html += "</center></td><td><center>";
