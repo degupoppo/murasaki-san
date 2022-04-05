@@ -1917,7 +1917,7 @@ function create() {
     icon_crafting_ohana.visible = false;
     //icon_kusa
     icon_crafting_kusa = this.add.sprite(830, 165, "icon_kusa");
-    icon_crafting_kusa.setScale(0.06);
+    icon_crafting_kusa.setScale(0.09);
     icon_crafting_kusa.visible = false;
     //icon_clock
     icon_crafting_time = this.add.sprite(900, 165, "icon_clock");
@@ -2130,7 +2130,7 @@ function create() {
     icon_name_ohana.setScale(0.12);
     text_name_ohana = this.add.text(185, 82, "100", {font: "17px Arial", fill: "#000000"});
     icon_name_kusa = this.add.sprite(225, 90, "icon_kusa");
-    icon_name_kusa.setScale(0.06);
+    icon_name_kusa.setScale(0.09);
     text_name_kusa = this.add.text(235, 82, "100", {font: "17px Arial", fill: "#000000"});
     //group
     group_mint_name = this.add.group();
@@ -2499,7 +2499,8 @@ function update() {
                 let _day = Math.floor(_total_sec / 86400);
                 let _hr = Math.floor(_total_sec % 86400 / 3600);
                 let _min = Math.floor(_total_sec % 3600 / 60);
-                text_crafting_calc.setText(_day + "d:" + _hr + "h:" + _min + "m remining");
+                //text_crafting_calc.setText(_day + "d:" + _hr + "h:" + _min + "m remining");
+                text_crafting_calc.setText(_day + "d:" + _hr + "h:" + _min + "m");
             } else{
                 text_crafting_calc.setText("Completed!");
             }
