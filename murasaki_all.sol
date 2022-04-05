@@ -1939,6 +1939,23 @@ contract Murasaki_Function_Summon_and_LevelUp is Ownable {
         ms.set_isActive(_summoner, false);
     }
 
+    //petrified check
+    //***TODO*** duplicated code
+    function not_petrified(uint32 _summoner) internal view returns (bool) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        uint32 SPEED = ms.SPEED();
+        uint32 BASE_SEC = ms.BASE_SEC();
+        uint32 DAY_PETRIFIED = ms.DAY_PETRIFIED();
+        uint32 _now = uint32(block.timestamp);
+        uint32 _delta_sec = _now - ms.last_feeding_time(_summoner);
+        if ( _delta_sec >= BASE_SEC * DAY_PETRIFIED *100/SPEED) {
+            return false;
+        }else {
+            return true;
+        }
+    }
+
     //level-up
     function level_up(uint32 _summoner) external {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
@@ -1946,8 +1963,12 @@ contract Murasaki_Function_Summon_and_LevelUp is Ownable {
         require(mfs.check_owner(_summoner, msg.sender));
         require(ms.mining_status(_summoner) == 0 && ms.farming_status(_summoner) == 0 && ms.crafting_status(_summoner) == 0);
         require(ms.exp(_summoner) >= ms.next_exp_required(_summoner));
-        uint32 _now = uint32(block.timestamp);
+
+        //petrified check ***TODO*** duplicated code
+        require(not_petrified(_summoner));
+        
         //calculate working percent
+        uint32 _now = uint32(block.timestamp);
         uint32 _base_sec = _now - ms.last_level_up_time(_summoner);
         uint32 _resting_sec = _base_sec
              - ms.last_total_mining_sec(_summoner)

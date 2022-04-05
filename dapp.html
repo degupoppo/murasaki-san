@@ -4,6 +4,21 @@
 
 ToDo
 
+    Donationボタンの実装
+        さりげないdonationボタンを作る
+
+    UpgradeのUIの実装
+        選択性にするかランダム消費にするか
+        選択性ならば、自分のアイテム一覧表示と、ラジオボタンでの選択が必要
+        あるいは、プルダウンメニューで3つのアイテムを選択、など
+        htmlならばもう少し楽だが、味気ないか。
+        Item marketにupgradeの鍛冶屋を作ってしまっても良いかも
+            この場合、coin/materialのコストは不要にするか
+
+ ok システムメッセージ周りの整理
+        setTextでの制御がとっちらかってるので専用update区域を作って整理する
+        システムメッセージは単一の区域内で表示トリガーを定義して一元管理させる
+
     石化の実装
         石化時はシステムメッセージと治療ボタンを表示
 
@@ -18,13 +33,15 @@ ToDo
  ok summonのpay実装
         ms.PRICEを参照してpayするよう修正する
 
-    アイテムを買うインセンティブの再考
+ ok アイテムを買うインセンティブの再考
         買うより自分で作る方が楽しそう
         Normalを3つ合わせて錬成すると効果2倍のRareになるなど、
             何かしら消費するインセンティブを作る。
         Function_Craftingに追記でいけるか
 
     Nameは看板をクラフト後にmint出来るように変更する
+        看板orNameTagのspriteの用意
+        item_typeの割り振り
 
     サウンドの洗練
         有効サウンドの選別
@@ -35,6 +52,8 @@ ToDo
             動作開始時
             動作終了時
             動作中
+        効果音メーカーを使って作成する
+            https://www.peko-step.com/tool/soundeffect/#pInTopMenu
 
     UIの洗練
         ウィンドウの整備
@@ -206,11 +225,10 @@ ok! しゅっきん！（お仕事へ移動中）
 
 //---global variants-------------------------------------------------------------------------------------------------
 
-const version = "0.2.0";
 let turn = 0;
 
 //on chain static status
-let summoner = 0;
+let summoner = -1;
 let local_birth_time;
 
 //on chain global status
@@ -242,6 +260,8 @@ let local_heart = 0;
 let local_wallet;
 let local_owner = "0x0000000000000000000000000000000000000000";
 let local_name_str = "(unnamed)";
+let local_notPetrified = true;
+let local_isActive;
 
 //local using variants
 let previous_local_last_feeding_time = 0;
@@ -261,7 +281,7 @@ let local_crafting_calc;
 let flag_pet = 0;       //0:not crafted, 1:crafted
 let flag_music = 0;
 let bgm = 0;
-let local_items_flag = new Array(64).fill(0);
+let local_items_flag = new Array(256).fill(0);
 let global_selected_crafting_item = 0;
 let global_selected_crafting_item_dc;
 let last_sync_time = 0;
@@ -425,22 +445,26 @@ async function contract_update_summoner_of_wallet() {
     let web3 = await connect();
     let wallet = await get_wallet(web3);
     let contract_mm = await new web3.eth.Contract(abi_murasaki_main, contract_murasaki_main);
+    summoner = await contract_mm.methods.tokenOf(wallet).call();  //have not summoned yet: 0
+    /*
     let _summoner = await contract_mm.methods.tokenOf(wallet).call();  //have not summoned yet: 0
     if (_summoner == 0) {
         console.log("MSG: You have not summoned any summoners yet", wallet);
-        text_system_message.setText("--- You have not summoned Murasaki-san yet ---");
-        text_summon.setText(">>> Summon your Murasaki-san <<<")
+        //text_system_message.setText("--- You have not summoned Murasaki-san yet ---");
+        //text_summon.setText(">>> Summon your Murasaki-san <<<")
+        summoner = 0;
     } else {
         //check isActive
         let contract_ms = await new web3.eth.Contract(abi_murasaki_strage, contract_murasaki_strage);
-        let _isActive = await contract_ms.methods.isActive(_summoner).call();
-        if (_isActive == false) {
+        local_isActive = await contract_ms.methods.isActive(_summoner).call();
+        if (local_isActive == false) {
             console.log("MSG: You have burned summoner:", wallet, _summoner);
         } else {
             console.log("MSG: You have summoner:", wallet, _summoner);
             summoner = _summoner;
         }
     }
+    */
 }
 
 //update local status reading from contract
@@ -455,16 +479,14 @@ async function contract_update_status(_summoner) {
     let contract_mfs = await new web3.eth.Contract(abi_murasaki_function_share, contract_murasaki_function_share);
     let contract_mfc = await new web3.eth.Contract(abi_murasaki_function_crafting, contract_murasaki_function_crafting);
     let contract_mfmf = await new web3.eth.Contract(abi_murasaki_function_mining_and_farming, contract_murasaki_function_mining_and_farming);
-    //let contract_th = await new web3.eth.Contract(abi_tiny_heart, contract_tiny_heart);
+    let contract_mffg = await new web3.eth.Contract(abi_murasaki_function_feeding_and_grooming, contract_murasaki_function_feeding_and_grooming);
     let contract_mn = await new web3.eth.Contract(abi_murasaki_function_name, contract_murasaki_function_name);
 
     //check isActive
-    let _isActive = await contract_ms.methods.isActive(_summoner).call();
-    if (_isActive == false) {
-        console.log("MSG: This summoner has been burned:", _summoner);
-        if (_summoner != 0) {
-            text_system_message.setText("This Murasaki-san is not available.");
-        }
+    local_isActive = await contract_ms.methods.isActive(_summoner).call();
+    if (local_isActive == false) {
+        console.log("summoner=", _summoner, "local_isActive=", local_isActive);
+        count_update += 1;
         return 0;
     }
 
@@ -531,7 +553,7 @@ async function contract_update_status(_summoner) {
     local_name_str = await contract_mn.methods.call_name_from_summoner(_summoner).call();
     
     //petrification
-    
+    local_notPetrified = await contract_mffg.methods.not_petrified(_summoner).call();
 
     //update last_sync_time
     last_sync_time = Date.now();
@@ -553,6 +575,16 @@ async function contract_summon(_class) {
     _price = Number(_price) * 10**18;
     let wallet = await get_wallet(web3);
     contract.methods.summon(_class).send({from:wallet, value:_price});
+}
+
+async function contract_curePetrification(_summoner) {
+    let web3 = await connect();
+    let wallet = await get_wallet(web3);
+    let contract_ms = await new web3.eth.Contract(abi_murasaki_strage, contract_murasaki_strage);
+    let _price = await contract_ms.methods.PRICE().call();
+    let contract = await new web3.eth.Contract(abi_murasaki_function_feeding_and_grooming, contract_murasaki_function_feeding_and_grooming);
+    _price = Number(_price) * 10**18 * local_level;
+    contract.methods.cure_petrification(_summoner).send({from:wallet, value:_price});
 }
 
 //burn
@@ -713,10 +745,10 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             if (tmp <= 5) {
                 this.mode = "sleeping";
                 this.count = 0;
-            }else if (tmp <= 20 & satiety <= 10) {
-                this.mode = "stone";
+            }else if (tmp <= 20 && satiety <= 10 && count_update > 3) {
+                this.mode = "hungry";
                 this.count = 0;
-            }else if (tmp <= 20 & happy <= 10) {
+            }else if (tmp <= 20 && happy <= 10 && count_update > 3) {
                 this.mode = "crying";
                 this.count = 0;
             }else {
@@ -822,13 +854,25 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             this.count = 0;
         }
     }
-    stone() {
+    hungry() {
         this.count += 1;
         if (this.count == 1){
             this.anims.play("murasaki_stone", true);
         }else if (this.count >= 500) {
             this.mode = "resting";
             this.count = 0;
+        }
+    }
+    petrified() {
+        this.count += 1;
+        if (this.count == 1){
+            this.anims.play("murasaki_stone", true);
+        //continue to be petrified
+        /*
+        }else if (this.count >= 500) {
+            this.mode = "resting";
+            this.count = 0;
+        */
         }
     }
     sleeping() {
@@ -1001,7 +1045,8 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         else if (this.mode == "hugging") {this.hugging();}
         else if (this.mode == "farming") {this.farming();}
         else if (this.mode == "crafting") {this.crafting();}
-        else if (this.mode == "stone") {this.stone();}
+        else if (this.mode == "hungry") {this.hungry();}
+        else if (this.mode == "petrified") {this.petrified();}
     }
 }
 
@@ -1242,7 +1287,7 @@ async function draw_radarchart(scene) {
         let _y = 115;
         let _r = 80;
         let _res = await contract_get_item_count(summoner);
-        console.log(_res);
+        //console.log(_res);
         //radarchart(scene, _x, _y, _r, local_strength, local_dexterity, local_intelligence, local_luck, _res[0], _res[1], _res[2], _res[3]);
         radarchart(scene, _x, _y, _r, local_strength, local_dexterity, local_intelligence, local_luck, _res[0], _res[1], _res[2], local_heart*5/100);
 }
@@ -1641,7 +1686,23 @@ function preload() {
         percentText.setText( Math.round(value * 100) + "%");
         if (value == 1) {
             progressText_loading.setText("Completed!");
-            progressText.setText("Visitting...");
+            let _arr = [
+                "Making roasted sweet potatoes now...",
+                "Brushing a teddy bear now...",
+                "Looking for my shovel now...",
+                "Polishing the watering can now...",
+                "Assembling the sewing machine now...",
+                "Counting flowers and grass now...",
+                "Cleaning up the house now...",
+                "Replacing the sand in the sandbox now...",
+                "Adding fertilizer to the flowerpot...",
+                "treating a needle puncture wound now...",
+                "Washing the dishes now...",
+                "Putting a flower on the teddy bear now...",
+            ];
+            let _index = Math.floor(Math.random() * _arr.length);
+            let _text = _arr[_index];            
+            progressText.setText(_text);
         }
     });
     this.load.on("fileprogress", function(file) {
@@ -1948,13 +2009,15 @@ function create() {
 
     //===button===
 
-    //button_text
-    text_summon = this.add.text(640, 480, "", {font: "30px Arial", fill: "#E62E8B", backgroundColor: "#FDEFF5"})
+    //summon
+    text_summon = this.add.text(640, 480, ">> Summon your Murasaki-san <<", {font: "30px Arial", fill: "#E62E8B", backgroundColor: "#FDEFF5"})
         .setOrigin(0.5)
         .setInteractive({useHandCursor: true})
         .on("pointerdown", () => open_window_summon(this) )
         .on("pointerover", () => text_summon.setStyle({ fontSize: 30, fontFamily: "Arial", fill: '#0000ff' }))
         .on("pointerout", () => text_summon.setStyle({ fontSize: 30, fontFamily: "Arial", fill: '#E62E8B' }));
+    text_summon.visible = false;
+
     //new Button(10, 880, 'Kill', this, () => contract_burn(summoner));
     new Button(10, 870, '[Rotate]', this, () => {
         console.log(this.sys.game.scale.gameSize._width);
@@ -1969,6 +2032,15 @@ function create() {
             this.cameras.main.centerOn(640,480);
         }
     });
+
+    //curePetrification
+    text_curePetrification = this.add.text(640, 480, " >> Cure Petrification (Cost: Lv x 10 $ASTR) << ", {font: "28px Arial", fill: "#E62E8B", backgroundColor: "#FDEFF5"})
+        .setOrigin(0.5)
+        .setInteractive({useHandCursor: true})
+        .on("pointerdown", () => contract_curePetrification(summoner) )
+        .on("pointerover", () => text_curePetrification.setStyle({ fontSize: 28, fontFamily: "Arial", fill: '#0000ff' }))
+        .on("pointerout", () => text_curePetrification.setStyle({ fontSize: 28, fontFamily: "Arial", fill: '#E62E8B' }));
+    text_curePetrification.visible = false;
 
     //===status===
 
@@ -2086,28 +2158,48 @@ function create() {
     }).setOrigin(0.5);
 
     //first sync test
+    /*
     text_sync_first = this.add.text(
         murasakisan.x - 100, 
         murasakisan.y - 50, 
         "connecting to Astar...", 
         {fontSize: 20, fontFamily: "Arial", fill: '#000000'}
     );
+    */
 }
 
 
 
 //---update-----------------------------------------------------------------------------------------------------
 
-function update() {
+//update system message
+function update_systemMessage() {
+    if (summoner == -1) {
+        text_system_message.setText(" --- Connecting to Astar Network... --- ");
+    } else if (summoner == 0) {
+        text_system_message.setText(" --- You have not summoned Murasaki-san yet --- ");
+        text_summon.visible = true;
+    } else if (local_isActive == false) {
+        text_system_message.setText(" --- This Murasaki-san is not Available --- ");
+    } else if (local_notPetrified == false) {
+        text_system_message.setText(" --- This murasaki-san has been petrified --- ");
+        text_curePetrification.visible = true;
+    } else {
+        text_system_message.setText("");
+        text_summon.visible = false;
+        text_curePetrification.visible = false;
+    }
+}
 
-    //this.scale.startFullscreen();
+//main function
+function update() {
 
     //increment turn
     turn += 1;
     text_turn.setText("turn: " + turn);
 
     //update summoner
-    if (local_level != 0) {
+    if (local_level > 0) {
         murasakisan.update();
     }
     //update pet
@@ -2124,7 +2216,7 @@ function update() {
         } else {
             let _delta = Math.round( (Date.now() - last_sync_time) / 1000 );
             text_sync_time.setText("synced: " + _delta + "s ago");
-            text_sync_first.setText("");
+            //text_sync_first.setText("");
         }
     }
 
@@ -2235,7 +2327,7 @@ function update() {
             screen_coin_delta = local_coin - previous_local_coin;
             screen_coin_easing = 100;
             //earning text
-            if (count_update > 1) {
+            if (count_update > 3) {
                 let _delta = local_coin - previous_local_coin;
                 let _sign = "";
                 if (_delta > 0) {
@@ -2264,7 +2356,7 @@ function update() {
             screen_material_delta = local_material - previous_local_material;
             screen_material_easing = 100;
             //earning text
-            if (count_update > 1) {
+            if (count_update > 3) {
                 let _delta = local_material - previous_local_material;
                 let _sign = ""; //no need when minus
                 if (_delta > 0) {
@@ -2300,7 +2392,7 @@ function update() {
             }
             screen_exp_easing = 100;
             //earning text
-            if (count_update > 1) {
+            if (count_update > 3) {
                 let _delta = local_exp - previous_local_exp;
                 let _sign = ""; //no need when minus
                 if (_delta > 0) {
@@ -2445,8 +2537,14 @@ function update() {
 
     if (turn % 150 == 20) {
 
+        //check petrified
+        if (local_notPetrified == false) {
+            murasakisan.set_mode = "petrified";
+            //text_system_message.setText(" --- This murasaki-san has been petrified --- ");
+            //text_curePetrification.visible = true;
+
         //level up
-        if (local_level > previous_local_level) {
+        } else if (local_level > previous_local_level) {
             //update radarchart
             draw_radarchart(this);
             if (local_level == 2) {
@@ -2462,7 +2560,7 @@ function update() {
                 button_farming.setInteractive();
             }
             if (local_level == 3) {
-                //enable mining button
+                //enable crafting button
                 button_crafting.setTexture("button_crafting_enable");
                 button_crafting.on('pointerover', () => button_crafting.setTexture("button_crafting_pointerover"));
                 button_crafting.on('pointerout', () => button_crafting.setTexture("button_crafting_enable"));
@@ -2492,10 +2590,9 @@ function update() {
             murasakisan.target_x = 1000;
             murasakisan.target_y = 400;
             sound_grooming.play();
-        }
 
         //mining check
-        if (local_mining_status == 1 & murasakisan.mode != "mining" & murasakisan.mode != "feeding"){
+        } else if (local_mining_status == 1 & murasakisan.mode != "mining" & murasakisan.mode != "feeding"){
             murasakisan.set_mode = "mining";
             murasakisan.submode = 0;
             murasakisan.count = 0;
@@ -2715,20 +2812,27 @@ function update() {
         previous_local_items = local_items;
     }
 
+    //===== update system message =====
+    
+    //blink message
+    if (turn % 300 == 50) {
+        text_system_message.setText("");
+    }
+    //update message text
+    if (turn % 150 == 60 || turn == 10 || count_update == 1) {
+        update_systemMessage();
+    }
+
     //===== update onchain data =====
 
-    if (turn % 300 == 80) {
-        text_system_message.setText("");
+    if (turn % 300 == 80 || turn == 50) {
         //when no summoner argument, load summoner id from wallet
-        if (summoner == 0) {
-            //cant get summoner id directry, update summoner id is better.
-            //contract_update_summoner_of_wallet(web3);
+        if (summoner == -1) {
+            //can not get summoner id directry, update summoner id is better.
             contract_update_all();
         //when summoner is loaded, update summoner status
-        } else {
-            //update dynamic_status
+        } else if (summoner > 0) {
             contract_update_status(summoner);
-            text_summon.setText("");
         }
     }
 }
