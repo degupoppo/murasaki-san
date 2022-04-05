@@ -19,7 +19,7 @@ ToDo
         setTextでの制御がとっちらかってるので専用update区域を作って整理する
         システムメッセージは単一の区域内で表示トリガーを定義して一元管理させる
 
-    石化の実装
+ ok 石化の実装
         石化時はシステムメッセージと治療ボタンを表示
 
     時間経過で成長する木の実装
@@ -2819,7 +2819,7 @@ function update() {
         text_system_message.setText("");
     }
     //update message text
-    if (turn % 150 == 60 || turn == 10 || count_update == 1) {
+    if (turn % 150 == 60 || turn == 1 || count_update == 1) {
         update_systemMessage();
     }
 
