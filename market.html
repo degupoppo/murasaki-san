@@ -29,6 +29,8 @@ ToDo
 <script src="js_v2/big-number.js"></script>
 <script src="js_v2/array_item_name.js"></script>
 <script src="js_v2/murasaki_main.js"></script>
+<script src="js_v2/murasaki_function_name.js"></script>
+<script src="js_v2/murasaki_function_crafting.js"></script>
 
 <script type="text/javascript">
 
@@ -75,6 +77,22 @@ ToDo
             let _items = await contract_mc.methods.items(_item).call();
             let _item_type = _items[0];
             let _crafted_summoner = _items[2];
+            //summoner_name
+            let _crafted_summoner_name = await call_name_from_summoner(_crafted_summoner);
+            if (_crafted_summoner_name == "") {
+                _crafted_summoner_name = _crafted_summoner;
+            }
+            //item_rarity
+            let _item_rarity;
+            if (_item_type <= 64) {
+                _item_rarity = "<font color=green>common</font>";
+            } else if (_item_type <= 128) {
+                _item_rarity = "<font color=blue>uncommon</font>";
+            } else if (_item_type <= 192) {
+                _item_rarity = "<font color=orange>rare</font>";
+            } else {
+                _item_rarity = "<font color=black>---</font>";
+            }
             let _html = "";
             _html += "<tr><td><center>"
             _html += _item;
@@ -82,7 +100,9 @@ ToDo
             //_html += _item_type;
             _html += array_item_name[_item_type];
             _html += "</center></td><td><center>";
-            _html += _crafted_summoner;
+            _html += _item_rarity;
+            _html += "</center></td><td><center>";
+            _html += _crafted_summoner_name;
             _html += "</center></td><td id='" + "input_price_" + _item + "'><center><b>";
             _html += (Math.round(_price/(10**18)*100)/100).toFixed(2);
             _html += "</b></center></td><td><center>";
@@ -113,13 +133,31 @@ ToDo
             let _items = await contract_mc.methods.items(_item).call();
             let _item_type = _items[0];
             let _crafted_summoner = _items[2];
+            //summoner_name
+            let _crafted_summoner_name = await call_name_from_summoner(_crafted_summoner);
+            if (_crafted_summoner_name == "") {
+                _crafted_summoner_name = _crafted_summoner;
+            }
+            //item_rarity
+            let _item_rarity;
+            if (_item_type <= 64) {
+                _item_rarity = "<font color=green>common</font>";
+            } else if (_item_type <= 128) {
+                _item_rarity = "<font color=blue>uncommon</font>";
+            } else if (_item_type <= 192) {
+                _item_rarity = "<font color=orange>rare</font>";
+            } else {
+                _item_rarity = "<font color=black>---</font>";
+            }
             let _html = "";
             _html += "<tr><td><center>"
             _html += _item;
             _html += "</center></td><td><center>";
             _html += array_item_name[_item_type];
             _html += "</center></td><td><center>";
-            _html += _crafted_summoner;
+            _html += _item_rarity;
+            _html += "</center></td><td><center>";
+            _html += _crafted_summoner_name;
             _html += "</center></td><td><center><b>";
             _html += (Math.round(_price/(10**18)*100)/100).toFixed(2);
             _html += "</b></center></td><td><center>";
@@ -143,15 +181,32 @@ ToDo
         let contract = await new web3.eth.Contract(abi_murasaki_craft, contract_murasaki_craft);
         let myListLength = await contract.methods.myListLength(wallet).call();
         let myListsAt = await contract.methods.myListsAt(wallet, 0, myListLength).call();
+        console.log(myListsAt);
         for (let i = 0; i < myListLength; i++) {
             let _item = myListsAt[i];
             _items = await contract.methods.items(_item).call();
             let _item_type = _items[0];
-            let _crafted_time = _items[1];
+            //let _crafted_time = _items[1];
             let _crafted_summoner = _items[2];
             let _crafted_wallet = _items[3];
             let _wallet1 = _crafted_wallet.substring(0,5);
             let _wallet2 = _crafted_wallet.slice(-4);
+            //summoner_name
+            let _crafted_summoner_name = await call_name_from_summoner(_crafted_summoner);
+            if (_crafted_summoner_name == "") {
+                _crafted_summoner_name = _crafted_summoner;
+            }
+            //item_rarity
+            let _item_rarity;
+            if (_item_type <= 64) {
+                _item_rarity = "<font color=green>common</font>";
+            } else if (_item_type <= 128) {
+                _item_rarity = "<font color=blue>uncommon</font>";
+            } else if (_item_type <= 192) {
+                _item_rarity = "<font color=orange>rare</font>";
+            } else {
+                _item_rarity = "<font color=black>---</font>";
+            }
             //console.log(_item, _item_type, _crafted_time, _crafted_summoner, _crafted_wallet);
             let _html = "";
             _html += "<tr><td><center>"
@@ -159,9 +214,12 @@ ToDo
             _html += "</center></td><td><center>";
             _html += array_item_name[_item_type];
             _html += "</center></td><td><center>";
-            _html += _crafted_time;
+            //_html += _crafted_time;
+            _html += _item_rarity;
             _html += "</center></td><td><center>";
-            _html += _crafted_summoner;
+            //_html += _crafted_summoner;
+            //_html += await call_name_from_summoner(_crafted_summoner);
+            _html += _crafted_summoner_name;
             //_html += "</center></td><td><center>";
             //_html += _wallet1 + "..." + _wallet2;
             _html += "</center></td><td><center>";
@@ -237,6 +295,48 @@ ToDo
         let contract = await new web3.eth.Contract(abi_murasaki_craft, contract_murasaki_craft);
         contract.methods.safeTransferFrom(wallet, _to_wallet, _item).send({from:wallet});
     }
+    
+    //call name from summoner id
+    async function call_name_from_summoner(_summoner) {
+        let web3 = await connect();
+        let contract = await new web3.eth.Contract(abi_murasaki_function_name, contract_murasaki_function_name);
+        let _name = await contract.methods.call_name_from_summoner(_summoner).call();
+        return _name;
+    }
+    
+    //approve_upgrade
+    async function approve_upgrade() {
+        let web3 = await connect();
+        let wallet = await get_wallet(web3);
+        let contract = await new web3.eth.Contract(abi_murasaki_craft, contract_murasaki_craft);
+        await contract.methods.setApprovalForAll(contract_murasaki_function_crafting, true).send({from:wallet});
+    }
+
+    //check_approve_upgrade
+    async function check_approve_upgrade() {
+        let web3 = await connect();
+        let wallet = await get_wallet(web3);
+        let contract = await new web3.eth.Contract(abi_murasaki_craft, contract_murasaki_craft);
+        let _res = await contract.methods.isApprovedForAll(wallet, contract_murasaki_function_crafting).call();
+        console.log(_res);
+        if (_res == true) {
+            document.getElementById("button_approve_upgrade").disabled = true;
+            document.getElementById("button_approve_upgrade").firstChild.data = "Approved";
+        }
+    }
+        
+    //upgrade item
+    async function upgrade_item() {
+        let web3 = await connect();
+        let wallet = await get_wallet(web3);
+        let contract_mm = await new web3.eth.Contract(abi_murasaki_main, contract_murasaki_main);
+        let _summoner = await contract_mm.methods.tokenOf(wallet).call();  //have not summoned yet: 0
+        let _item1 = document.getElementById("upgrade_item_id1").value;
+        let _item2 = document.getElementById("upgrade_item_id2").value;
+        let _item3 = document.getElementById("upgrade_item_id3").value;
+        let contract_mfc = await new web3.eth.Contract(abi_murasaki_function_crafting, contract_murasaki_function_crafting);
+        contract_mfc.methods.upgrade_item(_summoner, _item1, _item2, _item3).send({from:wallet});
+    }
 
 </script>
 
@@ -281,6 +381,7 @@ ToDo
 		<thead><tr>
 			<th style="width:50px;"><center>item_id</center></th>
 			<th><center>item_type</center></th>
+            <th><center>item_rarity</center></th>
 			<th><center>crafted_by</center></th>
 			<th><center>Price ($ASTR)</center></th>
 			<th><center>action</center></th>
@@ -293,6 +394,7 @@ ToDo
 		<thead><tr>
 			<th style="width:50px;"><center>item_id</center></th>
 			<th><center>item_type</center></th>
+            <th><center>item_rarity</center></th>
 			<th><center>crafted_by</center></th>
 			<th><center>Price ($ASTR)</center></th>
 			<th><center>action</center></th>
@@ -309,7 +411,7 @@ ToDo
 	    <thead><tr>
             <th style="width:50px;"><center>item_id</center></th>
             <th><center>item_type</center></th>
-            <th><center>crafted_at</center></th>
+            <th><center>item_rarity</center></th>
             <th><center>crafted_by</center></th>
             <th><center>selling Price ($ASTR)</center></th>
         </tr></thead>
@@ -317,19 +419,20 @@ ToDo
 	</table>
 
 	<p>
-	<b>Send your items to other Murasaki-san:</b><br>
+	<b>■ Send Item</b><br>
+	Transfer your items to other Murasaki-san:<br>
     item_id: <input type="number" id="transfer_item_id" style="width:80px;">
     &nbsp;&nbsp;to Murasaki-san: <input type="number" id="transfer_summoner" style="width:80px;">
     &nbsp;&nbsp;<button onclick="transfer_item();">Send Item</button>
     </p>
 
 	<p>
-	<b>Upgrade items to a higher rarity item:</b><br>
-	Mint a higher rarity item by consuming 3 items with the same item_type and rarity<br>
+	<b>■ Upgrade Item</b><br>
+	Mint a higher rarity item by burning 3 items with the same item_type and rarity:<br>
     item_id: <input type="number" id="upgrade_item_id1" style="width:80px;">
     &nbsp;item_id: <input type="number" id="upgrade_item_id2" style="width:80px;">
     &nbsp;item_id: <input type="number" id="upgrade_item_id3" style="width:80px;">
-    &nbsp;&nbsp;<button onclick="upgrade_item();" disabled>Upgrade Item</button>
+    &nbsp;&nbsp;<button onclick="upgrade_item();">Upgrade Item</button>
     </p>
 
     <script>

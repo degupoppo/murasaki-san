@@ -299,3 +299,4 @@ const abi_murasaki_function_crafting = [
 		"type": "function"
 	}
 ]
+

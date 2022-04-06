@@ -4,6 +4,9 @@
 
 /***
 
+    220406
+        mc修正、未デプロイ
+
     素材boxの実装
         1000単位、10000単位を消費してクラフト→NFTアイテム化
         NFTアイテムを消費して+1000, +10000素材を加算
@@ -51,6 +54,14 @@
         ステーキング専用の高価なitemを作る
         このitemは作った後にstakingすることで何かしらのリワードが得られる
             ゲーム内の通貨か、Astarか
+
+ ok tiny_heartコントラの修正
+        crafted_summonerは、item craft元になるようにfunctionを修正
+        mcは修正しなくても対応可能
+            create_tiny_heart()にto_walletを要求させる
+            stop_crafting内で_to_walletを取得して渡す
+                _to_summonerをランダムで選び、その後_to_walletへと変換すれば実装可能
+        → 不要. すでに上記実装になっていた。
 
  ok upgrade深慮
         costは必要とするか
@@ -2558,18 +2569,20 @@ contract Murasaki_Function_Crafting is Ownable {
     //upgrade item
     //***TODO***
     //cost? time? UI?
-    function upgrade_item(uint32 _summoner, uint32 _item1, uint32 _item2, uint32 _item3) internal {
+    function upgrade_item(uint32 _summoner, uint32 _item1, uint32 _item2, uint32 _item3) external {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
-        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        //Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
         //check summoner owner
         require(mfs.check_owner(_summoner, msg.sender));
+        /*
         //check and spend cost
         uint32 _coin = 1000;
         uint32 _material = 1000;
         require(ms.coin(_summoner) >= _coin && ms.material(_summoner) >= _material);
         ms.set_coin(_summoner, ms.coin(_summoner) - _coin);
         ms.set_material(_summoner, ms.material(_summoner) - _material);
+        */
         //check item owner
         require(
             mc.ownerOf(_item1) == msg.sender
@@ -2585,10 +2598,15 @@ contract Murasaki_Function_Crafting is Ownable {
     	    _item_type2 == _item_type1
     	    && _item_type3 == _item_type1
     	);
-        //burn lower rank items
+        //burn (transfer) lower rank items
+        mc.safeTransferFrom(msg.sender, address(this), _item1);
+        mc.safeTransferFrom(msg.sender, address(this), _item2);
+        mc.safeTransferFrom(msg.sender, address(this), _item3);
+        /*
         mc.burn(_item1);
         mc.burn(_item2);
         mc.burn(_item3);
+        */
         //mint upper rank item
         uint32 _seed = mfs.seed(_summoner);
         mc.craft(_item_type1 + 64, _summoner, msg.sender, _seed);
@@ -2945,17 +2963,20 @@ contract Murasaki_Craft is ERC721, Ownable{
         mySet[to].add(tokenId);
     }
 
+    /*  not used 220406
     //override ERC721 burn
     function _burn(uint256 tokenId) internal virtual override {
-        ERC721._burn(tokenId);
         uint32 _item_type = items[tokenId].item_type;
         address _owner = ERC721.ownerOf(tokenId);
         balance_of_type[_owner][_item_type] -= 1;
         mySet[msg.sender].remove(tokenId);
+        ERC721._burn(tokenId);
     }
     function burn(uint256 tokenId) external {
+        require(msg.sender == murasaki_function_address);
         _burn(tokenId);
     }
+    */
 
     //craft
     function craft(uint32 _item_type, uint32 _summoner, address _wallet, uint32 _seed) external {

@@ -4,9 +4,13 @@
 
 ToDo
 
-    MarketでItem名表示の実装
-        item_typeとitem名の対応テーブルを作成する
-        
+    Upgradeの再実装
+        rarityのNFTにはburnが実装されておらず使えなかった
+        自力で実装するには不安が残る
+        よって、approveと組み合わせて、適当なコントラにtransferする方法で実装する
+            transfer_toはfunction_craftingでよいか
+            function_craftingに対してmcをapproveし、
+            その後transferしつつcraft()する。
 
     Donationボタンの実装
         さりげないdonationボタンを作る
@@ -19,6 +23,14 @@ ToDo
         Item marketにupgradeの鍛冶屋を作ってしまっても良いかも
             この場合、coin/materialのコストは不要にするか
 
+ ok Marketでitem rarity表示の実装
+
+ ok MarketでSummoner名の表示の実装
+        nameをmintしていないものはid表記
+
+ ok MarketでItem名表示の実装
+        item_typeとitem名の対応テーブルを作成する
+        
  ok システムメッセージ周りの整理
         setTextでの制御がとっちらかってるので専用update区域を作って整理する
         システムメッセージは単一の区域内で表示トリガーを定義して一元管理させる
