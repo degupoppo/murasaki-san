@@ -1,4 +1,4 @@
-const contract_murasaki_function_crafting = "0x814D236B791d4B1E60D0e011012201751aBe46dE";
+const contract_murasaki_function_crafting = "0xEd634c1F7c0F1De2C04A733bAe70359304143513";
 const abi_murasaki_function_crafting = [
 	{
 		"anonymous": false,
@@ -98,6 +98,34 @@ const abi_murasaki_function_crafting = [
 			}
 		],
 		"name": "transferOwnership",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint32",
+				"name": "_summoner",
+				"type": "uint32"
+			},
+			{
+				"internalType": "uint32",
+				"name": "_item1",
+				"type": "uint32"
+			},
+			{
+				"internalType": "uint32",
+				"name": "_item2",
+				"type": "uint32"
+			},
+			{
+				"internalType": "uint32",
+				"name": "_item3",
+				"type": "uint32"
+			}
+		],
+		"name": "upgrade_item",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"

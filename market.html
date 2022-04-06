@@ -21,12 +21,13 @@ ToDo
     Unlistボタンの実装
     所有item一覧表示の実装
 
+<script src="js_v2/big-number.js"></script>
+
 --->
 
 <script src="js_v2/web3.min.js"></script>
 <script src="js_v2/murasaki_item_market.js"></script>
 <script src="js_v2/murasaki_craft.js"></script>
-<script src="js_v2/big-number.js"></script>
 <script src="js_v2/array_item_name.js"></script>
 <script src="js_v2/murasaki_main.js"></script>
 <script src="js_v2/murasaki_function_name.js"></script>
@@ -74,6 +75,7 @@ ToDo
         for (let i = 0; i < ListLength; i++) {
             let _item = ListsAt[0][i];
             let _price = ListsAt[1][i];
+            _price = web3.utils.fromWei(_price, "ether");
             let _items = await contract_mc.methods.items(_item).call();
             let _item_type = _items[0];
             let _crafted_summoner = _items[2];
@@ -104,7 +106,8 @@ ToDo
             _html += "</center></td><td><center>";
             _html += _crafted_summoner_name;
             _html += "</center></td><td id='" + "input_price_" + _item + "'><center><b>";
-            _html += (Math.round(_price/(10**18)*100)/100).toFixed(2);
+            //_html += (Math.round(_price/(10**18)*100)/100).toFixed(2);
+            _html += (Math.round(_price*100)/100).toFixed(2);
             _html += "</b></center></td><td><center>";
             _html += "<button onclick='buy_item(" + _item + "," + _price + ");'>";
             _html += "Buy";
@@ -130,6 +133,7 @@ ToDo
         for (let i = 0; i < myListLength; i++) {
             let _item = myListsAt[0][i];
             let _price = myListsAt[1][i];
+            _price = web3.utils.fromWei(_price, "ether");
             let _items = await contract_mc.methods.items(_item).call();
             let _item_type = _items[0];
             let _crafted_summoner = _items[2];
@@ -159,7 +163,8 @@ ToDo
             _html += "</center></td><td><center>";
             _html += _crafted_summoner_name;
             _html += "</center></td><td><center><b>";
-            _html += (Math.round(_price/(10**18)*100)/100).toFixed(2);
+            //_html += (Math.round(_price/(10**18)*100)/100).toFixed(2);
+            _html += (Math.round(_price*100)/100).toFixed(2);
             _html += "</b></center></td><td><center>";
             _html += "<button onclick='unlist_item(" + _item + ");'>";
             _html += "Unlist";
@@ -242,6 +247,8 @@ ToDo
         let web3 = await connect();
         let wallet = await get_wallet(web3);
         let contract = await new web3.eth.Contract(abi_murasaki_item_market, contract_murasaki_item_market);
+        _price = (_price).toString();
+        _price = web3.utils.toWei(_price);
         await contract.methods.buy(_item).send({from: wallet, value: _price});
     }
 
@@ -257,7 +264,9 @@ ToDo
     async function list_item(_item) {
         let web3 = await connect();
         let wallet = await get_wallet(web3);
-        let _price = new BigNumber(document.getElementById("input_price_"+_item).value * 10**18);
+        //let _price = new BigNumber(document.getElementById("input_price_"+_item).value * 10**18);
+        let _price = document.getElementById("input_price_"+_item).value
+        _price = web3.utils.toWei(_price);
         let contract = await new web3.eth.Contract(abi_murasaki_item_market, contract_murasaki_item_market);
         await contract.methods.list(_item, _price).send({from:wallet});
     }
@@ -428,11 +437,13 @@ ToDo
 
 	<p>
 	<b>■ Upgrade Item</b><br>
-	Mint a higher rarity item by burning 3 items with the same item_type and rarity:<br>
-    item_id: <input type="number" id="upgrade_item_id1" style="width:80px;">
-    &nbsp;item_id: <input type="number" id="upgrade_item_id2" style="width:80px;">
-    &nbsp;item_id: <input type="number" id="upgrade_item_id3" style="width:80px;">
-    &nbsp;&nbsp;<button onclick="upgrade_item();">Upgrade Item</button>
+	Mint a higher rarity item by <u>burning 3 items</u> with the same item_type and rarity:<br>
+	Ex) <font color="green">three common Violin</font> <b>-></b> <font color="blue">one uncommon Violin</font><br>
+    item_ids: <input type="number" id="upgrade_item_id1" style="width:80px;">
+    &nbsp;<input type="number" id="upgrade_item_id2" style="width:80px;">
+    &nbsp;<input type="number" id="upgrade_item_id3" style="width:80px;">
+    &nbsp;&nbsp;<button id="button_approve_upgrade" onclick="approve_upgrade();">Approve</button>
+    &nbsp;&nbsp;<button onclick="upgrade_item();">Burn & Upgrade</button>
     </p>
 
     <script>
@@ -440,6 +451,7 @@ ToDo
         update_sellingItems();
         update_userItems();
         check_approve();
+        check_approve_upgrade();
     </script>
 
 </main>

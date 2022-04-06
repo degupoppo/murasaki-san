@@ -4,8 +4,12 @@
 
 /***
 
-    220406
-        mc修正、未デプロイ
+    upgradeの実装
+        burnではなくコントラへのtransferで消費させる
+        再デプロイ必要
+        safeTransferではcontractへは送れない模様
+            なにか「消費」の概念を考えねばならない
+            safeTransferではなくtransferFromならばコントラへ投げれた。これを利用する
 
     素材boxの実装
         1000単位、10000単位を消費してクラフト→NFTアイテム化
@@ -54,6 +58,10 @@
         ステーキング専用の高価なitemを作る
         このitemは作った後にstakingすることで何かしらのリワードが得られる
             ゲーム内の通貨か、Astarか
+
+ ng 220406
+        mc修正、未デプロイ
+        → 保留, burn実装は見送り
 
  ok tiny_heartコントラの修正
         crafted_summonerは、item craft元になるようにfunctionを修正
@@ -2375,6 +2383,8 @@ contract Murasaki_Function_Crafting is Ownable {
         uint32[4] memory _dc_table = get_item_dc(_item_type);
         uint32 _coin = _dc_table[2];
         uint32 _material = _dc_table[3];
+        if (_item_type == 48){_coin = 10;} //***test craft***
+        if (_item_type == 48){_material = 10;} //***test craft***
         require(ms.coin(_summoner) >= _coin && ms.material(_summoner) >= _material);
         //start crafting
         ms.set_coin(_summoner, ms.coin(_summoner) - _coin);
@@ -2444,6 +2454,7 @@ contract Murasaki_Function_Crafting is Ownable {
         } else {
             _mod_dc = _dc - _delta;
         }
+        if (_item_type == 48){_mod_dc = 10;} //***test craft***
         return _mod_dc;
     }
     function calc_crafting(uint32 _summoner) public view returns (uint32) {
@@ -2599,9 +2610,9 @@ contract Murasaki_Function_Crafting is Ownable {
     	    && _item_type3 == _item_type1
     	);
         //burn (transfer) lower rank items
-        mc.safeTransferFrom(msg.sender, address(this), _item1);
-        mc.safeTransferFrom(msg.sender, address(this), _item2);
-        mc.safeTransferFrom(msg.sender, address(this), _item3);
+        mc.transferFrom(msg.sender, address(this), _item1);
+        mc.transferFrom(msg.sender, address(this), _item2);
+        mc.transferFrom(msg.sender, address(this), _item3);
         /*
         mc.burn(_item1);
         mc.burn(_item2);

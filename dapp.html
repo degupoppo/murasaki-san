@@ -15,7 +15,7 @@ ToDo
     Donationボタンの実装
         さりげないdonationボタンを作る
 
-    UpgradeのUIの実装
+ ok UpgradeのUIの実装
         選択性にするかランダム消費にするか
         選択性ならば、自分のアイテム一覧表示と、ラジオボタンでの選択が必要
         あるいは、プルダウンメニューで3つのアイテムを選択、など
@@ -982,7 +982,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         this.count += 1;
         if (this.count == 1){
             this.anims.play("murasaki_click", true);
-        }else if (this.count >= 250) {
+        }else if (this.count >= 300) {
             this.mode = "resting";
             this.count = 0;
         }
@@ -2770,16 +2770,21 @@ function update() {
         //1:Ms. Astar
         if (
                 (local_items[1] != 0 && local_items_flag[1] != true) ||
-                (local_items[1+64] != 0 && local_items_flag[1] != true)
-            ) {
+                (local_items[1+64] != 0 && local_items_flag[1] != true) ||
+                (local_items[1+128] != 0 && local_items_flag[1] != true)
+        ) {
             pet = new Pet(this, 300 + Math.random()*200, 400 + Math.random()*100);
             pet.scaleX = pet.scaleX * 0.1;
             pet.scaleY = pet.scaleY * 0.1;
             local_items_flag[1] = true;
             flag_pet = 1;
         }
-        //50:musicbox
-        if (local_items[34] != 0 && local_items_flag[34] != true) {
+        //34:musicbox
+        if (
+                (local_items[34] != 0 && local_items_flag[34] != true) ||
+                (local_items[34+64] != 0 && local_items_flag[34] != true) ||
+                (local_items[34+128] != 0 && local_items_flag[34] != true)
+        ) {
             item_musicbox = this.add.sprite(1200,840, "item_musicbox");
             item_musicbox.scaleX = item_musicbox.scaleX * 0.4;
             item_musicbox.scaleY = item_musicbox.scaleY * 0.4;
@@ -2788,19 +2793,28 @@ function update() {
             local_items_flag[34] = true;
         }
         //33:violin
-        if (local_items[33] != 0 && local_items_flag[33] != true) {
+        if (
+                (local_items[33] != 0 && local_items_flag[33] != true) ||
+                (local_items[33+64] != 0 && local_items_flag[33] != true) ||
+                (local_items[33+128] != 0 && local_items_flag[33] != true)
+        ) {
             item_violin = this.add.sprite(1200,608, "item_violin");
             item_violin.scaleX = item_violin.scaleX * 0.24;
             item_violin.scaleY = item_violin.scaleY * 0.24;
             local_items_flag[33] = true;
         }
         //17:vase
-        if (local_items[17] != 0 && local_items_flag[17] != true) {
+        if (
+                (local_items[17] != 0 && local_items_flag[17] != true) ||
+                (local_items[17+64] != 0 && local_items_flag[17] != true) ||
+                (local_items[17+128] != 0 && local_items_flag[17] != true)
+        ) {
             item_17 = this.add.sprite(850,270, "item_vase");
             item_17.scaleX = item_17.scaleX * 0.20;
             item_17.scaleY = item_17.scaleY * 0.20;
             local_items_flag[17] = true;
         }
+        /*
         //18
         if (local_items[18] != 0 && local_items_flag[18] != true) {
             item_18 = this.add.sprite(320,880, "item_dummy");
@@ -2829,6 +2843,7 @@ function update() {
             item_21.scaleY = item_21.scaleY * 0.4;
             local_items_flag[21] = true;
         }
+        */
         //update raderchart
         //draw_radarchart(this);
         //console.log("tete");
