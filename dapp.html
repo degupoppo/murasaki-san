@@ -4,39 +4,8 @@
 
 ToDo
 
-    Upgradeの再実装
-        rarityのNFTにはburnが実装されておらず使えなかった
-        自力で実装するには不安が残る
-        よって、approveと組み合わせて、適当なコントラにtransferする方法で実装する
-            transfer_toはfunction_craftingでよいか
-            function_craftingに対してmcをapproveし、
-            その後transferしつつcraft()する。
-
     Donationボタンの実装
         さりげないdonationボタンを作る
-
- ok UpgradeのUIの実装
-        選択性にするかランダム消費にするか
-        選択性ならば、自分のアイテム一覧表示と、ラジオボタンでの選択が必要
-        あるいは、プルダウンメニューで3つのアイテムを選択、など
-        htmlならばもう少し楽だが、味気ないか。
-        Item marketにupgradeの鍛冶屋を作ってしまっても良いかも
-            この場合、coin/materialのコストは不要にするか
-
- ok Marketでitem rarity表示の実装
-
- ok MarketでSummoner名の表示の実装
-        nameをmintしていないものはid表記
-
- ok MarketでItem名表示の実装
-        item_typeとitem名の対応テーブルを作成する
-        
- ok システムメッセージ周りの整理
-        setTextでの制御がとっちらかってるので専用update区域を作って整理する
-        システムメッセージは単一の区域内で表示トリガーを定義して一元管理させる
-
- ok 石化の実装
-        石化時はシステムメッセージと治療ボタンを表示
 
     時間経過で成長する木の実装
         farming itemに割り振る
@@ -45,15 +14,6 @@ ToDo
         seedか、summonerのclassを参照して色や形を決める
         大体半年で最大成長するように。
         その他、お花とかも双葉→草→花と成長させるか
-
- ok summonのpay実装
-        ms.PRICEを参照してpayするよう修正する
-
- ok アイテムを買うインセンティブの再考
-        買うより自分で作る方が楽しそう
-        Normalを3つ合わせて錬成すると効果2倍のRareになるなど、
-            何かしら消費するインセンティブを作る。
-        Function_Craftingに追記でいけるか
 
     Nameは看板をクラフト後にmint出来るように変更する
         看板orNameTagのspriteの用意
@@ -186,23 +146,6 @@ ok! しゅっきん！（お仕事へ移動中）
         良いじょうろ
     クラフティングアイテム案（INT系）
         ミュージックボックス
-
- ok 効果音の追加
-        効果音の吟味と割り当て
-        working時にじゃまにならない程度に環境音を鳴らす
-        行動開始時・終了時の効果音を考える
-
- ok 他人のsummonerへのfeedingを可能にする実装
-        他のsummonerへもfeedingだけは可能とする
-        インセンティブとして、得られるexpの1-5%を自分も得られる。
-        feedingされた方のペナルティはなし（100% exp得られる）。
-        大量feeding botを防ぐために、他人のfeedingは1時間に1回程度にする。
-            last_feeding_time_otherを実装
-            feeding()にownerチェックを実装
-                非owner時は自分のsummonerの検索と、expへの追加を実装
-
-    <script src="js_v2/tiny_heart.js"></script>
-    <script src="js_v2/dropdownlist.js"></script>
 
 --->
 
@@ -1296,10 +1239,10 @@ function radarchart(scene, x0, y0, r, str, dex, int, luk, str_item, dex_item, in
     radar4 = scene.add.polygon(x0+(-x4i+x2i)/2, y0+(-y1i+y3i)/2, [x1,y1i,x2i,y2,x3,y3i,x4i,y4], 0xF9C270, 1);
     radar5 = scene.add.polygon(x0+(-x4+x2)/2, y0+(-y1+y3)/2, [x1,y1,x2,y2,x3,y3,x4,y4], 0xFFF67F, 1);
     let font_arg = {font: "17px Arial", fill: "#000000"};
-    radar6 = scene.add.text(x0-15, y0-r-25, "STR"+"\n"+Math.round( (str+str_item)*100 )/100, font_arg);
-    radar7 = scene.add.text(x0+r-5, y0-10, "DEX"+"\n"+Math.round( (dex+dex_item)*100 )/100, font_arg);
-    radar8 = scene.add.text(x0-15, y0+r-5, "LUK"+"\n"+Math.round( (luk+luk_item)*100 )/100, font_arg);
-    radar9 = scene.add.text(x0-r-20, y0-10, "INT"+"\n"+Math.round( (int+int_item)*100 )/100, font_arg);
+    radar6 = scene.add.text(x0-15, y0-r-25, "STR"+"\n"+(Math.round( (str+str_item)*100 )/100).toFixed(2), font_arg);
+    radar7 = scene.add.text(x0+r-5, y0-10, "DEX"+"\n"+(Math.round( (dex+dex_item)*100 )/100).toFixed(2), font_arg);
+    radar8 = scene.add.text(x0-15, y0+r-5, "LUK"+"\n"+(Math.round( (luk+luk_item)*100 )/100).toFixed(2), font_arg);
+    radar9 = scene.add.text(x0-r-20, y0-10, "INT"+"\n"+(Math.round( (int+int_item)*100 )/100).toFixed(2), font_arg);
 }
 async function draw_radarchart(scene) {
         let _x = 1136;
@@ -1680,6 +1623,8 @@ function preload() {
     this.load.image("icon_age", "png/icon_age.png", {frameWidth: 300, frameHeight: 325});
     this.load.image("icon_clock", "png/icon_clock.png", {frameWidth: 225, frameHeight: 225});
     this.load.image("icon_heart", "png/icon_heart.png", {frameWidth: 230, frameHeight: 220});
+    this.load.image("icon_rotate", "png/icon_rotate.png", {frameWidth: 980, frameHeight: 818});
+    this.load.image("icon_home", "png/icon_home.png", {frameWidth: 512, frameHeight: 512});
 
     //level_back
     this.load.image("back_level", "png/back_level.png", {frameWidth: 500, frameHeight: 500});
@@ -1706,18 +1651,18 @@ function preload() {
         if (value == 1) {
             progressText_loading.setText("Completed!");
             let _arr = [
-                "Making roasted sweet potatoes now...",
-                "Brushing a teddy bear now...",
-                "Looking for my shovel now...",
-                "Polishing the watering can now...",
-                "Assembling the sewing machine now...",
-                "Counting flowers and grass now...",
-                "Cleaning up the house now...",
-                "Replacing the sand in the sandbox now...",
+                "Making roasted sweet potatoes...",
+                "Brushing a teddy bear...",
+                "Looking for my shovel...",
+                "Polishing the watering can...",
+                "Assembling the sewing machine...",
+                "Counting flowers and grass...",
+                "Cleaning up the house...",
+                "Replacing the sand in the sandbox...",
                 "Adding fertilizer to the flowerpot...",
-                "treating a needle puncture wound now...",
-                "Washing the dishes now...",
-                "Putting a flower on the teddy bear now...",
+                "treating a needle puncture wound...",
+                "Washing the dishes...",
+                "Putting a flower on the teddy bear...",
             ];
             let _index = Math.floor(Math.random() * _arr.length);
             let _text = _arr[_index];            
@@ -1999,6 +1944,33 @@ function create() {
     button_levelup.on('pointerout', () => text_level.setText(local_level));
     button_levelup.disableInteractive();
 
+    //icon_rotate
+    icon_rotate = this.add.sprite(40,910, "icon_rotate")
+        .setOrigin(0.5)
+        .setScale(0.05)
+        .setInteractive({useHandCursor: true})
+        .on("pointerdown", () => {
+            if (this.sys.game.scale.gameSize._width == 1280) {
+                this.scale.setGameSize(960,1280);
+                this.cameras.main.rotation = 90 * Math.PI / 180;
+                this.cameras.main.centerOn(640,480);
+                //this.scale.startFullscreen();
+            } else {
+                this.scale.setGameSize(1280,960);
+                this.cameras.main.rotation = 0;
+                this.cameras.main.centerOn(640,480);
+            }
+        });
+
+    //icon_home
+    icon_home = this.add.sprite(100,910, "icon_home")
+        .setOrigin(0.5)
+        .setScale(0.1)
+        .setInteractive({useHandCursor: true})
+        .on("pointerdown", () => {
+                window.location.href = "./";
+        });
+
     //===music===
 
     //sound out of focus
@@ -2037,7 +2009,11 @@ function create() {
         .on("pointerout", () => text_summon.setStyle({ fontSize: 30, fontFamily: "Arial", fill: '#E62E8B' }));
     text_summon.visible = false;
 
+    //kill
     //new Button(10, 880, 'Kill', this, () => contract_burn(summoner));
+
+    /*
+    //rotate
     new Button(10, 870, '[Rotate]', this, () => {
         console.log(this.sys.game.scale.gameSize._width);
         if (this.sys.game.scale.gameSize._width == 1280) {
@@ -2051,6 +2027,7 @@ function create() {
             this.cameras.main.centerOn(640,480);
         }
     });
+    */
 
     //curePetrification
     text_curePetrification = this.add.text(640, 480, " >> Cure Petrification (Cost: Lv x 10 $ASTR) << ", {font: "28px Arial", fill: "#E62E8B", backgroundColor: "#FDEFF5"})
@@ -2060,6 +2037,14 @@ function create() {
         .on("pointerover", () => text_curePetrification.setStyle({ fontSize: 28, fontFamily: "Arial", fill: '#0000ff' }))
         .on("pointerout", () => text_curePetrification.setStyle({ fontSize: 28, fontFamily: "Arial", fill: '#E62E8B' }));
     text_curePetrification.visible = false;
+    
+    /*
+    //home
+    new Button(10, 830, '[Home]', this, () => {
+        window.location.href = "./";
+    });
+    */
+    
 
     //===status===
 
@@ -2071,10 +2056,10 @@ function create() {
     icon_age.setScale(0.06);
 
     //debug info
-    text_speed =        this.add.text(10, 910, "***", font_arg);
-    text_mode = this.add.text(1150, 908, "***", {font: "14px Arial", fill: "#727171"});
-    text_turn = this.add.text(1150, 923, "***", {font: "14px Arial", fill: "#727171"});
-    text_sync_time = this.add.text(1150, 935, "***", {font: "14px Arial", fill: "#727171"});
+    //text_speed =        this.add.text(10, 910, "***", font_arg);
+    //text_mode = this.add.text(1150, 916, "***", {font: "14px Arial", fill: "#727171"});
+    text_turn = this.add.text(1150, 928, "***", {font: "14px Arial", fill: "#727171"});
+    text_sync_time = this.add.text(1150, 940, "***", {font: "14px Arial", fill: "#727171"});
     text_wallet = this.add.text(10, 940, "***", {font: "14px Arial", fill: "#727171"});
 
     //satiety
@@ -2229,7 +2214,7 @@ function update() {
     //===== sync time =====
 
     if (turn % 20 == 0) {
-        text_mode.setText(murasakisan.get_mode);
+        //text_mode.setText(murasakisan.get_mode);
         if (last_sync_time == 0) {
             text_sync_time.setText("syncing...");
         } else {
@@ -2477,7 +2462,7 @@ function update() {
         }
 
         //degub info
-        text_speed.setText("speed: x" + SPEED);
+        //text_speed.setText("speed: x" + SPEED);
 
         //heart
         text_heart.setText("Heart: " + local_heart);
@@ -2889,6 +2874,61 @@ function update() {
 <!---
 //---garbadge-----------------------------------------------------------------------------------------------------
 
+ ok Upgradeの再実装
+        rarityのNFTにはburnが実装されておらず使えなかった
+        自力で実装するには不安が残る
+        よって、approveと組み合わせて、適当なコントラにtransferする方法で実装する
+            transfer_toはfunction_craftingでよいか
+            function_craftingに対してmcをapproveし、
+            その後transferしつつcraft()する。
 
+ ok UpgradeのUIの実装
+        選択性にするかランダム消費にするか
+        選択性ならば、自分のアイテム一覧表示と、ラジオボタンでの選択が必要
+        あるいは、プルダウンメニューで3つのアイテムを選択、など
+        htmlならばもう少し楽だが、味気ないか。
+        Item marketにupgradeの鍛冶屋を作ってしまっても良いかも
+            この場合、coin/materialのコストは不要にするか
 
+ ok Marketでitem rarity表示の実装
+
+ ok MarketでSummoner名の表示の実装
+        nameをmintしていないものはid表記
+
+ ok MarketでItem名表示の実装
+        item_typeとitem名の対応テーブルを作成する
+        
+ ok システムメッセージ周りの整理
+        setTextでの制御がとっちらかってるので専用update区域を作って整理する
+        システムメッセージは単一の区域内で表示トリガーを定義して一元管理させる
+
+ ok 石化の実装
+        石化時はシステムメッセージと治療ボタンを表示
+
+ ok summonのpay実装
+        ms.PRICEを参照してpayするよう修正する
+
+ ok アイテムを買うインセンティブの再考
+        買うより自分で作る方が楽しそう
+        Normalを3つ合わせて錬成すると効果2倍のRareになるなど、
+            何かしら消費するインセンティブを作る。
+        Function_Craftingに追記でいけるか
+
+ ok 効果音の追加
+        効果音の吟味と割り当て
+        working時にじゃまにならない程度に環境音を鳴らす
+        行動開始時・終了時の効果音を考える
+
+ ok 他人のsummonerへのfeedingを可能にする実装
+        他のsummonerへもfeedingだけは可能とする
+        インセンティブとして、得られるexpの1-5%を自分も得られる。
+        feedingされた方のペナルティはなし（100% exp得られる）。
+        大量feeding botを防ぐために、他人のfeedingは1時間に1回程度にする。
+            last_feeding_time_otherを実装
+            feeding()にownerチェックを実装
+                非owner時は自分のsummonerの検索と、expへの追加を実装
+
+    <script src="js_v2/tiny_heart.js"></script>
+    <script src="js_v2/dropdownlist.js"></script>
+    
 --->
