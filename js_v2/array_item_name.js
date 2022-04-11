@@ -3,7 +3,7 @@ let array_item_name = [
     "dummy",
     //1-16
     "Mr. Astar",
-    "---",
+    "Crown",
     "---",
     "---",
     "---",
@@ -72,7 +72,7 @@ let array_item_name = [
     //65-128, uncommon
     //65-80
     "Mr. Astar",
-    "---",
+    "Crown",
     "---",
     "---",
     "---",

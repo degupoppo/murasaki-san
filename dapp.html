@@ -819,7 +819,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
     hungry() {
         this.count += 1;
         if (this.count == 1){
-            this.anims.play("murasaki_stone", true);
+            this.anims.play("murasaki_hungry", true);
         }else if (this.count >= 500) {
             this.mode = "resting";
             this.count = 0;
@@ -878,13 +878,17 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             this.anims.play("murasaki_grooming", true);
             this.count_limit = this.count + 1500;
             this.submode = 3;
+            item_bear.visible = false;
         }else if (this.submode == 3) {
             if (this.count % 200 == 10) {
                 sound_happy.play();
             }
             if (this.count >= this.count_limit) {
+                this.x = 1000 - 50
+                this.y = 400 + 50
                 this.mode = "resting";
                 this.count = 0;
+                item_bear.visible = true;
             }
         }
     }
@@ -1354,7 +1358,8 @@ function open_window_craft (scene) {
         //eval(`button_crafting_item${i}  = create_button(_x, _y + _y_add *  ${i}, '[' + _item_count + '] ' + array_item_name[${i}],  ${i},  scene);`)
         eval(`button_crafting_item${i}  = create_button(_x, _y + _y_add *  ${i}, '[' + local_items[${i}] + ',' + local_items[${i+64}] + '] ' + array_item_name[${i}],  ${i},  scene);`)
     }
-    item1_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  1, "pet_normal").setScale(0.08);
+    item1_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  1, "pet_normal").setScale(0.1);
+    item2_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  2, "item_crown").setScale(0.15);
 
     //farming_item
     _x = 520;
@@ -1426,6 +1431,7 @@ function open_window_craft (scene) {
     group_window_crafting.add(button_crafting_item47);
     group_window_crafting.add(button_crafting_item48);
     group_window_crafting.add(item1_icon);
+    group_window_crafting.add(item2_icon);
     group_window_crafting.add(item17_icon);
     group_window_crafting.add(item33_icon);
     group_window_crafting.add(item34_icon);
@@ -1549,13 +1555,15 @@ function preload() {
     this.load.spritesheet("murasaki_mining", "png/murasaki_mining.png", {frameWidth: 370, frameHeight: 320});
     this.load.spritesheet("murasaki_hugging", "png/murasaki_hugging.png", {frameWidth: 370, frameHeight: 320});
     this.load.spritesheet("murasaki_farming", "png/murasaki_farming.png", {frameWidth: 370, frameHeight: 320});
-    this.load.spritesheet("murasaki_grooming", "png/murasaki_grooming.png", {frameWidth: 720, frameHeight: 622});
+    //this.load.spritesheet("murasaki_grooming", "png/murasaki_grooming.png", {frameWidth: 720, frameHeight: 622});
+    this.load.spritesheet("murasaki_grooming", "png/murasaki_grooming3.png", {frameWidth: 720, frameHeight: 622});
     this.load.spritesheet("murasaki_crafting", "png/murasaki_crafting.png", {frameWidth: 370, frameHeight: 320});
     this.load.spritesheet("murasaki_working_left", "png/murasaki_working_left.png", {frameWidth: 370, frameHeight: 320});
     this.load.spritesheet("murasaki_working_right", "png/murasaki_working_right.png", {frameWidth: 370, frameHeight: 320});
     this.load.spritesheet("murasaki_click", "png/murasaki_click.png", {frameWidth: 370, frameHeight: 320});
     this.load.spritesheet("murasaki_loading", "png/murasaki_loading.png", {frameWidth: 370, frameHeight: 320});
     this.load.spritesheet("murasaki_stone", "png/murasaki_stone.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("murasaki_hungry", "png/murasaki_hungry.png", {frameWidth: 370, frameHeight: 320});
 
     //icon button
     this.load.image("button_feeding", "png/button_feeding.png", {frameWidth: 500, frameHeight: 500});
@@ -1613,13 +1621,14 @@ function preload() {
     //this.load.image("item_20", "png/item_20.png", {frameWidth: 300, frameHeight: 300});
     //this.load.image("item_21", "png/item_21.png", {frameWidth: 300, frameHeight: 300});
     this.load.image("item_kanban", "png/item_kanban2.png", {frameWidth: 1000, frameHeight: 475});
+    this.load.image("item_crown", "png/item_crown.png", {frameWidth: 370, frameHeight: 320});
 
     //window
     this.load.image("window", "png/window.png");
 
     //icon
     this.load.image("icon_kusa", "png/icon_kusa.png", {frameWidth: 350, frameHeight: 350});
-    this.load.image("icon_ohana", "png/icon_ohana.png", {frameWidth: 182, frameHeight: 171});
+    this.load.image("icon_ohana", "png/icon_ohana.png", {frameWidth: 350, frameHeight: 350});
     this.load.image("icon_age", "png/icon_age.png", {frameWidth: 300, frameHeight: 325});
     this.load.image("icon_clock", "png/icon_clock.png", {frameWidth: 225, frameHeight: 225});
     this.load.image("icon_heart", "png/icon_heart.png", {frameWidth: 230, frameHeight: 220});
@@ -1824,6 +1833,12 @@ function create() {
         frameRate: 1,
         repeat: -1
     });
+    this.anims.create({
+        key: "murasaki_hungry",
+        frames: this.anims.generateFrameNumbers("murasaki_hungry", {start:0, end:1}),
+        frameRate: 1,
+        repeat: -1
+    });
     
     //===item_bear===
 
@@ -1869,8 +1884,8 @@ function create() {
     button_crafting.disableInteractive();
     //---select item
     //icon_ohana
-    icon_crafting_ohana = this.add.sprite(760, 165, "icon_ohana");
-    icon_crafting_ohana.setScale(0.12);
+    icon_crafting_ohana = this.add.sprite(758, 163, "icon_ohana");
+    icon_crafting_ohana.setScale(0.07);
     icon_crafting_ohana.visible = false;
     //icon_kusa
     icon_crafting_kusa = this.add.sprite(830, 165, "icon_kusa");
@@ -1904,8 +1919,8 @@ function create() {
     button_mining.on('pointerout', () => button_mining.setTexture("button_mining_enable"));
     button_mining.disableInteractive();
     //icon
-    icon_mining = this.add.sprite(105,680, "icon_ohana");
-    icon_mining.setScale(0.12);
+    icon_mining = this.add.sprite(103,678, "icon_ohana");
+    icon_mining.setScale(0.07);
     icon_mining.visible = false;
     //text
     text_mining_calc = this.add.text(115, 670, "", {font: "18px Arial", fill: "#000"});
@@ -2091,8 +2106,8 @@ function create() {
     text_exp_earned_count = 0;
 
     //coin
-    icon_ohana = this.add.sprite(670,25, "icon_ohana");
-    icon_ohana.setScale(0.12);
+    icon_ohana = this.add.sprite(668,23, "icon_ohana");
+    icon_ohana.setScale(0.07);
     text_coin = this.add.text(685, 15, "Ohana: 0", {font: "17px Arial", fill: "#000", backgroundColor: "#FFF200"});
     text_coin_earned = this.add.text(685, 38, "", {font: "17px Arial", fill: "#000000"});
     text_coin_earned_count = 0;
@@ -2123,8 +2138,8 @@ function create() {
         .on("pointerout", () => text_mint_name.setStyle({ fontSize: 17, fontFamily: "Arial", fill: '#000000' }));
     text_mint_name.setInteractive().on("pointerdown", () => {contract_mint_name(summoner, text_kanban.text)});
     //text_mint_name.visible = false;
-    icon_name_ohana = this.add.sprite(175, 90, "icon_ohana");
-    icon_name_ohana.setScale(0.12);
+    icon_name_ohana = this.add.sprite(173, 88, "icon_ohana");
+    icon_name_ohana.setScale(0.07);
     text_name_ohana = this.add.text(185, 82, "100", {font: "17px Arial", fill: "#000000"});
     icon_name_kusa = this.add.sprite(225, 90, "icon_kusa");
     icon_name_kusa.setScale(0.09);
@@ -2763,6 +2778,17 @@ function update() {
             pet.scaleY = pet.scaleY * 0.1;
             local_items_flag[1] = true;
             flag_pet = 1;
+        }
+        //2:Crown
+        if (
+                (local_items[2] != 0 && local_items_flag[2] != true) ||
+                (local_items[2+64] != 0 && local_items_flag[2] != true) ||
+                (local_items[2+128] != 0 && local_items_flag[2] != true)
+        ) {
+            item_musicbox = this.add.sprite(1050,290, "item_crown");
+            item_musicbox.scaleX = item_musicbox.scaleX * 0.3;
+            item_musicbox.scaleY = item_musicbox.scaleY * 0.3;
+            local_items_flag[2] = true;
         }
         //34:musicbox
         if (
