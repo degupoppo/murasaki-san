@@ -231,7 +231,7 @@ ToDo
             _html += "<input type='number' id='" + "input_price_" + _item + "'>";
             _html += "&nbsp;&nbsp;";
             _html += "<button onclick='list_item(" + _item + ");'>";
-            _html += "List";
+            _html += "Sell";
             _html += "</button>";
             _html += "</center></td></tr>";
             tbody_myItems.innerHTML += _html;
@@ -347,6 +347,15 @@ ToDo
         contract_mfc.methods.upgrade_item(_summoner, _item1, _item2, _item3).send({from:wallet});
     }
 
+    //donate
+    async function donate() {
+        let web3 = await connect();
+        let wallet = await get_wallet(web3);
+        let _to_wallet = "0x2F7448B62134e52C2f46454d0089Ae21B5248805";
+        let _value = web3.utils.toWei("10");
+        web3.eth.sendTransaction({from: wallet, to: _to_wallet, value: _value});
+    }
+
 </script>
 
 <head>
@@ -366,7 +375,7 @@ ToDo
 <header>
     <nav>
       <a href="/">Home</a>
-      <a href="/dapp.html" ><b>Play the Game</b></a>
+      <a href="/dapp.html" ><b>Play Game</b></a>
       <a href="/market.html" class="current"><b>Item Market</b></a>
       <a href="/dapp.html?summoner=1">Demo Preview</a>
       <a href="https://twitter.com/degupoppo" >Twitter</a>
@@ -457,9 +466,8 @@ ToDo
 </main>
 
 <footer>
-    <p>
-        Donation: 0x2F7448B62134e52C2f46454d0089Ae21B5248805<br>
-    </p>
+        Developper wallet: 0x2F7448B62134e52C2f46454d0089Ae21B5248805
+        &nbsp;&nbsp;<button style="height:28px;font-size:80%" onclick="donate();">Donate 10 $ASTR</button>
 </footer>
 
 </body>

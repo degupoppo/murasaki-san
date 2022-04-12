@@ -20,7 +20,7 @@ let array_item_name = [
     "---",
     //17-32
     "Flowerpot",
-    "---",
+    "Ms. Ether",
     "---",
     "---",
     "---",
@@ -89,7 +89,7 @@ let array_item_name = [
     "---",
     //81-96
     "Flowerpot",
-    "---",
+    "Ms. Ether",
     "---",
     "---",
     "---",

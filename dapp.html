@@ -4,24 +4,14 @@
 
 ToDo
 
-    Mr. Astarの実装
+    クラフトウィンドウの改善
+        デザイン再考
+
+ ok Mr. Astarの実装
     
-    Ms. Ethereumの実装
-
-    Donationボタンの実装
-        さりげないdonationボタンを作る
-
-    時間経過で成長する木の実装
-        farming itemに割り振る
-        双葉　→　低木　→　背の高い木
-            植木鉢に収まるように？
-        seedか、summonerのclassを参照して色や形を決める
-        大体半年で最大成長するように。
-        その他、お花とかも双葉→草→花と成長させるか
-
-    Nameは看板をクラフト後にmint出来るように変更する
-        看板orNameTagのspriteの用意
-        item_typeの割り振り
+ ok Ms. Ethereumの実装
+    
+    看板デザインの変更
 
     サウンドの洗練
         有効サウンドの選別
@@ -35,34 +25,26 @@ ToDo
         効果音メーカーを使って作成する
             https://www.peko-step.com/tool/soundeffect/#pInTopMenu
 
-    UIの洗練
-        ウィンドウの整備
-        システムメッセージの整備
-        数字加算のアニメーション化
-        バー増加のアニメーション化
-        名前クライムのボタン化
-        Summonウィンドウの洗練
-        システムメッセージの表示方法
-            アニメーションなどで演出する
-
     微調整
         groomingの位置合わせ
         目をいじった画像の差し替え
     
     pngファイルの軽量化
 
-    Item選択ウィンドウ
-        シャボン玉がバラバラアニメーションで出てきてふわふわ浮いてるUI
-        実装難しそうだが
-        48種類なので、48個のシャボン玉を飛ばすのは非現実的
-        やはり大きなウィンドウが扱いやすいか。
-
-    Petの実装
+ ok Petの実装
         アニメーションの完備
         複数種類のpet所有時のコード整備
             Mr. ASTR
             Ms. DOT
             ひよこ, など
+
+    時間経過で成長する木の実装
+        farming itemに割り振る
+        双葉　→　低木　→　背の高い木
+            植木鉢に収まるように？
+        seedか、summonerのclassを参照して色や形を決める
+        大体半年で最大成長するように。
+        その他、お花とかも双葉→草→花と成長させるか
 
     経済の深慮
         マケプレ解説はRMTと同義
@@ -74,14 +56,6 @@ ToDo
             itemがNFTであるので、個人的なtransferは禁止しにくい
             itemを大量に出品するのは別に構わない。
                 Rarityを見ていても適正な価格に落ち着くだろう。
-
-    市場の実装
-        市場入場券をクラフトするとマケプレへ入場可能
-
-    Daycareの実装
-        Rarityのdaycareを参考に
-        0.1 ASTR/day等のコストを要求する
-        withdray, set_cost関数を忘れずに実装する
 
     summonerごとにユニークなシンボルの考案
         phaser3での色彩変化
@@ -242,7 +216,7 @@ let previous_local_name_str;
 let local_coin_calc;
 let local_material_calc;
 let local_crafting_calc;
-let flag_pet = 0;       //0:not crafted, 1:crafted
+//let flag_pet = 0;       //0:not crafted, 1:crafted
 let flag_music = 0;
 let bgm = 0;
 let local_items_flag = new Array(256).fill(0);
@@ -687,6 +661,9 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
     set set_mode(mode){
         this.mode = mode;
         this.count = 0;
+        if (item_bear.visible == false && this.mode != "grooming"){
+            item_bear.visible = true;
+        }
     }
     get get_mode(){
         return this.mode;
@@ -888,6 +865,11 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
                 sound_happy.play();
             }
             if (this.count >= this.count_limit) {
+                if (this.dist == "right"){
+                    this.anims.play("murasaki_right", true);
+                }else if (this.dist == "left") {
+                    this.anims.play("murasaki_left", true);
+                }
                 this.x = 1000 - 50
                 this.y = 400 + 50
                 this.mode = "resting";
@@ -1025,10 +1007,12 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
 //---pet-----------------------------------------------------------------------------------------------------
 
 class Pet extends Phaser.GameObjects.Sprite{
-    constructor(scene, x, y){
-        super(scene, x, y, "pet_normal");
+    constructor(scene, x, y, sprite_right, sprite_left){
+        super(scene, x, y, sprite_right);
         this.scene.add.existing(this);
-        this.anims.play("pet_normal", true);
+        this.sprite_right = sprite_right;
+        this.sprite_left = sprite_left;
+        this.anims.play(sprite_right, true);
     	this.mode = "resting";
         this.submode = 0;
         this.count = 0;
@@ -1059,11 +1043,13 @@ class Pet extends Phaser.GameObjects.Sprite{
 	    this.count += 1;
         if (this.count == 1) {
             if (this.dist == "right"){
-                this.anims.play("pet_normal", true);
+                //this.anims.play("pet_normal", true);
+                this.anims.play(this.sprite_right, true);
             }else if (this.dist == "left") {
-                this.anims.play("pet_normal", true);
+                //this.anims.play("pet_normal", true);
+                this.anims.play(this.sprite_left, true);
             }
-            this.resting_count = 100 + Math.random() * 30;
+            this.resting_count = 200 + Math.random() * 50;
 	    }else if (this.count >= this.resting_count){
             let tmp = Math.random() * 100;
             this.mode = "moving";
@@ -1110,10 +1096,12 @@ class Pet extends Phaser.GameObjects.Sprite{
             //determine left or right
             if (this.moving_degree > 90 && this.moving_degree <= 270) {
                 this.dist = "left";
-                this.anims.play("pet_normal", true);
+                //this.anims.play("pet_normal", true);
+                this.anims.play(this.sprite_left, true);
             }else {
                 this.dist = "right";
-                this.anims.play("pet_normal", true);
+                //this.anims.play("pet_normal", true);
+                this.anims.play(this.sprite_right, true);
             }
         //moving
         }else if (this.count < this.moving_count) {
@@ -1362,7 +1350,8 @@ function open_window_craft (scene) {
         //eval(`button_crafting_item${i}  = create_button(_x, _y + _y_add *  ${i}, '[' + _item_count + '] ' + array_item_name[${i}],  ${i},  scene);`)
         eval(`button_crafting_item${i}  = create_button(_x, _y + _y_add *  ${i}, '[' + local_items[${i}] + ',' + local_items[${i+64}] + '] ' + array_item_name[${i}],  ${i},  scene);`)
     }
-    item1_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  1, "pet_normal").setScale(0.1);
+    //item1_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  1, "pet_normal").setScale(0.1);
+    item1_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  1, "mr_astar_right").setScale(0.08);
     item2_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  2, "item_crown").setScale(0.15);
 
     //farming_item
@@ -1372,6 +1361,7 @@ function open_window_craft (scene) {
         eval(`button_crafting_item${i}  = create_button(_x, _y + _y_add *  ${i-16}, '[' + local_items[${i}] + ',' + local_items[${i+64}] + '] ' + array_item_name[${i}],  ${i},  scene);`)
     }
     item17_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  1, "item_vase").setScale(0.08);
+    item18_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  2, "ms_ether_right").setScale(0.08);
 
     //crafting_item
     _x = 870;
@@ -1437,6 +1427,7 @@ function open_window_craft (scene) {
     group_window_crafting.add(item1_icon);
     group_window_crafting.add(item2_icon);
     group_window_crafting.add(item17_icon);
+    group_window_crafting.add(item18_icon);
     group_window_crafting.add(item33_icon);
     group_window_crafting.add(item34_icon);
 }
@@ -1565,7 +1556,7 @@ function preload() {
     this.load.spritesheet("murasaki_working_left", "png/murasaki_working_left.png", {frameWidth: 370, frameHeight: 320});
     this.load.spritesheet("murasaki_working_right", "png/murasaki_working_right.png", {frameWidth: 370, frameHeight: 320});
     this.load.spritesheet("murasaki_click", "png/murasaki_click.png", {frameWidth: 370, frameHeight: 320});
-    this.load.spritesheet("murasaki_loading", "png/murasaki_loading.png", {frameWidth: 370, frameHeight: 320});
+    //this.load.spritesheet("murasaki_loading", "png/murasaki_loading.png", {frameWidth: 370, frameHeight: 320});
     this.load.spritesheet("murasaki_stone", "png/murasaki_stone.png", {frameWidth: 370, frameHeight: 320});
     this.load.spritesheet("murasaki_hungry", "png/murasaki_hungry.png", {frameWidth: 370, frameHeight: 320});
 
@@ -1574,7 +1565,6 @@ function preload() {
     this.load.image("button_feeding_pointerover", "png/button_feeding_pointerover.png", {frameWidth: 500, frameHeight: 500});
     this.load.image("food_sweet_potato", "png/food_sweet_potato.png", {frameWidth: 500, frameHeight: 500});
     this.load.image("item_bear", "png/item_bear.png", {frameWidth: 720, frameHeight: 622});
-    this.load.spritesheet("pet_normal", "png/pet_normal.png", {frameWidth: 500, frameHeight: 500});
     this.load.image("button_mining_enable", "png/button_mining_enable.png", {frameWidth: 500, frameHeight: 500});
     this.load.image("button_mining_unable", "png/button_mining_unable.png", {frameWidth: 500, frameHeight: 500});
     this.load.image("button_mining_pointerover", "png/button_mining_pointerover.png", {frameWidth: 500, frameHeight: 500});
@@ -1596,6 +1586,13 @@ function preload() {
     this.load.image("button_levelup_enable", "png/button_levelup_enable.png", {frameWidth: 500, frameHeight: 500});
     this.load.image("button_levelup_unable", "png/button_levelup_unable.png", {frameWidth: 500, frameHeight: 500});
     this.load.image("button_levelup_pointerover", "png/button_levelup_pointerover.png", {frameWidth: 500, frameHeight: 500});
+
+    //pet
+    //this.load.spritesheet("pet_normal", "png/pet_normal.png", {frameWidth: 500, frameHeight: 500});
+    this.load.spritesheet("mr_astar_right", "png/mr_astar_right.png", {frameWidth: 600, frameHeight: 600});
+    this.load.spritesheet("mr_astar_left", "png/mr_astar_left.png", {frameWidth: 600, frameHeight: 600});
+    this.load.spritesheet("ms_ether_right", "png/ms_ether_right.png", {frameWidth: 600, frameHeight: 600});
+    this.load.spritesheet("ms_ether_left", "png/ms_ether_left.png", {frameWidth: 600, frameHeight: 600});
 
     //music
     this.load.audio("bgm1", "mp3/Morning_2.mp3");
@@ -1620,7 +1617,7 @@ function preload() {
     this.load.spritesheet("item_musicbox", "png/item_musicbox.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("item_violin", "png/item_violin.png", {frameWidth: 600, frameHeight: 600});
     this.load.image("item_vase", "png/item_vase.png", {frameWidth: 300, frameHeight: 300});
-    this.load.image("item_dummy", "png/item_18.png", {frameWidth: 300, frameHeight: 300});
+    //this.load.image("item_dummy", "png/item_18.png", {frameWidth: 300, frameHeight: 300});
     //this.load.image("item_19", "png/item_19.png", {frameWidth: 300, frameHeight: 300});
     //this.load.image("item_20", "png/item_20.png", {frameWidth: 300, frameHeight: 300});
     //this.load.image("item_21", "png/item_21.png", {frameWidth: 300, frameHeight: 300});
@@ -1813,9 +1810,35 @@ function create() {
 
     //===animation others===
 
+    /*
     this.anims.create({
         key: "pet_normal",
         frames: this.anims.generateFrameNumbers("pet_normal", {start:0, end:1}),
+        frameRate: 1,
+        repeat: -1
+    });
+    */
+    this.anims.create({
+        key: "mr_astar_right",
+        frames: this.anims.generateFrameNumbers("mr_astar_right", {start:0, end:1}),
+        frameRate: 1,
+        repeat: -1
+    });
+    this.anims.create({
+        key: "mr_astar_left",
+        frames: this.anims.generateFrameNumbers("mr_astar_left", {start:0, end:1}),
+        frameRate: 1,
+        repeat: -1
+    });
+    this.anims.create({
+        key: "ms_ether_right",
+        frames: this.anims.generateFrameNumbers("ms_ether_right", {start:0, end:1}),
+        frameRate: 1,
+        repeat: -1
+    });
+    this.anims.create({
+        key: "ms_ether_left",
+        frames: this.anims.generateFrameNumbers("ms_ether_left", {start:0, end:1}),
         frameRate: 1,
         repeat: -1
     });
@@ -1831,12 +1854,14 @@ function create() {
         frameRate: 1,
         repeat: -1
     });
+    /*
     this.anims.create({
         key: "murasaki_loading",
         frames: this.anims.generateFrameNumbers("murasaki_loading", {start:0, end:1}),
         frameRate: 1,
         repeat: -1
     });
+    */
     this.anims.create({
         key: "murasaki_hungry",
         frames: this.anims.generateFrameNumbers("murasaki_hungry", {start:0, end:1}),
@@ -2226,8 +2251,11 @@ function update() {
         murasakisan.update();
     }
     //update pet
-    if (flag_pet == 1) {
-        pet.update();
+    if (typeof mr_astar != "undefined") {
+        mr_astar.update();
+    }
+    if (typeof ms_ether != "undefined") {
+        ms_ether.update();
     }
 
     //===== sync time =====
@@ -2777,11 +2805,16 @@ function update() {
                 (local_items[1+64] != 0 && local_items_flag[1] != true) ||
                 (local_items[1+128] != 0 && local_items_flag[1] != true)
         ) {
-            pet = new Pet(this, 300 + Math.random()*200, 400 + Math.random()*100);
-            pet.scaleX = pet.scaleX * 0.1;
-            pet.scaleY = pet.scaleY * 0.1;
+            mr_astar = new Pet(
+                this, 
+                400 + Math.random()*300, 
+                500 + Math.random()*200, 
+                "mr_astar_right", 
+                "mr_astar_left"
+            );
+            mr_astar.scaleX = mr_astar.scaleX * 0.12;
+            mr_astar.scaleY = mr_astar.scaleY * 0.12;
             local_items_flag[1] = true;
-            flag_pet = 1;
         }
         //2:Crown
         if (
@@ -2829,39 +2862,23 @@ function update() {
             item_17.scaleY = item_17.scaleY * 0.20;
             local_items_flag[17] = true;
         }
-        /*
-        //18
-        if (local_items[18] != 0 && local_items_flag[18] != true) {
-            item_18 = this.add.sprite(320,880, "item_dummy");
-            item_18.scaleX = item_18.scaleX * 0.2;
-            item_18.scaleY = item_18.scaleY * 0.2;
+        //18:ms_ether
+        if (
+                (local_items[18] != 0 && local_items_flag[18] != true) ||
+                (local_items[18+64] != 0 && local_items_flag[18] != true) ||
+                (local_items[18+128] != 0 && local_items_flag[18] != true)
+        ) {
+            ms_ether = new Pet(
+                this, 
+                400 + Math.random()*300, 
+                500 + Math.random()*200, 
+                "ms_ether_right", 
+                "ms_ether_left"
+            );
+            ms_ether.scaleX = ms_ether.scaleX * 0.12;
+            ms_ether.scaleY = ms_ether.scaleY * 0.12;
             local_items_flag[18] = true;
         }
-        //19
-        if (local_items[19] != 0 && local_items_flag[19] != true) {
-            item_19 = this.add.sprite(400,880, "item_19");
-            item_19.scaleX = item_19.scaleX * 0.2;
-            item_19.scaleY = item_19.scaleY * 0.2;
-            local_items_flag[19] = true;
-        }
-        //20
-        if (local_items[20] != 0 && local_items_flag[20] != true) {
-            item_20 = this.add.sprite(480,880, "item_20");
-            item_20.scaleX = item_20.scaleX * 0.4;
-            item_20.scaleY = item_20.scaleY * 0.4;
-            local_items_flag[20] = true;
-        }
-        //21
-        if (local_items[21] != 0 && local_items_flag[21] != true) {
-            item_21 = this.add.sprite(560,880, "item_21");
-            item_21.scaleX = item_21.scaleX * 0.4;
-            item_21.scaleY = item_21.scaleY * 0.4;
-            local_items_flag[21] = true;
-        }
-        */
-        //update raderchart
-        //draw_radarchart(this);
-        //console.log("tete");
         previous_local_items = local_items;
     }
 
@@ -2961,4 +2978,35 @@ function update() {
     <script src="js_v2/tiny_heart.js"></script>
     <script src="js_v2/dropdownlist.js"></script>
     
+ ok Donationボタンの実装
+        さりげないdonationボタンを作る
+
+ ng Nameは看板をクラフト後にmint出来るように変更する
+        看板orNameTagのspriteの用意
+        item_typeの割り振り
+
+ ok UIの洗練
+        ウィンドウの整備
+     ok システムメッセージの整備
+     ok 数字加算のアニメーション化
+     ok バー増加のアニメーション化
+     ok 名前クライムのボタン化
+     ok Summonウィンドウの洗練
+     ok システムメッセージの表示方法
+            アニメーションなどで演出する
+
+ ng Item選択ウィンドウ
+        シャボン玉がバラバラアニメーションで出てきてふわふわ浮いてるUI
+        実装難しそうだが
+        48種類なので、48個のシャボン玉を飛ばすのは非現実的
+        やはり大きなウィンドウが扱いやすいか。
+
+ ng 市場の実装
+        市場入場券をクラフトするとマケプレへ入場可能
+
+ ng Daycareの実装
+        Rarityのdaycareを参考に
+        0.1 ASTR/day等のコストを要求する
+        withdray, set_cost関数を忘れずに実装する
+
 --->
