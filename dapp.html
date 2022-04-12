@@ -5,13 +5,16 @@
 ToDo
 
     クラフトウィンドウの改善
-        デザイン再考
+        枠のデザイン再考
+        アイテムアイコンを影絵に
 
  ok Mr. Astarの実装
     
  ok Ms. Ethereumの実装
     
     看板デザインの変更
+    
+    Happy, Satiety, Expアイコンの変更
 
     サウンドの洗練
         有効サウンドの選別
@@ -25,7 +28,7 @@ ToDo
         効果音メーカーを使って作成する
             https://www.peko-step.com/tool/soundeffect/#pInTopMenu
 
-    微調整
+ ok 微調整
         groomingの位置合わせ
         目をいじった画像の差し替え
     
@@ -1622,7 +1625,7 @@ function preload() {
     //this.load.image("item_20", "png/item_20.png", {frameWidth: 300, frameHeight: 300});
     //this.load.image("item_21", "png/item_21.png", {frameWidth: 300, frameHeight: 300});
     this.load.image("item_kanban", "png/item_kanban2.png", {frameWidth: 1000, frameHeight: 475});
-    this.load.image("item_crown", "png/item_crown.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("item_crown", "png/item_crown.png", {frameWidth: 370, frameHeight: 320});
 
     //window
     this.load.image("window", "png/window.png");
@@ -1851,6 +1854,12 @@ function create() {
     this.anims.create({
         key: "item_musicbox_off",
         frames: this.anims.generateFrameNumbers("item_musicbox", {start:0, end:0}),
+        frameRate: 1,
+        repeat: -1
+    });
+    this.anims.create({
+        key: "item_crown",
+        frames: this.anims.generateFrameNumbers("item_crown", {start:0, end:1}),
         frameRate: 1,
         repeat: -1
     });
@@ -2822,9 +2831,10 @@ function update() {
                 (local_items[2+64] != 0 && local_items_flag[2] != true) ||
                 (local_items[2+128] != 0 && local_items_flag[2] != true)
         ) {
-            item_musicbox = this.add.sprite(1050,290, "item_crown");
-            item_musicbox.scaleX = item_musicbox.scaleX * 0.3;
-            item_musicbox.scaleY = item_musicbox.scaleY * 0.3;
+            item_crown = this.add.sprite(1050,290, "item_crown");
+            item_crown.anims.play("item_crown", true);
+            item_crown.scaleX = item_crown.scaleX * 0.3;
+            item_crown.scaleY = item_crown.scaleY * 0.3;
             local_items_flag[2] = true;
         }
         //34:musicbox
