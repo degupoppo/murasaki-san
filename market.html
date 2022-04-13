@@ -356,6 +356,29 @@ ToDo
         web3.eth.sendTransaction({from: wallet, to: _to_wallet, value: _value});
     }
 
+    //write donation icon
+    function write_icon(_value) {
+        let _icon;
+        let _rand = Math.floor(Math.random()*3);
+        //1 astar
+        if (_value == 1) {
+            if (_rand == 0) {_icon = "&#x1f36c;"}   //candy
+            if (_rand == 1) {_icon = "&#x1f968;"}   //pretzel
+            if (_rand == 2) {_icon = "&#x1f36a;"}   //cookie
+        //10 astar
+        }else if (_value == 10) {
+            if (_rand == 0) {_icon = "&#x2615;"}    //coffee
+            if (_rand == 1) {_icon = "&#x1f375;"}   //tea
+            if (_rand == 2) {_icon = "&#x1f9cb;"}   //juce
+        //100 astar
+        }else if (_value == 100) {
+            if (_rand == 0) {_icon = "&#x1f355;"}   //pizza
+            if (_rand == 1) {_icon = "&#x1f363;"}   //sushi
+            if (_rand == 2) {_icon = "&#x1f370;"}   //cake
+        }
+        document.write(_icon);
+    }
+
 </script>
 
 <head>
@@ -374,10 +397,10 @@ ToDo
 
 <header>
     <nav>
-      <a href="/">Home</a>
-      <a href="/dapp.html" ><b>Play Game</b></a>
-      <a href="/market.html" class="current"><b>Item Market</b></a>
-      <a href="/dapp.html?summoner=1">Demo Preview</a>
+      <a href="/" class="current">&#x1f3e0; Home</a>
+      <a href="/dapp.html" ><b>&#x1f497; Play</b></a>
+      <a href="/market.html"><b>&#x1f6d2; Market</b></a>
+      <a href="/dapp.html?summoner=1">&#x1f530; Demo</a>
       <a href="https://twitter.com/degupoppo" >Twitter</a>
       <a href="https://github.com/degupoppo/murasakisan/" >GitHub</a>
     </nav>
@@ -466,8 +489,20 @@ ToDo
 </main>
 
 <footer>
-        Developper wallet: 0x2F7448B62134e52C2f46454d0089Ae21B5248805
-        &nbsp;&nbsp;<button style="height:28px;font-size:80%" onclick="donate();">Donate 10 $ASTR</button>
+        Developper's wallet: 0x2F7448B62134e52C2f46454d0089Ae21B5248805<br>
+        Donation:
+        &nbsp;
+        <button style="height:28px;font-size:80%" onclick="donate(1);">
+            <script type="text/javascript">write_icon(1)</script>&nbsp;1 $ASTR
+        </button>
+        &nbsp;
+        <button style="height:28px;font-size:80%" onclick="donate(10);">
+            <script type="text/javascript">write_icon(10)</script>&nbsp;10 $ASTR
+        </button>
+        &nbsp;
+        <button style="height:28px;font-size:80%" onclick="donate(100);">
+            <script type="text/javascript">write_icon(100)</script>&nbsp;100 $ASTR
+        </button>
 </footer>
 
 </body>
