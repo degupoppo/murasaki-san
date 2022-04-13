@@ -1365,6 +1365,7 @@ function open_window_craft (scene) {
     }
     item33_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  1, "item_violin").setScale(0.08);
     item34_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  2, "item_musicbox").setScale(0.12);
+    item35_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  3, "master_solid_left").setScale(0.08);
 
     //create group
     group_window_crafting = scene.add.group();
@@ -1424,6 +1425,7 @@ function open_window_craft (scene) {
     group_window_crafting.add(item18_icon);
     group_window_crafting.add(item33_icon);
     group_window_crafting.add(item34_icon);
+    group_window_crafting.add(item35_icon);
 }
 
 
@@ -1587,6 +1589,8 @@ function preload() {
     this.load.spritesheet("mr_astar_left", "png/mr_astar_left.png", {frameWidth: 600, frameHeight: 600});
     this.load.spritesheet("ms_ether_right", "png/ms_ether_right.png", {frameWidth: 600, frameHeight: 600});
     this.load.spritesheet("ms_ether_left", "png/ms_ether_left.png", {frameWidth: 600, frameHeight: 600});
+    this.load.spritesheet("master_solid_right", "png/master_solid_right.png", {frameWidth: 600, frameHeight: 600});
+    this.load.spritesheet("master_solid_left", "png/master_solid_left.png", {frameWidth: 600, frameHeight: 600});
 
     //music
     this.load.audio("bgm1", "mp3/Morning_2.mp3");
@@ -1833,6 +1837,18 @@ function create() {
     this.anims.create({
         key: "ms_ether_left",
         frames: this.anims.generateFrameNumbers("ms_ether_left", {start:0, end:1}),
+        frameRate: 1,
+        repeat: -1
+    });
+    this.anims.create({
+        key: "master_solid_right",
+        frames: this.anims.generateFrameNumbers("master_solid_right", {start:0, end:1}),
+        frameRate: 1,
+        repeat: -1
+    });
+    this.anims.create({
+        key: "master_solid_left",
+        frames: this.anims.generateFrameNumbers("master_solid_left", {start:0, end:1}),
         frameRate: 1,
         repeat: -1
     });
@@ -2256,6 +2272,9 @@ function update() {
     }
     if (typeof ms_ether != "undefined") {
         ms_ether.update();
+    }
+    if (typeof master_solid != "undefined") {
+        master_solid.update();
     }
 
     //===== sync time =====
@@ -2811,9 +2830,7 @@ function update() {
                 500 + Math.random()*200, 
                 "mr_astar_right", 
                 "mr_astar_left"
-            );
-            mr_astar.scaleX = mr_astar.scaleX * 0.12;
-            mr_astar.scaleY = mr_astar.scaleY * 0.12;
+            ).setScale(0.12);
             local_items_flag[1] = true;
         }
         //2:Crown
@@ -2875,10 +2892,23 @@ function update() {
                 500 + Math.random()*200, 
                 "ms_ether_right", 
                 "ms_ether_left"
-            );
-            ms_ether.scaleX = ms_ether.scaleX * 0.12;
-            ms_ether.scaleY = ms_ether.scaleY * 0.12;
+            ).setScale(0.12);
             local_items_flag[18] = true;
+        }
+        //35:ms_ether
+        if (
+                (local_items[35] != 0 && local_items_flag[35] != true) ||
+                (local_items[35+64] != 0 && local_items_flag[35] != true) ||
+                (local_items[35+128] != 0 && local_items_flag[35] != true)
+        ) {
+            master_solid = new Pet(
+                this, 
+                400 + Math.random()*300, 
+                500 + Math.random()*200, 
+                "master_solid_right", 
+                "master_solid_left"
+            ).setScale(0.12);
+            local_items_flag[35] = true;
         }
         previous_local_items = local_items;
     }
