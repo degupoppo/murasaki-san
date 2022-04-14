@@ -4,6 +4,10 @@
 
 ToDo
 
+    Petの行動の実装
+        mining, farming時に一緒に働く
+        feeding, grooming時にハートが出る
+
     クラフトウィンドウの改善
         枠のデザイン再考
         アイテムアイコンを影絵に
@@ -19,6 +23,8 @@ ToDo
     Prof. Polkaの実装
     
     Master Solidの実装
+    
+    ダイスの実装
 
     サウンドの洗練
         有効サウンドの選別
@@ -1001,11 +1007,12 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
 //---pet-----------------------------------------------------------------------------------------------------
 
 class Pet extends Phaser.GameObjects.Sprite{
-    constructor(scene, x, y, sprite_right, sprite_left){
+    constructor(scene, x, y, sprite_right, sprite_left, type){
         super(scene, x, y, sprite_right);
         this.scene.add.existing(this);
         this.sprite_right = sprite_right;
         this.sprite_left = sprite_left;
+        this.type = type;
         this.anims.play(sprite_right, true);
     	this.mode = "resting";
         this.submode = 0;
@@ -1045,21 +1052,16 @@ class Pet extends Phaser.GameObjects.Sprite{
             }
             this.resting_count = 200 + Math.random() * 50;
 	    }else if (this.count >= this.resting_count){
-            let tmp = Math.random() * 100;
-            this.mode = "moving";
-            this.count = 0;
-            /***
-            if (tmp <= 10) {
-                this.mode = "sleeping";
-                this.count = 0;
-            }else if (tmp <= 20 & happy <= 10) {
-                this.mode = "crying";
-                this.count = 0;
-            }else {
+	        if (murasakisan.mode == this.type){
+	            this.mode = "working";
+	            this.target_x = murasakisan.target_x + 50;
+	            this.target_y = murasakisan.target_y + 40;
+	            this.count = 0;
+	        } else {
+                let tmp = Math.random() * 100;
                 this.mode = "moving";
                 this.count = 0;
             }
-            ***/
         }
     }
     moving() {
@@ -1107,6 +1109,43 @@ class Pet extends Phaser.GameObjects.Sprite{
             this.count = 0;
         }
     }
+    working() {
+        this.count += 1;
+        if (this.submode == 0) {
+            let delta_x = this.target_x - this.x;
+            if (delta_x >0) {
+                this.dist = "right";
+                this.anims.play(this.sprite_right, true);
+            }else {
+                this.dist = "left";
+                this.anims.play(this.sprite_left, true);
+            }
+            this.submode = 1;
+        }else if (this.submode == 1) {
+            let delta_x = this.target_x - this.x;
+            let delta_y = this.target_y - this.y;
+            let delta_x2 = delta_x / (Math.abs(delta_x) + Math.abs(delta_y)) * 1.2;
+            let delta_y2 = delta_y / (Math.abs(delta_x) + Math.abs(delta_y)) * 1.2;
+            this.x += delta_x2;
+            this.y += delta_y2;
+            if (this.x > this.target_x-1 
+              && this.x < this.target_x+1 
+              && this.y > this.target_y-1 
+              && this.y < this.target_y+1) {
+                this.submode = 2;
+            }
+        }else if (this.submode == 2) {
+            if (murasakisan.mode != this.type) {
+                this.mode = "resting";
+                this.count = 0;
+            }
+            //this.anims.play("murasaki_mining", true);
+            //if (this.count % 400 == 10) {
+            //    sound_mining_during.play();
+            //}
+        }
+    }
+    /*
     sleeping() {
         this.count += 1;
         if (this.count == 1){
@@ -1116,13 +1155,13 @@ class Pet extends Phaser.GameObjects.Sprite{
             this.count = 0;
         }
     }
+    */
     update(){
         //console.log(this.version, this.mode, this.count);
         if (this.mode == "resting") {this.resting();}
         else if (this.mode == "moving") {this.moving();}
-        else if (this.mode == "sleeping") {this.sleeping();}
-        else if (this.mode == "mining") {this.mining();}
-        else if (this.mode == "farming") {this.farming();}
+        //else if (this.mode == "sleeping") {this.sleeping();}
+        else if (this.mode == "working") {this.working();}
     }
 }
 
@@ -2833,7 +2872,8 @@ function update() {
                 400 + Math.random()*300, 
                 500 + Math.random()*200, 
                 "mr_astar_right", 
-                "mr_astar_left"
+                "mr_astar_left",
+                "mining"
             ).setScale(0.12);
             local_items_flag[1] = true;
         }
@@ -2895,7 +2935,8 @@ function update() {
                 400 + Math.random()*300, 
                 500 + Math.random()*200, 
                 "ms_ether_right", 
-                "ms_ether_left"
+                "ms_ether_left",
+                "farming"
             ).setScale(0.12);
             local_items_flag[18] = true;
         }
