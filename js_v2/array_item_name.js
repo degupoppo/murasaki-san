@@ -38,7 +38,7 @@ let array_item_name = [
     //33-48
     "Violin",
     "Music Box",
-    "---",
+    "Dr. Bitco",
     "---",
     "---",
     "---",
@@ -107,7 +107,7 @@ let array_item_name = [
     //97-112
     "Violin",
     "Music Box",
-    "---",
+    "Dr. Bitco",
     "---",
     "---",
     "---",
