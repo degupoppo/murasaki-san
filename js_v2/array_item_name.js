@@ -4,8 +4,8 @@ let array_item_name = [
     //1-16
     "Mr. Astar",
     "Crown",
-    "---",
-    "---",
+    "The Rock",
+    "The Earth",
     "---",
     "---",
     "---",
@@ -21,9 +21,9 @@ let array_item_name = [
     //17-32
     "Flowerpot",
     "Ms. Ether",
-    "---",
-    "---",
-    "---",
+    "Cactus",
+    "Horsetail",
+    "Mushroom",
     "---",
     "---",
     "---",
@@ -39,8 +39,8 @@ let array_item_name = [
     "Violin",
     "Music Box",
     "Dr. Bitco",
-    "---",
-    "---",
+    "Needle Cushion",
+    "Aquarium",
     "---",
     "---",
     "---",
@@ -205,4 +205,8 @@ let array_item_name = [
     "---",
     //193, heart
     "Tiny Heart",
+    //194, Ohana Piggy Bank
+    "Ohana Piggy Bank",
+    //195, Kusa Pouch
+    "Kusa Pouch",
 ]

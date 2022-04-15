@@ -4,7 +4,7 @@
 
 ToDo
 
-    IDを看板内に表示する
+ ok IDを看板内に表示する
 
     アイテム案
         食べ物
@@ -1205,21 +1205,14 @@ function open_window_craft (scene) {
     //mining_item
     for (var i = 1; i <= 16; i++) {
         //use eval to create dynamic variants
-        //button_crafting_item1  = create_button(_x, _y + _y_add *  1, "[" + local_items[1] + "] " + array_item_name[1],  1,  scene);
-        //eval("button_crafting_item" + i + " = create_button(_x, _y + _y_add *  " + i + ", array_item_name[" + i + "],  " + i + ",  scene);")
-        //_item_count = Number(local_items[i]) + Number(local_items[i+64]);
-        //eval(`button_crafting_item${i}  = create_button(_x, _y + _y_add *  ${i}, '[' + local_items[${i}] + '] ' + array_item_name[${i}],  ${i},  scene);`)
-        //eval(`button_crafting_item${i}  = create_button(_x, _y + _y_add *  ${i}, '[' + _item_count + '] ' + array_item_name[${i}],  ${i},  scene);`)
         eval(`button_crafting_item${i}  = create_button(_x, _y + _y_add *  ${i}, '[' + local_items[${i}] + ',' + local_items[${i+64}] + '] ' + array_item_name[${i}],  ${i},  scene);`)
     }
-    //item1_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  1, "pet_normal").setScale(0.1);
     item1_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  1, "mr_astar_right").setScale(0.08);
     item2_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  2, "item_crown").setScale(0.15);
 
     //farming_item
     _x = 520;
     for (var i = 17; i <= 32; i++) {
-        //eval(`button_crafting_item${i}  = create_button(_x, _y + _y_add *  ${i-16}, '[' + local_items[${i}] + '] ' + array_item_name[${i}],  ${i},  scene);`)
         eval(`button_crafting_item${i}  = create_button(_x, _y + _y_add *  ${i-16}, '[' + local_items[${i}] + ',' + local_items[${i+64}] + '] ' + array_item_name[${i}],  ${i},  scene);`)
     }
     item17_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  1, "item_vase").setScale(0.08);
@@ -1228,12 +1221,10 @@ function open_window_craft (scene) {
     //crafting_item
     _x = 870;
     for (var i = 33; i <= 48; i++) {
-        //eval(`button_crafting_item${i}  = create_button(_x, _y + _y_add *  ${i-32}, '[' + local_items[${i}] + '] ' + array_item_name[${i}],  ${i},  scene);`)
         eval(`button_crafting_item${i}  = create_button(_x, _y + _y_add *  ${i-32}, '[' + local_items[${i}] + ',' + local_items[${i+64}] + '] ' + array_item_name[${i}],  ${i},  scene);`)
     }
     item33_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  1, "item_violin").setScale(0.08);
     item34_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  2, "item_musicbox").setScale(0.12);
-    //item35_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  3, "master_solid_left").setScale(0.08);
     item35_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  3, "dr_bitco_right").setScale(0.08);
 
     //create group
@@ -1482,6 +1473,15 @@ function preload() {
     this.load.image("item_vase", "png/item_vase.png", {frameWidth: 300, frameHeight: 300});
     this.load.image("item_kanban", "png/item_kanban2.png", {frameWidth: 1000, frameHeight: 475});
     this.load.spritesheet("item_crown", "png/item_crown.png", {frameWidth: 370, frameHeight: 320});
+    
+    //items_todo
+    this.load.image("item_mushroom", "png/item_mushroom.png", {frameWidth: 300, frameHeight: 300});
+    this.load.image("item_the_rock", "png/item_the_rock.png", {frameWidth: 300, frameHeight: 300});
+    this.load.image("item_cactus", "png/item_cactus.png", {frameWidth: 300, frameHeight: 300});
+    this.load.image("item_needle_cushion", "png/item_needle_cushion.png", {frameWidth: 300, frameHeight: 300});
+    this.load.image("item_horsetail", "png/item_horsetail.png", {frameWidth: 300, frameHeight: 300});
+    this.load.image("item_aquarium", "png/item_aquarium.png", {frameWidth: 300, frameHeight: 300});
+    this.load.image("item_the_earth", "png/item_the_earth.png", {frameWidth: 300, frameHeight: 300});    
 
     //window
     this.load.image("window", "png/window.png");
@@ -2004,7 +2004,7 @@ function create() {
     //name
     item_kanban = this.add.sprite(85, 75, "item_kanban");
     item_kanban.setScale(0.14);
-    text_kanban = this.add.text(85, 80, "", {font: "17px Arial", fill: "#ffffff"}).setOrigin(0.5);
+    text_kanban = this.add.text(85, 77, "", {font: "17px Arial", fill: "#ffffff"}).setOrigin(0.5);
 	text_kanban.setInteractive().on('pointerdown', () => {this.rexUI.edit(text_kanban)})
     text_mint_name = this.add.text(165, 60, "[MINT NAME]", {font: "17px Arial", fill: "#000000"})
         .setInteractive({useHandCursor: true})
@@ -2026,6 +2026,9 @@ function create() {
     group_mint_name.add(icon_name_kusa);
     group_mint_name.add(text_name_kusa);
     group_mint_name.setVisible(false);
+    
+    //id
+    text_id = this.add.text(17,86, "#100", {font: "14px Arial", fill: "#ffffff"});
 
     //===etc===
 
@@ -2104,13 +2107,14 @@ function update() {
     //===== sync time =====
 
     if (turn % 20 == 0) {
-        //text_mode.setText(murasakisan.get_mode);
         if (last_sync_time == 0) {
             text_sync_time.setText("syncing...");
         } else {
             let _delta = Math.round( (Date.now() - last_sync_time) / 1000 );
             text_sync_time.setText("synced: " + _delta + "s ago");
         }
+        //debug
+        //console.log(Math.round(game.input.mousePointer.x), Math.round(game.input.mousePointer.y));
     }
 
     //===== numeric animation =====
@@ -2360,13 +2364,11 @@ function update() {
         let _mode = murasakisan.get_mode;
         if (_mode == "mining") {
             icon_mining.visible = true;
-            //text_mining_calc.setText("+ " + local_coin_calc + " Ohana");
             let _delta = (now_time - local_mining_start_time);
             let _daily_earn = local_coin_calc / _delta * 8640;
             text_mining_calc.setText("+ " + local_coin_calc + " Ohana\n  (" + Math.round(_daily_earn/10)*10 + " /d)");
         }else if (_mode == "farming") {
             icon_farming.visible = true;
-            //text_farming_calc.setText("+ " + local_material_calc + " Kusa");
             let _delta = (now_time - local_farming_start_time);
             let _daily_earn = local_material_calc / _delta * 8640;
             text_farming_calc.setText("+ " + local_material_calc + " Kusa\n  (" + Math.round(_daily_earn/10)*10 + " /d)");
@@ -2385,7 +2387,6 @@ function update() {
                 let _day = Math.floor(_total_sec / 86400);
                 let _hr = Math.floor(_total_sec % 86400 / 3600);
                 let _min = Math.floor(_total_sec % 3600 / 60);
-                //text_crafting_calc.setText(_day + "d:" + _hr + "h:" + _min + "m remining");
                 text_crafting_calc.setText(_day + "d:" + _hr + "h:" + _min + "m");
             } else{
                 text_crafting_calc.setText("Completed!");
@@ -2404,20 +2405,20 @@ function update() {
                 text_kanban.setInteractive();
                 group_mint_name.setVisible(true);
             } else {
-                _name_str = local_name_str;
+                if (local_name_str != "") {
+                    _name_str = local_name_str;
+                }
                 text_kanban.disableInteractive();
-                //text_mint_name.visible = false;
                 group_mint_name.setVisible(false);
             }
             text_kanban.setText(_name_str);
+            text_id.setText("# "+summoner);
         }
         
         //wallet text
         let _owner1 = local_owner.substring(0,5);
         let _owner2 = local_owner.slice(-4);
         let _text = "";
-        _text += "id: " + summoner + ", ";
-        _text += "name: " + local_name_str + ", ";
         _text += "owner: " + _owner1 + "..." + _owner2 + ", ";
         if (local_owner != local_wallet && local_owner != "0x0000000000000000000000000000000000000000") {
             _text += "not owned by you.";
@@ -2631,12 +2632,14 @@ function update() {
     //===== check item =====
 
     if (turn % 150 == 40 && local_items != previous_local_items) {
+        let _item_id;
         //1:Ms. Astar
+        _item_id = 1;
         if (
-                (local_items[1] != 0 && local_items_flag[1] != true) ||
-                (local_items[1+64] != 0 && local_items_flag[1] != true) ||
-                (local_items[1+128] != 0 && local_items_flag[1] != true)
+            (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+            && local_items_flag[_item_id] != true
         ) {
+            local_items_flag[_item_id] = true;
             mr_astar = new Pet(
                 this, 
                 400 + Math.random()*300, 
@@ -2645,61 +2648,35 @@ function update() {
                 "mr_astar_left",
                 "mining"
             ).setScale(0.12);
-            local_items_flag[1] = true;
         }
         //2:Crown
+        _item_id = 2;
         if (
-                (local_items[2] != 0 && local_items_flag[2] != true) ||
-                (local_items[2+64] != 0 && local_items_flag[2] != true) ||
-                (local_items[2+128] != 0 && local_items_flag[2] != true)
+            (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+            && local_items_flag[_item_id] != true
         ) {
+            local_items_flag[_item_id] = true;
             item_crown = this.add.sprite(1050,290, "item_crown");
             item_crown.anims.play("item_crown", true);
-            item_crown.scaleX = item_crown.scaleX * 0.3;
-            item_crown.scaleY = item_crown.scaleY * 0.3;
-            local_items_flag[2] = true;
-        }
-        //34:musicbox
-        if (
-                (local_items[34] != 0 && local_items_flag[34] != true) ||
-                (local_items[34+64] != 0 && local_items_flag[34] != true) ||
-                (local_items[34+128] != 0 && local_items_flag[34] != true)
-        ) {
-            item_musicbox = this.add.sprite(1200,840, "item_musicbox");
-            item_musicbox.scaleX = item_musicbox.scaleX * 0.4;
-            item_musicbox.scaleY = item_musicbox.scaleY * 0.4;
-            item_musicbox.setInteractive({useHandCursor: true});
-            item_musicbox.on('pointerdown', () => music() );
-            local_items_flag[34] = true;
-        }
-        //33:violin
-        if (
-                (local_items[33] != 0 && local_items_flag[33] != true) ||
-                (local_items[33+64] != 0 && local_items_flag[33] != true) ||
-                (local_items[33+128] != 0 && local_items_flag[33] != true)
-        ) {
-            item_violin = this.add.sprite(1200,608, "item_violin");
-            item_violin.scaleX = item_violin.scaleX * 0.24;
-            item_violin.scaleY = item_violin.scaleY * 0.24;
-            local_items_flag[33] = true;
+            item_crown.setScale(0.3);
         }
         //17:vase
+        _item_id = 17;
         if (
-                (local_items[17] != 0 && local_items_flag[17] != true) ||
-                (local_items[17+64] != 0 && local_items_flag[17] != true) ||
-                (local_items[17+128] != 0 && local_items_flag[17] != true)
+            (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+            && local_items_flag[_item_id] != true
         ) {
+            local_items_flag[_item_id] = true;
             item_17 = this.add.sprite(850,270, "item_vase");
-            item_17.scaleX = item_17.scaleX * 0.20;
-            item_17.scaleY = item_17.scaleY * 0.20;
-            local_items_flag[17] = true;
+            item_17.setScale(0.2);
         }
         //18:ms_ether
+        _item_id = 18;
         if (
-                (local_items[18] != 0 && local_items_flag[18] != true) ||
-                (local_items[18+64] != 0 && local_items_flag[18] != true) ||
-                (local_items[18+128] != 0 && local_items_flag[18] != true)
+            (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+            && local_items_flag[_item_id] != true
         ) {
+            local_items_flag[_item_id] = true;
             ms_ether = new Pet(
                 this, 
                 400 + Math.random()*300, 
@@ -2708,14 +2685,36 @@ function update() {
                 "ms_ether_left",
                 "farming"
             ).setScale(0.12);
-            local_items_flag[18] = true;
+        }
+        //33:violin
+        _item_id = 33;
+        if (
+            (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+            && local_items_flag[_item_id] != true
+        ) {
+            local_items_flag[_item_id] = true;
+            item_violin = this.add.sprite(1200,608, "item_violin");
+            item_violin.setScale(0.24);
+        }
+        //34:musicbox
+        _item_id = 34;
+        if (
+            (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+            && local_items_flag[_item_id] != true
+        ) {
+            local_items_flag[_item_id] = true;
+            item_musicbox = this.add.sprite(1200,840, "item_musicbox");
+            item_musicbox.setScale(0.4);
+            item_musicbox.setInteractive({useHandCursor: true});
+            item_musicbox.on('pointerdown', () => music() );
         }
         //35:dr_bitco
+        _item_id = 35;
         if (
-                (local_items[35] != 0 && local_items_flag[35] != true) ||
-                (local_items[35+64] != 0 && local_items_flag[35] != true) ||
-                (local_items[35+128] != 0 && local_items_flag[35] != true)
+            (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+            && local_items_flag[_item_id] != true
         ) {
+            local_items_flag[_item_id] = true;
             dr_bitco = new Pet(
                 this, 
                 400 + Math.random()*300, 
@@ -2724,8 +2723,73 @@ function update() {
                 "dr_bitco_left",
                 "crafting"
             ).setScale(0.11);
-            local_items_flag[35] = true;
         }
+        
+        //***TODO***
+
+        //3
+        _item_id = 3;
+        if (
+            (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+            && local_items_flag[_item_id] != true
+        ) {
+            local_items_flag[_item_id] = true;
+            item_rock = this.add.sprite(300,900, "item_the_rock").setOrigin(0.5).setScale(0.5);        
+        }
+        //4
+        _item_id = 4;
+        if (
+            (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+            && local_items_flag[_item_id] != true
+        ) {
+            local_items_flag[_item_id] = true;
+            item_earth = this.add.sprite(1000,850, "item_the_earth").setOrigin(0.5).setScale(0.4);        
+        }
+        //19
+        _item_id = 19;
+        if (
+            (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+            && local_items_flag[_item_id] != true
+        ) {
+            local_items_flag[_item_id] = true;
+            item_cactus = this.add.sprite(50,500, "item_cactus").setOrigin(0.5).setScale(0.4);        
+        }
+        //20
+        _item_id = 20;
+        if (
+            (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+            && local_items_flag[_item_id] != true
+        ) {
+            local_items_flag[_item_id] = true;
+            item_horsetail = this.add.sprite(150,500, "item_horsetail").setOrigin(0.5).setScale(0.3);        
+        }
+        //21
+        _item_id = 21;
+        if (
+            (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+            && local_items_flag[_item_id] != true
+        ) {
+            local_items_flag[_item_id] = true;
+            item_mushroom = this.add.sprite(250,500, "item_mushroom").setOrigin(0.5).setScale(0.3);        
+        }
+        //36
+        _item_id = 36;
+        if (
+            (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+            && local_items_flag[_item_id] != true
+        ) {
+            local_items_flag[_item_id] = true;
+            item_needle_cushion = this.add.sprite(790,350, "item_needle_cushion").setOrigin(0.5).setScale(0.3);        
+        }
+        //37        
+        _item_id = 37;
+        if (
+            (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+            && local_items_flag[_item_id] != true
+        ) {
+            local_items_flag[_item_id] = true;
+            item_aquarium = this.add.sprite(1100,550, "item_aquarium").setOrigin(0.5).setScale(0.3);
+        }        
         previous_local_items = local_items;
     }
 

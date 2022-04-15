@@ -4,7 +4,7 @@
 
 /***
 
-    upgradeの実装
+ ok upgradeの実装
         burnではなくコントラへのtransferで消費させる
         再デプロイ必要
         safeTransferではcontractへは送れない模様
