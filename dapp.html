@@ -621,7 +621,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             }
         }else if (this.submode == 2) {
             this.anims.play("murasaki_feeding", true);
-            food.destroy();
+            group_food.destroy(true);
             this.count_limit = this.count + 1000;
             this.submode = 3;
         }else if (this.submode == 3) {
@@ -1209,6 +1209,8 @@ function open_window_craft (scene) {
     }
     item1_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  1, "mr_astar_right").setScale(0.08);
     item2_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  2, "item_crown").setScale(0.15);
+    item3_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  3, "item_fortune_statue").setScale(0.15);
+    item5_icon = scene.add.sprite(_x-20, _y+15 + _y_add *  5, "item_pudding").setScale(0.2);
 
     //farming_item
     _x = 520;
@@ -1217,6 +1219,7 @@ function open_window_craft (scene) {
     }
     item17_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  1, "item_vase").setScale(0.08);
     item18_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  2, "ms_ether_right").setScale(0.08);
+    item22_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  6, "item_chocolate_bread").setScale(0.2);
 
     //crafting_item
     _x = 870;
@@ -1281,8 +1284,11 @@ function open_window_craft (scene) {
     group_window_crafting.add(button_crafting_item48);
     group_window_crafting.add(item1_icon);
     group_window_crafting.add(item2_icon);
+    group_window_crafting.add(item3_icon);
+    group_window_crafting.add(item5_icon);
     group_window_crafting.add(item17_icon);
     group_window_crafting.add(item18_icon);
+    group_window_crafting.add(item22_icon);
     group_window_crafting.add(item33_icon);
     group_window_crafting.add(item34_icon);
     group_window_crafting.add(item35_icon);
@@ -1473,6 +1479,9 @@ function preload() {
     this.load.image("item_vase", "png/item_vase.png", {frameWidth: 300, frameHeight: 300});
     this.load.image("item_kanban", "png/item_kanban2.png", {frameWidth: 1000, frameHeight: 475});
     this.load.spritesheet("item_crown", "png/item_crown.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_pudding", "png/item_pudding2.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_chocolate_bread", "png/item_chocolate_bread.png", {frameWidth: 643, frameHeight: 477});
+    this.load.image("item_fortune_statue", "png/item_fortune_statue.png", {frameWidth: 370, frameHeight: 320});
     
     //items_todo
     this.load.image("item_mushroom", "png/item_mushroom.png", {frameWidth: 300, frameHeight: 300});
@@ -2467,12 +2476,29 @@ function update() {
             murasakisan.count = 0;
             murasakisan.target_x = 600;
             murasakisan.target_y = 730;
-            if (typeof food !== "undefined") {
-                food.destroy();
+            if (typeof group_food != "undefined") {
+                group_food.destroy();
             }
-            food = this.add.sprite(600,730, "food_sweet_potato");
-            food.scaleX = food.scaleX * 0.16;
-            food.scaleY = food.scaleY * 0.16;
+            
+            /*
+            item_potato = this.add.sprite(620, 740, "food_sweet_potato").setScale(0.12).setOrigin(0.5);
+            item_pudding = this.add.sprite(590, 750, "item_pudding").setScale(0.35).setOrigin(0.5);
+            item_chocolate_bread = this.add.sprite(670, 750, "item_chocolate_bread").setScale(0.4).setOrigin(0.5);
+            */
+
+            group_food = this.add.group();
+            item_potato = this.add.sprite(620, 740, "food_sweet_potato").setScale(0.12).setOrigin(0.5);
+            group_food.add(item_potato);
+            if (local_items_flag[5] > 0) {
+                item_pudding = this.add.sprite(590, 750, "item_pudding").setScale(0.30).setOrigin(0.5);
+                group_food.add(item_pudding);
+            }
+            if (local_items_flag[22] > 0) {
+                item_chocolate_bread = this.add.sprite(670, 750, "item_chocolate_bread").setScale(0.4).setOrigin(0.5);
+                group_food.add(item_chocolate_bread);
+            }
+            
+            //food = this.add.sprite(600,730, "food_sweet_potato").setScale(0.12);
             sound_feeding.play();
 
         //grooming check, continue
@@ -2660,6 +2686,15 @@ function update() {
             item_crown.anims.play("item_crown", true);
             item_crown.setScale(0.3);
         }
+        //3:Fortune Statue
+        _item_id = 3;
+        if (
+            (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+            && local_items_flag[_item_id] != true
+        ) {
+            local_items_flag[_item_id] = true;
+            item_fortune_statue = this.add.sprite(70, 550, "item_fortune_statue").setScale(0.35).setOrigin(0.5);
+        }
         //17:vase
         _item_id = 17;
         if (
@@ -2727,15 +2762,6 @@ function update() {
         
         //***TODO***
 
-        //3
-        _item_id = 3;
-        if (
-            (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
-            && local_items_flag[_item_id] != true
-        ) {
-            local_items_flag[_item_id] = true;
-            item_rock = this.add.sprite(300,900, "item_the_rock").setOrigin(0.5).setScale(0.5);        
-        }
         //4
         _item_id = 4;
         if (
