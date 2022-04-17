@@ -1211,6 +1211,7 @@ function open_window_craft (scene) {
     item2_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  2, "item_crown").setScale(0.15);
     item3_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  3, "item_fortune_statue").setScale(0.15);
     item5_icon = scene.add.sprite(_x-20, _y+15 + _y_add *  5, "item_pudding").setScale(0.2);
+    item6_icon = scene.add.sprite(_x-15, _y+45 + _y_add *  6, "item_ribbon").setScale(0.35);
 
     //farming_item
     _x = 520;
@@ -1219,7 +1220,7 @@ function open_window_craft (scene) {
     }
     item17_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  1, "item_vase").setScale(0.08);
     item18_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  2, "ms_ether_right").setScale(0.08);
-    item22_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  6, "item_chocolate_bread").setScale(0.2);
+    item22_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  6, "item_chocolate_bread").setScale(0.25);
 
     //crafting_item
     _x = 870;
@@ -1286,6 +1287,7 @@ function open_window_craft (scene) {
     group_window_crafting.add(item2_icon);
     group_window_crafting.add(item3_icon);
     group_window_crafting.add(item5_icon);
+    group_window_crafting.add(item6_icon);
     group_window_crafting.add(item17_icon);
     group_window_crafting.add(item18_icon);
     group_window_crafting.add(item22_icon);
@@ -1482,6 +1484,7 @@ function preload() {
     this.load.image("item_pudding", "png/item_pudding2.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("item_chocolate_bread", "png/item_chocolate_bread.png", {frameWidth: 643, frameHeight: 477});
     this.load.image("item_fortune_statue", "png/item_fortune_statue.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_ribbon", "png/item_ribbon2.png", {frameWidth: 370, frameHeight: 320});
     
     //items_todo
     this.load.image("item_mushroom", "png/item_mushroom.png", {frameWidth: 300, frameHeight: 300});
@@ -2021,11 +2024,11 @@ function create() {
         .on("pointerout", () => text_mint_name.setStyle({ fontSize: 17, fontFamily: "Arial", fill: '#000000' }));
     text_mint_name.setInteractive().on("pointerdown", () => {contract_mint_name(summoner, text_kanban.text)});
     //text_mint_name.visible = false;
-    icon_name_ohana = this.add.sprite(173, 88, "icon_ohana");
-    icon_name_ohana.setScale(0.07);
+    icon_name_ohana = this.add.sprite(173, 90, "icon_ohana");
+    icon_name_ohana.setScale(0.05);
     text_name_ohana = this.add.text(185, 82, "100", {font: "17px Arial", fill: "#000000"});
     icon_name_kusa = this.add.sprite(225, 90, "icon_kusa");
-    icon_name_kusa.setScale(0.09);
+    icon_name_kusa.setScale(0.07);
     text_name_kusa = this.add.text(235, 82, "100", {font: "17px Arial", fill: "#000000"});
     //group
     group_mint_name = this.add.group();
@@ -2695,6 +2698,16 @@ function update() {
             local_items_flag[_item_id] = true;
             item_fortune_statue = this.add.sprite(70, 550, "item_fortune_statue").setScale(0.35).setOrigin(0.5);
         }
+        //5:Pudding -> Feeding()
+        //6:Ribbon
+        _item_id = 6;
+        if (
+            (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+            && local_items_flag[_item_id] != true
+        ) {
+            local_items_flag[_item_id] = true;
+            item_ribbon = this.add.sprite(1057, 443, "item_ribbon").setScale(0.5).setOrigin(0.5);
+        }
         //17:vase
         _item_id = 17;
         if (
@@ -2721,6 +2734,7 @@ function update() {
                 "farming"
             ).setScale(0.12);
         }
+        //21: Choco. Bread -> Feeding()
         //33:violin
         _item_id = 33;
         if (

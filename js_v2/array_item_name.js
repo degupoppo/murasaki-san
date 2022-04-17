@@ -7,7 +7,7 @@ let array_item_name = [
     "Fortune Statue",
     "The Earth",
     "Pudding",
-    "---",
+    "Ribbon",
     "---",
     "---",
     "---",
