@@ -823,6 +823,42 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             }
         }
     }
+    update_item() {
+        if (this.mode == "resting" || this.mode == "moving") {
+            tiny_crown.x = this.x;
+            tiny_crown.y = this.y;
+        }else if (this.mode == "sleeping") {
+            tiny_crown.x = this.x - 20;
+            tiny_crown.y = this.y + 38;
+        }else if (this.mode == "mining" && this.submode == 1 && this.dist == "left") {
+            tiny_crown.x = this.x - 5;
+            tiny_crown.y = this.y + 10;
+        }else if (this.mode == "mining" && this.submode == 1 && this.dist == "right") {
+            tiny_crown.x = this.x + 5;
+            tiny_crown.y = this.y + 10;
+        }else if (this.mode == "mining" && this.submode == 2) {
+            tiny_crown.x = this.x + 32;
+            tiny_crown.y = this.y - 10;
+        }else if (this.mode == "crafting" && this.submode == 1 && this.dist == "left") {
+            tiny_crown.x = this.x - 5;
+            tiny_crown.y = this.y + 10;
+        }else if (this.mode == "crafting" && this.submode == 1 && this.dist == "right") {
+            tiny_crown.x = this.x + 7;
+            tiny_crown.y = this.y + 10;
+        }else if (this.mode == "crafting" && this.submode == 2) {
+            tiny_crown.x = this.x + 2;
+            tiny_crown.y = this.y - 18;
+        }else if (this.mode == "feeding" && this.submode == 1 && this.dist == "right") {
+            tiny_crown.x = this.x + 8;
+            tiny_crown.y = this.y + 10;
+        }else if (this.mode == "feeding" && this.submode == 1 && this.dist == "left") {
+            tiny_crown.x = this.x - 8;
+            tiny_crown.y = this.y + 10;
+        }else if (this.mode == "feeding" && this.submode == 3) {
+            tiny_crown.x = this.x;
+            tiny_crown.y = this.y;
+        }
+    }
     update(){
         if (this.mode == "resting") {this.resting();}
         else if (this.mode == "moving") {this.moving();}
@@ -836,6 +872,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         else if (this.mode == "crafting") {this.crafting();}
         else if (this.mode == "hungry") {this.hungry();}
         else if (this.mode == "petrified") {this.petrified();}
+        //this.update_item();
     }
 }
 
@@ -1485,6 +1522,7 @@ function preload() {
     this.load.image("item_chocolate_bread", "png/item_chocolate_bread.png", {frameWidth: 643, frameHeight: 477});
     this.load.image("item_fortune_statue", "png/item_fortune_statue.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("item_ribbon", "png/item_ribbon2.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_tiny_crown", "png/item_tiny_crown.png", {frameWidth: 370, frameHeight: 320});
     
     //items_todo
     this.load.image("item_mushroom", "png/item_mushroom.png", {frameWidth: 300, frameHeight: 300});
@@ -1923,6 +1961,7 @@ function create() {
 
     murasakisan = new Murasakisan(this, 500 + Math.random()*200, 640 + Math.random()*100);
     murasakisan.setScale(0.45);
+    //tiny_crown = this.add.sprite(murasakisan.x, murasakisan.y, "item_tiny_crown").setScale(0.45);
 
     //===button===
 
@@ -1958,7 +1997,7 @@ function create() {
 
     //debug info
     //text_speed =        this.add.text(10, 910, "***", font_arg);
-    //text_mode = this.add.text(1150, 916, "***", {font: "14px Arial", fill: "#727171"});
+    text_mode = this.add.text(1150, 916, "***", {font: "14px Arial", fill: "#727171"});
     text_turn = this.add.text(1150, 928, "***", {font: "14px Arial", fill: "#727171"});
     text_sync_time = this.add.text(1150, 940, "***", {font: "14px Arial", fill: "#727171"});
     text_wallet = this.add.text(10, 940, "***", {font: "14px Arial", fill: "#727171"});
@@ -2119,6 +2158,7 @@ function update() {
     //===== sync time =====
 
     if (turn % 20 == 0) {
+        text_mode.setText(murasakisan.get_mode);
         if (last_sync_time == 0) {
             text_sync_time.setText("syncing...");
         } else {
@@ -2378,12 +2418,12 @@ function update() {
             icon_mining.visible = true;
             let _delta = (now_time - local_mining_start_time);
             let _daily_earn = local_coin_calc / _delta * 8640;
-            text_mining_calc.setText("+ " + local_coin_calc + " Ohana\n  (" + Math.round(_daily_earn/10)*10 + " /d)");
+            text_mining_calc.setText(" +" + local_coin_calc + " Ohana\n  (" + Math.round(_daily_earn/10)*10 + " /d)");
         }else if (_mode == "farming") {
             icon_farming.visible = true;
             let _delta = (now_time - local_farming_start_time);
             let _daily_earn = local_material_calc / _delta * 8640;
-            text_farming_calc.setText("+ " + local_material_calc + " Kusa\n  (" + Math.round(_daily_earn/10)*10 + " /d)");
+            text_farming_calc.setText(" +" + local_material_calc + " Kusa\n  (" + Math.round(_daily_earn/10)*10 + " /d)");
         }else if (_mode == "crafting") {
             icon_crafting_time_remining.visible = true;
             if (local_crafting_calc > 0) {
@@ -2492,11 +2532,11 @@ function update() {
             group_food = this.add.group();
             item_potato = this.add.sprite(620, 740, "food_sweet_potato").setScale(0.12).setOrigin(0.5);
             group_food.add(item_potato);
-            if (local_items_flag[5] > 0) {
+            if (local_items[5] > 0) {
                 item_pudding = this.add.sprite(590, 750, "item_pudding").setScale(0.30).setOrigin(0.5);
                 group_food.add(item_pudding);
             }
-            if (local_items_flag[22] > 0) {
+            if (local_items[22] > 0) {
                 item_chocolate_bread = this.add.sprite(670, 750, "item_chocolate_bread").setScale(0.4).setOrigin(0.5);
                 group_food.add(item_chocolate_bread);
             }
