@@ -36,6 +36,8 @@ ToDo
             Function_craftingにcraftをapprove通さないとunpackできない
             フロントエンド側でapproveを導入する
             現状、upgrade用のapproveボタンを押さないとunpackできない。
+        マウスオーバー時の絵の実装
+            中身が解かれてcoin/kusaが少し見えている絵
 
     Petの行動の実装
         mining, farming時に一緒に働く
@@ -2800,7 +2802,21 @@ function update() {
                 "mining"
             ).setScale(0.12);
             
+            
             //item_wearing_hat = this.add.sprite(murasakisan.x, murasakisan.y, "item_tiny_crown").setScale(0.45);
+            item_tiny_crown = this.add.sprite(670, 130, "item_tiny_crown").setOrigin(0.5).setScale(0.45);
+            item_tiny_crown.setInteractive({useHandCursor: true});
+            item_tiny_crown.on('pointerdown', () => {
+                if (typeof item_wearing_hat == "undefined") {
+                    item_wearing_hat = item_tiny_crown;
+                    //item_tiny_crown.visible = false;
+                } else {
+                    //item_tiny_crown = item_wearing_hat;
+                    item_wearing_hat.destroy();
+                    //item_tiny_crown.x = 500;
+                    //item_tiny_crown.y = 200;
+                }
+            });
             
         }
         //2:Crown
