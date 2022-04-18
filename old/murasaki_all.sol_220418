@@ -2377,24 +2377,21 @@ contract Murasaki_Function_Crafting is Ownable {
         require(ms.mining_status(_summoner) == 0 && ms.farming_status(_summoner) == 0 && ms.crafting_status(_summoner) == 0);
         require(mfs.calc_satiety(_summoner) >= 20 && mfs.calc_happy(_summoner) >= 20);
         require(ms.level(_summoner) >= 3);
-        require(_item_type <= 64 || _item_type == 194 || _item_type == 195);
+        require(_item_type <= 64);
         uint32 _now = uint32(block.timestamp);
         //check coin and material
-        uint32 _coin;
-        uint32 _material;
-        //coin/material bag
+        uint32[4] memory _dc_table = get_item_dc(_item_type);
+        uint32 _coin = _dc_table[2];
+        uint32 _material = _dc_table[3];
+        if (_item_type == 48){_coin = 10;} //***test craft***
+        if (_item_type == 48){_material = 10;} //***test craft***
         if (_item_type == 194){
             _coin = 1000;
-            _material = 10;
-        }else if (_item_type == 195){
-            _coin = 10;
+            _material = 0;
+        }
+        if (_item_type == 195){
+            _coin = 0;
             _material = 1000;
-        }else{
-            uint32[4] memory _dc_table = get_item_dc(_item_type);
-            _coin = _dc_table[2];
-            _material = _dc_table[3];
-            if (_item_type == 48){_coin = 10;} //***test craft***
-            if (_item_type == 48){_material = 10;} //***test craft***
         }
         require(ms.coin(_summoner) >= _coin && ms.material(_summoner) >= _material);
         //start crafting
@@ -2424,13 +2421,15 @@ contract Murasaki_Function_Crafting is Ownable {
             //rare challenge
             uint32 _luck_mod = ms.luck(_summoner) + mfs.calc_heart(_summoner) * 5;
             if (mfs.d100(_summoner) <= _luck_mod/100) {
+            //if (mfs.d100(_summoner) <= ms.luck(_summoner)/100) {
                 _item_type += 64;
             }
             //craft
             Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
+            //uint32 _next_item = mc.next_item();
             uint32 _seed = mfs.seed(_summoner);
             mc.craft(_item_type, _summoner, msg.sender, _seed);
-            //generate tiny heart, ignore coin/material bag
+            //generate tiny heart
             //create_tiny_heart(_next_item, _summoner);
             if (_item_type <= 128) {
                 create_tiny_heart(_summoner);
@@ -2440,10 +2439,6 @@ contract Murasaki_Function_Crafting is Ownable {
     function get_modified_dc(uint32 _summoner, uint32 _item_type) public view returns (uint32) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
-        //coin/material bag
-        if (_item_type == 194 || _item_type == 195){
-            return 20;  //about 30 min
-        }
         uint32[4] memory _dc_table = get_item_dc(_item_type);
         //get dc
         uint32 _level = _dc_table[0];
@@ -2470,6 +2465,8 @@ contract Murasaki_Function_Crafting is Ownable {
             _mod_dc = _dc - _delta;
         }
         if (_item_type == 48){_mod_dc = 10;} //***test craft***
+        if (_item_type == 194){_mod_dc = 20;} //***test craft***
+        if (_item_type == 195){_mod_dc = 20;} //***test craft***
         return _mod_dc;
     }
     function calc_crafting(uint32 _summoner) public view returns (uint32) {
@@ -2519,18 +2516,44 @@ contract Murasaki_Function_Crafting is Ownable {
 
     //get item dc
     function get_item_dc(uint32 _item_type) public view returns (uint32[4] memory) {
-        //coin/material bag
-        if (_item_type == 194){
-            return [uint32(99), uint32(0), uint32(1000), uint32(10)];
-        }else if (_item_type == 195) {
-            return [uint32(99), uint32(0), uint32(10), uint32(1000)];
-        }
         uint32 _level = level_table[_item_type];
         uint32 _dc = dc_table[_item_type];
         uint32 _coin = coin_table[_item_type];
         uint32 _material = material_table[_item_type];
         return [_level, _dc, _coin, _material];
     }
+
+    /*
+    //tiny heart
+    //choice random summoner and transfer tiny heart to it
+    //when not active summoner was selected, msg.sender will get it instedlly.
+    function create_tiny_heart(uint32 _created_item, uint32 _created_summoner) internal {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Main mm = Murasaki_Main(mfs.murasaki_main_address());
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        Tiny_Heart th = Tiny_Heart(mfs.tiny_heart_address());
+        //get random _to_summoner
+        uint32 _count_summoners = mm.next_summoner() - 1;
+        uint32 _to_summoner = mfs.dn(_created_summoner, _count_summoners) + 1;
+        //check _to_summoner: when not active summoner, transfer to msg.sender
+        bool _isActive = ms.isActive(_to_summoner);
+        address _to_wallet;
+        if (
+            _isActive == true
+            && ms.level(_to_summoner) >= 3
+            && mfs.calc_satiety(_to_summoner) >= 20
+            && mfs.calc_happy(_to_summoner) >= 20
+        ) {
+            _to_wallet = mm.ownerOf(_to_summoner);
+        } else {
+            _to_wallet = msg.sender;
+        }
+        //create tiny heart
+        uint32 _seed = mfs.seed(_created_summoner);
+        address _created_wallet = mm.ownerOf(_created_summoner);
+        th.create(_created_item, _created_summoner, _created_wallet, _seed, _to_wallet);
+    }
+    */
 
     //tiny heart
     //convert to main mc version, item_type 193 = tinyheart
@@ -2572,8 +2595,17 @@ contract Murasaki_Function_Crafting is Ownable {
     function upgrade_item(uint32 _summoner, uint32 _item1, uint32 _item2, uint32 _item3) external {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
+        //Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
         //check summoner owner
         require(mfs.check_owner(_summoner, msg.sender));
+        /*
+        //check and spend cost
+        uint32 _coin = 1000;
+        uint32 _material = 1000;
+        require(ms.coin(_summoner) >= _coin && ms.material(_summoner) >= _material);
+        ms.set_coin(_summoner, ms.coin(_summoner) - _coin);
+        ms.set_material(_summoner, ms.material(_summoner) - _material);
+        */
         //check item owner
         require(
             mc.ownerOf(_item1) == msg.sender
@@ -2593,6 +2625,11 @@ contract Murasaki_Function_Crafting is Ownable {
         mc.transferFrom(msg.sender, address(this), _item1);
         mc.transferFrom(msg.sender, address(this), _item2);
         mc.transferFrom(msg.sender, address(this), _item3);
+        /*
+        mc.burn(_item1);
+        mc.burn(_item2);
+        mc.burn(_item3);
+        */
         //mint upper rank item
         uint32 _seed = mfs.seed(_summoner);
         mc.craft(_item_type1 + 64, _summoner, msg.sender, _seed);
@@ -2615,7 +2652,7 @@ contract Murasaki_Function_Crafting is Ownable {
         if (_item_type == 194) {
             ms.set_coin(_summoner, ms.coin(_summoner) + 1000);
         } else if (_item_type == 195) {
-            ms.set_material(_summoner, ms.material(_summoner) + 1000);
+            ms.set_coin(_summoner, ms.material(_summoner) + 1000);
         }
     }
 
@@ -3154,6 +3191,140 @@ contract Bulletin_Board is Ownable {
     }
 }
 
+
+
+//---------------------------------------------------------------------------------------------------------------------
+//Tiny heart
+//0x6dB63DfCcD06887f27cf6c3D0B6812DDb0Cb4490
+/*
+contract Tiny_Heart is ERC721, Ownable{
+
+    //address
+    address public murasaki_function_address;
+    function _set_murasaki_function_address(address _address) public onlyOwner{
+        murasaki_function_address = _address;
+    }
+
+    using EnumerableSet for EnumerableSet.UintSet;
+    mapping(address => EnumerableSet.UintSet) private mySet;
+
+    //name
+    string constant public name = "Tiny Heart";
+    string constant public symbol = "TH";
+
+    //global variants
+    uint32 public next_heart = 1;
+    struct heart {
+        uint32 created_item;
+        uint32 created_time;
+        uint32 created_summoner;
+        address created_wallet;
+    }
+    mapping(uint256 => heart) public hearts;
+    mapping(uint32 => uint32) public seed;
+
+    //override ERC721 transfer, 
+    function _transfer(
+        address from,
+        address to,
+        uint256 tokenId
+    ) internal virtual override {
+        ERC721._transfer(from, to, tokenId);
+        mySet[from].remove(tokenId);
+        mySet[to].add(tokenId);
+    }
+
+    //override ERC721 burn
+    function _burn(uint256 tokenId) internal virtual override {
+        ERC721._burn(tokenId);
+        mySet[msg.sender].remove(tokenId);
+    }
+    function burn(uint256 tokenId) external {
+        _burn(tokenId);
+    }
+
+    //create
+    function create(
+        uint32 _created_item, 
+        uint32 _created_summoner, 
+        address _created_wallet, 
+        uint32 _seed,
+        address _to_wallet
+    ) external {
+        require(msg.sender == murasaki_function_address);
+        uint32 _now = uint32(block.timestamp);
+        uint32 _crafting_heart = next_heart;
+        hearts[_crafting_heart] = heart(_created_item, _now, _created_summoner, _created_wallet);
+        seed[_crafting_heart] = _seed;
+        next_heart++;
+        mySet[_to_wallet].add(_crafting_heart);
+        _safeMint(_to_wallet, _crafting_heart);
+    }  
+
+    /// @dev Returns list the total number of listed summoners of the given user.
+    function myListLength(address user) external view returns (uint) {
+        return mySet[user].length();
+    }
+
+    /// @dev Returns the ids and the prices of the listed summoners of the given user.
+    function myListsAt(
+        address user,
+        uint start,
+        uint count
+    ) external view returns (uint[] memory rIds) {
+        rIds = new uint[](count);
+        for (uint idx = 0; idx < count; idx++) {
+            rIds[idx] = mySet[user].at(start + idx);
+        }
+    }
+
+    //URI
+    //Inspired by OraclizeAPI's implementation - MIT license
+    //https://github.com/oraclize/ethereum-api/blob/b42146b063c7d6ee1358846c198246239e9360e8/oraclizeAPI_0.4.25.sol
+    function toString(uint256 value) internal pure returns (string memory) {
+        if (value == 0) {
+            return "0";
+        }
+        uint256 temp = value;
+        uint256 digits;
+        while (temp != 0) {
+            digits++;
+            temp /= 10;
+        }
+        bytes memory buffer = new bytes(digits);
+        while (value != 0) {
+            digits -= 1;
+            buffer[digits] = bytes1(uint8(48 + uint256(value % 10)));
+            value /= 10;
+        }
+        return string(buffer);
+    }
+
+    //TODO: not fixed yet.
+    function tokenURI (uint32 _heart) public view returns (string memory) {
+        string[9] memory parts;
+        parts[0] = '<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin meet" viewBox="0 0 350 350"><style>.base { fill: white; font-family: serif; font-size: 14px; }</style><rect width="100%" height="100%" fill="black" /><text x="10" y="20" class="base">';
+        parts[1] = string(abi.encodePacked("id", " ", toString(_heart)));
+        parts[2] = '</text><text x="10" y="40" class="base">';
+        parts[3] = string(abi.encodePacked("created summoner", " ", toString(hearts[_heart].created_summoner)));
+        parts[4] = '</text><text x="10" y="60" class="base">';
+        parts[5] = string(abi.encodePacked("created time", " ", toString(hearts[_heart].created_time)));
+        parts[6] = '</text></svg>';
+        string memory output = string(abi.encodePacked(
+            parts[0], 
+            parts[1], 
+            parts[2], 
+            parts[3], 
+            parts[4], 
+            parts[5], 
+            parts[6]
+        ));
+        string memory json = Base64.encode(bytes(string(abi.encodePacked('{"name": "heart #', toString(_heart), '", "description": "House of Murasaki-san. Murasaki-san is a pet living in your wallet. They grow with your dedication. https://murasaki-san.com/", "image": "data:image/svg+xml;base64,', Base64.encode(bytes(output)), '"}'))));
+        output = string(abi.encodePacked('data:application/json;base64,', json));
+        return output;
+    }
+}
+*/
 
 
 

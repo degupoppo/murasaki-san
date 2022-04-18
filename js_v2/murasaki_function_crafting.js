@@ -1,4 +1,4 @@
-const contract_murasaki_function_crafting = "0xEd634c1F7c0F1De2C04A733bAe70359304143513";
+const contract_murasaki_function_crafting = "0xD784F73a166727e8b2Aa6cf0488C030CEE24486C";
 const abi_murasaki_function_crafting = [
 	{
 		"anonymous": false,
@@ -28,117 +28,6 @@ const abi_murasaki_function_crafting = [
 			}
 		],
 		"name": "_set1_murasaki_function_share_address",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "pBaseURI",
-				"type": "string"
-			}
-		],
-		"name": "setBaseURI",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "rdg",
-				"type": "address"
-			}
-		],
-		"name": "setRDG",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint32",
-				"name": "_summoner",
-				"type": "uint32"
-			},
-			{
-				"internalType": "uint32",
-				"name": "_item_type",
-				"type": "uint32"
-			}
-		],
-		"name": "start_crafting",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint32",
-				"name": "_summoner",
-				"type": "uint32"
-			}
-		],
-		"name": "stop_crafting",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "newOwner",
-				"type": "address"
-			}
-		],
-		"name": "transferOwnership",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint32",
-				"name": "_summoner",
-				"type": "uint32"
-			},
-			{
-				"internalType": "uint32",
-				"name": "_item1",
-				"type": "uint32"
-			},
-			{
-				"internalType": "uint32",
-				"name": "_item2",
-				"type": "uint32"
-			},
-			{
-				"internalType": "uint32",
-				"name": "_item3",
-				"type": "uint32"
-			}
-		],
-		"name": "upgrade_item",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "rec",
-				"type": "address"
-			}
-		],
-		"name": "withdraw",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -324,6 +213,135 @@ const abi_murasaki_function_crafting = [
 			}
 		],
 		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "pBaseURI",
+				"type": "string"
+			}
+		],
+		"name": "setBaseURI",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "rdg",
+				"type": "address"
+			}
+		],
+		"name": "setRDG",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint32",
+				"name": "_summoner",
+				"type": "uint32"
+			},
+			{
+				"internalType": "uint32",
+				"name": "_item_type",
+				"type": "uint32"
+			}
+		],
+		"name": "start_crafting",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint32",
+				"name": "_summoner",
+				"type": "uint32"
+			}
+		],
+		"name": "stop_crafting",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "newOwner",
+				"type": "address"
+			}
+		],
+		"name": "transferOwnership",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint32",
+				"name": "_summoner",
+				"type": "uint32"
+			},
+			{
+				"internalType": "uint32",
+				"name": "_item",
+				"type": "uint32"
+			}
+		],
+		"name": "unpack_bag",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint32",
+				"name": "_summoner",
+				"type": "uint32"
+			},
+			{
+				"internalType": "uint32",
+				"name": "_item1",
+				"type": "uint32"
+			},
+			{
+				"internalType": "uint32",
+				"name": "_item2",
+				"type": "uint32"
+			},
+			{
+				"internalType": "uint32",
+				"name": "_item3",
+				"type": "uint32"
+			}
+		],
+		"name": "upgrade_item",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "rec",
+				"type": "address"
+			}
+		],
+		"name": "withdraw",
+		"outputs": [],
+		"stateMutability": "nonpayable",
 		"type": "function"
 	}
 ]

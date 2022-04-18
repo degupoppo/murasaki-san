@@ -13,9 +13,29 @@ ToDo
         絨毯
         ランタン
         ウォールアート
-        
+        王冠
+        とんがり帽子
+        ぴろー帽子
+
+    帽子枠の実装
+        summonerのすべてのアニメーションで、帽子の位置を決定する
+        帽子スプライトを1つだけ作成し、waringしているitemをそのスプライトに格納する
+            帽子スプライトの存在をチェックし、summoner()内でその都度描写する        
+            脱ぐときはdestroyする
+        帽子は棚や壁ラックにかけておき、クリックでwaringする
+            visible=false, 帽子spriteをcreateでよいか
+            帽子sprite側はdestroy、対応するspriteをvisible=trueで棚に戻す
 
     貯金箱システムの実装
+        消費時、クラフト時に即座に反映されるように修正
+            1個以上持っていたらではなく、個数が変更されたら画面更新させる機構
+            消す（destroy）メカニズムの実装
+                個数が減ったら全削除→再描写
+                予めgroupへ格納しておく
+        Approveの実装
+            Function_craftingにcraftをapprove通さないとunpackできない
+            フロントエンド側でapproveを導入する
+            現状、upgrade用のapproveボタンを押さないとunpackできない。
 
     Petの行動の実装
         mining, farming時に一緒に働く
@@ -98,6 +118,7 @@ picture
     <script src="js_v2/web3.min.js"></script>
     <script src="js_v2/murasaki_main.js"></script>
     <script src="js_v2/murasaki_strage.js"></script>
+    <script src="js_v2/murasaki_craft.js"></script>
     <script src="js_v2/murasaki_function_crafting.js"></script>
     <script src="js_v2/murasaki_function_feeding_and_grooming.js"></script>
     <script src="js_v2/murasaki_function_mining_and_farming.js"></script>
@@ -199,6 +220,8 @@ let screen_happy = 0;
 let screen_happy_delta = 0;
 let screen_satiety = 0;
 let screen_satiety_delta = 0;
+let previous_local_item194 = 0;
+let previous_local_item195 = 0;
 
 
 
@@ -488,6 +511,35 @@ async function contract_mint_name(_summoner, _name_str) {
     let wallet = await get_wallet(web3);
     contract.methods.mint(_summoner, _name_str).send({from:wallet});
 }
+
+//get_userItems_bag
+async function get_userItems(_target_item_type) {
+    let web3 = await connect();
+    let wallet = await get_wallet(web3);
+    //contract
+    let contract = await new web3.eth.Contract(abi_murasaki_craft, contract_murasaki_craft);
+    let myListLength = await contract.methods.myListLength(wallet).call();
+    let myListsAt = await contract.methods.myListsAt(wallet, 0, myListLength).call();
+    let _array_items = [];
+    for (let i = 0; i < myListLength; i++) {
+        let _item = myListsAt[i];
+        _items = await contract.methods.items(_item).call();
+        let _item_type = _items[0];
+        if (_item_type == _target_item_type) {
+            _array_items.push(_item);
+        }
+    }
+    return _array_items;
+}
+
+//unpack_bag
+async function unpack_bag(_summoner, _item) {
+    let web3 = await connect();
+    let wallet = await get_wallet(web3);
+    let contract_mfc = await new web3.eth.Contract(abi_murasaki_function_crafting, contract_murasaki_function_crafting);
+    contract_mfc.methods.unpack_bag(_summoner, _item).send({from:wallet});
+}
+
 
 
 
@@ -823,40 +875,49 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             }
         }
     }
-    update_item() {
+    update_item_wearing_hat() {
         if (this.mode == "resting" || this.mode == "moving") {
-            tiny_crown.x = this.x;
-            tiny_crown.y = this.y;
+            item_wearing_hat.x = this.x;
+            item_wearing_hat.y = this.y;
         }else if (this.mode == "sleeping") {
-            tiny_crown.x = this.x - 20;
-            tiny_crown.y = this.y + 38;
+            item_wearing_hat.x = this.x - 20;
+            item_wearing_hat.y = this.y + 38;
         }else if (this.mode == "mining" && this.submode == 1 && this.dist == "left") {
-            tiny_crown.x = this.x - 5;
-            tiny_crown.y = this.y + 10;
+            item_wearing_hat.x = this.x - 5;
+            item_wearing_hat.y = this.y + 10;
         }else if (this.mode == "mining" && this.submode == 1 && this.dist == "right") {
-            tiny_crown.x = this.x + 5;
-            tiny_crown.y = this.y + 10;
+            item_wearing_hat.x = this.x + 5;
+            item_wearing_hat.y = this.y + 10;
         }else if (this.mode == "mining" && this.submode == 2) {
-            tiny_crown.x = this.x + 32;
-            tiny_crown.y = this.y - 10;
+            item_wearing_hat.x = this.x + 32;
+            item_wearing_hat.y = this.y - 10;
         }else if (this.mode == "crafting" && this.submode == 1 && this.dist == "left") {
-            tiny_crown.x = this.x - 5;
-            tiny_crown.y = this.y + 10;
+            item_wearing_hat.x = this.x - 5;
+            item_wearing_hat.y = this.y + 10;
         }else if (this.mode == "crafting" && this.submode == 1 && this.dist == "right") {
-            tiny_crown.x = this.x + 7;
-            tiny_crown.y = this.y + 10;
+            item_wearing_hat.x = this.x + 7;
+            item_wearing_hat.y = this.y + 10;
         }else if (this.mode == "crafting" && this.submode == 2) {
-            tiny_crown.x = this.x + 2;
-            tiny_crown.y = this.y - 18;
+            item_wearing_hat.x = this.x + 2;
+            item_wearing_hat.y = this.y - 18;
         }else if (this.mode == "feeding" && this.submode == 1 && this.dist == "right") {
-            tiny_crown.x = this.x + 8;
-            tiny_crown.y = this.y + 10;
+            item_wearing_hat.x = this.x + 8;
+            item_wearing_hat.y = this.y + 10;
         }else if (this.mode == "feeding" && this.submode == 1 && this.dist == "left") {
-            tiny_crown.x = this.x - 8;
-            tiny_crown.y = this.y + 10;
+            item_wearing_hat.x = this.x - 8;
+            item_wearing_hat.y = this.y + 10;
         }else if (this.mode == "feeding" && this.submode == 3) {
-            tiny_crown.x = this.x;
-            tiny_crown.y = this.y;
+            item_wearing_hat.x = this.x;
+            item_wearing_hat.y = this.y;
+        }else if (this.mode == "grooming" && this.submode == 1 && this.dist == "right") {
+            item_wearing_hat.x = this.x + 8;
+            item_wearing_hat.y = this.y + 10;
+        }else if (this.mode == "grooming" && this.submode == 1 && this.dist == "left") {
+            item_wearing_hat.x = this.x - 8;
+            item_wearing_hat.y = this.y + 10;
+        }else if (this.mode == "grooming" && this.submode == 3) {
+            item_wearing_hat.x = this.x;
+            item_wearing_hat.y = this.y;
         }
     }
     update(){
@@ -872,7 +933,10 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         else if (this.mode == "crafting") {this.crafting();}
         else if (this.mode == "hungry") {this.hungry();}
         else if (this.mode == "petrified") {this.petrified();}
-        //this.update_item();
+        //draw item_wearing_hat
+        if (typeof item_wearing_hat != "undefined") {
+            this.update_item_wearing_hat();
+        }
     }
 }
 
@@ -1175,28 +1239,22 @@ function open_window_craft (scene) {
         let _level = global_selected_crafting_item_dc[0]
         //text_craft_item.setText("time= " + _dc + ", ohana = " + _coin + ", kusa = " + _material);
         if (_level > 0) {
-            //let _dc = global_selected_crafting_item_dc[1];
             let _dc = await get_modified_dc(summoner, _item);
             let _total_sec = _dc / 1000 * BASE_SEC;
             let _day = Math.floor(_total_sec / 86400);
             let _hr = Math.floor(_total_sec % 86400 / 3600);
             let _min = Math.floor(_total_sec % 3600 / 60);
-            //let _sec = _total_sec %  60;
             let _coin = global_selected_crafting_item_dc[2];
             let _material = global_selected_crafting_item_dc[3];
-            //text_craft_item.setText(_coin + " ohana / " + _material + " kusa / " + _day + "day " + _hr + "hr " + _min + "min " + Math.trunc(_sec) + "sec");
-            //text_craft_item.setText(_coin + " ohana / " + _material + " kusa / " + _day + "d:" + _hr + "h:" + _min + "m");
             text_crafting_selected_item_ohana.setText(_coin);
             text_crafting_selected_item_kusa.setText(_material);
             text_crafting_selected_item_time.setText(_day + "d:" + _hr + "h:" + _min + "m");
             icon_crafting_ohana.visible = true;
             icon_crafting_kusa.visible = true;
             icon_crafting_time.visible = true;
-            //text_craft_item.setText(_coin + " ohana / " + _material + " kusa / " + _day + "d:" + _hr + "h:" + _min + "m");
             text_select_item.setText('"'+array_item_name[_item]+'"');
             console.log("modified_dc:", _dc);
         } else {
-            //text_craft_item.setText("");
             text_crafting_selected_item_ohana.setText("");
             text_crafting_selected_item_kusa.setText("");
             text_crafting_selected_item_time.setText("");
@@ -1268,6 +1326,10 @@ function open_window_craft (scene) {
     item34_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  2, "item_musicbox").setScale(0.12);
     item35_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  3, "dr_bitco_right").setScale(0.08);
 
+    //coin/material bag
+    button_crafting_item194  = create_button(170, 110 + 40*17, "[" +local_items[194]+ "] Ohana Piggy Bank", 194,  scene);
+    button_crafting_item195  = create_button(520, 110 + 40*17, "[" +local_items[195]+ "] Kusa Pouch", 195,  scene);
+
     //create group
     group_window_crafting = scene.add.group();
     group_window_crafting.add(window_crafting);
@@ -1320,6 +1382,8 @@ function open_window_craft (scene) {
     group_window_crafting.add(button_crafting_item46);
     group_window_crafting.add(button_crafting_item47);
     group_window_crafting.add(button_crafting_item48);
+    group_window_crafting.add(button_crafting_item194);
+    group_window_crafting.add(button_crafting_item195);
     group_window_crafting.add(item1_icon);
     group_window_crafting.add(item2_icon);
     group_window_crafting.add(item3_icon);
@@ -1523,6 +1587,8 @@ function preload() {
     this.load.image("item_fortune_statue", "png/item_fortune_statue.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("item_ribbon", "png/item_ribbon2.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("item_tiny_crown", "png/item_tiny_crown.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_ohana_piggy_bank", "png/item_ohana_piggy_bank.png", {frameWidth: 619, frameHeight: 659});
+    this.load.image("item_kusa_pouch", "png/item_kusa_pouch.png", {frameWidth: 636, frameHeight: 895});
     
     //items_todo
     this.load.image("item_mushroom", "png/item_mushroom.png", {frameWidth: 300, frameHeight: 300});
@@ -1834,7 +1900,7 @@ function create() {
     button_crafting.on('pointerover', () => button_crafting.setTexture("button_crafting_pointerover"));
     button_crafting.on('pointerout', () => button_crafting.setTexture("button_crafting_enable"));
     button_crafting.disableInteractive();
-    //---select item
+    //--select item
     //icon_ohana
     icon_crafting_ohana = this.add.sprite(758, 163, "icon_ohana");
     icon_crafting_ohana.setScale(0.07);
@@ -1851,7 +1917,7 @@ function create() {
     text_crafting_selected_item_ohana = this.add.text(772, 155, "", {font: "18px Arial", fill: "#000"});
     text_crafting_selected_item_kusa = this.add.text(842, 155, "", {font: "18px Arial", fill: "#000"});
     text_crafting_selected_item_time = this.add.text(914, 155, "", {font: "18px Arial", fill: "#000"});
-    //---craftimg info
+    //--craftimg info
     //icon_clock
     icon_crafting_time_remining = this.add.sprite(760,165, "icon_clock");
     icon_crafting_time_remining.setScale(0.09);
@@ -1961,7 +2027,6 @@ function create() {
 
     murasakisan = new Murasakisan(this, 500 + Math.random()*200, 640 + Math.random()*100);
     murasakisan.setScale(0.45);
-    //tiny_crown = this.add.sprite(murasakisan.x, murasakisan.y, "item_tiny_crown").setScale(0.45);
 
     //===button===
 
@@ -2158,6 +2223,23 @@ function update() {
     //===== sync time =====
 
     if (turn % 20 == 0) {
+
+        /*
+        //protection code
+        if (location.hostname != "localhost" && location.hostname != "murasaki-san.com") {
+            while(true){
+                console.log("error", location.hostname);
+                const d1 = new Date();
+                while (true) {
+                  const d2 = new Date();
+                  if (d2 - d1 > 2000) {
+                    break;
+                  }
+                }
+            }
+        }
+        */
+
         text_mode.setText(murasakisan.get_mode);
         if (last_sync_time == 0) {
             text_sync_time.setText("syncing...");
@@ -2717,6 +2799,9 @@ function update() {
                 "mr_astar_left",
                 "mining"
             ).setScale(0.12);
+            
+            //item_wearing_hat = this.add.sprite(murasakisan.x, murasakisan.y, "item_tiny_crown").setScale(0.45);
+            
         }
         //2:Crown
         _item_id = 2;
@@ -2813,6 +2898,41 @@ function update() {
                 "crafting"
             ).setScale(0.11);
         }
+        //194:ohana_piggy_bank
+        if (
+            local_items[194] != previous_local_item194
+        ) {
+            local_items_flag[_item_id] = true;
+            async function _do (scene) {
+                let _array_item194 = await get_userItems(194);
+                //console.log(_array_item194);
+                for (let i = 0; i < _array_item194.length; i++) {
+                    item_bank = scene.add.sprite(880 + i*50, 900, "item_ohana_piggy_bank");
+                    item_bank.setScale(0.1);
+                    item_bank.setInteractive({useHandCursor: true});
+                    item_bank.on("pointerdown", () => unpack_bag(summoner, _array_item194[i]));
+                }
+            }
+            _do(this);
+            //***TODO*** remove sprite mechanism is needed
+        }
+        //195:kusa_pouch
+        if (
+            local_items[195] != previous_local_item195
+        ) {
+            local_items_flag[_item_id] = true;
+            async function _do (scene) {
+                let _array_item195 = await get_userItems(195);
+                for (let i = 0; i < _array_item195.length; i++) {
+                    item_bank = scene.add.sprite(350 + i*50, 900, "item_kusa_pouch");
+                    item_bank.setScale(0.08);
+                    item_bank.setInteractive({useHandCursor: true});
+                    item_bank.on("pointerdown", () => unpack_bag(summoner, _array_item195[i]));
+                }
+            }
+            _do(this);
+            //***TODO*** remove sprite mechanism is needed
+        }
         
         //***TODO***
 
@@ -2871,6 +2991,8 @@ function update() {
             item_aquarium = this.add.sprite(1100,550, "item_aquarium").setOrigin(0.5).setScale(0.3);
         }        
         previous_local_items = local_items;
+        previous_local_item194 = local_items[194];
+        previous_local_item195 = local_items[195];
     }
 
     //===== update system message =====
