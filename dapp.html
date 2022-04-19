@@ -6,6 +6,19 @@ ToDo
 
  ok IDを看板内に表示する
 
+    ダイスの実装
+        24時間でリセットされる
+            小さくカウントアップを表示するか
+            24時間後は補正0になる
+        クリックしてtx飛ばす
+            tx通れば値更新
+            d20の枠組み内に現在の数字を表示させるか
+        アニメーションが可能ならしてみたいが
+            ダイスらしく転がせられるだろうか
+            24時間経過前は転がる→必ず設定した値がでる
+            24時間経過後は、マウスオーバーで更新可能を示す絵に変わる
+                →クリックで値更新
+
     アイテム案
         食べ物
         お皿
@@ -39,10 +52,6 @@ ToDo
         マウスオーバー時の絵の実装
             中身が解かれてcoin/kusaが少し見えている絵
 
-    Petの行動の実装
-        mining, farming時に一緒に働く
-        feeding, grooming時にハートが出る
-
     クラフトウィンドウの改善
         枠のデザイン再考
         アイテムアイコンを影絵に
@@ -53,14 +62,6 @@ ToDo
 
     pngファイルの軽量化
     
-    Dr. Bitcoの実装
-    
-    Prof. Polkaの実装
-    
-    Master Solidの実装
-    
-    ダイスの実装
-
     サウンドの洗練
         有効サウンドの選別
         各アクションにできるだけサウンドを導入する
@@ -97,6 +98,16 @@ ToDo
         もしくは手動での色彩変化済み画像の用意
         あるいは、ユニークな色のアクセサリー
 
+ ok Petの行動の実装
+        mining, farming時に一緒に働く
+        feeding, grooming時にハートが出る
+
+ ok Dr. Bitcoの実装
+    
+ ng Prof. Polkaの実装
+    
+ ng Master Solidの実装
+    
 picture
 
     背景
@@ -224,6 +235,7 @@ let screen_satiety = 0;
 let screen_satiety_delta = 0;
 let previous_local_item194 = 0;
 let previous_local_item195 = 0;
+let item_wearing_hat = 0;
 
 
 
@@ -893,6 +905,15 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         }else if (this.mode == "mining" && this.submode == 2) {
             item_wearing_hat.x = this.x + 32;
             item_wearing_hat.y = this.y - 10;
+        }else if (this.mode == "farming" && this.submode == 1 && this.dist == "left") {
+            item_wearing_hat.x = this.x - 5;
+            item_wearing_hat.y = this.y + 10;
+        }else if (this.mode == "farming" && this.submode == 1 && this.dist == "right") {
+            item_wearing_hat.x = this.x + 5;
+            item_wearing_hat.y = this.y + 10;
+        }else if (this.mode == "farming" && this.submode == 2) {
+            item_wearing_hat.x = this.x + 32;
+            item_wearing_hat.y = this.y - 10;
         }else if (this.mode == "crafting" && this.submode == 1 && this.dist == "left") {
             item_wearing_hat.x = this.x - 5;
             item_wearing_hat.y = this.y + 10;
@@ -936,7 +957,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         else if (this.mode == "hungry") {this.hungry();}
         else if (this.mode == "petrified") {this.petrified();}
         //draw item_wearing_hat
-        if (typeof item_wearing_hat != "undefined") {
+        if (item_wearing_hat != 0) {
             this.update_item_wearing_hat();
         }
     }
@@ -2802,19 +2823,30 @@ function update() {
                 "mining"
             ).setScale(0.12);
             
-            
-            //item_wearing_hat = this.add.sprite(murasakisan.x, murasakisan.y, "item_tiny_crown").setScale(0.45);
+
+            //hat1
             item_tiny_crown = this.add.sprite(670, 130, "item_tiny_crown").setOrigin(0.5).setScale(0.45);
             item_tiny_crown.setInteractive({useHandCursor: true});
             item_tiny_crown.on('pointerdown', () => {
-                if (typeof item_wearing_hat == "undefined") {
+                if (item_wearing_hat == 0) {
                     item_wearing_hat = item_tiny_crown;
-                    //item_tiny_crown.visible = false;
-                } else {
-                    //item_tiny_crown = item_wearing_hat;
-                    item_wearing_hat.destroy();
-                    //item_tiny_crown.x = 500;
-                    //item_tiny_crown.y = 200;
+                } else if (item_wearing_hat == item_tiny_crown) {
+                    item_wearing_hat = 0;
+                    item_tiny_crown.x = 670;
+                    item_tiny_crown.y = 130;
+                }
+            });
+
+            //hat2
+            item_tiny_crown2 = this.add.sprite(800, 130, "item_tiny_crown").setOrigin(0.5).setScale(0.45);
+            item_tiny_crown2.setInteractive({useHandCursor: true});
+            item_tiny_crown2.on('pointerdown', () => {
+                if (item_wearing_hat == 0) {
+                    item_wearing_hat = item_tiny_crown2;
+                } else if (item_wearing_hat == item_tiny_crown2) {
+                    item_wearing_hat = 0;
+                    item_tiny_crown2.x = 800;
+                    item_tiny_crown2.y = 130;
                 }
             });
             
