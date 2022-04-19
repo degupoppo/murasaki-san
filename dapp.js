@@ -2963,7 +2963,8 @@ function update() {
             item_dice.on("pointerdown", () => {dice_roll(summoner);});
             async function _get_rolled_dice(scene) {
                 let _res = await get_rolled_dice(summoner);
-                item_dice_text = scene.add.text(1000,700, _res, {font: "12px Arial Bold", fill: "#ffffff"}).setOrigin(0.5);
+                _res = _res /10;
+                item_dice_text = scene.add.text(999,698, _res, {font: "14px Arial Bold", fill: "#ffffff"}).setOrigin(0.5);
             }
             _get_rolled_dice(this);
             //item_needle_cushion = this.add.sprite(790,350, "item_needle_cushion").setOrigin(0.5).setScale(0.3);        
@@ -2974,6 +2975,7 @@ function update() {
         ) {
             async function _get_rolled_dice(scene) {
                 let _res = await get_rolled_dice(summoner);
+                _res = _res /10;
                 item_dice_text.setText(_res);
             }
             _get_rolled_dice(this);
