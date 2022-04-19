@@ -3,6 +3,10 @@
 
 ToDo
 
+    わんころの顔塗る
+
+    重なり調整
+
  ok IDを看板内に表示する
 
     ダイスの実装
@@ -909,8 +913,8 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             item_wearing_hat.x = this.x + 5;
             item_wearing_hat.y = this.y + 10;
         }else if (this.mode == "farming" && this.submode == 2) {
-            item_wearing_hat.x = this.x + 32;
-            item_wearing_hat.y = this.y - 10;
+            item_wearing_hat.x = this.x + 30;
+            item_wearing_hat.y = this.y + 8;
         }else if (this.mode == "crafting" && this.submode == 1 && this.dist == "left") {
             item_wearing_hat.x = this.x - 5;
             item_wearing_hat.y = this.y + 10;
@@ -936,8 +940,8 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             item_wearing_hat.x = this.x - 8;
             item_wearing_hat.y = this.y + 10;
         }else if (this.mode == "grooming" && this.submode == 3) {
-            item_wearing_hat.x = this.x;
-            item_wearing_hat.y = this.y;
+            item_wearing_hat.x = this.x - 25;
+            item_wearing_hat.y = this.y + 110;
         }
     }
     update(){
