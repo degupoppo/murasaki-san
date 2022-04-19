@@ -891,7 +891,13 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         }
     }
     update_item_wearing_hat() {
-        if (this.mode == "resting" || this.mode == "moving") {
+        if (
+            this.mode == "resting"
+            || this.mode == "moving"
+            || this.mode == "hugging"
+            || this.mode == "hungry"
+            || this.mode == "crying"
+        ) {
             item_wearing_hat.x = this.x;
             item_wearing_hat.y = this.y;
         }else if (this.mode == "sleeping") {
@@ -2837,7 +2843,7 @@ function update() {
             });
 
             //hat2
-            item_hat_knit = this.add.sprite(600, 150, "item_hat_knit").setOrigin(0.5).setScale(0.25);
+            item_hat_knit = this.add.sprite(600, 150, "item_hat_knit").setOrigin(0.5).setScale(0.20);
             item_hat_knit.setInteractive({useHandCursor: true});
             item_hat_knit.on('pointerdown', () => {
                 if (item_wearing_hat == 0) {
