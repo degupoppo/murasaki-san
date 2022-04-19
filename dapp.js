@@ -943,8 +943,14 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             item_wearing_hat.x = this.x - 25;
             item_wearing_hat.y = this.y + 110;
         }
-        item_wearing_hat.x -= 0;
-        item_wearing_hat.y -= 48;
+        if (item_wearing_hat == item_hat_mugiwara) {
+            item_wearing_hat.x -= 0;
+            item_wearing_hat.y -= 48;
+        } else if (item_wearing_hat == item_hat_knit) {
+            item_wearing_hat.x -= 0;
+            item_wearing_hat.y -= 60;
+        }
+
     }
     update(){
         if (this.mode == "resting") {this.resting();}
@@ -2818,28 +2824,28 @@ function update() {
             ).setScale(0.12);
             
             //hat1
-            item_tiny_crown = this.add.sprite(400, 150, "item_hat_mugiwara").setOrigin(0.5).setScale(0.25);
-            item_tiny_crown.setInteractive({useHandCursor: true});
-            item_tiny_crown.on('pointerdown', () => {
+            item_hat_mugiwara = this.add.sprite(400, 150, "item_hat_mugiwara").setOrigin(0.5).setScale(0.25);
+            item_hat_mugiwara.setInteractive({useHandCursor: true});
+            item_hat_mugiwara.on('pointerdown', () => {
                 if (item_wearing_hat == 0) {
-                    item_wearing_hat = item_tiny_crown;
-                } else if (item_wearing_hat == item_tiny_crown) {
+                    item_wearing_hat = item_hat_mugiwara;
+                } else if (item_wearing_hat == item_hat_mugiwara) {
                     item_wearing_hat = 0;
-                    item_tiny_crown.x = 400;
-                    item_tiny_crown.y = 150;
+                    item_hat_mugiwara.x = 400;
+                    item_hat_mugiwara.y = 150;
                 }
             });
 
             //hat2
-            item_tiny_crown2 = this.add.sprite(600, 150, "item_hat_knit").setOrigin(0.5).setScale(0.15);
-            item_tiny_crown2.setInteractive({useHandCursor: true});
-            item_tiny_crown2.on('pointerdown', () => {
+            item_hat_knit = this.add.sprite(600, 150, "item_hat_knit").setOrigin(0.5).setScale(0.25);
+            item_hat_knit.setInteractive({useHandCursor: true});
+            item_hat_knit.on('pointerdown', () => {
                 if (item_wearing_hat == 0) {
-                    item_wearing_hat = item_tiny_crown2;
-                } else if (item_wearing_hat == item_tiny_crown2) {
+                    item_wearing_hat = item_hat_knit;
+                } else if (item_wearing_hat == item_hat_knit) {
                     item_wearing_hat = 0;
-                    item_tiny_crown2.x = 600;
-                    item_tiny_crown2.y = 150;
+                    item_hat_knit.x = 600;
+                    item_hat_knit.y = 150;
                 }
             });
             
