@@ -37,7 +37,7 @@ ToDo
      ok 帽子は棚や壁ラックにかけておき、クリックでwaringする
             visible=false, 帽子spriteをcreateでよいか
             帽子sprite側はdestroy、対応するspriteをvisible=trueで棚に戻す
-        帽子絵の規格を決定する
+      * 帽子絵の規格を決定する
             370x320はクリック領域が広く扱いにくい
             80x80ぐらいか？
 
@@ -47,7 +47,7 @@ ToDo
             消す（destroy）メカニズムの実装
                 個数が減ったら全削除→再描写
                 予めgroupへ格納しておく
-      * Approveの実装
+     ok Approveの実装
             Function_craftingにcraftをapprove通さないとunpackできない
             フロントエンド側でapproveを導入する
             現状、upgrade用のapproveボタンを押さないとunpackできない。
@@ -163,6 +163,7 @@ let local_owner = "0x0000000000000000000000000000000000000000";
 let local_name_str = "(unnamed)";
 let local_notPetrified = true;
 let local_isActive;
+let local_dice = 0;
 
 //local using variants
 let previous_local_last_feeding_time = 0;
@@ -278,6 +279,7 @@ async function contract_update_status(_summoner) {
     let contract_mfmf = await new web3.eth.Contract(abi_murasaki_function_mining_and_farming, contract_murasaki_function_mining_and_farming);
     let contract_mffg = await new web3.eth.Contract(abi_murasaki_function_feeding_and_grooming, contract_murasaki_function_feeding_and_grooming);
     let contract_mn = await new web3.eth.Contract(abi_murasaki_function_name, contract_murasaki_function_name);
+    let contract_d = await new web3.eth.Contract(abi_world_dice, contract_world_dice);
 
     //check isActive
     local_isActive = await contract_ms.methods.isActive(_summoner).call();
@@ -351,6 +353,9 @@ async function contract_update_status(_summoner) {
     
     //petrification
     local_notPetrified = await contract_mffg.methods.not_petrified(_summoner).call();
+    
+    //dice
+    local_dice = await contract_d.methods.get_rolled_dice(_summoner).call();
 
     //update last_sync_time
     last_sync_time = Date.now();
@@ -522,12 +527,28 @@ async function unpack_bag(_summoner, _item) {
     let contract_mc = await new web3.eth.Contract(abi_murasaki_craft, contract_murasaki_craft);
     let contract_mfc = await new web3.eth.Contract(abi_murasaki_function_crafting, contract_murasaki_function_crafting);
     let _res = await contract_mc.methods.isApprovedForAll(wallet, contract_murasaki_function_crafting).call();
-    console.log(_res);
     if (_res == false) {
         contract_mc.methods.setApprovalForAll(contract_murasaki_function_crafting, true).send({from:wallet});
     } else {
         contract_mfc.methods.unpack_bag(_summoner, _item).send({from:wallet});
     }
+}
+
+//dice_roll
+async function dice_roll(_summoner) {
+    let web3 = await connect();
+    let wallet = await get_wallet(web3);
+    let contract = await new web3.eth.Contract(abi_world_dice, contract_world_dice);
+    contract.methods.dice_roll(_summoner).send({from:wallet});
+}
+
+//get_rolled_dice
+async function get_rolled_dice(_summoner) {
+    let web3 = await connect();
+    let wallet = await get_wallet(web3);
+    let contract = await new web3.eth.Contract(abi_world_dice, contract_world_dice);
+    let _res = await contract.methods.get_rolled_dice(_summoner).call();
+    return _res;    
 }
 
 
@@ -1589,6 +1610,7 @@ function preload() {
     this.load.image("item_tiny_crown", "png/item_tiny_crown.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("item_ohana_piggy_bank", "png/item_ohana_piggy_bank.png", {frameWidth: 619, frameHeight: 659});
     this.load.image("item_kusa_pouch", "png/item_kusa_pouch.png", {frameWidth: 636, frameHeight: 895});
+    this.load.image("item_dice", "png/item_dice.png", {frameWidth: 200, frameHeight: 200});
     
     //items_todo
     this.load.image("item_mushroom", "png/item_mushroom.png", {frameWidth: 300, frameHeight: 300});
@@ -2787,30 +2809,29 @@ function update() {
                 "mining"
             ).setScale(0.12);
             
-
             //hat1
-            item_tiny_crown = this.add.sprite(670, 130, "item_tiny_crown").setOrigin(0.5).setScale(0.45);
+            item_tiny_crown = this.add.sprite(400, 150, "item_tiny_crown").setOrigin(0.5).setScale(0.45);
             item_tiny_crown.setInteractive({useHandCursor: true});
             item_tiny_crown.on('pointerdown', () => {
                 if (item_wearing_hat == 0) {
                     item_wearing_hat = item_tiny_crown;
                 } else if (item_wearing_hat == item_tiny_crown) {
                     item_wearing_hat = 0;
-                    item_tiny_crown.x = 670;
-                    item_tiny_crown.y = 130;
+                    item_tiny_crown.x = 400;
+                    item_tiny_crown.y = 150;
                 }
             });
 
             //hat2
-            item_tiny_crown2 = this.add.sprite(800, 130, "item_tiny_crown").setOrigin(0.5).setScale(0.45);
+            item_tiny_crown2 = this.add.sprite(600, 150, "item_tiny_crown").setOrigin(0.5).setScale(0.45);
             item_tiny_crown2.setInteractive({useHandCursor: true});
             item_tiny_crown2.on('pointerdown', () => {
                 if (item_wearing_hat == 0) {
                     item_wearing_hat = item_tiny_crown2;
                 } else if (item_wearing_hat == item_tiny_crown2) {
                     item_wearing_hat = 0;
-                    item_tiny_crown2.x = 800;
-                    item_tiny_crown2.y = 130;
+                    item_tiny_crown2.x = 600;
+                    item_tiny_crown2.y = 150;
                 }
             });
             
@@ -2910,6 +2931,33 @@ function update() {
                 "crafting"
             ).setScale(0.11);
         }
+        //36:dice
+        _item_id = 36;
+        if (
+            (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+            && local_items_flag[_item_id] != true
+        ) {
+            local_items_flag[_item_id] = true;
+            item_dice = this.add.sprite(1000, 700, "item_dice").setOrigin(0.5).setScale(0.3);
+            item_dice.setInteractive({useHandCursor: true});
+            item_dice.on("pointerdown", () => {dice_roll(summoner);});
+            async function _get_rolled_dice(scene) {
+                let _res = await get_rolled_dice(summoner);
+                item_dice_text = scene.add.text(1000,700, _res, {font: "12px Arial Bold", fill: "#ffffff"}).setOrigin(0.5);
+            }
+            _get_rolled_dice(this);
+            //item_needle_cushion = this.add.sprite(790,350, "item_needle_cushion").setOrigin(0.5).setScale(0.3);        
+        //check rolled_dice_text
+        } else if (
+            local_items_flag[_item_id] == true
+            && previous_local_dice != local_dice
+        ) {
+            async function _get_rolled_dice(scene) {
+                let _res = await get_rolled_dice(summoner);
+                item_dice_text.setText(_res);
+            }
+            _get_rolled_dice(this);
+        }
         //194:ohana_piggy_pouch
         if (local_items[194] != previous_local_item194) {
             // define async function
@@ -2995,15 +3043,6 @@ function update() {
             local_items_flag[_item_id] = true;
             item_mushroom = this.add.sprite(250,500, "item_mushroom").setOrigin(0.5).setScale(0.3);        
         }
-        //36
-        _item_id = 36;
-        if (
-            (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
-            && local_items_flag[_item_id] != true
-        ) {
-            local_items_flag[_item_id] = true;
-            item_needle_cushion = this.add.sprite(790,350, "item_needle_cushion").setOrigin(0.5).setScale(0.3);        
-        }
         //37        
         _item_id = 37;
         if (
@@ -3016,6 +3055,7 @@ function update() {
         previous_local_items = local_items;
         previous_local_item194 = local_items[194];
         previous_local_item195 = local_items[195];
+        previous_local_dice = local_dice;
     }
 
     //===== update system message =====
@@ -3042,3 +3082,6 @@ function update() {
         }
     }
 }
+
+//---end---
+

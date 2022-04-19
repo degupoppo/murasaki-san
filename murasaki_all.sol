@@ -3065,6 +3065,13 @@ contract World_Dice is Ownable {
     //variants
     mapping(uint32 => uint32) public rolled_dice;
     mapping(uint32 => uint32) public last_dice_roll_time;
+    uint32 dice_item_type = 36;
+    
+    //set dice item_type    
+    function _set2_dice_item_type(uint32 _item_type) external onlyOwner {
+        dice_item_type = _item_type;
+    }
+
 
     //dice roll
     function dice_roll(uint32 _summoner) external {
@@ -3073,7 +3080,7 @@ contract World_Dice is Ownable {
         require(mfs.check_owner(_summoner, msg.sender));
         //dice possession check
         address _owner = mfs.get_owner(_summoner);
-        require(mfs.get_balance_of_type_specific(_owner, 51) > 0);
+        require(mfs.get_balance_of_type_specific(_owner, dice_item_type) > 0);
         uint32 _now = uint32(block.timestamp);
         require(_now - last_dice_roll_time[_summoner] >= (ms.BASE_SEC() *9/10) *100/ms.SPEED());
         //dice roll
@@ -3093,8 +3100,12 @@ contract World_Dice is Ownable {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
         uint32 _now = uint32(block.timestamp);
+        address _owner = mfs.get_owner(_summoner);
         //ignore past rolled dice before BASE_SEC
-        if(_now - last_dice_roll_time[_summoner] >= ms.BASE_SEC() *100/ms.SPEED()) {
+        if(
+            _now - last_dice_roll_time[_summoner] >= ms.BASE_SEC() *100/ms.SPEED()
+            || mfs.get_balance_of_type_specific(_owner, dice_item_type) == 0
+        ) {
             return 0;
         } else{
             return rolled_dice[_summoner];
