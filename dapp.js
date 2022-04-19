@@ -943,6 +943,8 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             item_wearing_hat.x = this.x - 25;
             item_wearing_hat.y = this.y + 110;
         }
+        item_wearing_hat.x -= 0;
+        item_wearing_hat.y -= 48;
     }
     update(){
         if (this.mode == "resting") {this.resting();}
@@ -1615,6 +1617,8 @@ function preload() {
     this.load.image("item_ohana_piggy_bank", "png/item_ohana_piggy_bank.png", {frameWidth: 619, frameHeight: 659});
     this.load.image("item_kusa_pouch", "png/item_kusa_pouch.png", {frameWidth: 636, frameHeight: 895});
     this.load.image("item_dice", "png/item_dice.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("item_hat_knit", "png/item_hat_knit.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_hat_mugiwara", "png/item_hat_mugiwara.png", {frameWidth: 370, frameHeight: 320});
     
     //items_todo
     this.load.image("item_mushroom", "png/item_mushroom.png", {frameWidth: 300, frameHeight: 300});
@@ -2814,7 +2818,7 @@ function update() {
             ).setScale(0.12);
             
             //hat1
-            item_tiny_crown = this.add.sprite(400, 150, "item_tiny_crown").setOrigin(0.5).setScale(0.45);
+            item_tiny_crown = this.add.sprite(400, 150, "item_hat_mugiwara").setOrigin(0.5).setScale(0.25);
             item_tiny_crown.setInteractive({useHandCursor: true});
             item_tiny_crown.on('pointerdown', () => {
                 if (item_wearing_hat == 0) {
@@ -2827,7 +2831,7 @@ function update() {
             });
 
             //hat2
-            item_tiny_crown2 = this.add.sprite(600, 150, "item_tiny_crown").setOrigin(0.5).setScale(0.45);
+            item_tiny_crown2 = this.add.sprite(600, 150, "item_hat_knit").setOrigin(0.5).setScale(0.15);
             item_tiny_crown2.setInteractive({useHandCursor: true});
             item_tiny_crown2.on('pointerdown', () => {
                 if (item_wearing_hat == 0) {
