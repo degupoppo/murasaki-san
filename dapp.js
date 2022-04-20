@@ -10,13 +10,13 @@ ToDo
  ok IDを看板内に表示する
 
     ダイスの実装
-        24時間でリセットされる
+     ok 24時間でリセットされる
             小さくカウントアップを表示するか
             24時間後は補正0になる
-        クリックしてtx飛ばす
+     ok クリックしてtx飛ばす
             tx通れば値更新
             d20の枠組み内に現在の数字を表示させるか
-        アニメーションが可能ならしてみたいが
+      * アニメーションが可能ならしてみたいが
             ダイスらしく転がせられるだろうか
             24時間経過前は転がる→必ず設定した値がでる
             24時間経過後は、マウスオーバーで更新可能を示す絵に変わる
@@ -41,7 +41,7 @@ ToDo
      ok 帽子は棚や壁ラックにかけておき、クリックでwaringする
             visible=false, 帽子spriteをcreateでよいか
             帽子sprite側はdestroy、対応するspriteをvisible=trueで棚に戻す
-      * 帽子絵の規格を決定する
+     ok 帽子絵の規格を決定する
             370x320はクリック領域が広く扱いにくい
             80x80ぐらいか？
 
@@ -167,7 +167,8 @@ let local_owner = "0x0000000000000000000000000000000000000000";
 let local_name_str = "(unnamed)";
 let local_notPetrified = true;
 let local_isActive;
-let local_dice = 0;
+let local_rolled_dice = 0;
+let local_last_dice_roll_time;
 
 //local using variants
 let previous_local_last_feeding_time = 0;
@@ -359,7 +360,10 @@ async function contract_update_status(_summoner) {
     local_notPetrified = await contract_mffg.methods.not_petrified(_summoner).call();
     
     //dice
-    local_dice = await contract_d.methods.get_rolled_dice(_summoner).call();
+    if (local_items[36] > 0) {
+        local_rolled_dice = await contract_d.methods.get_rolled_dice(_summoner).call();
+        local_last_dice_roll_time = await contract_d.methods.last_dice_roll_time(_summoner).call();
+    }
 
     //update last_sync_time
     last_sync_time = Date.now();
@@ -555,6 +559,15 @@ async function get_rolled_dice(_summoner) {
     return _res;    
 }
 
+//last_dice_roll_time
+async function get_last_dice_roll_time(_summoner) {
+    let web3 = await connect();
+    let wallet = await get_wallet(web3);
+    let contract = await new web3.eth.Contract(abi_world_dice, contract_world_dice);
+    let _res = await contract.methods.last_dice_roll_time(_summoner).call();
+    return _res;
+}
+
 
 //---summoner-----------------------------------------------------------------------------------------------------
 
@@ -570,7 +583,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         this.dist = "right";
         this.target_x = 0;
         this.target_y = 0;
-        this.setInteractive()
+        this.setInteractive();
         this.on("pointerdown", function (pointer) {
             this.on_click();
         }, this);
@@ -1140,6 +1153,119 @@ class Pet extends Phaser.GameObjects.Sprite{
         else if (this.mode == "moving") {this.moving();}
         //else if (this.mode == "sleeping") {this.sleeping();}
         else if (this.mode == "working") {this.working();}
+    }
+}
+
+
+//---dice-----------------------------------------------------------------------------------------------------
+
+class Dice extends Phaser.GameObjects.Sprite{
+    constructor(scene, x, y){
+        super(scene, x, y, "item_dice");
+        this.scene.add.existing(this);
+        this.setInteractive({ useHandCursor: true });
+        this.on("pointerdown", function (pointer) {
+            this.on_click();
+        }, this);
+        this.speed_x = 0;
+        this.speed_y = 0;
+        this.text_rolled_number = scene.add.text(x, y, "88", {font: "14px Arial Bold", fill: "#ffffff"}).setOrigin(0.5);
+        this.text_next_time = scene.add.text(x, y+40, "---", {font: "14px Arial Bold", fill: "#000000"}).setOrigin(0.5);
+        this.flag_tx = 0;
+        this.count = 0;
+        this.line_y = 500;
+        this.line_x_r = 1100;
+        this.line_x_l = 50;
+    }
+    on_click() {
+        this.speed_x = Math.random() * 40 - 20;
+        this.speed_y = 10 + Math.random() * 10;
+        this.count = 0;
+        this.text_rolled_number.visible = false;
+        this.text_next_time.visible = false;
+        if (this.flag_tx == 1) {
+            dice_roll(summoner);
+        }
+    }
+    update(){
+        this.count += 1;
+        //update text
+        if (this.count% 200 == 1) {
+            //update rooled number
+            this.text_rolled_number.setText(local_rolled_dice/10);
+            //update next roll time
+            let _now = Date.now() / 1000;
+            let _delta_sec = _now - local_last_dice_roll_time;
+            //let _next_sec = BASE_SEC * 0.9 - _delta_sec * SPEED;
+            let _next_sec = BASE_SEC - _delta_sec * SPEED;
+            if (_next_sec <= 0) {
+                this.text_next_time.setText("Roll the Dice").setFill("#ff0000");
+                this.flag_tx = 1;
+            } else if (_next_sec <= 8640) {
+                let _hr = Math.floor(_next_sec % 86400 / 3600);
+                let _min = Math.floor(_next_sec % 3600 / 60);
+                let _text = _hr + "h:" + _min + "m";
+                this.text_next_time.setText(_text).setFill("#ff0000");
+                this.flag_tx = 1;
+            } else {
+                let _hr = Math.floor(_next_sec % 86400 / 3600);
+                let _min = Math.floor(_next_sec % 3600 / 60);
+                let _text = _hr + "h:" + _min + "m";
+                this.text_next_time.setText(_text).setFill("#000000");
+                this.flag_tx = 0;
+            }
+        }
+        //check speed
+        if (
+            Math.abs(this.speed_x) <= 0.5
+            && Math.abs(this.speed_y) <= 0.5
+            && this.line_y - this.y <= 1
+        ) {
+            //when stop
+            this.text_rolled_number.visible = true;
+            this.text_rolled_number.x = this.x;
+            this.text_rolled_number.y = this.y;
+            this.text_next_time.visible = true;
+            this.text_next_time.x = this.x;
+            this.text_next_time.y = this.y + 40;
+        } else {
+            //when moving
+            //reducing x speed, -/+
+            if (this.speed_x > 0) {
+                //friction, when speed_y = 0
+                if (Math.abs(this.speed_y) <= 0.5) {
+                    this.speed_x -= 0.1 * 3;
+                } else {
+                    this.speed_x -= 0.1;
+                }
+            } else {
+                if (Math.abs(this.speed_y) <= 0.5) {
+                    this.speed_x += 0.1 * 3;
+                } else {
+                    this.speed_x += 0.1;
+                }
+            }
+            //reduction of y speed
+            this.speed_y -= 0.98;
+            //position moving
+            this.x += this.speed_x;
+            this.y -= this.speed_y;
+            //increase angle
+            this.angle += this.speed_x * 2;
+            //refrection y
+            if (this.y >= this.line_y) {
+                this.y = this.line_y;
+                this.speed_y *= -0.7;   //bounce coefficient
+            }
+            //refrection x
+            if (this.x >= this.line_x_r) {
+                this.x = this.line_x_r;
+                this.speed_x *= -0.9;   //bounce coefficient
+            } else if (this.x <= this.line_x_l) {
+                this.x = this.line_x_l;
+                this.speed_x *= -0.9;
+            }
+        }
     }
 }
 
@@ -2248,6 +2374,11 @@ function update() {
         dr_bitco.update();
     }
 
+    //update dice
+    if (typeof dice != "undefined") {
+        dice.update();
+    }
+
     //===== sync time =====
 
     if (turn % 20 == 0) {
@@ -2855,6 +2986,8 @@ function update() {
                 }
             });
             
+            dice = new Dice(this, 400, 500).setScale(0.3);
+            
         }
         //2:Crown
         _item_id = 2;
@@ -2951,7 +3084,7 @@ function update() {
                 "crafting"
             ).setScale(0.11);
         }
-        //36:dice
+        //36:dice ***TODO***
         _item_id = 36;
         if (
             (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
@@ -2960,25 +3093,38 @@ function update() {
             local_items_flag[_item_id] = true;
             item_dice = this.add.sprite(1000, 700, "item_dice").setOrigin(0.5).setScale(0.3);
             item_dice.setInteractive({useHandCursor: true});
-            item_dice.on("pointerdown", () => {dice_roll(summoner);});
-            async function _get_rolled_dice(scene) {
-                let _res = await get_rolled_dice(summoner);
-                _res = _res /10;
-                item_dice_text = scene.add.text(999,698, _res, {font: "14px Arial Bold", fill: "#ffffff"}).setOrigin(0.5);
+            item_dice.on("pointerdown", () => {dice_roll(summoner);});    //***
+            item_dice_text_rolled_number = this.add.text(999,698, "", {font: "14px Arial Bold", fill: "#ffffff"}).setOrigin(0.5);
+            item_dice_text_next_time = this.add.text(999,740, "", {font: "14px Arial Bold", fill: "#000000"}).setOrigin(0.5);
+            
+            /*
+            item_dice.on("pointerdown", () => {_animation_dice_roll(this);});
+            function _animation_dice_roll(scene) {
+                for (let i = 0; i <= 10; i++) {
+                    item_dice.x -= 10;
+                }
             }
-            _get_rolled_dice(this);
-            //item_needle_cushion = this.add.sprite(790,350, "item_needle_cushion").setOrigin(0.5).setScale(0.3);        
-        //check rolled_dice_text
-        } else if (
-            local_items_flag[_item_id] == true
-            && previous_local_dice != local_dice
-        ) {
-            async function _get_rolled_dice(scene) {
-                let _res = await get_rolled_dice(summoner);
-                _res = _res /10;
-                item_dice_text.setText(_res);
+            */            
+            
+        }
+        if (local_items_flag[_item_id] == true) {
+            //update rolled_dice
+            item_dice_text_rolled_number.setText(local_rolled_dice/10);
+            //update next roll time
+            let _now = Date.now() / 1000;
+            let _delta_sec = _now - local_last_dice_roll_time;
+            let _next_sec = BASE_SEC * 0.9 - _delta_sec * SPEED;
+            if (_next_sec <= 0) {
+                item_dice_text_next_time.setText("Roll the Dice");
+                item_dice.setInteractive({useHandCursor: true});
+            } else {
+                let _hr = Math.floor(_next_sec % 86400 / 3600);
+                let _min = Math.floor(_next_sec % 3600 / 60);
+                let _text = _hr + "h:" + _min + "m";
+                item_dice_text_next_time.setText(_text);
+                item_dice.disableInteractive();
+                //item_dice.setInteractive({useHandCursor: true}); //***
             }
-            _get_rolled_dice(this);
         }
         //194:ohana_piggy_pouch
         if (local_items[194] != previous_local_item194) {
@@ -3077,7 +3223,7 @@ function update() {
         previous_local_items = local_items;
         previous_local_item194 = local_items[194];
         previous_local_item195 = local_items[195];
-        previous_local_dice = local_dice;
+        previous_local_rolled_dice = local_rolled_dice;
     }
 
     //===== update system message =====
@@ -3107,3 +3253,43 @@ function update() {
 
 //---end---
 
+        /*
+        _item_id = 36;
+        if (
+            (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+            && local_items_flag[_item_id] != true
+        ) {
+            local_items_flag[_item_id] = true;
+            item_dice = this.add.sprite(1000, 700, "item_dice").setOrigin(0.5).setScale(0.3);
+            item_dice.setInteractive({useHandCursor: true});
+            item_dice.on("pointerdown", () => {dice_roll(summoner);});
+            async function _get_rolled_dice(scene) {
+                let _rolled_dice = await get_rolled_dice(summoner);
+                _rolled_dice = _rolled_dice /10;
+                item_dice_text = scene.add.text(999,698, _rolled_dice, {font: "14px Arial Bold", fill: "#ffffff"}).setOrigin(0.5);
+                let _last_dice_roll_time = await get_last_dice_roll_time(summoner); 
+                let _now = Date.now() / 1000;
+                let _delta_sec = _now - _last_dice_roll_time;
+                
+                let _day = Math.floor(_delta_sec / 86400);
+                let _hr = Math.floor(_delta_sec % 86400 / 3600);
+                let _min = Math.floor(_delta_sec % 3600 / 60);
+                let _text = _day + "d:" + _hr + "h:" + _min + "m";
+                
+                item_dice_text = scene.add.text(999,748, _text, {font: "14px Arial Bold", fill: "#000000"}).setOrigin(0.5);
+            }
+            _get_rolled_dice(this);
+            //item_needle_cushion = this.add.sprite(790,350, "item_needle_cushion").setOrigin(0.5).setScale(0.3);        
+        //check rolled_dice_text
+        } else if (
+            local_items_flag[_item_id] == true
+            && previous_local_dice != local_dice
+        ) {
+            async function _get_rolled_dice(scene) {
+                let _res = await get_rolled_dice(summoner);
+                _res = _res /10;
+                item_dice_text.setText(_res);
+            }
+            _get_rolled_dice(this);
+        }
+        */
