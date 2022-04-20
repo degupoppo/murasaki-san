@@ -3,20 +3,20 @@
 
 ToDo
 
-    わんころの顔塗る
+  * わんころの顔塗る
 
-    重なり調整
+  * 重なり調整
 
  ok IDを看板内に表示する
 
-    ダイスの実装
+ ok ダイスの実装
      ok 24時間でリセットされる
             小さくカウントアップを表示するか
             24時間後は補正0になる
      ok クリックしてtx飛ばす
             tx通れば値更新
             d20の枠組み内に現在の数字を表示させるか
-      * アニメーションが可能ならしてみたいが
+     ok アニメーションが可能ならしてみたいが
             ダイスらしく転がせられるだろうか
             24時間経過前は転がる→必ず設定した値がでる
             24時間経過後は、マウスオーバーで更新可能を示す絵に変わる
@@ -35,6 +35,7 @@ ToDo
 
     帽子枠の実装
       * summonerのすべてのアニメーションで、帽子の位置を決定する
+            左右で絵を変える
      ok 帽子スプライトを1つだけ作成し、waringしているitemをそのスプライトに格納する
             帽子スプライトの存在をチェックし、summoner()内でその都度描写する        
             脱ぐときはdestroyする
@@ -918,54 +919,55 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             item_wearing_hat.y = this.y + 38;
         }else if (this.mode == "mining" && this.submode == 1 && this.dist == "left") {
             item_wearing_hat.x = this.x - 5;
-            item_wearing_hat.y = this.y + 10;
+            item_wearing_hat.y = this.y + 15;
         }else if (this.mode == "mining" && this.submode == 1 && this.dist == "right") {
             item_wearing_hat.x = this.x + 5;
-            item_wearing_hat.y = this.y + 10;
+            item_wearing_hat.y = this.y + 15;
         }else if (this.mode == "mining" && this.submode == 2) {
             item_wearing_hat.x = this.x + 32;
             item_wearing_hat.y = this.y - 10;
         }else if (this.mode == "farming" && this.submode == 1 && this.dist == "left") {
             item_wearing_hat.x = this.x - 5;
-            item_wearing_hat.y = this.y + 10;
+            item_wearing_hat.y = this.y + 15;
         }else if (this.mode == "farming" && this.submode == 1 && this.dist == "right") {
             item_wearing_hat.x = this.x + 5;
-            item_wearing_hat.y = this.y + 10;
+            item_wearing_hat.y = this.y + 15;
         }else if (this.mode == "farming" && this.submode == 2) {
-            item_wearing_hat.x = this.x + 30;
-            item_wearing_hat.y = this.y + 8;
+            item_wearing_hat.x = this.x + 25;
+            item_wearing_hat.y = this.y + 10;
         }else if (this.mode == "crafting" && this.submode == 1 && this.dist == "left") {
             item_wearing_hat.x = this.x - 5;
-            item_wearing_hat.y = this.y + 10;
+            item_wearing_hat.y = this.y + 15;
         }else if (this.mode == "crafting" && this.submode == 1 && this.dist == "right") {
             item_wearing_hat.x = this.x + 7;
-            item_wearing_hat.y = this.y + 10;
+            item_wearing_hat.y = this.y + 15;
         }else if (this.mode == "crafting" && this.submode == 2) {
             item_wearing_hat.x = this.x + 2;
             item_wearing_hat.y = this.y - 18;
         }else if (this.mode == "feeding" && this.submode == 1 && this.dist == "right") {
             item_wearing_hat.x = this.x + 8;
-            item_wearing_hat.y = this.y + 10;
+            item_wearing_hat.y = this.y + 15;
         }else if (this.mode == "feeding" && this.submode == 1 && this.dist == "left") {
             item_wearing_hat.x = this.x - 8;
-            item_wearing_hat.y = this.y + 10;
+            item_wearing_hat.y = this.y + 15;
         }else if (this.mode == "feeding" && this.submode == 3) {
-            item_wearing_hat.x = this.x;
+            item_wearing_hat.x = this.x - 2;
             item_wearing_hat.y = this.y;
         }else if (this.mode == "grooming" && this.submode == 1 && this.dist == "right") {
             item_wearing_hat.x = this.x + 8;
-            item_wearing_hat.y = this.y + 10;
+            item_wearing_hat.y = this.y + 15;
         }else if (this.mode == "grooming" && this.submode == 1 && this.dist == "left") {
             item_wearing_hat.x = this.x - 8;
-            item_wearing_hat.y = this.y + 10;
+            item_wearing_hat.y = this.y + 15;
         }else if (this.mode == "grooming" && this.submode == 3) {
             item_wearing_hat.x = this.x - 25;
             item_wearing_hat.y = this.y + 110;
         }
-        if (item_wearing_hat == item_hat_mugiwara) {
+        //***TODO*** Dirty Codes
+        if (typeof item_hat_mugiwara != "undefined" && item_wearing_hat == item_hat_mugiwara) {
             item_wearing_hat.x -= 0;
-            item_wearing_hat.y -= 48;
-        } else if (item_wearing_hat == item_hat_knit) {
+            item_wearing_hat.y -= 60;
+        } else if (typeof item_hat_knit != "undefined" && item_wearing_hat == item_hat_knit) {
             item_wearing_hat.x -= 0;
             item_wearing_hat.y -= 60;
         }
@@ -1173,19 +1175,32 @@ class Dice extends Phaser.GameObjects.Sprite{
         this.text_next_time = scene.add.text(x, y+40, "---", {font: "14px Arial Bold", fill: "#000000"}).setOrigin(0.5);
         this.flag_tx = 0;
         this.count = 0;
-        this.line_y = 500;
-        this.line_x_r = 1100;
-        this.line_x_l = 50;
+        this.line_y = y;      //initial value of line_y, the same as first position of y
+        this.line_y_max = 500;  //max floor position
+        this.line_y_min = 900;
+        this.line_x_r = 1200;   //right side
+        this.line_x_l = 50;     //left side
     }
     on_click() {
-        this.speed_x = Math.random() * 40 - 20;
-        this.speed_y = 10 + Math.random() * 10;
+        this.speed_x = 8 + Math.random() * 5;
+        /*
+        if (Math.random() > 0.5) {
+            this.speed_x *= -1;
+        }
+        */
+        if (game.input.mousePointer.x > this.x) {
+            this.speed_x *= -1;
+        }
+        this.speed_y = 8 + Math.random() * 5;
         this.count = 0;
         this.text_rolled_number.visible = false;
         this.text_next_time.visible = false;
         if (this.flag_tx == 1) {
             dice_roll(summoner);
         }
+        //define constant of y = b - a * x
+        this.b = this.y - 50 + Math.random() * 100; //define b base on this.y
+        this.a = (this.b - this.y) / this.x;    //calc a
     }
     update(){
         this.count += 1;
@@ -1196,7 +1211,6 @@ class Dice extends Phaser.GameObjects.Sprite{
             //update next roll time
             let _now = Date.now() / 1000;
             let _delta_sec = _now - local_last_dice_roll_time;
-            //let _next_sec = BASE_SEC * 0.9 - _delta_sec * SPEED;
             let _next_sec = BASE_SEC - _delta_sec * SPEED;
             if (_next_sec <= 0) {
                 this.text_next_time.setText("Roll the Dice").setFill("#ff0000");
@@ -1230,6 +1244,14 @@ class Dice extends Phaser.GameObjects.Sprite{
             this.text_next_time.y = this.y + 40;
         } else {
             //when moving
+            //define line_y
+            this.line_y = this.b - this.a * this.x;
+            if (this.line_y < this.line_y_max) {
+                this.line_y = this.line_y_max;
+            }
+            if (this.line_y > this.line_y_min) {
+                this.line_y = this.line_y_min;
+            }
             //reducing x speed, -/+
             if (this.speed_x > 0) {
                 //friction, when speed_y = 0
@@ -1251,11 +1273,16 @@ class Dice extends Phaser.GameObjects.Sprite{
             this.x += this.speed_x;
             this.y -= this.speed_y;
             //increase angle
-            this.angle += this.speed_x * 2;
+            this.angle += this.speed_x * 3;
             //refrection y
             if (this.y >= this.line_y) {
                 this.y = this.line_y;
-                this.speed_y *= -0.7;   //bounce coefficient
+                this.speed_y *= -0.5;   //bounce coefficient
+            /*
+            } else if (this.y <= this.line_yu) {
+                this.y = this.line_yu;
+                this.speed_y *= -0.5;   //bounce coefficient
+            */
             }
             //refrection x
             if (this.x >= this.line_x_r) {
@@ -1479,6 +1506,7 @@ function open_window_craft (scene) {
     }
     item17_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  1, "item_vase").setScale(0.08);
     item18_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  2, "ms_ether_right").setScale(0.08);
+    item19_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  3, "item_hat_mugiwara").setScale(0.15);
     item22_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  6, "item_chocolate_bread").setScale(0.25);
 
     //crafting_item
@@ -1489,6 +1517,8 @@ function open_window_craft (scene) {
     item33_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  1, "item_violin").setScale(0.08);
     item34_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  2, "item_musicbox").setScale(0.12);
     item35_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  3, "dr_bitco_right").setScale(0.08);
+    item36_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  4, "item_dice").setScale(0.18);
+    item37_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  5, "item_hat_knit").setScale(0.14);
 
     //coin/material bag
     button_crafting_item194  = create_button(170, 110 + 40*17, "[" +local_items[194]+ "] Ohana Piggy Bank", 194,  scene);
@@ -1555,10 +1585,13 @@ function open_window_craft (scene) {
     group_window_crafting.add(item6_icon);
     group_window_crafting.add(item17_icon);
     group_window_crafting.add(item18_icon);
+    group_window_crafting.add(item19_icon);
     group_window_crafting.add(item22_icon);
     group_window_crafting.add(item33_icon);
     group_window_crafting.add(item34_icon);
     group_window_crafting.add(item35_icon);
+    group_window_crafting.add(item36_icon);
+    group_window_crafting.add(item37_icon);
 }
 
 
@@ -2375,7 +2408,7 @@ function update() {
     }
 
     //update dice
-    if (typeof dice != "undefined") {
+    if (typeof dice != "undefined" && turn % 2 == 0) {
         dice.update();
     }
 
@@ -2961,32 +2994,8 @@ function update() {
             ).setScale(0.12);
             
             //hat1
-            item_hat_mugiwara = this.add.sprite(400, 150, "item_hat_mugiwara").setOrigin(0.5).setScale(0.25);
-            item_hat_mugiwara.setInteractive({useHandCursor: true});
-            item_hat_mugiwara.on('pointerdown', () => {
-                if (item_wearing_hat == 0) {
-                    item_wearing_hat = item_hat_mugiwara;
-                } else if (item_wearing_hat == item_hat_mugiwara) {
-                    item_wearing_hat = 0;
-                    item_hat_mugiwara.x = 400;
-                    item_hat_mugiwara.y = 150;
-                }
-            });
-
             //hat2
-            item_hat_knit = this.add.sprite(600, 150, "item_hat_knit").setOrigin(0.5).setScale(0.20);
-            item_hat_knit.setInteractive({useHandCursor: true});
-            item_hat_knit.on('pointerdown', () => {
-                if (item_wearing_hat == 0) {
-                    item_wearing_hat = item_hat_knit;
-                } else if (item_wearing_hat == item_hat_knit) {
-                    item_wearing_hat = 0;
-                    item_hat_knit.x = 600;
-                    item_hat_knit.y = 150;
-                }
-            });
-            
-            dice = new Dice(this, 400, 500).setScale(0.3);
+
             
         }
         //2:Crown
@@ -3045,6 +3054,27 @@ function update() {
                 "farming"
             ).setScale(0.12);
         }
+        //19:straw_hat
+        _item_id = 19;
+        if (
+            (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+            && local_items_flag[_item_id] != true
+        ) {
+            local_items_flag[_item_id] = true;
+            let _x = 300;
+            let _y = 85;
+            item_hat_mugiwara = this.add.sprite(_x, _y, "item_hat_mugiwara").setOrigin(0.5).setScale(0.25);
+            item_hat_mugiwara.setInteractive({useHandCursor: true});
+            item_hat_mugiwara.on('pointerdown', () => {
+                if (item_wearing_hat == 0) {
+                    item_wearing_hat = item_hat_mugiwara;
+                } else if (item_wearing_hat == item_hat_mugiwara) {
+                    item_wearing_hat = 0;
+                    item_hat_mugiwara.x = _x;
+                    item_hat_mugiwara.y = _y;
+                }
+            });
+        }
         //21: Choco. Bread -> Feeding()
         //33:violin
         _item_id = 33;
@@ -3091,21 +3121,23 @@ function update() {
             && local_items_flag[_item_id] != true
         ) {
             local_items_flag[_item_id] = true;
+            dice = new Dice(this, 400, 600).setScale(0.3);
+        }
+
+            /*
+            local_items_flag[_item_id] = true;
             item_dice = this.add.sprite(1000, 700, "item_dice").setOrigin(0.5).setScale(0.3);
             item_dice.setInteractive({useHandCursor: true});
             item_dice.on("pointerdown", () => {dice_roll(summoner);});    //***
             item_dice_text_rolled_number = this.add.text(999,698, "", {font: "14px Arial Bold", fill: "#ffffff"}).setOrigin(0.5);
             item_dice_text_next_time = this.add.text(999,740, "", {font: "14px Arial Bold", fill: "#000000"}).setOrigin(0.5);
-            
-            /*
+
             item_dice.on("pointerdown", () => {_animation_dice_roll(this);});
             function _animation_dice_roll(scene) {
                 for (let i = 0; i <= 10; i++) {
                     item_dice.x -= 10;
                 }
             }
-            */            
-            
         }
         if (local_items_flag[_item_id] == true) {
             //update rolled_dice
@@ -3125,6 +3157,28 @@ function update() {
                 item_dice.disableInteractive();
                 //item_dice.setInteractive({useHandCursor: true}); //***
             }
+        }
+        */
+        //37:Knit Hat
+        _item_id = 37;
+        if (
+            (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+            && local_items_flag[_item_id] != true
+        ) {
+            local_items_flag[_item_id] = true;
+            let _x = 700;
+            let _y = 90;
+            item_hat_knit = this.add.sprite(_x, _y, "item_hat_knit").setOrigin(0.5).setScale(0.20);
+            item_hat_knit.setInteractive({useHandCursor: true});
+            item_hat_knit.on('pointerdown', () => {
+                if (item_wearing_hat == 0) {
+                    item_wearing_hat = item_hat_knit;
+                } else if (item_wearing_hat == item_hat_knit) {
+                    item_wearing_hat = 0;
+                    item_hat_knit.x = _x;
+                    item_hat_knit.y = _y;
+                }
+            });
         }
         //194:ohana_piggy_pouch
         if (local_items[194] != previous_local_item194) {
@@ -3184,15 +3238,6 @@ function update() {
             local_items_flag[_item_id] = true;
             item_earth = this.add.sprite(1000,850, "item_the_earth").setOrigin(0.5).setScale(0.4);        
         }
-        //19
-        _item_id = 19;
-        if (
-            (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
-            && local_items_flag[_item_id] != true
-        ) {
-            local_items_flag[_item_id] = true;
-            item_cactus = this.add.sprite(50,500, "item_cactus").setOrigin(0.5).setScale(0.4);        
-        }
         //20
         _item_id = 20;
         if (
@@ -3211,15 +3256,6 @@ function update() {
             local_items_flag[_item_id] = true;
             item_mushroom = this.add.sprite(250,500, "item_mushroom").setOrigin(0.5).setScale(0.3);        
         }
-        //37        
-        _item_id = 37;
-        if (
-            (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
-            && local_items_flag[_item_id] != true
-        ) {
-            local_items_flag[_item_id] = true;
-            item_aquarium = this.add.sprite(1100,550, "item_aquarium").setOrigin(0.5).setScale(0.3);
-        }        
         previous_local_items = local_items;
         previous_local_item194 = local_items[194];
         previous_local_item195 = local_items[195];
