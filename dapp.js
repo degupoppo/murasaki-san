@@ -510,13 +510,15 @@ async function contract_mint_name(_summoner, _name_str) {
 }
 
 //get_userItems_bag
-async function get_userItems(_target_item_type) {
+async function get_userItems(_summoner, _target_item_type) {
     let web3 = await connect();
     let wallet = await get_wallet(web3);
+    let contract_mm = await new web3.eth.Contract(abi_murasaki_main, contract_murasaki_main);
+    let _owner = await contract_mm.methods.ownerOf(_summoner).call();
     //contract
     let contract = await new web3.eth.Contract(abi_murasaki_craft, contract_murasaki_craft);
-    let myListLength = await contract.methods.myListLength(wallet).call();
-    let myListsAt = await contract.methods.myListsAt(wallet, 0, myListLength).call();
+    let myListLength = await contract.methods.myListLength(_owner).call();
+    let myListsAt = await contract.methods.myListsAt(_owner, 0, myListLength).call();
     let _array_items = [];
     for (let i = 0; i < myListLength; i++) {
         let _item = myListsAt[i];
@@ -3183,9 +3185,9 @@ function update() {
         //194:ohana_piggy_pouch
         if (local_items[194] != previous_local_item194) {
             // define async function
-            async function _do (scene) {
+            async function _do(scene) {
                 // get item194 list, need to wait
-                let _array_item194 = await get_userItems(194);
+                let _array_item194 = await get_userItems(summoner, 194);
                 // recreate sprite group
                 try {
                     group_item194.destroy(true);
@@ -3206,9 +3208,9 @@ function update() {
         //195:kusa_pouch
         if (local_items[195] != previous_local_item195) {
             // define async function
-            async function _do (scene) {
+            async function _do(scene) {
                 // get item195 list, need to wait
-                let _array_item195 = await get_userItems(195);
+                let _array_item195 = await get_userItems(summoner, 195);
                 // recreate sprite group
                 try {
                     group_item195.destroy(true);
