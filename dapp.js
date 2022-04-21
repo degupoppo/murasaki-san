@@ -921,6 +921,9 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
     }
     hugging() {
         this.count += 1;
+        if (this.count % 200 == 50) {
+            sound_happy.play();
+        }
         if (this.count == 1){
             this.anims.play("murasaki_click", true);
         }else if (this.count >= 300) {
@@ -1292,6 +1295,8 @@ class Dice extends Phaser.GameObjects.Sprite{
         //define constant of y = b - a * x
         this.b = this.y - 50 + Math.random() * 100; //define b base on this.y
         this.a = (this.b - this.y) / this.x;    //calc a
+        //sound
+        sound_dice.play();
     }
     update(){
         this.count += 1;
@@ -1369,19 +1374,19 @@ class Dice extends Phaser.GameObjects.Sprite{
             if (this.y >= this.line_y) {
                 this.y = this.line_y;
                 this.speed_y *= -0.5;   //bounce coefficient
-            /*
-            } else if (this.y <= this.line_yu) {
-                this.y = this.line_yu;
-                this.speed_y *= -0.5;   //bounce coefficient
-            */
+                if (Math.abs(this.speed_y) > 0.5) {
+                    sound_dice2.play();
+                }
             }
             //refrection x
             if (this.x >= this.line_x_r) {
                 this.x = this.line_x_r;
                 this.speed_x *= -0.9;   //bounce coefficient
+                sound_dice2.play();
             } else if (this.x <= this.line_x_l) {
                 this.x = this.line_x_l;
                 this.speed_x *= -0.9;
+                sound_dice2.play();
             }
         }
     }
@@ -1864,6 +1869,9 @@ function preload() {
     this.load.audio("crafting_during", "sound/crafting_during.mp3");
     this.load.audio("happy", "sound/happy.mp3");
     this.load.audio("earn", "sound/earn.wav");
+    this.load.audio("dice", "sound/dice.mp3");
+    this.load.audio("dice2", "sound/dice2.mp3");
+    this.load.audio("hat", "sound/hat.mp3");
 
     //items
     this.load.spritesheet("item_musicbox", "png/item_musicbox.png", {frameWidth: 370, frameHeight: 320});
@@ -2304,6 +2312,9 @@ function create() {
     sound_crafting_during = this.sound.add("crafting_during", {volume:0.1});
     sound_happy = this.sound.add("happy", {volume:0.2});
     sound_earn = this.sound.add("earn", {volume:0.2});
+    sound_dice = this.sound.add("dice", {volume:0.15});
+    sound_dice2 = this.sound.add("dice2", {volume:0.1});
+    sound_hat = this.sound.add("hat", {volume:0.1});
 
     //===create summoner===
 
@@ -3104,6 +3115,7 @@ function update() {
                     item_crown.anims.stop();
                 } else {
                     item_crown.anims.isPlaying = true;
+                    sound_hat.play();
                 }
             });
             console.log(item_crown.anims.is);
@@ -3168,6 +3180,7 @@ function update() {
                 if (item_wearing_hat == 0) {
                     item_wearing_hat = item_hat_mugiwara;
                     murasakisan.on_click();
+                    sound_hat.play();
                 } else if (item_wearing_hat == item_hat_mugiwara) {
                     item_wearing_hat = 0;
                     item_hat_mugiwara.x = _x;
@@ -3274,6 +3287,7 @@ function update() {
                 if (item_wearing_hat == 0) {
                     item_wearing_hat = item_hat_knit;
                     murasakisan.on_click();
+                    sound_hat.play();
                 } else if (item_wearing_hat == item_hat_knit) {
                     item_wearing_hat = 0;
                     item_hat_knit.x = _x;
