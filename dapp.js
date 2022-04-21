@@ -3323,6 +3323,7 @@ function update() {
                     item_bank.on("pointerdown", () => unpack_bag(summoner, _array_item194[i]));
                     item_bank.on("pointerover", () => item_bank.setTexture("item_bank_broken"));
                     item_bank.on("pointerout", () => item_bank.setTexture("item_bank"));
+                    item_bank.on('pointerover', () => sound_button_select.play());
                     group_item194.add(item_bank);
                 }
             }
