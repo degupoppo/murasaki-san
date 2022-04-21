@@ -11,7 +11,7 @@
             なにか「消費」の概念を考えねばならない
             safeTransferではなくtransferFromならばコントラへ投げれた。これを利用する
 
-    素材boxの実装
+ ok 素材boxの実装
         1000単位、10000単位を消費してクラフト→NFTアイテム化
         NFTアイテムを消費して+1000, +10000素材を加算
         193以降の自由枠を使用する
@@ -3052,9 +3052,27 @@ contract Murasaki_Craft is ERC721, Ownable{
 
 //---------------------------------------------------------------------------------------------------------------------
 //world dice
-//0x84c003134E20c5a93859F5b1d601bf9FAF0c417A
 
 contract World_Dice is Ownable {
+
+    /*
+    rolled_dices = [a, b, c, d]
+    roll:
+        req(>=20)
+        now_dice = d20
+        >24*4: [0,0,0,now]
+        >24*3: [d,0,0,now]
+        >24*2: [c,d,0,now]
+        <=24*2: [b,c,d,now]
+    get:
+        >24*4: 0
+        >24*3: d/4
+        >24*2: c+d/4
+        >24*1: b+c+d/4
+        <=24: a+b+c+d/4
+    get_now:
+        rolled_dices[3]
+    */
 
     //address
     address public murasaki_function_share_address;
@@ -3072,7 +3090,6 @@ contract World_Dice is Ownable {
         dice_item_type = _item_type;
     }
 
-
     //dice roll
     function dice_roll(uint32 _summoner) external {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
@@ -3088,7 +3105,6 @@ contract World_Dice is Ownable {
         //luck challenge
         uint32 _luck_mod = ms.luck(_summoner) + mfs.calc_heart(_summoner) * 5;
         if (mfs.d100(_summoner) <= _luck_mod/100) {
-        //if (mfs.d100(_summoner) <= ms.luck(_summoner)/100) {
             _dice_roll = 20 * 10;  //critical
         }
         rolled_dice[_summoner] = _dice_roll;
@@ -3101,7 +3117,7 @@ contract World_Dice is Ownable {
         Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
         uint32 _now = uint32(block.timestamp);
         address _owner = mfs.get_owner(_summoner);
-        //ignore past rolled dice before BASE_SEC
+        //ignore past rolled dice before BASE_SEC, and when not possessed _item_type
         if(
             _now - last_dice_roll_time[_summoner] >= ms.BASE_SEC() *100/ms.SPEED()
             || mfs.get_balance_of_type_specific(_owner, dice_item_type) == 0

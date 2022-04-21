@@ -1,11 +1,93 @@
 
 /*
 
+//---ToDo---------------------------------------------------------------------------------------------
+
 ToDo
+
+    帽子案
+        ぴこぴこ揺れるお花
+            classごとにお花の種類を変える？
+
+    ダイスシステムの深慮
+        ダイスのリセット時間について
+            1日か3日か、あるいは5日とか
+            1日だと、良いダイスを引く→クラフト、と進んでも、
+                クラフトが完了する3日目には別の目を振り直さないといけない
+            しかし、クラフト開始時に補正をかけるのはちょっと困難
+        補正方法について
+            すべての行動は、stop時にステータス補正がかかる
+            stopのtxを飛ばしたときのステータス、所持アイテムによって得られる結果が変わる
+            このシステムにおいて、ダイス目をどうやって自然に組み込むか
+                stopする前に運試しで振るのか
+                良い補正値を見てからstartするのか
+        4日間の平均値とする
+            24時間開くごとに0を代入する
+            24+24時間以内に次をロールすればペナルティ無し
+            ただし、24時間経過後は、ダイス振るは直近が0として計算される
+            24+24時間以内に次を降れば4つの平均値が補正値として採用される
+            → とにかく、こまめに振ることが最も高効率の設計
+            20時間経過後に次のダイスを触れる。
+                20～48時間以内に振れば、0代入のペナルティ無し。
+            ダイスには直近の値のみを表示させる
+            平均すると、こまめに振っていれば平均10＝+1レベル程度の補正
+      * ダイスコントラの更新
+
+    NFT Stakingのメカニズムの深慮
+        自分の分身であるmini murasaki-sanをぬいぐるみとしてクラフトする
+            このmini murasaki-sanを旅に出す（NFT staking）
+            mini murasaki-sanは旅に出したときの本体のステータスを引き継ぐ
+                ではなくて、クラフト完了時点のステータスに固定される
+                    いつクラフトするかが悩ましくなる
+            ステータスによって効率が変わる
+                STR, DEX, INTの差別化をどうするか
+        報酬をどう設計するか
+            簡単なのは、dapp stakingの報酬の50%を全体に配る
+                購入価格の50%もジャックポットに入れてしまう
+            独自トークンを配る
+                独自トークンのユースケース設計が大変
+            ohana/kusaを発生させる
+                自分の分身を出稼ぎに出してるイメージ
+            ハートやその他のアイテムなどを見つけにゆかせる
+                staking時間に応じて見つけるものが違う
+                gas代で判断できるので、何かしらはcraftさせる
+                最低時間（3日程度）を決めておき、放置すれば放置するだけレアアイテムの確率が上がる
+                旅支度に持たせるcoin/materialによっても確率を変えるか
+                この方法でしか手に入らないアイテムを設計することで、ユースケースになるか
+        mini murasaki-sanのコスト設計
+            いつクラフト可能とするか
+                あまりに後半だとモチベが持たない
+                あまりに初期だとバランスが難しい
+                １ヶ月程度か？
+                jacpot内のお金を表示させてモチベをもたせる
+        コントラの実装
+            お金が絡むのでセキュリティは慎重に
+            良いお手本コントラを探しておく
+            NFTをtransferして手形（NFT）を発行する
+            時間経過でコントラが保持しているお金をNFTに割り振る
+            最低ステーキング時間を設定する
+            withdraw時に手形NFTを要求する
+            withdraw時に報酬をtransferする
+
+ ok マケプレへのアイコン表示の実装
+
+    NFTの絵の実装
+        pngをifgなどに格納するか
+        urlをコードするか
+        いずれにしても、ToFuNFTでも正常に表示させたいところだが、果たして
+        あるいは、独自マケプレでも良いかもしれないが。
 
   * わんころの顔塗る
 
   * 重なり調整
+
+    クラフトウィンドウの改善
+        枠のデザイン再考
+        アイテムアイコンを影絵にする？
+
+    看板デザインの変更
+
+    Happy, Satiety, Expアイコンの変更
 
  ok IDを看板内に表示する
 
@@ -58,14 +140,6 @@ ToDo
             現状、upgrade用のapproveボタンを押さないとunpackできない。
       * マウスオーバー時の絵の実装
             中身が解かれてcoin/kusaが少し見えている絵
-
-    クラフトウィンドウの改善
-        枠のデザイン再考
-        アイテムアイコンを影絵に
-
-    看板デザインの変更
-
-    Happy, Satiety, Expアイコンの変更
 
     pngファイルの軽量化
     
@@ -200,7 +274,7 @@ let screen_material = 0;
 let screen_material_delta = 0;
 let screen_exp = 0;
 let screen_exp_delta = 0;
-let count_update = 0;
+let count_sync = 0;
 let happy = 0;
 let previous_happy = 0;
 let satiety = 0;
@@ -291,21 +365,17 @@ async function contract_update_status(_summoner) {
     local_isActive = await contract_ms.methods.isActive(_summoner).call();
     if (local_isActive == false) {
         console.log("summoner=", _summoner, "local_isActive=", local_isActive);
-        count_update += 1;
+        count_sync += 1;
         return 0;
     }
+    
+    //=====update high frequency=====
 
-    //call global variants ***TODO***
-    SPEED = await contract_ms.methods.SPEED().call();   //220311: speed was modified as 100%=x1
-    SPEED = Number(SPEED) / 100;
+    //wallet
+    local_wallet = wallet;
 
-    //call status from ms
+    //call dynamic status from ms
     let _dynamic_status = await contract_mfs.methods.get_dynamic_status_array(_summoner).call();
-    let _static_status = await contract_mfs.methods.get_static_status_array(_summoner).call();
-
-    //update static status
-    local_class = Number(_static_status[0]);
-    local_birth_time = Number(_static_status[1]);
 
     //update local variants
     local_level = Number(_dynamic_status[0]);
@@ -328,7 +398,7 @@ async function contract_update_status(_summoner) {
     local_crafting_start_time = Number(_dynamic_status[17]);
     local_crafting_item_type = Number(_dynamic_status[18]);
 
-    //mining, farming, crafting
+    //mining, farming, crafting calculation
     if (local_mining_status == 1){
         local_coin_calc = await contract_mfmf.methods.calc_mining(_summoner).call();
         local_coin_calc = Number(local_coin_calc);
@@ -339,36 +409,53 @@ async function contract_update_status(_summoner) {
         local_crafting_calc = await contract_mfc.methods.calc_crafting(_summoner).call();
         local_crafting_calc = Number(local_crafting_calc);
     }
-
-    //item
-    let _owner = await contract_mm.methods.ownerOf(_summoner).call();
-    local_items = await contract_mfs.methods.get_balance_of_type_array(_owner).call();
-    console.log("status:", _dynamic_status, "items:", local_items);
-
-    //heart
-    //local_heart = await contract_th.methods.balanceOf(_owner).call();
-    local_heart = local_items[193];
-    local_heart = Number(local_heart);
-
-    //update wallet
-    local_wallet = wallet;
-    local_owner = _owner;
-
-    //name
-    local_name_str = await contract_mn.methods.call_name_from_summoner(_summoner).call();
     
-    //petrification
-    local_notPetrified = await contract_mffg.methods.not_petrified(_summoner).call();
+    //=====update low frequency=====
     
-    //dice
-    if (local_items[36] > 0) {
-        local_rolled_dice = await contract_d.methods.get_rolled_dice(_summoner).call();
-        local_last_dice_roll_time = await contract_d.methods.last_dice_roll_time(_summoner).call();
+    if (count_sync % 3 == 0) {
+
+        //call global variants ***TODO***
+        SPEED = await contract_ms.methods.SPEED().call();   //220311: speed was modified as 100%=x1
+        SPEED = Number(SPEED) / 100;
+        
+        //call static status from ms
+        let _static_status = await contract_mfs.methods.get_static_status_array(_summoner).call();
+
+        //update static status
+        local_class = Number(_static_status[0]);
+        local_birth_time = Number(_static_status[1]);
+
+        //owner of summoner
+        let _owner = await contract_mm.methods.ownerOf(_summoner).call();
+        local_owner = _owner;
+
+        //call item from contract
+        local_items = await contract_mfs.methods.get_balance_of_type_array(_owner).call();
+
+        //update local heart
+        local_heart = Number(local_items[193]);
+
+        //petrification
+        local_notPetrified = await contract_mffg.methods.not_petrified(_summoner).call();
+        
+        //name
+        local_name_str = await contract_mn.methods.call_name_from_summoner(_summoner).call();
+
+        //dice
+        if (local_items[36] > 0) {
+            local_rolled_dice = await contract_d.methods.get_rolled_dice(_summoner).call();
+            local_last_dice_roll_time = await contract_d.methods.last_dice_roll_time(_summoner).call();
+        }
     }
+
+    //=====msc=====
+
+    //debug
+    console.log("status:", _dynamic_status, "items:", local_items);
 
     //update last_sync_time
     last_sync_time = Date.now();
-    count_update += 1;
+    count_sync += 1;
 }
 
 //update_all
@@ -621,10 +708,10 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             if (tmp <= 5) {
                 this.mode = "sleeping";
                 this.count = 0;
-            }else if (tmp <= 20 && satiety <= 10 && count_update > 3) {
+            }else if (tmp <= 20 && satiety <= 10 && count_sync > 3) {
                 this.mode = "hungry";
                 this.count = 0;
-            }else if (tmp <= 20 && happy <= 10 && count_update > 3) {
+            }else if (tmp <= 20 && happy <= 10 && count_sync > 3) {
                 this.mode = "crying";
                 this.count = 0;
             }else {
@@ -968,7 +1055,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         //***TODO*** Dirty Codes
         if (typeof item_hat_mugiwara != "undefined" && item_wearing_hat == item_hat_mugiwara) {
             item_wearing_hat.x -= 0;
-            item_wearing_hat.y -= 60;
+            item_wearing_hat.y -= 65;
         } else if (typeof item_hat_knit != "undefined" && item_wearing_hat == item_hat_knit) {
             item_wearing_hat.x -= 0;
             item_wearing_hat.y -= 60;
@@ -1182,6 +1269,8 @@ class Dice extends Phaser.GameObjects.Sprite{
         this.line_y_min = 900;
         this.line_x_r = 1200;   //right side
         this.line_x_l = 50;     //left side
+        //contract parameter
+        this.limit_per = 0.9;
     }
     on_click() {
         this.speed_x = 8 + Math.random() * 5;
@@ -1215,9 +1304,9 @@ class Dice extends Phaser.GameObjects.Sprite{
             let _delta_sec = _now - local_last_dice_roll_time;
             let _next_sec = BASE_SEC - _delta_sec * SPEED;
             if (_next_sec <= 0) {
-                this.text_next_time.setText("Roll the Dice").setFill("#ff0000");
+                this.text_next_time.setText("Dice Roll").setFill("#ff0000");
                 this.flag_tx = 1;
-            } else if (_next_sec <= 8640) {
+            } else if (_next_sec <= BASE_SEC * (1 - this.limit_per)) {
                 let _hr = Math.floor(_next_sec % 86400 / 3600);
                 let _min = Math.floor(_next_sec % 3600 / 60);
                 let _text = _hr + "h:" + _min + "m";
@@ -2053,7 +2142,7 @@ function create() {
     item_bear.scaleX = item_bear.scaleX * 0.45;
     item_bear.scaleY = item_bear.scaleY * 0.45;
 
-    //===button_icon===
+    //===click button===
 
     //feeding
     button_feeding = this.add.sprite(610,850, "button_feeding");
@@ -2164,11 +2253,14 @@ function create() {
     button_levelup.on('pointerout', () => text_level.setText(local_level));
     button_levelup.disableInteractive();
 
+    //===system click button===
+
     //icon_rotate
-    icon_rotate = this.add.sprite(40,910, "icon_rotate")
+    icon_rotate = this.add.sprite(50,900, "icon_rotate")
         .setOrigin(0.5)
-        .setScale(0.05)
+        .setScale(0.075)
         .setInteractive({useHandCursor: true})
+        .on('pointerdown', () => sound_button_on.play())
         .on("pointerdown", () => {
             if (this.sys.game.scale.gameSize._width == 1280) {
                 this.scale.setGameSize(960,1280);
@@ -2182,10 +2274,11 @@ function create() {
         });
 
     //icon_home
-    icon_home = this.add.sprite(100,910, "icon_home")
+    icon_home = this.add.sprite(130,900, "icon_home")
         .setOrigin(0.5)
-        .setScale(0.1)
+        .setScale(0.15)
         .setInteractive({useHandCursor: true})
+        .on('pointerdown', () => sound_button_on.play())
         .on("pointerdown", () => {
                 window.location.href = "./";
         });
@@ -2217,7 +2310,15 @@ function create() {
     murasakisan = new Murasakisan(this, 500 + Math.random()*200, 640 + Math.random()*100);
     murasakisan.setScale(0.45);
 
-    //===button===
+    //===system message===
+
+    //system message
+    text_system_message = this.add.text(640, 420, "", {
+        font: "32px Arial", 
+        fill: "#000000", 
+        backgroundColor: "#ffffff",
+        align: "center"
+    }).setOrigin(0.5);
 
     //summon
     text_summon = this.add.text(640, 480, ">> Summon your Murasaki-san <<", {font: "30px Arial", fill: "#E62E8B", backgroundColor: "#FDEFF5"})
@@ -2337,7 +2438,7 @@ function create() {
 
     //===etc===
 
-    //craft_window ***TODO***
+    //crafting_window ***TODO***
     //select crafting_item_type
     text_select_item = this.add.text(750, 120, ">> Select Item <<", {font: "30px Arial", fill: "#000", backgroundColor: "#ecd9ff"})
                 .setFontSize(24).setFontFamily("Arial").setFill('#000000')
@@ -2348,14 +2449,6 @@ function create() {
     text_craft_item = this.add.text(750, 150, "", font_arg)
                 .setInteractive({useHandCursor: true})
                 .on("pointerdown", () => open_window_craft(this) )
-
-    //system message
-    text_system_message = this.add.text(640, 420, "", {
-        font: "32px Arial", 
-        fill: "#000000", 
-        backgroundColor: "#ffffff",
-        align: "center"
-    }).setOrigin(0.5);
 }
 
 
@@ -2400,11 +2493,6 @@ function update() {
     if (typeof ms_ether != "undefined") {
         ms_ether.update();
     }
-    /*
-    if (typeof master_solid != "undefined") {
-        master_solid.update();
-    }
-    */
     if (typeof dr_bitco != "undefined") {
         dr_bitco.update();
     }
@@ -2423,9 +2511,8 @@ function update() {
 
         /*
         //protection code
-        if (location.hostname != "localhost" && location.hostname != "murasaki-san.com") {
+        if (location.hostname != "murasaki-san.com") {
             while(true){
-                console.log("error", location.hostname);
                 const d1 = new Date();
                 while (true) {
                   const d2 = new Date();
@@ -2553,7 +2640,7 @@ function update() {
             screen_coin_delta = local_coin - previous_local_coin;
             screen_coin_easing = 100;
             //earning text
-            if (count_update > 3) {
+            if (count_sync > 3) {
                 let _delta = local_coin - previous_local_coin;
                 let _sign = "";
                 if (_delta > 0) {
@@ -2582,7 +2669,7 @@ function update() {
             screen_material_delta = local_material - previous_local_material;
             screen_material_easing = 100;
             //earning text
-            if (count_update > 3) {
+            if (count_sync > 3) {
                 let _delta = local_material - previous_local_material;
                 let _sign = ""; //no need when minus
                 if (_delta > 0) {
@@ -2618,7 +2705,7 @@ function update() {
             }
             screen_exp_easing = 100;
             //earning text
-            if (count_update > 3) {
+            if (count_sync > 3) {
                 let _delta = local_exp - previous_local_exp;
                 let _sign = ""; //no need when minus
                 if (_delta > 0) {
@@ -3009,7 +3096,17 @@ function update() {
             local_items_flag[_item_id] = true;
             item_crown = this.add.sprite(1050,290, "item_crown");
             item_crown.anims.play("item_crown", true);
+            item_crown.anims.isPlaying = false;
             item_crown.setScale(0.3);
+            item_crown.setInteractive({useHandCursor: true});
+            item_crown.on('pointerdown', () => {
+                if (item_crown.anims.isPlaying) {
+                    item_crown.anims.stop();
+                } else {
+                    item_crown.anims.isPlaying = true;
+                }
+            });
+            console.log(item_crown.anims.is);
         }
         //3:Fortune Statue
         _item_id = 3;
@@ -3070,6 +3167,7 @@ function update() {
             item_hat_mugiwara.on('pointerdown', () => {
                 if (item_wearing_hat == 0) {
                     item_wearing_hat = item_hat_mugiwara;
+                    murasakisan.on_click();
                 } else if (item_wearing_hat == item_hat_mugiwara) {
                     item_wearing_hat = 0;
                     item_hat_mugiwara.x = _x;
@@ -3175,6 +3273,7 @@ function update() {
             item_hat_knit.on('pointerdown', () => {
                 if (item_wearing_hat == 0) {
                     item_wearing_hat = item_hat_knit;
+                    murasakisan.on_click();
                 } else if (item_wearing_hat == item_hat_knit) {
                     item_wearing_hat = 0;
                     item_hat_knit.x = _x;
@@ -3271,7 +3370,7 @@ function update() {
         text_system_message.setText("");
     }
     //update message text
-    if (turn % 150 == 60 || turn == 1 || count_update == 1) {
+    if (turn % 150 == 60 || turn == 1 || count_sync == 1) {
         update_systemMessage();
     }
 

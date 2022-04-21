@@ -1,0 +1,11 @@
+
+#table_onMarketItems thead th, #talbe_sellingItems thead th, #table_userItems thead th{
+    padding-top: 5px;
+    padding-bottom: 5px;
+    font-size: 0.9em;
+}
+#table_onMarketItems tbody td, #talbe_sellingItems tbody td, #table_userItems tbody td{
+    padding-top: 1px;
+    padding-bottom: 1px;
+    font-size: 0.9em;
+}
