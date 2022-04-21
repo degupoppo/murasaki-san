@@ -3324,6 +3324,7 @@ function update() {
                     item_bank.on("pointerover", () => item_bank.setTexture("item_bank_broken"));
                     item_bank.on("pointerout", () => item_bank.setTexture("item_bank"));
                     item_bank.on('pointerover', () => sound_button_select.play());
+                    item_bank.on('pointerdown', () => sound_button_on.play() );
                     group_item194.add(item_bank);
                 }
             }
