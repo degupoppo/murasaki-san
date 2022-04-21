@@ -5,6 +5,12 @@
 
 ToDo
 
+    帽子周りの整備
+        位置合わせ微調整で座標を決定する
+            なにかモデル絵を対象にして座標を決定する
+        画像側をあわせる
+        帽子絵がそろってからか
+
     帽子案
         ぴこぴこ揺れるお花
             classごとにお花の種類を変える？
@@ -1889,6 +1895,8 @@ function preload() {
     this.load.image("item_dice", "png/item_dice.png", {frameWidth: 200, frameHeight: 200});
     this.load.image("item_hat_knit", "png/item_hat_knit.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("item_hat_mugiwara", "png/item_hat_mugiwara.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_bank", "png/item_bank.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_bank_broken", "png/item_bank_broken.png", {frameWidth: 370, frameHeight: 320});
     
     //items_todo
     this.load.image("item_mushroom", "png/item_mushroom.png", {frameWidth: 300, frameHeight: 300});
@@ -3309,10 +3317,12 @@ function update() {
                 group_item194 = scene.add.group();
                 // create sprite, add group
                 for (let i = 0; i < _array_item194.length; i++) {
-                    item_bank = scene.add.sprite(850 + i*50, 900, "item_ohana_piggy_bank");
-                    item_bank.setScale(0.08);
+                    item_bank = scene.add.sprite(850 + i*50, 900, "item_bank");
+                    item_bank.setScale(0.25);
                     item_bank.setInteractive({useHandCursor: true});
                     item_bank.on("pointerdown", () => unpack_bag(summoner, _array_item194[i]));
+                    item_bank.on("pointerover", () => item_bank.setTexture("item_bank_broken"));
+                    item_bank.on("pointerout", () => item_bank.setTexture("item_bank"));
                     group_item194.add(item_bank);
                 }
             }
