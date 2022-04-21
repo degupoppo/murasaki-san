@@ -3318,7 +3318,7 @@ function update() {
                 // create sprite, add group
                 for (let i = 0; i < _array_item194.length; i++) {
                     item_bank = scene.add.sprite(850 + i*50, 900, "item_bank");
-                    item_bank.setScale(0.25);
+                    item_bank.setScale(0.3);
                     item_bank.setInteractive({useHandCursor: true});
                     item_bank.on("pointerdown", () => unpack_bag(summoner, _array_item194[i]));
                     item_bank.on("pointerover", () => item_bank.setTexture("item_bank_broken"));
