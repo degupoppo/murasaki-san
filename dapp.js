@@ -19,7 +19,44 @@ ToDo
         ぴこぴこ揺れるお花
             classごとにお花の種類を変える？
 
-    ダイスシステムの深慮
+    NFT Stakingのメカニズムの深慮
+        自分の分身であるmini murasaki-sanをぬいぐるみとしてクラフトする
+            このmini murasaki-sanを旅に出す（NFT staking）
+            mini murasaki-sanは旅に出したときの本体のステータスを引き継ぐ
+                ではなくて、クラフト完了時点のステータスに固定される
+                    いつクラフトするかが悩ましくなる
+            ステータスによって効率が変わる
+                STR, DEX, INTの差別化をどうするか
+        報酬をどう設計するか
+            簡単なのは、dapp stakingの報酬の50%を全体に配る
+                購入価格の50%もジャックポットに入れてしまう
+            独自トークンを配る
+                独自トークンのユースケース設計が大変なのでNG
+            ohana/kusaを発生させる
+                自分の分身を出稼ぎに出してるイメージ
+                これだけではインセンティブが弱いか
+            ハートやその他のアイテムなどを見つけにゆかせる
+                staking時間に応じて見つけるものが違う
+                gas代で判断できるので、何かしらはcraftさせる
+                最低時間（3日程度）を決めておき、放置すれば放置するだけレアアイテムの確率が上がる
+                旅支度に持たせるcoin/materialによっても確率を変えるか
+                この方法でしか手に入らないアイテムを設計することで、ユースケースになるか
+        mini murasaki-sanのコスト設計
+            いつクラフト可能とするか
+                あまりに後半だとモチベが持たない
+                あまりに初期だとバランスが難しい
+                １ヶ月程度か？
+                jacpot内のお金を表示させてモチベをもたせる
+        コントラの実装
+            お金が絡むのでセキュリティは慎重に
+            良いお手本コントラを探しておく
+            NFTをtransferして手形（NFT）を発行する
+            時間経過でコントラが保持しているお金をNFTに割り振る
+            最低ステーキング時間を設定する
+            withdraw時に手形NFTを要求する
+            withdraw時に報酬をtransferする
+
+ ok ダイスシステムの深慮
         ダイスのリセット時間について
             1日か3日か、あるいは5日とか
             1日だと、良いダイスを引く→クラフト、と進んでも、
@@ -42,42 +79,6 @@ ToDo
             ダイスには直近の値のみを表示させる
             平均すると、こまめに振っていれば平均10＝+1レベル程度の補正
       * ダイスコントラの更新
-
-    NFT Stakingのメカニズムの深慮
-        自分の分身であるmini murasaki-sanをぬいぐるみとしてクラフトする
-            このmini murasaki-sanを旅に出す（NFT staking）
-            mini murasaki-sanは旅に出したときの本体のステータスを引き継ぐ
-                ではなくて、クラフト完了時点のステータスに固定される
-                    いつクラフトするかが悩ましくなる
-            ステータスによって効率が変わる
-                STR, DEX, INTの差別化をどうするか
-        報酬をどう設計するか
-            簡単なのは、dapp stakingの報酬の50%を全体に配る
-                購入価格の50%もジャックポットに入れてしまう
-            独自トークンを配る
-                独自トークンのユースケース設計が大変
-            ohana/kusaを発生させる
-                自分の分身を出稼ぎに出してるイメージ
-            ハートやその他のアイテムなどを見つけにゆかせる
-                staking時間に応じて見つけるものが違う
-                gas代で判断できるので、何かしらはcraftさせる
-                最低時間（3日程度）を決めておき、放置すれば放置するだけレアアイテムの確率が上がる
-                旅支度に持たせるcoin/materialによっても確率を変えるか
-                この方法でしか手に入らないアイテムを設計することで、ユースケースになるか
-        mini murasaki-sanのコスト設計
-            いつクラフト可能とするか
-                あまりに後半だとモチベが持たない
-                あまりに初期だとバランスが難しい
-                １ヶ月程度か？
-                jacpot内のお金を表示させてモチベをもたせる
-        コントラの実装
-            お金が絡むのでセキュリティは慎重に
-            良いお手本コントラを探しておく
-            NFTをtransferして手形（NFT）を発行する
-            時間経過でコントラが保持しているお金をNFTに割り振る
-            最低ステーキング時間を設定する
-            withdraw時に手形NFTを要求する
-            withdraw時に報酬をtransferする
 
  ok マケプレへのアイコン表示の実装
 
@@ -1266,7 +1267,7 @@ class Dice extends Phaser.GameObjects.Sprite{
         this.line_x_l = 50;     //left side
         //contract parameter
         //this.limit_per = 0.9;
-        this.buffer_sec = 8640 * 4;
+        this.buffer_sec = 60 * 60 * 4;  // 4hr
     }
     on_click() {
         this.speed_x = 8 + Math.random() * 5;
@@ -1308,7 +1309,7 @@ class Dice extends Phaser.GameObjects.Sprite{
             if (_next_sec <= 0) {
                 this.text_next_time.setText("Dice Roll").setFill("#ff0000");
                 this.flag_tx = 1;
-            } else if (_next_sec <= BASE_SEC - this.buffer_sec) {
+            } else if (_next_sec <= this.buffer_sec ) {
                 let _hr = Math.floor(_next_sec % 86400 / 3600);
                 let _min = Math.floor(_next_sec % 3600 / 60);
                 let _text = _hr + "h:" + _min + "m";
@@ -3307,33 +3308,37 @@ function update() {
                 }
                 group_item194 = scene.add.group();
                 // create sprite, add group, using array for independency
-                let _array = [];
+                let _array_bank = [];
+                let _array_text = [];
+                let _array_icon = [];
                 for (let i = 0; i < _array_item194.length; i++) {
-                    _array[i] = scene.add.sprite(850 + i*50, 900, "item_bank")
+                    //bank sprite
+                    _array_bank[i] = scene.add.sprite(850 + i*50, 900, "item_bank")
                         .setScale(0.3)
+                        .setOrigin(0.5)
                         .setInteractive({useHandCursor: true})
-                        .on("pointerover", () => _array[i].setTexture("item_bank_broken") )
+                        .on("pointerover", () => _array_bank[i].setTexture("item_bank_broken") )
                         .on('pointerover', () => sound_button_select.play() )
-                        .on("pointerout", () => _array[i].setTexture("item_bank"))
+                        .on('pointerover', () => {_array_text[i].visible = true;} )
+                        .on('pointerover', () => {_array_icon[i].visible = true;} )
+                        .on("pointerout", () => _array_bank[i].setTexture("item_bank"))
+                        .on('pointerout', () => {_array_text[i].visible = false;} )
+                        .on('pointerout', () => {_array_icon[i].visible = false;} )
                         .on("pointerdown", () => unpack_bag(summoner, _array_item194[i]) )
                         .on('pointerdown', () => sound_button_on.play() );
-                    group_item194.add(_array[i]);
+                    //text, "+1000"
+                    _array_text[i] = scene.add.text(860 + i*50, 850, "+1000", {font: "17px Arial", fill: "#000000"})
+                        .setOrigin(0.5)
+                        .setVisible(false);
+                    //icon, ohana
+                    _array_icon[i] = scene.add.sprite(820 + i*50, 850, "icon_ohana")
+                        .setOrigin(0.5)
+                        .setScale(0.07)
+                        .setVisible(false);
+                    group_item194.add(_array_bank[i]);
+                    group_item194.add(_array_text[i]);
+                    group_item194.add(_array_icon[i]);
                 }
-
-                /*
-                for (let i = 0; i < _array_item194.length; i++) {
-                    item_bank = scene.add.sprite(850 + i*50, 900, "item_bank")
-                        .setScale(0.3)
-                        .setInteractive({useHandCursor: true})
-                        .on("pointerover", () => item_bank.setTexture("item_bank_broken") )
-                        .on('pointerover', () => sound_button_select.play() )
-                        .on("pointerout", () => item_bank.setTexture("item_bank"))
-                        .on("pointerdown", () => unpack_bag(summoner, _array_item194[i]) )
-                        .on('pointerdown', () => sound_button_on.play() );
-                    group_item194.add(item_bank);
-                }
-                */
-                
             }
             _do(this);
         }
