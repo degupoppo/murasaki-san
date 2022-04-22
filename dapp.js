@@ -1355,7 +1355,7 @@ class Dice extends Phaser.GameObjects.Sprite{
         */
         
         //if (game.input.mousePointer.x > this.x) {
-        if (game.input.activePointer.x > this.x) {
+        if (game.input.activePointer.position.x > this.x) {
             this.speed_x *= -1;
         }
 
