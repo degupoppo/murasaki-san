@@ -5,12 +5,6 @@
 
 ToDo
 
-  * 重なり調整
-        depthを修正する
-        基本的には、y座表示準じればよいか
-        ボタン、帽子など、一部のものは再背面、最前面にdepthを設定する
-        https://gpnotes.hatenablog.jp/entry/2019/01/16/170100
-
     NFT Stakingのメカニズムの深慮
         自分の分身であるmini murasaki-sanをぬいぐるみとしてクラフトする
             このmini murasaki-sanを旅に出す（NFT staking）
@@ -120,6 +114,12 @@ ToDo
         もしくは手動での色彩変化済み画像の用意
         あるいは、ユニークな色のアクセサリー
         
+ ok 重なり調整
+        depthを修正する
+        基本的には、y座表示準じればよいか
+        ボタン、帽子など、一部のものは再背面、最前面にdepthを設定する
+        https://gpnotes.hatenablog.jp/entry/2019/01/16/170100
+
  ok 貯金箱に資源表示
         マウスオーバー時にお花+1000と表示する
         グループに入れて表示/非表示をスムーズに。
@@ -1765,6 +1765,7 @@ function open_window_craft (scene) {
     group_window_crafting.add(item35_icon);
     group_window_crafting.add(item36_icon);
     group_window_crafting.add(item37_icon);
+    group_window_crafting.setDepth(9999 + 1);
 }
 
 
@@ -1827,6 +1828,8 @@ function open_window_summon(scene) {
     group_window_summon.add(button10);
     group_window_summon.add(button11);
     group_window_summon.add(button_cancel);
+    //depth
+    group_window_summon.setDepth(9999 + 1);
 }
 
 
@@ -3199,6 +3202,7 @@ function update() {
                     sound_hat.play();
                 }
             });
+            item_crown.depth = 9999;
             //console.log(item_crown.anims.is);
         }
         //3:Fortune Statue
@@ -3220,6 +3224,7 @@ function update() {
         ) {
             local_items_flag[_item_id] = true;
             item_ribbon = this.add.sprite(1057, 443, "item_ribbon").setScale(0.5).setOrigin(0.5);
+            item_ribbon.depth = 9999;
         }
         //17:vase
         _item_id = 17;
