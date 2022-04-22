@@ -206,7 +206,7 @@ let array_item_png = [
     //193, heart
     "tiny_heart.png",
     //194, Ohana Piggy Bank
-    "Ohana Piggy Bank",
+    "item_bank.png",
     //195, Kusa Pouch
     "Kusa Pouch",
 ]
