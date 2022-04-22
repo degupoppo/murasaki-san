@@ -5,9 +5,13 @@
 
 ToDo
 
+    貯金箱に資源表示
+        マウスオーバー時にお花+1000と表示する
+        グループに入れて表示/非表示をスムーズに。
+
     帽子周りの整備
         位置合わせ微調整で座標を決定する
-            なにかモデル絵を対象にして座標を決定する
+          * なにかモデル絵を対象にして座標を決定する
         画像側をあわせる
         帽子絵がそろってからか
 
@@ -449,7 +453,7 @@ async function contract_update_status(_summoner) {
 
         //dice
         if (local_items[36] > 0) {
-            local_rolled_dice = await contract_d.methods.get_rolled_dice(_summoner).call();
+            local_rolled_dice = await contract_d.methods.get_last_rolled_dice(_summoner).call();
             local_last_dice_roll_time = await contract_d.methods.last_dice_roll_time(_summoner).call();
         }
     }
@@ -644,24 +648,6 @@ async function dice_roll(_summoner) {
     let wallet = await get_wallet(web3);
     let contract = await new web3.eth.Contract(abi_world_dice, contract_world_dice);
     contract.methods.dice_roll(_summoner).send({from:wallet});
-}
-
-//get_rolled_dice
-async function get_rolled_dice(_summoner) {
-    let web3 = await connect();
-    let wallet = await get_wallet(web3);
-    let contract = await new web3.eth.Contract(abi_world_dice, contract_world_dice);
-    let _res = await contract.methods.get_rolled_dice(_summoner).call();
-    return _res;    
-}
-
-//last_dice_roll_time
-async function get_last_dice_roll_time(_summoner) {
-    let web3 = await connect();
-    let wallet = await get_wallet(web3);
-    let contract = await new web3.eth.Contract(abi_world_dice, contract_world_dice);
-    let _res = await contract.methods.last_dice_roll_time(_summoner).call();
-    return _res;
 }
 
 
@@ -1279,7 +1265,8 @@ class Dice extends Phaser.GameObjects.Sprite{
         this.line_x_r = 1200;   //right side
         this.line_x_l = 50;     //left side
         //contract parameter
-        this.limit_per = 0.9;
+        //this.limit_per = 0.9;
+        this.buffer_sec = 8640 * 4;
     }
     on_click() {
         this.speed_x = 8 + Math.random() * 5;
@@ -1299,8 +1286,12 @@ class Dice extends Phaser.GameObjects.Sprite{
             dice_roll(summoner);
         }
         //define constant of y = b - a * x
+        this.a = Math.random() * 0.5 - 0.25;
+        this.b = this.y + this.a * this.x;
+        /*
         this.b = this.y - 50 + Math.random() * 100; //define b base on this.y
         this.a = (this.b - this.y) / this.x;    //calc a
+        */
         //sound
         sound_dice.play();
     }
@@ -1317,7 +1308,7 @@ class Dice extends Phaser.GameObjects.Sprite{
             if (_next_sec <= 0) {
                 this.text_next_time.setText("Dice Roll").setFill("#ff0000");
                 this.flag_tx = 1;
-            } else if (_next_sec <= BASE_SEC * (1 - this.limit_per)) {
+            } else if (_next_sec <= BASE_SEC - this.buffer_sec) {
                 let _hr = Math.floor(_next_sec % 86400 / 3600);
                 let _min = Math.floor(_next_sec % 3600 / 60);
                 let _text = _hr + "h:" + _min + "m";
@@ -3315,18 +3306,34 @@ function update() {
                 } catch (error) {
                 }
                 group_item194 = scene.add.group();
-                // create sprite, add group
+                // create sprite, add group, using array for independency
+                let _array = [];
                 for (let i = 0; i < _array_item194.length; i++) {
-                    item_bank = scene.add.sprite(850 + i*50, 900, "item_bank");
-                    item_bank.setScale(0.3);
-                    item_bank.setInteractive({useHandCursor: true});
-                    item_bank.on("pointerdown", () => unpack_bag(summoner, _array_item194[i]));
-                    item_bank.on("pointerover", () => item_bank.setTexture("item_bank_broken"));
-                    item_bank.on("pointerout", () => item_bank.setTexture("item_bank"));
-                    item_bank.on('pointerover', () => sound_button_select.play());
-                    item_bank.on('pointerdown', () => sound_button_on.play() );
+                    _array[i] = scene.add.sprite(850 + i*50, 900, "item_bank")
+                        .setScale(0.3)
+                        .setInteractive({useHandCursor: true})
+                        .on("pointerover", () => _array[i].setTexture("item_bank_broken") )
+                        .on('pointerover', () => sound_button_select.play() )
+                        .on("pointerout", () => _array[i].setTexture("item_bank"))
+                        .on("pointerdown", () => unpack_bag(summoner, _array_item194[i]) )
+                        .on('pointerdown', () => sound_button_on.play() );
+                    group_item194.add(_array[i]);
+                }
+
+                /*
+                for (let i = 0; i < _array_item194.length; i++) {
+                    item_bank = scene.add.sprite(850 + i*50, 900, "item_bank")
+                        .setScale(0.3)
+                        .setInteractive({useHandCursor: true})
+                        .on("pointerover", () => item_bank.setTexture("item_bank_broken") )
+                        .on('pointerover', () => sound_button_select.play() )
+                        .on("pointerout", () => item_bank.setTexture("item_bank"))
+                        .on("pointerdown", () => unpack_bag(summoner, _array_item194[i]) )
+                        .on('pointerdown', () => sound_button_on.play() );
                     group_item194.add(item_bank);
                 }
+                */
+                
             }
             _do(this);
         }
@@ -3415,8 +3422,7 @@ function update() {
 }
 
 //---end---
-
-        /*
+/*
         _item_id = 36;
         if (
             (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
@@ -3455,4 +3461,23 @@ function update() {
             }
             _get_rolled_dice(this);
         }
-        */
+        
+//get_rolled_dice
+async function get_rolled_dice(_summoner) {
+    let web3 = await connect();
+    let wallet = await get_wallet(web3);
+    let contract = await new web3.eth.Contract(abi_world_dice, contract_world_dice);
+    let _res = await contract.methods.get_last_rolled_dice(_summoner).call();
+    return _res;    
+}
+
+//last_dice_roll_time
+async function get_last_dice_roll_time(_summoner) {
+    let web3 = await connect();
+    let wallet = await get_wallet(web3);
+    let contract = await new web3.eth.Contract(abi_world_dice, contract_world_dice);
+    let _res = await contract.methods.last_dice_roll_time(_summoner).call();
+    return _res;
+}
+
+*/

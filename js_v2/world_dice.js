@@ -1,4 +1,4 @@
-const contract_world_dice = "0x5D5bc0edc06eC200fE5A395D7166f58dD5F02eA4";
+const contract_world_dice = "0x985A9BbF0d51b75102B12fb6E65b8E02225279fA";
 const abi_world_dice = [
 	{
 		"anonymous": false,
@@ -41,6 +41,19 @@ const abi_world_dice = [
 			}
 		],
 		"name": "_set2_dice_item_type",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint32",
+				"name": "_sec",
+				"type": "uint32"
+			}
+		],
+		"name": "_set3_buffer_sec",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -95,6 +108,44 @@ const abi_world_dice = [
 		"name": "transferOwnership",
 		"outputs": [],
 		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint32",
+				"name": "_summoner",
+				"type": "uint32"
+			}
+		],
+		"name": "calc_elasped_time",
+		"outputs": [
+			{
+				"internalType": "uint32",
+				"name": "",
+				"type": "uint32"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint32",
+				"name": "_summoner",
+				"type": "uint32"
+			}
+		],
+		"name": "get_last_rolled_dice",
+		"outputs": [
+			{
+				"internalType": "uint32",
+				"name": "",
+				"type": "uint32"
+			}
+		],
+		"stateMutability": "view",
 		"type": "function"
 	},
 	{
@@ -167,6 +218,11 @@ const abi_world_dice = [
 				"internalType": "uint32",
 				"name": "",
 				"type": "uint32"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
 			}
 		],
 		"name": "rolled_dice",

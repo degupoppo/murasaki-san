@@ -3081,6 +3081,156 @@ contract World_Dice is Ownable {
     }
 
     //variants
+    mapping(uint32 => uint32[4]) public rolled_dice;
+    mapping(uint32 => uint32) public last_dice_roll_time;
+    uint32 dice_item_type = 36;
+    uint32 buffer_sec = 14400;  //4 hr
+
+    //set dice item_type    
+    function _set2_dice_item_type(uint32 _item_type) external onlyOwner {
+        dice_item_type = _item_type;
+    }
+
+    //set buffer_sec
+    function _set3_buffer_sec(uint32 _sec) external onlyOwner {
+        buffer_sec = _sec;
+    }
+
+    //calc elasped_time
+    function calc_elasped_time(uint32 _summoner) public view returns (uint32) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        if (last_dice_roll_time[_summoner] == 0) {
+            return 86400 * 10;  //if not rolled yet, return 10 days
+        } else {
+            uint32 _now = uint32(block.timestamp);
+            uint32 SPEED = ms.SPEED();
+            uint32 _elasped_time = uint32( (_now - last_dice_roll_time[_summoner]) * SPEED/100 );
+            return _elasped_time;
+        }
+    }
+
+    //dice roll
+    function dice_roll(uint32 _summoner) external {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        require(mfs.check_owner(_summoner, msg.sender));
+        //check dice possession
+        address _owner = mfs.get_owner(_summoner);
+        require(mfs.get_balance_of_type_specific(_owner, dice_item_type) > 0);
+        //check elasped_time
+        uint32 BASE_SEC = ms.BASE_SEC();
+        uint32 _elasped_time = calc_elasped_time(_summoner);
+        require(_elasped_time >= BASE_SEC - buffer_sec);
+        //dice roll
+        uint32 _dice_roll = mfs.d20(_summoner) * 10;
+        //luck challenge
+        uint32 _luck_mod = ms.luck(_summoner) + mfs.calc_heart(_summoner) * 5;
+        if (mfs.d100(_summoner) <= _luck_mod/100) {
+            _dice_roll = 20 * 10;  //critical
+        }
+        //update rolled_dice, after 48hr, input 0 in each 24hr
+        if (_elasped_time > BASE_SEC * 4) {
+            rolled_dice[_summoner] = [
+                0, 
+                0, 
+                0, 
+                _dice_roll
+            ];
+        } else if (_elasped_time > BASE_SEC * 3) {
+            rolled_dice[_summoner] = [
+                rolled_dice[_summoner][3], 
+                0, 
+                0, 
+                _dice_roll
+            ];
+        } else if (_elasped_time > BASE_SEC * 2) {
+            rolled_dice[_summoner] = [
+                rolled_dice[_summoner][2], 
+                rolled_dice[_summoner][3], 
+                0, 
+                _dice_roll
+            ];
+        } else {
+            rolled_dice[_summoner] = [
+                rolled_dice[_summoner][1], 
+                rolled_dice[_summoner][2], 
+                rolled_dice[_summoner][3], 
+                _dice_roll
+            ];
+        }
+        //update last time
+        uint32 _now = uint32(block.timestamp);
+        last_dice_roll_time[_summoner] = _now;
+    }
+    
+    //get rolled dice, average of 4 dices
+    function get_rolled_dice(uint32 _summoner) external view returns (uint32) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        //get elasped_time
+        uint32 BASE_SEC = ms.BASE_SEC();
+        uint32 _elasped_time = calc_elasped_time(_summoner);
+        //get owner of summoner
+        address _owner = mfs.get_owner(_summoner);
+        //calc mod_dice
+        uint32 _mod_dice;
+        //ignore when not possessed item_dice
+        if (mfs.get_balance_of_type_specific(_owner, dice_item_type) == 0) {
+            _mod_dice = 0;
+        //calc mod_dice depends on delta_sec
+        } else if (_elasped_time > BASE_SEC * 4) {
+            _mod_dice = 0;
+        } else if (_elasped_time > BASE_SEC * 3) {
+            _mod_dice = (
+                0 +
+                0 +
+                0 +
+                rolled_dice[_summoner][3]
+                ) / 4;
+        } else if (_elasped_time > BASE_SEC * 2) {
+            _mod_dice = (
+                0 +
+                0 +
+                rolled_dice[_summoner][2] +
+                rolled_dice[_summoner][3]
+                ) / 4;
+        } else if (_elasped_time > BASE_SEC * 1) {
+            _mod_dice = (
+                0 +
+                rolled_dice[_summoner][1] +
+                rolled_dice[_summoner][2] +
+                rolled_dice[_summoner][3]
+                ) / 4;
+        } else {
+            _mod_dice = (
+                rolled_dice[_summoner][0] +
+                rolled_dice[_summoner][1] +
+                rolled_dice[_summoner][2] +
+                rolled_dice[_summoner][3]
+                ) / 4;
+        }
+        return _mod_dice;
+    }
+    
+    //get last_rolled_dice
+    function get_last_rolled_dice(uint32 _summoner) external view returns (uint32) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        address _owner = mfs.get_owner(_summoner);
+        uint32 BASE_SEC = ms.BASE_SEC();
+        uint32 _elasped_time = calc_elasped_time(_summoner);
+        if (mfs.get_balance_of_type_specific(_owner, dice_item_type) == 0) {
+            return 0;
+        } else if (_elasped_time > BASE_SEC * 1) {
+            return 0;
+        } else {
+            return rolled_dice[_summoner][3];
+        }
+    }
+
+    /*
+    //variants
     mapping(uint32 => uint32) public rolled_dice;
     mapping(uint32 => uint32) public last_dice_roll_time;
     uint32 dice_item_type = 36;
@@ -3127,6 +3277,8 @@ contract World_Dice is Ownable {
             return rolled_dice[_summoner];
         }
     }
+    */
+
 }
 
 
