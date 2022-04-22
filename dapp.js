@@ -1347,14 +1347,16 @@ class Dice extends Phaser.GameObjects.Sprite{
     }
     on_click() {
         this.speed_x = 8 + Math.random() * 5;
-        /*
+        
         if (Math.random() > 0.5) {
             this.speed_x *= -1;
         }
-        */
+        
+        /*
         if (game.input.mousePointer.x > this.x) {
             this.speed_x *= -1;
         }
+        */
         this.speed_y = 8 + Math.random() * 5;
         this.count = 0;
         this.text_rolled_number.visible = false;
