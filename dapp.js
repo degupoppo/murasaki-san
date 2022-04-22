@@ -1057,6 +1057,9 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             item_wearing_hat.y = this.y + 45;
         }
 
+        //depth
+        item_wearing_hat.depth = item_wearing_hat.y + 100;
+
         /*
         if (
             this.mode == "resting"
@@ -1144,6 +1147,8 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         if (item_wearing_hat != 0) {
             this.update_item_wearing_hat();
         }
+        //deps
+        this.depth = this.y;
     }
 }
 
@@ -1309,6 +1314,8 @@ class Pet extends Phaser.GameObjects.Sprite{
         else if (this.mode == "moving") {this.moving();}
         //else if (this.mode == "sleeping") {this.sleeping();}
         else if (this.mode == "working") {this.working();}
+        //depth
+        this.depth = this.y;
     }
 }
 
@@ -1325,8 +1332,8 @@ class Dice extends Phaser.GameObjects.Sprite{
         }, this);
         this.speed_x = 0;
         this.speed_y = 0;
-        this.text_rolled_number = scene.add.text(x, y, "88", {font: "14px Arial Bold", fill: "#ffffff"}).setOrigin(0.5);
-        this.text_next_time = scene.add.text(x, y+40, "---", {font: "14px Arial Bold", fill: "#000000"}).setOrigin(0.5);
+        this.text_rolled_number = scene.add.text(x, y, "88", {font: "bold 20px Arial", fill: "#ffffff"}).setOrigin(0.5);
+        this.text_next_time = scene.add.text(x, y+40, "---", {font: "14px Arial", fill: "#000000"}).setOrigin(0.5);
         this.flag_tx = 0;
         this.count = 0;
         this.line_y = y;      //initial value of line_y, the same as first position of y
@@ -1356,7 +1363,7 @@ class Dice extends Phaser.GameObjects.Sprite{
             dice_roll(summoner);
         }
         //define constant of y = b - a * x
-        this.a = Math.random() * 0.5 - 0.25;
+        this.a = Math.random() * 0.8 - 0.4;
         this.b = this.y + this.a * this.x;
         /*
         this.b = this.y - 50 + Math.random() * 100; //define b base on this.y
@@ -1367,6 +1374,9 @@ class Dice extends Phaser.GameObjects.Sprite{
     }
     update(){
         this.count += 1;
+        //dept
+        this.depth = this.line_y;
+        this.text_rolled_number.depth = this.line_y + 1;
         //update text
         if (this.count% 200 == 1) {
             //update rooled number
@@ -2975,16 +2985,18 @@ function update() {
 
             group_food = this.add.group();
             item_potato = this.add.sprite(620, 740, "food_sweet_potato").setScale(0.12).setOrigin(0.5);
+            item_potato.depth = 9999;
             group_food.add(item_potato);
             if (local_items[5] > 0) {
                 item_pudding = this.add.sprite(590, 750, "item_pudding").setScale(0.30).setOrigin(0.5);
+                item_pudding.depth = 9999;
                 group_food.add(item_pudding);
             }
             if (local_items[22] > 0) {
                 item_chocolate_bread = this.add.sprite(670, 750, "item_chocolate_bread").setScale(0.4).setOrigin(0.5);
+                item_chocolate_bread.depth = 9999;
                 group_food.add(item_chocolate_bread);
             }
-            
             //food = this.add.sprite(600,730, "food_sweet_potato").setScale(0.12);
             sound_feeding.play();
 
@@ -3187,7 +3199,7 @@ function update() {
                     sound_hat.play();
                 }
             });
-            console.log(item_crown.anims.is);
+            //console.log(item_crown.anims.is);
         }
         //3:Fortune Statue
         _item_id = 3;
@@ -3197,6 +3209,7 @@ function update() {
         ) {
             local_items_flag[_item_id] = true;
             item_fortune_statue = this.add.sprite(70, 550, "item_fortune_statue").setScale(0.35).setOrigin(0.5);
+            item_fortune_statue.depth = item_fortune_statue.y;
         }
         //5:Pudding -> Feeding()
         //6:Ribbon
@@ -3217,6 +3230,7 @@ function update() {
             local_items_flag[_item_id] = true;
             item_17 = this.add.sprite(850,270, "item_vase");
             item_17.setScale(0.2);
+            item_17.depth = item_17.y;
         }
         //18:ms_ether
         _item_id = 18;
@@ -3267,6 +3281,7 @@ function update() {
             local_items_flag[_item_id] = true;
             item_violin = this.add.sprite(1200,608, "item_violin");
             item_violin.setScale(0.24);
+            item_violin.depth = item_violin.y;
         }
         //34:musicbox
         _item_id = 34;
@@ -3279,6 +3294,7 @@ function update() {
             item_musicbox.setScale(0.4);
             item_musicbox.setInteractive({useHandCursor: true});
             item_musicbox.on('pointerdown', () => music() );
+            item_musicbox.depth = item_musicbox.y;
         }
         //35:dr_bitco
         _item_id = 35;
@@ -3395,6 +3411,7 @@ function update() {
                         .on('pointerout', () => {_array_icon[i].visible = false;} )
                         .on("pointerdown", () => unpack_bag(summoner, _array_item194[i]) )
                         .on('pointerdown', () => sound_button_on.play() );
+                    _array_bank[i].depth = _array_bank[i].y;
                     //text, "+1000"
                     _array_text[i] = scene.add.text(860 + i*50, 850, "+1000", {font: "17px Arial", fill: "#000000"})
                         .setOrigin(0.5)
