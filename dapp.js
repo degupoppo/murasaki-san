@@ -5,19 +5,11 @@
 
 ToDo
 
-    貯金箱に資源表示
-        マウスオーバー時にお花+1000と表示する
-        グループに入れて表示/非表示をスムーズに。
-
-    帽子周りの整備
-        位置合わせ微調整で座標を決定する
-          * なにかモデル絵を対象にして座標を決定する
-        画像側をあわせる
-        帽子絵がそろってからか
-
-    帽子案
-        ぴこぴこ揺れるお花
-            classごとにお花の種類を変える？
+  * 重なり調整
+        depthを修正する
+        基本的には、y座表示準じればよいか
+        ボタン、帽子など、一部のものは再背面、最前面にdepthを設定する
+        https://gpnotes.hatenablog.jp/entry/2019/01/16/170100
 
     NFT Stakingのメカニズムの深慮
         自分の分身であるmini murasaki-sanをぬいぐるみとしてクラフトする
@@ -56,31 +48,12 @@ ToDo
             withdraw時に手形NFTを要求する
             withdraw時に報酬をtransferする
 
- ok ダイスシステムの深慮
-        ダイスのリセット時間について
-            1日か3日か、あるいは5日とか
-            1日だと、良いダイスを引く→クラフト、と進んでも、
-                クラフトが完了する3日目には別の目を振り直さないといけない
-            しかし、クラフト開始時に補正をかけるのはちょっと困難
-        補正方法について
-            すべての行動は、stop時にステータス補正がかかる
-            stopのtxを飛ばしたときのステータス、所持アイテムによって得られる結果が変わる
-            このシステムにおいて、ダイス目をどうやって自然に組み込むか
-                stopする前に運試しで振るのか
-                良い補正値を見てからstartするのか
-        4日間の平均値とする
-            24時間開くごとに0を代入する
-            24+24時間以内に次をロールすればペナルティ無し
-            ただし、24時間経過後は、ダイス振るは直近が0として計算される
-            24+24時間以内に次を降れば4つの平均値が補正値として採用される
-            → とにかく、こまめに振ることが最も高効率の設計
-            20時間経過後に次のダイスを触れる。
-                20～48時間以内に振れば、0代入のペナルティ無し。
-            ダイスには直近の値のみを表示させる
-            平均すると、こまめに振っていれば平均10＝+1レベル程度の補正
-      * ダイスコントラの更新
+    ポーチ絵の実装
+        貯金箱に準ずる
 
- ok マケプレへのアイコン表示の実装
+    帽子案
+        ぴこぴこ揺れるお花
+            classごとにお花の種類を変える？
 
     NFTの絵の実装
         pngをifgなどに格納するか
@@ -90,8 +63,6 @@ ToDo
 
   * わんころの顔塗る
 
-  * 重なり調整
-
     クラフトウィンドウの改善
         枠のデザイン再考
         アイテムアイコンを影絵にする？
@@ -99,21 +70,6 @@ ToDo
     看板デザインの変更
 
     Happy, Satiety, Expアイコンの変更
-
- ok IDを看板内に表示する
-
- ok ダイスの実装
-     ok 24時間でリセットされる
-            小さくカウントアップを表示するか
-            24時間後は補正0になる
-     ok クリックしてtx飛ばす
-            tx通れば値更新
-            d20の枠組み内に現在の数字を表示させるか
-     ok アニメーションが可能ならしてみたいが
-            ダイスらしく転がせられるだろうか
-            24時間経過前は転がる→必ず設定した値がでる
-            24時間経過後は、マウスオーバーで更新可能を示す絵に変わる
-                →クリックで値更新
 
     アイテム案
         食べ物
@@ -125,32 +81,6 @@ ToDo
         王冠
         とんがり帽子
         ぴろー帽子
-
-    帽子枠の実装
-      * summonerのすべてのアニメーションで、帽子の位置を決定する
-            左右で絵を変える
-     ok 帽子スプライトを1つだけ作成し、waringしているitemをそのスプライトに格納する
-            帽子スプライトの存在をチェックし、summoner()内でその都度描写する        
-            脱ぐときはdestroyする
-     ok 帽子は棚や壁ラックにかけておき、クリックでwaringする
-            visible=false, 帽子spriteをcreateでよいか
-            帽子sprite側はdestroy、対応するspriteをvisible=trueで棚に戻す
-     ok 帽子絵の規格を決定する
-            370x320はクリック領域が広く扱いにくい
-            80x80ぐらいか？
-
-    貯金箱システムの実装
-     ok 消費時、クラフト時に即座に反映されるように修正
-            1個以上持っていたらではなく、個数が変更されたら画面更新させる機構
-            消す（destroy）メカニズムの実装
-                個数が減ったら全削除→再描写
-                予めgroupへ格納しておく
-     ok Approveの実装
-            Function_craftingにcraftをapprove通さないとunpackできない
-            フロントエンド側でapproveを導入する
-            現状、upgrade用のapproveボタンを押さないとunpackできない。
-      * マウスオーバー時の絵の実装
-            中身が解かれてcoin/kusaが少し見えている絵
 
     pngファイルの軽量化
     
@@ -189,6 +119,83 @@ ToDo
         phaser3での色彩変化
         もしくは手動での色彩変化済み画像の用意
         あるいは、ユニークな色のアクセサリー
+        
+ ok 貯金箱に資源表示
+        マウスオーバー時にお花+1000と表示する
+        グループに入れて表示/非表示をスムーズに。
+
+ ok 帽子周りの整備
+        位置合わせ微調整で座標を決定する
+          * なにかモデル絵を対象にして座標を決定する
+        画像側をあわせる
+        帽子絵がそろってからか
+
+ ok ダイスシステムの深慮
+        ダイスのリセット時間について
+            1日か3日か、あるいは5日とか
+            1日だと、良いダイスを引く→クラフト、と進んでも、
+                クラフトが完了する3日目には別の目を振り直さないといけない
+            しかし、クラフト開始時に補正をかけるのはちょっと困難
+        補正方法について
+            すべての行動は、stop時にステータス補正がかかる
+            stopのtxを飛ばしたときのステータス、所持アイテムによって得られる結果が変わる
+            このシステムにおいて、ダイス目をどうやって自然に組み込むか
+                stopする前に運試しで振るのか
+                良い補正値を見てからstartするのか
+        4日間の平均値とする
+            24時間開くごとに0を代入する
+            24+24時間以内に次をロールすればペナルティ無し
+            ただし、24時間経過後は、ダイス振るは直近が0として計算される
+            24+24時間以内に次を降れば4つの平均値が補正値として採用される
+            → とにかく、こまめに振ることが最も高効率の設計
+            20時間経過後に次のダイスを触れる。
+                20～48時間以内に振れば、0代入のペナルティ無し。
+            ダイスには直近の値のみを表示させる
+            平均すると、こまめに振っていれば平均10＝+1レベル程度の補正
+      * ダイスコントラの更新
+
+ ok マケプレのアイコン表示の実装
+
+ ok IDを看板内に表示する
+
+ ok ダイスの実装
+     ok 24時間でリセットされる
+            小さくカウントアップを表示するか
+            24時間後は補正0になる
+     ok クリックしてtx飛ばす
+            tx通れば値更新
+            d20の枠組み内に現在の数字を表示させるか
+     ok アニメーションが可能ならしてみたいが
+            ダイスらしく転がせられるだろうか
+            24時間経過前は転がる→必ず設定した値がでる
+            24時間経過後は、マウスオーバーで更新可能を示す絵に変わる
+                →クリックで値更新
+
+ ok 帽子枠の実装
+      * summonerのすべてのアニメーションで、帽子の位置を決定する
+            左右で絵を変える
+     ok 帽子スプライトを1つだけ作成し、waringしているitemをそのスプライトに格納する
+            帽子スプライトの存在をチェックし、summoner()内でその都度描写する        
+            脱ぐときはdestroyする
+     ok 帽子は棚や壁ラックにかけておき、クリックでwaringする
+            visible=false, 帽子spriteをcreateでよいか
+            帽子sprite側はdestroy、対応するspriteをvisible=trueで棚に戻す
+     ok 帽子絵の規格を決定する
+            370x320はクリック領域が広く扱いにくい
+            80x80ぐらいか？
+
+ ok 貯金箱システムの実装
+     ok 消費時、クラフト時に即座に反映されるように修正
+            1個以上持っていたらではなく、個数が変更されたら画面更新させる機構
+            消す（destroy）メカニズムの実装
+                個数が減ったら全削除→再描写
+                予めgroupへ格納しておく
+     ok Approveの実装
+            Function_craftingにcraftをapprove通さないとunpackできない
+            フロントエンド側でapproveを導入する
+            現状、upgrade用のapproveボタンを押さないとunpackできない。
+      * マウスオーバー時の絵の実装
+            中身が解かれてcoin/kusaが少し見えている絵
 
  ok Petの行動の実装
         mining, farming時に一緒に働く
@@ -990,6 +997,67 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         }
     }
     update_item_wearing_hat() {
+
+        if (
+            this.mode == "resting"
+            || this.mode == "moving"
+            || this.mode == "hugging"
+            || this.mode == "hungry"
+            || this.mode == "crying"
+        ) {
+            item_wearing_hat.x = this.x;
+            item_wearing_hat.y = this.y - 65;
+        }else if (this.mode == "sleeping") {
+            item_wearing_hat.x = this.x - 20;
+            item_wearing_hat.y = this.y - 25;
+        }else if (this.mode == "mining" && this.submode == 1 && this.dist == "left") {
+            item_wearing_hat.x = this.x - 5;
+            item_wearing_hat.y = this.y - 50;
+        }else if (this.mode == "mining" && this.submode == 1 && this.dist == "right") {
+            item_wearing_hat.x = this.x + 5;
+            item_wearing_hat.y = this.y - 50;
+        }else if (this.mode == "mining" && this.submode == 2) {
+            item_wearing_hat.x = this.x + 32;
+            item_wearing_hat.y = this.y - 75;
+        }else if (this.mode == "farming" && this.submode == 1 && this.dist == "left") {
+            item_wearing_hat.x = this.x - 5;
+            item_wearing_hat.y = this.y + 15;
+        }else if (this.mode == "farming" && this.submode == 1 && this.dist == "right") {
+            item_wearing_hat.x = this.x + 5;
+            item_wearing_hat.y = this.y - 50;
+        }else if (this.mode == "farming" && this.submode == 2) {
+            item_wearing_hat.x = this.x + 25;
+            item_wearing_hat.y = this.y - 55;
+        }else if (this.mode == "crafting" && this.submode == 1 && this.dist == "left") {
+            item_wearing_hat.x = this.x - 5;
+            item_wearing_hat.y = this.y - 50;
+        }else if (this.mode == "crafting" && this.submode == 1 && this.dist == "right") {
+            item_wearing_hat.x = this.x + 7;
+            item_wearing_hat.y = this.y - 50;
+        }else if (this.mode == "crafting" && this.submode == 2) {
+            item_wearing_hat.x = this.x + 2;
+            item_wearing_hat.y = this.y - 80;
+        }else if (this.mode == "feeding" && this.submode == 1 && this.dist == "right") {
+            item_wearing_hat.x = this.x + 8;
+            item_wearing_hat.y = this.y - 55;
+        }else if (this.mode == "feeding" && this.submode == 1 && this.dist == "left") {
+            item_wearing_hat.x = this.x - 8;
+            item_wearing_hat.y = this.y - 55;
+        }else if (this.mode == "feeding" && this.submode == 3) {
+            item_wearing_hat.x = this.x - 2;
+            item_wearing_hat.y = this.y - 65;
+        }else if (this.mode == "grooming" && this.submode == 1 && this.dist == "right") {
+            item_wearing_hat.x = this.x + 8;
+            item_wearing_hat.y = this.y - 55;
+        }else if (this.mode == "grooming" && this.submode == 1 && this.dist == "left") {
+            item_wearing_hat.x = this.x - 8;
+            item_wearing_hat.y = this.y - 55;
+        }else if (this.mode == "grooming" && this.submode == 3) {
+            item_wearing_hat.x = this.x - 25;
+            item_wearing_hat.y = this.y + 45;
+        }
+
+        /*
         if (
             this.mode == "resting"
             || this.mode == "moving"
@@ -1056,6 +1124,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             item_wearing_hat.x -= 0;
             item_wearing_hat.y -= 60;
         }
+        */
 
     }
     update(){
@@ -1262,7 +1331,7 @@ class Dice extends Phaser.GameObjects.Sprite{
         this.count = 0;
         this.line_y = y;      //initial value of line_y, the same as first position of y
         this.line_y_max = 500;  //max floor position
-        this.line_y_min = 900;
+        this.line_y_min = 620;
         this.line_x_r = 1200;   //right side
         this.line_x_l = 50;     //left side
         //contract parameter
