@@ -3123,7 +3123,7 @@ contract World_Dice is Ownable {
         uint32 _elasped_time = calc_elasped_time(_summoner);
         require(_elasped_time >= BASE_SEC - buffer_sec);
         //dice roll
-        uint32 _dice_roll = mfs.d20(_summoner) * 10;
+        uint32 _dice_roll = (mfs.d20(_summoner) + 1) * 10;
         //luck challenge
         uint32 _luck_mod = ms.luck(_summoner) + mfs.calc_heart(_summoner) * 5;
         if (mfs.d100(_summoner) <= _luck_mod/100) {

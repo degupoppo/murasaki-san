@@ -1,4 +1,4 @@
-const contract_world_dice = "0x985A9BbF0d51b75102B12fb6E65b8E02225279fA";
+const contract_world_dice = "0x4a1D3075C6964a0ab8ddcE38FaC0B5dEF4D82051";
 const abi_world_dice = [
 	{
 		"anonymous": false,
