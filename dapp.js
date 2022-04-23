@@ -1977,6 +1977,7 @@ function preload() {
     this.load.image("item_hat_mugiwara", "png/item_hat_mugiwara.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("item_bank", "png/item_bank.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("item_bank_broken", "png/item_bank_broken.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_hat_helmet", "png/item_hat_helmet.png", {frameWidth: 370, frameHeight: 320});
     
     //items_todo
     this.load.image("item_mushroom", "png/item_mushroom.png", {frameWidth: 300, frameHeight: 300});
@@ -3183,8 +3184,23 @@ function update() {
                 "mining"
             ).setScale(0.12);
             
-            //hat1
-            //hat2
+            //hat3
+            let _x = 50;
+            let _y = 640;
+            item_hat_helmet = this.add.sprite(_x, _y, "item_hat_helmet").setOrigin(0.5).setScale(0.20);
+            item_hat_helmet.setInteractive({useHandCursor: true});
+            item_hat_helmet.on('pointerdown', () => {
+                if (item_wearing_hat == 0) {
+                    item_wearing_hat = item_hat_helmet;
+                    murasakisan.on_click();
+                    sound_hat.play();
+                } else if (item_wearing_hat == item_hat_helmet) {
+                    item_wearing_hat = 0;
+                    item_hat_helmet.x = _x;
+                    item_hat_helmet.y = _y;
+                }
+            });
+
 
             
         }
