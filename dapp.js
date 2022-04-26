@@ -5,7 +5,101 @@
 
 ToDo
 
+  * わんころの顔塗る
+
+    看板はクラフト品とする
+    
+    帽子の位置合わせ    
+
+    猫コントラクト
+
+    文通システムの実装
+        フロントエンド
+            猫用クッションのクラフト（DEX系か）
+            クッション所持時、手紙のクラフト（低コスト）
+                所持するまでリストに表示しない
+                あるいは、"kussyon required"などとメッセージを表示じておく
+            遊びに来た猫スプライトの表示、自分の猫との差別化
+                クリックで手紙開封
+            遊びに行ってる際の、帰ってくるまでの時間表示
+        コントラクト
+            やはりmail自体は普通のクラフト品として扱う
+                複数クラフト可能、貯めておける
+            猫がいて、かつメール所持時に、猫をクリックでsend_mailのtxを飛ばせる
+                猫コントラはメールNFTをburnする
+                    猫コントラへのapproveが必要
+                receving_summonerをランダムで選ぶ
+                    すでにreceving中のものは無視するなど、何かしら制限を設けたい
+                sending_from_to[_summoner]とreceving_from_toに書き込む
+                    sending_from_to[summoner_from] = summoner_to
+                    sending_to_from[summoner_to] = [summoner_from]
+                last_sending_timeとlast_receving_timeを更新する
+                    last_sending_time[summoner_from] = now
+                    last_receving_time[summoner_to] = now
+                check_mail(_summoner_to)でメールチェックする
+                    last_receving_time[_summoner_to] <= 3 days で
+                        sending_to_from[_summoner_to] = _summoner_ftomを返す
+                メールがあれば、mail_open可とする
+                    require(owner, last_receving_time <= 3 days)
+                    sending_summoner, receving_summoner, last_timeをすべてリセットする
+                        receving_summonerのみリセットするか
+                        
+                    sending_summonerとreceving_summonerにtiny_heartをクラフトする
+                        クラフト主はお互いに相手
+                        mfcにexternalのcraft_heart()が必要
+                        mfsに猫コントラを記載し、msg.sender == 猫コントラを要求する
+            猫は文通に成功しようが失敗しようが、3daysは帰ってこない
+            文通成功の演出をどうするか
+                last_sending_time[_summoner] <= 3days かつ
+                sending_from2to[_summoner_from] == 0 ならば、
+                文通成功（相手がopen_mail()済み）で"Mail Successful!"と表示する
+                しかし、3 day経過しないと猫は帰ってこない
+                    メーターは表示したまま
+                
+        コントラクト
+            専用コントラを実装する
+            逐一、クッションitem_typeの所持をrequireする
+            手紙はNFTとはせずに、文通コントラ内でフラグとして処理する
+                フロントエンド上では30minクラフト品として表現する
+                if item_type == 196なら、文通コントラを呼び出す
+                文通コントラをmsに許可しておく
+                coin/material支払いも、mcではなく文通コントラ内で行う
+            start_crafting_mail()
+                require(owner)
+                require(last_sending_time >= 3days)
+                coin/materialを支払う
+                flag_crafting_mail = 1
+                start_time = now
+            calc_crafting_mail()
+                dc = 30minで固定
+                    ステータス補正なし
+                    レアリティなし
+            stop_crafting_mail()
+                require(owner)
+                require(calc_crafting_mail == 0)
+                _send_mail()
+            _send_mail(_summoner)
+                _sending_summoner = _select_random_summoner()
+                sending_summoner[_summoner] = _sending_summoner
+                receving_summoner[_sending_summoner] = _summoner
+                last_receving_time[_sending_summoner] = now
+                last_sending_time[_summoner] = now
+            _select_random_summoner(_summoner)
+                not
+            open_mail(_receving_summoner)
+                require(owner of summoner)
+                require(satiety, happy)
+                _sending_summoner = sending_summoner[_from_summoner]
+                craft_heart(_sending_summoner)
+                craft_heart(_summoner)
+            check_mail(_receving_summoner)
+                _sending_summoner = 0
+                if (last_receving_time[_summoner] <= 3days)
+                    _sending_summoner = sending_summoner[_summoner]
+                return _sending_summoner
+                
     お花電話の実装
+        能動的にTiny Heartを集める機構
         電話を掛けると、誰かにコール中になる
         コール中に電話に出ると、通話がつながる
         通話がつながると、お互いに何かしらのインセンティブが働く
@@ -14,7 +108,28 @@ ToDo
         コール中に相手が気付ければ電話がつながる
         電話成功すると、お互いにハート＋１
             ハートのクラフト主は相手
-        
+        電話だと常に張り付いていないと行けないので、
+            call中は例えばworkingができなくなって不便か
+    お花文通にするか
+        お手紙をクラフト→完了すると自動的に送る
+        相手が開封したらお互いにハート＋１
+        3日間読まれなかったら消滅する（色あせて読めなくなる）
+        くろねこが運んでくれる
+            黒猫をクラフトすると文通が可能になる
+                あるいは、黒猫用のソファーをクラフトすると黒猫が来る
+            文通をクラフトすると黒猫が受け取って誰かのところへ遊びにゆく
+            3日間経ってもかまってくれなかったら、黒猫は飼い主のところへ戻ってしまう
+            3日以内に、遊びに来ている黒猫をクリックすると開封できる
+            自分の黒猫はどうするか
+                ソファーで寝てることとする
+            リボンか、首輪の色を変える
+            遊びに来ている黒猫は、口にお花文通を加えて座っている
+        スプライト案
+            ソファーで寝ている絵
+            手紙を受け取る絵
+            手紙を加えて歩いてゆく絵
+            手紙を加えて待っている絵
+            手紙を加えずに歩いてゆく絵
 
     NFT Stakingのメカニズムの深慮
         自分の分身であるmini murasaki-sanをぬいぐるみとしてクラフトする
@@ -65,8 +180,6 @@ ToDo
         urlをコードするか
         いずれにしても、ToFuNFTでも正常に表示させたいところだが、果たして
         あるいは、独自マケプレでも良いかもしれないが。
-
-  * わんころの顔塗る
 
     クラフトウィンドウの改善
         枠のデザイン再考
