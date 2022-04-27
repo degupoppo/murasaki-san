@@ -115,9 +115,12 @@ contract Murasaki_Mail is Ownable {
     //variants
     interval_sec = 60 * 60 * 24 * 3;    // 3 days
     
-    //check mail, return _summoner_from
+    //check mail
     function check_receving_mail(uint32 _summoner_to) public view returns (bool) {
-        if (last_receving_time <= interval_sec && sending_to2from[_summoner_to] != 0x0000000000000000000000000000000000000000) {
+        if (
+            last_receving_time <= interval_sec 
+            && sending_to2from[_summoner_to] != 0x0000000000000000000000000000000000000000
+        ) {
             return true;
         } else {
             return false;

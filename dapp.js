@@ -344,6 +344,24 @@ picture
 */
 
 
+
+//---fingerprint-------------------------------------------------------------------------------------------------
+
+
+//https://github.com/fingerprintjs/fingerprintjs
+//https://github.com/fingerprintjs/fingerprintjs/blob/master/docs/api.md
+//with no module option
+//preload require: umd.min.js
+
+// Initialize the agent at application startup.
+const fpPromise = FingerprintJS.load()
+
+// Get the visitor identifier when you need it.
+fpPromise
+  .then(fp => fp.get())
+  .then(result => console.log(result.visitorId))
+
+
 //---global variants-------------------------------------------------------------------------------------------------
 
 
