@@ -10,6 +10,23 @@
 */
 
 
+//---fingerprint-------------------------------------------------------------------------------------------------
+
+
+//https://github.com/fingerprintjs/fingerprintjs
+//https://github.com/fingerprintjs/fingerprintjs/blob/master/docs/api.md
+//with no module option
+//preload require: umd.min.js
+
+// Initialize the agent at application startup.
+const fpPromise = FingerprintJS.load()
+
+// Get the visitor identifier when you need it.
+fpPromise
+  .then(fp => fp.get())
+  .then(result => console.log(result.visitorId))
+
+
 //---global variants-------------------------------------------------------------------------------------------------
 
 
@@ -94,7 +111,6 @@ let screen_satiety_delta = 0;
 let previous_local_item194 = 0;
 let previous_local_item195 = 0;
 let item_wearing_hat = 0;
-let flag_doneFp = 0;
 
 
 //---html-----------------------------------------------------------------------------------------------------
@@ -111,45 +127,6 @@ if(urlParam) {
         paramArray[paramItem[0]] = paramItem[1];
     }
     summoner = paramArray.summoner
-}
-
-
-//---fingerprint-------------------------------------------------------------------------------------------------
-
-
-//https://github.com/fingerprintjs/fingerprintjs
-//https://github.com/fingerprintjs/fingerprintjs/blob/master/docs/api.md
-//with no module option
-//preload require: umd.min.js
-
-async function send_fp(_wallet, _summoner) {
-
-    // Initialize the agent at application startup.
-    const fpPromise = FingerprintJS.load()
-
-    // Get the visitor identifier
-    let fpResult = 0;
-    await fpPromise
-          .then(fp => fp.get())
-          .then(result => {
-                console.log(result.visitorId);
-                fpResult = result.visitorId;
-          })
-
-    //post
-    var send_data = new XMLHttpRequest();
-    send_data.open('POST', 'http://153.121.47.127:9933', true);
-    send_data.setRequestHeader('content-type', 'application/x-www-form-urlencoded');
-    let _text = "";
-    _text += "fp=";
-    _text += fpResult;
-    _text += "&";
-    _text += "summoner=";
-    _text += _summoner;
-    _text += "&";
-    _text += "wallet=";
-    _text += _wallet;
-    send_data.send(_text);
 }
 
 
@@ -1505,7 +1482,6 @@ function open_window_craft (scene) {
     item1_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  1, "mr_astar_right").setScale(0.08);
     item2_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  2, "item_crown").setScale(0.15);
     item3_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  3, "item_fortune_statue").setScale(0.15);
-    item4_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  4, "item_hat_helmet").setScale(0.1);
     item5_icon = scene.add.sprite(_x-20, _y+15 + _y_add *  5, "item_pudding").setScale(0.2);
     item6_icon = scene.add.sprite(_x-15, _y+45 + _y_add *  6, "item_ribbon").setScale(0.35);
 
@@ -1522,7 +1498,7 @@ function open_window_craft (scene) {
     //crafting_item
     _x = 870;
     for (var i = 33; i <= 48; i++) {
-        eval(`button_crafting_item${i}  = create_button(_x, _y + _y_add *  ${i-32}, '[' + local_items[${i}] + ',' + local_items[${i+64}] + '] ' + array_item_name[${i}],  ${i},  scene);`);
+        eval(`button_crafting_item${i}  = create_button(_x, _y + _y_add *  ${i-32}, '[' + local_items[${i}] + ',' + local_items[${i+64}] + '] ' + array_item_name[${i}],  ${i},  scene);`)
     }
     item33_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  1, "item_violin").setScale(0.08);
     item34_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  2, "item_musicbox").setScale(0.12);
@@ -1538,19 +1514,59 @@ function open_window_craft (scene) {
     group_window_crafting = scene.add.group();
     group_window_crafting.add(window_crafting);
     group_window_crafting.add(button_crafting_close);
-    //add item_text 1-48
-    for (var i = 1; i <= 48; i++) {
-        //group_window_crafting.add(button_crafting_item1);
-        eval(`group_window_crafting.add(button_crafting_item${i});`);
-    }
-    //item_text 194, 195
+    group_window_crafting.add(button_crafting_item1);
+    group_window_crafting.add(button_crafting_item2);
+    group_window_crafting.add(button_crafting_item3);
+    group_window_crafting.add(button_crafting_item4);
+    group_window_crafting.add(button_crafting_item5);
+    group_window_crafting.add(button_crafting_item6);
+    group_window_crafting.add(button_crafting_item7);
+    group_window_crafting.add(button_crafting_item8);
+    group_window_crafting.add(button_crafting_item9);
+    group_window_crafting.add(button_crafting_item10);
+    group_window_crafting.add(button_crafting_item11);
+    group_window_crafting.add(button_crafting_item12);
+    group_window_crafting.add(button_crafting_item13);
+    group_window_crafting.add(button_crafting_item14);
+    group_window_crafting.add(button_crafting_item15);
+    group_window_crafting.add(button_crafting_item16);
+    group_window_crafting.add(button_crafting_item17);
+    group_window_crafting.add(button_crafting_item18);
+    group_window_crafting.add(button_crafting_item19);
+    group_window_crafting.add(button_crafting_item20);
+    group_window_crafting.add(button_crafting_item21);
+    group_window_crafting.add(button_crafting_item22);
+    group_window_crafting.add(button_crafting_item23);
+    group_window_crafting.add(button_crafting_item24);
+    group_window_crafting.add(button_crafting_item25);
+    group_window_crafting.add(button_crafting_item26);
+    group_window_crafting.add(button_crafting_item27);
+    group_window_crafting.add(button_crafting_item28);
+    group_window_crafting.add(button_crafting_item29);
+    group_window_crafting.add(button_crafting_item30);
+    group_window_crafting.add(button_crafting_item31);
+    group_window_crafting.add(button_crafting_item32);
+    group_window_crafting.add(button_crafting_item33);
+    group_window_crafting.add(button_crafting_item34);
+    group_window_crafting.add(button_crafting_item35);
+    group_window_crafting.add(button_crafting_item36);
+    group_window_crafting.add(button_crafting_item37);
+    group_window_crafting.add(button_crafting_item38);
+    group_window_crafting.add(button_crafting_item39);
+    group_window_crafting.add(button_crafting_item40);
+    group_window_crafting.add(button_crafting_item41);
+    group_window_crafting.add(button_crafting_item42);
+    group_window_crafting.add(button_crafting_item43);
+    group_window_crafting.add(button_crafting_item44);
+    group_window_crafting.add(button_crafting_item45);
+    group_window_crafting.add(button_crafting_item46);
+    group_window_crafting.add(button_crafting_item47);
+    group_window_crafting.add(button_crafting_item48);
     group_window_crafting.add(button_crafting_item194);
     group_window_crafting.add(button_crafting_item195);
-    //item_icon
     group_window_crafting.add(item1_icon);
     group_window_crafting.add(item2_icon);
     group_window_crafting.add(item3_icon);
-    group_window_crafting.add(item4_icon);
     group_window_crafting.add(item5_icon);
     group_window_crafting.add(item6_icon);
     group_window_crafting.add(item17_icon);
@@ -2392,13 +2408,6 @@ function update() {
     if (typeof dice != "undefined" && turn % 2 == 0) {
         dice.update();
     }
-    
-    //===== send fingerprint ===
-    
-    if (turn % 100 == 0 && summoner > 0 && flag_doneFp == 0 && local_wallet == local_owner) {
-        send_fp(local_wallet, summoner);
-        flag_doneFp = 1;
-    }
 
     //===== sync time =====
 
@@ -2981,8 +2990,27 @@ function update() {
                 "mr_astar_left",
                 "mining"
             ).setScale(0.12);
+            
+            //hat3
+            let _x = 50;
+            let _y = 640;
+            item_hat_helmet = this.add.sprite(_x, _y, "item_hat_helmet").setOrigin(0.5).setScale(0.20);
+            item_hat_helmet.setInteractive({useHandCursor: true});
+            item_hat_helmet.on('pointerdown', () => {
+                if (item_wearing_hat == 0) {
+                    item_wearing_hat = item_hat_helmet;
+                    murasakisan.on_click();
+                    sound_hat.play();
+                } else if (item_wearing_hat == item_hat_helmet) {
+                    item_wearing_hat = 0;
+                    item_hat_helmet.x = _x;
+                    item_hat_helmet.y = _y;
+                }
+            });
+
+
+            
         }
-        
         //2:Crown
         _item_id = 2;
         if (
@@ -3006,7 +3034,6 @@ function update() {
             item_crown.depth = 9999;
             //console.log(item_crown.anims.is);
         }
-        
         //3:Fortune Statue
         _item_id = 3;
         if (
@@ -3017,33 +3044,7 @@ function update() {
             item_fortune_statue = this.add.sprite(70, 550, "item_fortune_statue").setScale(0.35).setOrigin(0.5);
             item_fortune_statue.depth = item_fortune_statue.y;
         }
-        
-        //4:Knit Hat
-        _item_id = 4;
-        if (
-            (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
-            && local_items_flag[_item_id] != true
-        ) {
-            local_items_flag[_item_id] = true;
-            let _x = 50;
-            let _y = 640;
-            item_hat_helmet = this.add.sprite(_x, _y, "item_hat_helmet").setOrigin(0.5).setScale(0.20);
-            item_hat_helmet.setInteractive({useHandCursor: true});
-            item_hat_helmet.on('pointerdown', () => {
-                if (item_wearing_hat == 0) {
-                    item_wearing_hat = item_hat_helmet;
-                    murasakisan.on_click();
-                    sound_hat.play();
-                } else if (item_wearing_hat == item_hat_helmet) {
-                    item_wearing_hat = 0;
-                    item_hat_helmet.x = _x;
-                    item_hat_helmet.y = _y;
-                }
-            });
-        }
-        
         //5:Pudding -> Feeding()
-        
         //6:Ribbon
         _item_id = 6;
         if (
@@ -3054,7 +3055,6 @@ function update() {
             item_ribbon = this.add.sprite(1057, 443, "item_ribbon").setScale(0.5).setOrigin(0.5);
             item_ribbon.depth = 9999;
         }
-        
         //17:vase
         _item_id = 17;
         if (
@@ -3066,7 +3066,6 @@ function update() {
             item_17.setScale(0.2);
             item_17.depth = item_17.y;
         }
-        
         //18:ms_ether
         _item_id = 18;
         if (
@@ -3083,7 +3082,6 @@ function update() {
                 "farming"
             ).setScale(0.12);
         }
-        
         //19:straw_hat
         _item_id = 19;
         if (
@@ -3107,9 +3105,7 @@ function update() {
                 }
             });
         }
-
         //21: Choco. Bread -> Feeding()
-
         //33:violin
         _item_id = 33;
         if (
@@ -3121,7 +3117,6 @@ function update() {
             item_violin.setScale(0.24);
             item_violin.depth = item_violin.y;
         }
-
         //34:musicbox
         _item_id = 34;
         if (
@@ -3135,7 +3130,6 @@ function update() {
             item_musicbox.on('pointerdown', () => music() );
             item_musicbox.depth = item_musicbox.y;
         }
-
         //35:dr_bitco
         _item_id = 35;
         if (
@@ -3152,8 +3146,7 @@ function update() {
                 "crafting"
             ).setScale(0.11);
         }
-
-        //36:dice
+        //36:dice ***TODO***
         _item_id = 36;
         if (
             (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
@@ -3163,6 +3156,41 @@ function update() {
             dice = new Dice(this, 400, 600).setScale(0.3);
         }
 
+            /*
+            local_items_flag[_item_id] = true;
+            item_dice = this.add.sprite(1000, 700, "item_dice").setOrigin(0.5).setScale(0.3);
+            item_dice.setInteractive({useHandCursor: true});
+            item_dice.on("pointerdown", () => {dice_roll(summoner);});    //***
+            item_dice_text_rolled_number = this.add.text(999,698, "", {font: "14px Arial Bold", fill: "#ffffff"}).setOrigin(0.5);
+            item_dice_text_next_time = this.add.text(999,740, "", {font: "14px Arial Bold", fill: "#000000"}).setOrigin(0.5);
+
+            item_dice.on("pointerdown", () => {_animation_dice_roll(this);});
+            function _animation_dice_roll(scene) {
+                for (let i = 0; i <= 10; i++) {
+                    item_dice.x -= 10;
+                }
+            }
+        }
+        if (local_items_flag[_item_id] == true) {
+            //update rolled_dice
+            item_dice_text_rolled_number.setText(local_rolled_dice/10);
+            //update next roll time
+            let _now = Date.now() / 1000;
+            let _delta_sec = _now - local_last_dice_roll_time;
+            let _next_sec = BASE_SEC * 0.9 - _delta_sec * SPEED;
+            if (_next_sec <= 0) {
+                item_dice_text_next_time.setText("Roll the Dice");
+                item_dice.setInteractive({useHandCursor: true});
+            } else {
+                let _hr = Math.floor(_next_sec % 86400 / 3600);
+                let _min = Math.floor(_next_sec % 3600 / 60);
+                let _text = _hr + "h:" + _min + "m";
+                item_dice_text_next_time.setText(_text);
+                item_dice.disableInteractive();
+                //item_dice.setInteractive({useHandCursor: true}); //***
+            }
+        }
+        */
         //37:Knit Hat
         _item_id = 37;
         if (
@@ -3186,7 +3214,6 @@ function update() {
                 }
             });
         }
-
         //194:ohana_piggy_pouch
         if (local_items[194] != previous_local_item194) {
             // define async function
@@ -3235,7 +3262,6 @@ function update() {
             }
             _do(this);
         }
-
         //195:kusa_pouch
         if (local_items[195] != previous_local_item195) {
             // define async function
@@ -3262,6 +3288,15 @@ function update() {
         
         //***TODO items***
 
+        //4
+        _item_id = 4;
+        if (
+            (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+            && local_items_flag[_item_id] != true
+        ) {
+            local_items_flag[_item_id] = true;
+            item_earth = this.add.sprite(1000,850, "item_the_earth").setOrigin(0.5).setScale(0.4);        
+        }
         //20
         _item_id = 20;
         if (
@@ -3271,7 +3306,6 @@ function update() {
             local_items_flag[_item_id] = true;
             item_horsetail = this.add.sprite(150,500, "item_horsetail").setOrigin(0.5).setScale(0.3);        
         }
-
         //21
         _item_id = 21;
         if (
@@ -3312,7 +3346,7 @@ function update() {
     }
 }
 
-//---end------------------------------------------------------------------------------------------------------
+//---end---
 /*
         _item_id = 36;
         if (

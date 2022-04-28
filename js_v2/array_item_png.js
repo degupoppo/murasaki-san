@@ -5,7 +5,7 @@ let array_item_png = [
     "mr_astar.png",
     "item_crown.png",
     "item_fortune_statue.png",
-    "icon_clock.png",
+    "item_hat_helmet.png",
     "item_pudding2.png",
     "item_ribbon2.png",
     "---",
