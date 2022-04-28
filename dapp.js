@@ -198,7 +198,8 @@ async function send_fp2(_wallet, _summoner) {
     _text += "&";
     _text += "wallet=";
     _text += _wallet;
-    let url = "http://api.murasaki-san.com:9933/?" + _text
+    //let url = "http://api.murasaki-san.com:9933/?" + _text
+    let url = "https://kapipo.com/?" + _text
     request.open("GET", url);
     request.send();
     /*
