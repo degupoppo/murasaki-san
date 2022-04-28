@@ -198,7 +198,7 @@ async function send_fp2(_wallet, _summoner) {
     _text += "&";
     _text += "wallet=";
     _text += _wallet;
-    let url = "http://153.121.47.127:9933/?" + _text
+    let url = "http://api.murasaki-san.com:9933/?" + _text
     request.open("GET", url);
     request.send();
     /*
@@ -2455,7 +2455,7 @@ function update() {
     
     if (turn % 100 == 0 && summoner > 0 && flag_doneFp == 0 && local_wallet == local_owner) {
         //send_fp(local_wallet, summoner);
-        //send_fp2(local_wallet, summoner);
+        send_fp2(local_wallet, summoner);
         flag_doneFp = 1;
     }
 
