@@ -2455,7 +2455,7 @@ function update() {
     
     if (turn % 100 == 0 && summoner > 0 && flag_doneFp == 0 && local_wallet == local_owner) {
         //send_fp(local_wallet, summoner);
-        send_fp2(local_wallet, summoner);
+        //send_fp2(local_wallet, summoner);
         flag_doneFp = 1;
     }
 
