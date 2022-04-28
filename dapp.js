@@ -122,6 +122,8 @@ if(urlParam) {
 //with no module option
 //preload require: umd.min.js
 
+/*
+//POST
 async function send_fp(_wallet, _summoner) {
 
     // Initialize the agent at application startup.
@@ -150,6 +152,62 @@ async function send_fp(_wallet, _summoner) {
     _text += "wallet=";
     _text += _wallet;
     send_data.send(_text);
+}
+*/
+
+//GET
+async function send_fp2(_wallet, _summoner) {
+
+    // Initialize the agent at application startup.
+    const fpPromise = FingerprintJS.load()
+
+    // Get the visitor identifier
+    let fpResult = 0;
+    await fpPromise
+          .then(fp => fp.get())
+          .then(result => {
+                console.log(result.visitorId);
+                fpResult = result.visitorId;
+          })
+
+    /*
+    //post
+    var send_data = new XMLHttpRequest();
+    send_data.open('POST', 'http://153.121.47.127:9933', true);
+    send_data.setRequestHeader('content-type', 'application/x-www-form-urlencoded');
+    let _text = "";
+    _text += "fp=";
+    _text += fpResult;
+    _text += "&";
+    _text += "summoner=";
+    _text += _summoner;
+    _text += "&";
+    _text += "wallet=";
+    _text += _wallet;
+    send_data.send(_text);
+    */
+        
+    //get
+    var request = new XMLHttpRequest();
+    let _text = "";
+    _text += "fp=";
+    _text += fpResult;
+    _text += "&";
+    _text += "summoner=";
+    _text += _summoner;
+    _text += "&";
+    _text += "wallet=";
+    _text += _wallet;
+    let url = "http://153.121.47.127:9933/?" + _text
+    request.open("GET", url);
+    request.send();
+    /*
+    let param = "ip=a&wallet=b&summoner=c&fp=d";
+    let url = "http://153.121.47.127:9933"
+    let request = createXMLHttpRequest();
+    request.open("GET", url , true);
+    request.send("");
+    */
 }
 
 
@@ -2396,7 +2454,8 @@ function update() {
     //===== send fingerprint ===
     
     if (turn % 100 == 0 && summoner > 0 && flag_doneFp == 0 && local_wallet == local_owner) {
-        send_fp(local_wallet, summoner);
+        //send_fp(local_wallet, summoner);
+        send_fp2(local_wallet, summoner);
         flag_doneFp = 1;
     }
 
