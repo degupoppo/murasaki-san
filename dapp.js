@@ -122,7 +122,6 @@ if(urlParam) {
 //with no module option
 //preload require: umd.min.js
 
-/*
 //POST
 async function send_fp(_wallet, _summoner) {
 
@@ -140,7 +139,8 @@ async function send_fp(_wallet, _summoner) {
 
     //post
     var send_data = new XMLHttpRequest();
-    send_data.open('POST', 'http://153.121.47.127:9933', true);
+    //send_data.open('POST', 'http://153.121.47.127:9933', true);
+    send_data.open('POST', 'https://www.kapipo.com', true);
     send_data.setRequestHeader('content-type', 'application/x-www-form-urlencoded');
     let _text = "";
     _text += "fp=";
@@ -153,7 +153,6 @@ async function send_fp(_wallet, _summoner) {
     _text += _wallet;
     send_data.send(_text);
 }
-*/
 
 //GET
 async function send_fp2(_wallet, _summoner) {
