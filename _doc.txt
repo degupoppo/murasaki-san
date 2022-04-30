@@ -1,4 +1,8 @@
 
+効果音
+    https://soundeffect-lab.info/sound/button/
+    https://otologic.jp/free/se/motion-pop01.html
+
 コントラ修正
     msにcraft_countを追加
     msにpenalty_timeを追加

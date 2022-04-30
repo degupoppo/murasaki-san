@@ -168,23 +168,6 @@ async function send_fp2(_wallet, _summoner) {
                 console.log(result.visitorId);
                 fpResult = result.visitorId;
           })
-
-    /*
-    //post
-    var send_data = new XMLHttpRequest();
-    send_data.open('POST', 'http://153.121.47.127:9933', true);
-    send_data.setRequestHeader('content-type', 'application/x-www-form-urlencoded');
-    let _text = "";
-    _text += "fp=";
-    _text += fpResult;
-    _text += "&";
-    _text += "summoner=";
-    _text += _summoner;
-    _text += "&";
-    _text += "wallet=";
-    _text += _wallet;
-    send_data.send(_text);
-    */
         
     //get
     var request = new XMLHttpRequest();
@@ -197,17 +180,14 @@ async function send_fp2(_wallet, _summoner) {
     _text += "&";
     _text += "wallet=";
     _text += _wallet;
-    //let url = "http://api.murasaki-san.com:9933/?" + _text
-    let url = "https://www.kapipo.com/?" + _text
-    request.open("GET", url);
+    //let url = "https://www.kapipo.com/?" + _text;
+    let url = "https://api.murasaki-san.com/index.html?" + _text;
+    //let url = "https://api.murasaki-san.com/?aaa=bbb";
+    //console.log(url);
+    request.open("GET", url, true);
+    //request.setRequestHeader("Pgragma", "no-cache");
+    //request.setRequestHeader("Cache-Control", "no-cache");
     request.send();
-    /*
-    let param = "ip=a&wallet=b&summoner=c&fp=d";
-    let url = "http://153.121.47.127:9933"
-    let request = createXMLHttpRequest();
-    request.open("GET", url , true);
-    request.send("");
-    */
 }
 
 
@@ -700,6 +680,9 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             this.mode = "resting";
             this.count = 0;
         }
+        if (this.count % 200 == 10) {
+            sound_unhappy.play();
+        }
     }
     hungry() {
         this.count += 1;
@@ -708,6 +691,9 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         }else if (this.count >= 500) {
             this.mode = "resting";
             this.count = 0;
+        }
+        if (this.count % 200 == 10) {
+            sound_unhappy.play();
         }
     }
     petrified() {
@@ -1807,6 +1793,7 @@ function preload() {
     this.load.audio("dice", "sound/dice.mp3");
     this.load.audio("dice2", "sound/dice2.mp3");
     this.load.audio("hat", "sound/hat.mp3");
+    this.load.audio("unhappy", "sound/unhappy.mp3");
 
     //items
     this.load.spritesheet("item_musicbox", "png/item_musicbox.png", {frameWidth: 370, frameHeight: 320});
@@ -2253,6 +2240,7 @@ function create() {
     sound_dice = this.sound.add("dice", {volume:0.15});
     sound_dice2 = this.sound.add("dice2", {volume:0.1});
     sound_hat = this.sound.add("hat", {volume:0.1});
+    sound_unhappy = this.sound.add("unhappy", {volume:0.2});
 
     //===create summoner===
 
