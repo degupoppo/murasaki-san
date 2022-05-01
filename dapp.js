@@ -1448,17 +1448,17 @@ function radarchart(scene, x0, y0, r, str, dex, int, luk, str_item, dex_item, in
     let font_arg = {font: "17px Arial", fill: "#000000"};
     radar6 = scene.add.text(x0-15, y0-r-25, "STR"+"\n"+(Math.round( (str+str_item)*100 )/100).toFixed(2), font_arg);
     radar7 = scene.add.text(x0+r-5, y0-10, "DEX"+"\n"+(Math.round( (dex+dex_item)*100 )/100).toFixed(2), font_arg);
-    radar8 = scene.add.text(x0-15, y0+r-5, "LUK"+"\n"+(Math.round( (luk+luk_item)*100 )/100).toFixed(2), font_arg);
+    radar8 = scene.add.text(x0-15, y0+r-7, "LUK"+"\n"+(Math.round( (luk+luk_item)*100 )/100).toFixed(2), font_arg);
     radar9 = scene.add.text(x0-r-20, y0-12, "INT"+"\n"+(Math.round( (int+int_item)*100 )/100).toFixed(2), font_arg);
     icon_str = scene.add.sprite(x0-15-10, y0-r-25+20, "icon_str").setOrigin(0.5).setScale(0.12);
     icon_dex = scene.add.sprite(x0+r-5+10, y0-30, "icon_dex").setOrigin(0.5).setScale(0.12);
-    icon_luk = scene.add.sprite(x0-15-12, y0+r-5+16, "icon_luk").setOrigin(0.5).setScale(0.10);
+    icon_luk = scene.add.sprite(x0-15-12, y0+r-5+14, "icon_luk").setOrigin(0.5).setScale(0.10);
     icon_int = scene.add.sprite(x0-r-20+16, y0-10-16, "icon_int").setOrigin(0.5).setScale(0.10);
 }
 async function draw_radarchart(scene) {
-        let _x = 1150;
-        let _y = 115;
-        let _r = 80;
+        let _x = 1160;
+        let _y = 110;
+        let _r = 75;
         let _res = await contract_get_item_count(summoner);
         radarchart(scene, _x, _y, _r, local_strength, local_dexterity, local_intelligence, local_luck, _res[0], _res[1], _res[2], local_heart*5/100);
 }
