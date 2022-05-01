@@ -3083,7 +3083,7 @@ function update() {
                 "mining"
             ).setScale(0.12);
 
-            item_asnya = this.add.sprite(590, 110, "item_asnya").setOrigin(0.5).setScale(0.25);
+            item_asnya = this.add.sprite(590, 140, "item_asnya").setOrigin(0.5).setScale(0.25);
             item_asnya.depth = item_asnya.y;
 
         }
@@ -3119,7 +3119,7 @@ function update() {
             && local_items_flag[_item_id] != true
         ) {
             local_items_flag[_item_id] = true;
-            item_fortune_statue = this.add.sprite(500, 120, "item_fortune_statue").setScale(0.35).setOrigin(0.5);
+            item_fortune_statue = this.add.sprite(500, 150, "item_fortune_statue").setScale(0.35).setOrigin(0.5);
             item_fortune_statue.depth = item_fortune_statue.y;
         }
         
