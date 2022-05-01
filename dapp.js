@@ -1716,7 +1716,7 @@ let game = new Phaser.Game(config);
 function preload() {
 
     //back
-    this.load.image("back", "png/back6.jpg");
+    this.load.image("back", "png/back8.png");
 
     //murasaki-san
     this.load.spritesheet("murasaki_right", "png/murasaki_right.png", {frameWidth: 370, frameHeight: 320});
@@ -1798,6 +1798,10 @@ function preload() {
     this.load.audio("dice2", "sound/dice2.mp3");
     this.load.audio("hat", "sound/hat.mp3");
     this.load.audio("unhappy", "sound/unhappy.mp3");
+
+    //items_back
+    this.load.image("item_table", "png/item_table.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_tree", "png/item_tree.png", {frameWidth: 370, frameHeight: 320});
 
     //items
     this.load.spritesheet("item_musicbox", "png/item_musicbox.png", {frameWidth: 370, frameHeight: 320});
@@ -2083,11 +2087,15 @@ function create() {
         repeat: -1
     });
     
-    //===item_bear===
+    //===item_bear, item_table===
 
     item_bear = this.add.sprite(1000,400, "item_bear");
     item_bear.scaleX = item_bear.scaleX * 0.45;
     item_bear.scaleY = item_bear.scaleY * 0.45;
+    item_table = this.add.sprite(600,870, "item_table").setOrigin(0.5).setScale(0.6);
+    item_table.depth = item_table.y;
+    item_tree = this.add.sprite(100,380, "item_tree").setOrigin(0.5).setScale(0.8);
+    item_tree.depth = item_tree.y;
 
     //===click button===
 
@@ -2468,7 +2476,7 @@ function update() {
     if (turn % 20 == 0) {
 
         //debug
-        //console.log(Math.round(game.input.mousePointer.x), Math.round(game.input.mousePointer.y));
+        console.log(Math.round(game.input.mousePointer.x), Math.round(game.input.mousePointer.y));
 
         /*
         //protection code
@@ -3045,7 +3053,7 @@ function update() {
                 "mining"
             ).setScale(0.12);
 
-            item_asnya = this.add.sprite(120, 600, "item_asnya").setOrigin(0.5).setScale(0.25);
+            item_asnya = this.add.sprite(590, 110, "item_asnya").setOrigin(0.5).setScale(0.25);
             item_asnya.depth = item_asnya.y;
 
         }
@@ -3081,7 +3089,7 @@ function update() {
             && local_items_flag[_item_id] != true
         ) {
             local_items_flag[_item_id] = true;
-            item_fortune_statue = this.add.sprite(70, 550, "item_fortune_statue").setScale(0.35).setOrigin(0.5);
+            item_fortune_statue = this.add.sprite(500, 120, "item_fortune_statue").setScale(0.35).setOrigin(0.5);
             item_fortune_statue.depth = item_fortune_statue.y;
         }
         
@@ -3129,7 +3137,7 @@ function update() {
             && local_items_flag[_item_id] != true
         ) {
             local_items_flag[_item_id] = true;
-            item_17 = this.add.sprite(850,270, "item_vase");
+            item_17 = this.add.sprite(600,360, "item_vase").setOrigin(0.5);
             item_17.setScale(0.2);
             item_17.depth = item_17.y;
         }
@@ -3196,8 +3204,8 @@ function update() {
             && local_items_flag[_item_id] != true
         ) {
             local_items_flag[_item_id] = true;
-            item_musicbox = this.add.sprite(1200,840, "item_musicbox");
-            item_musicbox.setScale(0.4);
+            item_musicbox = this.add.sprite(510,360, "item_musicbox").setOrigin(0.5);
+            item_musicbox.setScale(0.35);
             item_musicbox.setInteractive({useHandCursor: true});
             item_musicbox.on('pointerdown', () => music() );
             item_musicbox.depth = item_musicbox.y;
@@ -3272,7 +3280,9 @@ function update() {
                 let _array_icon = [];
                 for (let i = 0; i < _array_item194.length; i++) {
                     //bank sprite
-                    _array_bank[i] = scene.add.sprite(850 + i*50, 900, "item_bank")
+                    let _x = 720;
+                    let _y = 500;
+                    _array_bank[i] = scene.add.sprite(_x + i*50, _y, "item_bank")
                         .setScale(0.3)
                         .setOrigin(0.5)
                         .setInteractive({useHandCursor: true})
@@ -3287,11 +3297,11 @@ function update() {
                         .on('pointerdown', () => sound_button_on.play() );
                     _array_bank[i].depth = _array_bank[i].y;
                     //text, "+1000"
-                    _array_text[i] = scene.add.text(860 + i*50, 850, "+1000", {font: "17px Arial", fill: "#000000"})
+                    _array_text[i] = scene.add.text(_x + 10 + i*50, _y - 50, "+1000", {font: "17px Arial", fill: "#000000"})
                         .setOrigin(0.5)
                         .setVisible(false);
                     //icon, ohana
-                    _array_icon[i] = scene.add.sprite(820 + i*50, 850, "icon_ohana")
+                    _array_icon[i] = scene.add.sprite(_x - 30 + i*50, _y - 50, "icon_ohana")
                         .setOrigin(0.5)
                         .setScale(0.07)
                         .setVisible(false);
@@ -3317,8 +3327,8 @@ function update() {
                 group_item195 = scene.add.group();
                 // create sprite, add group
                 for (let i = 0; i < _array_item195.length; i++) {
-                    item_pouch = scene.add.sprite(350 + i*50, 900, "item_kusa_pouch");
-                    item_pouch.setScale(0.06);
+                    item_pouch = scene.add.sprite(720 + i*50, 400, "item_kusa_pouch");
+                    item_pouch.setScale(0.07);
                     item_pouch.setInteractive({useHandCursor: true});
                     item_pouch.on("pointerdown", () => unpack_bag(summoner, _array_item195[i]));
                     group_item195.add(item_pouch);
@@ -3336,7 +3346,8 @@ function update() {
             && local_items_flag[_item_id] != true
         ) {
             local_items_flag[_item_id] = true;
-            item_horsetail = this.add.sprite(150,500, "item_horsetail").setOrigin(0.5).setScale(0.3);        
+            item_horsetail = this.add.sprite(50,560, "item_horsetail").setOrigin(0.5).setScale(0.3);
+            item_horsetail.depth = item_horsetail.y;
         }
 
         //21
