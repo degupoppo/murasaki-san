@@ -2194,8 +2194,8 @@ function create() {
     //text
     text_farming_calc = this.add.text(370, 120, "", {font: "18px Arial", fill: "#000"});
 
-    //levelup
-    button_levelup = this.add.sprite(1220, 35, "back_level");
+    //level
+    button_levelup = this.add.sprite(1240, 35, "back_level");
     button_levelup.scaleX = button_levelup.scaleX * 0.11;
     button_levelup.scaleY = button_levelup.scaleY * 0.11;
     button_levelup.setInteractive({useHandCursor: true});
@@ -2207,11 +2207,12 @@ function create() {
     button_levelup.on('pointerout', () => button_levelup.setTexture("button_levelup_enable"));
     button_levelup.on('pointerout', () => text_level.setText(local_level));
     button_levelup.disableInteractive();
+    text_level = this.add.text(1240, 42, "0", {font: "bold 26px Verdana", fill: "#E5004F"}).setOrigin(0.5);
 
     //===system click button===
 
     //icon_rotate
-    icon_rotate = this.add.sprite(50,900, "icon_rotate")
+    icon_rotate = this.add.sprite(1235,915, "icon_rotate")
         .setOrigin(0.5)
         .setScale(0.075)
         .setInteractive({useHandCursor: true})
@@ -2229,7 +2230,7 @@ function create() {
         });
 
     //icon_home
-    icon_home = this.add.sprite(130,900, "icon_home")
+    icon_home = this.add.sprite(1155,915, "icon_home")
         .setOrigin(0.5)
         .setScale(0.15)
         .setInteractive({useHandCursor: true})
@@ -2305,15 +2306,17 @@ function create() {
     let font_arg = {font: "18px Arial", fill: "#000"};
 
     //age
-    text_age_time =     this.add.text(1213, 67, "***", font_arg);
-    icon_age = this.add.sprite(1200,77, "icon_age");
-    icon_age.setScale(0.06);
+    //text_age_time =     this.add.text(1213, 67, "***", font_arg);
+    //text_age_time =     this.add.text(120, 80, "***", font_arg);
+    //text_age_time.depth = 1;
+    //icon_age = this.add.sprite(1200,77, "icon_age");
+    //icon_age.setScale(0.06);
 
     //debug info
     //text_speed =        this.add.text(10, 910, "***", font_arg);
-    text_mode = this.add.text(1150, 916, "***", {font: "14px Arial", fill: "#727171"});
-    text_turn = this.add.text(1150, 928, "***", {font: "14px Arial", fill: "#727171"});
-    text_sync_time = this.add.text(1150, 940, "***", {font: "14px Arial", fill: "#727171"});
+    //text_mode = this.add.text(1150, 916, "***", {font: "14px Arial", fill: "#727171"});
+    text_turn = this.add.text(10, 916, "***", {font: "14px Arial", fill: "#727171"});
+    text_sync_time = this.add.text(10, 928, "***", {font: "14px Arial", fill: "#727171"});
     text_wallet = this.add.text(10, 940, "***", {font: "14px Arial", fill: "#727171"});
 
     //satiety
@@ -2361,7 +2364,7 @@ function create() {
     text_material_earned_count = 0;
 
     //level
-    text_level = this.add.text(1220, 42, "0", {font: "bold 26px Verdana", fill: "#E5004F"}).setOrigin(0.5);
+    //text_level = this.add.text(1220, 42, "0", {font: "bold 26px Verdana", fill: "#E5004F"}).setOrigin(0.5);
 
     //heart
     icon_heart = this.add.sprite(960, 21, "icon_heart");
@@ -2396,6 +2399,9 @@ function create() {
     
     //id
     text_id = this.add.text(17,86, "#100", {font: "14px Arial", fill: "#ffffff"});
+
+    //age
+    text_age_time =     this.add.text(120, 86, "***", {font: "14px Arial", fill: "#ffffff"});
 
     //===etc===
 
@@ -2493,7 +2499,7 @@ function update() {
         }
         */
 
-        text_mode.setText(murasakisan.get_mode);
+        //text_mode.setText(murasakisan.get_mode);
         if (last_sync_time == 0) {
             text_sync_time.setText("syncing...");
         } else {
