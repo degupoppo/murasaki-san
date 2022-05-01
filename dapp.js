@@ -2104,6 +2104,9 @@ function create() {
 
     //===click button===
 
+    let _x;
+    let _y;
+
     //feeding
     button_feeding = this.add.sprite(460,870, "button_feeding");
     button_feeding.scaleX = button_feeding.scaleX * 0.16;
@@ -2128,8 +2131,8 @@ function create() {
     button_grooming.disableInteractive();
 
     //crafting
-    let _x = 800;
-    let _y = 850;
+    _x = 800;
+    _y = 870;
     //button_crafting = this.add.sprite(700,150, "button_crafting_unable");
     button_crafting = this.add.sprite(_x, _y, "button_crafting_unable");
     button_crafting.scaleX = button_crafting.scaleX * 0.16;
@@ -2188,7 +2191,9 @@ function create() {
                 .on("pointerdown", () => open_window_craft(this) )
 
     //mining
-    button_mining = this.add.sprite(50,700, "button_mining_unable");
+    _x = 60;
+    _y = 760;
+    button_mining = this.add.sprite(_x, _y, "button_mining_unable");
     button_mining.scaleX = button_mining.scaleX * 0.16;
     button_mining.scaleY = button_mining.scaleY * 0.16;
     button_mining.setInteractive({useHandCursor: true});
@@ -2199,11 +2204,11 @@ function create() {
     button_mining.on('pointerout', () => button_mining.setTexture("button_mining_enable"));
     button_mining.disableInteractive();
     //icon
-    icon_mining = this.add.sprite(103,678, "icon_ohana");
+    icon_mining = this.add.sprite(_x+55, _y-22, "icon_ohana");
     icon_mining.setScale(0.07);
     icon_mining.visible = false;
     //text
-    text_mining_calc = this.add.text(115, 670, "", {font: "18px Arial", fill: "#000"});
+    text_mining_calc = this.add.text(_x+67, _y-30, "", {font: "18px Arial", fill: "#000"});
 
     //farming
     //button_farming = this.add.sprite(300,150, "button_farming_unable");
