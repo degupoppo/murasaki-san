@@ -2100,7 +2100,7 @@ function create() {
     //===click button===
 
     //feeding
-    button_feeding = this.add.sprite(610,850, "button_feeding");
+    button_feeding = this.add.sprite(740,870, "button_feeding");
     button_feeding.scaleX = button_feeding.scaleX * 0.16;
     button_feeding.scaleY = button_feeding.scaleY * 0.16;
     button_feeding.setInteractive({useHandCursor: true});
