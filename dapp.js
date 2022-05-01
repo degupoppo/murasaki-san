@@ -1448,9 +1448,13 @@ function radarchart(scene, x0, y0, r, str, dex, int, luk, str_item, dex_item, in
     radar7 = scene.add.text(x0+r-5, y0-10, "DEX"+"\n"+(Math.round( (dex+dex_item)*100 )/100).toFixed(2), font_arg);
     radar8 = scene.add.text(x0-15, y0+r-5, "LUK"+"\n"+(Math.round( (luk+luk_item)*100 )/100).toFixed(2), font_arg);
     radar9 = scene.add.text(x0-r-20, y0-10, "INT"+"\n"+(Math.round( (int+int_item)*100 )/100).toFixed(2), font_arg);
+    icon_str = scene.add.sprite(x0-15-10, y0-r-25+20, "icon_str").setOrigin(0.5).setScale(0.12);
+    icon_dex = scene.add.sprite(x0+r-5+60, y0-10+15, "icon_dex").setOrigin(0.5).setScale(0.12);
+    icon_luk = scene.add.sprite(x0-15-12, y0+r-5+16, "icon_luk").setOrigin(0.5).setScale(0.10);
+    icon_int = scene.add.sprite(x0-r-20-20, y0-10+20, "icon_int").setOrigin(0.5).setScale(0.10);
 }
 async function draw_radarchart(scene) {
-        let _x = 1136;
+        let _x = 1115;
         let _y = 115;
         let _r = 80;
         let _res = await contract_get_item_count(summoner);
@@ -1712,7 +1716,7 @@ let game = new Phaser.Game(config);
 function preload() {
 
     //back
-    this.load.image("back", "png/back4.png");
+    this.load.image("back", "png/back6.jpg");
 
     //murasaki-san
     this.load.spritesheet("murasaki_right", "png/murasaki_right.png", {frameWidth: 370, frameHeight: 320});
@@ -1814,6 +1818,7 @@ function preload() {
     this.load.image("item_bank", "png/item_bank.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("item_bank_broken", "png/item_bank_broken.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("item_hat_helmet", "png/item_hat_helmet.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_asnya", "png/item_asnya.png", {frameWidth: 500, frameHeight: 500});
     
     //items_todo
     this.load.image("item_mushroom", "png/item_mushroom.png", {frameWidth: 300, frameHeight: 300});
@@ -1830,11 +1835,20 @@ function preload() {
     //icon
     this.load.image("icon_kusa", "png/icon_kusa.png", {frameWidth: 350, frameHeight: 350});
     this.load.image("icon_ohana", "png/icon_ohana.png", {frameWidth: 350, frameHeight: 350});
-    this.load.image("icon_age", "png/icon_age.png", {frameWidth: 300, frameHeight: 325});
+    //this.load.image("icon_age", "png/icon_age.png", {frameWidth: 300, frameHeight: 325});
+    this.load.image("icon_age", "png/icon_age2.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("icon_clock", "png/icon_clock.png", {frameWidth: 225, frameHeight: 225});
     this.load.image("icon_heart", "png/icon_heart.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("icon_rotate", "png/icon_rotate.png", {frameWidth: 980, frameHeight: 818});
     this.load.image("icon_home", "png/icon_home.png", {frameWidth: 512, frameHeight: 512});
+    this.load.image("icon_satiety", "png/icon_satiety.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("icon_happy", "png/icon_happy.png", {frameWidth: 500, frameHeight: 500});
+
+    //icon_status
+    this.load.image("icon_str", "png/icon_str.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("icon_dex", "png/icon_dex.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("icon_int", "png/icon_int.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("icon_luk", "png/icon_luk.png", {frameWidth: 370, frameHeight: 320});
 
     //level_back
     this.load.image("back_level", "png/back_level.png", {frameWidth: 500, frameHeight: 500});
@@ -2295,8 +2309,9 @@ function create() {
     text_wallet = this.add.text(10, 940, "***", {font: "14px Arial", fill: "#727171"});
 
     //satiety
-    icon_satiety = this.add.sprite(30,25, "button_feeding");
-    icon_satiety.setScale(0.07);
+    icon_satiety = this.add.sprite(30,25, "icon_satiety");
+    //icon_satiety = this.add.sprite(30,25, "button_feeding");
+    icon_satiety.setScale(0.08);
     bar_satiety_back = makeBar(this, 55, 15, 0xF8C5AC);
     bar_satiety_back.scaleX = 1;
     bar_satiety = makeBar(this, 55, 15, 0xE60012);
@@ -2304,8 +2319,9 @@ function create() {
     text_satiety = this.add.text(60, 16, "0%", {font: "17px Arial", fill: "#ffffff"});
 
     //happy
-    icon_happy = this.add.sprite(245,25, "button_grooming_enable");
-    icon_happy.setScale(0.07);
+    //icon_happy = this.add.sprite(245,25, "button_grooming_enable");
+    icon_happy = this.add.sprite(245,25, "icon_happy");
+    icon_happy.setScale(0.08);
     bar_happy_back = makeBar(this, 270, 15, 0xFCE2BA);
     bar_happy_back.scaleX = 1;
     bar_happy = makeBar(this, 270, 15, 0xF39800);
@@ -3028,6 +3044,10 @@ function update() {
                 "mr_astar_left",
                 "mining"
             ).setScale(0.12);
+
+            item_asnya = this.add.sprite(120, 600, "item_asnya").setOrigin(0.5).setScale(0.25);
+            item_asnya.depth = item_asnya.y;
+
         }
         
         //2:Crown
