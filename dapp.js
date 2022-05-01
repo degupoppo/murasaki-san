@@ -2164,9 +2164,9 @@ function create() {
     //text_crafting_selected_item_ohana = this.add.text(772, 155, "", {font: "18px Arial", fill: "#000"});
     //text_crafting_selected_item_kusa = this.add.text(842, 155, "", {font: "18px Arial", fill: "#000"});
     //text_crafting_selected_item_time = this.add.text(914, 155, "", {font: "18px Arial", fill: "#000"});
-    text_crafting_selected_item_ohana = this.add.text(_x+72, _y+5, "", {font: "18px Arial", fill: "#000"}).setDepth(9999);
-    text_crafting_selected_item_kusa = this.add.text(_x+142, _y+5, "", {font: "18px Arial", fill: "#000"}).setDepth(9999);
-    text_crafting_selected_item_time = this.add.text(_x+214, _y+5, "", {font: "18px Arial", fill: "#000"}).setDepth(9999);
+    text_crafting_selected_item_ohana = this.add.text(_x+72, _y+5, "", {font: "18px Arial", fill: "#000", backgroundColor: "#ecd9ff"}).setDepth(9999);
+    text_crafting_selected_item_kusa = this.add.text(_x+142, _y+5, "", {font: "18px Arial", fill: "#000", backgroundColor: "#ecd9ff"}).setDepth(9999);
+    text_crafting_selected_item_time = this.add.text(_x+214, _y+5, "", {font: "18px Arial", fill: "#000", backgroundColor: "#ecd9ff"}).setDepth(9999);
     //--craftimg info
     //icon_clock
     //icon_crafting_time_remining = this.add.sprite(760,165, "icon_clock");
