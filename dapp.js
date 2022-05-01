@@ -2919,7 +2919,7 @@ function update() {
             murasakisan.submode = 0;
             murasakisan.count = 0;
             murasakisan.target_x = 100;
-            murasakisan.target_y = 800;
+            murasakisan.target_y = 880;
             sound_mining.play();
         }else if (local_mining_status == 0 & murasakisan.mode == "mining") {
             murasakisan.set_mode = "resting";
