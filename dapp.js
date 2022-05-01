@@ -1718,7 +1718,7 @@ let game = new Phaser.Game(config);
 function preload() {
 
     //back
-    this.load.image("back", "png/back10.png");
+    this.load.image("back", "png/back11.png");
 
     //murasaki-san
     this.load.spritesheet("murasaki_right", "png/murasaki_right.png", {frameWidth: 370, frameHeight: 320});
@@ -1804,6 +1804,7 @@ function preload() {
     //items_back
     this.load.image("item_table", "png/item_table.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("item_tree", "png/item_tree.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_misin", "png/item_misin.png", {frameWidth: 370, frameHeight: 320});
 
     //items
     this.load.spritesheet("item_musicbox", "png/item_musicbox.png", {frameWidth: 370, frameHeight: 320});
@@ -2098,11 +2099,13 @@ function create() {
     item_table.depth = item_table.y;
     item_tree = this.add.sprite(100,380, "item_tree").setOrigin(0.5).setScale(0.8);
     item_tree.depth = item_tree.y;
+    item_misin = this.add.sprite(1000,830, "item_misin").setOrigin(0.5).setScale(0.8);
+    item_misin.depth = item_misin.y;
 
     //===click button===
 
     //feeding
-    button_feeding = this.add.sprite(740,870, "button_feeding");
+    button_feeding = this.add.sprite(460,870, "button_feeding");
     button_feeding.scaleX = button_feeding.scaleX * 0.16;
     button_feeding.scaleY = button_feeding.scaleY * 0.16;
     button_feeding.setInteractive({useHandCursor: true});
@@ -2125,7 +2128,10 @@ function create() {
     button_grooming.disableInteractive();
 
     //crafting
-    button_crafting = this.add.sprite(700,150, "button_crafting_unable");
+    let _x = 800;
+    let _y = 850;
+    //button_crafting = this.add.sprite(700,150, "button_crafting_unable");
+    button_crafting = this.add.sprite(_x, _y, "button_crafting_unable");
     button_crafting.scaleX = button_crafting.scaleX * 0.16;
     button_crafting.scaleY = button_crafting.scaleY * 0.16;
     button_crafting.setInteractive({useHandCursor: true});
@@ -2137,28 +2143,49 @@ function create() {
     button_crafting.disableInteractive();
     //--select item
     //icon_ohana
-    icon_crafting_ohana = this.add.sprite(758, 163, "icon_ohana");
+    //icon_crafting_ohana = this.add.sprite(758, 163, "icon_ohana");
+    icon_crafting_ohana = this.add.sprite(_x+58, _y+13, "icon_ohana").setDepth(9999);
     icon_crafting_ohana.setScale(0.07);
     icon_crafting_ohana.visible = false;
     //icon_kusa
-    icon_crafting_kusa = this.add.sprite(830, 165, "icon_kusa");
+    //icon_crafting_kusa = this.add.sprite(830, 165, "icon_kusa");
+    icon_crafting_kusa = this.add.sprite(_x+130, _y+15, "icon_kusa").setDepth(9999);
     icon_crafting_kusa.setScale(0.09);
     icon_crafting_kusa.visible = false;
     //icon_clock
-    icon_crafting_time = this.add.sprite(900, 165, "icon_clock");
+    //icon_crafting_time = this.add.sprite(900, 165, "icon_clock");
+    icon_crafting_time = this.add.sprite(_x+200, _y+15, "icon_clock").setDepth(9999);
     icon_crafting_time.setScale(0.09);
     icon_crafting_time.visible = false;
     //text
-    text_crafting_selected_item_ohana = this.add.text(772, 155, "", {font: "18px Arial", fill: "#000"});
-    text_crafting_selected_item_kusa = this.add.text(842, 155, "", {font: "18px Arial", fill: "#000"});
-    text_crafting_selected_item_time = this.add.text(914, 155, "", {font: "18px Arial", fill: "#000"});
+    //text_crafting_selected_item_ohana = this.add.text(772, 155, "", {font: "18px Arial", fill: "#000"});
+    //text_crafting_selected_item_kusa = this.add.text(842, 155, "", {font: "18px Arial", fill: "#000"});
+    //text_crafting_selected_item_time = this.add.text(914, 155, "", {font: "18px Arial", fill: "#000"});
+    text_crafting_selected_item_ohana = this.add.text(_x+72, _y+5, "", {font: "18px Arial", fill: "#000"}).setDepth(9999);
+    text_crafting_selected_item_kusa = this.add.text(_x+142, _y+5, "", {font: "18px Arial", fill: "#000"}).setDepth(9999);
+    text_crafting_selected_item_time = this.add.text(_x+214, _y+5, "", {font: "18px Arial", fill: "#000"}).setDepth(9999);
     //--craftimg info
     //icon_clock
-    icon_crafting_time_remining = this.add.sprite(760,165, "icon_clock");
+    //icon_crafting_time_remining = this.add.sprite(760,165, "icon_clock");
+    icon_crafting_time_remining = this.add.sprite(_x+60, _y+15, "icon_clock").setDepth(9999);
     icon_crafting_time_remining.setScale(0.09);
     icon_crafting_time_remining.visible = false;
     //text
-    text_crafting_calc = this.add.text(775, 155, "", {font: "18px Arial", fill: "#000"});
+    //text_crafting_calc = this.add.text(775, 155, "", {font: "18px Arial", fill: "#000"});
+    text_crafting_calc = this.add.text(_x+75, _y+5, "", {font: "18px Arial", fill: "#000"}).setDepth(9999);
+    //crafting_window ***TODO***
+    //select crafting_item_type
+    text_select_item = this.add.text(_x+50, _y-30, ">> Select Item <<", {font: "30px Arial", fill: "#000", backgroundColor: "#ecd9ff"})
+                .setDepth(9999)
+                .setFontSize(24).setFontFamily("Arial").setFill('#000000')
+                .setInteractive({useHandCursor: true})
+                .on("pointerdown", () => open_window_craft(this) )
+                .on("pointerover", () => text_select_item.setStyle({ fontSize: 24, fontFamily: "Arial", fill: '#d19dff' }))
+                .on("pointerout", () => text_select_item.setStyle({ fontSize: 24, fontFamily: "Arial", fill: '#000000' }));
+    text_craft_item = this.add.text(_x+50, _y, "", {font: "18px Arial", fill: "#000"})
+                .setDepth(9999)
+                .setInteractive({useHandCursor: true})
+                .on("pointerdown", () => open_window_craft(this) )
 
     //mining
     button_mining = this.add.sprite(50,700, "button_mining_unable");
@@ -2408,17 +2435,6 @@ function create() {
 
     //===etc===
 
-    //crafting_window ***TODO***
-    //select crafting_item_type
-    text_select_item = this.add.text(750, 120, ">> Select Item <<", {font: "30px Arial", fill: "#000", backgroundColor: "#ecd9ff"})
-                .setFontSize(24).setFontFamily("Arial").setFill('#000000')
-                .setInteractive({useHandCursor: true})
-                .on("pointerdown", () => open_window_craft(this) )
-                .on("pointerover", () => text_select_item.setStyle({ fontSize: 24, fontFamily: "Arial", fill: '#d19dff' }))
-                .on("pointerout", () => text_select_item.setStyle({ fontSize: 24, fontFamily: "Arial", fill: '#000000' }));
-    text_craft_item = this.add.text(750, 150, "", font_arg)
-                .setInteractive({useHandCursor: true})
-                .on("pointerdown", () => open_window_craft(this) )
 }
 
 
