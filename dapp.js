@@ -2350,9 +2350,12 @@ function create() {
     //debug info
     //text_speed =        this.add.text(10, 910, "***", font_arg);
     //text_mode = this.add.text(1150, 916, "***", {font: "14px Arial", fill: "#727171"});
-    text_turn = this.add.text(10, 916, "***", {font: "14px Arial", fill: "#727171"});
-    text_sync_time = this.add.text(10, 928, "***", {font: "14px Arial", fill: "#727171"});
-    text_wallet = this.add.text(10, 940, "***", {font: "14px Arial", fill: "#727171"});
+    text_turn = this.add.text(250, 916, "***", {font: "14px Arial", fill: "#727171"});
+    text_sync_time = this.add.text(250, 928, "***", {font: "14px Arial", fill: "#727171"});
+    text_wallet = this.add.text(250, 940, "***", {font: "14px Arial", fill: "#727171"});
+    //text_turn = this.add.text(10, 916, "***", {font: "14px Arial", fill: "#ffffff"});
+    //text_sync_time = this.add.text(10, 928, "***", {font: "14px Arial", fill: "#ffffff"});
+    //text_wallet = this.add.text(10, 940, "***", {font: "14px Arial", fill: "#ffffff"});
 
     //satiety
     icon_satiety = this.add.sprite(30,25, "icon_satiety");
