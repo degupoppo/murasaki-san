@@ -932,7 +932,8 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         }
 
         //depth
-        item_wearing_hat.depth = item_wearing_hat.y + 100;
+        //item_wearing_hat.depth = item_wearing_hat.y + 100;
+        item_wearing_hat.depth = this.y + 1;
 
         /*
         if (
@@ -1443,18 +1444,19 @@ function radarchart(scene, x0, y0, r, str, dex, int, luk, str_item, dex_item, in
     radar3 = scene.add.polygon(x0+r/2, y0+r/2, [0,-r/2,r/2,0,0,r/2,-r/2,0], 0xDADADA, 0.4);
     radar4 = scene.add.polygon(x0+(-x4i+x2i)/2, y0+(-y1i+y3i)/2, [x1,y1i,x2i,y2,x3,y3i,x4i,y4], 0xF9C270, 1);
     radar5 = scene.add.polygon(x0+(-x4+x2)/2, y0+(-y1+y3)/2, [x1,y1,x2,y2,x3,y3,x4,y4], 0xFFF67F, 1);
+    //let font_arg = {font: "17px Arial", fill: "#000000", backgroundColor: "#ffffff"};
     let font_arg = {font: "17px Arial", fill: "#000000"};
     radar6 = scene.add.text(x0-15, y0-r-25, "STR"+"\n"+(Math.round( (str+str_item)*100 )/100).toFixed(2), font_arg);
     radar7 = scene.add.text(x0+r-5, y0-10, "DEX"+"\n"+(Math.round( (dex+dex_item)*100 )/100).toFixed(2), font_arg);
     radar8 = scene.add.text(x0-15, y0+r-5, "LUK"+"\n"+(Math.round( (luk+luk_item)*100 )/100).toFixed(2), font_arg);
-    radar9 = scene.add.text(x0-r-20, y0-10, "INT"+"\n"+(Math.round( (int+int_item)*100 )/100).toFixed(2), font_arg);
+    radar9 = scene.add.text(x0-r-20, y0-12, "INT"+"\n"+(Math.round( (int+int_item)*100 )/100).toFixed(2), font_arg);
     icon_str = scene.add.sprite(x0-15-10, y0-r-25+20, "icon_str").setOrigin(0.5).setScale(0.12);
-    icon_dex = scene.add.sprite(x0+r-5+60, y0-10+15, "icon_dex").setOrigin(0.5).setScale(0.12);
+    icon_dex = scene.add.sprite(x0+r-5+10, y0-30, "icon_dex").setOrigin(0.5).setScale(0.12);
     icon_luk = scene.add.sprite(x0-15-12, y0+r-5+16, "icon_luk").setOrigin(0.5).setScale(0.10);
-    icon_int = scene.add.sprite(x0-r-20-20, y0-10+20, "icon_int").setOrigin(0.5).setScale(0.10);
+    icon_int = scene.add.sprite(x0-r-20+16, y0-10-16, "icon_int").setOrigin(0.5).setScale(0.10);
 }
 async function draw_radarchart(scene) {
-        let _x = 1115;
+        let _x = 1150;
         let _y = 115;
         let _r = 80;
         let _res = await contract_get_item_count(summoner);
@@ -1716,7 +1718,7 @@ let game = new Phaser.Game(config);
 function preload() {
 
     //back
-    this.load.image("back", "png/back8.png");
+    this.load.image("back", "png/back10.png");
 
     //murasaki-san
     this.load.spritesheet("murasaki_right", "png/murasaki_right.png", {frameWidth: 370, frameHeight: 320});
@@ -2177,7 +2179,8 @@ function create() {
     text_mining_calc = this.add.text(115, 670, "", {font: "18px Arial", fill: "#000"});
 
     //farming
-    button_farming = this.add.sprite(300,150, "button_farming_unable");
+    //button_farming = this.add.sprite(300,150, "button_farming_unable");
+    button_farming = this.add.sprite(240,340, "button_farming_unable");
     button_farming.scaleX = button_farming.scaleX * 0.16;
     button_farming.scaleY = button_farming.scaleY * 0.16;
     button_farming.setInteractive({useHandCursor: true});
@@ -2188,11 +2191,11 @@ function create() {
     button_farming.on('pointerout', () => button_farming.setTexture("button_farming_enable"));
     button_farming.disableInteractive();
     //icon
-    icon_farming = this.add.sprite(355,130, "icon_kusa");
+    icon_farming = this.add.sprite(295,320, "icon_kusa");
     icon_farming.setScale(0.09);
     icon_farming.visible = false;
     //text
-    text_farming_calc = this.add.text(370, 120, "", {font: "18px Arial", fill: "#000"});
+    text_farming_calc = this.add.text(305, 310, "", {font: "18px Arial", fill: "#000"});
 
     //level
     button_levelup = this.add.sprite(1240, 35, "back_level");
@@ -2913,8 +2916,8 @@ function update() {
             murasakisan.set_mode = "farming";
             murasakisan.submode = 0;
             murasakisan.count = 0;
-            murasakisan.target_x = 450;
-            murasakisan.target_y = 300;
+            murasakisan.target_x = 180;
+            murasakisan.target_y = 450;
             sound_farming.play();
         }else if (local_farming_status == 0 & murasakisan.mode == "farming") {
             murasakisan.set_mode = "resting";
@@ -3172,8 +3175,8 @@ function update() {
             && local_items_flag[_item_id] != true
         ) {
             local_items_flag[_item_id] = true;
-            let _x = 300;
-            let _y = 85;
+            let _x = 240;
+            let _y = 275;
             item_hat_mugiwara = this.add.sprite(_x, _y, "item_hat_mugiwara").setOrigin(0.5).setScale(0.25);
             item_hat_mugiwara.setInteractive({useHandCursor: true});
             item_hat_mugiwara.on('pointerdown', () => {
