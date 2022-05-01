@@ -2100,7 +2100,7 @@ function create() {
     item_tree = this.add.sprite(100,380, "item_tree").setOrigin(0.5).setScale(0.8);
     item_tree.depth = item_tree.y;
     item_misin = this.add.sprite(1000,830, "item_misin").setOrigin(0.5).setScale(0.8);
-    item_misin.depth = item_misin.y;
+    item_misin.depth = item_misin.y-100;
 
     //===click button===
 
@@ -2954,8 +2954,8 @@ function update() {
             murasakisan.set_mode = "crafting";
             murasakisan.submode = 0;
             murasakisan.count = 0;
-            murasakisan.target_x = 730;
-            murasakisan.target_y = 300;
+            murasakisan.target_x = 1000;
+            murasakisan.target_y = 740;
             text_select_item.setText('"'+array_item_name[local_crafting_item_type]+'"')
             sound_crafting.play();
         }else if (local_crafting_status == 0 & murasakisan.mode == "crafting") {
