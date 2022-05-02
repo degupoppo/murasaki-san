@@ -5,9 +5,20 @@
 
 コントラ修正
     msにcraft_countを追加
+        各working timeのtotalだけでなく, クラフト品回数も集計する
+    msにtotal_coinとtotal_materialを追加
+        総mining数、総farming数も集計する
     msにpenalty_timeを追加
         でなくとも、summoner単位でdeactivateできる変数を追加
         強制petrification機構でもよいか
+    Luckの補正を2倍ではなく1.5倍程度にするか
+        補正値が強すぎる
+    Uncommonを1.5倍, Rareを2倍程度にするか
+        補正値が強すぎる
+    Diceの補正がLuckにも乗るようにする
+        現状、Diceで良い目がでてもmining/farmingにしか影響せずイマイチ
+        Luckにも影響するのなら、feedingなどすべての行動がブーストされてよいか
+        ただし、dice roll時のluck判定には影響させない
 
 ランキングページの実装
     summonerを一覧表示する

@@ -2096,7 +2096,7 @@ function create() {
     item_bear.scaleX = item_bear.scaleX * 0.45;
     item_bear.scaleY = item_bear.scaleY * 0.45;
     item_table = this.add.sprite(600,870, "item_table").setOrigin(0.5).setScale(0.6);
-    item_table.depth = item_table.y;
+    item_table.depth = item_table.y-50;
     item_tree = this.add.sprite(100,380, "item_tree").setOrigin(0.5).setScale(0.8);
     item_tree.depth = item_tree.y;
     item_misin = this.add.sprite(1000,830, "item_misin").setOrigin(0.5).setScale(0.8);
@@ -2440,9 +2440,6 @@ function create() {
 
     //age
     text_age_time =     this.add.text(120, 86, "***", {font: "14px Arial", fill: "#ffffff"});
-
-    //===etc===
-
 }
 
 
@@ -2452,7 +2449,7 @@ function create() {
 //update system message
 function update_systemMessage() {
     if (summoner == -1) {
-        text_system_message.setText(" --- Connecting to Astar Network... --- ");
+        text_system_message.setText(" --- Connecting to Astar Network --- ");
     } else if (summoner == 0) {
         text_system_message.setText(" --- You have not summoned Murasaki-san yet --- ");
         text_summon.visible = true;
@@ -2884,28 +2881,21 @@ function update() {
             murasakisan.submode = 0;
             murasakisan.count = 0;
             murasakisan.target_x = 600;
-            murasakisan.target_y = 730;
+            murasakisan.target_y = 840;
             if (typeof group_food != "undefined") {
                 group_food.destroy();
             }
-            
-            /*
-            item_potato = this.add.sprite(620, 740, "food_sweet_potato").setScale(0.12).setOrigin(0.5);
-            item_pudding = this.add.sprite(590, 750, "item_pudding").setScale(0.35).setOrigin(0.5);
-            item_chocolate_bread = this.add.sprite(670, 750, "item_chocolate_bread").setScale(0.4).setOrigin(0.5);
-            */
-
             group_food = this.add.group();
-            item_potato = this.add.sprite(620, 740, "food_sweet_potato").setScale(0.12).setOrigin(0.5);
+            item_potato = this.add.sprite(600, 840+10, "food_sweet_potato").setScale(0.12).setOrigin(0.5);
             item_potato.depth = 9999;
             group_food.add(item_potato);
             if (local_items[5] > 0) {
-                item_pudding = this.add.sprite(590, 750, "item_pudding").setScale(0.30).setOrigin(0.5);
+                item_pudding = this.add.sprite(570, 840+20, "item_pudding").setScale(0.30).setOrigin(0.5);
                 item_pudding.depth = 9999;
                 group_food.add(item_pudding);
             }
             if (local_items[22] > 0) {
-                item_chocolate_bread = this.add.sprite(670, 750, "item_chocolate_bread").setScale(0.4).setOrigin(0.5);
+                item_chocolate_bread = this.add.sprite(650, 840+20, "item_chocolate_bread").setScale(0.4).setOrigin(0.5);
                 item_chocolate_bread.depth = 9999;
                 group_food.add(item_chocolate_bread);
             }
