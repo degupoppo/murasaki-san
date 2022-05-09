@@ -582,6 +582,9 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             }else if (tmp <= 20 && happy <= 10 && count_sync > 3) {
                 this.mode = "crying";
                 this.count = 0;
+            }else if (tmp <= 20 && flag_music == 1 && count_sync > 3) {
+                this.mode = "listning";
+                this.count = 0;
             }else {
                 this.mode = "moving";
                 this.count = 0;
@@ -706,7 +709,16 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         this.count += 1;
         if (this.count == 1){
             this.anims.play("murasaki_sleeping", true);
-        }else if (this.count >= 1000) {
+        }else if (this.count >= 1500) {
+            this.mode = "resting";
+            this.count = 0;
+        }
+    }
+    listning() {
+        this.count += 1;
+        if (this.count == 1){
+            this.anims.play("murasaki_listning", true);
+        }else if (this.count >= 750) {
             this.mode = "resting";
             this.count = 0;
         }
@@ -878,6 +890,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             || this.mode == "hugging"
             || this.mode == "hungry"
             || this.mode == "crying"
+            || this.mode == "listning"
         ) {
             item_wearing_hat.x = this.x;
             item_wearing_hat.y = this.y - 65;
@@ -1018,6 +1031,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         else if (this.mode == "crafting") {this.crafting();}
         else if (this.mode == "hungry") {this.hungry();}
         else if (this.mode == "petrified") {this.petrified();}
+        else if (this.mode == "listning") {this.listning();}
         //draw item_wearing_hat
         if (item_wearing_hat != 0) {
             this.update_item_wearing_hat();
@@ -1557,7 +1571,7 @@ function open_window_craft (scene) {
     item3_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  3, "item_fortune_statue").setScale(0.15);
     item4_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  4, "item_hat_helmet").setScale(0.1);
     item5_icon = scene.add.sprite(_x-20, _y+15 + _y_add *  5, "item_pudding").setScale(0.2);
-    item6_icon = scene.add.sprite(_x-15, _y+45 + _y_add *  6, "item_ribbon").setScale(0.35);
+    item6_icon = scene.add.sprite(_x-25, _y+12 + _y_add *  6, "item_ribbon").setScale(0.12);
 
     //farming_item
     _x = 520;
@@ -1719,11 +1733,13 @@ function preload() {
 
     //back
     this.load.image("back", "png/back11.png");
+    this.load.image("back_black", "png/back11_black.png");
 
     //murasaki-san
     this.load.spritesheet("murasaki_right", "png/murasaki_right.png", {frameWidth: 370, frameHeight: 320});
     this.load.spritesheet("murasaki_left", "png/murasaki_left.png", {frameWidth: 370, frameHeight: 320});
-    this.load.spritesheet("murasaki_sleeping", "png/murasaki_sleeping.png", {frameWidth: 370, frameHeight: 320});
+    //this.load.spritesheet("murasaki_sleeping", "png/murasaki_sleeping.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("murasaki_sleeping", "png/murasaki_sleeping2.png", {frameWidth: 370, frameHeight: 320});
     this.load.spritesheet("murasaki_feeding", "png/murasaki_feeding.png", {frameWidth: 370, frameHeight: 320});
     this.load.spritesheet("murasaki_feeding_happy_right", 
         "png/murasaki_feeding_happy_right.png", {frameWidth: 370, frameHeight: 320});
@@ -1740,6 +1756,7 @@ function preload() {
     this.load.spritesheet("murasaki_click", "png/murasaki_click.png", {frameWidth: 370, frameHeight: 320});
     this.load.spritesheet("murasaki_stone", "png/murasaki_stone.png", {frameWidth: 370, frameHeight: 320});
     this.load.spritesheet("murasaki_hungry", "png/murasaki_hungry.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("murasaki_listning", "png/murasaki_listning.png", {frameWidth: 370, frameHeight: 320});
 
     //icon button
     this.load.image("button_feeding", "png/button_feeding.png", {frameWidth: 500, frameHeight: 500});
@@ -1800,6 +1817,7 @@ function preload() {
     this.load.audio("dice2", "sound/dice2.mp3");
     this.load.audio("hat", "sound/hat.mp3");
     this.load.audio("unhappy", "sound/unhappy.mp3");
+    this.load.audio("switch", "sound/switch.mp3");
 
     //items_back
     this.load.image("item_table", "png/item_table.png", {frameWidth: 370, frameHeight: 320});
@@ -1810,12 +1828,13 @@ function preload() {
     this.load.spritesheet("item_musicbox", "png/item_musicbox.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("item_violin", "png/item_violin.png", {frameWidth: 600, frameHeight: 600});
     this.load.image("item_vase", "png/item_vase.png", {frameWidth: 300, frameHeight: 300});
-    this.load.image("item_kanban", "png/item_kanban2.png", {frameWidth: 1000, frameHeight: 475});
+    //this.load.image("item_kanban", "png/item_kanban2.png", {frameWidth: 1000, frameHeight: 475});
+    this.load.image("item_kanban", "png/item_kanban4.png", {frameWidth: 370, frameHeight: 320});
     this.load.spritesheet("item_crown", "png/item_crown.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("item_pudding", "png/item_pudding2.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("item_chocolate_bread", "png/item_chocolate_bread.png", {frameWidth: 643, frameHeight: 477});
     this.load.image("item_fortune_statue", "png/item_fortune_statue.png", {frameWidth: 370, frameHeight: 320});
-    this.load.image("item_ribbon", "png/item_ribbon2.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_ribbon", "png/item_ribbon3.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("item_tiny_crown", "png/item_tiny_crown.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("item_ohana_piggy_bank", "png/item_ohana_piggy_bank.png", {frameWidth: 619, frameHeight: 659});
     this.load.image("item_kusa_pouch", "png/item_kusa_pouch.png", {frameWidth: 636, frameHeight: 895});
@@ -1826,6 +1845,10 @@ function preload() {
     this.load.image("item_bank_broken", "png/item_bank_broken.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("item_hat_helmet", "png/item_hat_helmet.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("item_asnya", "png/item_asnya.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("item_nui", "png/item_nui.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("item_switch", "png/item_switch.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_pouch", "png/item_pouch.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_pouch_broken", "png/item_pouch_broken.png", {frameWidth: 370, frameHeight: 320});
     
     //items_todo
     this.load.image("item_mushroom", "png/item_mushroom.png", {frameWidth: 300, frameHeight: 300});
@@ -2023,6 +2046,12 @@ function create() {
         frameRate: 1,
         repeat: -1
     });
+    this.anims.create({
+        key: "murasaki_listning",
+        frames: this.anims.generateFrameNumbers("murasaki_listning", {start:0, end:1}),
+        frameRate: 1,
+        repeat: -1
+    });
 
     //===animation pet===
 
@@ -2086,6 +2115,18 @@ function create() {
     this.anims.create({
         key: "murasaki_hungry",
         frames: this.anims.generateFrameNumbers("murasaki_hungry", {start:0, end:1}),
+        frameRate: 1,
+        repeat: -1
+    });
+    this.anims.create({
+        key: "item_switch_on",
+        frames: this.anims.generateFrameNumbers("item_switch", {start:0, end:0}),
+        frameRate: 1,
+        repeat: -1
+    });
+    this.anims.create({
+        key: "item_switch_off",
+        frames: this.anims.generateFrameNumbers("item_switch", {start:1, end:1}),
         frameRate: 1,
         repeat: -1
     });
@@ -2299,6 +2340,7 @@ function create() {
     sound_dice2 = this.sound.add("dice2", {volume:0.1});
     sound_hat = this.sound.add("hat", {volume:0.1});
     sound_unhappy = this.sound.add("unhappy", {volume:0.2});
+    sound_switch = this.sound.add("switch", {volume:0.2});
 
     //===create summoner===
 
@@ -2410,22 +2452,26 @@ function create() {
     text_heart = this.add.text(975, 15, "***", {font: "17px Arial", fill: "#000", backgroundColor: "#FDEEED"});
 
     //name
-    item_kanban = this.add.sprite(85, 75, "item_kanban");
-    item_kanban.setScale(0.14);
-    text_kanban = this.add.text(85, 77, "", {font: "17px Arial", fill: "#ffffff"}).setOrigin(0.5);
+    _x = 85;
+    _y = 100;
+    //item_kanban = this.add.sprite(85, 75, "item_kanban");
+    item_kanban = this.add.sprite(85, 100, "item_kanban");
+    //item_kanban.setScale(0.14);
+    item_kanban.setScale(0.4);
+    text_kanban = this.add.text(_x+2, _y+17, "", {font: "17px Arial", fill: "#000000"}).setOrigin(0.5);
 	text_kanban.setInteractive().on('pointerdown', () => {this.rexUI.edit(text_kanban)})
-    text_mint_name = this.add.text(165, 60, "[MINT NAME]", {font: "17px Arial", fill: "#000000"})
+    text_mint_name = this.add.text(_x+80, _y-5, "[MINT NAME]", {font: "17px Arial", fill: "#000000"})
         .setInteractive({useHandCursor: true})
         .on("pointerover", () => text_mint_name.setStyle({ fontSize: 17, fontFamily: "Arial", fill: '#ffff00' }))
         .on("pointerout", () => text_mint_name.setStyle({ fontSize: 17, fontFamily: "Arial", fill: '#000000' }));
     text_mint_name.setInteractive().on("pointerdown", () => {contract_mint_name(summoner, text_kanban.text)});
     //text_mint_name.visible = false;
-    icon_name_ohana = this.add.sprite(173, 90, "icon_ohana");
+    icon_name_ohana = this.add.sprite(_x+88, _y+25, "icon_ohana");
     icon_name_ohana.setScale(0.05);
-    text_name_ohana = this.add.text(185, 82, "100", {font: "17px Arial", fill: "#000000"});
-    icon_name_kusa = this.add.sprite(225, 90, "icon_kusa");
+    text_name_ohana = this.add.text(_x+100, _y+17, "100", {font: "17px Arial", fill: "#000000"});
+    icon_name_kusa = this.add.sprite(_x+140, _y+25, "icon_kusa");
     icon_name_kusa.setScale(0.07);
-    text_name_kusa = this.add.text(235, 82, "100", {font: "17px Arial", fill: "#000000"});
+    text_name_kusa = this.add.text(_x+150, _y+17, "100", {font: "17px Arial", fill: "#000000"});
     //group
     group_mint_name = this.add.group();
     group_mint_name.add(text_mint_name);
@@ -2436,10 +2482,10 @@ function create() {
     group_mint_name.setVisible(false);
     
     //id
-    text_id = this.add.text(17,86, "#100", {font: "14px Arial", fill: "#ffffff"});
+    text_id = this.add.text(_x-45, _y+32, "#100", {font: "14px Arial", fill: "#000000"});
 
     //age
-    text_age_time =     this.add.text(120, 86, "***", {font: "14px Arial", fill: "#ffffff"});
+    text_age_time =     this.add.text(_x+20, _y+32, "***", {font: "14px Arial", fill: "#000000"});
 }
 
 
@@ -3079,6 +3125,30 @@ function update() {
             item_asnya = this.add.sprite(590, 140, "item_asnya").setOrigin(0.5).setScale(0.25);
             item_asnya.depth = item_asnya.y;
 
+            item_nui = this.add.sprite(680, 165, "item_nui").setOrigin(0.5).setScale(0.38);
+            item_nui.depth = item_nui.y;
+
+            item_switch = this.add.sprite(1230,300, "item_switch").setOrigin(0.5);
+            item_switch.setScale(0.25);
+            item_switch.anims.play("item_switch_off", true);
+            item_switch.setInteractive({useHandCursor: true});
+            back_black = this.add.image(640, 480, "back_black");
+            back_black.depth = 9999+1;
+            back_black.visible = false;
+            item_switch.on('pointerdown', () => {
+                if (item_switch.anims.currentAnim.key == "item_switch_off") {
+                    item_switch.anims.play("item_switch_on", true);
+                    back_black.visible = true;
+                    sound_switch.play();
+                } else {
+                    item_switch.anims.play("item_switch_off", true);
+                    back_black.visible = false;
+                    sound_switch.play();
+                }
+            });
+            item_switch.depth = item_switch.y;
+
+
         }
         
         //2:Crown
@@ -3116,15 +3186,15 @@ function update() {
             item_fortune_statue.depth = item_fortune_statue.y;
         }
         
-        //4:Knit Hat
+        //4:helment
         _item_id = 4;
         if (
             (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
             && local_items_flag[_item_id] != true
         ) {
             local_items_flag[_item_id] = true;
-            let _x = 50;
-            let _y = 640;
+            let _x = 60;
+            let _y = 700;
             item_hat_helmet = this.add.sprite(_x, _y, "item_hat_helmet").setOrigin(0.5).setScale(0.20);
             item_hat_helmet.setInteractive({useHandCursor: true});
             item_hat_helmet.on('pointerdown', () => {
@@ -3149,7 +3219,8 @@ function update() {
             && local_items_flag[_item_id] != true
         ) {
             local_items_flag[_item_id] = true;
-            item_ribbon = this.add.sprite(1057, 443, "item_ribbon").setScale(0.5).setOrigin(0.5);
+            //item_ribbon = this.add.sprite(1057, 443, "item_ribbon").setScale(0.5).setOrigin(0.5);
+            item_ribbon = this.add.sprite(1037, 401, "item_ribbon").setScale(0.15).setOrigin(0.5);
             item_ribbon.depth = 9999;
         }
         
@@ -3268,8 +3339,8 @@ function update() {
             && local_items_flag[_item_id] != true
         ) {
             local_items_flag[_item_id] = true;
-            let _x = 700;
-            let _y = 90;
+            let _x = 800;
+            let _y = 810;
             item_hat_knit = this.add.sprite(_x, _y, "item_hat_knit").setOrigin(0.5).setScale(0.20);
             item_hat_knit.setInteractive({useHandCursor: true});
             item_hat_knit.on('pointerdown', () => {
@@ -3285,7 +3356,7 @@ function update() {
             });
         }
 
-        //194:ohana_piggy_pouch
+        //194:ohana_bank
         if (local_items[194] != previous_local_item194) {
             // define async function
             async function _do(scene) {
@@ -3340,6 +3411,58 @@ function update() {
         if (local_items[195] != previous_local_item195) {
             // define async function
             async function _do(scene) {
+                // get item194 list, need to wait
+                let _array_item195 = await get_userItems(summoner, 195);
+                // recreate sprite group
+                try {
+                    group_item195.destroy(true);
+                } catch (error) {
+                }
+                group_item195 = scene.add.group();
+                // create sprite, add group, using array for independency
+                let _array_bank = [];
+                let _array_text = [];
+                let _array_icon = [];
+                for (let i = 0; i < _array_item195.length; i++) {
+                    //bank sprite
+                    let _x = 720;
+                    let _y = 400;
+                    _array_bank[i] = scene.add.sprite(_x + i*50, _y, "item_pouch")
+                        .setScale(0.25)
+                        .setOrigin(0.5)
+                        .setInteractive({useHandCursor: true})
+                        .on("pointerover", () => _array_bank[i].setTexture("item_pouch_broken") )
+                        .on('pointerover', () => sound_button_select.play() )
+                        .on('pointerover', () => {_array_text[i].visible = true;} )
+                        .on('pointerover', () => {_array_icon[i].visible = true;} )
+                        .on("pointerout", () => _array_bank[i].setTexture("item_pouch"))
+                        .on('pointerout', () => {_array_text[i].visible = false;} )
+                        .on('pointerout', () => {_array_icon[i].visible = false;} )
+                        .on("pointerdown", () => unpack_bag(summoner, _array_item195[i]) )
+                        .on('pointerdown', () => sound_button_on.play() );
+                    _array_bank[i].depth = _array_bank[i].y;
+                    //text, "+1000"
+                    _array_text[i] = scene.add.text(_x + 15 + i*50, _y - 50, "+1000", {font: "17px Arial", fill: "#000000"})
+                        .setOrigin(0.5)
+                        .setVisible(false);
+                    //icon, ohana
+                    _array_icon[i] = scene.add.sprite(_x - 22 + i*50, _y - 50, "icon_kusa")
+                        .setOrigin(0.5)
+                        .setScale(0.09)
+                        .setVisible(false);
+                    group_item195.add(_array_bank[i]);
+                    group_item195.add(_array_text[i]);
+                    group_item195.add(_array_icon[i]);
+                }
+            }
+            _do(this);
+        }
+
+        /*
+        //195:kusa_pouch
+        if (local_items[195] != previous_local_item195) {
+            // define async function
+            async function _do(scene) {
                 // get item195 list, need to wait
                 let _array_item195 = await get_userItems(summoner, 195);
                 // recreate sprite group
@@ -3359,6 +3482,7 @@ function update() {
             }
             _do(this);
         }
+        */
         
         //***TODO items***
 
@@ -3401,7 +3525,7 @@ function update() {
 
     //===== update onchain data =====
 
-    if (turn % 300 == 80 || turn == 50) {
+    if (turn % 600 == 80 || turn == 50) {
         //when no summoner argument, load summoner id from wallet
         if (summoner == -1) {
             //can not get summoner id directry, update summoner id is better.
