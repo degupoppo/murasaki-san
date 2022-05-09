@@ -1821,7 +1821,10 @@ function preload() {
 
     //items_back
     this.load.image("item_table", "png/item_table.png", {frameWidth: 370, frameHeight: 320});
-    this.load.image("item_tree", "png/item_tree.png", {frameWidth: 370, frameHeight: 320});
+    //this.load.image("item_tree", "png/item_tree.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_tree1", "png/item_tree1.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_tree2", "png/item_tree2.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_tree3", "png/item_tree3.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("item_misin", "png/item_misin.png", {frameWidth: 370, frameHeight: 320});
 
     //items
@@ -2138,8 +2141,16 @@ function create() {
     item_bear.scaleY = item_bear.scaleY * 0.45;
     item_table = this.add.sprite(600,870, "item_table").setOrigin(0.5).setScale(0.6);
     item_table.depth = item_table.y-50;
-    item_tree = this.add.sprite(100,380, "item_tree").setOrigin(0.5).setScale(0.8);
-    item_tree.depth = item_tree.y;
+    //item_tree = this.add.sprite(100,380, "item_tree").setOrigin(0.5).setScale(0.8);
+    //item_tree.depth = item_tree.y;
+    item_tree1 = this.add.sprite(100,380, "item_tree1").setOrigin(0.5).setScale(0.8);
+    item_tree2 = this.add.sprite(100,380, "item_tree2").setOrigin(0.5).setScale(0.8);
+    item_tree3 = this.add.sprite(100,380, "item_tree3").setOrigin(0.5).setScale(0.8);
+    item_tree1.depth = item_tree1.y;
+    item_tree2.depth = item_tree1.y - 1;
+    item_tree3.depth = item_tree1.y - 2;
+    item_tree2.visible = false;
+    item_tree3.visible = false;
     item_misin = this.add.sprite(1000,830, "item_misin").setOrigin(0.5).setScale(0.8);
     item_misin.depth = item_misin.y-100;
 
@@ -2833,6 +2844,12 @@ function update() {
             let _delta = (now_time - local_farming_start_time);
             let _daily_earn = local_material_calc / _delta * 8640;
             text_farming_calc.setText(" +" + local_material_calc + " Kusa\n  (" + Math.round(_daily_earn/10)*10 + " /d)");
+            //update tree
+            if (local_material_calc >= 1000) {
+                item_tree2.visible = true;
+            } else if (local_material_calc >= 2000 ) {
+                item_tree3.visible = true;
+            }
         }else if (_mode == "crafting") {
             icon_crafting_time_remining.visible = true;
             if (local_crafting_calc > 0) {
@@ -2856,6 +2873,19 @@ function update() {
             text_mining_calc.setText("");
             text_farming_calc.setText("");
             text_crafting_calc.setText("");
+        }
+
+        //reset progression status
+        if (local_mining_status != 1) {
+            icon_mining.visible = false;
+        }
+        if (local_farming_status != 1) {
+            icon_farming.visible = false;
+            item_tree2.visible = false;
+            item_tree3.visible = false;
+        }
+        if (local_crafting_status != 1) {
+            icon_crafting_time_remining.visible = false;
         }
         
         //name
