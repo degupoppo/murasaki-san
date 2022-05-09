@@ -1626,7 +1626,7 @@ function open_window_craft (scene) {
     group_window_crafting.add(item35_icon);
     group_window_crafting.add(item36_icon);
     group_window_crafting.add(item37_icon);
-    group_window_crafting.setDepth(9999 + 1);
+    group_window_crafting.setDepth(9999 + 10);
 }
 
 
