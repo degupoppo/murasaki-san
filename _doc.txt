@@ -3,7 +3,7 @@
     https://soundeffect-lab.info/sound/button/
     https://otologic.jp/free/se/motion-pop01.html
 
-コントラ修正
+コントラ修正案
     msにcraft_countを追加
         各working timeのtotalだけでなく, クラフト品回数も集計する
     msにtotal_coinとtotal_materialを追加
@@ -98,6 +98,11 @@ Doc
 
 
 //---Murasaki_Mail---
+
+文通システム概要
+    クッションをクラフト
+    クラフト後、猫が寄り付く
+    
 
 
 文通システムの実装

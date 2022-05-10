@@ -1217,6 +1217,13 @@ class Dice extends Phaser.GameObjects.Sprite{
         //contract parameter
         //this.limit_per = 0.9;
         this.buffer_sec = 60 * 60 * 4;  // 4hr
+        this.on("pointerover", () => {
+            if (this.flag_tx == 1) {
+                this.setTexture("item_dice_pointerover");
+                sound_button_select.play();
+            }
+        });
+        this.on("pointerout", () => {this.setTexture("item_dice");} );
     }
     on_click() {
         this.speed_x = 8 + Math.random() * 5;
@@ -1452,7 +1459,7 @@ function radarchart(scene, x0, y0, r, str, dex, int, luk, str_item, dex_item, in
 }
 async function draw_radarchart(scene) {
         let _x = 1160;
-        let _y = 110;
+        let _y = 115;
         let _r = 75;
         let _res = await contract_get_item_count(summoner);
         radarchart(scene, _x, _y, _r, local_strength, local_dexterity, local_intelligence, local_luck, _res[0], _res[1], _res[2], local_heart*5/100);
@@ -1607,7 +1614,7 @@ function open_window_craft (scene) {
     group_window_crafting.add(item35_icon);
     group_window_crafting.add(item36_icon);
     group_window_crafting.add(item37_icon);
-    group_window_crafting.setDepth(9999 + 10);
+    group_window_crafting.setDepth(9999 + 100);
 }
 
 
@@ -1716,6 +1723,7 @@ function preload() {
     this.load.image("back", "src/png/background.png");
     this.load.image("back_black", "src/png/background_black.png");
     this.load.image("window", "src/png/background_window.png");
+    this.load.image("back_neon", "src/png/background_neon.png", {frameWidth: 500, frameHeight: 500});
 
     //===murasaki-san===
     this.load.spritesheet("murasaki_right", "src/png/murasaki_right.png", {frameWidth: 370, frameHeight: 320});
@@ -1803,6 +1811,9 @@ function preload() {
     this.load.image("item_tree3", "src/png/item_basic_tree3.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("item_bear", "src/png/item_basic_bear.png", {frameWidth: 720, frameHeight: 622});
     this.load.image("item_sweet_potato", "src/png/item_basic_sweet_potato.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("item_gold1", "src/png/item_basic_gold1.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_gold2", "src/png/item_basic_gold2.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_gold3", "src/png/item_basic_gold3.png", {frameWidth: 370, frameHeight: 320});
 
     //===item_craft===
     this.load.spritesheet("item_musicbox", "src/png/item_musicbox.png", {frameWidth: 370, frameHeight: 320});
@@ -1817,6 +1828,7 @@ function preload() {
     this.load.image("item_tiny_crown", "src/png/item_tiny_crown.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("item_kusa_pouch", "src/png/item_kusa_pouch.png", {frameWidth: 636, frameHeight: 895});
     this.load.image("item_dice", "src/png/item_dice.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("item_dice_pointerover", "src/png/item_dice_pointerover.png", {frameWidth: 200, frameHeight: 200});
     this.load.image("item_hat_knit", "src/png/item_hat_knit.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("item_hat_mugiwara", "src/png/item_hat_mugiwara.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("item_bank", "src/png/item_bank.png", {frameWidth: 370, frameHeight: 320});
@@ -1913,6 +1925,10 @@ function create() {
     //===back image===
 
     this.add.image(640, 480, "back");
+    back_neon = this.add.image(900, 180, "back_neon").setOrigin(0.5).setScale(0.3);
+    back_neon.angle += 10;
+    back_neon.visible = false;
+    back_neon.depth = 9999+11;
 
     //===animation murasaki===
 
@@ -2097,7 +2113,7 @@ function create() {
         repeat: -1
     });
     
-    //===item_bear, item_table===
+    //===item_basic===
 
     item_bear = this.add.sprite(1000,400, "item_bear");
     item_bear.scaleX = item_bear.scaleX * 0.45;
@@ -2114,6 +2130,15 @@ function create() {
     item_tree3.depth = item_tree1.y - 2;
     item_tree2.visible = false;
     item_tree3.visible = false;
+    item_gold1 = this.add.sprite(130,750, "item_gold1").setOrigin(0.5).setScale(0.7);
+    item_gold2 = this.add.sprite(130,750, "item_gold2").setOrigin(0.5).setScale(0.7);
+    item_gold3 = this.add.sprite(130,750, "item_gold3").setOrigin(0.5).setScale(0.7);
+    item_gold1.depth = item_gold1.y;
+    item_gold2.depth = item_gold2.y+1;
+    item_gold3.depth = item_gold3.y+2;
+    item_gold1.visible = false;
+    item_gold2.visible = false;
+    item_gold3.visible = false;
 
     //===click button===
 
@@ -2429,7 +2454,8 @@ function create() {
     item_kanban = this.add.sprite(85, 100, "item_kanban");
     item_kanban.setScale(0.4);
     text_kanban = this.add.text(_x+2, _y+17, "", {font: "17px Arial", fill: "#000000"}).setOrigin(0.5);
-	text_kanban.setInteractive().on('pointerdown', () => {this.rexUI.edit(text_kanban)})
+	text_kanban.setInteractive().on('pointerdown', () => {this.rexUI.edit(text_kanban)});
+    text_kanban.depth = 9999+2;
     text_mint_name = this.add.text(_x+80, _y-5, "[MINT NAME]", {font: "17px Arial", fill: "#000000"})
         .setInteractive({useHandCursor: true})
         .on("pointerover", () => text_mint_name.setStyle({ fontSize: 17, fontFamily: "Arial", fill: '#ffff00' }))
@@ -2798,6 +2824,16 @@ function update() {
             let _delta = (now_time - local_mining_start_time);
             let _daily_earn = local_coin_calc / _delta * 8640;
             text_mining_calc.setText(" +" + local_coin_calc + " Ohana\n  (" + Math.round(_daily_earn/10)*10 + " /d)");
+            //update gold
+            if (local_coin_calc >= 500) {
+                item_gold1.visible = true;
+            }
+            if (local_coin_calc >= 1000) {
+                item_gold2.visible = true;
+            }
+            if (local_coin_calc >= 2000) {
+                item_gold3.visible = true;
+            }            
         }else if (_mode == "farming") {
             icon_farming.visible = true;
             let _delta = (now_time - local_farming_start_time);
@@ -2838,6 +2874,9 @@ function update() {
         //reset progression status
         if (local_mining_status != 1) {
             icon_mining.visible = false;
+            item_gold1.visible = false;
+            item_gold2.visible = false;
+            item_gold3.visible = false;
         }
         if (local_farming_status != 1) {
             icon_farming.visible = false;
@@ -3132,10 +3171,14 @@ function update() {
                     item_switch.anims.play("item_switch_on", true);
                     back_black.visible = true;
                     sound_switch.play();
+                    back_neon.visible = true;
+                    text_kanban.setColor("white");
                 } else {
                     item_switch.anims.play("item_switch_off", true);
                     back_black.visible = false;
                     sound_switch.play();
+                    back_neon.visible = false;
+                    text_kanban.setColor("black");
                 }
             });
             item_switch.depth = item_switch.y;
@@ -3520,7 +3563,7 @@ function update() {
 
     //===== update onchain data =====
 
-    if (turn % 300 == 80 || turn == 50) {
+    if (turn % 500 == 80 || turn == 50) {
         //when no summoner argument, load summoner id from wallet
         if (summoner == -1) {
             //can not get summoner id directry, update summoner id is better.
