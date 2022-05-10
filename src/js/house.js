@@ -5,6 +5,7 @@
 
 /*
 
+・かんばんの実装
 
 
 */
@@ -159,7 +160,7 @@ if(urlParam) {
 */
 
 //POST
-async function send_fp(_wallet, _summoner) {
+async function send_fp_post(_wallet, _summoner) {
 
     // Initialize the agent at application startup.
     const fpPromise = FingerprintJS.load()
@@ -190,7 +191,7 @@ async function send_fp(_wallet, _summoner) {
 }
 
 //GET
-async function send_fp2(_wallet, _summoner) {
+async function send_fp_get(_wallet, _summoner) {
 
     // Initialize the agent at application startup.
     const fpPromise = FingerprintJS.load()
@@ -224,6 +225,7 @@ async function send_fp2(_wallet, _summoner) {
 //---web3-----------------------------------------------------------------------------------------------------
 
 
+/*
 //connect to metamask
 async function connect() {
     const web3 = await new Web3(window.ethereum);
@@ -253,6 +255,7 @@ async function get_wallet() {
     //text_wallet.setText("id: " + summoner + ", wallet: " + wallet[0]);
     return wallet[0];
 }
+*/
 
 //update summoner of wallet
 async function contract_update_summoner_of_wallet() {
@@ -1708,8 +1711,9 @@ let game = new Phaser.Game(config);
 function preload() {
 
     //back
-    this.load.image("back", "src/png/back11.png");
-    this.load.image("back_black", "src/png/back11_black.png");
+    this.load.image("back", "src/png/background.png");
+    this.load.image("back_black", "src/png/background_black.png");
+    this.load.image("window", "src/png/background_window.png");
 
     //murasaki-san
     this.load.spritesheet("murasaki_right", "src/png/murasaki_right.png", {frameWidth: 370, frameHeight: 320});
@@ -1731,11 +1735,9 @@ function preload() {
     this.load.spritesheet("murasaki_hungry", "src/png/murasaki_hungry.png", {frameWidth: 370, frameHeight: 320});
     this.load.spritesheet("murasaki_listning", "src/png/murasaki_listning.png", {frameWidth: 370, frameHeight: 320});
 
-    //icon button
+    //button
     this.load.image("button_feeding", "src/png/button_feeding.png", {frameWidth: 500, frameHeight: 500});
     this.load.image("button_feeding_pointerover", "src/png/button_feeding_pointerover.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("food_sweet_potato", "src/png/food_sweet_potato.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("item_bear", "src/png/item_bear.png", {frameWidth: 720, frameHeight: 622});
     this.load.image("button_mining_enable", "src/png/button_mining_enable.png", {frameWidth: 500, frameHeight: 500});
     this.load.image("button_mining_unable", "src/png/button_mining_unable.png", {frameWidth: 500, frameHeight: 500});
     this.load.image("button_mining_pointerover", "src/png/button_mining_pointerover.png", {frameWidth: 500, frameHeight: 500});
@@ -1757,14 +1759,15 @@ function preload() {
     this.load.image("button_levelup_enable", "src/png/button_levelup_enable.png", {frameWidth: 500, frameHeight: 500});
     this.load.image("button_levelup_unable", "src/png/button_levelup_unable.png", {frameWidth: 500, frameHeight: 500});
     this.load.image("button_levelup_pointerover", "src/png/button_levelup_pointerover.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("back_level", "src/png/button_level.png", {frameWidth: 500, frameHeight: 500});
 
     //pet
-    this.load.spritesheet("mr_astar_right", "src/png/mr_astar_right.png", {frameWidth: 600, frameHeight: 600});
-    this.load.spritesheet("mr_astar_left", "src/png/mr_astar_left.png", {frameWidth: 600, frameHeight: 600});
-    this.load.spritesheet("ms_ether_right", "src/png/ms_ether_right.png", {frameWidth: 600, frameHeight: 600});
-    this.load.spritesheet("ms_ether_left", "src/png/ms_ether_left.png", {frameWidth: 600, frameHeight: 600});
-    this.load.spritesheet("dr_bitco_right", "src/png/dr_bitco_right.png", {frameWidth: 600, frameHeight: 600});
-    this.load.spritesheet("dr_bitco_left", "src/png/dr_bitco_left.png", {frameWidth: 600, frameHeight: 600});
+    this.load.spritesheet("mr_astar_right", "src/png/pet_mr_astar_right.png", {frameWidth: 600, frameHeight: 600});
+    this.load.spritesheet("mr_astar_left", "src/png/pet_mr_astar_left.png", {frameWidth: 600, frameHeight: 600});
+    this.load.spritesheet("ms_ether_right", "src/png/pet_ms_ether_right.png", {frameWidth: 600, frameHeight: 600});
+    this.load.spritesheet("ms_ether_left", "src/png/pet_ms_ether_left.png", {frameWidth: 600, frameHeight: 600});
+    this.load.spritesheet("dr_bitco_right", "src/png/pet_dr_bitco_right.png", {frameWidth: 600, frameHeight: 600});
+    this.load.spritesheet("dr_bitco_left", "src/png/pet_dr_bitco_left.png", {frameWidth: 600, frameHeight: 600});
 
     //music
     this.load.audio("bgm1", "src/music/Morning_2.mp3");
@@ -1790,14 +1793,16 @@ function preload() {
     this.load.audio("unhappy", "src/sound/unhappy.mp3");
     this.load.audio("switch", "src/sound/switch.mp3");
 
-    //items_back
-    this.load.image("item_table", "src/png/item_table.png", {frameWidth: 370, frameHeight: 320});
-    this.load.image("item_misin", "src/png/item_misin.png", {frameWidth: 370, frameHeight: 320});
-    this.load.image("item_tree1", "src/png/item_tree1.png", {frameWidth: 370, frameHeight: 320});
-    this.load.image("item_tree2", "src/png/item_tree2.png", {frameWidth: 370, frameHeight: 320});
-    this.load.image("item_tree3", "src/png/item_tree3.png", {frameWidth: 370, frameHeight: 320});
+    //item_basic
+    this.load.image("item_table", "src/png/item_basic_table.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_misin", "src/png/item_basic_misin.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_tree1", "src/png/item_basic_tree1.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_tree2", "src/png/item_basic_tree2.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_tree3", "src/png/item_basic_tree3.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_bear", "src/png/item_basic_bear.png", {frameWidth: 720, frameHeight: 622});
+    this.load.image("item_sweet_potato", "src/png/item_basic_sweet_potato.png", {frameWidth: 500, frameHeight: 500});
 
-    //items
+    //item_craft
     this.load.spritesheet("item_musicbox", "src/png/item_musicbox.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("item_violin", "src/png/item_violin.png", {frameWidth: 600, frameHeight: 600});
     this.load.image("item_vase", "src/png/item_vase.png", {frameWidth: 300, frameHeight: 300});
@@ -1821,37 +1826,25 @@ function preload() {
     this.load.image("item_pouch", "src/png/item_pouch.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("item_pouch_broken", "src/png/item_pouch_broken.png", {frameWidth: 370, frameHeight: 320});
     
-    //items_todo
+    //item_craft_todo
     this.load.image("item_mushroom", "src/png/item_mushroom.png", {frameWidth: 300, frameHeight: 300});
-    this.load.image("item_the_rock", "src/png/item_the_rock.png", {frameWidth: 300, frameHeight: 300});
-    this.load.image("item_cactus", "src/png/item_cactus.png", {frameWidth: 300, frameHeight: 300});
-    this.load.image("item_needle_cushion", "src/png/item_needle_cushion.png", {frameWidth: 300, frameHeight: 300});
     this.load.image("item_horsetail", "src/png/item_horsetail.png", {frameWidth: 300, frameHeight: 300});
-    this.load.image("item_aquarium", "src/png/item_aquarium.png", {frameWidth: 300, frameHeight: 300});
-    this.load.image("item_the_earth", "src/png/item_the_earth.png", {frameWidth: 300, frameHeight: 300});    
 
-    //window
-    this.load.image("window", "src/png/window.png");
-
-    //icon
-    this.load.image("icon_kusa", "src/png/icon_kusa.png", {frameWidth: 350, frameHeight: 350});
-    this.load.image("icon_ohana", "src/png/icon_ohana.png", {frameWidth: 350, frameHeight: 350});
-    this.load.image("icon_age", "src/png/icon_age2.png", {frameWidth: 370, frameHeight: 320});
-    this.load.image("icon_clock", "src/png/icon_clock.png", {frameWidth: 225, frameHeight: 225});
-    this.load.image("icon_heart", "src/png/icon_heart.png", {frameWidth: 370, frameHeight: 320});
-    this.load.image("icon_rotate", "src/png/icon_rotate.png", {frameWidth: 980, frameHeight: 818});
-    this.load.image("icon_home", "src/png/icon_home.png", {frameWidth: 512, frameHeight: 512});
-    this.load.image("icon_satiety", "src/png/icon_satiety.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("icon_happy", "src/png/icon_happy.png", {frameWidth: 500, frameHeight: 500});
+    //icon_system
+    this.load.image("icon_kusa", "src/png/icon_system_kusa.png", {frameWidth: 350, frameHeight: 350});
+    this.load.image("icon_ohana", "src/png/icon_system_ohana.png", {frameWidth: 350, frameHeight: 350});
+    this.load.image("icon_clock", "src/png/icon_system_clock.png", {frameWidth: 225, frameHeight: 225});
+    this.load.image("icon_heart", "src/png/icon_system_heart.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("icon_rotate", "src/png/icon_system_rotate.png", {frameWidth: 980, frameHeight: 818});
+    this.load.image("icon_home", "src/png/icon_system_home.png", {frameWidth: 512, frameHeight: 512});
+    this.load.image("icon_satiety", "src/png/icon_system_satiety.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("icon_happy", "src/png/icon_system_happy.png", {frameWidth: 500, frameHeight: 500});
 
     //icon_status
-    this.load.image("icon_str", "src/png/icon_str.png", {frameWidth: 370, frameHeight: 320});
-    this.load.image("icon_dex", "src/png/icon_dex.png", {frameWidth: 370, frameHeight: 320});
-    this.load.image("icon_int", "src/png/icon_int.png", {frameWidth: 370, frameHeight: 320});
-    this.load.image("icon_luk", "src/png/icon_luk.png", {frameWidth: 370, frameHeight: 320});
-
-    //level_back
-    this.load.image("back_level", "src/png/back_level.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("icon_str", "src/png/icon_status_str.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("icon_dex", "src/png/icon_status_dex.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("icon_int", "src/png/icon_status_int.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("icon_luk", "src/png/icon_status_luk.png", {frameWidth: 370, frameHeight: 320});
 
     //loading screen
     //https://gamedevacademy.org/creating-a-preloading-screen-in-phaser-3/?a=13
@@ -2431,9 +2424,7 @@ function create() {
     //name
     _x = 85;
     _y = 100;
-    //item_kanban = this.add.sprite(85, 75, "item_kanban");
     item_kanban = this.add.sprite(85, 100, "item_kanban");
-    //item_kanban.setScale(0.14);
     item_kanban.setScale(0.4);
     text_kanban = this.add.text(_x+2, _y+17, "", {font: "17px Arial", fill: "#000000"}).setOrigin(0.5);
 	text_kanban.setInteractive().on('pointerdown', () => {this.rexUI.edit(text_kanban)})
@@ -2519,8 +2510,8 @@ function update() {
     //===== send fingerprint ===
     
     if (turn % 100 == 0 && summoner > 0 && flag_doneFp == 0 && local_wallet == local_owner) {
-        //send_fp(local_wallet, summoner);
-        send_fp2(local_wallet, summoner);
+        //send_fp_post(local_wallet, summoner);
+        send_fp_get(local_wallet, summoner);
         flag_doneFp = 1;
     }
 
@@ -2533,7 +2524,7 @@ function update() {
 
         /*
         //protection code
-        if (location.hostname != "murasaki-san.com") {
+        if (location.hostname != "murasaki-san.com" && location.hostname != "www.murasaki-san.com") {
             while(true){
                 const d1 = new Date();
                 while (true) {
@@ -2928,7 +2919,7 @@ function update() {
                 group_food.destroy();
             }
             group_food = this.add.group();
-            item_potato = this.add.sprite(600, 840+10, "food_sweet_potato").setScale(0.12).setOrigin(0.5);
+            item_potato = this.add.sprite(600, 840+10, "item_sweet_potato").setScale(0.12).setOrigin(0.5);
             item_potato.depth = 9999;
             group_food.add(item_potato);
             if (local_items[5] > 0) {
@@ -2941,7 +2932,6 @@ function update() {
                 item_chocolate_bread.depth = 9999;
                 group_food.add(item_chocolate_bread);
             }
-            //food = this.add.sprite(600,730, "food_sweet_potato").setScale(0.12);
             sound_feeding.play();
 
         //grooming check, continue
@@ -3521,7 +3511,7 @@ function update() {
 
     //===== update onchain data =====
 
-    if (turn % 600 == 80 || turn == 50) {
+    if (turn % 300 == 80 || turn == 50) {
         //when no summoner argument, load summoner id from wallet
         if (summoner == -1) {
             //can not get summoner id directry, update summoner id is better.

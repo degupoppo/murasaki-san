@@ -7,6 +7,7 @@ jQueryのDataTablesプラグインを使用
 */
 
 
+/*
 //connect to metamask
 async function connect() {
     const web3 = await new Web3(window.ethereum);
@@ -34,6 +35,7 @@ async function get_wallet() {
     let wallet = await web3.eth.getAccounts();
     return wallet[0];
 }
+*/
 
 //get items on market
 async function update_onMarketItems() {
@@ -328,6 +330,7 @@ async function upgrade_item() {
     contract_mfc.methods.upgrade_item(_summoner, _item1, _item2, _item3).send({from:wallet});
 }
 
+/*
 //donate
 async function donate() {
     let web3 = await connect();
@@ -359,3 +362,4 @@ function write_icon(_value) {
     }
     document.write(_icon);
 }
+*/

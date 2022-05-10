@@ -5,6 +5,7 @@ function button_select_summoner() {
     window.location.href = "house.html?summoner=" + summoner;
 }
 
+/*
 //connect to metamask
 async function connect() {
     const web3 = await new Web3(window.ethereum);
@@ -33,6 +34,7 @@ async function get_wallet() {
     let wallet = await web3.eth.getAccounts();
     return wallet[0];
 }
+*/
 
 //write message
 async function contract_write_message(_message) {
@@ -80,6 +82,7 @@ async function show_messages() {
     }
 }
 
+/*
 //donate
 async function donate(_value) {
     let web3 = await connect();
@@ -111,3 +114,4 @@ function write_icon(_value) {
     }
     document.write(_icon);
 }
+*/
