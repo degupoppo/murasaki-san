@@ -44,7 +44,7 @@ Bot対策の深慮
         IP重複、fingerprintの重複が凄まじいsummonerは何かしらのペナルティを課す
 
 
-#index
+//---index---
 
 コンセプト
     低インフレ率の育成ゲーム
@@ -97,7 +97,7 @@ Doc
     critical判定時の計算式と効果
 
 
-# Murasaki_Mail
+//---Murasaki_Mail---
 
 
 文通システムの実装
@@ -186,7 +186,7 @@ Doc
             return _sending_summoner
 
 
-# Murasaki_all
+//---Murasaki_all---
 
 
  ok upgradeの実装

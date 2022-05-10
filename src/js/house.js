@@ -5,8 +5,10 @@
 
 /*
 
-・かんばんの実装
-
+・かんばんのアイテム化
+・木の成長
+・マイニングの金塊
+・マーケットのjson化
 
 */
 
@@ -2104,9 +2106,9 @@ function create() {
     item_table.depth = item_table.y-50;
     item_misin = this.add.sprite(1000,830, "item_misin").setOrigin(0.5).setScale(0.8);
     item_misin.depth = item_misin.y-100;
-    item_tree1 = this.add.sprite(100,380, "item_tree1").setOrigin(0.5).setScale(0.8);
-    item_tree2 = this.add.sprite(100,380, "item_tree2").setOrigin(0.5).setScale(0.8);
-    item_tree3 = this.add.sprite(100,380, "item_tree3").setOrigin(0.5).setScale(0.8);
+    item_tree1 = this.add.sprite(100,420, "item_tree1").setOrigin(0.5).setScale(0.7);
+    item_tree2 = this.add.sprite(100,420, "item_tree2").setOrigin(0.5).setScale(0.7);
+    item_tree3 = this.add.sprite(100,420, "item_tree3").setOrigin(0.5).setScale(0.7);
     item_tree1.depth = item_tree1.y;
     item_tree2.depth = item_tree1.y - 1;
     item_tree3.depth = item_tree1.y - 2;
@@ -3108,12 +3110,15 @@ function update() {
                 "mining"
             ).setScale(0.12);
 
+            //asnya
             item_asnya = this.add.sprite(590, 140, "item_asnya").setOrigin(0.5).setScale(0.25);
             item_asnya.depth = item_asnya.y;
 
+            //nui-chan
             item_nui = this.add.sprite(680, 165, "item_nui").setOrigin(0.5).setScale(0.38);
             item_nui.depth = item_nui.y;
 
+            //switch
             item_switch = this.add.sprite(1230,300, "item_switch").setOrigin(0.5);
             item_switch.setScale(0.25);
             item_switch.anims.play("item_switch_off", true);
@@ -3133,7 +3138,10 @@ function update() {
                 }
             });
             item_switch.depth = item_switch.y;
-
+            
+            //cake
+            
+            //tiny_crown
 
         }
         
