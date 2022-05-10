@@ -1,0 +1,417 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="png" href="png/icon.PNG">
+    <title>Test</title>
+    <script src="phaser.js"></script>
+    <style type="text/css">
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+
+<script type="text/javascript">
+
+/***
+ToDo
+    ボタンの実装、表示、押したときの動作
+    eating実装
+    grooming実装
+    コントラを見立てた外部ステータス格納区域の実装と、読み込み、書き込みの実装
+    キャラのステータスをテキストで描写, コントラから定期的に取得し計算する
+    ステータスはキャラクラスに保持させずに、コントラに見立てた外部変数に格納する。
+    1日1回？feeding, last_feeding_timeからの差でexp加算, 24hr以上の差は無効
+***/
+
+
+// class
+
+/***
+A, behavior
+    1, resting
+    2, moving
+    3, eating
+    4, sleeping
+    5, grooming
+    6, working
+B, dynamic_status
+    lif: -working/+sleeping
+    nutirition: +eating
+    happy: +grooming
+    exp: +working
+    coin: +working
+C, static_status
+    strength
+    dexterity
+    vitality
+    intelligence
+    luck
+***/
+
+
+const version = "0.0.14";
+var turn = 0;
+
+
+//static_status, read from construct at once
+var global_type = Math.trunc(Math.random() * 5);
+var global_strength = 2 + Math.trunc(Math.random() * 8);
+var global_dexterity = 2 + Math.trunc(Math.random() * 8);
+var global_vitality = 2 + Math.trunc(Math.random() * 8);
+var global_intelligence = 2 + Math.trunc(Math.random() * 8);
+var global_luck = 2 + Math.trunc(Math.random() * 8);
+var global_birth_time = Date.now();
+//dynamic_status, read from construct continuously, write to construct
+var global_last_feeding_time = Date.now();
+var global_last_grooming_time = Date.now();
+var global_coin = 100;
+var global_working_status = 0;
+var global_working_start_time = 0;
+var global_exp = 0;
+
+
+class Contract {
+    constructor() {
+        var contract_type;
+        var contract_strength;
+        var contract_dexterity;
+        var contract_vitality;
+        var contract_intelligence;
+        var contract_luck;
+        var contract_birth_time;
+        var contract_last_feedint_time;
+        var contract_flat_grooming_time;
+        var contract_coin;
+        var contract_working_status;
+        var contract_working_start_time;
+        var contract_exp;
+    }
+}
+
+
+functip update_status(contract) {
+    global_type = contract.contract_type;
+    global_type = contract.contract_type;
+    global_type = contract.contract_type;
+    global_type = contract.contract_type;
+    global_type = contract.contract_type;
+    global_type = contract.contract_type;
+    global_type = contract.contract_type;
+    global_type = contract.contract_type;
+    global_type = contract.contract_type;
+    global_type = contract.contract_type;
+    global_type = contract.contract_type;
+    global_type = contract.contract_type;
+    global_type = contract.contract_type;
+
+}
+
+
+
+class Character extends Phaser.GameObjects.Sprite{
+    constructor(scene, x, y){
+        super(scene, x, y, "murasaki_right");
+        this.scene.add.existing(this);
+        this.anims.play("murasaki_right", true);
+    	this.mode = "resting";
+        this.count = 0;
+        //static_status, TODO:get from contract
+        this.strength       = 2 + Math.random()* 8;
+        this.dexterity      = 2 + Math.random()* 8;
+        this.vitality       = 2 + Math.random()* 8;
+        this.intelligence   = 2 + Math.random()* 8;
+        this.luck           = 2 + Math.random()* 8;
+        //dymamic_status, TODO:get from contract
+        this.life       = 100;  //TODO: get from static_status
+        this.nutrition  = 100;  //TODO: calc from static_status, last_mealing_time
+        this.happy      = 100;  //TODO: calc from static_status, last_grooming_time
+        this.exp        = 0;    //TODO: get from static_status
+        this.coin       = 0;    //TODO: get from static_status
+    }
+    set set_mode(mode){
+        this.mode = mode;
+        this.count = 0;
+    }
+    get get_mode(){
+        return this.mode;
+    }
+    resting(){
+	    this.count += 1;
+	    if (this.count >= 100){
+            let tmp = Math.random() * 100;
+            if (tmp <= 10) {
+                this.mode = "sleeping";
+                this.count = 0;
+            }else if (tmp <= 20) {
+                this.mode = "crying";
+                this.count = 0;
+            }else {
+                this.mode = "moving";
+                this.count = 0;
+            }
+        }
+    }
+    moving() {
+        this.count += 1;
+        if (this.count == 1){
+            if (this.x <= 100) {
+                this.dist = "right";
+            }else if (this.x >= 700) {
+                this.dist = "left";
+            }else {
+                var li = ["right", "left"];
+                this.dist = li[Math.floor(Math.random() * li.length)];
+            }
+            if (this.dist == "right"){
+                this.anims.play("murasaki_right", true);
+            }else if (this.dist == "left") {
+                this.anims.play("murasaki_left", true);
+            }
+        }else if (this.count < 100) {
+            if (this.dist == "right" && this.count % 2 == 0){
+                this.x += 1;
+            }else if (this.dist == "left" && this.count % 2 == 0) {
+                this.x -= 1;
+            }
+        }else if (this.count >= 100) {
+            this.mode = "resting";
+            this.count = 0;
+        }
+    }
+    //send: last_nutrition_time
+    feeding() {
+        this.count += 1;
+        if (this.count == 1){
+            this.anims.play("murasaki_feeding", true);
+        }else if (this.count >= 1000) {
+            this.mode = "resting";
+            this.count = 0;
+        }
+    }
+    crying() {
+        this.count += 1;
+        if (this.count == 1){
+            this.anims.play("murasaki_crying", true);
+        }else if (this.count >= 500) {
+            this.mode = "resting";
+            this.count = 0;
+        }
+    }
+    sleeping() {
+        this.count += 1;
+        if (this.count == 1){
+            this.anims.play("murasaki_sleeping", true);
+        }else if (this.count >= 1000) {
+            this.mode = "resting";
+            this.count = 0;
+        }
+    }
+    //send: last_grooming_time
+    grooming() {
+        this.count += 1;
+    }
+    //cost: life, gain: coin
+    working() {
+        this.count += 1;
+    }
+    update(){
+        //console.log(this.version, this.mode, this.count);
+        if (this.mode == "resting") {this.resting();}
+        else if (this.mode == "moving") {this.moving();}
+        else if (this.mode == "feeding") {this.feeding();}
+        else if (this.mode == "crying") {this.crying();}
+        else if (this.mode == "sleeping") {this.sleeping();}
+        else if (this.mode == "grooming") {this.grooming();}
+        else if (this.mode == "working") {this.working();}
+    }
+}
+
+
+class Button {
+    constructor(x, y, label, scene, callback) {
+        let fontsize = 12;
+        const button = scene.add.text(x, y, label)
+            .setFontSize(fontsize)
+            .setFontFamily("Arial")
+            .setOrigin(0.5)
+            .setPadding(10)
+            //.setStyle({ backgroundColor: '#111' })
+            .setInteractive({ useHandCursor: true })
+            .on('pointerdown', () => callback())
+            .on('pointerover', () => button.setStyle({ fontSize: fontsize, fontFamily: "Arial", fill: '#f39c12' }))
+            .on('pointerout', () => button.setStyle({ fontSize: fontsize, fontFamily: "Arial", fill: '#FFF' }));
+    }
+}
+
+
+function actionOnClick() {
+    char1.set_mode = "feeding";
+    delta = Date.now() - global_last_feeding_time;
+    global_exp += delta / 1000
+    global_last_feeding_time = Date.now();
+}
+
+const _sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+
+// main functions
+
+
+let config = {
+    type: Phaser.AUTO,
+    width: 800,
+    height: 600,
+    scale: {
+        //autoCenter: Phaser.Scale.CENTER_HORIZONTALLY,
+    },
+    scene: {
+        preload: preload,
+        create: create,
+        update: update
+    },
+//    fps: {
+//        target: 1,
+//        forceSetTimeOut: true
+//    }
+};
+
+
+let game = new Phaser.Game(config);
+
+
+function preload() {
+    this.load.image("sky", "png/sky.png");
+    this.load.spritesheet("murasaki_right", "png/murasaki_right.png", {frameWidth: 74, frameHeight: 64});
+    this.load.spritesheet("murasaki_left", "png/murasaki_left.png", {frameWidth: 74, frameHeight: 64});
+    this.load.spritesheet("murasaki_sleeping", "png/murasaki_sleeping.png", {frameWidth: 74, frameHeight: 64});
+    this.load.spritesheet("murasaki_feeding", "png/murasaki_feeding.png", {frameWidth: 74, frameHeight: 64});
+    this.load.spritesheet("murasaki_crying", "png/murasaki_crying.png", {frameWidth: 74, frameHeight: 64});
+    cursors = this.input.keyboard.createCursorKeys();
+}
+
+
+function create() {
+    this.add.image(400, 300, "sky");
+    this.anims.create({
+        key: "murasaki_right",
+        frames: this.anims.generateFrameNumbers("murasaki_right", {start: 0, end:3}),
+        frameRate: 2,
+        repeat: -1
+    });
+    this.anims.create({
+        key: "murasaki_left",
+        frames: this.anims.generateFrameNumbers("murasaki_left", {start: 0, end:3}),
+        frameRate: 2,
+        repeat: -1
+    });
+    this.anims.create({
+        key: "murasaki_sleeping",
+        frames: this.anims.generateFrameNumbers("murasaki_sleeping", {start: 0, end:1}),
+        frameRate: 1,
+        repeat: -1
+    });
+    this.anims.create({
+        key: "murasaki_feeding",
+        frames: this.anims.generateFrameNumbers("murasaki_feeding", {start: 0, end:1}),
+        frameRate: 1,
+        repeat: -1
+    });
+    this.anims.create({
+        key: "murasaki_crying",
+        frames: this.anims.generateFrameNumbers("murasaki_crying", {start: 0, end:1}),
+        frameRate: 1,
+        repeat: -1
+    });
+    //summon character
+    char1 = new Character(this, 300 + Math.random()*200, 400 + Math.random()*100);
+    //button
+    const button1 = new Button(100, 25, 'Grooming', this, () => console.log('game is started'));
+    const button2 = new Button(100, 50, 'Feeding', this, () => actionOnClick());
+    //text
+    text_version = this.add.text(600, 10, "version = " + version, {font: "10.5px Arial", fill: "#000"});
+    //static_status
+    text_birth_time = this.add.text(
+        600, 20, "birth_time = " + global_birth_time, {font: "10.5px Arial", fill: "#000"});
+    text_strength = this.add.text(
+        600, 30, "strength = " + global_strength, {font: "10.5px Arial", fill: "#000"});
+    text_dexterity = this.add.text(
+        600, 40, "dexterity = " + global_dexterity, {font: "10.5px Arial", fill: "#000"});
+    text_vitality = this.add.text(
+        600, 50, "vitality = " + global_vitality, {font: "10.5px Arial", fill: "#000"});
+    text_intelligence = this.add.text(
+        600, 60, "intelligence = " + global_intelligence, {font: "10.5px Arial", fill: "#000"});
+    text_luck = this.add.text(
+        600, 70, "luck = " + global_luck, {font: "10.5px Arial", fill: "#000"});
+    //dynamic_status
+    text_last_feeding_time = this.add.text(
+        600, 90, "last_feeding_time = " + global_last_feeding_time, {font: "10.5px Arial", fill: "#000"});
+    text_last_grooming_time = this.add.text(
+        600, 100, "last_grooming_time = " + global_last_grooming_time, {font: "10.5px Arial", fill: "#000"});
+    text_coin = this.add.text(
+        600, 110, "coin = " + global_coin, {font: "10.5px Arial", fill: "#000"});
+    text_working_status = this.add.text(
+        600, 120, "working_status = " + global_working_status, {font: "10.5px Arial", fill: "#000"});
+    text_working_start_time = this.add.text(
+        600, 130, "working_start_time = " + global_working_start_time, {font: "10.5px Arial", fill: "#000"});
+    text_exp = this.add.text(
+        600, 140, "exp = " + global_exp, {font: "10.5px Arial", fill: "#000"});
+    //calculation_status
+    text_turn = this.add.text(
+        600, 160, "turn = ", {font: "10.5px Arial", fill: "#000"});
+    text_age_time = this.add.text(
+        600, 170, "age_time = ", {font: "10.5px Arial", fill: "#000"});
+    text_mode = this.add.text(
+        600, 180, "mode = ", {font: "10.5px Arial", fill: "#000"});
+    text_satiety = this.add.text(
+        600, 190, "satiey = ", {font: "10.5px Arial", fill: "#000"});
+    text_happy = this.add.text(
+        600, 200, "happy = ", {font: "10.5px Arial", fill: "#000"});
+}
+
+
+function update() {
+    //update turn
+    turn += 1;
+    text_turn.setText("turn = " + turn);
+    //update character
+    char1.update();
+    //update status, text
+    if (turn % 10 == 0) {
+        //update calculation_status
+        now_time = Date.now();
+        age_time = Math.round( (now_time - global_birth_time) / 1000 );
+        mode = char1.get_mode;
+        //var base = 86400000
+        var base = 864000
+        satiety = Math.round( (base - (now_time - global_last_feeding_time)) / base * 1000 ) / 10;
+        happy = Math.round( (base - (now_time - global_last_grooming_time)) / base * 1000 ) / 10;
+        //update text
+        text_last_feeding_time.setText("last_feeding_time = " + global_last_feeding_time);
+        text_last_grooming_time.setText("last_grooming_time = " + global_last_grooming_time);
+        text_working_status.setText("working_status = " + global_working_status);
+        text_working_start_time.setText("working_start_time = " + global_working_start_time);
+        text_exp.setText("exp = " + global_exp);
+        text_age_time.setText("age_time = " + age_time);
+        text_mode.setText("mode = " + mode);
+        text_satiety.setText("satiety = " + satiety);
+        text_happy.setText("happy = " + happy);
+    }
+    if (turn % 101 == 0) {
+        //update statistic_status
+        //update dynamic_status
+        //TODO: read from contract
+        update_status();
+    }
+}
+
+
+</script>
+
+
+</body>
+</html>

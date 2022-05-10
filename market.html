@@ -1,28 +1,29 @@
+
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 
-<script src="js_v2/web3.min.js"></script>
-<script src="js_v2/murasaki_item_market.js"></script>
-<script src="js_v2/murasaki_craft.js"></script>
-<script src="js_v2/array_item_name.js"></script>
-<script src="js_v2/array_item_png.js"></script>
-<script src="js_v2/murasaki_main.js"></script>
-<script src="js_v2/murasaki_function_name.js"></script>
-<script src="js_v2/murasaki_function_crafting.js"></script>
+<script src="lib/web3.min.js"></script>
+<script src="src/js_info/murasaki_item_market.js"></script>
+<script src="src/js_info/murasaki_craft.js"></script>
+<script src="src/js_info/array_item_name.js"></script>
+<script src="src/js_info/array_item_png.js"></script>
+<script src="src/js_info/murasaki_main.js"></script>
+<script src="src/js_info/murasaki_function_name.js"></script>
+<script src="src/js_info/murasaki_function_crafting.js"></script>
 
-<script src="market.js"></script>
+<script src="src/js/market.js"></script>
 
 <head>
 	<meta charset="UTF-8">
 	<title>Murasaki-san Item Market</title>
-	<link rel="stylesheet" type="text/css" href="./market/datatables.min.css"/>
-	<script type="text/javascript" language="javascript" src="./market/jquery-3.6.0.min.js"></script>
-	<script type="text/javascript" language="javascript" src="./market/datatables.min.js"></script>
-    <link rel="stylesheet" href="assets/css/simple.css">
-    <link rel="stylesheet" href="assets/css/style.css">
-    <link rel="stylesheet" href="assets/css/datatable.css">
-    <link rel="icon" href="png/icon.PNG" />
-    <link rel="apple-touch-icon" href="png/icon.PNG">
+	<link rel="stylesheet" type="text/css" href="lib/datatables.min.css"/>
+	<script type="text/javascript" language="javascript" src="lib/jquery-3.6.0.min.js"></script>
+	<script type="text/javascript" language="javascript" src="lib/datatables.min.js"></script>
+    <link rel="stylesheet" href="src/css/simple.css">
+    <link rel="stylesheet" href="src/css/style.css">
+    <link rel="stylesheet" href="src/css/datatable.css">
+    <link rel="icon" href="src/png/icon.png" />
+    <link rel="apple-touch-icon" href="src/png/icon.png">
 </head>
 
 <body>
@@ -30,16 +31,16 @@
 <header>
     <nav>
       <a href="index.html">&#x1f3e0; Home</a>
-      <a href="dapp.html" ><b>&#x1f497; Play</b></a>
+      <a href="house.html" ><b>&#x1f497; Play</b></a>
       <a href="market.html" class="current"><b>&#x1f6d2; Market</b></a>
-      <a href="dapp.html?summoner=1">&#x1f530; Demo</a>
+      <a href="house.html?summoner=1">&#x1f530; Demo</a>
       <a href="https://twitter.com/degupoppo" >Twitter</a>
       <a href="https://github.com/degupoppo/murasakisan/" >GitHub</a>
     </nav>
     <h1>
-        <img src="png/food_sweet_potato.png" width="40" height="40">
+        <img src="src/png/food_sweet_potato.png" width="40" height="40">
         Item Market Place
-        <img src="png/food_sweet_potato.png" width="40" height="40">
+        <img src="src/png/food_sweet_potato.png" width="40" height="40">
     </h1>
     <p><code class="language-plaintext highlighter-rouge">
         You can buy and sell crafted item NFTs here.<br>

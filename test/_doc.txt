@@ -1,0 +1,615 @@
+
+効果音
+    https://soundeffect-lab.info/sound/button/
+    https://otologic.jp/free/se/motion-pop01.html
+
+コントラ修正
+    msにcraft_countを追加
+        各working timeのtotalだけでなく, クラフト品回数も集計する
+    msにtotal_coinとtotal_materialを追加
+        総mining数、総farming数も集計する
+    msにpenalty_timeを追加
+        でなくとも、summoner単位でdeactivateできる変数を追加
+        強制petrification機構でもよいか
+    Luckの補正を2倍ではなく1.5倍程度にするか
+        補正値が強すぎる
+    Uncommonを1.5倍, Rareを2倍程度にするか
+        補正値が強すぎる
+    Diceの補正がLuckにも乗るようにする
+        現状、Diceで良い目がでてもmining/farmingにしか影響せずイマイチ
+        Luckにも影響するのなら、feedingなどすべての行動がブーストされてよいか
+        ただし、dice roll時のluck判定には影響させない
+
+ランキングページの実装
+    summonerを一覧表示する
+    total_time, total_mining_timeなどをバーグラフで％表示する
+    The Crafter, The Minerなど、称号を表示する？
+
+Bot対策の深慮
+    仮想敵はマルチウォレットによる効率プレイ
+        この方法だと、多数の植民地summoner→少数のメインsummonerが成り立つ
+            メインsummonerにcoin/materialとitemを集中してステータスブーストさせる
+            例えば、farm専用、mining専用、crafting専用、など？
+                しかし、これはまっとうな遊び方とも言えるか
+        もっとも対策すべきは、大量のwalletを運用したbotter
+            stakingが実装された際は、
+            このタイプの単一プレイヤーがベネフィットをごっそり持っていってしまう
+    IPアドレス, wallet, summoner_id, fingerprintをどうにかして保存する
+        jsで何かしらのサーバーにpostしてロギングするか
+    jsでPOST構想
+        https://webukatu.com/wordpress/blog/30539/
+        wallet=zzz&summoner_id=xxx&fingerprint=yyyをpostし、
+            サーバー側でtime, アクセス元IPアドレスとともにロギングする
+            https://qiita.com/linxuesong/items/8ac98102c24b8f587a16
+        IP重複、fingerprintの重複が凄まじいsummonerは何かしらのペナルティを課す
+
+
+#index
+
+コンセプト
+    低インフレ率の育成ゲーム
+
+ゲームシステム概要
+    NTTについて
+    クラフト品とNFTについて
+    Not play2earn
+    no token
+
+行動説明
+    feeding
+    grooming
+    mining
+    farming
+    crafting
+
+ステータス説明
+    テーブルで説明
+
+アイテム説明
+    テーブルで説明
+
+ロードマップ
+    NFTマーケットプレイス
+
+制作話
+    むらさきさん誕生について
+        友人が書いた絵を動かしたかった
+        長くお世話できる成長するNFTを作りたかった
+        Rarityのsummonerコンセプト
+            expテーブルはrarityとDnD3.5を踏襲している
+    むらさきさんの名前の由来について
+    このゲームのコンセプトについて
+        製作者が楽しめるものを作っている
+    低インフレ
+        1年で最大値
+    ポンジスキームではなく、長く付き合える作品をブロックチェーン上に作ってみたかった。
+        何よりも製作者達本人のために。
+        作るのが最も楽しく、プレイするのはその次に楽しいように。
+    非人力のbot対策として、初期コストに少しかけたが、それ以外はコストは必要ない。
+        下心として、dapps stakingへの登録が直近の目標。
+
+Doc
+    exp要求テーブル
+    itemのコスト/時間要求テーブル
+    mining/farmingによるcoin/material取得の計算式
+    craftingのrequired timeの計算式
+    Level-up時のstatus point加算の計算式
+    critical判定時の計算式と効果
+
+
+# Murasaki_Mail
+
+
+文通システムの実装
+    フロントエンド
+        猫用クッションのクラフト（DEX系か）
+        クッション所持時、手紙のクラフト（低コスト）
+            所持するまでリストに表示しない
+            あるいは、"kussyon required"などとメッセージを表示じておく
+        遊びに来た猫スプライトの表示、自分の猫との差別化
+            クリックで手紙開封
+        遊びに行ってる際の、帰ってくるまでの時間表示
+    コントラクト
+        やはりmail自体は普通のクラフト品として扱う
+            複数クラフト可能、貯めておける
+        猫がいて、かつメール所持時に、猫をクリックでsend_mailのtxを飛ばせる
+            猫コントラはメールNFTをburnする
+                猫コントラへのapproveが必要
+            receving_summonerをランダムで選ぶ
+                すでにreceving中のものは無視するなど、何かしら制限を設けたい
+            sending_from_to[_summoner]とreceving_from_toに書き込む
+                sending_from_to[summoner_from] = summoner_to
+                sending_to_from[summoner_to] = [summoner_from]
+            last_sending_timeとlast_receving_timeを更新する
+                last_sending_time[summoner_from] = now
+                last_receving_time[summoner_to] = now
+            check_mail(_summoner_to)でメールチェックする
+                last_receving_time[_summoner_to] <= 3 days で
+                    sending_to_from[_summoner_to] = _summoner_ftomを返す
+            メールがあれば、mail_open可とする
+                require(owner, last_receving_time <= 3 days)
+                sending_summoner, receving_summoner, last_timeをすべてリセットする
+                    receving_summonerのみリセットするか
+                    
+                sending_summonerとreceving_summonerにtiny_heartをクラフトする
+                    クラフト主はお互いに相手
+                    mfcにexternalのcraft_heart()が必要
+                    mfsに猫コントラを記載し、msg.sender == 猫コントラを要求する
+        猫は文通に成功しようが失敗しようが、3daysは帰ってこない
+        文通成功の演出をどうするか
+            last_sending_time[_summoner] <= 3days かつ
+            sending_from2to[_summoner_from] == 0 ならば、
+            文通成功（相手がopen_mail()済み）で"Mail Successful!"と表示する
+            しかし、3 day経過しないと猫は帰ってこない
+                メーターは表示したまま
+            
+    コントラクト
+        専用コントラを実装する
+        逐一、クッションitem_typeの所持をrequireする
+        手紙はNFTとはせずに、文通コントラ内でフラグとして処理する
+            フロントエンド上では30minクラフト品として表現する
+            if item_type == 196なら、文通コントラを呼び出す
+            文通コントラをmsに許可しておく
+            coin/material支払いも、mcではなく文通コントラ内で行う
+        start_crafting_mail()
+            require(owner)
+            require(last_sending_time >= 3days)
+            coin/materialを支払う
+            flag_crafting_mail = 1
+            start_time = now
+        calc_crafting_mail()
+            dc = 30minで固定
+                ステータス補正なし
+                レアリティなし
+        stop_crafting_mail()
+            require(owner)
+            require(calc_crafting_mail == 0)
+            _send_mail()
+        _send_mail(_summoner)
+            _sending_summoner = _select_random_summoner()
+            sending_summoner[_summoner] = _sending_summoner
+            receving_summoner[_sending_summoner] = _summoner
+            last_receving_time[_sending_summoner] = now
+            last_sending_time[_summoner] = now
+        _select_random_summoner(_summoner)
+            not
+        open_mail(_receving_summoner)
+            require(owner of summoner)
+            require(satiety, happy)
+            _sending_summoner = sending_summoner[_from_summoner]
+            craft_heart(_sending_summoner)
+            craft_heart(_summoner)
+        check_mail(_receving_summoner)
+            _sending_summoner = 0
+            if (last_receving_time[_summoner] <= 3days)
+                _sending_summoner = sending_summoner[_summoner]
+            return _sending_summoner
+
+
+# Murasaki_all
+
+
+ ok upgradeの実装
+        burnではなくコントラへのtransferで消費させる
+        再デプロイ必要
+        safeTransferではcontractへは送れない模様
+            なにか「消費」の概念を考えねばならない
+            safeTransferではなくtransferFromならばコントラへ投げれた。これを利用する
+
+ ok 素材boxの実装
+        1000単位、10000単位を消費してクラフト→NFTアイテム化
+        NFTアイテムを消費して+1000, +10000素材を加算
+        193以降の自由枠を使用する
+
+    補正の上限の設定
+        将来的でよいか
+        heartは100個以上無効
+        str/dex/int/luckも50以上無効、など
+
+    bot対策
+        大量のwalletを運用した効率プレイへの対策
+            基本的にすべてを防ぐことはできない
+            一方で、全く有害でもない
+                理論的な最低価格をはじき出してくれるNPCとして利用することも出来るため
+            summoner間のやり取りに手数料をかけることで、
+                bot化による効率プレイの最低料金を設ける
+                手数料の合計値がそのアイテムの最低料金
+            一般プレイヤーは「体験」のために労力を投資する
+            一方で、金銭的リターンのためにプレイするプレイヤーは
+                botの効率プレイにまさることはできない。
+                ここをどうするか。
+                しかし、効率的にリターンを得ようとするプレイヤーはほぼbotと同義か
+            やはり、「体験」のためにプレイしているプレイヤーに有害でないかどうかを重点に考える
+                最低価格で資源やアイテムが手に入ることは有益
+                作ったアイテムを売りに出して買い手が付けばなお良い
+                    botterと張り合ったら負けるが、botterが氾濫するほど成熟すればそれはそれで良い経済
+                自分の頑張りが「体験」として帰ってくるシステムにしたい
+                    売りに出しても買い手が付かないのは寂しい
+                botterにも全部達成できないほど、クラフト可能なitemの種類を増やすか
+                    自分だけが作れるレアアイテム、など
+                    特殊な素材を要求する上位アイテムなど
+        summonにコスト
+        summoner間のcoin, materialのtransferにコスト
+        itemのtransferにコスト？（NFTなので普通にtransferされると難しいか）
+        NFTをsummoner間でtransferすることに対する対策
+            coin/materialのtransferにはコストを設定できるが、
+            NFTは共通インターフェイスで自由に移動できるため対策が難しい
+            NFT化して1キャラに集中→効率化が可能となってしまう
+            active化を導入し、active化にコストを必要とするか？
+                activeしているitemのみ表示され、ステータスに影響する
+                balanceOf_activated_item_typeのmappingが必要か
+
+    NFTステーキングの実装
+        ステーキング専用の高価なitemを作る
+        このitemは作った後にstakingすることで何かしらのリワードが得られる
+            ゲーム内の通貨か、Astarか
+
+ ng 220406
+        mc修正、未デプロイ
+        → 保留, burn実装は見送り
+
+ ok tiny_heartコントラの修正
+        crafted_summonerは、item craft元になるようにfunctionを修正
+        mcは修正しなくても対応可能
+            create_tiny_heart()にto_walletを要求させる
+            stop_crafting内で_to_walletを取得して渡す
+                _to_summonerをランダムで選び、その後_to_walletへと変換すれば実装可能
+        → 不要. すでに上記実装になっていた。
+
+ ok upgrade深慮
+        costは必要とするか
+            コストのみの要求にするか
+            1000/1000ぐらいが妥当か
+        クラフトタイムは設定するか
+            タイム設定すると、start後にNFT動かしたときの例外処理が面倒か
+            よって、即時完了にする
+        item選択のUIを実装する
+
+ ok TinyHeartのMurasakiCraftへの統合
+        craft可能なitemは64個
+        レア度3段階で64 * 3 = 192までが予約枠
+        193～255の62枠が自由枠
+        thは別コントラとするのではなく、この予約枠を使用する
+        そうすると、Item Marketも同一コントラで一元管理できて便利
+        193番を使用
+
+ ok Itemレア度の設定
+        Common, Uncommon, Rareの3段階？
+        Common x 3 -> Uncommonのupgradeクラフトを実装する
+        Uncommonはクラフト時にLuk%で出現する
+        Rareはupgradeでしか出現しない
+        Common, Uncommon, Rareによる補正の実装
+
+ ok upgradeの実装
+        coin, material, 下位item 3つを消費させる
+        下位itemの指定はどうするか
+            ランダムで消費か
+            IDの大きい順に消費か
+            IDを選択可能にするか
+
+ ok ItemとHeartのカウント化
+        rarity_marketのコードを流用する
+        とりあえずmintしまくってlist表示の動作確認を独立で行う
+        market.htmlへと組み込む。
+        以上が完成してからメインに組み込む。
+
+ ok heart補正の実装
+        luck参照時にheart補正を加える
+        補正値をどうするか。+0.01？0.02？0.05？
+        0.05で。およそ100個得ると+5.00の補正
+            Lv10で最大+5の補正なので、このくらいが妥当か。
+        ほぼすべてのfunctionが再デプロになるので、すげ替える。
+
+ ng NFTのtransferへのコスト設定
+        murasaki_craft内でtransferをoverriderする
+        costを実装しておき後から設定できるようにする
+        限られたmsg.senderからのtransferはコストがかからないようにもoverrideしておく
+        今後、multi walletによるアイテム集中型botが問題になった際は、
+            直コンのtransferにはcostを掛け、
+            マケプレcontractによるtransferにはcost無視とする。
+        botterが沸かなければ杞憂に終わるだろう。
+        summonにコストを設けているので、そこまでのmulti-walletはやりにくいはず
+            10 wallet程度までは許容するか
+        また、「ちょっとあれ貸して」と気軽にやり取り出来る程度には
+            NFTの特性を利用したい。
+        ただし、NFTのtransferのUIを開放してしまうと、
+            大体の人がmulti walletの有利さに気づいてしまうだろう。
+
+ ok nameの実装
+        strageに保存するか、別の専用コントラを設けるか
+        重複なしの場合はrarity_nameの様な専用コントラが必要
+        NFTではなくNTTが良いか。
+        重複判定、walletごとの所持の有無の機能を実装した別コントラを作る
+            所持の有無はNTT規格がそのまま使えそう
+            重複判定はrarity_nameのアルゴリズムを参考にする
+        コストはどうするか
+            coinとmaterialを少々要求で良いか
+        名前の付け直しはどうするか
+            burnしてNTT再発行で良さそう
+        クラフト品とするのが良いか
+            肖像画アイテムクラフト時に名前を入力、など。
+
+ ng ゆっくりと成長する木の実装
+        item type = 50ぐらいの専用スロット
+        成長するまで何が生えるかわからない
+        summonerの行動によって結果がかわる
+        1ヶ月で最大成長ぐらいか
+        itemにわるふるだけでOK
+            コントラ側でやることはあまりない
+            ランダム性はseedが使える
+            あとはUIの問題か
+
+ ok マーケットプレイスの実装
+        ERC721に準じるもので良さそう
+            rarityのマーケットが参考になるか
+        itemのみ売買可能
+        所持item一覧の実装
+        売りに出しているitem一覧の実装
+        売買マージンの導入
+        coin, materialのまとめ売り
+
+ ok item補正の微調整
+        同じitem_typeを2つ以上保有しているときは+10%上乗せする
+        modの単位を1ではなく100に変更する必要があるか
+
+ ok NTTのburn機能の実装
+        murasaki_functionへ追加する
+        murasaki_strageもリセットする
+        場合によっては、murasaki_strageにactiveのboolを追加する
+
+
+# Main
+
+
+ToDo
+
+  * わんころの顔塗る
+
+    看板はクラフト品とする
+    
+    帽子の位置合わせ    
+
+    猫コントラクト
+                
+    お花電話の実装
+        能動的にTiny Heartを集める機構
+        電話を掛けると、誰かにコール中になる
+        コール中に電話に出ると、通話がつながる
+        通話がつながると、お互いに何かしらのインセンティブが働く
+        電話は1日1回
+        コール中の時間制限を設ける
+        コール中に相手が気付ければ電話がつながる
+        電話成功すると、お互いにハート＋１
+            ハートのクラフト主は相手
+        電話だと常に張り付いていないと行けないので、
+            call中は例えばworkingができなくなって不便か
+    お花文通にするか
+        お手紙をクラフト→完了すると自動的に送る
+        相手が開封したらお互いにハート＋１
+        3日間読まれなかったら消滅する（色あせて読めなくなる）
+        くろねこが運んでくれる
+            黒猫をクラフトすると文通が可能になる
+                あるいは、黒猫用のソファーをクラフトすると黒猫が来る
+            文通をクラフトすると黒猫が受け取って誰かのところへ遊びにゆく
+            3日間経ってもかまってくれなかったら、黒猫は飼い主のところへ戻ってしまう
+            3日以内に、遊びに来ている黒猫をクリックすると開封できる
+            自分の黒猫はどうするか
+                ソファーで寝てることとする
+            リボンか、首輪の色を変える
+            遊びに来ている黒猫は、口にお花文通を加えて座っている
+        スプライト案
+            ソファーで寝ている絵
+            手紙を受け取る絵
+            手紙を加えて歩いてゆく絵
+            手紙を加えて待っている絵
+            手紙を加えずに歩いてゆく絵
+
+    NFT Stakingのメカニズムの深慮
+        自分の分身であるmini murasaki-sanをぬいぐるみとしてクラフトする
+            このmini murasaki-sanを旅に出す（NFT staking）
+            mini murasaki-sanは旅に出したときの本体のステータスを引き継ぐ
+                ではなくて、クラフト完了時点のステータスに固定される
+                    いつクラフトするかが悩ましくなる
+            ステータスによって効率が変わる
+                STR, DEX, INTの差別化をどうするか
+        報酬をどう設計するか
+            簡単なのは、dapp stakingの報酬の50%を全体に配る
+                購入価格の50%もジャックポットに入れてしまう
+            独自トークンを配る
+                独自トークンのユースケース設計が大変なのでNG
+            ohana/kusaを発生させる
+                自分の分身を出稼ぎに出してるイメージ
+                これだけではインセンティブが弱いか
+            ハートやその他のアイテムなどを見つけにゆかせる
+                staking時間に応じて見つけるものが違う
+                gas代で判断できるので、何かしらはcraftさせる
+                最低時間（3日程度）を決めておき、放置すれば放置するだけレアアイテムの確率が上がる
+                旅支度に持たせるcoin/materialによっても確率を変えるか
+                この方法でしか手に入らないアイテムを設計することで、ユースケースになるか
+        mini murasaki-sanのコスト設計
+            いつクラフト可能とするか
+                あまりに後半だとモチベが持たない
+                あまりに初期だとバランスが難しい
+                １ヶ月程度か？
+                jacpot内のお金を表示させてモチベをもたせる
+        コントラの実装
+            お金が絡むのでセキュリティは慎重に
+            良いお手本コントラを探しておく
+            NFTをtransferして手形（NFT）を発行する
+            時間経過でコントラが保持しているお金をNFTに割り振る
+            最低ステーキング時間を設定する
+            withdraw時に手形NFTを要求する
+            withdraw時に報酬をtransferする
+
+    ポーチ絵の実装
+        貯金箱に準ずる
+
+    帽子案
+        ぴこぴこ揺れるお花
+            classごとにお花の種類を変える？
+
+    NFTの絵の実装
+        pngをifgなどに格納するか
+        urlをコードするか
+        いずれにしても、ToFuNFTでも正常に表示させたいところだが、果たして
+        あるいは、独自マケプレでも良いかもしれないが。
+
+    クラフトウィンドウの改善
+        枠のデザイン再考
+        アイテムアイコンを影絵にする？
+
+    看板デザインの変更
+
+    Happy, Satiety, Expアイコンの変更
+
+    アイテム案
+        食べ物
+        お皿
+        ランチョンマット
+        絨毯
+        ランタン
+        ウォールアート
+        王冠
+        とんがり帽子
+        ぴろー帽子
+
+    pngファイルの軽量化
+    
+    サウンドの洗練
+        有効サウンドの選別
+        各アクションにできるだけサウンドを導入する
+        mining/farming/craftingのduringサウンドの実装
+        earn時のサウンドの実装
+        サウンド案
+            動作開始時
+            動作終了時
+            動作中
+        効果音メーカーを使って作成する
+            https://www.peko-step.com/tool/soundeffect/#pInTopMenu
+
+    時間経過で成長する木の実装
+        farming itemに割り振る
+        双葉　→　低木　→　背の高い木
+            植木鉢に収まるように？
+        seedか、summonerのclassを参照して色や形を決める
+        大体半年で最大成長するように。
+        その他、お花とかも双葉→草→花と成長させるか
+
+    経済の深慮
+        マケプレ解説はRMTと同義
+            RMTによるバランス崩壊の問題をよく調べる
+            これを防ぐか、または利用する方法を考える
+            Andreの意見では、効率的なプレイヤー＝Bot＝NPCなので
+                うまくゲーム経済へ組み込むことを考えてみる
+        今回のbotは多walletで回してマケプレを経ずにアイテムを集中させるプレイヤー
+            itemがNFTであるので、個人的なtransferは禁止しにくい
+            itemを大量に出品するのは別に構わない。
+                Rarityを見ていても適正な価格に落ち着くだろう。
+
+    summonerごとにユニークなシンボルの考案
+        phaser3での色彩変化
+        もしくは手動での色彩変化済み画像の用意
+        あるいは、ユニークな色のアクセサリー
+        
+ ok 重なり調整
+        depthを修正する
+        基本的には、y座表示準じればよいか
+        ボタン、帽子など、一部のものは再背面、最前面にdepthを設定する
+        https://gpnotes.hatenablog.jp/entry/2019/01/16/170100
+
+ ok 貯金箱に資源表示
+        マウスオーバー時にお花+1000と表示する
+        グループに入れて表示/非表示をスムーズに。
+
+ ok 帽子周りの整備
+        位置合わせ微調整で座標を決定する
+          * なにかモデル絵を対象にして座標を決定する
+        画像側をあわせる
+        帽子絵がそろってからか
+
+ ok ダイスシステムの深慮
+        ダイスのリセット時間について
+            1日か3日か、あるいは5日とか
+            1日だと、良いダイスを引く→クラフト、と進んでも、
+                クラフトが完了する3日目には別の目を振り直さないといけない
+            しかし、クラフト開始時に補正をかけるのはちょっと困難
+        補正方法について
+            すべての行動は、stop時にステータス補正がかかる
+            stopのtxを飛ばしたときのステータス、所持アイテムによって得られる結果が変わる
+            このシステムにおいて、ダイス目をどうやって自然に組み込むか
+                stopする前に運試しで振るのか
+                良い補正値を見てからstartするのか
+        4日間の平均値とする
+            24時間開くごとに0を代入する
+            24+24時間以内に次をロールすればペナルティ無し
+            ただし、24時間経過後は、ダイス振るは直近が0として計算される
+            24+24時間以内に次を降れば4つの平均値が補正値として採用される
+            → とにかく、こまめに振ることが最も高効率の設計
+            20時間経過後に次のダイスを触れる。
+                20～48時間以内に振れば、0代入のペナルティ無し。
+            ダイスには直近の値のみを表示させる
+            平均すると、こまめに振っていれば平均10＝+1レベル程度の補正
+      * ダイスコントラの更新
+
+ ok マケプレのアイコン表示の実装
+
+ ok IDを看板内に表示する
+
+ ok ダイスの実装
+     ok 24時間でリセットされる
+            小さくカウントアップを表示するか
+            24時間後は補正0になる
+     ok クリックしてtx飛ばす
+            tx通れば値更新
+            d20の枠組み内に現在の数字を表示させるか
+     ok アニメーションが可能ならしてみたいが
+            ダイスらしく転がせられるだろうか
+            24時間経過前は転がる→必ず設定した値がでる
+            24時間経過後は、マウスオーバーで更新可能を示す絵に変わる
+                →クリックで値更新
+
+ ok 帽子枠の実装
+      * summonerのすべてのアニメーションで、帽子の位置を決定する
+            左右で絵を変える
+     ok 帽子スプライトを1つだけ作成し、waringしているitemをそのスプライトに格納する
+            帽子スプライトの存在をチェックし、summoner()内でその都度描写する        
+            脱ぐときはdestroyする
+     ok 帽子は棚や壁ラックにかけておき、クリックでwaringする
+            visible=false, 帽子spriteをcreateでよいか
+            帽子sprite側はdestroy、対応するspriteをvisible=trueで棚に戻す
+     ok 帽子絵の規格を決定する
+            370x320はクリック領域が広く扱いにくい
+            80x80ぐらいか？
+
+ ok 貯金箱システムの実装
+     ok 消費時、クラフト時に即座に反映されるように修正
+            1個以上持っていたらではなく、個数が変更されたら画面更新させる機構
+            消す（destroy）メカニズムの実装
+                個数が減ったら全削除→再描写
+                予めgroupへ格納しておく
+     ok Approveの実装
+            Function_craftingにcraftをapprove通さないとunpackできない
+            フロントエンド側でapproveを導入する
+            現状、upgrade用のapproveボタンを押さないとunpackできない。
+      * マウスオーバー時の絵の実装
+            中身が解かれてcoin/kusaが少し見えている絵
+
+ ok Petの行動の実装
+        mining, farming時に一緒に働く
+        feeding, grooming時にハートが出る
+
+ ok Dr. Bitcoの実装
+    
+ ng Prof. Polkaの実装
+    
+ ng Master Solidの実装
+    
+picture
+
+    背景
+    ごきげん！（お腹いっぱい＆ハッピーなときなど）
+    ありがとう！（ご飯たべたあとなど）
+    クラフトアイテムたくさん（飼い主手伝う）
+    成功したよー！（クラフト成功時, mining終了時など）
+    れべるあっぷ！
+    おんがくかんしょうちゅう～♪

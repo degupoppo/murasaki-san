@@ -1,182 +1,10 @@
 <!doctype html>
-<html lang="en-GB">
+<html lang="en">
 
-<!---
+<script src="lib/web3.min.js"></script>
+<script src="src/js_info/bulletin_board.js"></script>
 
-コンセプト
-    低インフレ率の育成ゲーム
-
-ゲームシステム概要
-    NTTについて
-    クラフト品とNFTについて
-    Not play2earn
-    no token
-
-行動説明
-    feeding
-    grooming
-    mining
-    farming
-    crafting
-
-ステータス説明
-    テーブルで説明
-
-アイテム説明
-    テーブルで説明
-
-ロードマップ
-    NFTマーケットプレイス
-
-制作話
-    むらさきさん誕生について
-        友人が書いた絵を動かしたかった
-        長くお世話できる成長するNFTを作りたかった
-        Rarityのsummonerコンセプト
-            expテーブルはrarityとDnD3.5を踏襲している
-    むらさきさんの名前の由来について
-    このゲームのコンセプトについて
-        製作者が楽しめるものを作っている
-    低インフレ
-        1年で最大値
-    ポンジスキームではなく、長く付き合える作品をブロックチェーン上に作ってみたかった。
-        何よりも製作者達本人のために。
-        作るのが最も楽しく、プレイするのはその次に楽しいように。
-    非人力のbot対策として、初期コストに少しかけたが、それ以外はコストは必要ない。
-        下心として、dapps stakingへの登録が直近の目標。
-
-Doc
-    exp要求テーブル
-    itemのコスト/時間要求テーブル
-    mining/farmingによるcoin/material取得の計算式
-    craftingのrequired timeの計算式
-    Level-up時のstatus point加算の計算式
-    critical判定時の計算式と効果
-
---->
-
-
-
-<script src="js_v2/web3.min.js"></script>
-<script src="js_v2/bulletin_board.js"></script>
-<script type="text/javascript">
-
-    //update summoner
-    function button_select_summoner() {
-        summoner = document.getElementById("summoner").value;
-        window.location.href = "dapp.html?summoner=" + summoner;
-    }
-
-    //connect to metamask
-    async function connect() {
-        const web3 = await new Web3(window.ethereum);
-        window.ethereum.enable();
-        window.ethereum.request({
-            method: 'wallet_addEthereumChain',
-
-            params: [{
-                chainId: '0x51',  //4369
-                chainName: 'Shibuya Testnet',
-                nativeCurrency: {
-                    name: 'sby',
-                    symbol: 'SBY',
-                    decimals: 18
-                },
-                rpcUrls: ["https://rpc.shibuya.astar.network:8545"],
-                blockExplorerUrls: ['https://blockscout.com/shibuya'],
-            }]
-        });
-        return web3;
-    }
-
-    //get wallet
-    async function get_wallet() {
-        let web3 = await connect();
-        let wallet = await web3.eth.getAccounts();
-        return wallet[0];
-    }
-
-    //write message
-    async function contract_write_message(_message) {
-        let web3 = await connect();
-        let contract = await new web3.eth.Contract(abi_bulletin_board, contract_bulletin_board);
-        let wallet = await get_wallet(web3);
-        contract.methods.write_message(_message).send({from:wallet});
-    }
-    function write_message() {
-        let _message = document.getElementById("message").value;
-        contract_write_message(_message);
-    }
-
-    //read message
-    async function contract_read_message(_count) {
-        let web3 = await connect();
-        let contract = await new web3.eth.Contract(abi_bulletin_board, contract_bulletin_board);
-        let wallet = await get_wallet(web3);
-        let _message = await contract.methods.read_recent_messages(_count).call(); 
-        //console.log(_message);
-        return _message;
-    }
-
-    //show messages
-    async function show_messages() {
-        let _res;
-        let _count;
-        //reset text
-        messages.innerHTML = "";
-        for (let i = 1; i <= 10; i++) {
-            _res = await contract_read_message(i);
-            //when count=0, stop
-            _count = _res[0];
-            if (_count == 0) {
-                return 0;
-            }
-            if (_res[2] == "0x0000000000000000000000000000000000000000") {
-                continue;
-            }
-            messages.innerHTML += "<p>";
-            messages.innerHTML += "<font color='blue'>" + _res[1] + " / " + _res[2].substring(0,10) +"... :</font>";
-            messages.innerHTML += "<br>";
-            messages.innerHTML += _res[3];
-            messages.innerHTML += "</p>";
-        }
-    }
-    
-    //donate
-    async function donate(_value) {
-        let web3 = await connect();
-        let wallet = await get_wallet(web3);
-        let _to_wallet = "0x2F7448B62134e52C2f46454d0089Ae21B5248805";
-        let _value_wei = web3.utils.toWei(_value.toString());
-        await web3.eth.sendTransaction({from: wallet, to: _to_wallet, value: _value_wei});
-    }
-    
-    //write donation icon
-    function write_icon(_value) {
-        let _icon;
-        let _rand = Math.floor(Math.random()*3);
-        //1 astar
-        if (_value == 1) {
-            if (_rand == 0) {_icon = "&#x1f36c;"}   //candy
-            if (_rand == 1) {_icon = "&#x1f968;"}   //pretzel
-            if (_rand == 2) {_icon = "&#x1f36a;"}   //cookie
-        //10 astar
-        }else if (_value == 10) {
-            if (_rand == 0) {_icon = "&#x2615;"}    //coffee
-            if (_rand == 1) {_icon = "&#x1f375;"}   //tea
-            if (_rand == 2) {_icon = "&#x1f9cb;"}   //juce
-        //100 astar
-        }else if (_value == 100) {
-            if (_rand == 0) {_icon = "&#x1f355;"}   //pizza
-            if (_rand == 1) {_icon = "&#x1f363;"}   //sushi
-            if (_rand == 2) {_icon = "&#x1f370;"}   //cake
-        }
-        document.write(_icon);
-    }
-
-</script>
-
-
+<script src="src/js/index.js"></script>
 
 <head>
     <meta charset="utf-8">
@@ -184,29 +12,29 @@ Doc
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>House of Murasaki-san</title>
     <meta name="description" content="Murasaki-san is a pet living in your wallet on Astar Network." />
-    <link rel="stylesheet" href="assets/css/simple.css">
-    <link rel="stylesheet" href="assets/css/style.css">
-    <link rel="icon" href="png/icon.PNG" />
-    <link rel="apple-touch-icon" href="png/icon.PNG">
+    <link rel="stylesheet" href="src/css/simple.css">
+    <link rel="stylesheet" href="src/css/style.css">
+    <link rel="icon" href="src/png/icon.png" />
+    <link rel="apple-touch-icon" href="src/png/icon.png">
 </head>
 
-<body>
 
+<body>
 
 
 <header>
     <nav>
       <a href="index.html" class="current">&#x1f3e0; Home</a>
-      <a href="dapp.html" ><b>&#x1f497; Play</b></a>
+      <a href="house.html" ><b>&#x1f497; Play</b></a>
       <a href="market.html"><b>&#x1f6d2; Market</b></a>
-      <a href="dapp.html?summoner=1">&#x1f530; Demo</a>
+      <a href="house.html?summoner=1">&#x1f530; Demo</a>
       <a href="https://twitter.com/degupoppo" >Twitter</a>
       <a href="https://github.com/degupoppo/murasakisan/" >GitHub</a>
     </nav>
     <h1>
-        <img src="png/food_sweet_potato.png" width="40" height="40">
+        <img src="src/png/food_sweet_potato.png" width="40" height="40">
         House of Murasaki-san
-        <img src="png/food_sweet_potato.png" width="40" height="40">
+        <img src="src/png/food_sweet_potato.png" width="40" height="40">
     </h1>
     <p>
         Murasaki-san is a pet living in your wallet on <a href="https://astar.network/">Astar Network</a>.<br>
@@ -228,7 +56,7 @@ Doc
 <p>House of Murasaki-san project is a dApp game built on Astar Network. You can summon your Murasaki-san character and care them to grow. Murasaki-san can mine coins (not token), farm materials, and craft item NFTs.</p>
 
 <p>
-    You can <b><a href="/murasakisan/dapp.html?summoner=1">Demo Preview</a></b> before summoning your Murasaki-san.<br>
+    You can <b><a href="house.html?summoner=1">Demo Preview</a></b> before summoning your Murasaki-san.<br>
     (Developer's character. No transactions are permitted.)
 </p>
 
@@ -237,7 +65,7 @@ Doc
 
 <h3 id="screen">Game Screen &#128149;</h3>
 <figure>
-  <img alt="Game screen" src="png/demo.jpg" />
+  <img alt="Game screen" src="src/png/demo.jpg" />
   <figcaption>Game screen</figcaption>
 </figure>
 
