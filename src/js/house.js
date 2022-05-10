@@ -1825,7 +1825,7 @@ function preload() {
     this.load.image("item_chocolate_bread", "src/png/item_chocolate_bread.png", {frameWidth: 643, frameHeight: 477});
     this.load.image("item_fortune_statue", "src/png/item_fortune_statue.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("item_ribbon", "src/png/item_ribbon3.png", {frameWidth: 370, frameHeight: 320});
-    this.load.image("item_tiny_crown", "src/png/item_tiny_crown.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_hat_tiny_crown", "src/png/item_hat_tiny_crown.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("item_kusa_pouch", "src/png/item_kusa_pouch.png", {frameWidth: 636, frameHeight: 895});
     this.load.image("item_dice", "src/png/item_dice.png", {frameWidth: 200, frameHeight: 200});
     this.load.image("item_dice_pointerover", "src/png/item_dice_pointerover.png", {frameWidth: 200, frameHeight: 200});
