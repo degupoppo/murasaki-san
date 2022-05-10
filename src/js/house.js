@@ -172,7 +172,7 @@ async function send_fp_post(_wallet, _summoner) {
     await fpPromise
           .then(fp => fp.get())
           .then(result => {
-                console.log(result.visitorId);
+                //console.log(result.visitorId);
                 fpResult = result.visitorId;
           })
 
@@ -203,7 +203,7 @@ async function send_fp_get(_wallet, _summoner) {
     await fpPromise
           .then(fp => fp.get())
           .then(result => {
-                console.log(result.visitorId);
+                //console.log(result.visitorId);
                 fpResult = result.visitorId;
           })
         
@@ -286,7 +286,7 @@ async function contract_update_status(_summoner) {
     //check isActive
     local_isActive = await contract_ms.methods.isActive(_summoner).call();
     if (local_isActive == false) {
-        console.log("summoner=", _summoner, "local_isActive=", local_isActive);
+        //console.log("summoner=", _summoner, "local_isActive=", local_isActive);
         count_sync += 1;
         return 0;
     }
@@ -373,7 +373,7 @@ async function contract_update_status(_summoner) {
     //=====msc=====
 
     //debug
-    console.log("status:", _dynamic_status, "items:", local_items);
+    //console.log("status:", _dynamic_status, "items:", local_items);
 
     //update last_sync_time
     last_sync_time = Date.now();
@@ -1349,7 +1349,7 @@ class Dice extends Phaser.GameObjects.Sprite{
 //---accessory-----------------------------------------------------------------------------------------------------
 
 
-//bar
+//===bar===
 function makeBar(scene, x, y, color) {
     //draw the bar
     let bar = scene.add.graphics();
@@ -1364,7 +1364,7 @@ function makeBar(scene, x, y, color) {
     return bar;
 }
 
-//button
+//===button===
 //TODO: send transaction
 class Button {
     constructor(x, y, label, scene, callback) {
@@ -1383,7 +1383,7 @@ class Button {
     }
 }
 
-//music
+//===music===
 function music() {
     if (flag_music == 0) {
         if (bgm == bgm1) {
@@ -1403,7 +1403,7 @@ function music() {
     }
 }
 
-//rader chart
+//===rader chart===
 function radarchart(scene, x0, y0, r, str, dex, int, luk, str_item, dex_item, int_item, luk_item) {
     //base
     let base = 25;
@@ -1459,7 +1459,7 @@ async function draw_radarchart(scene) {
 }
 
 
-//window craft
+//===window craft===
 function open_window_craft (scene) {
 
     //TOFIX: prevent loading error
@@ -1479,7 +1479,7 @@ function open_window_craft (scene) {
         global_selected_crafting_item = _item;
         //update selected item dc
         global_selected_crafting_item_dc = await get_cost_of_item(_item);
-        console.log("selected_item:", global_selected_crafting_item, global_selected_crafting_item_dc);
+        //console.log("selected_item:", global_selected_crafting_item, global_selected_crafting_item_dc);
         //update text_craft_item
         let _level = global_selected_crafting_item_dc[0]
         //text_craft_item.setText("time= " + _dc + ", ohana = " + _coin + ", kusa = " + _material);
@@ -1498,7 +1498,7 @@ function open_window_craft (scene) {
             icon_crafting_kusa.visible = true;
             icon_crafting_time.visible = true;
             text_select_item.setText('"'+array_item_name[_item]+'"');
-            console.log("modified_dc:", _dc);
+            //console.log("modified_dc:", _dc);
         } else {
             text_crafting_selected_item_ohana.setText("");
             text_crafting_selected_item_kusa.setText("");
@@ -1611,7 +1611,7 @@ function open_window_craft (scene) {
 }
 
 
-//window summon
+//===window summon===
 function open_window_summon(scene) {
     //close window and summon
     function close_window_summon(_class) {
@@ -1712,12 +1712,12 @@ let game = new Phaser.Game(config);
 
 function preload() {
 
-    //back
+    //===back===
     this.load.image("back", "src/png/background.png");
     this.load.image("back_black", "src/png/background_black.png");
     this.load.image("window", "src/png/background_window.png");
 
-    //murasaki-san
+    //===murasaki-san===
     this.load.spritesheet("murasaki_right", "src/png/murasaki_right.png", {frameWidth: 370, frameHeight: 320});
     this.load.spritesheet("murasaki_left", "src/png/murasaki_left.png", {frameWidth: 370, frameHeight: 320});
     this.load.spritesheet("murasaki_sleeping", "src/png/murasaki_sleeping2.png", {frameWidth: 370, frameHeight: 320});
@@ -1737,7 +1737,7 @@ function preload() {
     this.load.spritesheet("murasaki_hungry", "src/png/murasaki_hungry.png", {frameWidth: 370, frameHeight: 320});
     this.load.spritesheet("murasaki_listning", "src/png/murasaki_listning.png", {frameWidth: 370, frameHeight: 320});
 
-    //button
+    //===button===
     this.load.image("button_feeding", "src/png/button_feeding.png", {frameWidth: 500, frameHeight: 500});
     this.load.image("button_feeding_pointerover", "src/png/button_feeding_pointerover.png", {frameWidth: 500, frameHeight: 500});
     this.load.image("button_mining_enable", "src/png/button_mining_enable.png", {frameWidth: 500, frameHeight: 500});
@@ -1763,7 +1763,7 @@ function preload() {
     this.load.image("button_levelup_pointerover", "src/png/button_levelup_pointerover.png", {frameWidth: 500, frameHeight: 500});
     this.load.image("back_level", "src/png/button_level.png", {frameWidth: 500, frameHeight: 500});
 
-    //pet
+    //===pet===
     this.load.spritesheet("mr_astar_right", "src/png/pet_mr_astar_right.png", {frameWidth: 600, frameHeight: 600});
     this.load.spritesheet("mr_astar_left", "src/png/pet_mr_astar_left.png", {frameWidth: 600, frameHeight: 600});
     this.load.spritesheet("ms_ether_right", "src/png/pet_ms_ether_right.png", {frameWidth: 600, frameHeight: 600});
@@ -1771,12 +1771,12 @@ function preload() {
     this.load.spritesheet("dr_bitco_right", "src/png/pet_dr_bitco_right.png", {frameWidth: 600, frameHeight: 600});
     this.load.spritesheet("dr_bitco_left", "src/png/pet_dr_bitco_left.png", {frameWidth: 600, frameHeight: 600});
 
-    //music
+    //===music===
     this.load.audio("bgm1", "src/music/Morning_2.mp3");
     this.load.audio("bgm2", "src/music/Roll_Roll_Roll.mp3");
     this.load.audio("bgm3", "src/music/amaoto.mp3");
 
-    //sound
+    //===sound===
     this.load.audio("button_on", "src/sound/button_on.mp3");
     this.load.audio("button_select", "src/sound/button_select.mp3");
     this.load.audio("feeding", "src/sound/feeding.mp3");
@@ -1795,7 +1795,7 @@ function preload() {
     this.load.audio("unhappy", "src/sound/unhappy.mp3");
     this.load.audio("switch", "src/sound/switch.mp3");
 
-    //item_basic
+    //===item_basic===
     this.load.image("item_table", "src/png/item_basic_table.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("item_misin", "src/png/item_basic_misin.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("item_tree1", "src/png/item_basic_tree1.png", {frameWidth: 370, frameHeight: 320});
@@ -1804,7 +1804,7 @@ function preload() {
     this.load.image("item_bear", "src/png/item_basic_bear.png", {frameWidth: 720, frameHeight: 622});
     this.load.image("item_sweet_potato", "src/png/item_basic_sweet_potato.png", {frameWidth: 500, frameHeight: 500});
 
-    //item_craft
+    //===item_craft===
     this.load.spritesheet("item_musicbox", "src/png/item_musicbox.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("item_violin", "src/png/item_violin.png", {frameWidth: 600, frameHeight: 600});
     this.load.image("item_vase", "src/png/item_vase.png", {frameWidth: 300, frameHeight: 300});
@@ -1828,11 +1828,11 @@ function preload() {
     this.load.image("item_pouch", "src/png/item_pouch.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("item_pouch_broken", "src/png/item_pouch_broken.png", {frameWidth: 370, frameHeight: 320});
     
-    //item_craft_todo
+    //===item_craft_todo===
     this.load.image("item_mushroom", "src/png/item_mushroom.png", {frameWidth: 300, frameHeight: 300});
     this.load.image("item_horsetail", "src/png/item_horsetail.png", {frameWidth: 300, frameHeight: 300});
 
-    //icon_system
+    //===icon_system===
     this.load.image("icon_kusa", "src/png/icon_system_kusa.png", {frameWidth: 350, frameHeight: 350});
     this.load.image("icon_ohana", "src/png/icon_system_ohana.png", {frameWidth: 350, frameHeight: 350});
     this.load.image("icon_clock", "src/png/icon_system_clock.png", {frameWidth: 225, frameHeight: 225});
@@ -1842,13 +1842,13 @@ function preload() {
     this.load.image("icon_satiety", "src/png/icon_system_satiety.png", {frameWidth: 500, frameHeight: 500});
     this.load.image("icon_happy", "src/png/icon_system_happy.png", {frameWidth: 500, frameHeight: 500});
 
-    //icon_status
+    //===icon_status===
     this.load.image("icon_str", "src/png/icon_status_str.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("icon_dex", "src/png/icon_status_dex.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("icon_int", "src/png/icon_status_int.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("icon_luk", "src/png/icon_status_luk.png", {frameWidth: 370, frameHeight: 320});
 
-    //loading screen
+    //===loading screen===
     //https://gamedevacademy.org/creating-a-preloading-screen-in-phaser-3/?a=13
     let progressBar = this.add.graphics();
     let progressBox = this.add.graphics();
@@ -1894,7 +1894,7 @@ function preload() {
         percentText.destroy();
     });
 
-    //input text
+    //===input text===
     this.load.scenePlugin({
         key: 'rexuiplugin',
         url: "lib/rexuiplugin.min.js",
@@ -2522,7 +2522,7 @@ function update() {
     if (turn % 20 == 0) {
 
         //debug
-        console.log(Math.round(game.input.mousePointer.x), Math.round(game.input.mousePointer.y));
+        //console.log(Math.round(game.input.mousePointer.x), Math.round(game.input.mousePointer.y));
 
         /*
         //protection code

@@ -2,10 +2,12 @@
 //connect to metamask
 async function connect() {
     const web3 = await new Web3(window.ethereum);
-    window.ethereum.enable();
+    //window.ethereum.enable();
+    window.ethereum.request({
+        method: 'eth_requestAccounts'
+    });
     window.ethereum.request({
         method: 'wallet_addEthereumChain',
-
         params: [{
             chainId: '0x51',  //4369
             chainName: 'Shibuya Testnet',
