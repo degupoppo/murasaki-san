@@ -1328,18 +1328,18 @@ class Dice extends Phaser.GameObjects.Sprite{
                 this.y = this.line_y;
                 this.speed_y *= -0.5;   //bounce coefficient
                 if (Math.abs(this.speed_y) > 0.5) {
-                    sound_dice2.play();
+                    sound_dice_impact.play();
                 }
             }
             //refrection x
             if (this.x >= this.line_x_r) {
                 this.x = this.line_x_r;
                 this.speed_x *= -0.9;   //bounce coefficient
-                sound_dice2.play();
+                sound_dice_impact.play();
             } else if (this.x <= this.line_x_l) {
                 this.x = this.line_x_l;
                 this.speed_x *= -0.9;
-                sound_dice2.play();
+                sound_dice_impact.play();
             }
         }
     }
@@ -1790,7 +1790,7 @@ function preload() {
     this.load.audio("happy", "src/sound/happy.mp3");
     this.load.audio("earn", "src/sound/earn.wav");
     this.load.audio("dice", "src/sound/dice.mp3");
-    this.load.audio("dice2", "src/sound/dice2.mp3");
+    this.load.audio("dice_impact", "src/sound/dice_impact.mp3");
     this.load.audio("hat", "src/sound/hat.mp3");
     this.load.audio("unhappy", "src/sound/unhappy.mp3");
     this.load.audio("switch", "src/sound/switch.mp3");
@@ -2309,7 +2309,7 @@ function create() {
     sound_happy = this.sound.add("happy", {volume:0.2});
     sound_earn = this.sound.add("earn", {volume:0.2});
     sound_dice = this.sound.add("dice", {volume:0.15});
-    sound_dice2 = this.sound.add("dice2", {volume:0.1});
+    sound_dice_impact = this.sound.add("dice_impact", {volume:0.1});
     sound_hat = this.sound.add("hat", {volume:0.1});
     sound_unhappy = this.sound.add("unhappy", {volume:0.2});
     sound_switch = this.sound.add("switch", {volume:0.2});
@@ -2806,7 +2806,8 @@ function update() {
             //update tree
             if (local_material_calc >= 1000) {
                 item_tree2.visible = true;
-            } else if (local_material_calc >= 2000 ) {
+            }
+            if (local_material_calc >= 2000 ) {
                 item_tree3.visible = true;
             }
         }else if (_mode == "crafting") {
