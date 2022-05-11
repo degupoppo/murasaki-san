@@ -46,6 +46,7 @@ async function update_onMarketItems() {
     let contract_mc = await new web3.eth.Contract(abi_murasaki_craft, contract_murasaki_craft);
     let ListLength = await contract.methods.listLength().call();
     let ListsAt = await contract.methods.listsAt(0, ListLength).call();
+    let _html_all = "";
     for (let i = 0; i < ListLength; i++) {
         let _item = ListsAt[0][i];
         let _price = ListsAt[1][i];
@@ -90,8 +91,14 @@ async function update_onMarketItems() {
         _html += "Buy";
         _html += "</button>";
         _html += "</center></td></tr>";
-        tbody_sellingItems.innerHTML += _html;
+        //combine html
+        _html_all += _html;
+        //count-up loading
+        let _text = "&nbsp;Now&nbsp;Loading...&nbsp;" + i + "/" + ListLength;
+        tbody_sellingItems.innerHTML = _text;
     }
+    //write html
+    tbody_sellingItems.innerHTML = _html_all;
     //after loading, activate JQuery CSS
     $(document).ready(function(){
        $('#table_onMarketItems').DataTable({lengthChange: false});
@@ -107,6 +114,7 @@ async function update_sellingItems() {
     let contract_mc = await new web3.eth.Contract(abi_murasaki_craft, contract_murasaki_craft);
     let myListLength = await contract.methods.myListLength(wallet).call();
     let myListsAt = await contract.methods.myListsAt(wallet, 0, myListLength).call();
+    let _html_all = "";
     for (let i = 0; i < myListLength; i++) {
         let _item = myListsAt[0][i];
         let _price = myListsAt[1][i];
@@ -150,8 +158,14 @@ async function update_sellingItems() {
         _html += "Unlist";
         _html += "</button>";
         _html += "</center></td></tr>";
-        tbody_listedItems.innerHTML += _html;
+        //combine html
+        _html_all += _html;
+        //count-up loading
+        let _text = "&nbsp;Now&nbsp;Loading...&nbsp;" + i + "/" + myListLength;
+        tbody_listedItems.innerHTML = _text;
     }
+    //write html
+    tbody_listedItems.innerHTML = _html_all;
     //after loading, activate JQuery CSS
     $(document).ready(function(){
        $('#talbe_sellingItems').DataTable({lengthChange: false});
@@ -167,6 +181,7 @@ async function update_userItems() {
     let myListLength = await contract.methods.myListLength(wallet).call();
     let myListsAt = await contract.methods.myListsAt(wallet, 0, myListLength).call();
     //console.log(myListsAt);
+    let _html_all = "";
     for (let i = 0; i < myListLength; i++) {
         let _item = myListsAt[i];
         _items = await contract.methods.items(_item).call();
@@ -217,8 +232,15 @@ async function update_userItems() {
         _html += "Sell";
         _html += "</button>";
         _html += "</center></td></tr>";
-        tbody_myItems.innerHTML += _html;
+        //tbody_myItems.innerHTML += _html;
+        //add html
+        _html_all += _html;
+        //count-up loading
+        let _text = "&nbsp;Now&nbsp;Loading...&nbsp;" + i + "/" + myListLength;
+        tbody_myItems.innerHTML = _text;
     }
+    //write html
+    tbody_myItems.innerHTML = _html_all;
     //after loading, activate JQuery CSS
     $(document).ready(function(){
        $('#table_userItems').DataTable({lengthChange: false});

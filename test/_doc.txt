@@ -1,194 +1,242 @@
 
-効果音
-    https://soundeffect-lab.info/sound/button/
-    https://otologic.jp/free/se/motion-pop01.html
+    文通システム概要
+        送信
+            まずクッションをクラフトする
+            クッションクラフト後、猫が寄り付く
+            クッションクラフト後、メールをクラフト可能に
+            メールを所持し、猫がいる場合は、tx飛ばしてメール送信できる
+            送信したら、猫は3d間不在となる
+            猫が帰宅するまでのタイマーを表示する
+        受信
+            受信条件なし
+                Lv1, 石化でも受信可能
+            受信上限なし
+                何匹でも一度に受信可能
+                コントラで実装可能か？
+            受信中は、他の人の猫がにゃーにゃー鳴いて待っている
+                マウスオーバーで誰の猫か表示される
+            猫をクリックしてtx飛ばしてメールを開封
+            開封すると自分と相手にheartがmintされる
+            開封後、猫は速やかに消える
 
-コントラ修正案
-    msにcraft_countを追加
-        各working timeのtotalだけでなく, クラフト品回数も集計する
-    msにtotal_coinとtotal_materialを追加
-        総mining数、総farming数も集計する
-    msにpenalty_timeを追加
-        でなくとも、summoner単位でdeactivateできる変数を追加
-        強制petrification機構でもよいか
-    Luckの補正を2倍ではなく1.5倍程度にするか
-        補正値が強すぎる
-    Uncommonを1.5倍, Rareを2倍程度にするか
-        補正値が強すぎる
-    Diceの補正がLuckにも乗るようにする
-        現状、Diceで良い目がでてもmining/farmingにしか影響せずイマイチ
-        Luckにも影響するのなら、feedingなどすべての行動がブーストされてよいか
-        ただし、dice roll時のluck判定には影響させない
+    文通システムの実装
+        フロントエンド
+            猫用クッションのクラフト（DEX系か）
+            クッション所持時、手紙のクラフト（低コスト）
+                所持するまでリストに表示しない
+                あるいは、"kussyon required"などとメッセージを表示じておく
+            遊びに来た猫スプライトの表示、自分の猫との差別化
+                クリックで手紙開封
+            遊びに行ってる際の、帰ってくるまでの時間表示
+        コントラクト
+            やはりmail自体は普通のクラフト品として扱う
+                複数クラフト可能、貯めておける
+            猫がいて、かつメール所持時に、猫をクリックでsend_mailのtxを飛ばせる
+                猫コントラはメールNFTをburnする
+                    猫コントラへのapproveが必要
+                receving_summonerをランダムで選ぶ
+                    すでにreceving中のものは無視するなど、何かしら制限を設けたい
+                sending_from_to[_summoner]とreceving_from_toに書き込む
+                    sending_from_to[summoner_from] = summoner_to
+                    sending_to_from[summoner_to] = [summoner_from]
+                last_sending_timeとlast_receving_timeを更新する
+                    last_sending_time[summoner_from] = now
+                    last_receving_time[summoner_to] = now
+                check_mail(_summoner_to)でメールチェックする
+                    last_receving_time[_summoner_to] <= 3 days で
+                        sending_to_from[_summoner_to] = _summoner_ftomを返す
+                メールがあれば、mail_open可とする
+                    require(owner, last_receving_time <= 3 days)
+                    sending_summoner, receving_summoner, last_timeをすべてリセットする
+                        receving_summonerのみリセットするか
+                        
+                    sending_summonerとreceving_summonerにtiny_heartをクラフトする
+                        クラフト主はお互いに相手
+                        mfcにexternalのcraft_heart()が必要
+                        mfsに猫コントラを記載し、msg.sender == 猫コントラを要求する
+            猫は文通に成功しようが失敗しようが、3daysは帰ってこない
+            文通成功の演出をどうするか
+                last_sending_time[_summoner] <= 3days かつ
+                sending_from2to[_summoner_from] == 0 ならば、
+                文通成功（相手がopen_mail()済み）で"Mail Successful!"と表示する
+                しかし、3 day経過しないと猫は帰ってこない
+                    メーターは表示したまま
+                
+        コントラクト
+            専用コントラを実装する
+            逐一、クッションitem_typeの所持をrequireする
+            手紙はNFTとはせずに、文通コントラ内でフラグとして処理する
+                フロントエンド上では30minクラフト品として表現する
+                if item_type == 196なら、文通コントラを呼び出す
+                文通コントラをmsに許可しておく
+                coin/material支払いも、mcではなく文通コントラ内で行う
+            start_crafting_mail()
+                require(owner)
+                require(last_sending_time >= 3days)
+                coin/materialを支払う
+                flag_crafting_mail = 1
+                start_time = now
+            calc_crafting_mail()
+                dc = 30minで固定
+                    ステータス補正なし
+                    レアリティなし
+            stop_crafting_mail()
+                require(owner)
+                require(calc_crafting_mail == 0)
+                _send_mail()
+            _send_mail(_summoner)
+                _sending_summoner = _select_random_summoner()
+                sending_summoner[_summoner] = _sending_summoner
+                receving_summoner[_sending_summoner] = _summoner
+                last_receving_time[_sending_summoner] = now
+                last_sending_time[_summoner] = now
+            _select_random_summoner(_summoner)
+                not
+            open_mail(_receving_summoner)
+                require(owner of summoner)
+                require(satiety, happy)
+                _sending_summoner = sending_summoner[_from_summoner]
+                craft_heart(_sending_summoner)
+                craft_heart(_summoner)
+            check_mail(_receving_summoner)
+                _sending_summoner = 0
+                if (last_receving_time[_summoner] <= 3days)
+                    _sending_summoner = sending_summoner[_summoner]
+                return _sending_summoner
 
-ランキングページの実装
-    summonerを一覧表示する
-    total_time, total_mining_timeなどをバーグラフで％表示する
-    The Crafter, The Minerなど、称号を表示する？
+    ランキングページの実装
+        summonerを一覧表示する
+        total_time, total_mining_timeなどをバーグラフで％表示する
+        The Crafter, The Minerなど、称号を表示する？
 
-Bot対策の深慮
-    仮想敵はマルチウォレットによる効率プレイ
-        この方法だと、多数の植民地summoner→少数のメインsummonerが成り立つ
-            メインsummonerにcoin/materialとitemを集中してステータスブーストさせる
-            例えば、farm専用、mining専用、crafting専用、など？
-                しかし、これはまっとうな遊び方とも言えるか
-        もっとも対策すべきは、大量のwalletを運用したbotter
-            stakingが実装された際は、
-            このタイプの単一プレイヤーがベネフィットをごっそり持っていってしまう
-    IPアドレス, wallet, summoner_id, fingerprintをどうにかして保存する
-        jsで何かしらのサーバーにpostしてロギングするか
-    jsでPOST構想
-        https://webukatu.com/wordpress/blog/30539/
-        wallet=zzz&summoner_id=xxx&fingerprint=yyyをpostし、
-            サーバー側でtime, アクセス元IPアドレスとともにロギングする
-            https://qiita.com/linxuesong/items/8ac98102c24b8f587a16
-        IP重複、fingerprintの重複が凄まじいsummonerは何かしらのペナルティを課す
+    スコアボードの実装
+        別コントラでstrageを作成するか
+            fcコントラでstrage_rankingコントラへも書き込む
+        #実装必要
+        total_item_crafted
+        total_coin_mined
+        total_material_farmed
+        total_exp_gained
+        total_heart_received    #売買とは別に記録
+        #ms情報
+        str
+        dex
+        int
+        luk
+        #スコア
+        coin + material + exp + item*1000 + heart*10
+
+    Bot対策
+        手動でゲームプレイにペナルティをもたせるメカニズムを作る
+            isActiveだけでよいか？？
+        無効アカウントが増えると文通とheartシステムが崩壊することへの対策を考える
+            Activeなユーザーからランダムで選びたいが・・・
+                userを選ぶことを100回ほど繰り返し、isActiveのみを抽出してリスト化し、
+                その中からランダムで選ぶコントラをつくるか？
+                100回は後で変更できるようにする
+
+    効果音
+        https://soundeffect-lab.info/sound/button/
+        https://otologic.jp/free/se/motion-pop01.html
+
+ ok コントラ修正案
+     ok msにcraft_countを追加
+            各working timeのtotalだけでなく, クラフト品回数も集計する
+     ok msにtotal_coinとtotal_materialを追加
+            総mining数、総farming数も集計する
+     ok msにpenalty_timeを追加
+            でなくとも、summoner単位でdeactivateできる変数を追加
+            強制petrification機構でもよいか
+     ok Luckの補正を2倍ではなく1.5倍程度にするか
+            補正値が強すぎる
+     ok Uncommonを1.5倍, Rareを2倍程度にするか
+            補正値が強すぎる
+     ok Diceの補正がLuckにも乗るようにする
+            現状、Diceで良い目がでてもmining/farmingにしか影響せずイマイチ
+            Luckにも影響するのなら、feedingなどすべての行動がブーストされてよいか
+            ただし、dice roll時のluck判定には影響させない
+            → DiceはLuckのみブーストさせる
+                代わりに、dice目には何も影響させない
+                また、str, dexにも補正を与えない
+                dice目が良いときはcriticalが出やすく、全てが有利になる
+                criticalは2倍ではなく1.5倍へと落とした
+                また、uncommonも2倍ではなく1.5倍へ落とした
+
+    Bot対策の深慮
+        仮想敵はマルチウォレットによる効率プレイ
+            この方法だと、多数の植民地summoner→少数のメインsummonerが成り立つ
+                メインsummonerにcoin/materialとitemを集中してステータスブーストさせる
+                例えば、farm専用、mining専用、crafting専用、など？
+                    しかし、これはまっとうな遊び方とも言えるか
+            もっとも対策すべきは、大量のwalletを運用したbotter
+                stakingが実装された際は、
+                このタイプの単一プレイヤーがベネフィットをごっそり持っていってしまう
+        IPアドレス, wallet, summoner_id, fingerprintをどうにかして保存する
+            jsで何かしらのサーバーにpostしてロギングするか
+        jsでPOST構想
+            https://webukatu.com/wordpress/blog/30539/
+            wallet=zzz&summoner_id=xxx&fingerprint=yyyをpostし、
+                サーバー側でtime, アクセス元IPアドレスとともにロギングする
+                https://qiita.com/linxuesong/items/8ac98102c24b8f587a16
+            IP重複、fingerprintの重複が凄まじいsummonerは何かしらのペナルティを課す
 
 
 //---index---
 
-コンセプト
-    低インフレ率の育成ゲーム
+    コンセプト
+        低インフレ率の育成ゲーム
 
-ゲームシステム概要
-    NTTについて
-    クラフト品とNFTについて
-    Not play2earn
-    no token
+    ゲームシステム概要
+        NTTについて
+        クラフト品とNFTについて
+        Not play2earn
+        no token
 
-行動説明
-    feeding
-    grooming
-    mining
-    farming
-    crafting
+    行動説明
+        feeding
+        grooming
+        mining
+        farming
+        crafting
 
-ステータス説明
-    テーブルで説明
+    ステータス説明
+        テーブルで説明
 
-アイテム説明
-    テーブルで説明
+    アイテム説明
+        テーブルで説明
 
-ロードマップ
-    NFTマーケットプレイス
+    ロードマップ
+        NFTマーケットプレイス
 
-制作話
-    むらさきさん誕生について
-        友人が書いた絵を動かしたかった
-        長くお世話できる成長するNFTを作りたかった
-        Rarityのsummonerコンセプト
-            expテーブルはrarityとDnD3.5を踏襲している
-    むらさきさんの名前の由来について
-    このゲームのコンセプトについて
-        製作者が楽しめるものを作っている
-    低インフレ
-        1年で最大値
-    ポンジスキームではなく、長く付き合える作品をブロックチェーン上に作ってみたかった。
-        何よりも製作者達本人のために。
-        作るのが最も楽しく、プレイするのはその次に楽しいように。
-    非人力のbot対策として、初期コストに少しかけたが、それ以外はコストは必要ない。
-        下心として、dapps stakingへの登録が直近の目標。
+    制作話
+        むらさきさん誕生について
+            友人が書いた絵を動かしたかった
+            長くお世話できる成長するNFTを作りたかった
+            Rarityのsummonerコンセプト
+                expテーブルはrarityとDnD3.5を踏襲している
+        むらさきさんの名前の由来について
+        このゲームのコンセプトについて
+            製作者が楽しめるものを作っている
+        低インフレ
+            1年で最大値
+        ポンジスキームではなく、長く付き合える作品をブロックチェーン上に作ってみたかった。
+            何よりも製作者達本人のために。
+            作るのが最も楽しく、プレイするのはその次に楽しいように。
+        非人力のbot対策として、初期コストに少しかけたが、それ以外はコストは必要ない。
+            下心として、dapps stakingへの登録が直近の目標。
 
-Doc
-    exp要求テーブル
-    itemのコスト/時間要求テーブル
-    mining/farmingによるcoin/material取得の計算式
-    craftingのrequired timeの計算式
-    Level-up時のstatus point加算の計算式
-    critical判定時の計算式と効果
+    Doc
+        exp要求テーブル
+        itemのコスト/時間要求テーブル
+        mining/farmingによるcoin/material取得の計算式
+        craftingのrequired timeの計算式
+        Level-up時のstatus point加算の計算式
+        critical判定時の計算式と効果
 
 
 //---Murasaki_Mail---
 
-文通システム概要
-    クッションをクラフト
-    クラフト後、猫が寄り付く
-    
 
-
-文通システムの実装
-    フロントエンド
-        猫用クッションのクラフト（DEX系か）
-        クッション所持時、手紙のクラフト（低コスト）
-            所持するまでリストに表示しない
-            あるいは、"kussyon required"などとメッセージを表示じておく
-        遊びに来た猫スプライトの表示、自分の猫との差別化
-            クリックで手紙開封
-        遊びに行ってる際の、帰ってくるまでの時間表示
-    コントラクト
-        やはりmail自体は普通のクラフト品として扱う
-            複数クラフト可能、貯めておける
-        猫がいて、かつメール所持時に、猫をクリックでsend_mailのtxを飛ばせる
-            猫コントラはメールNFTをburnする
-                猫コントラへのapproveが必要
-            receving_summonerをランダムで選ぶ
-                すでにreceving中のものは無視するなど、何かしら制限を設けたい
-            sending_from_to[_summoner]とreceving_from_toに書き込む
-                sending_from_to[summoner_from] = summoner_to
-                sending_to_from[summoner_to] = [summoner_from]
-            last_sending_timeとlast_receving_timeを更新する
-                last_sending_time[summoner_from] = now
-                last_receving_time[summoner_to] = now
-            check_mail(_summoner_to)でメールチェックする
-                last_receving_time[_summoner_to] <= 3 days で
-                    sending_to_from[_summoner_to] = _summoner_ftomを返す
-            メールがあれば、mail_open可とする
-                require(owner, last_receving_time <= 3 days)
-                sending_summoner, receving_summoner, last_timeをすべてリセットする
-                    receving_summonerのみリセットするか
-                    
-                sending_summonerとreceving_summonerにtiny_heartをクラフトする
-                    クラフト主はお互いに相手
-                    mfcにexternalのcraft_heart()が必要
-                    mfsに猫コントラを記載し、msg.sender == 猫コントラを要求する
-        猫は文通に成功しようが失敗しようが、3daysは帰ってこない
-        文通成功の演出をどうするか
-            last_sending_time[_summoner] <= 3days かつ
-            sending_from2to[_summoner_from] == 0 ならば、
-            文通成功（相手がopen_mail()済み）で"Mail Successful!"と表示する
-            しかし、3 day経過しないと猫は帰ってこない
-                メーターは表示したまま
-            
-    コントラクト
-        専用コントラを実装する
-        逐一、クッションitem_typeの所持をrequireする
-        手紙はNFTとはせずに、文通コントラ内でフラグとして処理する
-            フロントエンド上では30minクラフト品として表現する
-            if item_type == 196なら、文通コントラを呼び出す
-            文通コントラをmsに許可しておく
-            coin/material支払いも、mcではなく文通コントラ内で行う
-        start_crafting_mail()
-            require(owner)
-            require(last_sending_time >= 3days)
-            coin/materialを支払う
-            flag_crafting_mail = 1
-            start_time = now
-        calc_crafting_mail()
-            dc = 30minで固定
-                ステータス補正なし
-                レアリティなし
-        stop_crafting_mail()
-            require(owner)
-            require(calc_crafting_mail == 0)
-            _send_mail()
-        _send_mail(_summoner)
-            _sending_summoner = _select_random_summoner()
-            sending_summoner[_summoner] = _sending_summoner
-            receving_summoner[_sending_summoner] = _summoner
-            last_receving_time[_sending_summoner] = now
-            last_sending_time[_summoner] = now
-        _select_random_summoner(_summoner)
-            not
-        open_mail(_receving_summoner)
-            require(owner of summoner)
-            require(satiety, happy)
-            _sending_summoner = sending_summoner[_from_summoner]
-            craft_heart(_sending_summoner)
-            craft_heart(_summoner)
-        check_mail(_receving_summoner)
-            _sending_summoner = 0
-            if (last_receving_time[_summoner] <= 3days)
-                _sending_summoner = sending_summoner[_summoner]
-            return _sending_summoner
 
 
 //---Murasaki_all---
@@ -363,12 +411,12 @@ Doc
         場合によっては、murasaki_strageにactiveのboolを追加する
 
 
-# Main
+//---Main---
 
 
 ToDo
 
-  * わんころの顔塗る
+ ng わんころの顔塗る
 
     看板はクラフト品とする
     
@@ -376,7 +424,7 @@ ToDo
 
     猫コントラクト
                 
-    お花電話の実装
+ ng お花電話の実装
         能動的にTiny Heartを集める機構
         電話を掛けると、誰かにコール中になる
         コール中に電話に出ると、通話がつながる
@@ -446,10 +494,10 @@ ToDo
             withdraw時に手形NFTを要求する
             withdraw時に報酬をtransferする
 
-    ポーチ絵の実装
+ ok ポーチ絵の実装
         貯金箱に準ずる
 
-    帽子案
+ ng 帽子案
         ぴこぴこ揺れるお花
             classごとにお花の種類を変える？
 
@@ -463,9 +511,9 @@ ToDo
         枠のデザイン再考
         アイテムアイコンを影絵にする？
 
-    看板デザインの変更
+ ok 看板デザインの変更
 
-    Happy, Satiety, Expアイコンの変更
+ ok Happy, Satiety, Expアイコンの変更
 
     アイテム案
         食べ物
@@ -478,7 +526,7 @@ ToDo
         とんがり帽子
         ぴろー帽子
 
-    pngファイルの軽量化
+ ok pngファイルの軽量化
     
     サウンドの洗練
         有効サウンドの選別
@@ -492,7 +540,7 @@ ToDo
         効果音メーカーを使って作成する
             https://www.peko-step.com/tool/soundeffect/#pInTopMenu
 
-    時間経過で成長する木の実装
+ ng 時間経過で成長する木の実装
         farming itemに割り振る
         双葉　→　低木　→　背の高い木
             植木鉢に収まるように？

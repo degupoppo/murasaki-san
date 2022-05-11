@@ -2,7 +2,9 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
 
+
 //---RC721------------------------------------------------------------------------------------------------------------------
+
 
 interface IERC721 {
     event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
@@ -555,9 +557,9 @@ abstract contract ERC721Enumerable is ERC721, IERC721Enumerable {
 }
 
 
-
 //---Badge------------------------------------------------------------------------------------------------------------------
 //https://github.com/ra-phael/badge-token/tree/main/contracts/withoutTimestamp
+
 
 interface IBadge {
 	// @dev Emitted when `tokenId` token is minted to `to`, an address.
@@ -675,8 +677,8 @@ contract Badge is IBadge {
 }
 
 
-
 //---Ownable------------------------------------------------------------------------------------------------------------------
+
 
 /**
  * @dev Provides information about the current execution context, including the
@@ -768,8 +770,8 @@ interface RandomDataGuard {
 }
 
 
-
 //---Base64------------------------------------------------------------------------------------------------------------------
+
 
 /// [MIT License]
 /// @title Base64
@@ -833,8 +835,8 @@ library Base64 {
 }
 
 
-
 //---EnumerableSet------------------------------------------------------------------------------------------------------------------
+
 
 /**
  * @dev Library for managing
@@ -1190,8 +1192,8 @@ library EnumerableSet {
 }
 
 
-
 //---Murasaki_Main------------------------------------------------------------------------------------------------------------------
+
 
 contract Murasaki_Main is Badge, Ownable{
 
@@ -1273,8 +1275,8 @@ contract Murasaki_Main is Badge, Ownable{
 }
 
 
-
 //---Murasaki_Strage------------------------------------------------------------------------------------------------------------------
+
 
 contract Murasaki_Strage is Ownable {
 
@@ -1465,8 +1467,11 @@ contract Murasaki_Strage is Ownable {
 }
 
 
-
 //---Murasaki_Function------------------------------------------------------------------------------------------------------------------
+
+
+//===*Share======================================================================================================
+
 
 contract Murasaki_Function_Share is Ownable {
 
@@ -1477,6 +1482,7 @@ contract Murasaki_Function_Share is Ownable {
     address public world_dice_address;
     //address public tiny_heart_address;
     address public murasaki_name_address;
+    address public murasaki_strage_score_address;
 
     //address set, admin
     function _set1_murasaki_main_address(address _address) external onlyOwner {
@@ -1496,6 +1502,9 @@ contract Murasaki_Function_Share is Ownable {
     //}
     function _set6_murasaki_name_address(address _address) external onlyOwner {
         murasaki_name_address = _address;
+    }
+    function _set7_murasaki_strage_score_address(address _address) external onlyOwner {
+        murasaki_strage_score_address = _address;
     }
 
     //check owner of summoner
@@ -1652,6 +1661,9 @@ contract Murasaki_Function_Share is Ownable {
 
     //random
     //for block chain
+    function d1000(uint32 _summoner) external view returns (uint32) {
+        return dn(_summoner, 1000);
+    }
     function d100(uint32 _summoner) external view returns (uint32) {
         return dn(_summoner, 100);
     }
@@ -1696,7 +1708,9 @@ contract Murasaki_Function_Share is Ownable {
     }
 }
 
-//=========================================================================================================
+
+//===Summon_and_LevelUp======================================================================================================
+
 
 contract Murasaki_Function_Summon_and_LevelUp is Ownable {
 
@@ -1866,7 +1880,9 @@ contract Murasaki_Function_Summon_and_LevelUp is Ownable {
     }
 }
 
-//=========================================================================================================
+
+//===*Feeding_and_Grooming======================================================================================================
+
 
 contract Murasaki_Function_Feeding_and_Grooming is Ownable {
 
@@ -1882,8 +1898,6 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable {
     }
 
     //feeding
-    //***TODO*** limit to feed other summoners, ex: 1hr
-    //function feeding(uint32 _summoner) external returns (uint32){
     function feeding(uint32 _summoner) external {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
@@ -1894,13 +1908,20 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable {
         uint32 _exp_add = 500 * (100 - _satiety) / 100;
         //luck challenge
         uint32 _luck_mod = ms.luck(_summoner) + mfs.calc_heart(_summoner) * 5;
-        if (mfs.d100(_summoner) <= _luck_mod/100) {
-        //if (mfs.d100(_summoner) <= ms.luck(_summoner)/100) {
-            _exp_add = _exp_add *2;
+        //world dice boost
+        World_Dice wd = World_Dice(mfs.world_dice_address());
+        uint32 _rolled_dice = wd.get_rolled_dice(_summoner);
+        _luck_mod += _rolled_dice;
+        if (mfs.d1000(_summoner) <= _luck_mod/10) {
+            _exp_add = _exp_add * 3 / 2;
         }
         uint32 _exp = ms.exp(_summoner) + _exp_add;
         ms.set_exp(_summoner, _exp);
         ms.set_last_feeding_time(_summoner, _now);
+        //update score
+        Murasaki_Strage_Score mss = Murasaki_Strage_Score(mfs.murasaki_strage_score_address());
+        uint32 _total_exp_gained = mss.total_exp_gained(_summoner);
+        mss.set_total_exp_gained(_summoner, _total_exp_gained + _exp_add);
         //owner check, gain some exp when not your summoner
         Murasaki_Main mm = Murasaki_Main(mfs.murasaki_main_address());
         uint32 _summoner_yours = mm.tokenOf(msg.sender);
@@ -1908,7 +1929,6 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable {
             uint32 _exp_yours = ms.exp(_summoner_yours);
             ms.set_exp(_summoner_yours, _exp_yours + _exp_add / 50);
         }
-        //return _exp_add;
     }
 
     //petrification, debends on only feeding
@@ -1942,7 +1962,7 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable {
     }
 
     //grooming
-    function grooming(uint32 _summoner) external returns (uint32){
+    function grooming(uint32 _summoner) external {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
         require(mfs.check_owner(_summoner, msg.sender));
@@ -1953,15 +1973,21 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable {
         uint32 _exp_add = 3000 * (100 - _happy) / 100;
         //luck challenge
         uint32 _luck_mod = ms.luck(_summoner) + mfs.calc_heart(_summoner) * 5;
-        if (mfs.d100(_summoner) <= _luck_mod/100) {
-        //if (mfs.d100(_summoner) <= ms.luck(_summoner)/100) {
-            _exp_add = _exp_add *2;
+        //world dice boost
+        World_Dice wd = World_Dice(mfs.world_dice_address());
+        uint32 _rolled_dice = wd.get_rolled_dice(_summoner);
+        _luck_mod += _rolled_dice;
+        if (mfs.d1000(_summoner) <= _luck_mod/10) {
+            _exp_add = _exp_add * 3 / 2;
         }
         uint32 _exp = ms.exp(_summoner) + _exp_add;
         ms.set_exp(_summoner, _exp);
         ms.set_last_grooming_time(_summoner, _now);
         ms.set_last_grooming_time_plus_working_time(_summoner, _now);
-        return _exp_add;
+        //update score
+        Murasaki_Strage_Score mss = Murasaki_Strage_Score(mfs.murasaki_strage_score_address());
+        uint32 _total_exp_gained = mss.total_exp_gained(_summoner);
+        mss.set_total_exp_gained(_summoner, _total_exp_gained + _exp_add);
     }
     //calc happy, modified with working_time
     function calc_happy_real(uint32 _summoner) internal view returns (uint32) {
@@ -1982,7 +2008,9 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable {
     }
 }
 
-//=========================================================================================================
+
+//===*Mining_and_Farming======================================================================================================
+
 
 contract Murasaki_Function_Mining_and_Farming is Ownable {
 
@@ -2009,7 +2037,7 @@ contract Murasaki_Function_Mining_and_Farming is Ownable {
         ms.set_mining_status(_summoner, 1);
         ms.set_mining_start_time(_summoner, _now);
     }
-    function stop_mining(uint32 _summoner) external returns (uint32) {
+    function stop_mining(uint32 _summoner) external {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
         require(mfs.check_owner(_summoner, msg.sender));
@@ -2018,23 +2046,30 @@ contract Murasaki_Function_Mining_and_Farming is Ownable {
         uint32 _delta = calc_mining(_summoner);
         //luck modification
         uint32 _luck_mod = ms.luck(_summoner) + mfs.calc_heart(_summoner) * 5;
-        if (mfs.d100(_summoner) <= _luck_mod/100) {
-        //if (mfs.d100(_summoner) <= ms.luck(_summoner)/100) {
-            _delta = _delta *2;
+        //world dice boost
+        World_Dice wd = World_Dice(mfs.world_dice_address());
+        //uint32 _rolled_dice = wd.get_rolled_dice(_summoner);
+        //_luck_mod += _rolled_dice;
+        _luck_mod += wd.get_rolled_dice(_summoner);
+        if (mfs.d1000(_summoner) <= _luck_mod/10) {
+            _delta = _delta * 3 / 2;
         }
         //add coin
         uint32 _coin = ms.coin(_summoner) + _delta;
         ms.set_coin(_summoner, _coin);
         //update timestamp
         uint32 _delta_sec = _now - ms.mining_start_time(_summoner);
-        uint32 _total_mining_sec = ms.total_mining_sec(_summoner) + _delta_sec;
-        ms.set_total_mining_sec(_summoner, _total_mining_sec);
+        //uint32 _total_mining_sec = ms.total_mining_sec(_summoner) + _delta_sec;
+        //ms.set_total_mining_sec(_summoner, _total_mining_sec);
         uint32 _last_total_mining_sec = ms.last_total_mining_sec(_summoner) + _delta_sec;
         ms.set_last_total_mining_sec(_summoner, _last_total_mining_sec);
         uint32 _last_grooming_time_plus_working_time = ms.last_grooming_time_plus_working_time(_summoner) + _delta_sec;
         ms.set_last_grooming_time_plus_working_time(_summoner, _last_grooming_time_plus_working_time);
         ms.set_mining_status(_summoner, 0);
-        return _delta;
+        //update score
+        Murasaki_Strage_Score mss = Murasaki_Strage_Score(mfs.murasaki_strage_score_address());
+        uint32 _total_coin_mined = mss.total_coin_mined(_summoner);
+        mss.set_total_coin_mined(_summoner, _total_coin_mined + _delta);
     }
     function calc_mining(uint32 _summoner) public view returns (uint32) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
@@ -2047,10 +2082,12 @@ contract Murasaki_Function_Mining_and_Farming is Ownable {
         _delta = _delta * 1000 / BASE_SEC; // 1 day = +1000
         //status, level, item boost
         uint32 _mod = ms.strength(_summoner) + ms.level(_summoner)*100 + count_mining_items(msg.sender);
+        /*
         //world dice boost
         World_Dice wd = World_Dice(mfs.world_dice_address());
         uint32 _rolled_dice = wd.get_rolled_dice(_summoner);
         _mod += _rolled_dice;
+        */
         //5%/point, 100 -> 1.00
         _mod = _mod * 5 / 100;
         //boost
@@ -2063,9 +2100,9 @@ contract Murasaki_Function_Mining_and_Farming is Ownable {
         uint32 _mining_items = 0;
         for (uint i = 1; i <= 16; i++) {
             if (_balance_of_type[i+128] > 0) {
-                _mining_items += 300;
-            }else if (_balance_of_type[i+64] > 0) {
                 _mining_items += 200;
+            }else if (_balance_of_type[i+64] > 0) {
+                _mining_items += 150;
             }else if (_balance_of_type[i] > 0) {
                 _mining_items += 100;
             }
@@ -2074,6 +2111,9 @@ contract Murasaki_Function_Mining_and_Farming is Ownable {
                 _mining_items += (_balance_of_type[i] - 1) * 10;
             }
             if (_balance_of_type[i+64] >= 2) {
+                _mining_items += (_balance_of_type[i+64] - 1) * 15;
+            }
+            if (_balance_of_type[i+128] >= 2) {
                 _mining_items += (_balance_of_type[i+64] - 1) * 20;
             }
         }
@@ -2092,7 +2132,7 @@ contract Murasaki_Function_Mining_and_Farming is Ownable {
         ms.set_farming_status(_summoner, 1);
         ms.set_farming_start_time(_summoner, _now);
     }
-    function stop_farming(uint32 _summoner) external returns (uint32){
+    function stop_farming(uint32 _summoner) external {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
         require(mfs.check_owner(_summoner, msg.sender));
@@ -2101,23 +2141,30 @@ contract Murasaki_Function_Mining_and_Farming is Ownable {
         uint32 _delta = calc_farming(_summoner);
         //luck modification
         uint32 _luck_mod = ms.luck(_summoner) + mfs.calc_heart(_summoner) * 5;
-        if (mfs.d100(_summoner) <= _luck_mod/100) {
-        //if (mfs.d100(_summoner) <= ms.luck(_summoner)/100) {
-            _delta = _delta *2;
+        //world dice boost
+        World_Dice wd = World_Dice(mfs.world_dice_address());
+        //uint32 _rolled_dice = wd.get_rolled_dice(_summoner);
+        //_luck_mod += _rolled_dice;
+        _luck_mod += wd.get_rolled_dice(_summoner);
+        if (mfs.d1000(_summoner) <= _luck_mod/10) {
+            _delta = _delta * 3 / 2;
         }
         //add coin
         uint32 _material = ms.material(_summoner) + _delta;
         ms.set_material(_summoner, _material);
         //update timestamp
         uint32 _delta_sec = _now - ms.farming_start_time(_summoner);
-        uint32 _total_farming_sec = ms.total_farming_sec(_summoner) + _delta_sec;
-        ms.set_total_farming_sec(_summoner, _total_farming_sec);
+        //uint32 _total_farming_sec = ms.total_farming_sec(_summoner) + _delta_sec;
+        //ms.set_total_farming_sec(_summoner, _total_farming_sec);
         uint32 _last_total_farming_sec = ms.last_total_farming_sec(_summoner) + _delta_sec;
         ms.set_last_total_farming_sec(_summoner, _last_total_farming_sec);
         uint32 _last_grooming_time_plus_working_time = ms.last_grooming_time_plus_working_time(_summoner) + _delta_sec;
         ms.set_last_grooming_time_plus_working_time(_summoner, _last_grooming_time_plus_working_time);
         ms.set_farming_status(_summoner, 0);
-        return _delta;
+        //update score
+        Murasaki_Strage_Score mss = Murasaki_Strage_Score(mfs.murasaki_strage_score_address());
+        uint32 _total_material_farmed = mss.total_material_farmed(_summoner);
+        mss.set_total_material_farmed(_summoner, _total_material_farmed + _delta);
     }
     function calc_farming(uint32 _summoner) public view returns (uint32) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
@@ -2130,10 +2177,12 @@ contract Murasaki_Function_Mining_and_Farming is Ownable {
         _delta = _delta * 1000 / BASE_SEC; // 1 day = +1000
         //status and item boost
         uint32 _mod = ms.dexterity(_summoner) + ms.level(_summoner)*100 + count_farming_items(msg.sender);
+        /*
         //world dice boost
         World_Dice wd = World_Dice(mfs.world_dice_address());
         uint32 _rolled_dice = wd.get_rolled_dice(_summoner);
         _mod += _rolled_dice;
+        */
         //5%/point, 100 -> 1.00
         _mod = _mod * 5 / 100;
         //boost
@@ -2147,9 +2196,9 @@ contract Murasaki_Function_Mining_and_Farming is Ownable {
         uint32 _farming_items = 0;
         for (uint i = 17; i <= 32; i++) {
             if (_balance_of_type[i+128] > 0) {
-                _farming_items += 300;
-            }else if (_balance_of_type[i+64] > 0) {
                 _farming_items += 200;
+            }else if (_balance_of_type[i+64] > 0) {
+                _farming_items += 150;
             }else if (_balance_of_type[i] > 0) {
                 _farming_items += 100;
             }
@@ -2158,6 +2207,9 @@ contract Murasaki_Function_Mining_and_Farming is Ownable {
                 _farming_items += (_balance_of_type[i] - 1) * 10;
             }
             if (_balance_of_type[i+64] >= 2) {
+                _farming_items += (_balance_of_type[i+64] - 1) * 15;
+            }
+            if (_balance_of_type[i+128] >= 2) {
                 _farming_items += (_balance_of_type[i+64] - 1) * 20;
             }
         }
@@ -2165,7 +2217,9 @@ contract Murasaki_Function_Mining_and_Farming is Ownable {
     }
 }
 
-//=========================================================================================================
+
+//===*Crafting======================================================================================================
+
 
 contract Murasaki_Function_Crafting is Ownable {
 
@@ -2234,7 +2288,11 @@ contract Murasaki_Function_Crafting is Ownable {
         if (_calc_crafting == 0) {
             //rare challenge
             uint32 _luck_mod = ms.luck(_summoner) + mfs.calc_heart(_summoner) * 5;
-            if (mfs.d100(_summoner) <= _luck_mod/100) {
+            //world dice boost
+            World_Dice wd = World_Dice(mfs.world_dice_address());
+            uint32 _rolled_dice = wd.get_rolled_dice(_summoner);
+            _luck_mod += _rolled_dice;
+            if (mfs.d1000(_summoner) <= _luck_mod/10) {
                 _item_type += 64;
             }
             //craft
@@ -2246,6 +2304,17 @@ contract Murasaki_Function_Crafting is Ownable {
             if (_item_type <= 128) {
                 create_tiny_heart(_summoner);
             }
+        } else if (_item_type <= 64) {
+            //return coin/material
+            uint32[4] memory _dc_table = get_item_dc(_item_type);
+            uint32 _coin = _dc_table[2];
+            uint32 _material = _dc_table[3];
+            ms.set_coin(_summoner, ms.coin(_summoner) + _coin * 8/10);
+            ms.set_material(_summoner, ms.material(_summoner) + _material * 8/10);            
+        } else if (_item_type == 194) {
+            ms.set_coin(_summoner, ms.coin(_summoner) + 800);
+        } else if (_item_type == 195) {
+            ms.set_material(_summoner, ms.material(_summoner) + 800);            
         }
     }
     function get_modified_dc(uint32 _summoner, uint32 _item_type) public view returns (uint32) {
@@ -2261,10 +2330,12 @@ contract Murasaki_Function_Crafting is Ownable {
         uint32 _dc = _dc_table[1];
         //status boost
         uint32 _mod = ms.intelligence(_summoner) + ms.level(_summoner)*100 + count_crafting_items(msg.sender);
+        /*
         //world dice boost
         World_Dice wd = World_Dice(mfs.world_dice_address());
         uint32 _rolled_dice = wd.get_rolled_dice(_summoner);
         _mod += _rolled_dice;
+        */
         //initial point = 400 (1Lv*100, 3INT*100)
         //point per level = 150 (1Lv*100 + 0.5INT*100)
         //minimum dc = 3000 (3 days)
@@ -2346,7 +2417,7 @@ contract Murasaki_Function_Crafting is Ownable {
     //tiny heart
     //convert to main mc version, item_type 193 = tinyheart
     //choice random summoner and transfer tiny heart to it
-    //when not active summoner was selected, msg.sender will get it instedlly.
+    //when not-active summoner was selected, msg.sender will get it instedlly.
     //function create_tiny_heart(uint32 _created_item, uint32 _created_summoner) internal {
     function create_tiny_heart(uint32 _created_summoner) internal {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
@@ -2369,12 +2440,15 @@ contract Murasaki_Function_Crafting is Ownable {
             _to_wallet = mm.ownerOf(_to_summoner);
         } else {
             _to_wallet = msg.sender;
+            _to_summoner = _created_summoner;
         }
         //create tiny heart
         uint32 _seed = mfs.seed(_created_summoner);
-        //address _created_wallet = mm.ownerOf(_created_summoner);
         mc.craft(193, _created_summoner, _to_wallet, _seed);
-        //th.create(_created_item, _created_summoner, _created_wallet, _seed, _to_wallet);
+        //update score
+        Murasaki_Strage_Score mss = Murasaki_Strage_Score(mfs.murasaki_strage_score_address());
+        uint32 _total_heart_received = mss.total_heart_received(_to_summoner);
+        mss.set_total_heart_received(_to_summoner, _total_heart_received + 1);
     }
 
     //upgrade item
@@ -2724,8 +2798,8 @@ contract Murasaki_Function_Crafting is Ownable {
 }
 
 
-
 //---Murasaki_Craft------------------------------------------------------------------------------------------------------------------
+
 
 contract Murasaki_Craft is ERC721, Ownable{
 
@@ -2859,8 +2933,8 @@ contract Murasaki_Craft is ERC721, Ownable{
 }
 
 
+//---*World_Dice------------------------------------------------------------------------------------------------------------------
 
-//---World_Dice------------------------------------------------------------------------------------------------------------------
 
 contract World_Dice is Ownable {
 
@@ -2933,11 +3007,13 @@ contract World_Dice is Ownable {
         require(_elasped_time >= BASE_SEC - buffer_sec);
         //dice roll
         uint32 _dice_roll = (mfs.d20(_summoner) + 1) * 10;
+        /*
         //luck challenge
         uint32 _luck_mod = ms.luck(_summoner) + mfs.calc_heart(_summoner) * 5;
         if (mfs.d100(_summoner) <= _luck_mod/100) {
             _dice_roll = 20 * 10;  //critical
         }
+        */
         //update rolled_dice, after 48hr, input 0 in each 24hr
         if (_elasped_time > BASE_SEC * 4) {
             rolled_dice[_summoner] = [
@@ -3091,8 +3167,8 @@ contract World_Dice is Ownable {
 }
 
 
-
 //---BBS------------------------------------------------------------------------------------------------------------------
+
 
 contract Bulletin_Board is Ownable {
 
@@ -3142,9 +3218,8 @@ contract Bulletin_Board is Ownable {
 }
 
 
-
-
 //---Murasaki_Name------------------------------------------------------------------------------------------------------------------
+
 
 contract Murasaki_Name is Badge, Ownable{
 
@@ -3193,8 +3268,8 @@ contract Murasaki_Name is Badge, Ownable{
 }
 
 
-
 //---Murasaki_Function_Name------------------------------------------------------------------------------------------------------------------
+
 
 contract Murasaki_Function_Name is Ownable {
 
@@ -3283,3 +3358,181 @@ contract Murasaki_Function_Name is Ownable {
 }
 
 
+//---*Murasaki_Strage_Score------------------------------------------------------------------------------------------------------------------
+
+
+contract Murasaki_Strage_Score is Ownable {
+
+    //permitted address
+    mapping(address => bool) public permitted_address;
+
+    //admin, add or remove permitted_address
+    function _add_permitted_address(address _address) external onlyOwner {
+        permitted_address[_address] = true;
+    }
+    function _remove_permitted_address(address _address) external onlyOwner {
+        permitted_address[_address] = false;
+    }
+
+    //status
+    mapping(uint32 => uint32) public total_exp_gained;
+    mapping(uint32 => uint32) public total_coin_mined;
+    mapping(uint32 => uint32) public total_material_farmed;
+    mapping(uint32 => uint32) public total_item_crafted;
+    mapping(uint32 => uint32) public total_heart_received;
+
+    //set status
+    function set_total_exp_gained(uint32 _summoner, uint32 _value) external {
+        require(permitted_address[msg.sender] == true);
+        total_exp_gained[_summoner] = _value;
+    }
+    function set_total_coin_mined(uint32 _summoner, uint32 _value) external {
+        require(permitted_address[msg.sender] == true);
+        total_coin_mined[_summoner] = _value;
+    }
+    function set_total_material_farmed(uint32 _summoner, uint32 _value) external {
+        require(permitted_address[msg.sender] == true);
+        total_material_farmed[_summoner] = _value;
+    }
+    function set_total_item_crafted(uint32 _summoner, uint32 _value) external {
+        require(permitted_address[msg.sender] == true);
+        total_item_crafted[_summoner] = _value;
+    }
+    function set_total_heart_received(uint32 _summoner, uint32 _value) external {
+        require(permitted_address[msg.sender] == true);
+        total_heart_received[_summoner] = _value;
+    }
+}
+
+
+//---*Murasaki_Function_Score------------------------------------------------------------------------------------------------------------------
+
+
+contract Murasaki_Function_Score is Ownable {
+
+    //address
+    address public murasaki_function_share_address;
+    function _set1_murasaki_function_share_address(address _address) external onlyOwner {
+        murasaki_function_share_address = _address;
+    }
+
+    //admin, withdraw
+    function withdraw(address rec)public onlyOwner{
+        payable(rec).transfer(address(this).balance);
+    }
+
+    //calc_score
+    function calc_score(uint32 _summoner) external view returns (uint32) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage_Score mss = Murasaki_Strage_Score(mfs.murasaki_strage_score_address());
+        uint32 _total_exp_gained = mss.total_exp_gained(_summoner);
+        uint32 _total_coin_mined = mss.total_coin_mined(_summoner);
+        uint32 _total_material_farmed = mss.total_material_farmed(_summoner);
+        uint32 _total_item_crafted = mss.total_item_crafted(_summoner);
+        uint32 _total_heart_received = mss.total_heart_received(_summoner);
+        uint32 _score = 0;
+        _score += _total_exp_gained;
+        _score += _total_coin_mined;
+        _score += _total_material_farmed;
+        _score += _total_item_crafted * 3000 + _total_item_crafted ** 2 * 300;
+        _score += _total_heart_received * 1000 + _total_heart_received ** 2 * 100;
+        return _score;
+    }
+}
+
+
+//---*Murasaki_Mail-----------------------------------------------------------------------------------------------------
+
+
+contract Murasaki_Mail is Ownable {
+
+    //address
+    address public murasaki_function_address;
+    function _set_murasaki_function_address(address _address) public onlyOwner {
+        murasaki_function_address = _address;
+    }
+    
+    //mapping
+    mapping(address => address) public sending_from2to;     //[_summoner_from] = _summoner_to
+    mapping(address => address) public sending_to2from;     //[_summoner_to] = _summoner_from
+    mapping(uint32 => uint32) public last_sending_time;     //[_summoner_from] = block.time
+    mapping(uint32 => uint32) public last_receving_time;    //[_summoner_to] = block.time
+    
+    //variants
+    //interval, both of sending interval & receving limit
+    interval_sec = 60 * 60 * 24 * 3;    // 3 days
+    
+    //check mail
+    function check_receving_mail(uint32 _summoner_to) public view returns (bool) {
+        if (
+            last_receving_time <= interval_sec  //recieving limit
+            && sending_to2from[_summoner_to] != 0x0000000000000000000000000000000000000000
+        ) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
+    //calc sending interval
+    function calc_sending_interval(uint32 _summoner_from) public view returns (uint32) {
+        uint32 _now = uint32(block.timestamp);
+        uint32 _delta = _now - last_sending_time[_summoner_from];
+        if (_delta >= interval_sec) {
+            return 0;
+        } else {
+            return interval_sec - _delta;
+        }
+    }
+    
+    //send mail
+    function send_mail(uint32 _summoner_from, uint32 _item_mail_nft) external {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address):
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        //check owner
+        require(mfs.check_owner(_summoner_from, msg.sender));
+        //check sending interval
+        require(calc_sending_interval(_summoner_from) == 0);
+        //burn mail nft
+        _burn_mail_nft(_item_mail_nft);
+        //select _summoner_to
+        uint32 _summoner_to = _select_random_summoner_to(_summoner_from);
+        //update parameters
+        sending_from2to[_summoner_from] = _summoner_to;
+        sending_to2from[_summoner_to] = _summoner_from;
+        last_sending_time[_summoner_from] = _now;
+        last_receving_time[_summoner_to] = _now;
+    }
+    function _select_random_summoner_to(uint32 _summoner_from) internal view returns (uint32) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Main mm = Murasaki_Main(mfs.murasaki_main_address());
+        uint32 _count_summoners = mm.next_summoner() - 1;
+        uint32 _summoner_to = mfs.dn(_summoner_from, _count_summoners) + 1;
+        return _summoner_to;
+    }
+    function _burn_mail_nft(_item_mail_nft) internal {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address):
+        Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
+        //need approval
+        mc.transferFrom(msg.sender, address(this), _item_mail_nft);
+    }
+    
+    //open mail
+    function open_mail(uint32 _summoner_to) external {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        //check owner
+        require(mfs.check_owner(_summoner_to, msg.sender));
+        //check mail
+        require(check_receving_mail);
+        //get _summoner_from
+        uint32 _summoner_from = sending_to2from(_summoner_to);
+        //reset parameters
+        sending_to2from[_summoner_to] = 0x0000000000000000000000000000000000000000;
+        //mint heart
+        _create_tiny_heart(_summoner_to, _summoner_from);
+    }
+    function _create_tiny_heart(uint32 _summoner_to, uint32 _summoner_from) internal {
+        //***
+    }
+}
