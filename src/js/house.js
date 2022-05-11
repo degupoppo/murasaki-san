@@ -14,25 +14,6 @@
 */
 
 
-console.log(
-    "%c"+
-    "\n"+
-    "'##::::'##:'##::::'##:'########:::::'###:::::'######:::::'###::::'##:::'##:'####:::::::::::'######:::::'###::::'##::: ##:\n"+
-    " ###::'###: ##:::: ##: ##.... ##:::'## ##:::'##... ##:::'## ##::: ##::'##::. ##:::::::::::'##... ##:::'## ##::: ###:: ##:\n"+
-    " ####'####: ##:::: ##: ##:::: ##::'##:. ##:: ##:::..:::'##:. ##:: ##:'##:::: ##::::::::::: ##:::..:::'##:. ##:: ####: ##:\n"+
-    " ## ### ##: ##:::: ##: ########::'##:::. ##:. ######::'##:::. ##: #####::::: ##::'#######:. ######::'##:::. ##: ## ## ##:\n"+
-    " ##. #: ##: ##:::: ##: ##.. ##::: #########::..... ##: #########: ##. ##:::: ##::........::..... ##: #########: ##. ####:\n"+
-    " ##:.:: ##: ##:::: ##: ##::. ##:: ##.... ##:'##::: ##: ##.... ##: ##:. ##::: ##:::::::::::'##::: ##: ##.... ##: ##:. ###:\n"+
-    " ##:::: ##:. #######:: ##:::. ##: ##:::: ##:. ######:: ##:::: ##: ##::. ##:'####::::::::::. ######:: ##:::: ##: ##::. ##:\n"+
-    "..:::::..:::.......:::..:::::..::..:::::..:::......:::..:::::..::..::::..::....::::::::::::......:::..:::::..::..::::..::\n"+
-    "\n"+
-    "%cWelcome to House of Murasaki-san!💗\n"+
-    "..._@ﾉ\" < Cheers to ASTR!🍺\n"+
-    "\n",
-    "color: pink;",
-    "color: pink; font-size: 16px;",
-)
-
 //---global variants-------------------------------------------------------------------------------------------------
 
 
@@ -1489,8 +1470,10 @@ async function draw_radarchart(scene) {
 //===window craft===
 function open_window_craft (scene) {
 
+    sound_window_open.play();
+
     //TOFIX: prevent loading error
-    if (local_level == 0) {
+    if (local_level == 0 || typeof mr_astar == "undefined") {
         return 0;
     }
 
@@ -1555,8 +1538,10 @@ function open_window_craft (scene) {
             .setFontSize(30).setFontFamily("Arial").setFill('#000000')
             .setInteractive({useHandCursor: true})
             .on("pointerdown", () => close_crafting_window(_item_type) )
+            .on("pointerdown", () => sound_window_select.play() )
             .on("pointerover", () => obj.setStyle({ fontSize: 30, fontFamily: "Arial", fill: '#ffff00' }))
-            .on("pointerout", () => obj.setStyle({ fontSize: 30, fontFamily: "Arial", fill: '#000000' }))
+            .on("pointerover", () => sound_window_pointerover.play())
+            .on("pointerout", () => obj.setStyle({ fontSize: 30, fontFamily: "Arial", fill: '#000000' }));
         return obj;
     }
 
@@ -1822,6 +1807,11 @@ function preload() {
     this.load.audio("hat", "src/sound/hat.mp3");
     this.load.audio("unhappy", "src/sound/unhappy.mp3");
     this.load.audio("switch", "src/sound/switch.mp3");
+    this.load.audio("window_open", "src/sound/window_open.mp3");
+    this.load.audio("window_pointerover", "src/sound/window_pointerover.mp3");
+    this.load.audio("window_select", "src/sound/window_select.mp3");
+    this.load.audio("window_cancel", "src/sound/window_cancel.mp3");
+    this.load.audio("system", "src/sound/system.mp3");
 
     //===item_basic===
     this.load.image("item_table", "src/png/item_basic_table.png", {frameWidth: 370, frameHeight: 320});
@@ -2309,7 +2299,7 @@ function create() {
         .setOrigin(0.5)
         .setScale(0.075)
         .setInteractive({useHandCursor: true})
-        .on('pointerdown', () => sound_button_on.play())
+        .on('pointerdown', () => sound_system.play())
         .on("pointerdown", () => {
             if (this.sys.game.scale.gameSize._width == 1280) {
                 this.scale.setGameSize(960,1280);
@@ -2327,7 +2317,7 @@ function create() {
         .setOrigin(0.5)
         .setScale(0.15)
         .setInteractive({useHandCursor: true})
-        .on('pointerdown', () => sound_button_on.play())
+        .on('pointerdown', () => sound_system.play())
         .on("pointerdown", () => {
                 window.location.href = "./";
         });
@@ -2358,6 +2348,11 @@ function create() {
     sound_hat = this.sound.add("hat", {volume:0.1});
     sound_unhappy = this.sound.add("unhappy", {volume:0.2});
     sound_switch = this.sound.add("switch", {volume:0.2});
+    sound_window_open = this.sound.add("window_open", {volume:0.2});
+    sound_window_pointerover = this.sound.add("window_pointerover", {volume:0.2});
+    sound_window_select = this.sound.add("window_select", {volume:0.2});
+    sound_window_cancel = this.sound.add("window_cancel", {volume:0.2});
+    sound_system = this.sound.add("system", {volume:0.2});
 
     //===create summoner===
 
@@ -2407,14 +2402,18 @@ function create() {
     //icon_age.setScale(0.06);
 
     //debug info
+    text_turn = this.add.text(230, 940, "***", {font: "14px Arial", fill: "#727171"});
+    text_sync_time = this.add.text(330, 940, "***", {font: "14px Arial", fill: "#727171"});
+    text_wallet = this.add.text(430, 940, "***", {font: "14px Arial", fill: "#727171"});
     //text_speed =        this.add.text(10, 910, "***", font_arg);
     //text_mode = this.add.text(1150, 916, "***", {font: "14px Arial", fill: "#727171"});
-    text_turn = this.add.text(250, 916, "***", {font: "14px Arial", fill: "#727171"});
-    text_sync_time = this.add.text(250, 928, "***", {font: "14px Arial", fill: "#727171"});
-    text_wallet = this.add.text(250, 940, "***", {font: "14px Arial", fill: "#727171"});
+    //text_turn = this.add.text(250, 916, "***", {font: "14px Arial", fill: "#727171"});
+    //text_sync_time = this.add.text(250, 928, "***", {font: "14px Arial", fill: "#727171"});
+    //text_wallet = this.add.text(250, 940, "***", {font: "14px Arial", fill: "#727171"});
     //text_turn = this.add.text(10, 916, "***", {font: "14px Arial", fill: "#ffffff"});
     //text_sync_time = this.add.text(10, 928, "***", {font: "14px Arial", fill: "#ffffff"});
     //text_wallet = this.add.text(10, 940, "***", {font: "14px Arial", fill: "#ffffff"});
+    //text_info = this.add.text(5, 945, "", {font: "12px Arial", fill: "#ffffff", backgroundColor: "#898989"});
 
     //satiety
     icon_satiety = this.add.sprite(30,25, "icon_satiety");
@@ -2532,7 +2531,7 @@ function update() {
 
     //increment turn
     turn += 1;
-    text_turn.setText("turn: " + turn);
+    text_turn.setText("turn: " + ("0000000" + turn).slice(-7) );
 
     //update summoner
     if (local_level > 0) {
@@ -2587,10 +2586,10 @@ function update() {
 
         //text_mode.setText(murasakisan.get_mode);
         if (last_sync_time == 0) {
-            text_sync_time.setText("syncing...");
+            text_sync_time.setText("synced: 9999");
         } else {
             let _delta = Math.round( (Date.now() - last_sync_time) / 1000 );
-            text_sync_time.setText("synced: " + _delta + "s ago");
+            text_sync_time.setText("synced: " + ("0000" + _delta).slice(-4));
         }
     }
 
