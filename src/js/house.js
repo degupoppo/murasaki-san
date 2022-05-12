@@ -99,6 +99,7 @@ let previous_local_item194 = 0;
 let previous_local_item195 = 0;
 let item_wearing_hat = 0;
 let flag_doneFp = 0;
+let previsou_local_rolled_dice = 0;
 
 
 //---html-----------------------------------------------------------------------------------------------------
@@ -1416,47 +1417,82 @@ function radarchart(scene, x0, y0, r, str, dex, int, luk, str_item, dex_item, in
     //base
     let base = 25;
     //calc (x,y) from status
+    //main
     let x1 = 0;
     let y1 = -r * str/base;
     let x2 = r * dex/base;
     let y2 = 0;
     let x3 = 0;
-    let y3 = r * luk/base;
+    //let y3 = r * luk/(base*0.7);
+    //luk: boost draw x2 beyond initial value=3
+    let y3 = r * (luk-3)/(base/2) + 3/base;
     let x4 = -r * int/base;
     let y4 = 0;
+    //item
     let y1i = -r * (str+str_item)/base;
     let x2i = r * (dex+dex_item)/base;
-    let y3i = r * (luk+luk_item)/base;
+    let y3i = r * (luk+luk_item-3)/(base/2) + 3/base;
     let x4i = -r * (int+int_item)/base;
+    //dice
+    let y1d = -r * (str+str_item)/base;
+    let x2d = r * (dex+dex_item)/base;
+    let y3d = r * (luk+luk_item+local_rolled_dice/100-3)/(base/2) + 3/base;
+    let x4d = -r * (int+int_item)/base;
     //remove old chart
     try {
-        radar1.setVisible(false);
-        radar2.setVisible(false);
-        radar3.setVisible(false);
-        radar4.setVisible(false);
-        radar5.setVisible(false);
-        radar6.setVisible(false);
-        radar7.setVisible(false);
-        radar8.setVisible(false);
-        radar9.setVisible(false);
+        /*
+        radar_b1.setVisible(false);
+        radar_b2.setVisible(false);
+        radar_b3.setVisible(false);
+        radar_g1.setVisible(false);
+        radar_g2.setVisible(false);
+        radar_g3.setVisible(false);
+        text_str.setVisible(false);
+        text_dex.setVisible(false);
+        text_luk.setVisible(false);
+        text_int.setVisible(false);
+        icon_str.setVisible(false);
+        icon_dex.setVisible(false);
+        icon_luk.setVisible(false);
+        icon_int.setVisible(false);
+        */
+        group_chart.destroy(true);
     } catch(error) {
     }
     //draw
-    radar1 = scene.add.polygon(x0+r, y0+r, [0,-r,r,0,0,r,-r,0], 0xDADADA, 0.4);
-    radar2 = scene.add.polygon(x0+r*0.75, y0+r*0.75, [0,-r*0.75,r*0.75,0,0,r*0.75,-r*0.75,0], 0xDADADA, 0.4);
-    radar3 = scene.add.polygon(x0+r/2, y0+r/2, [0,-r/2,r/2,0,0,r/2,-r/2,0], 0xDADADA, 0.4);
-    radar4 = scene.add.polygon(x0+(-x4i+x2i)/2, y0+(-y1i+y3i)/2, [x1,y1i,x2i,y2,x3,y3i,x4i,y4], 0xF9C270, 1);
-    radar5 = scene.add.polygon(x0+(-x4+x2)/2, y0+(-y1+y3)/2, [x1,y1,x2,y2,x3,y3,x4,y4], 0xFFF67F, 1);
-    //let font_arg = {font: "17px Arial", fill: "#000000", backgroundColor: "#ffffff"};
+    group_chart = scene.add.group();
+    group_chart.add(scene.add.polygon(x0+r, y0+r, [0,-r,r,0,0,r,-r,0], 0xDADADA, 0.4));
+    group_chart.add(scene.add.polygon(x0+r*0.75, y0+r*0.75, [0,-r*0.75,r*0.75,0,0,r*0.75,-r*0.75,0], 0xDADADA, 0.4));
+    group_chart.add(scene.add.polygon(x0+r/2, y0+r/2, [0,-r/2,r/2,0,0,r/2,-r/2,0], 0xDADADA, 0.4));
+    group_chart.add(scene.add.polygon(x0+(-x4d+x2d)/2, y0+(-y1d+y3d)/2, [x1,y1d,x2d,y2,x3,y3d,x4d,y4], 0xF29B76, 1));
+    group_chart.add(scene.add.polygon(x0+(-x4i+x2i)/2, y0+(-y1i+y3i)/2, [x1,y1i,x2i,y2,x3,y3i,x4i,y4], 0xF9C270, 1));
+    group_chart.add(scene.add.polygon(x0+(-x4+x2)/2, y0+(-y1+y3)/2, [x1,y1,x2,y2,x3,y3,x4,y4], 0xFFF67F, 1));
     let font_arg = {font: "17px Arial", fill: "#000000"};
-    radar6 = scene.add.text(x0-15, y0-r-25, "STR"+"\n"+(Math.round( (str+str_item)*100 )/100).toFixed(2), font_arg);
-    radar7 = scene.add.text(x0+r-5, y0-10, "DEX"+"\n"+(Math.round( (dex+dex_item)*100 )/100).toFixed(2), font_arg);
-    radar8 = scene.add.text(x0-15, y0+r-7, "LUK"+"\n"+(Math.round( (luk+luk_item)*100 )/100).toFixed(2), font_arg);
-    radar9 = scene.add.text(x0-r-20, y0-12, "INT"+"\n"+(Math.round( (int+int_item)*100 )/100).toFixed(2), font_arg);
+    group_chart.add(scene.add.text(x0-15, y0-r-25, "STR"+"\n"+(Math.round( (str+str_item)*100 )/100).toFixed(2), font_arg));
+    group_chart.add(scene.add.text(x0+r-5, y0-10, "DEX"+"\n"+(Math.round( (dex+dex_item)*100 )/100).toFixed(2), font_arg));
+    group_chart.add(scene.add.text(x0-15, y0+r-7, "LUK"+"\n"+(Math.round( (luk+luk_item+local_rolled_dice/100)*100 )/100).toFixed(2), font_arg));
+    group_chart.add(scene.add.text(x0-r-20, y0-12, "INT"+"\n"+(Math.round( (int+int_item)*100 )/100).toFixed(2), font_arg));
+    group_chart.add(scene.add.sprite(x0-15-10, y0-r-25+20, "icon_str").setOrigin(0.5).setScale(0.12));
+    group_chart.add(scene.add.sprite(x0+r-5+10, y0-30, "icon_dex").setOrigin(0.5).setScale(0.12));
+    group_chart.add(scene.add.sprite(x0-15-12, y0+r-5+14, "icon_luk").setOrigin(0.5).setScale(0.10));
+    group_chart.add(scene.add.sprite(x0-r-20+16, y0-10-16, "icon_int").setOrigin(0.5).setScale(0.10));
+    /*
+    radar_b1 = scene.add.polygon(x0+r, y0+r, [0,-r,r,0,0,r,-r,0], 0xDADADA, 0.4);
+    radar_b2 = scene.add.polygon(x0+r*0.75, y0+r*0.75, [0,-r*0.75,r*0.75,0,0,r*0.75,-r*0.75,0], 0xDADADA, 0.4);
+    radar_b3 = scene.add.polygon(x0+r/2, y0+r/2, [0,-r/2,r/2,0,0,r/2,-r/2,0], 0xDADADA, 0.4);
+    radar_g1 = scene.add.polygon(x0+(-x4d+x2d)/2, y0+(-y1d+y3d)/2, [x1,y1d,x2d,y2,x3,y3d,x4d,y4], 0x54C3F1, 1);
+    radar_g2 = scene.add.polygon(x0+(-x4i+x2i)/2, y0+(-y1i+y3i)/2, [x1,y1i,x2i,y2,x3,y3i,x4i,y4], 0xF9C270, 1);
+    radar_g3 = scene.add.polygon(x0+(-x4+x2)/2, y0+(-y1+y3)/2, [x1,y1,x2,y2,x3,y3,x4,y4], 0xFFF67F, 1);
+    let font_arg = {font: "17px Arial", fill: "#000000"};
+    text_str = scene.add.text(x0-15, y0-r-25, "STR"+"\n"+(Math.round( (str+str_item)*100 )/100).toFixed(2), font_arg);
+    text_dex = scene.add.text(x0+r-5, y0-10, "DEX"+"\n"+(Math.round( (dex+dex_item)*100 )/100).toFixed(2), font_arg);
+    text_luk = scene.add.text(x0-15, y0+r-7, "LUK"+"\n"+(Math.round( (luk+luk_item+local_rolled_dice/100)*100 )/100).toFixed(2), font_arg);
+    text_int = scene.add.text(x0-r-20, y0-12, "INT"+"\n"+(Math.round( (int+int_item)*100 )/100).toFixed(2), font_arg);
     icon_str = scene.add.sprite(x0-15-10, y0-r-25+20, "icon_str").setOrigin(0.5).setScale(0.12);
     icon_dex = scene.add.sprite(x0+r-5+10, y0-30, "icon_dex").setOrigin(0.5).setScale(0.12);
     icon_luk = scene.add.sprite(x0-15-12, y0+r-5+14, "icon_luk").setOrigin(0.5).setScale(0.10);
     icon_int = scene.add.sprite(x0-r-20+16, y0-10-16, "icon_int").setOrigin(0.5).setScale(0.10);
+    */
 }
 async function draw_radarchart(scene) {
         let _x = 1160;
@@ -1845,7 +1881,8 @@ function preload() {
     this.load.image("item_bank_broken", "src/png/item_bank_broken.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("item_hat_helmet", "src/png/item_hat_helmet.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("item_asnya", "src/png/item_asnya.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("item_nui", "src/png/item_nui.png", {frameWidth: 370, frameHeight: 320});
+    //this.load.image("item_nui", "src/png/item_nui.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("item_nui", "src/png/item_nui2.png", {frameWidth: 370, frameHeight: 320});
     this.load.spritesheet("item_switch", "src/png/item_switch.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("item_pouch", "src/png/item_pouch.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("item_pouch_broken", "src/png/item_pouch_broken.png", {frameWidth: 370, frameHeight: 320});
@@ -2119,6 +2156,18 @@ function create() {
     this.anims.create({
         key: "item_switch_off",
         frames: this.anims.generateFrameNumbers("item_switch", {start:1, end:1}),
+        frameRate: 1,
+        repeat: -1
+    });
+    this.anims.create({
+        key: "item_nui",
+        frames: this.anims.generateFrameNumbers("item_nui", {start:0, end:0}),
+        frameRate: 1,
+        repeat: -1
+    });
+    this.anims.create({
+        key: "item_nui_alive",
+        frames: this.anims.generateFrameNumbers("item_nui", {start:1, end:3}),
         frameRate: 1,
         repeat: -1
     });
@@ -2553,8 +2602,14 @@ function update() {
     if (typeof dice != "undefined" && turn % 2 == 0) {
         dice.update();
     }
+
+    //=== update radarchart ===
+
+    if (turn % 1000 == 0 && summoner > 0) {
+        draw_radarchart(this);
+    }
     
-    //===== send fingerprint ===
+    //=== send fingerprint ===
     
     if (turn % 100 == 0 && summoner > 0 && flag_doneFp == 0 && local_wallet == local_owner) {
         //send_fp_post(local_wallet, summoner);
@@ -2586,10 +2641,16 @@ function update() {
 
         //text_mode.setText(murasakisan.get_mode);
         if (last_sync_time == 0) {
-            text_sync_time.setText("synced: 9999");
+            text_sync_time.setText("synced: ####");
+            text_sync_time.setColor("#ff0000");
         } else {
             let _delta = Math.round( (Date.now() - last_sync_time) / 1000 );
             text_sync_time.setText("synced: " + ("0000" + _delta).slice(-4));
+            if (_delta >= 30) {
+                text_sync_time.setColor("#ff0000");
+            } else {
+                text_sync_time.setColor("#727171");
+            }
         }
     }
 
@@ -2928,13 +2989,24 @@ function update() {
         let _owner1 = local_owner.substring(0,5);
         let _owner2 = local_owner.slice(-4);
         let _text = "";
-        _text += "owner: " + _owner1 + "..." + _owner2 + ", ";
-        if (local_owner != local_wallet && local_owner != "0x0000000000000000000000000000000000000000") {
+        if (local_owner == local_wallet || local_owner == "0x0000000000000000000000000000000000000000") {
+            _text += "owner: " + _owner1 + "..." + _owner2 + ", ";
+            text_wallet.setText(_text);
+            text_wallet.setColor("#727171");
+        } else {
+            _text += "owner: " + _owner1 + "..." + _owner2 + ", ";
             _text += "not owned by you.";
+            text_wallet.setText(_text);
+            text_wallet.setColor("blue");
         }
-        text_wallet.setText(_text);
+        
+        //radarchart
+        if (previsou_local_rolled_dice != local_rolled_dice) {
+            draw_radarchart(this);
+        }
 
         previous_local_name_str = local_name_str;
+        previsou_local_rolled_dice = local_rolled_dice;
     }
 
     //===== check mode change =====
@@ -3044,7 +3116,7 @@ function update() {
         }else if (local_crafting_status == 0 & murasakisan.mode == "crafting") {
             murasakisan.set_mode = "resting";
             text_select_item.setText(">> Select Item <<")
-            draw_radarchart(this);  //update radarchart
+            //draw_radarchart(this);  //update radarchart
             //icon invisible
             icon_crafting_time_remining.visible = false;
             sound_earn.play();
@@ -3174,8 +3246,34 @@ function update() {
             item_asnya.depth = item_asnya.y;
 
             //nui-chan
-            item_nui = this.add.sprite(680, 165, "item_nui").setOrigin(0.5).setScale(0.38);
-            item_nui.depth = item_nui.y;
+            item_nui = this.add.sprite(680, 165, "item_nui")
+                .setOrigin(0.5)
+                .setScale(0.38)
+                .setInteractive({ draggable: true, useHandCursor: true })
+                .setDepth(165)
+                .on("dragstart", () => {
+                    //sound, depth
+                })
+                .on("drag", () => {
+                    item_nui.x = game.input.mousePointer.x;
+                    item_nui.y = game.input.mousePointer.y;
+                    item_nui.depth = item_nui.y;
+                })
+                .on("dragend", () => {
+                    //grand, sound, depth
+                });
+                /*
+                .on('dragstart', function(pointer, dragX, dragY){
+                    // ...
+                }, scope)
+                .on('drag', function(pointer, dragX, dragY){
+                    gameObject.setPosition(dragX, dragY)
+                }, scope)
+                .on('dragend', function(pointer, dragX, dragY, dropped){
+                    // ...
+                }, scope);
+                */
+            //item_nui.depth = item_nui.y;
 
             //switch
             item_switch = this.add.sprite(1230,300, "item_switch").setOrigin(0.5);
@@ -3192,12 +3290,18 @@ function update() {
                     sound_switch.play();
                     back_neon.visible = true;
                     text_kanban.setColor("white");
+                    if (typeof item_nui != "undefined") {
+                        item_nui.anims.play("item_nui_alive", true);
+                    }
                 } else {
                     item_switch.anims.play("item_switch_off", true);
                     back_black.visible = false;
                     sound_switch.play();
                     back_neon.visible = false;
                     text_kanban.setColor("black");
+                    if (typeof item_nui != "undefined") {
+                        item_nui.anims.play("item_nui", true);
+                    }
                 }
             });
             item_switch.depth = item_switch.y;
@@ -3205,6 +3309,8 @@ function update() {
             //cake
             
             //tiny_crown
+            
+            //kanban
 
         }
         

@@ -1,5 +1,5 @@
 
-
+/*
 console.log(
     "%c"+
     "\n"+
@@ -18,6 +18,7 @@ console.log(
     "color: pink;",
     "color: pink; font-size: 16px;",
 )
+*/
 
 
 //connect to metamask
