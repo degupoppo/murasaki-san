@@ -3255,8 +3255,8 @@ function update() {
                     //sound, depth
                 })
                 .on("drag", () => {
-                    item_nui.x = game.input.mousePointer.x;
-                    item_nui.y = game.input.mousePointer.y;
+                    item_nui.x = game.input.activePointer.x;
+                    item_nui.y = game.input.activePointer.y;
                     item_nui.depth = item_nui.y;
                 })
                 .on("dragend", () => {
