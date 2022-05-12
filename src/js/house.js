@@ -3255,8 +3255,13 @@ function update() {
                     //sound, depth
                 })
                 .on("drag", () => {
-                    item_nui.x = game.input.activePointer.x;
-                    item_nui.y = game.input.activePointer.y;
+                    if (this.sys.game.scale.gameSize._width == 1280) {
+                        item_nui.x = game.input.activePointer.x;
+                        item_nui.y = game.input.activePointer.y;
+                    } else {
+                        item_nui.x = game.input.activePointer.y;
+                        item_nui.y = 960 - game.input.activePointer.x;
+                    }
                     item_nui.depth = item_nui.y;
                 })
                 .on("dragend", () => {
