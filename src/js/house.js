@@ -1425,18 +1425,18 @@ function radarchart(scene, x0, y0, r, str, dex, int, luk, str_item, dex_item, in
     let x3 = 0;
     //let y3 = r * luk/(base*0.7);
     //luk: boost draw x2 beyond initial value=3
-    let y3 = r * (luk-3)/(base/2) + 3/base;
+    let y3 = r * ((luk-3)/(base/2) + 3/base);
     let x4 = -r * int/base;
     let y4 = 0;
     //item
     let y1i = -r * (str+str_item)/base;
     let x2i = r * (dex+dex_item)/base;
-    let y3i = r * (luk+luk_item-3)/(base/2) + 3/base;
+    let y3i = r * ((luk+luk_item-3)/(base/2) + 3/base);
     let x4i = -r * (int+int_item)/base;
     //dice
     let y1d = -r * (str+str_item)/base;
     let x2d = r * (dex+dex_item)/base;
-    let y3d = r * (luk+luk_item+local_rolled_dice/100-3)/(base/2) + 3/base;
+    let y3d = r * ((luk+luk_item+local_rolled_dice/100-3)/(base/2) + 3/base);
     let x4d = -r * (int+int_item)/base;
     //remove old chart
     try {
@@ -1883,6 +1883,7 @@ function preload() {
     this.load.image("item_asnya", "src/png/item_asnya.png", {frameWidth: 500, frameHeight: 500});
     //this.load.image("item_nui", "src/png/item_nui.png", {frameWidth: 370, frameHeight: 320});
     this.load.spritesheet("item_nui", "src/png/item_nui2.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("item_nui_ribbon", "src/png/item_nui_ribbon.png", {frameWidth: 370, frameHeight: 320});
     this.load.spritesheet("item_switch", "src/png/item_switch.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("item_pouch", "src/png/item_pouch.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("item_pouch_broken", "src/png/item_pouch_broken.png", {frameWidth: 370, frameHeight: 320});
@@ -2982,7 +2983,7 @@ function update() {
                 group_mint_name.setVisible(false);
             }
             text_kanban.setText(_name_str);
-            text_id.setText("# "+summoner);
+            text_id.setText("#"+summoner);
         }
         
         //wallet text
@@ -3246,11 +3247,21 @@ function update() {
             item_asnya.depth = item_asnya.y;
 
             //nui-chan
-            item_nui = this.add.sprite(680, 165, "item_nui")
+            console.log("ok");
+            let _x = 1070;
+            let _y = 520;
+            text_nui = this.add.text(
+                _x,
+                _y+58,
+                " Crafter: #1 Kapico \n Score:123123123 \n EXP +120% ",
+                {font: "14px Arial", fill: "#000000", backgroundColor: "#ffffff"}
+            ).setOrigin(0.5);
+            text_nui.visible = false;
+            item_nui = this.add.sprite(_x, _y, "item_nui")
                 .setOrigin(0.5)
                 .setScale(0.38)
                 .setInteractive({ draggable: true, useHandCursor: true })
-                .setDepth(165)
+                .setDepth(_y)
                 .on("dragstart", () => {
                     //sound, depth
                 })
@@ -3263,22 +3274,25 @@ function update() {
                         item_nui.y = 960 - game.input.activePointer.x;
                     }
                     item_nui.depth = item_nui.y;
+                    text_nui.visible = false;
+                    item_nui_ribbon.x = item_nui.x;
+                    item_nui_ribbon.y = item_nui.y;
+                    item_nui_ribbon.depth = item_nui.depth+1;
                 })
                 .on("dragend", () => {
                     //grand, sound, depth
+                    text_nui.x = item_nui.x;
+                    text_nui.y = item_nui.y+58;
+                    text_nui.visible = true;
+                })
+                .on("pointerover", () => {
+                    text_nui.visible = true;
+                })
+                .on("pointerout", () => {
+                    text_nui.visible = false;
                 });
-                /*
-                .on('dragstart', function(pointer, dragX, dragY){
-                    // ...
-                }, scope)
-                .on('drag', function(pointer, dragX, dragY){
-                    gameObject.setPosition(dragX, dragY)
-                }, scope)
-                .on('dragend', function(pointer, dragX, dragY, dropped){
-                    // ...
-                }, scope);
-                */
-            //item_nui.depth = item_nui.y;
+            item_nui_ribbon = this.add.sprite(_x,_y, "item_nui_ribbon").setOrigin(0.5).setScale(0.38);
+            item_nui_ribbon.depth = item_nui.y + 1;
 
             //switch
             item_switch = this.add.sprite(1230,300, "item_switch").setOrigin(0.5);

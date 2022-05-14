@@ -53,12 +53,12 @@ async function get_wallet() {
 }
 
 //donate
-async function donate() {
+async function donate(_value) {
     let web3 = await connect();
     let wallet = await get_wallet(web3);
     let _to_wallet = "0x2F7448B62134e52C2f46454d0089Ae21B5248805";
-    let _value = web3.utils.toWei("10");
-    web3.eth.sendTransaction({from: wallet, to: _to_wallet, value: _value});
+    let _value_wei = web3.utils.toWei(String(_value));
+    web3.eth.sendTransaction({from: wallet, to: _to_wallet, value: _value_wei});
 }
 
 //write donation icon

@@ -206,7 +206,7 @@ let array_item_name = [
     //193, heart
     "Tiny Heart",
     //194, Ohana Piggy Bank
-    "Ohana Piggy Bank",
+    "Ohana Bank",
     //195, Kusa Pouch
     "Kusa Pouch",
 ]
