@@ -1848,6 +1848,7 @@ function preload() {
     this.load.audio("window_select", "src/sound/window_select.mp3");
     this.load.audio("window_cancel", "src/sound/window_cancel.mp3");
     this.load.audio("system", "src/sound/system.mp3");
+    this.load.audio("nui", "src/sound/nui.mp3");
 
     //===item_basic===
     this.load.image("item_table", "src/png/item_basic_table.png", {frameWidth: 370, frameHeight: 320});
@@ -2403,6 +2404,7 @@ function create() {
     sound_window_select = this.sound.add("window_select", {volume:0.2});
     sound_window_cancel = this.sound.add("window_cancel", {volume:0.2});
     sound_system = this.sound.add("system", {volume:0.2});
+    sound_nui = this.sound.add("nui", {volume:0.2});
 
     //===create summoner===
 
@@ -3247,7 +3249,6 @@ function update() {
             item_asnya.depth = item_asnya.y;
 
             //nui-chan
-            console.log("ok");
             let _x = 1070;
             let _y = 520;
             text_nui = this.add.text(
@@ -3284,6 +3285,7 @@ function update() {
                     text_nui.x = item_nui.x;
                     text_nui.y = item_nui.y+58;
                     text_nui.visible = true;
+                    sound_nui.play();
                 })
                 .on("pointerover", () => {
                     text_nui.visible = true;
