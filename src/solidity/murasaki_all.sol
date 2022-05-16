@@ -1483,6 +1483,7 @@ contract Murasaki_Function_Share is Ownable {
     //address public tiny_heart_address;
     address public murasaki_name_address;
     address public murasaki_strage_score_address;
+    address public murasaki_mail_address;
 
     //address set, admin
     function _set1_murasaki_main_address(address _address) external onlyOwner {
@@ -1505,6 +1506,9 @@ contract Murasaki_Function_Share is Ownable {
     }
     function _set7_murasaki_strage_score_address(address _address) external onlyOwner {
         murasaki_strage_score_address = _address;
+    }
+    function _set8_murasaki_mail_address(address _address) external onlyOwner {
+        murasaki_mail_address = _address;
     }
 
     //check owner of summoner
@@ -2302,7 +2306,7 @@ contract Murasaki_Function_Crafting is Ownable {
             //generate tiny heart, ignore coin/material bag
             //create_tiny_heart(_next_item, _summoner);
             if (_item_type <= 128) {
-                create_tiny_heart(_summoner);
+                _create_tiny_heart(_summoner);
             }
         } else if (_item_type <= 64) {
             //return coin/material
@@ -2418,8 +2422,7 @@ contract Murasaki_Function_Crafting is Ownable {
     //convert to main mc version, item_type 193 = tinyheart
     //choice random summoner and transfer tiny heart to it
     //when not-active summoner was selected, msg.sender will get it instedlly.
-    //function create_tiny_heart(uint32 _created_item, uint32 _created_summoner) internal {
-    function create_tiny_heart(uint32 _created_summoner) internal {
+    function _create_tiny_heart(uint32 _created_summoner) internal {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Main mm = Murasaki_Main(mfs.murasaki_main_address());
         Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
@@ -2450,10 +2453,31 @@ contract Murasaki_Function_Crafting is Ownable {
         uint32 _total_heart_received = mss.total_heart_received(_to_summoner);
         mss.set_total_heart_received(_to_summoner, _total_heart_received + 1);
     }
+    
+    //tiny heart, for Murasaki_Mail
+    function create_tiny_heart(uint32 _summoner_to, uint32 _summoner_from) external {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Main mm = Murasaki_Main(mfs.murasaki_main_address());
+        Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
+        //only from Murasaki_Mail
+        require(msg.sender == mfs.murasaki_main_address());
+        //get wallet
+        address _wallet_to = mm.ownerOf(_summoner_to);
+        address _wallet_from = mm.ownerOf(_summoner_from);
+        //create
+        uint32 _seed_from = mfs.seed(_summoner_from);
+        mc.craft(193, _summoner_from, _wallet_to, _seed_from);
+        uint32 _seed_to = mfs.seed(_summoner_to);
+        mc.craft(193, _summoner_to, _wallet_from, _seed_to);
+        //update score
+        Murasaki_Strage_Score mss = Murasaki_Strage_Score(mfs.murasaki_strage_score_address());
+        uint32 _total_heart_received_to = mss.total_heart_received(_summoner_to);
+        mss.set_total_heart_received(_summoner_to, _total_heart_received_to + 1);
+        uint32 _total_heart_received_from = mss.total_heart_received(_summoner_from);
+        mss.set_total_heart_received(_summoner_from, _total_heart_received_from + 1);
+    }
 
     //upgrade item
-    //***TODO***
-    //cost? time? UI?
     function upgrade_item(uint32 _summoner, uint32 _item1, uint32 _item2, uint32 _item3) external {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
@@ -3447,37 +3471,64 @@ contract Murasaki_Function_Score is Ownable {
 contract Murasaki_Mail is Ownable {
 
     //address
-    address public murasaki_function_address;
-    function _set_murasaki_function_address(address _address) public onlyOwner {
-        murasaki_function_address = _address;
+    address public murasaki_function_share_address;
+    function _set1_murasaki_function_share_address(address _address) external onlyOwner {
+        murasaki_function_share_address = _address;
+    }
+    address public murasaki_function_crafting_address;
+    function _set2_murasaki_function_crafting_address(address _address) external onlyOwner {
+        murasaki_function_crafting_address = _address;
     }
     
+    //mail
+    struct Mail {
+        uint32 send_time;
+        uint32 open_time;
+        uint32 summoner_from;
+        uint32 summoner_to;
+    }
+    mapping(uint32 => Mail) public mails;
+
     //mapping
-    mapping(address => address) public sending_from2to;     //[_summoner_from] = _summoner_to
-    mapping(address => address) public sending_to2from;     //[_summoner_to] = _summoner_from
-    mapping(uint32 => uint32) public last_sending_time;     //[_summoner_from] = block.time
-    mapping(uint32 => uint32) public last_receving_time;    //[_summoner_to] = block.time
+    mapping(uint32 => uint32) public sending;   //[_summoner_from] = mails;
+    mapping(uint32 => uint32) public receiving;  //[_summoner_to] = mails;
     
     //variants
     //interval, both of sending interval & receving limit
-    interval_sec = 60 * 60 * 24 * 3;    // 3 days
+    uint32 interval_sec = 60 * 60 * 24 * 3;    // 3 days
+    uint32 item_type_of_mail = 196;
     
     //check mail
-    function check_receving_mail(uint32 _summoner_to) public view returns (bool) {
-        if (
-            last_receving_time <= interval_sec  //recieving limit
-            && sending_to2from[_summoner_to] != 0x0000000000000000000000000000000000000000
-        ) {
-            return true;
-        } else {
+    function check_receiving_mail(uint32 _summoner_to) public view returns (bool) {
+        uint32 _mail_id = receiving[_summoner_to];
+        //no mail
+        if (_mail_id == 0) {
             return false;
+        } else {
+            Mail memory _mail = mails[_mail_id];
+            //expired
+            if (_mail.send_time >= interval_sec) {
+                return false;
+            // already opend
+            } else if (_mail.open_time != 0) {
+                return false;
+            } else {
+                return true;
+            }
         }
     }
     
     //calc sending interval
     function calc_sending_interval(uint32 _summoner_from) public view returns (uint32) {
+        uint32 _mail_id = sending[_summoner_from];
+        //not send yet
+        if (_mail_id == 0) {
+            return 0;
+        }
+        //mail sending
+        Mail memory _mail = mails[_mail_id];
         uint32 _now = uint32(block.timestamp);
-        uint32 _delta = _now - last_sending_time[_summoner_from];
+        uint32 _delta = _now - _mail.send_time;
         if (_delta >= interval_sec) {
             return 0;
         } else {
@@ -3485,54 +3536,78 @@ contract Murasaki_Mail is Ownable {
         }
     }
     
-    //send mail
-    function send_mail(uint32 _summoner_from, uint32 _item_mail_nft) external {
-        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address):
-        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+    //send mail, need to burn item_mail nft
+    function send_mail(uint32 _summoner_from, uint32 _item_mail) external {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         //check owner
         require(mfs.check_owner(_summoner_from, msg.sender));
         //check sending interval
         require(calc_sending_interval(_summoner_from) == 0);
+        //check _item_mail nft
+        Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
+        (uint32 _item_type, , ,) = mc.items(_item_mail);
+        require(_item_type == item_type_of_mail);
+        require(mc.ownerOf(_item_mail) == msg.sender);
         //burn mail nft
-        _burn_mail_nft(_item_mail_nft);
+        _burn_mail(_item_mail);
         //select _summoner_to
         uint32 _summoner_to = _select_random_summoner_to(_summoner_from);
-        //update parameters
-        sending_from2to[_summoner_from] = _summoner_to;
-        sending_to2from[_summoner_to] = _summoner_from;
-        last_sending_time[_summoner_from] = _now;
-        last_receving_time[_summoner_to] = _now;
+        //prepare Mail, id = _item_mail
+        uint32 _now = uint32(block.timestamp);
+        Mail memory _mail = Mail(_now, 0, _summoner_from, _summoner_to);
+        mails[_item_mail] = _mail;
+        //send mail
+        sending[_summoner_to] = _item_mail;
+        receiving[_summoner_from] = _item_mail;
     }
+
+    //***TODO***
     function _select_random_summoner_to(uint32 _summoner_from) internal view returns (uint32) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Main mm = Murasaki_Main(mfs.murasaki_main_address());
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
         uint32 _count_summoners = mm.next_summoner() - 1;
-        uint32 _summoner_to = mfs.dn(_summoner_from, _count_summoners) + 1;
+        uint32 _summoner_to_1 = mfs.dn(_summoner_from, _count_summoners) + 1;
+
+        bool _isActive = ms.isActive(_summoner_to_1);
+        uint32 _mail_id = receiving[_summoner_to_1]
+        uint32 _happy = mfs.calc_happy(_summoner_to_1) >= 20
+        mails[_mail_id].open_time != 0;
+        mails[_mail_id].send_time >= interval_sec;
+        
+        uint32 _summoner_to_2 = mfs.dn(_summoner_from+1, _count_summoners) + 1;
+        uint32 _summoner_to_3 = mfs.dn(_summoner_from+2, _count_summoners) + 1;
+        uint32 _summoner_to_4 = mfs.dn(_summoner_from+3, _count_summoners) + 1;
+        uint32 _summoner_to_5 = mfs.dn(_summoner_from+4, _count_summoners) + 1;
         return _summoner_to;
     }
-    function _burn_mail_nft(_item_mail_nft) internal {
-        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address):
+
+    function _burn_mail(uint32 _item_mail) internal {
+        //prior approval required
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
-        //need approval
-        mc.transferFrom(msg.sender, address(this), _item_mail_nft);
+        mc.transferFrom(msg.sender, address(this), _item_mail);
     }
     
     //open mail
     function open_mail(uint32 _summoner_to) external {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
-        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
         //check owner
         require(mfs.check_owner(_summoner_to, msg.sender));
-        //check mail
-        require(check_receving_mail);
-        //get _summoner_from
-        uint32 _summoner_from = sending_to2from(_summoner_to);
-        //reset parameters
-        sending_to2from[_summoner_to] = 0x0000000000000000000000000000000000000000;
+        //check receving mail
+        require(check_receiving_mail(_summoner_to));
+        //get mail
+        uint32 _mail_id = receiving[_summoner_to];
+        Mail memory _mail = mails[_mail_id];
+        receiving[_summoner_to] = 0;
+        //open mail
+        uint32 _now = uint32(block.timestamp);
+        _mail.open_time = _now;
         //mint heart
-        _create_tiny_heart(_summoner_to, _summoner_from);
+        _create_tiny_heart(_summoner_to, _mail.summoner_from);
     }
     function _create_tiny_heart(uint32 _summoner_to, uint32 _summoner_from) internal {
-        //***
+        Murasaki_Function_Crafting mfc = Murasaki_Function_Crafting(murasaki_function_crafting_address);
+        mfc.create_tiny_heart(_summoner_to, _summoner_from);
     }
 }

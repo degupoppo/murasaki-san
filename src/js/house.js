@@ -5,11 +5,13 @@
 
 /*
 
-・かんばんのアイテム化
-・帽子の普遍的な位置合わせ
-・ダイスはラックにのみ補正をかける
-    すべてのluck参照処理時にdice値を足す
-    レーダーチャートに青色でdice補正を表示する
+ ok かんばんのアイテム化
+    帽子の普遍的な位置合わせ
+ ok ダイスはラックにのみ補正をかける
+        すべてのluck参照処理時にdice値を足す
+        レーダーチャートに青色でdice補正を表示する
+    パンケーキ
+    すし
 
 */
 
@@ -55,7 +57,9 @@ let local_name_str = "(unnamed)";
 let local_notPetrified = true;
 let local_isActive;
 let local_rolled_dice = 0;
+let local_last_rolled_dice = 0;
 let local_last_dice_roll_time;
+
 
 //local using variants
 let previous_local_last_feeding_time = 0;
@@ -367,9 +371,10 @@ async function contract_update_status(_summoner) {
 
         //dice
         if (local_items[36] > 0) {
-            local_rolled_dice = await contract_d.methods.get_last_rolled_dice(_summoner).call();
+            local_rolled_dice = await contract_d.methods.get_rolled_dice(_summoner).call();
+            local_last_rolled_dice = await contract_d.methods.get_last_rolled_dice(_summoner).call();
             local_last_dice_roll_time = await contract_d.methods.last_dice_roll_time(_summoner).call();
-        }    
+        }
     }
 
     //=====msc=====
@@ -1265,7 +1270,7 @@ class Dice extends Phaser.GameObjects.Sprite{
         //update text
         if (this.count% 200 == 1) {
             //update rooled number
-            this.text_rolled_number.setText(local_rolled_dice/10);
+            this.text_rolled_number.setText(local_last_rolled_dice/10);
             //update next roll time
             let _now = Date.now() / 1000;
             let _delta_sec = _now - local_last_dice_roll_time;
@@ -1599,7 +1604,7 @@ function open_window_craft (scene) {
     item2_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  2, "item_crown").setScale(0.15);
     item3_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  3, "item_fortune_statue").setScale(0.15);
     item4_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  4, "item_hat_helmet").setScale(0.1);
-    item5_icon = scene.add.sprite(_x-20, _y+15 + _y_add *  5, "item_pudding").setScale(0.2);
+    item5_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  5, "item_kanban").setScale(0.1);
     item6_icon = scene.add.sprite(_x-25, _y+12 + _y_add *  6, "item_ribbon").setScale(0.12);
 
     //farming_item
@@ -1610,6 +1615,8 @@ function open_window_craft (scene) {
     item17_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  1, "item_vase").setScale(0.08);
     item18_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  2, "ms_ether_right").setScale(0.08);
     item19_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  3, "item_hat_mugiwara").setScale(0.15);
+    item20_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  4, "item_asnya").setScale(0.1);
+    item21_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  5, "item_switch").setScale(0.1);
     item22_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  6, "item_chocolate_bread").setScale(0.25);
 
     //crafting_item
@@ -1622,6 +1629,7 @@ function open_window_craft (scene) {
     item35_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  3, "dr_bitco_right").setScale(0.08);
     item36_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  4, "item_dice").setScale(0.18);
     item37_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  5, "item_hat_knit").setScale(0.14);
+    item38_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  6, "item_hat_mortarboard").setScale(0.14);
 
     //coin/material bag
     button_crafting_item194  = create_button(170, 110 + 40*17, "[" +local_items[194]+ "] Ohana Piggy Bank", 194,  scene);
@@ -1649,12 +1657,15 @@ function open_window_craft (scene) {
     group_window_crafting.add(item17_icon);
     group_window_crafting.add(item18_icon);
     group_window_crafting.add(item19_icon);
+    group_window_crafting.add(item20_icon);
+    group_window_crafting.add(item21_icon);
     group_window_crafting.add(item22_icon);
     group_window_crafting.add(item33_icon);
     group_window_crafting.add(item34_icon);
     group_window_crafting.add(item35_icon);
     group_window_crafting.add(item36_icon);
     group_window_crafting.add(item37_icon);
+    group_window_crafting.add(item38_icon);
     group_window_crafting.setDepth(9999 + 100);
 }
 
@@ -1888,10 +1899,11 @@ function preload() {
     this.load.spritesheet("item_switch", "src/png/item_switch.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("item_pouch", "src/png/item_pouch.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("item_pouch_broken", "src/png/item_pouch_broken.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_hat_mortarboard", "src/png/item_hat_mortarboard.png", {frameWidth: 370, frameHeight: 320});
     
     //===item_craft_todo===
-    this.load.image("item_mushroom", "src/png/item_mushroom.png", {frameWidth: 300, frameHeight: 300});
-    this.load.image("item_horsetail", "src/png/item_horsetail.png", {frameWidth: 300, frameHeight: 300});
+    //this.load.image("item_mushroom", "src/png/item_mushroom.png", {frameWidth: 300, frameHeight: 300});
+    //this.load.image("item_horsetail", "src/png/item_horsetail.png", {frameWidth: 300, frameHeight: 300});
 
     //===icon_system===
     this.load.image("icon_kusa", "src/png/icon_system_kusa.png", {frameWidth: 350, frameHeight: 350});
@@ -2539,7 +2551,17 @@ function create() {
     icon_name_kusa = this.add.sprite(_x+140, _y+25, "icon_kusa");
     icon_name_kusa.setScale(0.07);
     text_name_kusa = this.add.text(_x+150, _y+17, "100", {font: "17px Arial", fill: "#000000"});
+    //id
+    text_id = this.add.text(_x-45, _y+32, "#100", {font: "14px Arial", fill: "#000000"});
+    //age
+    text_age_time =     this.add.text(_x+20, _y+32, "***", {font: "14px Arial", fill: "#000000"});
     //group
+    group_kanban = this.add.group();
+    group_kanban.add(item_kanban);
+    group_kanban.add(text_kanban);
+    group_kanban.add(text_id);
+    group_kanban.add(text_age_time);
+    group_kanban.setVisible(false);
     group_mint_name = this.add.group();
     group_mint_name.add(text_mint_name);
     group_mint_name.add(icon_name_ohana);
@@ -2547,12 +2569,6 @@ function create() {
     group_mint_name.add(icon_name_kusa);
     group_mint_name.add(text_name_kusa);
     group_mint_name.setVisible(false);
-    
-    //id
-    text_id = this.add.text(_x-45, _y+32, "#100", {font: "14px Arial", fill: "#000000"});
-
-    //age
-    text_age_time =     this.add.text(_x+20, _y+32, "***", {font: "14px Arial", fill: "#000000"});
 }
 
 
@@ -2561,7 +2577,8 @@ function create() {
 
 //update system message
 function update_systemMessage() {
-    if (summoner == -1) {
+    //if (summoner == -1) {
+    if (count_sync == 0) {
         text_system_message.setText(" --- Connecting to Astar Network --- ");
     } else if (summoner == 0) {
         text_system_message.setText(" --- You have not summoned Murasaki-san yet --- ");
@@ -2586,7 +2603,8 @@ function update() {
     text_turn.setText("turn: " + ("0000000" + turn).slice(-7) );
 
     //update summoner
-    if (local_level > 0) {
+    //if (local_level > 0) {
+    if (count_sync > 0) {
         murasakisan.update();
     }
     
@@ -2970,24 +2988,6 @@ function update() {
             icon_crafting_time_remining.visible = false;
         }
         
-        //name
-        if (previous_local_name_str != local_name_str || previous_local_level != local_level) {
-            let _name_str;
-            if (local_name_str == "" && local_level >= 3) {
-                _name_str = "(enter name)";
-                text_kanban.setInteractive();
-                group_mint_name.setVisible(true);
-            } else {
-                if (local_name_str != "") {
-                    _name_str = local_name_str;
-                }
-                text_kanban.disableInteractive();
-                group_mint_name.setVisible(false);
-            }
-            text_kanban.setText(_name_str);
-            text_id.setText("#"+summoner);
-        }
-        
         //wallet text
         let _owner1 = local_owner.substring(0,5);
         let _owner2 = local_owner.slice(-4);
@@ -3008,7 +3008,6 @@ function update() {
             draw_radarchart(this);
         }
 
-        previous_local_name_str = local_name_str;
         previsou_local_rolled_dice = local_rolled_dice;
     }
 
@@ -3058,11 +3057,13 @@ function update() {
             item_potato = this.add.sprite(600, 840+10, "item_sweet_potato").setScale(0.12).setOrigin(0.5);
             item_potato.depth = 9999;
             group_food.add(item_potato);
+            /*
             if (local_items[5] > 0) {
                 item_pudding = this.add.sprite(570, 840+20, "item_pudding").setScale(0.30).setOrigin(0.5);
                 item_pudding.depth = 9999;
                 group_food.add(item_pudding);
             }
+            */
             if (local_items[22] > 0) {
                 item_chocolate_bread = this.add.sprite(650, 840+20, "item_chocolate_bread").setScale(0.4).setOrigin(0.5);
                 item_chocolate_bread.depth = 9999;
@@ -3244,11 +3245,7 @@ function update() {
                 "mining"
             ).setScale(0.12);
 
-            //asnya
-            item_asnya = this.add.sprite(590, 140, "item_asnya").setOrigin(0.5).setScale(0.25);
-            item_asnya.depth = item_asnya.y;
-
-            //nui-chan
+            //***nui-chan***
             let _x = 1070;
             let _y = 520;
             text_nui = this.add.text(
@@ -3296,43 +3293,10 @@ function update() {
             item_nui_ribbon = this.add.sprite(_x,_y, "item_nui_ribbon").setOrigin(0.5).setScale(0.38);
             item_nui_ribbon.depth = item_nui.y + 1;
 
-            //switch
-            item_switch = this.add.sprite(1230,300, "item_switch").setOrigin(0.5);
-            item_switch.setScale(0.25);
-            item_switch.anims.play("item_switch_off", true);
-            item_switch.setInteractive({useHandCursor: true});
-            back_black = this.add.image(640, 480, "back_black");
-            back_black.depth = 9999+1;
-            back_black.visible = false;
-            item_switch.on('pointerdown', () => {
-                if (item_switch.anims.currentAnim.key == "item_switch_off") {
-                    item_switch.anims.play("item_switch_on", true);
-                    back_black.visible = true;
-                    sound_switch.play();
-                    back_neon.visible = true;
-                    text_kanban.setColor("white");
-                    if (typeof item_nui != "undefined") {
-                        item_nui.anims.play("item_nui_alive", true);
-                    }
-                } else {
-                    item_switch.anims.play("item_switch_off", true);
-                    back_black.visible = false;
-                    sound_switch.play();
-                    back_neon.visible = false;
-                    text_kanban.setColor("black");
-                    if (typeof item_nui != "undefined") {
-                        item_nui.anims.play("item_nui", true);
-                    }
-                }
-            });
-            item_switch.depth = item_switch.y;
-            
             //cake
             
             //tiny_crown
             
-            //kanban
-
         }
         
         //2:Crown
@@ -3394,8 +3358,34 @@ function update() {
             });
         }
         
-        //5:Pudding -> Feeding()
+        //5:Nameplate
+        _item_id = 5;
+        if (
+            (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+            && local_items_flag[_item_id] != true
+        ) {
+            local_items_flag[_item_id] = true;
+            group_kanban.setVisible(true);
+        }
+        if (previous_local_name_str != local_name_str) {
+            let _name_str;
+            //if (local_name_str == "" && local_items[_item_id] != 0) {
+            if (local_name_str == "") {
+                _name_str = "(enter name)";
+                text_kanban.setInteractive();
+                group_mint_name.setVisible(true);
+            } else {
+                if (local_name_str != "") {
+                    _name_str = local_name_str;
+                }
+                text_kanban.disableInteractive();
+                group_mint_name.setVisible(false);
+            }
+            text_kanban.setText(_name_str);
+            text_id.setText("#"+summoner);
+        }
         
+
         //6:Ribbon
         _item_id = 6;
         if (
@@ -3461,7 +3451,56 @@ function update() {
             });
         }
 
-        //21: Choco. Bread -> Feeding()
+        //20: Asnya
+        _item_id = 20;
+        if (
+            (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+            && local_items_flag[_item_id] != true
+        ) {
+            local_items_flag[_item_id] = true;
+            item_asnya = this.add.sprite(590, 140, "item_asnya").setOrigin(0.5).setScale(0.25);
+            item_asnya.depth = item_asnya.y;
+        }
+
+        //21: Switch
+        _item_id = 21;
+        if (
+            (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+            && local_items_flag[_item_id] != true
+        ) {
+            local_items_flag[_item_id] = true;
+            item_switch = this.add.sprite(1230,300, "item_switch").setOrigin(0.5);
+            item_switch.setScale(0.25);
+            item_switch.anims.play("item_switch_off", true);
+            item_switch.setInteractive({useHandCursor: true});
+            back_black = this.add.image(640, 480, "back_black");
+            back_black.depth = 9999+1;
+            back_black.visible = false;
+            item_switch.on('pointerdown', () => {
+                if (item_switch.anims.currentAnim.key == "item_switch_off") {
+                    item_switch.anims.play("item_switch_on", true);
+                    back_black.visible = true;
+                    sound_switch.play();
+                    back_neon.visible = true;
+                    text_kanban.setColor("white");
+                    if (typeof item_nui != "undefined") {
+                        item_nui.anims.play("item_nui_alive", true);
+                    }
+                } else {
+                    item_switch.anims.play("item_switch_off", true);
+                    back_black.visible = false;
+                    sound_switch.play();
+                    back_neon.visible = false;
+                    text_kanban.setColor("black");
+                    if (typeof item_nui != "undefined") {
+                        item_nui.anims.play("item_nui", true);
+                    }
+                }
+            });
+            item_switch.depth = item_switch.y;
+        }
+
+        //22: Choco. Bread -> Feeding()
 
         //33:violin
         _item_id = 33;
@@ -3540,6 +3579,30 @@ function update() {
             });
         }
 
+        //38:Mortarboard
+        _item_id = 38;
+        if (
+            (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+            && local_items_flag[_item_id] != true
+        ) {
+            local_items_flag[_item_id] = true;
+            _x = 700;
+            _y = 380;
+            item_hat_mortarboard = this.add.sprite(_x, _y, "item_hat_mortarboard").setOrigin(0.5).setScale(0.20);
+            item_hat_mortarboard.setInteractive({useHandCursor: true});
+            item_hat_mortarboard.on('pointerdown', () => {
+                if (item_wearing_hat == 0) {
+                    item_wearing_hat = item_hat_mortarboard;
+                    murasakisan.on_click();
+                    sound_hat.play();
+                } else if (item_wearing_hat == item_hat_mortarboard) {
+                    item_wearing_hat = 0;
+                    item_hat_mortarboard.x = _x;
+                    item_hat_mortarboard.y = _y;
+                }
+            });
+        }
+
         //194:ohana_bank
         if (local_items[194] != previous_local_item194) {
             // define async function
@@ -3558,7 +3621,7 @@ function update() {
                 let _array_icon = [];
                 for (let i = 0; i < _array_item194.length; i++) {
                     //bank sprite
-                    let _x = 720;
+                    let _x = 650;
                     let _y = 500;
                     _array_bank[i] = scene.add.sprite(_x + i*50, _y, "item_bank")
                         .setScale(0.3)
@@ -3609,9 +3672,9 @@ function update() {
                 let _array_icon = [];
                 for (let i = 0; i < _array_item195.length; i++) {
                     //bank sprite
-                    let _x = 720;
-                    let _y = 400;
-                    _array_bank[i] = scene.add.sprite(_x + i*50, _y, "item_pouch")
+                    let _x = 550;
+                    let _y = 490;
+                    _array_bank[i] = scene.add.sprite(_x - i*50, _y, "item_pouch")
                         .setScale(0.25)
                         .setOrigin(0.5)
                         .setInteractive({useHandCursor: true})
@@ -3626,11 +3689,11 @@ function update() {
                         .on('pointerdown', () => sound_button_on.play() );
                     _array_bank[i].depth = _array_bank[i].y;
                     //text, "+1000"
-                    _array_text[i] = scene.add.text(_x + 15 + i*50, _y - 50, "+1000", {font: "17px Arial", fill: "#000000"})
+                    _array_text[i] = scene.add.text(_x + 15 - i*50, _y - 50, "+1000", {font: "17px Arial", fill: "#000000"})
                         .setOrigin(0.5)
                         .setVisible(false);
                     //icon, ohana
-                    _array_icon[i] = scene.add.sprite(_x - 22 + i*50, _y - 50, "icon_kusa")
+                    _array_icon[i] = scene.add.sprite(_x - 22 - i*50, _y - 50, "icon_kusa")
                         .setOrigin(0.5)
                         .setScale(0.09)
                         .setVisible(false);
@@ -3642,58 +3705,11 @@ function update() {
             _do(this);
         }
 
-        /*
-        //195:kusa_pouch
-        if (local_items[195] != previous_local_item195) {
-            // define async function
-            async function _do(scene) {
-                // get item195 list, need to wait
-                let _array_item195 = await get_userItems(summoner, 195);
-                // recreate sprite group
-                try {
-                    group_item195.destroy(true);
-                } catch (error) {
-                }
-                group_item195 = scene.add.group();
-                // create sprite, add group
-                for (let i = 0; i < _array_item195.length; i++) {
-                    item_pouch = scene.add.sprite(720 + i*50, 400, "item_kusa_pouch");
-                    item_pouch.setScale(0.07);
-                    item_pouch.setInteractive({useHandCursor: true});
-                    item_pouch.on("pointerdown", () => unpack_bag(summoner, _array_item195[i]));
-                    group_item195.add(item_pouch);
-                }
-            }
-            _do(this);
-        }
-        */
-        
-        //***TODO items***
-
-        //20
-        _item_id = 20;
-        if (
-            (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
-            && local_items_flag[_item_id] != true
-        ) {
-            local_items_flag[_item_id] = true;
-            item_horsetail = this.add.sprite(50,560, "item_horsetail").setOrigin(0.5).setScale(0.3);
-            item_horsetail.depth = item_horsetail.y;
-        }
-
-        //21
-        _item_id = 21;
-        if (
-            (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
-            && local_items_flag[_item_id] != true
-        ) {
-            local_items_flag[_item_id] = true;
-            item_mushroom = this.add.sprite(250,500, "item_mushroom").setOrigin(0.5).setScale(0.3);        
-        }
         previous_local_items = local_items;
         previous_local_item194 = local_items[194];
         previous_local_item195 = local_items[195];
         previous_local_rolled_dice = local_rolled_dice;
+        previous_local_name_str = local_name_str;
     }
 
     //===== update system message =====
