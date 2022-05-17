@@ -2258,6 +2258,9 @@ contract Murasaki_Function_Crafting is Ownable {
         }else if (_item_type == 195){
             _coin = 10;
             _material = 1000;
+        }else if (_item_type == 196){
+            _coin = 100;
+            _material = 100;
         }else{
             uint32[4] memory _dc_table = get_item_dc(_item_type);
             _coin = _dc_table[2];
@@ -2319,13 +2322,16 @@ contract Murasaki_Function_Crafting is Ownable {
             ms.set_coin(_summoner, ms.coin(_summoner) + 800);
         } else if (_item_type == 195) {
             ms.set_material(_summoner, ms.material(_summoner) + 800);            
+        } else if (_item_type == 196) {
+            ms.set_coin(_summoner, ms.coin(_summoner) + 80);
+            ms.set_material(_summoner, ms.material(_summoner) + 80);            
         }
     }
     function get_modified_dc(uint32 _summoner, uint32 _item_type) public view returns (uint32) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
-        //coin/material bag
-        if (_item_type == 194 || _item_type == 195){
+        //coin/material bag, mail
+        if (_item_type == 194 || _item_type == 195 || _item_type == 196){
             return 20;  //about 30 min
         }
         uint32[4] memory _dc_table = get_item_dc(_item_type);
@@ -3491,12 +3497,20 @@ contract Murasaki_Mail is Ownable {
 
     //mapping
     mapping(uint32 => uint32) public sending;   //[_summoner_from] = mails;
-    mapping(uint32 => uint32) public receiving;  //[_summoner_to] = mails;
+    mapping(uint32 => uint32) public receiving; //[_summoner_to] = mails;
     
     //variants
     //interval, both of sending interval & receving limit
     uint32 interval_sec = 60 * 60 * 24 * 3;    // 3 days
     uint32 item_type_of_mail = 196;
+
+    //admin, set variants
+    function set_interval_sec(uint32 _value) external onlyOwner {
+        interval_sec = _value;
+    }
+    function set_item_type_of_mail(uint32 _value) external onlyOwner {
+        item_type_of_mail = _value;
+    }
     
     //check mail
     function check_receiving_mail(uint32 _summoner_to) public view returns (bool) {
@@ -3560,28 +3574,30 @@ contract Murasaki_Mail is Ownable {
         sending[_summoner_to] = _item_mail;
         receiving[_summoner_from] = _item_mail;
     }
-
-    //***TODO***
     function _select_random_summoner_to(uint32 _summoner_from) internal view returns (uint32) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Main mm = Murasaki_Main(mfs.murasaki_main_address());
         Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
         uint32 _count_summoners = mm.next_summoner() - 1;
-        uint32 _summoner_to_1 = mfs.dn(_summoner_from, _count_summoners) + 1;
-
-        bool _isActive = ms.isActive(_summoner_to_1);
-        uint32 _mail_id = receiving[_summoner_to_1]
-        uint32 _happy = mfs.calc_happy(_summoner_to_1) >= 20
-        mails[_mail_id].open_time != 0;
-        mails[_mail_id].send_time >= interval_sec;
-        
-        uint32 _summoner_to_2 = mfs.dn(_summoner_from+1, _count_summoners) + 1;
-        uint32 _summoner_to_3 = mfs.dn(_summoner_from+2, _count_summoners) + 1;
-        uint32 _summoner_to_4 = mfs.dn(_summoner_from+3, _count_summoners) + 1;
-        uint32 _summoner_to_5 = mfs.dn(_summoner_from+4, _count_summoners) + 1;
+        uint32 _summoner_to = 0;
+        uint32 _count = 0;
+        while (_count < 5) {
+            uint32 _summoner_tmp = mfs.dn(_summoner_from + _count, _count_summoners) + 1;
+            bool _isActive = ms.isActive(_summoner_tmp);
+            uint32 _happy = mfs.calc_happy(_summoner_tmp);
+            if (
+                _summoner_to == 0
+                && _isActive == true
+                && _happy >= 20
+                && check_receiving_mail(_summoner_tmp) == false
+                && _summoner_tmp != _summoner_from
+            ) {
+                _summoner_to = _summoner_tmp;
+            }
+            _count += 1;
+        }
         return _summoner_to;
     }
-
     function _burn_mail(uint32 _item_mail) internal {
         //prior approval required
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
@@ -3609,5 +3625,53 @@ contract Murasaki_Mail is Ownable {
     function _create_tiny_heart(uint32 _summoner_to, uint32 _summoner_from) internal {
         Murasaki_Function_Crafting mfc = Murasaki_Function_Crafting(murasaki_function_crafting_address);
         mfc.create_tiny_heart(_summoner_to, _summoner_from);
+    }
+}
+
+
+//---*Murasaki_Strage_Nui------------------------------------------------------------------------------------------------------------------
+
+
+contract Murasaki_Strage_Nui is Ownable {
+
+    //item_type_of_nui = 197
+
+    //permitted address
+    mapping(address => bool) public permitted_address;
+
+    //admin, add or remove permitted_address
+    function _add_permitted_address(address _address) external onlyOwner {
+        permitted_address[_address] = true;
+    }
+    function _remove_permitted_address(address _address) external onlyOwner {
+        permitted_address[_address] = false;
+    }
+
+    //nui
+    struct Nui {
+        uint32 mint_time;
+        uint32 summoner;
+        uint32 score;
+    }
+    mapping(uint32 => Nui) public nuis;
+    
+    //mint nui
+    function mint(uint32 _item_nui, uint32 xxx, uint32 yyy, uint32 zzz) external {
+        Nui memory _nui = Nui(xxx, yyy, zzz);
+        nuis[_item_nui] = _nui;
+    }
+
+    //set status
+    function set_xxx(uint32 _item_nui, uint32 _value) external {
+        require(permitted_address[msg.sender] == true);
+        nuis[_item_nui].xxx = _value;
+    }
+    function set_yyy(uint32 _item_nui, uint32 _value) external {
+        require(permitted_address[msg.sender] == true);
+        nuis[_item_nui].yyy = _value;
+    }
+    function set_zzz(uint32 _item_nui, uint32 _value) external {
+        require(permitted_address[msg.sender] == true);
+        nuis[_item_nui].zzz = _value;
     }
 }

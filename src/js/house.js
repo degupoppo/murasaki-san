@@ -12,6 +12,25 @@
         レーダーチャートに青色でdice補正を表示する
     パンケーキ
     すし
+    
+    イベントの実装
+        https://qiita.com/crazy_traveler/items/a00c7f0b69f242607aef
+        定期的に情報を読みに行くのではなく、
+        eventを発行し、フロントエンド側でeventの発行を購読して待っておく
+        tx→comfirmまでの待ちも表現できるか
+        https://web3js.readthedocs.io/en/v1.2.11/web3-eth-contract.html#contract-events
+        contract.events.allEvents({filter: {summoner: [summoner]})
+        msやmcでitem生成時, status変更時にemit飛ばせればよかったが後の祭り
+            よって、functionでevent発行してみる
+        Eventポイント
+            feeding
+            grooming
+            mining/farming/crafting
+                start, stop
+            
+        これらのイベント観測時にblockchainを読みに行く
+            ホントはevent内容だけでfrontendに反映したいが、流石に複雑になりすぎている
+        また、イベント観測時以外でも定期的に読みに行く
 
 */
 
@@ -104,6 +123,7 @@ let previous_local_item195 = 0;
 let item_wearing_hat = 0;
 let flag_doneFp = 0;
 let previsou_local_rolled_dice = 0;
+let flag_dice_rolling = 0;
 
 
 //---html-----------------------------------------------------------------------------------------------------
@@ -233,72 +253,94 @@ async function send_fp_get(_wallet, _summoner) {
 //---web3-----------------------------------------------------------------------------------------------------
 
 
-/*
-//connect to metamask
-async function connect() {
-    const web3 = await new Web3(window.ethereum);
-    window.ethereum.enable();
-    window.ethereum.request({
-        method: 'wallet_addEthereumChain',
-        params: [{
-            chainId: '0x51',  //4369
-            chainName: 'Shibuya Testnet',
-            nativeCurrency: {
-                name: 'sby',
-                symbol: 'SBY',
-                decimals: 18
-            },
-            //rpcUrls: ["https://rpc.shibuya.astar.network:8545"],
-            rpcUrls: ["https://https://evm.shibuya.astar.network"],
-            blockExplorerUrls: ['https://blockscout.com/shibuya'],
-        }]
-    });
-    return web3;
-}
-
-//get wallet
-async function get_wallet() {
-    let web3 = await connect();
-    let wallet = await web3.eth.getAccounts();
-    //text_wallet.setText("id: " + summoner + ", wallet: " + wallet[0]);
-    return wallet[0];
-}
-*/
+//===call===
 
 //update summoner of wallet
 async function contract_update_summoner_of_wallet() {
-    let web3 = await connect();
-    let wallet = await get_wallet(web3);
-    let contract_mm = await new web3.eth.Contract(abi_murasaki_main, contract_murasaki_main);
-    summoner = await contract_mm.methods.tokenOf(wallet).call();  //have not summoned yet: 0
+    if (summoner == -1) {
+        let web3 = await connect();
+        let wallet = await get_wallet(web3);
+        let contract_mm = await new web3.eth.Contract(abi_murasaki_main, contract_murasaki_main);
+        summoner = await contract_mm.methods.tokenOf(wallet).call();  //have not summoned yet: 0
+    }
 }
 
-//update local status reading from contract
+//update name
+async function contract_update_name(_summoner) {
+    if (local_isActive == false) {
+        return 0;
+    }
+    let web3 = await connect();
+    let wallet = await get_wallet(web3);
+    let contract_mn = await new web3.eth.Contract(abi_murasaki_function_name, contract_murasaki_function_name);
+    local_name_str = await contract_mn.methods.call_name_from_summoner(_summoner).call();
+}
+
+//update dice
+async function contract_update_dice(_summoner) {
+    let web3 = await connect();
+    let wallet = await get_wallet(web3);
+    let contract_d = await new web3.eth.Contract(abi_world_dice, contract_world_dice);
+    local_rolled_dice = await contract_d.methods.get_rolled_dice(_summoner).call();
+    local_last_rolled_dice = await contract_d.methods.get_last_rolled_dice(_summoner).call();
+    local_last_dice_roll_time = await contract_d.methods.last_dice_roll_time(_summoner).call();
+}
+
+//update static_parameters
+async function contract_update_statics(_summoner) {
+    let web3 = await connect();
+    let wallet = await get_wallet(web3);
+    let contract_ms = await new web3.eth.Contract(abi_murasaki_strage, contract_murasaki_strage);
+    local_isActive = await contract_ms.methods.isActive(_summoner).call();
+    if (local_isActive == false) {
+        return 0;
+    }
+    SPEED = await contract_ms.methods.SPEED().call();   //220311: speed was modified as 100%=x1
+    SPEED = Number(SPEED) / 100;
+    let contract_mfs = await new web3.eth.Contract(abi_murasaki_function_share, contract_murasaki_function_share);
+    let _static_status = await contract_mfs.methods.get_static_status_array(_summoner).call();
+    local_class = Number(_static_status[0]);
+    local_birth_time = Number(_static_status[1]);
+    let contract_mm = await new web3.eth.Contract(abi_murasaki_main, contract_murasaki_main);
+    let _owner = await contract_mm.methods.ownerOf(_summoner).call();
+    local_owner = _owner;
+    let contract_mffg = await new web3.eth.Contract(abi_murasaki_function_feeding_and_grooming, contract_murasaki_function_feeding_and_grooming);
+    local_notPetrified = await contract_mffg.methods.not_petrified(_summoner).call();
+}
+
+//update mining/farming/crafting
+async function contract_update_working(_summoner) {
+    let web3 = await connect();
+    let wallet = await get_wallet(web3);
+    let contract_mfc = await new web3.eth.Contract(abi_murasaki_function_crafting, contract_murasaki_function_crafting);
+    let contract_mfmf = await new web3.eth.Contract(abi_murasaki_function_mining_and_farming, contract_murasaki_function_mining_and_farming);
+    if (local_mining_status == 1){
+        local_coin_calc = await contract_mfmf.methods.calc_mining(_summoner).call();
+        local_coin_calc = Number(local_coin_calc);
+    }else if (local_farming_status == 1) {
+        local_material_calc = await contract_mfmf.methods.calc_farming(_summoner).call();
+        local_material_calc = Number(local_material_calc);
+    }else if (local_crafting_status == 1) {
+        local_crafting_calc = await contract_mfc.methods.calc_crafting(_summoner).call();
+        local_crafting_calc = Number(local_crafting_calc);
+    }
+}
+
+//update dynamic_parameters
 async function contract_update_status(_summoner) {
 
     let web3 = await connect();
     let wallet = await get_wallet(web3);
 
     //contract
-    let contract_mm = await new web3.eth.Contract(abi_murasaki_main, contract_murasaki_main);
-    let contract_ms = await new web3.eth.Contract(abi_murasaki_strage, contract_murasaki_strage);
     let contract_mfs = await new web3.eth.Contract(abi_murasaki_function_share, contract_murasaki_function_share);
-    let contract_mfc = await new web3.eth.Contract(abi_murasaki_function_crafting, contract_murasaki_function_crafting);
-    let contract_mfmf = await new web3.eth.Contract(abi_murasaki_function_mining_and_farming, contract_murasaki_function_mining_and_farming);
-    let contract_mffg = await new web3.eth.Contract(abi_murasaki_function_feeding_and_grooming, contract_murasaki_function_feeding_and_grooming);
-    let contract_mn = await new web3.eth.Contract(abi_murasaki_function_name, contract_murasaki_function_name);
-    let contract_d = await new web3.eth.Contract(abi_world_dice, contract_world_dice);
 
     //check isActive
-    local_isActive = await contract_ms.methods.isActive(_summoner).call();
     if (local_isActive == false) {
-        //console.log("summoner=", _summoner, "local_isActive=", local_isActive);
         count_sync += 1;
         return 0;
     }
     
-    //=====update high frequency=====
-
     //wallet
     local_wallet = wallet;
 
@@ -326,59 +368,27 @@ async function contract_update_status(_summoner) {
     local_crafting_start_time = Number(_dynamic_status[17]);
     local_crafting_item_type = Number(_dynamic_status[18]);
 
-    //mining, farming, crafting calculation
-    if (local_mining_status == 1){
-        local_coin_calc = await contract_mfmf.methods.calc_mining(_summoner).call();
-        local_coin_calc = Number(local_coin_calc);
-    }else if (local_farming_status == 1) {
-        local_material_calc = await contract_mfmf.methods.calc_farming(_summoner).call();
-        local_material_calc = Number(local_material_calc);
-    }else if (local_crafting_status == 1) {
-        local_crafting_calc = await contract_mfc.methods.calc_crafting(_summoner).call();
-        local_crafting_calc = Number(local_crafting_calc);
+    //dice, when rolling, high frequency update
+    if (flag_dice_rolling == 1 && local_items[36] > 0) {
+        await contract_update_dice(_summoner);
     }
 
-    //=====update low frequency=====
-    
-    if (count_sync % 3 == 0) {
+    //low frequency updates
+    if (count_sync % 5 == 0) {
 
-        //call global variants ***TODO***
-        SPEED = await contract_ms.methods.SPEED().call();   //220311: speed was modified as 100%=x1
-        SPEED = Number(SPEED) / 100;
-        
-        //call static status from ms
-        let _static_status = await contract_mfs.methods.get_static_status_array(_summoner).call();
-
-        //update static status
-        local_class = Number(_static_status[0]);
-        local_birth_time = Number(_static_status[1]);
-
-        //owner of summoner
-        let _owner = await contract_mm.methods.ownerOf(_summoner).call();
-        local_owner = _owner;
-
-        //call item from contract
-        local_items = await contract_mfs.methods.get_balance_of_type_array(_owner).call();
-
-        //update local heart
+        //call item
+        local_items = await contract_mfs.methods.get_balance_of_type_array(local_owner).call();
         local_heart = Number(local_items[193]);
 
-        //petrification
-        local_notPetrified = await contract_mffg.methods.not_petrified(_summoner).call();
-        
-        //name
-        local_name_str = await contract_mn.methods.call_name_from_summoner(_summoner).call();
+        //update mining, farming, crafting calculation
+        contract_update_working(_summoner);
 
-        //dice
-        if (local_items[36] > 0) {
-            local_rolled_dice = await contract_d.methods.get_rolled_dice(_summoner).call();
-            local_last_rolled_dice = await contract_d.methods.get_last_rolled_dice(_summoner).call();
-            local_last_dice_roll_time = await contract_d.methods.last_dice_roll_time(_summoner).call();
+        //update dice
+        if (flag_dice_rolling == 0 && local_items[36] > 0) {
+            await contract_update_dice(_summoner);
         }
     }
-
-    //=====msc=====
-
+    
     //debug
     //console.log("status:", _dynamic_status, "items:", local_items);
 
@@ -387,11 +397,15 @@ async function contract_update_status(_summoner) {
     count_sync += 1;
 }
 
-//update_all
+//update_all, at the first
 async function contract_update_all() {
     await contract_update_summoner_of_wallet();
+    await contract_update_statics(summoner);
+    await contract_update_name(summoner);
     await contract_update_status(summoner);
 }
+
+//===send===
 
 //summon
 async function contract_summon(_class) {
@@ -1235,7 +1249,6 @@ class Dice extends Phaser.GameObjects.Sprite{
     on_click() {
         this.speed_x = 8 + Math.random() * 5;
         
-        
         if (Math.random() > 0.5) {
             this.speed_x *= -1;
         }
@@ -1255,6 +1268,7 @@ class Dice extends Phaser.GameObjects.Sprite{
         this.text_next_time.visible = false;
         if (this.flag_tx == 1) {
             dice_roll(summoner);
+            flag_dice_rolling = 1;
         }
         //define constant of y = b - a * x
         this.a = Math.random() * 0.8 - 0.4;
@@ -1268,7 +1282,7 @@ class Dice extends Phaser.GameObjects.Sprite{
         this.depth = this.line_y;
         this.text_rolled_number.depth = this.line_y + 1;
         //update text
-        if (this.count% 200 == 1) {
+        if (this.count % 200 == 1) {
             //update rooled number
             this.text_rolled_number.setText(local_last_rolled_dice/10);
             //update next roll time
@@ -1290,6 +1304,7 @@ class Dice extends Phaser.GameObjects.Sprite{
                 let _text = _hr + "h:" + _min + "m";
                 this.text_next_time.setText(_text).setFill("#000000");
                 this.flag_tx = 0;
+                flag_dice_rolling = 0;
             }
         }
         //check speed
@@ -1355,6 +1370,12 @@ class Dice extends Phaser.GameObjects.Sprite{
                 this.speed_x *= -0.9;
                 sound_dice_impact.play();
             }
+        }
+        //dice rolling
+        if (flag_dice_rolling == 1 && this.count % 2 == 0) {
+            //this.text_rolled_number.setText(Math.round(Math.random()*20));
+            this.text_rolled_number.setText(this.count / 2 % 20 + 1);
+            this.text_next_time.setText("Rolling!").setFill("#ff0000");
         }
     }
 }
@@ -2604,7 +2625,7 @@ function update() {
 
     //update summoner
     //if (local_level > 0) {
-    if (count_sync > 0) {
+    if (count_sync > 0 && local_level > 0) {
         murasakisan.update();
     }
     
@@ -3297,6 +3318,10 @@ function update() {
             
             //tiny_crown
             
+            //pancake
+            
+            //sushi
+            
         }
         
         //2:Crown
@@ -3367,7 +3392,7 @@ function update() {
             local_items_flag[_item_id] = true;
             group_kanban.setVisible(true);
         }
-        if (previous_local_name_str != local_name_str) {
+        if (local_items_flag[_item_id] == true && previous_local_name_str != local_name_str) {
             let _name_str;
             //if (local_name_str == "" && local_items[_item_id] != 0) {
             if (local_name_str == "") {
@@ -3727,7 +3752,8 @@ function update() {
 
     if (turn % 500 == 80 || turn == 50) {
         //when no summoner argument, load summoner id from wallet
-        if (summoner == -1) {
+        //if (summoner == -1) {
+        if (count_sync == 0) {
             //can not get summoner id directry, update summoner id is better.
             contract_update_all();
         //when summoner is loaded, update summoner status
