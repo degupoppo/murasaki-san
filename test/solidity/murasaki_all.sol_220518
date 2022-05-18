@@ -3,14 +3,6 @@
 pragma solidity ^0.8.7;
 
 
-/*
-
-    nuiのコスト設定, heart要求？
-    nui存在時のexp補正の実装
-
-*/
-
-
 //---RC721------------------------------------------------------------------------------------------------------------------
 
 
@@ -1492,7 +1484,6 @@ contract Murasaki_Function_Share is Ownable {
     address public murasaki_name_address;
     address public murasaki_strage_score_address;
     address public murasaki_mail_address;
-    address public murasaki_strage_nui_address;
 
     //address set, admin
     function _set1_murasaki_main_address(address _address) external onlyOwner {
@@ -1518,9 +1509,6 @@ contract Murasaki_Function_Share is Ownable {
     }
     function _set8_murasaki_mail_address(address _address) external onlyOwner {
         murasaki_mail_address = _address;
-    }
-    function _set9_murasaki_strage_nui_address(address _address) external onlyOwner {
-        murasaki_strage_nui_address = _address;
     }
 
     //check owner of summoner
@@ -1673,23 +1661,6 @@ contract Murasaki_Function_Share is Ownable {
         uint32 _name_id = mn.tokenOf(_owner);
         string memory _name_str = mn.names(_name_id);
         return _name_str;
-    }
-
-    //calc_score
-    function calc_score(uint32 _summoner) external view returns (uint32) {
-        Murasaki_Strage_Score mss = Murasaki_Strage_Score(murasaki_strage_score_address);
-        uint32 _total_exp_gained = mss.total_exp_gained(_summoner);
-        uint32 _total_coin_mined = mss.total_coin_mined(_summoner);
-        uint32 _total_material_farmed = mss.total_material_farmed(_summoner);
-        uint32 _total_item_crafted = mss.total_item_crafted(_summoner);
-        uint32 _total_heart_received = mss.total_heart_received(_summoner);
-        uint32 _score = 0;
-        _score += _total_exp_gained;
-        _score += _total_coin_mined;
-        _score += _total_material_farmed;
-        _score += _total_item_crafted * 3000 + _total_item_crafted ** 2 * 300;
-        _score += _total_heart_received * 1000 + _total_heart_received ** 2 * 100;
-        return _score;
     }
 
     //random
@@ -2275,18 +2246,11 @@ contract Murasaki_Function_Crafting is Ownable {
         require(ms.mining_status(_summoner) == 0 && ms.farming_status(_summoner) == 0 && ms.crafting_status(_summoner) == 0);
         require(mfs.calc_satiety(_summoner) >= 20 && mfs.calc_happy(_summoner) >= 20);
         require(ms.level(_summoner) >= 3);
-        /*
-        require(
-            _item_type <= 64 
-            || _item_type == 194    //coin bag 
-            || _item_type == 195    //material bag
-            || _item_type == 196    //mail
-            || _item_type == 197    //nui
-        );
-        */
+        require(_item_type <= 64 || _item_type == 194 || _item_type == 195);
         uint32 _now = uint32(block.timestamp);
         //check coin and material
-        /*
+        uint32 _coin;
+        uint32 _material;
         //coin/material bag
         if (_item_type == 194){
             _coin = 1000;
@@ -2298,22 +2262,14 @@ contract Murasaki_Function_Crafting is Ownable {
         }else if (_item_type == 196){
             _coin = 100;
             _material = 100;
-        //nui
-        }else if (_item_type == 197){
-            _coin = 100;
-            _material = 100;
         //normail items
         }else{
             uint32[4] memory _dc_table = get_item_dc(_item_type);
             _coin = _dc_table[2];
             _material = _dc_table[3];
+            if (_item_type == 48){_coin = 10;} //***test craft***
+            if (_item_type == 48){_material = 10;} //***test craft***
         }
-        */
-        //get dc, cost
-        uint32[4] memory _dc_table = get_item_dc(_item_type);
-        uint32 _coin = _dc_table[2];
-        uint32 _material = _dc_table[3];
-        //check coin, material
         require(ms.coin(_summoner) >= _coin && ms.material(_summoner) >= _material);
         //start crafting
         ms.set_coin(_summoner, ms.coin(_summoner) - _coin);
@@ -2352,15 +2308,11 @@ contract Murasaki_Function_Crafting is Ownable {
             Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
             uint32 _seed = mfs.seed(_summoner);
             mc.craft(_item_type, _summoner, msg.sender, _seed);
-            //generate tiny heart, only normal items
+            //generate tiny heart, ignore coin/material bag
+            //create_tiny_heart(_next_item, _summoner);
             if (_item_type <= 128) {
                 _create_tiny_heart(_summoner);
             }
-            //when crafting nui-chan, update Strage_Nui
-            if (_item_type == 197) {
-                _update_strage_nui(_summoner, mc.next_item());
-            }
-        /*
         } else if (_item_type <= 64) {
             //return coin/material
             uint32[4] memory _dc_table = get_item_dc(_item_type);
@@ -2376,93 +2328,43 @@ contract Murasaki_Function_Crafting is Ownable {
             ms.set_coin(_summoner, ms.coin(_summoner) + 80);
             ms.set_material(_summoner, ms.material(_summoner) + 80);            
         }
-        */
-        //not completed, chancel
-        } else {
-            //return coin/material
-            uint32[4] memory _dc_table = get_item_dc(_item_type);
-            uint32 _coin = _dc_table[2];
-            uint32 _material = _dc_table[3];
-            ms.set_coin(_summoner, ms.coin(_summoner) + _coin * 8/10);
-            ms.set_material(_summoner, ms.material(_summoner) + _material * 8/10);
-        }
-    }
-    function _update_strage_nui(uint32 _summoner, uint32 _item_nui) internal {
-        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
-        Murasaki_Strage_Nui msn = Murasaki_Strage_Nui(mfs.murasaki_strage_nui_address());
-        Murasaki_Main mm = Murasaki_Main(mfs.murasaki_main_address());
-        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
-        Murasaki_Strage_Score mss = Murasaki_Strage_Score(mfs.murasaki_strage_score_address());
-        uint32 _class = mm.class(_summoner);
-        uint32[5] memory _status = [
-                ms.level(_summoner), 
-                ms.strength(_summoner), 
-                ms.dexterity(_summoner), 
-                ms.intelligence(_summoner), 
-                ms.luck(_summoner)
-        ];
-        uint32[5] memory _strage_score = [
-                mss.total_exp_gained(_summoner), 
-                mss.total_coin_mined(_summoner),
-                mss.total_material_farmed(_summoner),
-                mss.total_item_crafted(_summoner),
-                mss.total_heart_received(_summoner)
-        ];
-        uint32 _score = mfs.calc_score(_summoner);
-        //mint, (_item, _summoner, _class, _status, _strage_score, _score)
-        msn.mint(
-            _item_nui,
-            _summoner,
-            _class,
-            _status,
-            _strage_score,
-            _score
-        );
     }
     function get_modified_dc(uint32 _summoner, uint32 _item_type) public view returns (uint32) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
-        /*
         //coin/material bag, mail
         if (_item_type == 194 || _item_type == 195 || _item_type == 196){
             return 20;  //about 30 min
         }
-        */
         uint32[4] memory _dc_table = get_item_dc(_item_type);
         //get dc
         uint32 _level = _dc_table[0];
         uint32 _dc = _dc_table[1];
-        // not normal crafting items: return dc
-        if (_item_type >= 193) {
-            return _dc;
-        // normal crafting items: modified by status
+        //status boost
+        uint32 _mod = ms.intelligence(_summoner) + ms.level(_summoner)*100 + count_crafting_items(msg.sender);
+        /*
+        //world dice boost
+        World_Dice wd = World_Dice(mfs.world_dice_address());
+        uint32 _rolled_dice = wd.get_rolled_dice(_summoner);
+        _mod += _rolled_dice;
+        */
+        //initial point = 400 (1Lv*100, 3INT*100)
+        //point per level = 150 (1Lv*100 + 0.5INT*100)
+        //minimum dc = 3000 (3 days)
+        // _mod_dc = _dc - ( _dc / (_level * 150) ) * (_mod - 400) >= 3000
+        // _delta = (_mod - 400) / (_level * 150) * _dc
+        // _mod_dc = _dc - _delta >= 3000
+        //uint32 _delta = (_mod - 400) / (_level * 150) * _dc;  //original concept law, but not good
+        //uint32 _delta = _dc * (_mod - 400) / (_level * 150);    //division should be done last
+        uint32 _delta = _dc * (_mod - 400) / (_level * 300);    //150 -> 300, 220401
+        uint32 _mod_dc;
+        if (_dc < 3000 + _delta) {
+            _mod_dc = 3000;
         } else {
-            //status boost
-            uint32 _mod = ms.intelligence(_summoner) + ms.level(_summoner)*100 + count_crafting_items(msg.sender);
-            /*
-            //world dice boost
-            World_Dice wd = World_Dice(mfs.world_dice_address());
-            uint32 _rolled_dice = wd.get_rolled_dice(_summoner);
-            _mod += _rolled_dice;
-            */
-            //initial point = 400 (1Lv*100, 3INT*100)
-            //point per level = 150 (1Lv*100 + 0.5INT*100)
-            //minimum dc = 3000 (3 days)
-            // _mod_dc = _dc - ( _dc / (_level * 150) ) * (_mod - 400) >= 3000
-            // _delta = (_mod - 400) / (_level * 150) * _dc
-            // _mod_dc = _dc - _delta >= 3000
-            //uint32 _delta = (_mod - 400) / (_level * 150) * _dc;  //original concept law, but not good
-            //uint32 _delta = _dc * (_mod - 400) / (_level * 150);    //division should be done last
-            uint32 _delta = _dc * (_mod - 400) / (_level * 300);    //150 -> 300, 220401
-            uint32 _mod_dc;
-            if (_dc < 3000 + _delta) {
-                _mod_dc = 3000;
-            } else {
-                _mod_dc = _dc - _delta;
-            }
-            //if (_item_type == 48){_mod_dc = 10;} //***test craft***
-            return _mod_dc;
+            _mod_dc = _dc - _delta;
         }
+        if (_item_type == 48){_mod_dc = 10;} //***test craft***
+        return _mod_dc;
     }
     function calc_crafting(uint32 _summoner) public view returns (uint32) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
@@ -2510,58 +2412,17 @@ contract Murasaki_Function_Crafting is Ownable {
     }
 
     //get item dc
-    //when cannnot refer, error to block crafting
     function get_item_dc(uint32 _item_type) public view returns (uint32[4] memory) {
-        /*
         //dummy, coin/material bag
         if (_item_type == 194){
             return [uint32(99), uint32(0), uint32(1000), uint32(10)];
-        } else if (_item_type == 195) {
+        }else if (_item_type == 195) {
             return [uint32(99), uint32(0), uint32(10), uint32(1000)];
-        } else {
-            uint32 _level = level_table[_item_type];
-            uint32 _dc = dc_table[_item_type];
-            uint32 _coin = coin_table[_item_type];
-            uint32 _material = material_table[_item_type];
-            return [_level, _dc, _coin, _material];
         }
-        */
-        //return: level, dc, coin, material
-        uint32 _level;
-        uint32 _dc;
-        uint32 _coin;
-        uint32 _material;
-        //coin bag
-        if (_item_type == 194){
-            _level = 99;
-            _dc = 20;    //30min
-            _coin = 1000;
-            _material = 10;
-        //material bag
-        } else if (_item_type == 195) {
-            _level = 99;
-            _dc = 20;
-            _coin = 10;
-            _material = 1000;
-        //mail
-        } else if (_item_type == 196) {
-            _level = 99;
-            _dc = 20;
-            _coin = 100;
-            _material = 100;
-        //nui
-        } else if (_item_type == 197) {
-            _level = 99;
-            _dc = 3000;
-            _coin = 1000;
-            _material = 1000;
-        //normal items
-        } else {
-            _level = level_table[_item_type];
-            _dc = dc_table[_item_type];
-            _coin = coin_table[_item_type];
-            _material = material_table[_item_type];
-        }        
+        uint32 _level = level_table[_item_type];
+        uint32 _dc = dc_table[_item_type];
+        uint32 _coin = coin_table[_item_type];
+        uint32 _material = material_table[_item_type];
         return [_level, _dc, _coin, _material];
     }
 
@@ -3576,9 +3437,9 @@ contract Murasaki_Strage_Score is Ownable {
 }
 
 
-///---*Murasaki_Function_Score------------------------------------------------------------------------------------------------------------------
+//---*Murasaki_Function_Score------------------------------------------------------------------------------------------------------------------
 
-/*
+
 contract Murasaki_Function_Score is Ownable {
 
     //address
@@ -3610,7 +3471,6 @@ contract Murasaki_Function_Score is Ownable {
         return _score;
     }
 }
-*/
 
 
 //---*Murasaki_Mail-----------------------------------------------------------------------------------------------------
@@ -3794,8 +3654,12 @@ contract Murasaki_Strage_Nui is Ownable {
         uint32 mint_time;
         uint32 summoner;
         uint32 class;
-        uint32[5] status;   //lv, str, dex, int, luk
-        uint32[5] strage_score; //total_exp, coin, material, items, hearts
+        uint32 seed;
+        uint32 level;
+        uint32 strength;
+        uint32 dexterity;
+        uint32 intelligence;
+        uint32 luck
         uint32 score;
     }
     mapping(uint32 => Nui) public nuis;
@@ -3805,8 +3669,12 @@ contract Murasaki_Strage_Nui is Ownable {
         uint32 _item_nui,
         uint32 _summoner,
         uint32 _class,
-        uint32[5] memory _status,
-        uint32[5] memory _strage_score,
+        uint32 _seed,
+        uint32 _level,
+        uint32 _strength,
+        uint32 _dexterity,
+        uint32 _intelligence,
+        uint32 _luck,
         uint32 _score
     ) external {
         require(permitted_address[msg.sender] == true);
@@ -3815,21 +3683,20 @@ contract Murasaki_Strage_Nui is Ownable {
             _now,
             _summoner,
             _class,
-            _status,
-            _strage_score,
+            _seed,
+            _level,
+            _strength,
+            _dexterity,
+            _intelligence,
+            _luck,
             _score
             );
         nuis[_item_nui] = _nui;
     }
 
-    //set status, for update scoring in the future
+    //set status
     function set_score(uint32 _item_nui, uint32 _value) external {
         require(permitted_address[msg.sender] == true);
         nuis[_item_nui].score = _value;
-    }
-    
-    //get status, return as array of 14 values
-    function get_status(uint32 _item_nui) external view returns (Nui memory) {
-        return nuis[_item_nui];
     }
 }
