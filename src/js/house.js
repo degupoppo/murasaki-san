@@ -1628,10 +1628,10 @@ function open_window_craft (scene) {
     group_window_crafting.add(scene.add.sprite(640, 480, "window").setInteractive())
 
     //create item list text
-    button_crafting_close = create_button(1070, 790, "Cancel", 0, scene);
+    button_crafting_close = create_button(1070, 820, "Cancel", 0, scene);
     group_window_crafting.add(button_crafting_close);
     let _x = 170;
-    let _y = 110;
+    let _y = 80;
     let _y_add = 40;
     let _item_count = 0;
     //mining_item
@@ -1726,8 +1726,8 @@ function open_window_craft (scene) {
     group_window_crafting.add(item38_icon);
 
     //coin/material bag
-    button_crafting_item194  = create_button(170, 110 + 40*17, "[" +local_items[194]+ "] Ohana Piggy Bank", 194,  scene);
-    button_crafting_item195  = create_button(520, 110 + 40*17, "[" +local_items[195]+ "] Kusa Pouch", 195,  scene);
+    button_crafting_item194  = create_button(170, 80 + 40*17, "[" +local_items[194]+ "] Ohana Bank", 194,  scene);
+    button_crafting_item195  = create_button(520, 80 + 40*17, "[" +local_items[195]+ "] Kusa Pouch", 195,  scene);
     group_window_crafting.add(button_crafting_item194);
     group_window_crafting.add(button_crafting_item195);
 
