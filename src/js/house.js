@@ -1598,31 +1598,58 @@ function open_window_craft (scene) {
     }
 
     //function, create button
-    function create_button(_x, _y, _text, _item_type, scene) {
+    function create_button(_x, _y, _text, _item_type, scene, rarity) {
+        let _color;
+        if (rarity == "common") {
+            _color = "green";
+        }else if (rarity == "uncommon") {
+            _color = "blue";
+        }else if (rarity == "rare") {
+            _color = "#FF8B00";
+        }else{
+            _color = "black";
+        }
         let obj = scene.add.text(_x, _y, _text)
-            .setFontSize(30).setFontFamily("Arial").setFill('#000000')
+            .setFontSize(30).setFontFamily("Arial")
             .setInteractive({useHandCursor: true})
+            .setFill(_color)
             .on("pointerdown", () => close_crafting_window(_item_type) )
             .on("pointerdown", () => sound_window_select.play() )
             .on("pointerover", () => obj.setStyle({ fontSize: 30, fontFamily: "Arial", fill: '#ffff00' }))
             .on("pointerover", () => sound_window_pointerover.play())
-            .on("pointerout", () => obj.setStyle({ fontSize: 30, fontFamily: "Arial", fill: '#000000' }));
+            .on("pointerout", () => obj.setStyle({ fontSize: 30, fontFamily: "Arial", fill: _color }));
         return obj;
     }
 
+    //create group
+    group_window_crafting = scene.add.group();
+
     //create window
-    window_crafting = scene.add.sprite(640, 480, "window").setInteractive();
+    group_window_crafting.add(scene.add.sprite(640, 480, "window").setInteractive())
 
     //create item list text
     button_crafting_close = create_button(1070, 790, "Cancel", 0, scene);
+    group_window_crafting.add(button_crafting_close);
     let _x = 170;
     let _y = 110;
     let _y_add = 40;
     let _item_count = 0;
     //mining_item
     for (var i = 1; i <= 16; i++) {
+        let _rarity;
+        if (local_items[i+128] > 0) {
+            _rarity = "rare";
+        }else if (local_items[i+64] > 0) {
+            _rarity = "uncommon";
+        }else if (local_items[i] > 0) {
+            _rarity = "common";
+        }else{
+            _rarity = "empty";
+        }
         //use eval to create dynamic variants
-        eval(`button_crafting_item${i}  = create_button(_x, _y + _y_add *  ${i}, '[' + local_items[${i}] + ',' + local_items[${i+64}] + ',' + local_items[${i+128}] + '] ' + array_item_name[${i}],  ${i},  scene);`)
+        //eval(`button_crafting_item${i}  = create_button(_x, _y + _y_add *  ${i}, '[' + local_items[${i}] + ',' + local_items[${i+64}] + ',' + local_items[${i+128}] + '] ' + array_item_name[${i}],  ${i},  scene);`)
+        eval(`_button  = create_button(_x, _y + _y_add *  ${i}, '[' + local_items[${i}] + ',' + local_items[${i+64}] + ',' + local_items[${i+128}] + '] ' + array_item_name[${i}],  ${i},  scene, _rarity);`)
+        group_window_crafting.add(_button);
     }
     item1_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  1, "mr_astar_right").setScale(0.08);
     item2_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  2, "item_crown").setScale(0.15);
@@ -1630,12 +1657,29 @@ function open_window_craft (scene) {
     item4_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  4, "item_hat_helmet").setScale(0.1);
     item5_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  5, "item_kanban").setScale(0.1);
     item6_icon = scene.add.sprite(_x-25, _y+12 + _y_add *  6, "item_ribbon").setScale(0.12);
+    group_window_crafting.add(item1_icon);
+    group_window_crafting.add(item2_icon);
+    group_window_crafting.add(item3_icon);
+    group_window_crafting.add(item4_icon);
+    group_window_crafting.add(item5_icon);
+    group_window_crafting.add(item6_icon);
 
     //farming_item
     _x = 520;
     for (var i = 17; i <= 32; i++) {
-        //eval(`button_crafting_item${i}  = create_button(_x, _y + _y_add *  ${i-16}, '[' + local_items[${i}] + ',' + local_items[${i+64}] + '] ' + array_item_name[${i}],  ${i},  scene);`)
-        eval(`button_crafting_item${i}  = create_button(_x, _y + _y_add *  ${i-16}, '[' + local_items[${i}] + ',' + local_items[${i+64}] + ',' + local_items[${i+128}] + '] ' + array_item_name[${i}],  ${i},  scene);`)
+        let _rarity;
+        if (local_items[i+128] > 0) {
+            _rarity = "rare";
+        }else if (local_items[i+64] > 0) {
+            _rarity = "uncommon";
+        }else if (local_items[i] > 0) {
+            _rarity = "common";
+        }else{
+            _rarity = "empty";
+        }
+        //eval(`button_crafting_item${i}  = create_button(_x, _y + _y_add *  ${i-16}, '[' + local_items[${i}] + ',' + local_items[${i+64}] + ',' + local_items[${i+128}] + '] ' + array_item_name[${i}],  ${i},  scene);`)
+        eval(`_button  = create_button(_x, _y + _y_add *  ${i-16}, '[' + local_items[${i}] + ',' + local_items[${i+64}] + ',' + local_items[${i+128}] + '] ' + array_item_name[${i}],  ${i},  scene, _rarity);`)
+        group_window_crafting.add(_button);
     }
     item17_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  1, "item_vase").setScale(0.08);
     item18_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  2, "ms_ether_right").setScale(0.08);
@@ -1643,12 +1687,30 @@ function open_window_craft (scene) {
     item20_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  4, "item_asnya").setScale(0.1);
     item21_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  5, "item_switch").setScale(0.1);
     item22_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  6, "item_chocolate_bread").setScale(0.25);
+    group_window_crafting.add(item17_icon);
+    group_window_crafting.add(item18_icon);
+    group_window_crafting.add(item19_icon);
+    group_window_crafting.add(item20_icon);
+    group_window_crafting.add(item21_icon);
+    group_window_crafting.add(item22_icon);
 
     //crafting_item
     _x = 870;
     for (var i = 33; i <= 48; i++) {
+        let _rarity;
+        if (local_items[i+128] > 0) {
+            _rarity = "rare";
+        }else if (local_items[i+64] > 0) {
+            _rarity = "uncommon";
+        }else if (local_items[i] > 0) {
+            _rarity = "common";
+        }else{
+            _rarity = "empty";
+        }
         //eval(`button_crafting_item${i}  = create_button(_x, _y + _y_add *  ${i-32}, '[' + local_items[${i}] + ',' + local_items[${i+64}] + '] ' + array_item_name[${i}],  ${i},  scene);`);
-        eval(`button_crafting_item${i}  = create_button(_x, _y + _y_add *  ${i-32}, '[' + local_items[${i}] + ',' + local_items[${i+64}] + ',' + local_items[${i+128}] + '] ' + array_item_name[${i}],  ${i},  scene);`)
+        //eval(`button_crafting_item${i}  = create_button(_x, _y + _y_add *  ${i-32}, '[' + local_items[${i}] + ',' + local_items[${i+64}] + ',' + local_items[${i+128}] + '] ' + array_item_name[${i}],  ${i},  scene);`)
+        eval(`_button  = create_button(_x, _y + _y_add *  ${i-32}, '[' + local_items[${i}] + ',' + local_items[${i+64}] + ',' + local_items[${i+128}] + '] ' + array_item_name[${i}],  ${i},  scene, _rarity);`)
+        group_window_crafting.add(_button);
     }
     item33_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  1, "item_violin").setScale(0.08);
     item34_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  2, "item_musicbox").setScale(0.12);
@@ -1656,43 +1718,22 @@ function open_window_craft (scene) {
     item36_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  4, "item_dice").setScale(0.18);
     item37_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  5, "item_hat_knit").setScale(0.14);
     item38_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  6, "item_hat_mortarboard").setScale(0.14);
-
-    //coin/material bag
-    button_crafting_item194  = create_button(170, 110 + 40*17, "[" +local_items[194]+ "] Ohana Piggy Bank", 194,  scene);
-    button_crafting_item195  = create_button(520, 110 + 40*17, "[" +local_items[195]+ "] Kusa Pouch", 195,  scene);
-
-    //create group
-    group_window_crafting = scene.add.group();
-    group_window_crafting.add(window_crafting);
-    group_window_crafting.add(button_crafting_close);
-    //add item_text 1-48
-    for (var i = 1; i <= 48; i++) {
-        //group_window_crafting.add(button_crafting_item1);
-        eval(`group_window_crafting.add(button_crafting_item${i});`);
-    }
-    //item_text 194, 195
-    group_window_crafting.add(button_crafting_item194);
-    group_window_crafting.add(button_crafting_item195);
-    //item_icon
-    group_window_crafting.add(item1_icon);
-    group_window_crafting.add(item2_icon);
-    group_window_crafting.add(item3_icon);
-    group_window_crafting.add(item4_icon);
-    group_window_crafting.add(item5_icon);
-    group_window_crafting.add(item6_icon);
-    group_window_crafting.add(item17_icon);
-    group_window_crafting.add(item18_icon);
-    group_window_crafting.add(item19_icon);
-    group_window_crafting.add(item20_icon);
-    group_window_crafting.add(item21_icon);
-    group_window_crafting.add(item22_icon);
     group_window_crafting.add(item33_icon);
     group_window_crafting.add(item34_icon);
     group_window_crafting.add(item35_icon);
     group_window_crafting.add(item36_icon);
     group_window_crafting.add(item37_icon);
     group_window_crafting.add(item38_icon);
+
+    //coin/material bag
+    button_crafting_item194  = create_button(170, 110 + 40*17, "[" +local_items[194]+ "] Ohana Piggy Bank", 194,  scene);
+    button_crafting_item195  = create_button(520, 110 + 40*17, "[" +local_items[195]+ "] Kusa Pouch", 195,  scene);
+    group_window_crafting.add(button_crafting_item194);
+    group_window_crafting.add(button_crafting_item195);
+
+    //depth
     group_window_crafting.setDepth(9999 + 100);
+    
 }
 
 
