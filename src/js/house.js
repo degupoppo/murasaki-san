@@ -5,6 +5,9 @@
 
 /*
 
+    summon時, petrified時の挙動確認
+    カンバンmint時の挙動確認
+
  ok かんばんのアイテム化
     帽子の普遍的な位置合わせ
  ok ダイスはラックにのみ補正をかける
@@ -1538,7 +1541,7 @@ function open_window_craft (scene) {
     sound_window_open.play();
 
     //TOFIX: prevent loading error
-    if (local_level == 0 || typeof mr_astar == "undefined") {
+    if (local_level == 0) {
         return 0;
     }
 
@@ -1730,7 +1733,15 @@ function open_window_craft (scene) {
     button_crafting_item195  = create_button(520, 80 + 40*17, "[" +local_items[195]+ "] Kusa Pouch", 195,  scene);
     group_window_crafting.add(button_crafting_item194);
     group_window_crafting.add(button_crafting_item195);
+    
+    //mail
+    button_crafting_item196  = create_button(870, 80 + 40*17, "[" +local_items[196]+ "] Mail", 196,  scene);
+    group_window_crafting.add(button_crafting_item196);
 
+    //nui
+    button_crafting_item197  = create_button(870, 80 + 40*18, "[" +local_items[197]+ "] Nui", 197,  scene);
+    group_window_crafting.add(button_crafting_item197);
+    
     //depth
     group_window_crafting.setDepth(9999 + 100);
     
@@ -2989,8 +3000,8 @@ function update() {
         let _mode = murasakisan.get_mode;
         if (_mode == "mining") {
             icon_mining.visible = true;
-            let _delta = (now_time - local_mining_start_time);
-            let _daily_earn = local_coin_calc / _delta * 8640;
+            let _delta = (now_time - local_mining_start_time) * SPEED;
+            let _daily_earn = local_coin_calc / _delta * 86400;
             text_mining_calc.setText(" +" + local_coin_calc + " Ohana\n  (" + Math.round(_daily_earn/10)*10 + " /d)");
             //update gold
             if (local_coin_calc >= 500) {
@@ -3004,8 +3015,8 @@ function update() {
             }            
         }else if (_mode == "farming") {
             icon_farming.visible = true;
-            let _delta = (now_time - local_farming_start_time);
-            let _daily_earn = local_material_calc / _delta * 8640;
+            let _delta = (now_time - local_farming_start_time) * SPEED;
+            let _daily_earn = local_material_calc / _delta * 86400;
             text_farming_calc.setText(" +" + local_material_calc + " Kusa\n  (" + Math.round(_daily_earn/10)*10 + " /d)");
             //update tree
             if (local_material_calc >= 1000) {
@@ -3798,8 +3809,8 @@ function update() {
 
     if (turn % 500 == 80 || turn == 50) {
         //when no summoner argument, load summoner id from wallet
-        //if (summoner == -1) {
-        if (count_sync == 0) {
+        if (summoner == -1) {
+        //if (count_sync == 0) {
             //can not get summoner id directry, update summoner id is better.
             contract_update_all();
         //when summoner is loaded, update summoner status

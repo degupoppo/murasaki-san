@@ -212,4 +212,6 @@ let array_item_name = [
     "Ohana Bank",
     //195, Kusa Pouch
     "Kusa Pouch",
+    "Mail",
+    "Nui",
 ]

@@ -2323,10 +2323,9 @@ contract Murasaki_Function_Crafting is Ownable {
             }
             //craft
             Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
-            //uint32 _crafting_item = mc.next_item();
             uint32 _seed = mfs.seed(_summoner);
             mc.craft(_item_type, _summoner, msg.sender, _seed);
-            //when normal items, generate tiny heart and update score
+            //when normal items, generate tiny heart
             if (_item_type <= 128) {
                 _create_tiny_heart(_summoner);
                 //update score
@@ -2336,10 +2335,10 @@ contract Murasaki_Function_Crafting is Ownable {
             }
             //when nui-chan, update Strage_Nui
             if (_item_type == 197) {
-                _update_strage_nui(_summoner, mc.next_item()-1);
+                _update_strage_nui(_summoner, mc.next_item());
             }
             //event
-            emit Crafting(_summoner, _item_type, mc.next_item()-1);
+            emit Crafting(_summoner, _item_type, mc.next_item());
         //not completed, chancel and return coin/material
         } else {
             uint32[4] memory _dc_table = get_item_dc(_item_type);
@@ -2385,16 +2384,94 @@ contract Murasaki_Function_Crafting is Ownable {
     function get_modified_dc(uint32 _summoner, uint32 _item_type) public view returns (uint32) {
         Murasaki_Function_Crafting_Codex mfcc = Murasaki_Function_Crafting_Codex(murasaki_function_crafting_codex_address);
         return mfcc.get_modified_dc(_summoner, _item_type);
+        /*
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        uint32[4] memory _dc_table = get_item_dc(_item_type);
+        //get dc
+        uint32 _level = _dc_table[0];
+        uint32 _dc = _dc_table[1];
+        // when not normal items: return exact dc
+        if (_item_type >= 193) {
+            return _dc;
+        // when normal crafting items: modified by status
+        } else {
+            //status boost
+            uint32 _mod = ms.intelligence(_summoner) + ms.level(_summoner)*100 + count_crafting_items(msg.sender);
+            //initial point = 400 (1Lv*100, 3INT*100)
+            //point per level = 150 (1Lv*100 + 0.5INT*100)
+            //minimum dc = 3000 (3 days)
+            // _mod_dc = _dc - ( _dc / (_level * 150) ) * (_mod - 400) >= 3000
+            // _delta = (_mod - 400) / (_level * 150) * _dc
+            // _mod_dc = _dc - _delta >= 3000
+            //uint32 _delta = (_mod - 400) / (_level * 150) * _dc;  //original concept law, but not good
+            //uint32 _delta = _dc * (_mod - 400) / (_level * 150);    //division should be done last
+            uint32 _delta = _dc * (_mod - 400) / (_level * 300);    //150 -> 300, 220401
+            uint32 _mod_dc;
+            if (_dc < 3000 + _delta) {
+                _mod_dc = 3000;
+            } else {
+                _mod_dc = _dc - _delta;
+            }
+            return _mod_dc;
+        }
+        */
     }
-    //calc crafting, using codex
     function calc_crafting(uint32 _summoner) public view returns (uint32) {
         Murasaki_Function_Crafting_Codex mfcc = Murasaki_Function_Crafting_Codex(murasaki_function_crafting_codex_address);
         return mfcc.calc_crafting(_summoner);
+        /*
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        require(ms.crafting_status(_summoner) == 1);
+        uint32 SPEED = ms.SPEED();
+        uint32 _now = uint32(block.timestamp);
+        uint32 _item_type = ms.crafting_item_type(_summoner);
+        //get modified dc
+        uint32 _dc = get_modified_dc(_summoner, _item_type);
+        //calc remaining sec
+        uint32 BASE_SEC = ms.BASE_SEC();
+        uint32 _dc_sec = _dc * BASE_SEC / 1000;   //1000dc = 1day = 86400sec
+        //calc remining sec
+        uint32 _delta_time = ( _now - ms.crafting_start_time(_summoner) ) * SPEED/100;
+        uint32 _remining_time;
+        if (_delta_time >= _dc_sec) {
+            _remining_time = 0;
+        }else {
+            _remining_time = _dc_sec - _delta_time;
+        }
+        return _remining_time;
+        */
     }
     //count crafting items, using codex
     function count_crafting_items(address _address) public view returns (uint32) {
         Murasaki_Function_Crafting_Codex mfcc = Murasaki_Function_Crafting_Codex(murasaki_function_crafting_codex_address);
         return mfcc.count_crafting_items(_address);
+        /*
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        uint32[256] memory _balance_of_type = mfs.get_balance_of_type_array(_address);
+        uint32 _crafting_items = 0;
+        for (uint i = 33; i <= 48; i++) {
+            if (_balance_of_type[i+128] > 0) {
+                _crafting_items += 200;
+            }else if (_balance_of_type[i+64] > 0) {
+                _crafting_items += 150;
+            }else if (_balance_of_type[i] > 0) {
+                _crafting_items += 100;
+            }
+            //+10% per one additional items
+            if (_balance_of_type[i] >= 2) {
+                _crafting_items += (_balance_of_type[i] - 1) * 10;
+            }
+            if (_balance_of_type[i+64] >= 2) {
+                _crafting_items += (_balance_of_type[i+64] - 1) * 15;
+            }
+            if (_balance_of_type[i+128] >= 2) {
+                _crafting_items += (_balance_of_type[i+128] - 1) * 20;
+            }
+        }
+        return _crafting_items;
+        */
     }
     //get item dc, using codex contract
     function get_item_dc(uint32 _item_type) public view returns (uint32[4] memory) {
@@ -2438,13 +2515,14 @@ contract Murasaki_Function_Crafting is Ownable {
         //event
         emit Heart(_created_summoner, _to_summoner);
     }
+    
     //tiny heart, external, for Murasaki_Mail, ***duplicated, DirtyCode***
     function create_tiny_heart(uint32 _summoner_to, uint32 _summoner_from) external {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Main mm = Murasaki_Main(mfs.murasaki_main_address());
         Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
         //only from Murasaki_Mail
-        require(msg.sender == mfs.murasaki_mail_address());
+        require(msg.sender == mfs.murasaki_main_address());
         //get wallet
         address _wallet_to = mm.ownerOf(_summoner_to);
         address _wallet_from = mm.ownerOf(_summoner_from);
@@ -3133,8 +3211,8 @@ contract World_Dice is Ownable {
     //variants
     mapping(uint32 => uint32[4]) public rolled_dice;
     mapping(uint32 => uint32) public last_dice_roll_time;
-    uint32 public dice_item_type = 36;
-    uint32 public buffer_sec = 14400;  //4 hr
+    uint32 dice_item_type = 36;
+    uint32 buffer_sec = 14400;  //4 hr
 
     //set dice item_type    
     function _set2_dice_item_type(uint32 _item_type) external onlyOwner {
@@ -3556,9 +3634,8 @@ contract Murasaki_Mail is Ownable {
     
     //variants
     //interval, both of sending interval & receving limit
-    uint32 public interval_sec = 60 * 60 * 24 * 3;    // 3 days
-    uint32 public item_type_of_mail = 196;
-    uint32 public item_type_of_cushion = 1;
+    uint32 interval_sec = 60 * 60 * 24 * 3;    // 3 days
+    uint32 item_type_of_mail = 196;
 
     //admin, set variants
     function set_interval_sec(uint32 _value) external onlyOwner {
@@ -3576,10 +3653,8 @@ contract Murasaki_Mail is Ownable {
             return false;
         } else {
             Mail memory _mail = mails[_mail_id];
-            uint32 _now = uint32(block.timestamp);
-            uint32 _delta = _now - _mail.send_time;
             //expired
-            if (_delta >= interval_sec) {
+            if (_mail.send_time >= interval_sec) {
                 return false;
             // already opend
             } else if (_mail.open_time != 0) {
@@ -3614,13 +3689,6 @@ contract Murasaki_Mail is Ownable {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         //check owner
         require(mfs.check_owner(_summoner_from, msg.sender));
-        //check cushion in wallet
-        address _owner = mfs.get_owner(_summoner_from);
-        require(
-            mfs.get_balance_of_type_specific(_owner, item_type_of_cushion) > 0
-            || mfs.get_balance_of_type_specific(_owner, item_type_of_cushion+64) > 0
-            || mfs.get_balance_of_type_specific(_owner, item_type_of_cushion+128) > 0
-            );
         //check sending interval
         require(calc_sending_interval(_summoner_from) == 0);
         //check _item_mail nft
@@ -3637,8 +3705,8 @@ contract Murasaki_Mail is Ownable {
         Mail memory _mail = Mail(_now, 0, _summoner_from, _summoner_to);
         mails[_item_mail] = _mail;
         //send mail
-        sending[_summoner_from] = _item_mail;
-        receiving[_summoner_to] = _item_mail;
+        sending[_summoner_to] = _item_mail;
+        receiving[_summoner_from] = _item_mail;
         //event
         emit Send_Mail(_summoner_from, _summoner_to, _item_mail);
     }

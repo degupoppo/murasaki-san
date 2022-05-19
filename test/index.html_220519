@@ -186,6 +186,12 @@
     </li>
 </ul></p>
 
+<h3 id="ToS">Terms of Service &#x1f4ac;</h3>
+<p>
+    To ensure fair gameplay, botting with multiple wallets is not allowed and your accounts being banned.
+    Use of this site is at your sole risk. All materials, information, products, software, programs, and services are provided "as is," with no warranties or guarantees whatsoever. We expressly disclaims to the fullest extent permitted by law all express, implied, statutory, and other warranties, guarantees, or representations, including, without limitation, the warranties of merchantability, fitness for a particular purpose, and non-infringement of proprietary and intellectual property rights. Without limitation, we makes no warranty or guarantee that this web site will be uninterrupted, timely, secure, or error-free.
+</p>
+
 <h3 id="future">Future Plans &#9203;</h3>
 <p><ul>
     <li>Development of all craftable items (total 48 types planned).</li>
@@ -211,11 +217,21 @@
 <h3 id="story">Back Story &#127799;</h3>
 <p>blah-blah-blah...</p>
 
-<h3 id="ToS">Terms of Service &#x2757;</h3>
+<h3 id="bbs">Bulletin Board &#x1F43E;</h3>
 <p>
-    To ensure fair gameplay, botting with multiple wallets is not allowed and your accounts being banned.
-    Use of this site is at your sole risk. All materials, information, products, software, programs, and services are provided "as is," with no warranties or guarantees whatsoever. We expressly disclaims to the fullest extent permitted by law all express, implied, statutory, and other warranties, guarantees, or representations, including, without limitation, the warranties of merchantability, fitness for a particular purpose, and non-infringement of proprietary and intellectual property rights. Without limitation, we makes no warranty or guarantee that this web site will be uninterrupted, timely, secure, or error-free.
+    This is a bulletin board using blockchain during trial operation.<br>
+    You need some gas cost to write message here.
 </p>
+<p>
+    <label><b>Message:</b></label>&nbsp;
+    <input type="text" id="message">
+    <button onclick="write_message();">Write</button>
+    <button onclick="show_messages();">Reload</button>
+</p>
+<p><div id="messages" class="box"></div></p>
+<script type="text/javascript">
+    show_messages();
+</script>
 
 </main>
 
