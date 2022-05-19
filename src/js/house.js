@@ -3809,8 +3809,8 @@ function update() {
 
     if (turn % 500 == 80 || turn == 50) {
         //when no summoner argument, load summoner id from wallet
-        if (summoner == -1) {
-        //if (count_sync == 0) {
+        //if (summoner == -1) {
+        if (count_sync == 0) {
             //can not get summoner id directry, update summoner id is better.
             contract_update_all();
         //when summoner is loaded, update summoner status
