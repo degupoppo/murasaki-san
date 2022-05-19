@@ -16,7 +16,7 @@
     パンケーキ
     すし
     
-    イベントの実装
+ ok イベントの実装
         https://qiita.com/crazy_traveler/items/a00c7f0b69f242607aef
         定期的に情報を読みに行くのではなく、
         eventを発行し、フロントエンド側でeventの発行を購読して待っておく
