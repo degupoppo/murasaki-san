@@ -2279,7 +2279,13 @@ contract Murasaki_Function_Crafting is Ownable {
         require(ms.mining_status(_summoner) == 0 && ms.farming_status(_summoner) == 0 && ms.crafting_status(_summoner) == 0);
         require(mfs.calc_satiety(_summoner) >= 20 && mfs.calc_happy(_summoner) >= 20);
         require(ms.level(_summoner) >= 3);
-        //check item_type is not nessesary, error in get_dc
+        //check item_type
+        require(
+            _item_type <= 64        //normal items
+            || _item_type == 194    //coin bag
+            || _item_type == 195    //material bag
+            || _item_type == 196    //mail
+        );
         uint32 _now = uint32(block.timestamp);
         //get dc, cost
         uint32[4] memory _dc_table = get_item_dc(_item_type);
@@ -2287,12 +2293,58 @@ contract Murasaki_Function_Crafting is Ownable {
         uint32 _material = _dc_table[3];
         //check coin, material
         require(ms.coin(_summoner) >= _coin && ms.material(_summoner) >= _material);
-        //start crafting
+        //pay coin/material
         ms.set_coin(_summoner, ms.coin(_summoner) - _coin);
         ms.set_material(_summoner, ms.material(_summoner) - _material);
+        //start crafting
         ms.set_crafting_item_type(_summoner, _item_type);
         ms.set_crafting_status(_summoner, 1);
         ms.set_crafting_start_time(_summoner, _now);
+    }
+    //crafting, heart required
+    function start_crafting_with_heart(uint32 _summoner, uint32 _item_type, uint32[10] memory _item_hearts) public {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
+        require(mfs.check_owner(_summoner, msg.sender));
+        require(ms.mining_status(_summoner) == 0 && ms.farming_status(_summoner) == 0 && ms.crafting_status(_summoner) == 0);
+        require(mfs.calc_satiety(_summoner) >= 20 && mfs.calc_happy(_summoner) >= 20);
+        require(ms.level(_summoner) >= 3);
+        //check item_type
+        require(
+            _item_type == 197    //nui, heart require
+        );
+        //check heart
+        uint32 _count_hearts = 0;
+        for (uint i = 0; i <= 9; i++) {
+            if (
+                _item_hearts[i] != 0
+                && mc.ownerOf(_item_hearts[i]) == msg.sender
+            ) {
+                _count_hearts += 1;
+            }
+        }
+        if (_item_type == 197) {
+            require(_count_hearts >= 1);
+        }
+        //uint32 _now = uint32(block.timestamp);
+        //get dc, cost
+        uint32[4] memory _dc_table = get_item_dc(_item_type);
+        uint32 _coin = _dc_table[2];
+        uint32 _material = _dc_table[3];
+        //check coin, material
+        require(ms.coin(_summoner) >= _coin && ms.material(_summoner) >= _material);
+        //pay coin/material
+        ms.set_coin(_summoner, ms.coin(_summoner) - _coin);
+        ms.set_material(_summoner, ms.material(_summoner) - _material);
+        //burn hearts
+        for (uint i = 0; i <= _count_hearts; i++) {
+            _burn(msg.sender, _item_hearts[i]);
+        }
+        //start crafting
+        ms.set_crafting_item_type(_summoner, _item_type);
+        ms.set_crafting_status(_summoner, 1);
+        ms.set_crafting_start_time(_summoner, uint32(block.timestamp));
     }
     event Crafting(uint32 indexed _summoner, uint32 _item_type, uint32 _item);
     function stop_crafting(uint32 _summoner) public {
@@ -2461,6 +2513,7 @@ contract Murasaki_Function_Crafting is Ownable {
         mss.set_total_heart_received(_summoner_from, _total_heart_received_from + 1);
         //event
         emit Heart(_summoner_to, _summoner_from);
+        emit Heart(_summoner_from, _summoner_to);
     }
 
     //upgrade item
@@ -2486,9 +2539,12 @@ contract Murasaki_Function_Crafting is Ownable {
     	    && _item_type3 == _item_type1
     	);
         //burn (transfer) lower rank items
-        mc.transferFrom(msg.sender, address(this), _item1);
-        mc.transferFrom(msg.sender, address(this), _item2);
-        mc.transferFrom(msg.sender, address(this), _item3);
+        //mc.transferFrom(msg.sender, address(this), _item1);
+        //mc.transferFrom(msg.sender, address(this), _item2);
+        //mc.transferFrom(msg.sender, address(this), _item3);
+        _burn(msg.sender, _item1);
+        _burn(msg.sender, _item2);
+        _burn(msg.sender, _item3);
         //mint upper rank item
         uint32 _seed = mfs.seed(_summoner);
         mc.craft(_item_type1 + 64, _summoner, msg.sender, _seed);
@@ -2509,7 +2565,8 @@ contract Murasaki_Function_Crafting is Ownable {
         (uint32 _item_type, , ,) = mc.items(_item);
         require(_item_type == 194 || _item_type == 195);
         //burn _item
-        mc.transferFrom(msg.sender, address(this), _item);
+        //mc.transferFrom(msg.sender, address(this), _item);
+        _burn(msg.sender, _item);
         //unpack coin/material
         if (_item_type == 194) {
             ms.set_coin(_summoner, ms.coin(_summoner) + 1000);
@@ -2518,6 +2575,20 @@ contract Murasaki_Function_Crafting is Ownable {
         }
         //event
         emit Unpack(_summoner, _item_type, _item);
+    }
+    
+    //burn, internal
+    function _burn(address _owner, uint32 _item) internal {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
+        mc.transferFrom(_owner, address(this), _item);
+    }
+    //burn mail, external, only from Murasaki_Mail
+    function burn_mail(address _owner, uint32 _item) external {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        //only from Murasaki_Mail
+        require(msg.sender == mfs.murasaki_mail_address());
+        _burn(_owner, _item);
     }
 }
 
@@ -2566,7 +2637,7 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
         uint32 _level = _dc_table[0];
         uint32 _dc = _dc_table[1];
         // when not normal items: return exact dc
-        if (_item_type >= 193) {
+        if (_item_type >= 192) {
             return _dc;
         // when normal crafting items: modified by status
         } else {
@@ -3279,49 +3350,6 @@ contract World_Dice is Ownable {
 }
 
 
-//---BBS------------------------------------------------------------------------------------------------------------------
-
-
-contract Bulletin_Board is Ownable {
-
-    //variants
-    mapping(uint32 => address) public writer;
-    mapping(uint32 => string) public message;
-    mapping(uint32 => uint32) public date_writed;
-    uint32 public next_message = 1;
-
-    function write_message(string memory _message) external {
-        writer[next_message] = msg.sender;
-        message[next_message] = _message;
-        date_writed[next_message] = uint32(block.timestamp);
-        next_message++;
-    }
-
-    function read_latest_messages() external view returns (uint32, address, string memory) {
-        return (date_writed[next_message-1], writer[next_message-1], message[next_message-1]);
-    }
-
-    function read_messages(uint32 _number) external view returns (uint32, address, string memory) {
-        return (date_writed[_number], writer[_number], message[_number]);
-    }
-
-    function read_recent_messages(uint32 _count) external view returns (uint32, uint32, address, string memory) {
-        return (
-            next_message - _count, 
-            date_writed[next_message - _count], 
-            writer[next_message - _count], 
-            message[next_message - _count]
-        );
-    }
-
-    function delete_message(uint32 _number) external onlyOwner {
-        writer[_number] = 0x0000000000000000000000000000000000000000;
-        message[_number] = "[DELETED]";
-        date_writed[_number] = 0;
-    }
-}
-
-
 //---Murasaki_Name------------------------------------------------------------------------------------------------------------------
 
 
@@ -3592,6 +3620,9 @@ contract Murasaki_Mail is Ownable {
     
     //calc sending interval
     function calc_sending_interval(uint32 _summoner_from) public view returns (uint32) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        uint32 SPEED = ms.SPEED();
         uint32 _mail_id = sending[_summoner_from];
         //not send yet
         if (_mail_id == 0) {
@@ -3600,7 +3631,7 @@ contract Murasaki_Mail is Ownable {
         //mail sending
         Mail memory _mail = mails[_mail_id];
         uint32 _now = uint32(block.timestamp);
-        uint32 _delta = _now - _mail.send_time;
+        uint32 _delta = (_now - _mail.send_time) * SPEED/100;
         if (_delta >= interval_sec) {
             return 0;
         } else {
@@ -3667,10 +3698,14 @@ contract Murasaki_Mail is Ownable {
         return _summoner_to;
     }
     function _burn_mail(uint32 _item_mail) internal {
+        /*
         //prior approval required
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
         mc.transferFrom(msg.sender, address(this), _item_mail);
+        */
+        Murasaki_Function_Crafting mfc = Murasaki_Function_Crafting(murasaki_function_crafting_address);
+        mfc.burn_mail(msg.sender, _item_mail);
     }
     
     //open mail

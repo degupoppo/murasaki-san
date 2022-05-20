@@ -57,7 +57,7 @@ async function update_onMarketItems() {
         //summoner_name
         let _crafted_summoner_name = await call_name_from_summoner(_crafted_summoner);
         if (_crafted_summoner_name == "") {
-            _crafted_summoner_name = _crafted_summoner;
+            _crafted_summoner_name = "#" + _crafted_summoner;
         }
         //item_rarity
         let _item_rarity;
@@ -125,7 +125,7 @@ async function update_sellingItems() {
         //summoner_name
         let _crafted_summoner_name = await call_name_from_summoner(_crafted_summoner);
         if (_crafted_summoner_name == "") {
-            _crafted_summoner_name = _crafted_summoner;
+            _crafted_summoner_name = "#" + _crafted_summoner;
         }
         //item_rarity
         let _item_rarity;
@@ -194,7 +194,7 @@ async function update_userItems() {
         //summoner_name
         let _crafted_summoner_name = await call_name_from_summoner(_crafted_summoner);
         if (_crafted_summoner_name == "") {
-            _crafted_summoner_name = _crafted_summoner;
+            _crafted_summoner_name = "#" + _crafted_summoner;
         }
         //item_rarity
         let _item_rarity;
@@ -350,6 +350,46 @@ async function upgrade_item() {
     let _item3 = document.getElementById("upgrade_item_id3").value;
     let contract_mfc = await new web3.eth.Contract(abi_murasaki_function_crafting, contract_murasaki_function_crafting);
     contract_mfc.methods.upgrade_item(_summoner, _item1, _item2, _item3).send({from:wallet});
+}
+
+//get event
+async function get_recent_activity() {
+    console.log(1);
+    let web3 = await connect();
+    let wallet = await get_wallet(web3);
+    let contract = await new web3.eth.Contract(abi_murasaki_item_market, contract_murasaki_item_market);
+    let _block_latest = await web3.eth.getBlockNumber();
+    let _block_from = _block_latest - 10000;
+    let events = await contract.getPastEvents("Buy", {
+            fromBlock: _block_from,
+            toBlock: "latest"
+    })
+    if (events) {
+        for (let event of events) {
+            let _block = event.blockNumber;
+            let _item_id = event.returnValues[0];
+            let _wallet_seller = event.returnValues[1];
+            let _wallet_buyer = event.returnValues[2];
+            let _price = web3.utils.fromWei(event.returnValues[3]);
+            let contract_mm = await new web3.eth.Contract(abi_murasaki_main, contract_murasaki_main);
+            let _summoner_seller = await contract_mm.methods.tokenOf(_wallet_seller).call();  //have not summoned yet: 0
+            let _summoner_buyer = await contract_mm.methods.tokenOf(_wallet_buyer).call();  //have not summoned yet: 0
+            let _name_seller = await call_name_from_summoner(_summoner_seller);
+            if (_name_seller == "") {
+                _name_seller = "#" + _summoner_seller;
+            }
+            let _name_buyer = await call_name_from_summoner(_summoner_buyer);
+            if (_name_buyer == "") {
+                _name_buyer = "#" + _summoner_buyer;
+            }
+            let contract_mc = await new web3.eth.Contract(abi_murasaki_craft, contract_murasaki_craft);
+            let _item = await contract_mc.methods.items(_item_id).call();
+            let _item_type = _item[0];
+            let _item_name = array_item_name[_item_type];
+            let _text = "&nbsp;&nbsp;&nbsp;" + _block + " : <u>" + _name_buyer + "</u> bought <b>" + _item_name + "</b> from <u>" + _name_seller + "</u> for <b>" + _price + " $ASTR</b>.<br>"
+            recentActivity.innerHTML += _text;
+        }
+    }
 }
 
 /*

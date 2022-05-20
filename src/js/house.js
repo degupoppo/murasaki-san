@@ -5,16 +5,17 @@
 
 /*
 
-    summon時, petrified時の挙動確認
-    カンバンmint時の挙動確認
+    帽子の普遍的な位置合わせ
+    パンケーキ
+    すし
+
+ ok summon時, petrified時の挙動確認
+ ok カンバンmint時の挙動確認
 
  ok かんばんのアイテム化
-    帽子の普遍的な位置合わせ
  ok ダイスはラックにのみ補正をかける
         すべてのluck参照処理時にdice値を足す
         レーダーチャートに青色でdice補正を表示する
-    パンケーキ
-    すし
     
  ok イベントの実装
         https://qiita.com/crazy_traveler/items/a00c7f0b69f242607aef
@@ -35,7 +36,7 @@
             ホントはevent内容だけでfrontendに反映したいが、流石に複雑になりすぎている
         また、イベント観測時以外でも定期的に読みに行く
         
-    市場のイベントの実装
+ ok 市場のイベントの実装
         過去トレードを履歴表示する
 
 */
@@ -130,6 +131,7 @@ let item_wearing_hat = 0;
 let flag_doneFp = 0;
 let previsou_local_rolled_dice = 0;
 let flag_dice_rolling = 0;
+let flag_name_minting = 0;
 
 
 //---html-----------------------------------------------------------------------------------------------------
@@ -263,7 +265,7 @@ async function send_fp_get(_wallet, _summoner) {
 
 //update summoner of wallet
 async function contract_update_summoner_of_wallet() {
-    if (summoner == -1) {
+    if (summoner <= 0) {
         let web3 = await connect();
         let wallet = await get_wallet(web3);
         let contract_mm = await new web3.eth.Contract(abi_murasaki_main, contract_murasaki_main);
@@ -377,6 +379,14 @@ async function contract_update_status(_summoner) {
     //dice, when rolling, high frequency update
     if (flag_dice_rolling == 1 && local_items[36] > 0) {
         await contract_update_dice(_summoner);
+    }
+    
+    //name minting
+    if (flag_name_minting == 1) {
+        contract_update_name(_summoner);
+        if (local_name_str != "") {
+            flag_name_minting = 0;
+        }
     }
 
     //low frequency updates
@@ -543,6 +553,14 @@ async function contract_mint_name(_summoner, _name_str) {
     let contract = await new web3.eth.Contract(abi_murasaki_function_name, contract_murasaki_function_name);
     let wallet = await get_wallet(web3);
     contract.methods.mint(_summoner, _name_str).send({from:wallet});
+}
+
+//burn name
+async function contract_burn_name(_summoner) {
+    let web3 = await connect();
+    let contract = await new web3.eth.Contract(abi_murasaki_function_name, contract_murasaki_function_name);
+    let wallet = await get_wallet(web3);
+    contract.methods.burn(_summoner).send({from:wallet});
 }
 
 //get_userItems_bag
@@ -2521,7 +2539,9 @@ function create() {
     text_summon.visible = false;
 
     //kill
-    //new Button(10, 880, 'Kill', this, () => contract_burn(summoner));
+    //new Button(10, 880, 'kill_summoner', this, () => contract_burn(summoner));
+    //burn name
+    //new Button(10, 780, 'burn_name', this, () => contract_burn_name(summoner));
 
     //curePetrification
     text_curePetrification = this.add.text(640, 480, " >> Cure Petrification (Cost: Lv x 10 $ASTR) << ", {font: "28px Arial", fill: "#E62E8B", backgroundColor: "#FDEFF5"})
@@ -2621,7 +2641,10 @@ function create() {
         .setInteractive({useHandCursor: true})
         .on("pointerover", () => text_mint_name.setStyle({ fontSize: 17, fontFamily: "Arial", fill: '#ffff00' }))
         .on("pointerout", () => text_mint_name.setStyle({ fontSize: 17, fontFamily: "Arial", fill: '#000000' }));
-    text_mint_name.setInteractive().on("pointerdown", () => {contract_mint_name(summoner, text_kanban.text)});
+    text_mint_name.setInteractive().on("pointerdown", () => {
+        contract_mint_name(summoner, text_kanban.text);
+        flag_name_minting = 1;
+    });
     //text_mint_name.visible = false;
     icon_name_ohana = this.add.sprite(_x+88, _y+25, "icon_ohana");
     icon_name_ohana.setScale(0.05);
@@ -2716,7 +2739,7 @@ function update() {
         flag_doneFp = 1;
     }
 
-    //===== sync time =====
+    //=== sync time ===
 
     if (turn % 20 == 0) {
 
@@ -2983,7 +3006,7 @@ function update() {
         let now_time = Date.now() / 1000;
         let age_time = Math.round(now_time - local_birth_time);
         let age = Math.round( age_time * SPEED / 86400 );
-        text_age_time.setText(age + "d");
+        text_age_time.setText(("000" + age).slice(-3) + "d");
 
         //level
         if (button_levelup.texture.key != "button_levelup_pointerover") {
@@ -3449,25 +3472,23 @@ function update() {
             local_items_flag[_item_id] = true;
             group_kanban.setVisible(true);
         }
-        if (local_items_flag[_item_id] == true && previous_local_name_str != local_name_str) {
-            let _name_str;
+        //if (local_items_flag[_item_id] == true && previous_local_name_str != local_name_str) {
+        if (local_items_flag[_item_id] == true) {
             //if (local_name_str == "" && local_items[_item_id] != 0) {
             if (local_name_str == "") {
-                _name_str = "(enter name)";
+                if (text_kanban.text == "") {
+                    text_kanban.setText("(enter name)");
+                }
                 text_kanban.setInteractive();
                 group_mint_name.setVisible(true);
             } else {
-                if (local_name_str != "") {
-                    _name_str = local_name_str;
-                }
+                text_kanban.setText(local_name_str);
                 text_kanban.disableInteractive();
                 group_mint_name.setVisible(false);
             }
-            text_kanban.setText(_name_str);
             text_id.setText("#"+summoner);
         }
         
-
         //6:Ribbon
         _item_id = 6;
         if (
@@ -3808,9 +3829,10 @@ function update() {
     //===== update onchain data =====
 
     if (turn % 500 == 80 || turn == 50) {
+        //console.log(summoner);
         //when no summoner argument, load summoner id from wallet
         //if (summoner == -1) {
-        if (count_sync == 0) {
+        if (count_sync == 0 || local_notPetrified == false || summoner == 0) {
             //can not get summoner id directry, update summoner id is better.
             contract_update_all();
         //when summoner is loaded, update summoner status
