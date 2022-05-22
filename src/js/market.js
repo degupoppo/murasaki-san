@@ -67,6 +67,9 @@ async function update_onMarketItems() {
             _item_rarity = "<font color=blue>uncommon</font>";
         } else if (_item_type <= 192) {
             _item_rarity = "<font color=orange>rare</font>";
+        } else if (_item_type == 197) { //nui
+            let _nui = await contract_msn.methods.nuis(_item).call();
+            _item_rarity = "<font color=#E85298>score: " + _nui[3] + "</font>";
         } else {
             _item_rarity = "<font color=black>---</font>";
         }
@@ -135,6 +138,9 @@ async function update_sellingItems() {
             _item_rarity = "<font color=blue>uncommon</font>";
         } else if (_item_type <= 192) {
             _item_rarity = "<font color=orange>rare</font>";
+        } else if (_item_type == 197) {
+            let _nui = await contract_msn.methods.nuis(_item).call();
+            _item_rarity = "<font color=#E85298>score: " + _nui[3] + "</font>";
         } else {
             _item_rarity = "<font color=black>---</font>";
         }
@@ -178,6 +184,7 @@ async function update_userItems() {
     let wallet = await get_wallet(web3);
     //contract
     let contract = await new web3.eth.Contract(abi_murasaki_craft, contract_murasaki_craft);
+    let contract_msn = await new web3.eth.Contract(abi_murasaki_strage_nui, contract_murasaki_strage_nui);
     let myListLength = await contract.methods.myListLength(wallet).call();
     let myListsAt = await contract.methods.myListsAt(wallet, 0, myListLength).call();
     //console.log(myListsAt);
@@ -204,6 +211,9 @@ async function update_userItems() {
             _item_rarity = "<font color=blue>uncommon</font>";
         } else if (_item_type <= 192) {
             _item_rarity = "<font color=orange>rare</font>";
+        } else if (_item_type == 197) {
+            let _nui = await contract_msn.methods.nuis(_item).call();
+            _item_rarity = "<font color=#E85298>score: " + _nui[3] + "</font>";
         } else {
             _item_rarity = "<font color=black>---</font>";
         }
@@ -354,7 +364,7 @@ async function upgrade_item() {
 
 //get event
 async function get_recent_activity() {
-    console.log(1);
+    //console.log(1);
     let web3 = await connect();
     let wallet = await get_wallet(web3);
     let contract = await new web3.eth.Contract(abi_murasaki_item_market, contract_murasaki_item_market);

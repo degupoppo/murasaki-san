@@ -1757,7 +1757,7 @@ contract Murasaki_Function_Summon_and_LevelUp is Ownable {
         Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
         uint32 PRICE = ms.PRICE();
         uint32 BASE_SEC = ms.BASE_SEC();
-        //uint32 SPEED = ms.SPEED();
+        uint32 SPEED = ms.SPEED();
         require(msg.value >= PRICE * 10**18);
         require(0 <= _class && _class <= 11);
         //summon on mm, mint NTT
@@ -1776,8 +1776,8 @@ contract Murasaki_Function_Summon_and_LevelUp is Ownable {
         ms.set_last_level_up_time(_summoner, _now);
         ms.set_coin(_summoner, 0);
         ms.set_material(_summoner, 0);
-        ms.set_last_feeding_time(_summoner, _now - BASE_SEC/4); //***TODO***
-        ms.set_last_grooming_time(_summoner, _now - BASE_SEC/4);  //***TODO***
+        ms.set_last_feeding_time(_summoner, _now - BASE_SEC * 100 / SPEED / 2);
+        ms.set_last_grooming_time(_summoner, _now - BASE_SEC * 100 / SPEED / 2);
         ms.set_mining_status(_summoner, 0);
         ms.set_mining_start_time(_summoner, 0);
         ms.set_farming_status(_summoner, 0);
@@ -1791,7 +1791,7 @@ contract Murasaki_Function_Summon_and_LevelUp is Ownable {
         ms.set_last_total_mining_sec(_summoner, 0);
         ms.set_last_total_farming_sec(_summoner, 0);
         ms.set_last_total_crafting_sec(_summoner, 0);
-        ms.set_last_grooming_time_plus_working_time(_summoner, _now - BASE_SEC/4); //***TODO***
+        ms.set_last_grooming_time_plus_working_time(_summoner, _now - BASE_SEC * 100 / SPEED / 2);
         ms.set_isActive(_summoner, true);
         //event
         emit Summon(_summoner, msg.sender, _class);
@@ -2073,7 +2073,7 @@ contract Murasaki_Function_Mining_and_Farming is Ownable {
         Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
         require(mfs.check_owner(_summoner, msg.sender));
         require(ms.mining_status(_summoner) == 0 && ms.farming_status(_summoner) == 0 && ms.crafting_status(_summoner) == 0);
-        require(mfs.calc_satiety(_summoner) >= 20 && mfs.calc_happy(_summoner) >= 20);
+        require(mfs.calc_satiety(_summoner) >= 10 && mfs.calc_happy(_summoner) >= 10);
         require(ms.level(_summoner) >= 2);
         uint32 _now = uint32(block.timestamp);
         ms.set_mining_status(_summoner, 1);
@@ -2165,7 +2165,7 @@ contract Murasaki_Function_Mining_and_Farming is Ownable {
         Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
         require(mfs.check_owner(_summoner, msg.sender));
         require(ms.mining_status(_summoner) == 0 && ms.farming_status(_summoner) == 0 && ms.crafting_status(_summoner) == 0);
-        require(mfs.calc_satiety(_summoner) >= 20 && mfs.calc_happy(_summoner) >= 20);
+        require(mfs.calc_satiety(_summoner) >= 10 && mfs.calc_happy(_summoner) >= 10);
         require(ms.level(_summoner) >= 2);
         uint32 _now = uint32(block.timestamp);
         ms.set_farming_status(_summoner, 1);
@@ -2277,7 +2277,7 @@ contract Murasaki_Function_Crafting is Ownable {
         Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
         require(mfs.check_owner(_summoner, msg.sender));
         require(ms.mining_status(_summoner) == 0 && ms.farming_status(_summoner) == 0 && ms.crafting_status(_summoner) == 0);
-        require(mfs.calc_satiety(_summoner) >= 20 && mfs.calc_happy(_summoner) >= 20);
+        require(mfs.calc_satiety(_summoner) >= 10 && mfs.calc_happy(_summoner) >= 10);
         require(ms.level(_summoner) >= 3);
         //check item_type
         require(
@@ -2314,19 +2314,22 @@ contract Murasaki_Function_Crafting is Ownable {
         require(
             _item_type == 197    //nui, heart require
         );
-        //check heart
+        //count correct hearts
         uint32 _count_hearts = 0;
         for (uint i = 0; i <= 9; i++) {
-            if (
-                _item_hearts[i] != 0
-                && mc.ownerOf(_item_hearts[i]) == msg.sender
-            ) {
-                _count_hearts += 1;
+            if (_item_hearts[i] != 0) {
+                if (mc.ownerOf(_item_hearts[i]) == msg.sender) {
+                    _count_hearts += 1;
+                }
             }
         }
+        //check hert count
+        /*
         if (_item_type == 197) {
             require(_count_hearts >= 1);
         }
+        */
+        require(_count_hearts >= get_heart_required(_item_type));
         //uint32 _now = uint32(block.timestamp);
         //get dc, cost
         uint32[4] memory _dc_table = get_item_dc(_item_type);
@@ -2338,7 +2341,7 @@ contract Murasaki_Function_Crafting is Ownable {
         ms.set_coin(_summoner, ms.coin(_summoner) - _coin);
         ms.set_material(_summoner, ms.material(_summoner) - _material);
         //burn hearts
-        for (uint i = 0; i <= _count_hearts; i++) {
+        for (uint i = 0; i < _count_hearts; i++) {
             _burn(msg.sender, _item_hearts[i]);
         }
         //start crafting
@@ -2453,6 +2456,11 @@ contract Murasaki_Function_Crafting is Ownable {
         Murasaki_Function_Crafting_Codex mfcc = Murasaki_Function_Crafting_Codex(murasaki_function_crafting_codex_address);
         return mfcc.get_item_dc(_item_type);
     }
+    //get heart required
+    function get_heart_required(uint32 _item_type) public view returns (uint32) {
+        Murasaki_Function_Crafting_Codex mfcc = Murasaki_Function_Crafting_Codex(murasaki_function_crafting_codex_address);
+        return mfcc.get_heart_required(_item_type);
+    }
 
     //tiny heart
     //choice random summoner and transfer tiny heart to it
@@ -2471,9 +2479,9 @@ contract Murasaki_Function_Crafting is Ownable {
         address _to_wallet;
         if (
             _isActive == true
-            && ms.level(_to_summoner) >= 3
-            && mfs.calc_satiety(_to_summoner) >= 20
-            && mfs.calc_happy(_to_summoner) >= 20
+            //&& ms.level(_to_summoner) >= 3
+            //&& mfs.calc_satiety(_to_summoner) >= 20
+            && mfs.calc_happy(_to_summoner) >= 10
         ) {
             _to_wallet = mm.ownerOf(_to_summoner);
         } else {
@@ -2690,7 +2698,6 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
     }
 
     //get item dc
-    //when cannnot refer, error to block crafting
     function get_item_dc(uint32 _item_type) public view returns (uint32[4] memory) {
         //return: level, dc, coin, material
         uint32 _level;
@@ -2730,6 +2737,17 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
             _material = material_table[_item_type];
         }        
         return [_level, _dc, _coin, _material];
+    }
+    
+    //get heart required
+    function get_heart_required(uint32 _item_type) public pure returns (uint32) {
+        if (_item_type <= 196) {
+            return 0;
+        } else if (_item_type == 197) {
+            return 1;
+        } else {
+            return 0;
+        }
     }
 
     //item level
@@ -3687,7 +3705,7 @@ contract Murasaki_Mail is Ownable {
             if (
                 _summoner_to == 0
                 && _isActive == true
-                && _happy >= 20
+                && _happy >= 10
                 && check_receiving_mail(_summoner_tmp) == false
                 && _summoner_tmp != _summoner_from
             ) {

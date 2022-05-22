@@ -9,6 +9,12 @@
     パンケーキ
     すし
 
+ ok heart要求アイテムの整備
+        heart要求値のコード化の整理
+        web3js側での参照方法の整備
+            現在はweb3js, contract双方で独立してコードしてしまっている
+        heart要求値を返すcontractを整備して組み入れる
+
  ok summon時, petrified時の挙動確認
  ok カンバンmint時の挙動確認
 
@@ -31,7 +37,6 @@
             grooming
             mining/farming/crafting
                 start, stop
-            
         これらのイベント観測時にblockchainを読みに行く
             ホントはevent内容だけでfrontendに反映したいが、流石に複雑になりすぎている
         また、イベント観測時以外でも定期的に読みに行く
@@ -127,6 +132,8 @@ let screen_satiety = 0;
 let screen_satiety_delta = 0;
 let previous_local_item194 = 0;
 let previous_local_item195 = 0;
+let previous_local_item196 = 0;
+let previous_local_item197 = 0;
 let item_wearing_hat = 0;
 let flag_doneFp = 0;
 let previsou_local_rolled_dice = 0;
@@ -421,6 +428,32 @@ async function contract_update_all() {
     await contract_update_status(summoner);
 }
 
+//get item_nui
+async function contract_get_item_nui(_item) {
+    let web3 = await connect();
+    let wallet = await get_wallet(web3);
+    let contract_msn = await new web3.eth.Contract(abi_murasaki_strage_nui, contract_murasaki_strage_nui);
+    let _nui = await contract_msn.methods.nuis(_item).call();
+    return _nui;
+}
+
+//get heart required
+async function contract_get_heart_required(_item_type) {
+    let web3 = await connect();
+    let wallet = await get_wallet(web3);
+    let contract = await new web3.eth.Contract(abi_murasaki_function_crafting, contract_murasaki_function_crafting);
+    let _heart_required = await contract.methods.get_heart_required(_item_type).call();
+    return _heart_required;
+}
+
+//call name from summoner id
+async function call_name_from_summoner(_summoner) {
+    let web3 = await connect();
+    let contract = await new web3.eth.Contract(abi_murasaki_function_name, contract_murasaki_function_name);
+    let _name = await contract.methods.call_name_from_summoner(_summoner).call();
+    return _name;
+}
+
 //===send===
 
 //summon
@@ -509,12 +542,39 @@ async function contract_crafting(_summoner) {
     let web3 = await connect();
     let contract = await new web3.eth.Contract(abi_murasaki_function_crafting, contract_murasaki_function_crafting);
     let wallet = await get_wallet(web3);
-    //let _item_type = 1;
     let _item_type = global_selected_crafting_item;
     if (local_crafting_status == 0) {
-        contract.methods.start_crafting(_summoner, _item_type).send({from:wallet});
+        if (_item_type == 197) {
+            _contract_crafting_with_heart(_summoner, _item_type, 1);
+        } else {
+            contract.methods.start_crafting(_summoner, _item_type).send({from:wallet});
+        }
     }else {
         contract.methods.stop_crafting(_summoner).send({from:wallet});
+    }
+}
+async function _contract_crafting_with_heart(_summoner, _item_type_to_craft, _heart_required) {
+    let web3 = await connect();
+    let contract = await new web3.eth.Contract(abi_murasaki_function_crafting, contract_murasaki_function_crafting);
+    let wallet = await get_wallet(web3);
+    let contract_mc = await new web3.eth.Contract(abi_murasaki_craft, contract_murasaki_craft);
+    let myListLength = await contract_mc.methods.myListLength(wallet).call();
+    let myListsAt = await contract_mc.methods.myListsAt(wallet, 0, myListLength).call();
+    let _array_heart = [0,0,0,0,0,0,0,0,0,0];
+    let _heart_count = 0;
+    for (let i = 0; i < myListLength; i++) {
+        let _item = myListsAt[i];
+        _items = await contract_mc.methods.items(_item).call();
+        let _item_type = _items[0];
+        if (_item_type == 193) {
+            _array_heart[_heart_count] = _item;
+            _heart_count += 1;
+        }
+        if (_heart_count >= _heart_required) {
+            console.log(_summoner, _item_type, _array_heart);
+            contract.methods.start_crafting_with_heart(_summoner, _item_type_to_craft, _array_heart).send({from:wallet});
+            break
+        }
     }
 }
 
@@ -1595,13 +1655,24 @@ function open_window_craft (scene) {
             icon_crafting_time.visible = true;
             text_select_item.setText('"'+array_item_name[_item]+'"');
             //console.log("modified_dc:", _dc);
+            //***TODO*** nuichan, dirty code, urgent 
+            if (_item == 197) {
+                let _heart_required = await contract_get_heart_required(_item);
+                text_crafting_selected_item_heart.setText(_heart_required);
+                icon_crafting_heart.visible = true;
+            } else {
+                text_crafting_selected_item_heart.setText("");
+                icon_crafting_heart.visible = false;
+            }
         } else {
             text_crafting_selected_item_ohana.setText("");
             text_crafting_selected_item_kusa.setText("");
             text_crafting_selected_item_time.setText("");
+            text_crafting_selected_item_heart.setText("");
             icon_crafting_ohana.visible = false;
             icon_crafting_kusa.visible = false;
             icon_crafting_time.visible = false;
+            icon_crafting_heart.visible = false;
             text_select_item.setText(">> Select Item <<");
         }
     }
@@ -1620,6 +1691,7 @@ function open_window_craft (scene) {
 
     //function, create button
     function create_button(_x, _y, _text, _item_type, scene, rarity) {
+        /*
         let _color;
         if (rarity == "common") {
             _color = "green";
@@ -1630,6 +1702,8 @@ function open_window_craft (scene) {
         }else{
             _color = "black";
         }
+        */
+        let _color = "black";
         let obj = scene.add.text(_x, _y, _text)
             .setFontSize(30).setFontFamily("Arial")
             .setInteractive({useHandCursor: true})
@@ -2367,6 +2441,10 @@ function create() {
     icon_crafting_time = this.add.sprite(_x+200, _y+15, "icon_clock").setDepth(9999);
     icon_crafting_time.setScale(0.09);
     icon_crafting_time.visible = false;
+    //icon_heart
+    icon_crafting_heart = this.add.sprite(_x+58, _y+40, "icon_heart").setDepth(9999);
+    icon_crafting_heart.setScale(0.08);
+    icon_crafting_heart.visible = false;
     //text
     //text_crafting_selected_item_ohana = this.add.text(772, 155, "", {font: "18px Arial", fill: "#000"});
     //text_crafting_selected_item_kusa = this.add.text(842, 155, "", {font: "18px Arial", fill: "#000"});
@@ -2374,6 +2452,7 @@ function create() {
     text_crafting_selected_item_ohana = this.add.text(_x+72, _y+5, "", {font: "18px Arial", fill: "#000", backgroundColor: "#ecd9ff"}).setDepth(9999);
     text_crafting_selected_item_kusa = this.add.text(_x+142, _y+5, "", {font: "18px Arial", fill: "#000", backgroundColor: "#ecd9ff"}).setDepth(9999);
     text_crafting_selected_item_time = this.add.text(_x+214, _y+5, "", {font: "18px Arial", fill: "#000", backgroundColor: "#ecd9ff"}).setDepth(9999);
+    text_crafting_selected_item_heart = this.add.text(_x+72, _y+32, "", {font: "18px Arial", fill: "#000", backgroundColor: "#ecd9ff"}).setDepth(9999);
     //--craftimg info
     //icon_clock
     //icon_crafting_time_remining = this.add.sprite(760,165, "icon_clock");
@@ -3346,53 +3425,7 @@ function update() {
                 "mining"
             ).setScale(0.12);
 
-            //***nui-chan***
-            let _x = 1070;
-            let _y = 520;
-            text_nui = this.add.text(
-                _x,
-                _y+58,
-                " Crafter: #1 Kapico \n Score:123123123 \n EXP +120% ",
-                {font: "14px Arial", fill: "#000000", backgroundColor: "#ffffff"}
-            ).setOrigin(0.5);
-            text_nui.visible = false;
-            item_nui = this.add.sprite(_x, _y, "item_nui")
-                .setOrigin(0.5)
-                .setScale(0.38)
-                .setInteractive({ draggable: true, useHandCursor: true })
-                .setDepth(_y)
-                .on("dragstart", () => {
-                    //sound, depth
-                })
-                .on("drag", () => {
-                    if (this.sys.game.scale.gameSize._width == 1280) {
-                        item_nui.x = game.input.activePointer.x;
-                        item_nui.y = game.input.activePointer.y;
-                    } else {
-                        item_nui.x = game.input.activePointer.y;
-                        item_nui.y = 960 - game.input.activePointer.x;
-                    }
-                    item_nui.depth = item_nui.y;
-                    text_nui.visible = false;
-                    item_nui_ribbon.x = item_nui.x;
-                    item_nui_ribbon.y = item_nui.y;
-                    item_nui_ribbon.depth = item_nui.depth+1;
-                })
-                .on("dragend", () => {
-                    //grand, sound, depth
-                    text_nui.x = item_nui.x;
-                    text_nui.y = item_nui.y+58;
-                    text_nui.visible = true;
-                    sound_nui.play();
-                })
-                .on("pointerover", () => {
-                    text_nui.visible = true;
-                })
-                .on("pointerout", () => {
-                    text_nui.visible = false;
-                });
-            item_nui_ribbon = this.add.sprite(_x,_y, "item_nui_ribbon").setOrigin(0.5).setScale(0.38);
-            item_nui_ribbon.depth = item_nui.y + 1;
+
 
             //cake
             
@@ -3808,9 +3841,96 @@ function update() {
             _do(this);
         }
 
+        //197:nuichan
+        if (local_items[197] != previous_local_item197) {
+            // define async function
+            async function _do(scene) {
+                // get item194 list, need to wait
+                let _array_item197 = await get_userItems(summoner, 197);
+                // recreate sprite group
+                try {
+                    group_item197.destroy(true);
+                } catch (error) {
+                }
+                group_item197 = scene.add.group();
+                // create sprite, add group, using array for independency
+                let _array_nui = [];
+                let _array_nui_text = [];
+                let _array_nui_ribbon = [];
+                for (let i = 0; i < _array_item197.length; i++) {
+                    let _x = 1070 + i*30;
+                    let _y = 520 + i*30;
+                    let _item_id = _array_item197[i];
+                    let _item_nui = await contract_get_item_nui(_item_id);
+                    let _summoner = _item_nui[1];
+                    let _summoner_name = await call_name_from_summoner(_summoner);
+                    if (_summoner_name == "") {
+                        _summoner_name = "#" + _summoner;
+                    }
+                    let _score = _item_nui[3];
+                    let _text = "";
+                    _text += " id: " + "#" + _array_item197[i] + " \n";
+                    _text +=" crafter: " + _summoner_name + " \n";
+                    _text += " score: " + _score + " \n";
+                    _text += " exp: +XX% ";
+                    _array_nui_text[i] = scene.add.text(
+                        _x,
+                        _y+68,
+                        _text,
+                        {font: "15px Arial", fill: "#000000", backgroundColor: "#ffffff"}
+                    ).setOrigin(0.5);
+                    _array_nui_text[i].visible = false;
+                    _array_nui[i] = scene.add.sprite(_x, _y, "item_nui")
+                        .setOrigin(0.5)
+                        .setScale(0.38)
+                        .setInteractive({ draggable: true, useHandCursor: true })
+                        .setDepth(_y)
+                        .on("dragstart", () => {
+                            //sound, depth
+                        })
+                        .on("drag", () => {
+                            if (scene.sys.game.scale.gameSize._width == 1280) {
+                                _array_nui[i].x = game.input.activePointer.x;
+                                _array_nui[i].y = game.input.activePointer.y;
+                            } else {
+                                _array_nui[i].x = game.input.activePointer.y;
+                                _array_nui[i].y = 960 - game.input.activePointer.x;
+                            }
+                            _array_nui[i].depth = _array_nui[i].y;
+                            _array_nui_text[i].visible = false;
+                            _array_nui_ribbon[i].x = _array_nui[i].x;
+                            _array_nui_ribbon[i].y = _array_nui[i].y;
+                            _array_nui_ribbon[i].depth = _array_nui[i].depth+1;
+                        })
+                        .on("dragend", () => {
+                            //grand, sound, depth
+                            _array_nui_text[i].x = _array_nui[i].x;
+                            _array_nui_text[i].y = _array_nui[i].y+68;
+                            _array_nui_text[i].visible = true;
+                            sound_nui.play();
+                        })
+                        .on("pointerover", () => {
+                            _array_nui_text[i].visible = true;
+                        })
+                        .on("pointerout", () => {
+                            _array_nui_text[i].visible = false;
+                        });
+                    _array_nui_ribbon[i] = scene.add.sprite(_x,_y, "item_nui_ribbon").setOrigin(0.5).setScale(0.38);
+                    _array_nui_ribbon[i].depth = _array_nui[i].y + 1;
+                    //add group
+                    group_item197.add(_array_nui[i]);
+                    group_item197.add(_array_nui_text[i]);
+                    group_item197.add(_array_nui_ribbon[i]);
+                }
+            }
+            _do(this);
+        }
+        
         previous_local_items = local_items;
         previous_local_item194 = local_items[194];
         previous_local_item195 = local_items[195];
+        previous_local_item196 = local_items[196];
+        previous_local_item197 = local_items[197];
         previous_local_rolled_dice = local_rolled_dice;
         previous_local_name_str = local_name_str;
     }

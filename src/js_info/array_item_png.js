@@ -209,4 +209,5 @@ let array_item_png = [
     "item_bank.png",
     //195, Kusa Pouch
     "item_kusa_pouch.png",
+    "nui.png"
 ]
