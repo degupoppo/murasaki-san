@@ -212,8 +212,8 @@ async function update_userItems() {
         } else if (_item_type <= 192) {
             _item_rarity = "<font color=orange>rare</font>";
         } else if (_item_type == 197) {
-            let _nui = await contract_msn.methods.nuis(_item).call();
-            _item_rarity = "<font color=#E85298>score: " + _nui[3] + "</font>";
+            let _score = await contract_msn.methods.score(_item).call();
+            _item_rarity = "<font color=#E85298>score: " + _score + "</font>";
         } else {
             _item_rarity = "<font color=black>---</font>";
         }

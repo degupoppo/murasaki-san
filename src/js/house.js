@@ -5,6 +5,14 @@
 
 /*
 
+    メール送信成功のメッセージを実装
+    メール送受信時の動的アクションの実装
+        送信時の猫のアニメーション
+        受診時の猫のアニメーション
+        メールの表示・非表示
+        
+    メール・ハート使用時のapproveチェックとapproveのUIの実装
+
     帽子の普遍的な位置合わせ
     パンケーキ
     すし
@@ -90,7 +98,7 @@ let local_isActive;
 let local_rolled_dice = 0;
 let local_last_rolled_dice = 0;
 let local_last_dice_roll_time;
-
+let local_mail_sending_interval = -1;
 
 //local using variants
 let previous_local_last_feeding_time = 0;
@@ -112,6 +120,7 @@ let bgm = 0;
 let local_items_flag = new Array(256).fill(0);
 let global_selected_crafting_item = 0;
 let global_selected_crafting_item_dc;
+let global_selected_crafting_item_required_heart;
 let last_sync_time = 0;
 let mode = "";
 let text_wallet;
@@ -139,6 +148,7 @@ let flag_doneFp = 0;
 let previsou_local_rolled_dice = 0;
 let flag_dice_rolling = 0;
 let flag_name_minting = 0;
+let flag_mail = false;
 
 
 //---html-----------------------------------------------------------------------------------------------------
@@ -410,6 +420,12 @@ async function contract_update_status(_summoner) {
         if (flag_dice_rolling == 0 && local_items[36] > 0) {
             await contract_update_dice(_summoner);
         }
+        
+        //check mail
+        contract_check_mail(summoner);
+        if (local_items[1] > 0) {
+            contract_calc_sending_interval(summoner);
+        }
     }
     
     //debug
@@ -428,13 +444,38 @@ async function contract_update_all() {
     await contract_update_status(summoner);
 }
 
-//get item_nui
+//check mail
+async function contract_check_mail(_summoner) {
+    let web3 = await connect();
+    let wallet = await get_wallet(web3);
+    let contract_mml = await new web3.eth.Contract(abi_murasaki_mail, contract_murasaki_mail);
+    flag_mail = await contract_mml.methods.check_receiving_mail(_summoner).call();
+    //console.log(flag_mail);
+}
+
+//calc mail sending interval
+async function contract_calc_sending_interval(_summoner) {
+    let web3 = await connect();
+    let wallet = await get_wallet(web3);
+    let contract_mml = await new web3.eth.Contract(abi_murasaki_mail, contract_murasaki_mail);
+    local_mail_sending_interval = await contract_mml.methods.calc_sending_interval(_summoner).call();
+}
+
+//get item_nui, summoner and score
 async function contract_get_item_nui(_item) {
     let web3 = await connect();
     let wallet = await get_wallet(web3);
     let contract_msn = await new web3.eth.Contract(abi_murasaki_strage_nui, contract_murasaki_strage_nui);
+    /*
     let _nui = await contract_msn.methods.nuis(_item).call();
     return _nui;
+    */
+    let _summoner_of_nui = await contract_msn.methods.summoner(_item).call();
+    let _class = await contract_msn.methods.class(_item).call();
+    let _score = await contract_msn.methods.score(_item).call();
+    let contract_mfs = await new web3.eth.Contract(abi_murasaki_function_share, contract_murasaki_function_share);
+    let _exp_rate = await contract_mfs.methods.calc_exp_addition_rate(summoner, _item).call();
+    return [_summoner_of_nui, _class, _score, _exp_rate];
 }
 
 //get heart required
@@ -545,7 +586,7 @@ async function contract_crafting(_summoner) {
     let _item_type = global_selected_crafting_item;
     if (local_crafting_status == 0) {
         if (_item_type == 197) {
-            _contract_crafting_with_heart(_summoner, _item_type, 1);
+            _contract_crafting_with_heart(_summoner, _item_type, global_selected_crafting_item_required_heart);
         } else {
             contract.methods.start_crafting(_summoner, _item_type).send({from:wallet});
         }
@@ -571,11 +612,43 @@ async function _contract_crafting_with_heart(_summoner, _item_type_to_craft, _he
             _heart_count += 1;
         }
         if (_heart_count >= _heart_required) {
-            console.log(_summoner, _item_type, _array_heart);
+            //console.log(_summoner, _item_type, _array_heart);
             contract.methods.start_crafting_with_heart(_summoner, _item_type_to_craft, _array_heart).send({from:wallet});
             break
         }
     }
+}
+
+//send mail
+async function contract_send_mail(_summoner) {
+    let web3 = await connect();
+    let wallet = await get_wallet(web3);
+    //select mail
+    let contract_mc = await new web3.eth.Contract(abi_murasaki_craft, contract_murasaki_craft);
+    let myListLength = await contract_mc.methods.myListLength(wallet).call();
+    let myListsAt = await contract_mc.methods.myListsAt(wallet, 0, myListLength).call();
+    let _item_mail = 0;
+    for (let i = 0; i < myListLength; i++) {
+        let _item = myListsAt[i];
+        _items = await contract_mc.methods.items(_item).call();
+        let _item_type = _items[0];
+        if (_item_type == 196) {
+            _item_mail = _item;
+            break;
+        }
+    }
+    if (_item_mail != 0) {
+        let contract_mm = await new web3.eth.Contract(abi_murasaki_mail, contract_murasaki_mail);
+        contract_mm.methods.send_mail(_summoner, _item_mail).send({from:wallet});
+    }
+}
+
+//open mail
+async function contract_open_mail(_summoner) {
+    let web3 = await connect();
+    let wallet = await get_wallet(web3);
+    let contract_mml = await new web3.eth.Contract(abi_murasaki_mail, contract_murasaki_mail);
+    contract_mml.methods.open_mail(_summoner).send({from:wallet});
 }
 
 //get item dc
@@ -1658,6 +1731,7 @@ function open_window_craft (scene) {
             //***TODO*** nuichan, dirty code, urgent 
             if (_item == 197) {
                 let _heart_required = await contract_get_heart_required(_item);
+                global_selected_crafting_item_required_heart = _heart_required;
                 text_crafting_selected_item_heart.setText(_heart_required);
                 icon_crafting_heart.visible = true;
             } else {
@@ -2071,9 +2145,15 @@ function preload() {
     this.load.image("item_pouch_broken", "src/png/item_pouch_broken.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("item_hat_mortarboard", "src/png/item_hat_mortarboard.png", {frameWidth: 370, frameHeight: 320});
     
+    //===cat===
+    this.load.image("item_mail", "src/png/item_mail.png", {frameWidth: 757, frameHeight: 757});
+    this.load.image("cat_sitting", "src/png/cat_sitting.png", {frameWidth: 772, frameHeight: 769});
+    this.load.image("cat_sleeping", "src/png/cat_sleeping.png", {frameWidth: 759, frameHeight: 759});
+    
     //===item_craft_todo===
     //this.load.image("item_mushroom", "src/png/item_mushroom.png", {frameWidth: 300, frameHeight: 300});
     //this.load.image("item_horsetail", "src/png/item_horsetail.png", {frameWidth: 300, frameHeight: 300});
+    this.load.image("item_cushion", "src/png/item_cushion.png", {frameWidth: 663, frameHeight: 447});
 
     //===icon_system===
     this.load.image("icon_kusa", "src/png/icon_system_kusa.png", {frameWidth: 350, frameHeight: 350});
@@ -3408,7 +3488,9 @@ function update() {
     //===== check item =====
 
     if (turn % 150 == 40 && local_items != previous_local_items) {
+
         let _item_id;
+
         //1:Ms. Astar
         _item_id = 1;
         if (
@@ -3424,15 +3506,32 @@ function update() {
                 "mr_astar_left",
                 "mining"
             ).setScale(0.12);
-
-
+            
+            
+            //cushion
+            item_cushion = this.add.sprite(90, 620, "item_cushion").setScale(0.25).setOrigin(0.5);
+            item_cushion.depth = item_cushion.y - 50;
+            
+            //cat
+            cat = this.add.sprite(90, 610, "cat_sleeping").setScale(0.12).setOrigin(0.5)
+                .setInteractive({useHandCursor: true})
+                .on("pointerdown", () => {contract_send_mail(summoner)})
+                .setVisible(false);
+            cat.depth = item_cushion.y + 1;
+            
+            //mail
+            if (local_items[196] > 0) {
+                mail = this.add.sprite(40, 645, "item_mail").setScale(0.06).setOrigin(0.5);
+                mail.depth = item_cushion.y + 2;
+            }
+            
+            //mail_sending_interval
+            text_sending_interval = this.add.text(70, 640, "00h:00m", {font: "15px Arial", fill: "#ffffff"});
+            text_sending_interval.depth = item_cushion.depth + 1;
 
             //cake
-            
             //tiny_crown
-            
             //pancake
-            
             //sushi
             
         }
@@ -3862,17 +3961,19 @@ function update() {
                     let _y = 520 + i*30;
                     let _item_id = _array_item197[i];
                     let _item_nui = await contract_get_item_nui(_item_id);
-                    let _summoner = _item_nui[1];
+                    let _summoner = _item_nui[0];
+                    let _class = _item_nui[1];
+                    let _score = _item_nui[2];
+                    let _exp_rate = _item_nui[3] - 100;
                     let _summoner_name = await call_name_from_summoner(_summoner);
                     if (_summoner_name == "") {
                         _summoner_name = "#" + _summoner;
                     }
-                    let _score = _item_nui[3];
                     let _text = "";
                     _text += " id: " + "#" + _array_item197[i] + " \n";
                     _text +=" crafter: " + _summoner_name + " \n";
                     _text += " score: " + _score + " \n";
-                    _text += " exp: +XX% ";
+                    _text += " exp: +" + _exp_rate + "% ";
                     _array_nui_text[i] = scene.add.text(
                         _x,
                         _y+68,
@@ -3924,6 +4025,34 @@ function update() {
                 }
             }
             _do(this);
+        }
+
+
+        //check mail
+        if (flag_mail) {
+            cat_others = this.add.sprite(800, 700, "cat_sitting").setScale(0.12).setOrigin(0.5)
+                .setInteractive({useHandCursor: true})
+                .on("pointerdown", () => {contract_open_mail(summoner)});            
+            cat_others.depth = cat_others.y;
+        }
+        //calc sending interval
+        if (
+            local_mail_sending_interval != -1
+            && typeof text_sending_interval != "undefined"
+            && typeof cat != "undefined"
+        ) {
+            if (local_mail_sending_interval == 0) {
+                text_sending_interval.setText("");
+                cat.visible = true;
+            } else {
+                let _d = Math.floor(local_mail_sending_interval / (60 * 60 * 24));
+                let _hr = Math.floor(local_mail_sending_interval % 86400 / 3600);
+                let _min = Math.floor(local_mail_sending_interval % 3600 / 60);
+                let _text = _d + "d:" + _hr + "h:" + _min + "m";
+                text_sending_interval.setText(_text).setFill("#ffffff");
+                cat.visible = false;
+                //console.log(local_mail_sending_interval);
+            }
         }
         
         previous_local_items = local_items;

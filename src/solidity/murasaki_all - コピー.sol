@@ -11,7 +11,7 @@ pragma solidity ^0.8.7;
             計算が1つのfunctionで完結するようにうまくリファクタできないだろうか
             計算コントラが互いに参照し合うと解読しにくくなる
 
- ok nuiのコスト設定, heart要求？
+    nuiのコスト設定, heart要求？
     nui存在時のexp補正の実装
 
 */
@@ -1690,7 +1690,9 @@ contract Murasaki_Function_Share is Ownable {
         uint32 _score_summoner = calc_score(_summoner);
         //call nui score
         Murasaki_Strage_Nui msn = Murasaki_Strage_Nui(murasaki_strage_nui_address);
-        uint32 _score_nui = msn.score(_item_nui);
+        //uint32[14] memory _status_nui = msn.get_status(_item_nui);
+        msn.Nui _nui = msn.get_status(_item_nui);
+        uint32 _score_nui = _status_nui[13];
         //calc exp addition rate ***TODO***
         //formula: _score_nui / _score_summoner * 100 (%)
         uint32 _percent = _score_nui * 100 / (_score_summoner + 1);
@@ -2344,6 +2346,11 @@ contract Murasaki_Function_Crafting is Ownable {
             }
         }
         //check hert count
+        /*
+        if (_item_type == 197) {
+            require(_count_hearts >= 1);
+        }
+        */
         require(_count_hearts >= get_heart_required(_item_type));
         //uint32 _now = uint32(block.timestamp);
         //get dc, cost
@@ -2425,22 +2432,31 @@ contract Murasaki_Function_Crafting is Ownable {
         Murasaki_Main mm = Murasaki_Main(mfs.murasaki_main_address());
         Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
         Murasaki_Strage_Score mss = Murasaki_Strage_Score(mfs.murasaki_strage_score_address());
-        uint32 _now = uint32(block.timestamp);
-        //set status
-        msn.set_mint_time(_item_nui, _now);
-        msn.set_summoner(_item_nui, _summoner);
-        msn.set_class(_item_nui, mm.class(_summoner));
-        msn.set_level(_item_nui, ms.level(_summoner));
-        msn.set_strength(_item_nui, ms.strength(_summoner));
-        msn.set_dexterity(_item_nui, ms.dexterity(_summoner));
-        msn.set_intelligence(_item_nui, ms.intelligence(_summoner));
-        msn.set_luck(_item_nui, ms.luck(_summoner));
-        msn.set_total_exp_gained(_item_nui, mss.total_exp_gained(_summoner));
-        msn.set_total_coin_mined(_item_nui, mss.total_coin_mined(_summoner));
-        msn.set_total_material_farmed(_item_nui, mss.total_material_farmed(_summoner));
-        msn.set_total_item_crafted(_item_nui, mss.total_item_crafted(_summoner));
-        msn.set_total_heart_received(_item_nui, mss.total_heart_received(_summoner));
-        msn.set_score(_item_nui, mfs.calc_score(_summoner));
+        uint32 _class = mm.class(_summoner);
+        uint32[5] memory _status = [
+                ms.level(_summoner), 
+                ms.strength(_summoner), 
+                ms.dexterity(_summoner), 
+                ms.intelligence(_summoner), 
+                ms.luck(_summoner)
+        ];
+        uint32[5] memory _strage_score = [
+                mss.total_exp_gained(_summoner), 
+                mss.total_coin_mined(_summoner),
+                mss.total_material_farmed(_summoner),
+                mss.total_item_crafted(_summoner),
+                mss.total_heart_received(_summoner)
+        ];
+        uint32 _score = mfs.calc_score(_summoner);
+        //mint, (_item, _summoner, _class, _status, _strage_score, _score)
+        msn.mint(
+            _item_nui,
+            _summoner,
+            _class,
+            _status,
+            _strage_score,
+            _score
+        );
     }
     //get modified dc, using codex
     function get_modified_dc(uint32 _summoner, uint32 _item_type) public view returns (uint32) {
@@ -2553,6 +2569,9 @@ contract Murasaki_Function_Crafting is Ownable {
     	    && _item_type3 == _item_type1
     	);
         //burn (transfer) lower rank items
+        //mc.transferFrom(msg.sender, address(this), _item1);
+        //mc.transferFrom(msg.sender, address(this), _item2);
+        //mc.transferFrom(msg.sender, address(this), _item3);
         _burn(msg.sender, _item1);
         _burn(msg.sender, _item2);
         _burn(msg.sender, _item3);
@@ -3719,6 +3738,12 @@ contract Murasaki_Mail is Ownable {
         return _summoner_to;
     }
     function _burn_mail(uint32 _item_mail) internal {
+        /*
+        //prior approval required
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
+        mc.transferFrom(msg.sender, address(this), _item_mail);
+        */
         Murasaki_Function_Crafting mfc = Murasaki_Function_Crafting(murasaki_function_crafting_address);
         mfc.burn_mail(msg.sender, _item_mail);
     }
@@ -3785,61 +3810,109 @@ contract Murasaki_Strage_Nui is Ownable {
     mapping(uint32 => uint32) public total_heart_received;
     mapping(uint32 => uint32) public score;
 
-    //set status
-    function set_mint_time(uint32 _item_nui, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
-        mint_time[_item_nui] = _value;
+    //nui
+    struct Nui {
+        uint32 mint_time;
+        uint32 summoner;
+        uint32 class;
+        uint32[5] status;   //lv, str, dex, int, luk
+        uint32[5] strage_score; //total_exp, coin, material, items, hearts
+        uint32 score;
     }
-    function set_summoner(uint32 _item_nui, uint32 _value) external {
+    mapping(uint32 => Nui) public nuis;
+    
+    //mint nui
+    function mint(
+        uint32 _item_nui,
+        uint32 _summoner,
+        uint32 _class,
+        uint32[5] memory _status,
+        uint32[5] memory _strage_score,
+        uint32 _score
+    ) external {
         require(permitted_address[msg.sender] == true);
-        summoner[_item_nui] = _value;
+        uint32 _now = uint32(block.timestamp);
+        Nui memory _nui = Nui(
+            _now,
+            _summoner,
+            _class,
+            _status,
+            _strage_score,
+            _score
+            );
+        nuis[_item_nui] = _nui;
     }
-    function set_class(uint32 _item_nui, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
-        class[_item_nui] = _value;
+
+    //admin, set status, for update scoring in the future
+    function set_score(uint32 _item_nui, uint32 _value) external onlyOwner {
+        nuis[_item_nui].score = _value;
     }
-    function set_level(uint32 _item_nui, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
-        level[_item_nui] = _value;
-    }
-    function set_strength(uint32 _item_nui, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
-        strength[_item_nui] = _value;
-    }
-    function set_dexterity(uint32 _item_nui, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
-        dexterity[_item_nui] = _value;
-    }
-    function set_intelligence(uint32 _item_nui, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
-        intelligence[_item_nui] = _value;
-    }
-    function set_luck(uint32 _item_nui, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
-        luck[_item_nui] = _value;
-    }
-    function set_total_exp_gained(uint32 _item_nui, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
-        total_exp_gained[_item_nui] = _value;
-    }
-    function set_total_coin_mined(uint32 _item_nui, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
-        total_coin_mined[_item_nui] = _value;
-    }
-    function set_total_material_farmed(uint32 _item_nui, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
-        total_material_farmed[_item_nui] = _value;
-    }
-    function set_total_item_crafted(uint32 _item_nui, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
-        total_item_crafted[_item_nui] = _value;
-    }
-    function set_total_heart_received(uint32 _item_nui, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
-        total_heart_received[_item_nui] = _value;
-    }
-    function set_score(uint32 _item_nui, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
-        score[_item_nui] = _value;
+    
+    //get status, return as array of 14 values
+    function get_status(uint32 _item_nui) external view returns (Nui memory) {
+        return nuis[_item_nui];
     }
 }
+
+
+/*
+contract Murasaki_Strage_Nui is Ownable {
+
+    //item_type_of_nui = 197
+    //permittion required: function_crafting
+
+    //permitted address
+    mapping(address => bool) public permitted_address;
+
+    //admin, add or remove permitted_address
+    function _add_permitted_address(address _address) external onlyOwner {
+        permitted_address[_address] = true;
+    }
+    function _remove_permitted_address(address _address) external onlyOwner {
+        permitted_address[_address] = false;
+    }
+
+    //nui
+    struct Nui {
+        uint32 mint_time;
+        uint32 summoner;
+        uint32 class;
+        uint32[5] status;   //lv, str, dex, int, luk
+        uint32[5] strage_score; //total_exp, coin, material, items, hearts
+        uint32 score;
+    }
+    mapping(uint32 => Nui) public nuis;
+    
+    //mint nui
+    function mint(
+        uint32 _item_nui,
+        uint32 _summoner,
+        uint32 _class,
+        uint32[5] memory _status,
+        uint32[5] memory _strage_score,
+        uint32 _score
+    ) external {
+        require(permitted_address[msg.sender] == true);
+        uint32 _now = uint32(block.timestamp);
+        Nui memory _nui = Nui(
+            _now,
+            _summoner,
+            _class,
+            _status,
+            _strage_score,
+            _score
+            );
+        nuis[_item_nui] = _nui;
+    }
+
+    //admin, set status, for update scoring in the future
+    function set_score(uint32 _item_nui, uint32 _value) external onlyOwner {
+        nuis[_item_nui].score = _value;
+    }
+    
+    //get status, return as array of 14 values
+    function get_status(uint32 _item_nui) external view returns (Nui memory) {
+        return nuis[_item_nui];
+    }
+}
+*/
