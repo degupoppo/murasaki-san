@@ -2362,8 +2362,7 @@ contract Murasaki_Function_Crafting is Ownable {
         ms.set_material(_summoner, ms.material(_summoner) - _material);
         //burn hearts
         for (uint i = 0; i < _count_hearts; i++) {
-            //_burn(msg.sender, _item_hearts[i]);
-            _burn(_item_hearts[i]);
+            _burn(msg.sender, _item_hearts[i]);
         }
         //start crafting
         ms.set_crafting_item_type(_summoner, _item_type);
@@ -2559,12 +2558,9 @@ contract Murasaki_Function_Crafting is Ownable {
     	    && _item_type3 == _item_type1
     	);
         //burn (transfer) lower rank items
-        //_burn(msg.sender, _item1);
-        //_burn(msg.sender, _item2);
-        //_burn(msg.sender, _item3);
-        _burn(_item1);
-        _burn(_item2);
-        _burn(_item3);
+        _burn(msg.sender, _item1);
+        _burn(msg.sender, _item2);
+        _burn(msg.sender, _item3);
         //mint upper rank item
         uint32 _seed = mfs.seed(_summoner);
         mc.craft(_item_type1 + 64, _summoner, msg.sender, _seed);
@@ -2586,8 +2582,7 @@ contract Murasaki_Function_Crafting is Ownable {
         require(_item_type == 194 || _item_type == 195);
         //burn _item
         //mc.transferFrom(msg.sender, address(this), _item);
-        //_burn(msg.sender, _item);
-        _burn(_item);
+        _burn(msg.sender, _item);
         //unpack coin/material
         if (_item_type == 194) {
             ms.set_coin(_summoner, ms.coin(_summoner) + 1000);
@@ -2599,21 +2594,17 @@ contract Murasaki_Function_Crafting is Ownable {
     }
     
     //burn, internal
-    //function _burn(address _owner, uint32 _item) internal {
-    function _burn(uint32 _item) internal {
+    function _burn(address _owner, uint32 _item) internal {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
-        //mc.transferFrom(_owner, address(this), _item);
-        mc.burn(_item);
+        mc.transferFrom(_owner, address(this), _item);
     }
     //burn mail, external, only from Murasaki_Mail
-    //function burn_mail(address _owner, uint32 _item) external {
-    function burn_mail(uint32 _item) external {
+    function burn_mail(address _owner, uint32 _item) external {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         //only from Murasaki_Mail
         require(msg.sender == mfs.murasaki_mail_address());
-        //_burn(_owner, _item);
-        _burn(_item);
+        _burn(_owner, _item);
     }
 }
 
@@ -3061,7 +3052,7 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
 }
 
 
-//---*Murasaki_Craft------------------------------------------------------------------------------------------------------------------
+//---Murasaki_Craft------------------------------------------------------------------------------------------------------------------
 
 
 contract Murasaki_Craft is ERC721, Ownable{
@@ -3118,8 +3109,6 @@ contract Murasaki_Craft is ERC721, Ownable{
         mySet[msg.sender].remove(tokenId);
         ERC721._burn(tokenId);
     }
-
-    //burn
     function burn(uint256 tokenId) external {
         require(permitted_address[msg.sender] == true);
         _burn(tokenId);
@@ -3156,7 +3145,7 @@ contract Murasaki_Craft is ERC721, Ownable{
         }
     }
     
-    //transfer from old contract
+    //copy info from old mc contract
     function mint_old_item(address _old_contract, uint32 _loop_count) external onlyOwner {
         Murasaki_Craft  mc = Murasaki_Craft(_old_contract);
         for (uint32 _i = 1; _i <= _loop_count; _i++) {
@@ -3760,8 +3749,7 @@ contract Murasaki_Mail is Ownable {
     }
     function _burn_mail(uint32 _item_mail) internal {
         Murasaki_Function_Crafting mfc = Murasaki_Function_Crafting(murasaki_function_crafting_address);
-        //mfc.burn_mail(msg.sender, _item_mail);
-        mfc.burn_mail(_item_mail);
+        mfc.burn_mail(msg.sender, _item_mail);
     }
     
     //open mail
