@@ -330,7 +330,8 @@ async function contract_update_statics(_summoner) {
     let _owner = await contract_mm.methods.ownerOf(_summoner).call();
     local_owner = _owner;
     let contract_mffg = await new web3.eth.Contract(abi_murasaki_function_feeding_and_grooming, contract_murasaki_function_feeding_and_grooming);
-    local_notPetrified = await contract_mffg.methods.not_petrified(_summoner).call();
+    //local_notPetrified = await contract_mffg.methods.not_petrified(_summoner).call();
+    local_notPetrified = await contract_mfs.methods.not_petrified(_summoner).call();
 }
 
 //update mining/farming/crafting
@@ -637,6 +638,7 @@ async function contract_send_mail(_summoner) {
             break;
         }
     }
+    console.log(_item_mail);
     if (_item_mail != 0) {
         let contract_mm = await new web3.eth.Contract(abi_murasaki_mail, contract_murasaki_mail);
         contract_mm.methods.send_mail(_summoner, _item_mail).send({from:wallet});
@@ -3209,14 +3211,16 @@ function update() {
             }
         }else if (_mode == "crafting") {
             icon_crafting_time_remining.visible = true;
+            text_crafting_selected_item_ohana.setText("");
+            text_crafting_selected_item_kusa.setText("");
+            text_crafting_selected_item_time.setText("");
+            text_crafting_selected_item_heart.setText("");
+            icon_crafting_ohana.visible = false;
+            icon_crafting_kusa.visible = false;
+            icon_crafting_time.visible = false;
+            icon_crafting_heart.visible = false;
             if (local_crafting_calc > 0) {
                 //TOFIX: invisible selecte item info
-                text_crafting_selected_item_ohana.setText("");
-                text_crafting_selected_item_kusa.setText("");
-                text_crafting_selected_item_time.setText("");
-                icon_crafting_ohana.visible = false;
-                icon_crafting_kusa.visible = false;
-                icon_crafting_time.visible = false;
                 //calc remining time
                 let _total_sec = local_crafting_calc;
                 let _day = Math.floor(_total_sec / 86400);
@@ -3596,7 +3600,7 @@ function update() {
         }
         
         //5:Nameplate
-        _item_id = 5;
+        _item_id = 48;
         if (
             (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
             && local_items_flag[_item_id] != true

@@ -623,6 +623,9 @@ interface IERC721 is IERC165 {
 
 interface Murasaki_Function_Share {
     function murasaki_craft_address() external view returns (address);
+    function murasaki_main_address() external view returns (address);
+    function murasaki_strage_address() external view returns (address);
+    function not_petrified(uint32) external view returns (bool);
 }
 interface Murasaki_Craft {
     function safeTransferFrom(
@@ -631,6 +634,13 @@ interface Murasaki_Craft {
         uint256 tokenId
     ) external;
 }
+interface Murasaki_Main {
+    function tokenOf(address) external view returns (uint32);
+}
+interface Murasaki_Strage {
+    function isActive(uint32) external view returns (bool);
+}
+
 
 // File: SummonerMarket.sol
 
@@ -700,6 +710,7 @@ contract Murasaki_Market_Item is Initializable, ERC721Holder {
 
     /// @dev Lists the given summoner. This contract will take custody until bought / unlisted.
     function list(uint32 _item, uint price) external nonReentrant {
+        _check_wallet(msg.sender);
         require(price > 0, 'bad price');
         require(prices[_item] == 0, 'already listed');
         //rarity.safeTransferFrom(msg.sender, address(this), summonerId);
@@ -715,6 +726,7 @@ contract Murasaki_Market_Item is Initializable, ERC721Holder {
 
     /// @dev Unlists the given summoner. Must be the lister.
     function unlist(uint32 _item) external nonReentrant {
+        _check_wallet(msg.sender);
         require(prices[_item] > 0, 'not listed');
         require(listers[_item] == msg.sender, 'not lister');
         prices[_item] = 0;
@@ -730,6 +742,7 @@ contract Murasaki_Market_Item is Initializable, ERC721Holder {
 
     /// @dev Buys the given summoner. Must pay the exact correct prirce.
     function buy(uint32 _item) external payable nonReentrant {
+        _check_wallet(msg.sender);
         uint price = prices[_item];
         require(price > 0, 'not listed');
         require(msg.value == price, 'bad msg.value');
@@ -746,6 +759,21 @@ contract Murasaki_Market_Item is Initializable, ERC721Holder {
         set.remove(_item);
         mySet[lister].remove(_item);
         emit Buy(_item, lister, msg.sender, price, fee);
+    }
+
+    //check wallet
+    function _check_wallet(address _wallet) internal view returns (bool) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        //check summoner possession
+        Murasaki_Main mm = Murasaki_Main(mfs.murasaki_main_address());
+        uint32 _summoner = mm.tokenOf(_wallet);
+        require(_summoner > 0);
+        //check summoner activation
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        require(ms.isActive(_summoner));
+        //check summoner petrification
+        require(mfs.not_petrified(_summoner));
+        return true;
     }
 
     /// @dev Withdraw trading fees. Only called by owner.

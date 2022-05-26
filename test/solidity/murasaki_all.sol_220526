@@ -5,12 +5,6 @@ pragma solidity ^0.8.7;
 
 /*
 
-    スコア補正の深慮
-        単純にスコア差ならば、高Lv低スコアの個体がExp+となってしまう
-        つまり、何もせずにLvだけ上げていた個体が恩恵を受けやすい
-        mining/farmingしてLv上げていない個体のぬいぐるみを買うとExp補正がかかってしまう
-        total_exp_gainedが同一になるのを上限とするか？
-
     mcコントラの改造
         permit型に修正する
         ついでに_burnも実装する？
@@ -1217,10 +1211,7 @@ library EnumerableSet {
 }
 
 
-//---NTT or NFT------------------------------------------------------------------------------------------------------------------
-
-
-//===Murasaki_Main======================================================================================================
+//---Murasaki_Main------------------------------------------------------------------------------------------------------------------
 
 
 contract Murasaki_Main is Badge, Ownable{
@@ -1305,227 +1296,7 @@ contract Murasaki_Main is Badge, Ownable{
 }
 
 
-//===Murasaki_Name======================================================================================================
-
-
-contract Murasaki_Name is Badge, Ownable{
-
-    //permission required: function_name
-
-    //address
-    address public murasaki_function_address;
-    function _set_murasaki_function_address(address _address) public onlyOwner {
-        murasaki_function_address = _address;
-    }
-
-    //names
-    string constant internal _name = "Murasaki Names";
-    string constant internal _symbol = "MN";
-    constructor(
-    ) Badge(_name, _symbol) {}
-
-    //static status
-    mapping(uint32 => string) public names;
-    mapping(uint32 => uint32) public minted_time;
-    mapping(uint32 => uint32) public seed;
-    mapping(string => bool) public isMinted;
-
-    //variants
-    uint32 public next_name = 1;
-
-    //mint
-    function mint(address _owner, string memory _name_str, uint32 _seed) external {
-        require(msg.sender == murasaki_function_address);
-        uint32 _now = uint32(block.timestamp);
-        uint32 _minting_name_id = next_name;
-        names[_minting_name_id] = _name_str;
-        minted_time[_minting_name_id] = _now;
-        seed[_minting_name_id] = _seed;
-        //mint
-        next_name++;
-        isMinted[_name_str] = true;
-        _mint(_owner, _minting_name_id);
-    }
-
-    //burn
-    function burn(uint32 _name_id) external {
-        require(msg.sender == murasaki_function_address);
-        string memory _name_str = names[_name_id];
-        isMinted[_name_str] = false;
-        Badge._burn(_name_id);
-    }
-}
-
-
-//===Murasaki_Craft======================================================================================================
-
-
-contract Murasaki_Craft is ERC721, Ownable{
-
-    //permitted address
-    mapping(address => bool) public permitted_address;
-
-    //admin, add or remove permitted_address
-    function _add_permitted_address(address _address) external onlyOwner {
-        permitted_address[_address] = true;
-    }
-    function _remove_permitted_address(address _address) external onlyOwner {
-        permitted_address[_address] = false;
-    }
-
-    using EnumerableSet for EnumerableSet.UintSet;
-    mapping(address => EnumerableSet.UintSet) private mySet;
-
-    //name
-    string constant public name = "Murasaki Craft";
-    string constant public symbol = "MC";
-
-    //global variants
-    uint32 public next_item = 1;
-    struct item {
-        uint32 item_type;
-        uint32 crafted_time;
-        uint32 crafted_summoner;
-        address crafted_wallet;
-    }
-    mapping(uint256 => item) public items;
-    mapping(address => uint32[256]) public balance_of_type;
-    mapping(uint32 => uint32) public seed;
-
-    //override ERC721 transfer, 
-    function _transfer(
-        address from,
-        address to,
-        uint256 tokenId
-    ) internal virtual override {
-        ERC721._transfer(from, to, tokenId);
-        uint32 _item_type = items[tokenId].item_type;
-        balance_of_type[from][_item_type] -= 1;
-        balance_of_type[to][_item_type] += 1;
-        mySet[from].remove(tokenId);
-        mySet[to].add(tokenId);
-    }
-
-    //override ERC721 burn
-    function _burn(uint256 tokenId) internal virtual override {
-        uint32 _item_type = items[tokenId].item_type;
-        address _owner = ERC721.ownerOf(tokenId);
-        balance_of_type[_owner][_item_type] -= 1;
-        mySet[_owner].remove(tokenId);
-        //ERC721._burn(tokenId);
-        ERC721._transfer(_owner, address(this), tokenId);
-    }
-
-    //burn
-    function burn(uint256 tokenId) external {
-        require(permitted_address[msg.sender] == true);
-        _burn(tokenId);
-    }
-
-    //craft
-    function craft(uint32 _item_type, uint32 _summoner, address _wallet, uint32 _seed) external {
-        //require(msg.sender == murasaki_function_address);
-        require(permitted_address[msg.sender] == true);
-        uint32 _now = uint32(block.timestamp);
-        uint32 _crafting_item = next_item;
-        items[_crafting_item] = item(_item_type, _now, _summoner, _wallet);
-        balance_of_type[_wallet][_item_type] += 1;  //balanceOf each item type
-        seed[_crafting_item] = _seed;
-        mySet[_wallet].add(_crafting_item);
-        next_item++;
-        _safeMint(_wallet, _crafting_item);
-    }  
-
-    /// @dev Returns list the total number of listed summoners of the given user.
-    function myListLength(address user) external view returns (uint) {
-        return mySet[user].length();
-    }
-
-    /// @dev Returns the ids and the prices of the listed summoners of the given user.
-    function myListsAt(
-        address user,
-        uint start,
-        uint count
-    ) external view returns (uint[] memory rIds) {
-        rIds = new uint[](count);
-        for (uint idx = 0; idx < count; idx++) {
-            rIds[idx] = mySet[user].at(start + idx);
-        }
-    }
-    
-    //transfer from old contract
-    function mint_old_item(address _old_contract, uint32 _loop_count) external onlyOwner {
-        Murasaki_Craft  mc = Murasaki_Craft(_old_contract);
-        for (uint32 _i = 1; _i <= _loop_count; _i++) {
-            require(next_item < mc.next_item());
-            uint32 _crafting_item = next_item;
-            //get item info crom contract
-            (uint32 _item_type, uint32 _crafted_time, uint32 _crafted_summoner, address _crafted_address) = mc.items(_crafting_item);
-            uint32 _seed = mc.seed(_crafting_item);
-            //write item info to struct
-            items[_crafting_item] = item(_item_type, _crafted_time, _crafted_summoner, _crafted_address);
-            seed[_crafting_item] = _seed;
-            //update balance of wallet
-            address _owner = mc.ownerOf(_crafting_item);
-            balance_of_type[_owner][_item_type] += 1;
-            mySet[_owner].add(_crafting_item);
-            //mint nft
-            _mint(_owner, _crafting_item);
-            //increment
-            next_item++;
-        }
-    }
-
-    //URI
-    //Inspired by OraclizeAPI's implementation - MIT license
-    //https://github.com/oraclize/ethereum-api/blob/b42146b063c7d6ee1358846c198246239e9360e8/oraclizeAPI_0.4.25.sol
-    function toString(uint256 value) internal pure returns (string memory) {
-        if (value == 0) {
-            return "0";
-        }
-        uint256 temp = value;
-        uint256 digits;
-        while (temp != 0) {
-            digits++;
-            temp /= 10;
-        }
-        bytes memory buffer = new bytes(digits);
-        while (value != 0) {
-            digits -= 1;
-            buffer[digits] = bytes1(uint8(48 + uint256(value % 10)));
-            value /= 10;
-        }
-        return string(buffer);
-    }
-    function tokenURI (uint32 _item) public view returns (string memory) {
-        string[9] memory parts;
-        parts[0] = '<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin meet" viewBox="0 0 350 350"><style>.base { fill: white; font-family: serif; font-size: 14px; }</style><rect width="100%" height="100%" fill="black" /><text x="10" y="20" class="base">';
-        parts[1] = string(abi.encodePacked("id", " ", toString(_item)));
-        parts[2] = '</text><text x="10" y="40" class="base">';
-        parts[3] = string(abi.encodePacked("type", " ", toString(items[_item].item_type)));
-        parts[4] = '</text><text x="10" y="60" class="base">';
-        parts[5] = string(abi.encodePacked("crafted time", " ", toString(items[_item].crafted_time)));
-        parts[6] = '</text><text x="10" y="80" class="base">';
-        parts[7] = string(abi.encodePacked("crafted summoner", " ", toString(items[_item].crafted_summoner)));
-        parts[8] = '</text></svg>';
-        string memory output = 
-            string(abi.encodePacked(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7], parts[8]));
-        string memory json = Base64.encode(bytes(string(abi.encodePacked('{"name": "summoner #', toString(_item), '", "description": "House of Murasaki-san. Murasaki-san is a pet living in your wallet. They grow with your dedication. https://murasaki-san.com/", "image": "data:image/svg+xml;base64,', Base64.encode(bytes(output)), '"}'))));
-        output = string(abi.encodePacked('data:application/json;base64,', json));
-        return output;
-    }
-
-    //call items as array, need to write in Craft contract
-    function get_balance_of_type(address _wallet) public view returns (uint32[256] memory) {
-        return balance_of_type[_wallet];
-    }
-}
-
-
-//---Strage------------------------------------------------------------------------------------------------------------------
-
-
-//===Murasaki_Strage======================================================================================================
+//---Murasaki_Strage------------------------------------------------------------------------------------------------------------------
 
 
 contract Murasaki_Strage is Ownable {
@@ -1721,155 +1492,6 @@ contract Murasaki_Strage is Ownable {
     function set_update_time(uint32 _summoner, uint32 _value) external {
         require(permitted_address[msg.sender] == true);
         update_time[_summoner] = _value;
-    }
-}
-
-
-//===Murasaki_Strage_Score======================================================================================================
-
-
-contract Murasaki_Strage_Score is Ownable {
-
-    /*
-    permittion require:
-        function_feeding_and_grooming
-        function_mining_and_farming
-        function_crafting
-    */
-
-    //permitted address
-    mapping(address => bool) public permitted_address;
-
-    //admin, add or remove permitted_address
-    function _add_permitted_address(address _address) external onlyOwner {
-        permitted_address[_address] = true;
-    }
-    function _remove_permitted_address(address _address) external onlyOwner {
-        permitted_address[_address] = false;
-    }
-
-    //status
-    mapping(uint32 => uint32) public total_exp_gained;
-    mapping(uint32 => uint32) public total_coin_mined;
-    mapping(uint32 => uint32) public total_material_farmed;
-    mapping(uint32 => uint32) public total_item_crafted;
-    mapping(uint32 => uint32) public total_heart_received;
-
-    //set status
-    function set_total_exp_gained(uint32 _summoner, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
-        total_exp_gained[_summoner] = _value;
-    }
-    function set_total_coin_mined(uint32 _summoner, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
-        total_coin_mined[_summoner] = _value;
-    }
-    function set_total_material_farmed(uint32 _summoner, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
-        total_material_farmed[_summoner] = _value;
-    }
-    function set_total_item_crafted(uint32 _summoner, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
-        total_item_crafted[_summoner] = _value;
-    }
-    function set_total_heart_received(uint32 _summoner, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
-        total_heart_received[_summoner] = _value;
-    }
-}
-
-
-//===Murasaki_Strage_Nui======================================================================================================
-
-
-contract Murasaki_Strage_Nui is Ownable {
-
-    //item_type_of_nui = 197
-    //permittion required: function_crafting
-
-    //permitted address
-    mapping(address => bool) public permitted_address;
-
-    //admin, add or remove permitted_address
-    function _add_permitted_address(address _address) external onlyOwner {
-        permitted_address[_address] = true;
-    }
-    function _remove_permitted_address(address _address) external onlyOwner {
-        permitted_address[_address] = false;
-    }
-    
-    //status of nui
-    mapping(uint32 => uint32) public mint_time;
-    mapping(uint32 => uint32) public summoner;
-    mapping(uint32 => uint32) public class;
-    mapping(uint32 => uint32) public level;
-    mapping(uint32 => uint32) public strength;
-    mapping(uint32 => uint32) public dexterity;
-    mapping(uint32 => uint32) public intelligence;
-    mapping(uint32 => uint32) public luck;
-    mapping(uint32 => uint32) public total_exp_gained;
-    mapping(uint32 => uint32) public total_coin_mined;
-    mapping(uint32 => uint32) public total_material_farmed;
-    mapping(uint32 => uint32) public total_item_crafted;
-    mapping(uint32 => uint32) public total_heart_received;
-    mapping(uint32 => uint32) public score;
-
-    //set status
-    function set_mint_time(uint32 _item_nui, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
-        mint_time[_item_nui] = _value;
-    }
-    function set_summoner(uint32 _item_nui, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
-        summoner[_item_nui] = _value;
-    }
-    function set_class(uint32 _item_nui, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
-        class[_item_nui] = _value;
-    }
-    function set_level(uint32 _item_nui, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
-        level[_item_nui] = _value;
-    }
-    function set_strength(uint32 _item_nui, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
-        strength[_item_nui] = _value;
-    }
-    function set_dexterity(uint32 _item_nui, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
-        dexterity[_item_nui] = _value;
-    }
-    function set_intelligence(uint32 _item_nui, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
-        intelligence[_item_nui] = _value;
-    }
-    function set_luck(uint32 _item_nui, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
-        luck[_item_nui] = _value;
-    }
-    function set_total_exp_gained(uint32 _item_nui, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
-        total_exp_gained[_item_nui] = _value;
-    }
-    function set_total_coin_mined(uint32 _item_nui, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
-        total_coin_mined[_item_nui] = _value;
-    }
-    function set_total_material_farmed(uint32 _item_nui, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
-        total_material_farmed[_item_nui] = _value;
-    }
-    function set_total_item_crafted(uint32 _item_nui, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
-        total_item_crafted[_item_nui] = _value;
-    }
-    function set_total_heart_received(uint32 _item_nui, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
-        total_heart_received[_item_nui] = _value;
-    }
-    function set_score(uint32 _item_nui, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
-        score[_item_nui] = _value;
     }
 }
 
@@ -3084,10 +2706,6 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
             } else {
                 _mod_dc = _dc - _delta;
             }
-            //***test item***
-            if (_item_type == 48) {
-                return 10;
-            }
             return _mod_dc;
         }
     }
@@ -3151,12 +2769,6 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
             _dc = 3000;
             _coin = 1000;
             _material = 1000;
-        //48: ***test item***
-        } else if (_item_type == 48) {
-            _level = 99;
-            _dc = 10;
-            _coin = 10;
-            _material = 10;
         //1-64: normal items
         } else {
             _level = level_table[_item_type];
@@ -3472,101 +3084,168 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
 }
 
 
-//===*Murasaki_Function_Name======================================================================================================
+//---*Murasaki_Craft------------------------------------------------------------------------------------------------------------------
 
 
-contract Murasaki_Function_Name is Ownable {
+contract Murasaki_Craft is ERC721, Ownable{
 
-    //address
-    address public murasaki_function_share_address;
-    function _set1_murasaki_function_share_address(address _address) external onlyOwner {
-        murasaki_function_share_address = _address;
+    //permitted address
+    mapping(address => bool) public permitted_address;
+
+    //admin, add or remove permitted_address
+    function _add_permitted_address(address _address) external onlyOwner {
+        permitted_address[_address] = true;
+    }
+    function _remove_permitted_address(address _address) external onlyOwner {
+        permitted_address[_address] = false;
     }
 
-    //admin, withdraw
-    function withdraw(address rec)public onlyOwner{
-        payable(rec).transfer(address(this).balance);
+    using EnumerableSet for EnumerableSet.UintSet;
+    mapping(address => EnumerableSet.UintSet) private mySet;
+
+    //name
+    string constant public name = "Murasaki Craft";
+    string constant public symbol = "MC";
+
+    //global variants
+    uint32 public next_item = 1;
+    struct item {
+        uint32 item_type;
+        uint32 crafted_time;
+        uint32 crafted_summoner;
+        address crafted_wallet;
+    }
+    mapping(uint256 => item) public items;
+    mapping(address => uint32[256]) public balance_of_type;
+    mapping(uint32 => uint32) public seed;
+
+    //override ERC721 transfer, 
+    function _transfer(
+        address from,
+        address to,
+        uint256 tokenId
+    ) internal virtual override {
+        ERC721._transfer(from, to, tokenId);
+        uint32 _item_type = items[tokenId].item_type;
+        balance_of_type[from][_item_type] -= 1;
+        balance_of_type[to][_item_type] += 1;
+        mySet[from].remove(tokenId);
+        mySet[to].add(tokenId);
     }
 
-    //mint
-    event Name(uint32 indexed _summoner, string _name_str, uint32 _name_id);
-    function mint(uint32 _summoner, string memory _name_str) external {
-        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
-        Murasaki_Name mn = Murasaki_Name(mfs.murasaki_name_address());
-        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
-        //owner check
-        require(mfs.check_owner(_summoner, msg.sender));
-        //name check
-        require(validate_name(_name_str));
-        require(mn.isMinted(_name_str) == false);
-        //level check
-        require(ms.level(_summoner) >= 3);
-        //cost check
-        uint32 _coin = 100;
-        uint32 _material = 100;
-        require(ms.coin(_summoner) >= _coin && ms.material(_summoner) >= _material);
-        //pay cost
-        ms.set_coin(_summoner, ms.coin(_summoner) - _coin);
-        ms.set_material(_summoner, ms.material(_summoner) - _material);
-        //mint
-        uint32 _seed = mfs.seed(_summoner);
-        mn.mint(msg.sender, _name_str, _seed);
-        //event
-        emit Name(_summoner, _name_str, mn.next_name());
+    //override ERC721 burn
+    function _burn(uint256 tokenId) internal virtual override {
+        uint32 _item_type = items[tokenId].item_type;
+        address _owner = ERC721.ownerOf(tokenId);
+        balance_of_type[_owner][_item_type] -= 1;
+        mySet[msg.sender].remove(tokenId);
+        ERC721._burn(tokenId);
     }
 
     //burn
-    event Burn(uint32 indexed _summoner, uint32 _name_id);
-    function burn(uint32 _summoner) external {
-        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
-        Murasaki_Name mn = Murasaki_Name(mfs.murasaki_name_address());
-        require(mfs.check_owner(_summoner, msg.sender));
-        address _owner = mfs.get_owner(_summoner);
-        uint32 _name_id = mn.tokenOf(_owner);
-        require(_name_id > 0);
-        mn.burn(_name_id);
-        //event
-        emit Burn(_summoner, _name_id);
+    function burn(uint256 tokenId) external {
+        require(permitted_address[msg.sender] == true);
+        _burn(tokenId);
     }
 
-    //call_name_from_summoner
-    function call_name_from_summoner(uint32 _summoner) external view returns (string memory) {
-        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
-        Murasaki_Name mn = Murasaki_Name(mfs.murasaki_name_address());
-        address _owner = mfs.get_owner(_summoner);
-        uint32 _name_id = mn.tokenOf(_owner);
-        string memory _name_str = mn.names(_name_id);
-        return _name_str;
+    //craft
+    function craft(uint32 _item_type, uint32 _summoner, address _wallet, uint32 _seed) external {
+        //require(msg.sender == murasaki_function_address);
+        require(permitted_address[msg.sender] == true);
+        uint32 _now = uint32(block.timestamp);
+        uint32 _crafting_item = next_item;
+        items[_crafting_item] = item(_item_type, _now, _summoner, _wallet);
+        balance_of_type[_wallet][_item_type] += 1;  //balanceOf each item type
+        seed[_crafting_item] = _seed;
+        mySet[_wallet].add(_crafting_item);
+        next_item++;
+        _safeMint(_wallet, _crafting_item);
+    }  
+
+    /// @dev Returns list the total number of listed summoners of the given user.
+    function myListLength(address user) external view returns (uint) {
+        return mySet[user].length();
     }
 
-    // from rarity_names
-    // indentifying large and small capital
-    // @dev Check if the name string is valid (Alphanumeric and spaces without leading or trailing space)
-    function validate_name(string memory str) public pure returns (bool){
-        bytes memory b = bytes(str);
-        if(b.length < 1) return false;
-        //if(b.length > 25) return false; // Cannot be longer than 25 characters
-        if(b.length > 12) return false; // Cannot be longer than 12 characters
-        if(b[0] == 0x20) return false; // Leading space
-        if (b[b.length - 1] == 0x20) return false; // Trailing space
-        bytes1 last_char = b[0];
-        for(uint i; i<b.length; i++){
-            bytes1 char = b[i];
-            //if (char == 0x20 && last_char == 0x20) return false; // Cannot contain continous spaces
-            if (char == 0x20) return false; // Cannot contain any spaces
-            if(
-                !(char >= 0x30 && char <= 0x39) && //9-0
-                !(char >= 0x41 && char <= 0x5A) && //A-Z
-                !(char >= 0x61 && char <= 0x7A) && //a-z
-                !(char == 0x20) //space
-            )
-                return false;
-            last_char = char;
+    /// @dev Returns the ids and the prices of the listed summoners of the given user.
+    function myListsAt(
+        address user,
+        uint start,
+        uint count
+    ) external view returns (uint[] memory rIds) {
+        rIds = new uint[](count);
+        for (uint idx = 0; idx < count; idx++) {
+            rIds[idx] = mySet[user].at(start + idx);
         }
-        return true;
+    }
+    
+    //transfer from old contract
+    function mint_old_item(address _old_contract, uint32 _loop_count) external onlyOwner {
+        Murasaki_Craft  mc = Murasaki_Craft(_old_contract);
+        for (uint32 _i = 1; _i <= _loop_count; _i++) {
+            require(next_item < mc.next_item());
+            uint32 _crafting_item = next_item;
+            //get item info crom contract
+            (uint32 _item_type, uint32 _crafted_time, uint32 _crafted_summoner, address _crafted_address) = mc.items(_crafting_item);
+            uint32 _seed = mc.seed(_crafting_item);
+            //write item info to struct
+            items[_crafting_item] = item(_item_type, _crafted_time, _crafted_summoner, _crafted_address);
+            seed[_crafting_item] = _seed;
+            //update balance of wallet
+            address _owner = mc.ownerOf(_crafting_item);
+            balance_of_type[_owner][_item_type] += 1;
+            mySet[_owner].add(_crafting_item);
+            //mint nft
+            _mint(_owner, _crafting_item);
+            //increment
+            next_item++;
+        }
+    }
+
+    //URI
+    //Inspired by OraclizeAPI's implementation - MIT license
+    //https://github.com/oraclize/ethereum-api/blob/b42146b063c7d6ee1358846c198246239e9360e8/oraclizeAPI_0.4.25.sol
+    function toString(uint256 value) internal pure returns (string memory) {
+        if (value == 0) {
+            return "0";
+        }
+        uint256 temp = value;
+        uint256 digits;
+        while (temp != 0) {
+            digits++;
+            temp /= 10;
+        }
+        bytes memory buffer = new bytes(digits);
+        while (value != 0) {
+            digits -= 1;
+            buffer[digits] = bytes1(uint8(48 + uint256(value % 10)));
+            value /= 10;
+        }
+        return string(buffer);
+    }
+    function tokenURI (uint32 _item) public view returns (string memory) {
+        string[9] memory parts;
+        parts[0] = '<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin meet" viewBox="0 0 350 350"><style>.base { fill: white; font-family: serif; font-size: 14px; }</style><rect width="100%" height="100%" fill="black" /><text x="10" y="20" class="base">';
+        parts[1] = string(abi.encodePacked("id", " ", toString(_item)));
+        parts[2] = '</text><text x="10" y="40" class="base">';
+        parts[3] = string(abi.encodePacked("type", " ", toString(items[_item].item_type)));
+        parts[4] = '</text><text x="10" y="60" class="base">';
+        parts[5] = string(abi.encodePacked("crafted time", " ", toString(items[_item].crafted_time)));
+        parts[6] = '</text><text x="10" y="80" class="base">';
+        parts[7] = string(abi.encodePacked("crafted summoner", " ", toString(items[_item].crafted_summoner)));
+        parts[8] = '</text></svg>';
+        string memory output = 
+            string(abi.encodePacked(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7], parts[8]));
+        string memory json = Base64.encode(bytes(string(abi.encodePacked('{"name": "summoner #', toString(_item), '", "description": "House of Murasaki-san. Murasaki-san is a pet living in your wallet. They grow with your dedication. https://murasaki-san.com/", "image": "data:image/svg+xml;base64,', Base64.encode(bytes(output)), '"}'))));
+        output = string(abi.encodePacked('data:application/json;base64,', json));
+        return output;
+    }
+
+    //call items as array, need to write in Craft contract
+    function get_balance_of_type(address _wallet) public view returns (uint32[256] memory) {
+        return balance_of_type[_wallet];
     }
 }
-
 
 
 //---*World_Dice------------------------------------------------------------------------------------------------------------------
@@ -3755,6 +3434,208 @@ contract World_Dice is Ownable {
 }
 
 
+//---Murasaki_Name------------------------------------------------------------------------------------------------------------------
+
+
+contract Murasaki_Name is Badge, Ownable{
+
+    //permission required: function_name
+
+    //address
+    address public murasaki_function_address;
+    function _set_murasaki_function_address(address _address) public onlyOwner {
+        murasaki_function_address = _address;
+    }
+
+    //names
+    string constant internal _name = "Murasaki Names";
+    string constant internal _symbol = "MN";
+    constructor(
+    ) Badge(_name, _symbol) {}
+
+    //static status
+    mapping(uint32 => string) public names;
+    mapping(uint32 => uint32) public minted_time;
+    mapping(uint32 => uint32) public seed;
+    mapping(string => bool) public isMinted;
+
+    //variants
+    uint32 public next_name = 1;
+
+    //mint
+    function mint(address _owner, string memory _name_str, uint32 _seed) external {
+        require(msg.sender == murasaki_function_address);
+        uint32 _now = uint32(block.timestamp);
+        uint32 _minting_name_id = next_name;
+        names[_minting_name_id] = _name_str;
+        minted_time[_minting_name_id] = _now;
+        seed[_minting_name_id] = _seed;
+        //mint
+        next_name++;
+        isMinted[_name_str] = true;
+        _mint(_owner, _minting_name_id);
+    }
+
+    //burn
+    function burn(uint32 _name_id) external {
+        require(msg.sender == murasaki_function_address);
+        string memory _name_str = names[_name_id];
+        isMinted[_name_str] = false;
+        Badge._burn(_name_id);
+    }
+}
+
+
+//---*Murasaki_Function_Name------------------------------------------------------------------------------------------------------------------
+
+
+contract Murasaki_Function_Name is Ownable {
+
+    //address
+    address public murasaki_function_share_address;
+    function _set1_murasaki_function_share_address(address _address) external onlyOwner {
+        murasaki_function_share_address = _address;
+    }
+
+    //admin, withdraw
+    function withdraw(address rec)public onlyOwner{
+        payable(rec).transfer(address(this).balance);
+    }
+
+    //mint
+    event Name(uint32 indexed _summoner, string _name_str, uint32 _name_id);
+    function mint(uint32 _summoner, string memory _name_str) external {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Name mn = Murasaki_Name(mfs.murasaki_name_address());
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        //owner check
+        require(mfs.check_owner(_summoner, msg.sender));
+        //name check
+        require(validate_name(_name_str));
+        require(mn.isMinted(_name_str) == false);
+        //level check
+        require(ms.level(_summoner) >= 3);
+        //cost check
+        uint32 _coin = 100;
+        uint32 _material = 100;
+        require(ms.coin(_summoner) >= _coin && ms.material(_summoner) >= _material);
+        //pay cost
+        ms.set_coin(_summoner, ms.coin(_summoner) - _coin);
+        ms.set_material(_summoner, ms.material(_summoner) - _material);
+        //mint
+        uint32 _seed = mfs.seed(_summoner);
+        mn.mint(msg.sender, _name_str, _seed);
+        //event
+        emit Name(_summoner, _name_str, mn.next_name());
+    }
+
+    //burn
+    event Burn(uint32 indexed _summoner, uint32 _name_id);
+    function burn(uint32 _summoner) external {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Name mn = Murasaki_Name(mfs.murasaki_name_address());
+        require(mfs.check_owner(_summoner, msg.sender));
+        address _owner = mfs.get_owner(_summoner);
+        uint32 _name_id = mn.tokenOf(_owner);
+        require(_name_id > 0);
+        mn.burn(_name_id);
+        //event
+        emit Burn(_summoner, _name_id);
+    }
+
+    //call_name_from_summoner
+    function call_name_from_summoner(uint32 _summoner) external view returns (string memory) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Name mn = Murasaki_Name(mfs.murasaki_name_address());
+        address _owner = mfs.get_owner(_summoner);
+        uint32 _name_id = mn.tokenOf(_owner);
+        string memory _name_str = mn.names(_name_id);
+        return _name_str;
+    }
+
+    // from rarity_names
+    // indentifying large and small capital
+    // @dev Check if the name string is valid (Alphanumeric and spaces without leading or trailing space)
+    function validate_name(string memory str) public pure returns (bool){
+        bytes memory b = bytes(str);
+        if(b.length < 1) return false;
+        //if(b.length > 25) return false; // Cannot be longer than 25 characters
+        if(b.length > 12) return false; // Cannot be longer than 12 characters
+        if(b[0] == 0x20) return false; // Leading space
+        if (b[b.length - 1] == 0x20) return false; // Trailing space
+        bytes1 last_char = b[0];
+        for(uint i; i<b.length; i++){
+            bytes1 char = b[i];
+            //if (char == 0x20 && last_char == 0x20) return false; // Cannot contain continous spaces
+            if (char == 0x20) return false; // Cannot contain any spaces
+            if(
+                !(char >= 0x30 && char <= 0x39) && //9-0
+                !(char >= 0x41 && char <= 0x5A) && //A-Z
+                !(char >= 0x61 && char <= 0x7A) && //a-z
+                !(char == 0x20) //space
+            )
+                return false;
+            last_char = char;
+        }
+        return true;
+    }
+}
+
+
+//---*Murasaki_Strage_Score------------------------------------------------------------------------------------------------------------------
+
+
+contract Murasaki_Strage_Score is Ownable {
+
+    /*
+    permittion require:
+        function_feeding_and_grooming
+        function_mining_and_farming
+        function_crafting
+    */
+
+    //permitted address
+    mapping(address => bool) public permitted_address;
+
+    //admin, add or remove permitted_address
+    function _add_permitted_address(address _address) external onlyOwner {
+        permitted_address[_address] = true;
+    }
+    function _remove_permitted_address(address _address) external onlyOwner {
+        permitted_address[_address] = false;
+    }
+
+    //status
+    mapping(uint32 => uint32) public total_exp_gained;
+    mapping(uint32 => uint32) public total_coin_mined;
+    mapping(uint32 => uint32) public total_material_farmed;
+    mapping(uint32 => uint32) public total_item_crafted;
+    mapping(uint32 => uint32) public total_heart_received;
+
+    //set status
+    function set_total_exp_gained(uint32 _summoner, uint32 _value) external {
+        require(permitted_address[msg.sender] == true);
+        total_exp_gained[_summoner] = _value;
+    }
+    function set_total_coin_mined(uint32 _summoner, uint32 _value) external {
+        require(permitted_address[msg.sender] == true);
+        total_coin_mined[_summoner] = _value;
+    }
+    function set_total_material_farmed(uint32 _summoner, uint32 _value) external {
+        require(permitted_address[msg.sender] == true);
+        total_material_farmed[_summoner] = _value;
+    }
+    function set_total_item_crafted(uint32 _summoner, uint32 _value) external {
+        require(permitted_address[msg.sender] == true);
+        total_item_crafted[_summoner] = _value;
+    }
+    function set_total_heart_received(uint32 _summoner, uint32 _value) external {
+        require(permitted_address[msg.sender] == true);
+        total_heart_received[_summoner] = _value;
+    }
+}
+
+
 //---*Murasaki_Mail-----------------------------------------------------------------------------------------------------
 
 
@@ -3933,8 +3814,102 @@ contract Murasaki_Mail is Ownable {
 }
 
 
-//---old------------------------------------------------------------------------------------------------------------------
+//---*Murasaki_Strage_Nui------------------------------------------------------------------------------------------------------------------
 
+
+contract Murasaki_Strage_Nui is Ownable {
+
+    //item_type_of_nui = 197
+    //permittion required: function_crafting
+
+    //permitted address
+    mapping(address => bool) public permitted_address;
+
+    //admin, add or remove permitted_address
+    function _add_permitted_address(address _address) external onlyOwner {
+        permitted_address[_address] = true;
+    }
+    function _remove_permitted_address(address _address) external onlyOwner {
+        permitted_address[_address] = false;
+    }
+    
+    //status of nui
+    mapping(uint32 => uint32) public mint_time;
+    mapping(uint32 => uint32) public summoner;
+    mapping(uint32 => uint32) public class;
+    mapping(uint32 => uint32) public level;
+    mapping(uint32 => uint32) public strength;
+    mapping(uint32 => uint32) public dexterity;
+    mapping(uint32 => uint32) public intelligence;
+    mapping(uint32 => uint32) public luck;
+    mapping(uint32 => uint32) public total_exp_gained;
+    mapping(uint32 => uint32) public total_coin_mined;
+    mapping(uint32 => uint32) public total_material_farmed;
+    mapping(uint32 => uint32) public total_item_crafted;
+    mapping(uint32 => uint32) public total_heart_received;
+    mapping(uint32 => uint32) public score;
+
+    //set status
+    function set_mint_time(uint32 _item_nui, uint32 _value) external {
+        require(permitted_address[msg.sender] == true);
+        mint_time[_item_nui] = _value;
+    }
+    function set_summoner(uint32 _item_nui, uint32 _value) external {
+        require(permitted_address[msg.sender] == true);
+        summoner[_item_nui] = _value;
+    }
+    function set_class(uint32 _item_nui, uint32 _value) external {
+        require(permitted_address[msg.sender] == true);
+        class[_item_nui] = _value;
+    }
+    function set_level(uint32 _item_nui, uint32 _value) external {
+        require(permitted_address[msg.sender] == true);
+        level[_item_nui] = _value;
+    }
+    function set_strength(uint32 _item_nui, uint32 _value) external {
+        require(permitted_address[msg.sender] == true);
+        strength[_item_nui] = _value;
+    }
+    function set_dexterity(uint32 _item_nui, uint32 _value) external {
+        require(permitted_address[msg.sender] == true);
+        dexterity[_item_nui] = _value;
+    }
+    function set_intelligence(uint32 _item_nui, uint32 _value) external {
+        require(permitted_address[msg.sender] == true);
+        intelligence[_item_nui] = _value;
+    }
+    function set_luck(uint32 _item_nui, uint32 _value) external {
+        require(permitted_address[msg.sender] == true);
+        luck[_item_nui] = _value;
+    }
+    function set_total_exp_gained(uint32 _item_nui, uint32 _value) external {
+        require(permitted_address[msg.sender] == true);
+        total_exp_gained[_item_nui] = _value;
+    }
+    function set_total_coin_mined(uint32 _item_nui, uint32 _value) external {
+        require(permitted_address[msg.sender] == true);
+        total_coin_mined[_item_nui] = _value;
+    }
+    function set_total_material_farmed(uint32 _item_nui, uint32 _value) external {
+        require(permitted_address[msg.sender] == true);
+        total_material_farmed[_item_nui] = _value;
+    }
+    function set_total_item_crafted(uint32 _item_nui, uint32 _value) external {
+        require(permitted_address[msg.sender] == true);
+        total_item_crafted[_item_nui] = _value;
+    }
+    function set_total_heart_received(uint32 _item_nui, uint32 _value) external {
+        require(permitted_address[msg.sender] == true);
+        total_heart_received[_item_nui] = _value;
+    }
+    function set_score(uint32 _item_nui, uint32 _value) external {
+        require(permitted_address[msg.sender] == true);
+        score[_item_nui] = _value;
+    }
+}
+
+
+//---old------------------------------------------------------------------------------------------------------------------
 
 /*
 contract Murasaki_Craft is ERC721, Ownable{
@@ -4071,4 +4046,3 @@ contract Murasaki_Craft is ERC721, Ownable{
     }
 }
 */
-

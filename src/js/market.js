@@ -43,6 +43,7 @@ async function update_onMarketItems() {
     let wallet = await get_wallet(web3);
     //contract
     let contract = await new web3.eth.Contract(abi_murasaki_item_market, contract_murasaki_item_market);
+    let contract_msn = await new web3.eth.Contract(abi_murasaki_strage_nui, contract_murasaki_strage_nui);
     let contract_mc = await new web3.eth.Contract(abi_murasaki_craft, contract_murasaki_craft);
     let ListLength = await contract.methods.listLength().call();
     let ListsAt = await contract.methods.listsAt(0, ListLength).call();
@@ -68,8 +69,10 @@ async function update_onMarketItems() {
         } else if (_item_type <= 192) {
             _item_rarity = "<font color=orange>rare</font>";
         } else if (_item_type == 197) { //nui
-            let _nui = await contract_msn.methods.nuis(_item).call();
-            _item_rarity = "<font color=#E85298>score: " + _nui[3] + "</font>";
+            //let _nui = await contract_msn.methods.nuis(_item).call();
+            //_item_rarity = "<font color=#E85298>score: " + _nui[3] + "</font>";
+            let _score = await contract_msn.methods.score(_item).call();
+            _item_rarity = "<font color=#E85298>score: " + _score + "</font>";
         } else {
             _item_rarity = "<font color=black>---</font>";
         }
@@ -114,6 +117,7 @@ async function update_sellingItems() {
     let wallet = await get_wallet(web3);
     //contract
     let contract = await new web3.eth.Contract(abi_murasaki_item_market, contract_murasaki_item_market);
+    let contract_msn = await new web3.eth.Contract(abi_murasaki_strage_nui, contract_murasaki_strage_nui);
     let contract_mc = await new web3.eth.Contract(abi_murasaki_craft, contract_murasaki_craft);
     let myListLength = await contract.methods.myListLength(wallet).call();
     let myListsAt = await contract.methods.myListsAt(wallet, 0, myListLength).call();
@@ -139,8 +143,10 @@ async function update_sellingItems() {
         } else if (_item_type <= 192) {
             _item_rarity = "<font color=orange>rare</font>";
         } else if (_item_type == 197) {
-            let _nui = await contract_msn.methods.nuis(_item).call();
-            _item_rarity = "<font color=#E85298>score: " + _nui[3] + "</font>";
+            //let _nui = await contract_msn.methods.nuis(_item).call();
+            //_item_rarity = "<font color=#E85298>score: " + _nui[3] + "</font>";
+            let _score = await contract_msn.methods.score(_item).call();
+            _item_rarity = "<font color=#E85298>score: " + _score + "</font>";
         } else {
             _item_rarity = "<font color=black>---</font>";
         }
@@ -369,10 +375,11 @@ async function get_recent_activity() {
     let wallet = await get_wallet(web3);
     let contract = await new web3.eth.Contract(abi_murasaki_item_market, contract_murasaki_item_market);
     let _block_latest = await web3.eth.getBlockNumber();
+    console.log({_block_latest});
     let _block_from = _block_latest - 10000;
     let events = await contract.getPastEvents("Buy", {
             fromBlock: _block_from,
-            toBlock: "latest"
+            toBlock: _block_latest
     })
     if (events) {
         for (let event of events) {
