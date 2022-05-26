@@ -330,8 +330,8 @@ async function contract_update_statics(_summoner) {
     let _owner = await contract_mm.methods.ownerOf(_summoner).call();
     local_owner = _owner;
     let contract_mffg = await new web3.eth.Contract(abi_murasaki_function_feeding_and_grooming, contract_murasaki_function_feeding_and_grooming);
-    //local_notPetrified = await contract_mffg.methods.not_petrified(_summoner).call();
-    local_notPetrified = await contract_mfs.methods.not_petrified(_summoner).call();
+    local_notPetrified = await contract_mffg.methods.not_petrified(_summoner).call();
+    //local_notPetrified = await contract_mfs.methods.not_petrified(_summoner).call();
 }
 
 //update mining/farming/crafting
