@@ -3600,7 +3600,7 @@ function update() {
         }
         
         //5:Nameplate
-        _item_id = 48;
+        _item_id = 5;
         if (
             (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
             && local_items_flag[_item_id] != true
