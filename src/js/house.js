@@ -11,46 +11,9 @@
         受診時の猫のアニメーション
         メールの表示・非表示
         
-    メール・ハート使用時のapproveチェックとapproveのUIの実装
-
     帽子の普遍的な位置合わせ
     パンケーキ
     すし
-
- ok heart要求アイテムの整備
-        heart要求値のコード化の整理
-        web3js側での参照方法の整備
-            現在はweb3js, contract双方で独立してコードしてしまっている
-        heart要求値を返すcontractを整備して組み入れる
-
- ok summon時, petrified時の挙動確認
- ok カンバンmint時の挙動確認
-
- ok かんばんのアイテム化
- ok ダイスはラックにのみ補正をかける
-        すべてのluck参照処理時にdice値を足す
-        レーダーチャートに青色でdice補正を表示する
-    
- ok イベントの実装
-        https://qiita.com/crazy_traveler/items/a00c7f0b69f242607aef
-        定期的に情報を読みに行くのではなく、
-        eventを発行し、フロントエンド側でeventの発行を購読して待っておく
-        tx→comfirmまでの待ちも表現できるか
-        https://web3js.readthedocs.io/en/v1.2.11/web3-eth-contract.html#contract-events
-        contract.events.allEvents({filter: {summoner: [summoner]})
-        msやmcでitem生成時, status変更時にemit飛ばせればよかったが後の祭り
-            よって、functionでevent発行してみる
-        Eventポイント
-            feeding
-            grooming
-            mining/farming/crafting
-                start, stop
-        これらのイベント観測時にblockchainを読みに行く
-            ホントはevent内容だけでfrontendに反映したいが、流石に複雑になりすぎている
-        また、イベント観測時以外でも定期的に読みに行く
-        
- ok 市場のイベントの実装
-        過去トレードを履歴表示する
 
 */
 
@@ -2235,7 +2198,7 @@ function preload() {
 
 function create() {
 
-    //===back image===
+    //=== back image ===
 
     this.add.image(640, 480, "back");
     back_neon = this.add.image(900, 180, "back_neon").setOrigin(0.5).setScale(0.3);
@@ -2243,7 +2206,7 @@ function create() {
     back_neon.visible = false;
     back_neon.depth = 9999+11;
 
-    //===animation murasaki===
+    //=== animation murasaki ===
 
     this.anims.create({
         key: "murasaki_right",
@@ -2348,7 +2311,7 @@ function create() {
         repeat: -1
     });
 
-    //===animation pet===
+    //=== animation pet ===
 
     this.anims.create({
         key: "mr_astar_right",
@@ -2387,7 +2350,7 @@ function create() {
         repeat: -1
     });
     
-    //===animation item===
+    //=== animation item ===
     
     this.anims.create({
         key: "item_musicbox_on",
@@ -2438,7 +2401,7 @@ function create() {
         repeat: -1
     });
     
-    //===item_basic===
+    //=== item_basic ===
 
     item_bear = this.add.sprite(1000,400, "item_bear");
     item_bear.scaleX = item_bear.scaleX * 0.45;
@@ -2465,7 +2428,7 @@ function create() {
     item_gold2.visible = false;
     item_gold3.visible = false;
 
-    //===click button===
+    //=== click button ===
 
     let _x;
     let _y;
@@ -2612,7 +2575,7 @@ function create() {
     button_levelup.disableInteractive();
     text_level = this.add.text(1240, 42, "0", {font: "bold 26px Verdana", fill: "#E5004F"}).setOrigin(0.5);
 
-    //===system click button===
+    //=== system click button ===
 
     //icon_rotate
     icon_rotate = this.add.sprite(1235,915, "icon_rotate")
@@ -2642,7 +2605,7 @@ function create() {
                 window.location.href = "./";
         });
 
-    //===music===
+    //=== music ===
 
     //sound out of focus
     this.sound.pauseOnBlur = false
@@ -2675,12 +2638,12 @@ function create() {
     sound_system = this.sound.add("system", {volume:0.2});
     sound_nui = this.sound.add("nui", {volume:0.2});
 
-    //===create summoner===
+    //=== create summoner ===
 
     murasakisan = new Murasakisan(this, 500 + Math.random()*200, 640 + Math.random()*100);
     murasakisan.setScale(0.45);
 
-    //===system message===
+    //=== system message ===
 
     //system message
     text_system_message = this.add.text(640, 420, "", {
@@ -2713,7 +2676,7 @@ function create() {
         .on("pointerout", () => text_curePetrification.setStyle({ fontSize: 28, fontFamily: "Arial", fill: '#E62E8B' }));
     text_curePetrification.visible = false;
 
-    //===status===
+    //=== status ===
 
     let font_arg = {font: "18px Arial", fill: "#000"};
 
@@ -2816,7 +2779,7 @@ function create() {
     //id
     text_id = this.add.text(_x-45, _y+32, "#100", {font: "14px Arial", fill: "#000000"});
     //age
-    text_age_time =     this.add.text(_x+20, _y+32, "***", {font: "14px Arial", fill: "#000000"});
+    text_age_time = this.add.text(_x+20, _y+32, "***", {font: "14px Arial", fill: "#000000"});
     //group
     group_kanban = this.add.group();
     group_kanban.add(item_kanban);
@@ -2937,7 +2900,7 @@ function update() {
         }
     }
 
-    //===== numeric animation =====
+    //=== numeric animation ===
 
     if (turn % 2 == 0) {
 
@@ -3033,7 +2996,7 @@ function update() {
         }
     }
 
-    //===== update parameters with animation =====
+    //=== update parameters with animation ===
 
     if (turn % 150 == 0) {
 
@@ -3159,7 +3122,7 @@ function update() {
         previous_local_exp = local_exp;
     }
 
-    //===== update parameters without animation =====
+    //=== update parameters without animation ===
 
     if (turn % 150 == 10) {
 
@@ -3275,7 +3238,7 @@ function update() {
         previsou_local_rolled_dice = local_rolled_dice;
     }
 
-    //===== check mode change =====
+    //=== check mode change ===
 
     if (turn % 150 == 20) {
 
@@ -3395,7 +3358,7 @@ function update() {
         previous_local_level = local_level;
     }
 
-    //===== check button activation =====
+    //=== check button activation ===
 
     if (turn % 150 == 30) {
 
@@ -3489,7 +3452,7 @@ function update() {
         previous_local_crafting_status = local_crafting_status;
     }
 
-    //===== check item =====
+    //=== check item ===
 
     if (turn % 150 == 40 && local_items != previous_local_items) {
 
@@ -4068,7 +4031,7 @@ function update() {
         previous_local_name_str = local_name_str;
     }
 
-    //===== update system message =====
+    //=== update system message ===
     
     //blink message
     if (turn % 300 == 50) {
@@ -4079,7 +4042,7 @@ function update() {
         update_systemMessage();
     }
 
-    //===== update onchain data =====
+    //=== update onchain data ===
 
     if (turn % 500 == 80 || turn == 50) {
         //console.log(summoner);
@@ -4153,5 +4116,42 @@ async function get_last_dice_roll_time(_summoner) {
     let _res = await contract.methods.last_dice_roll_time(_summoner).call();
     return _res;
 }
+
+ ng メール・ハート使用時のapproveチェックとapproveのUIの実装
+
+ ok heart要求アイテムの整備
+        heart要求値のコード化の整理
+        web3js側での参照方法の整備
+            現在はweb3js, contract双方で独立してコードしてしまっている
+        heart要求値を返すcontractを整備して組み入れる
+
+ ok summon時, petrified時の挙動確認
+ ok カンバンmint時の挙動確認
+
+ ok かんばんのアイテム化
+ ok ダイスはラックにのみ補正をかける
+        すべてのluck参照処理時にdice値を足す
+        レーダーチャートに青色でdice補正を表示する
+    
+ ok イベントの実装
+        https://qiita.com/crazy_traveler/items/a00c7f0b69f242607aef
+        定期的に情報を読みに行くのではなく、
+        eventを発行し、フロントエンド側でeventの発行を購読して待っておく
+        tx→comfirmまでの待ちも表現できるか
+        https://web3js.readthedocs.io/en/v1.2.11/web3-eth-contract.html#contract-events
+        contract.events.allEvents({filter: {summoner: [summoner]})
+        msやmcでitem生成時, status変更時にemit飛ばせればよかったが後の祭り
+            よって、functionでevent発行してみる
+        Eventポイント
+            feeding
+            grooming
+            mining/farming/crafting
+                start, stop
+        これらのイベント観測時にblockchainを読みに行く
+            ホントはevent内容だけでfrontendに反映したいが、流石に複雑になりすぎている
+        また、イベント観測時以外でも定期的に読みに行く
+        
+ ok 市場のイベントの実装
+        過去トレードを履歴表示する
 
 */

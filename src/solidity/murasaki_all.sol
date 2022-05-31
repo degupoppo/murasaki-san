@@ -11,12 +11,12 @@ pragma solidity ^0.8.7;
         mining/farmingしてLv上げていない個体のぬいぐるみを買うとExp補正がかかってしまう
         total_exp_gainedが同一になるのを上限とするか？
 
-    mcコントラの改造
+ ok mcコントラの改造
         permit型に修正する
         ついでに_burnも実装する？
             approveなしにpermitted contractから_burn可能になるが、推奨されるのだろうか
 
-    function_craftingの別コントラ化
+ ok function_craftingの別コントラ化
         書き込みを伴うfunctionはメインコントラに
         計算のみのfunctionはcodexコントラへ逃がす
             計算が1つのfunctionで完結するようにうまくリファクタできないだろうか
