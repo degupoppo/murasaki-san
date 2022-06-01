@@ -5,6 +5,22 @@
 
 /*
 
+    ハート経済の深慮
+        ハートを消費する行動
+            ぬいちゃんのクラフト
+                何個消費するか
+                5個で1週間分
+                最大では10個までしか消費させられない
+                ぬいちゃんはあまり多くは作ってほしくないので、高めに設定したいが。
+            後半アイテムのクラフト？
+        ハートの平均取得数
+            猫が3日サイクルだとすると、1週間で4個
+            クラフトを加えると1週間で5個
+            これは多いか？
+            少しさびしいが、猫は7日サイクルにするか
+                これで1週間に平均3個程度
+                ぬいちゃんの要求が8個だとすると、3週間分ていど。
+
     メール送信成功のメッセージを実装
     メール送受信時の動的アクションの実装
         送信時の猫のアニメーション
@@ -3534,8 +3550,35 @@ function update() {
             && local_items_flag[_item_id] != true
         ) {
             local_items_flag[_item_id] = true;
-            item_fortune_statue = this.add.sprite(500, 150, "item_fortune_statue").setScale(0.35).setOrigin(0.5);
-            item_fortune_statue.depth = item_fortune_statue.y;
+            let _x = 500;
+            let _y = 150;
+            let _pos_local = "pos_item_fortune_status"
+            //recover position from localStorage
+            if (localStorage.getItem(_pos_local) != null && local_owner == local_wallet) {
+                let _json = localStorage.getItem(_pos_local);
+                _pos = JSON.parse(_json);
+                _x = _pos[0];
+                _y = _pos[1];
+            }
+            item_fortune_statue = this.add.sprite(_x, _y, "item_fortune_statue")
+                .setScale(0.35)
+                .setOrigin(0.5)
+                .setDepth(_y)
+                .setInteractive({ draggable: true, useHandCursor: true })
+                .on("drag", () => {
+                    if (this.sys.game.scale.gameSize._width == 1280) {
+                        item_fortune_statue.x = game.input.activePointer.x;
+                        item_fortune_statue.y = game.input.activePointer.y;
+                    } else {
+                        item_fortune_statue.x = game.input.activePointer.y;
+                        item_fortune_statue.y = 960 - game.input.activePointer.x;
+                    }
+                    item_fortune_statue.depth = item_fortune_statue.y;
+                })
+                .on("dragend", () => {
+                    let _pos = [item_fortune_statue.x, item_fortune_statue.y];
+                    localStorage.setItem(_pos_local, JSON.stringify(_pos));
+                });
         }
         
         //4:helment
@@ -3607,9 +3650,35 @@ function update() {
             && local_items_flag[_item_id] != true
         ) {
             local_items_flag[_item_id] = true;
-            item_17 = this.add.sprite(600,360, "item_vase").setOrigin(0.5);
-            item_17.setScale(0.2);
-            item_17.depth = item_17.y;
+            let _x = 600;
+            let _y = 360;
+            let _pos_local = "pos_item_vase"
+            //recover position from localStorage
+            if (localStorage.getItem(_pos_local) != null && local_owner == local_wallet) {
+                let _json = localStorage.getItem(_pos_local);
+                _pos = JSON.parse(_json);
+                _x = _pos[0];
+                _y = _pos[1];
+            }
+            item_vase = this.add.sprite(_x, _y, "item_vase")
+                .setScale(0.2)
+                .setOrigin(0.5)
+                .setDepth(_y)
+                .setInteractive({ draggable: true, useHandCursor: true })
+                .on("drag", () => {
+                    if (this.sys.game.scale.gameSize._width == 1280) {
+                        item_vase.x = game.input.activePointer.x;
+                        item_vase.y = game.input.activePointer.y;
+                    } else {
+                        item_vase.x = game.input.activePointer.y;
+                        item_vase.y = 960 - game.input.activePointer.x;
+                    }
+                    item_vase.depth = item_vase.y;
+                })
+                .on("dragend", () => {
+                    let _pos = [item_vase.x, item_vase.y];
+                    localStorage.setItem(_pos_local, JSON.stringify(_pos));
+                });
         }
         
         //18:ms_ether
@@ -3660,8 +3729,40 @@ function update() {
             && local_items_flag[_item_id] != true
         ) {
             local_items_flag[_item_id] = true;
+            let _x = 590;
+            let _y = 140;
+            let _pos_local = "pos_item_asnya"
+            //recover position from localStorage
+            if (localStorage.getItem(_pos_local) != null && local_owner == local_wallet) {
+                let _json = localStorage.getItem(_pos_local);
+                _pos = JSON.parse(_json);
+                _x = _pos[0];
+                _y = _pos[1];
+            }
+            item_asnya = this.add.sprite(_x, _y, "item_asnya")
+                .setScale(0.25)
+                .setOrigin(0.5)
+                .setDepth(_y)
+                .setInteractive({ draggable: true, useHandCursor: true })
+                .on("drag", () => {
+                    if (this.sys.game.scale.gameSize._width == 1280) {
+                        item_asnya.x = game.input.activePointer.x;
+                        item_asnya.y = game.input.activePointer.y;
+                    } else {
+                        item_asnya.x = game.input.activePointer.y;
+                        item_asnya.y = 960 - game.input.activePointer.x;
+                    }
+                    item_asnya.depth = item_asnya.y;
+                })
+                .on("dragend", () => {
+                    let _pos = [item_asnya.x, item_asnya.y];
+                    localStorage.setItem(_pos_local, JSON.stringify(_pos));
+                });
+            /*
+            local_items_flag[_item_id] = true;
             item_asnya = this.add.sprite(590, 140, "item_asnya").setOrigin(0.5).setScale(0.25);
             item_asnya.depth = item_asnya.y;
+            */
         }
 
         //21: Switch
@@ -3711,9 +3812,35 @@ function update() {
             && local_items_flag[_item_id] != true
         ) {
             local_items_flag[_item_id] = true;
-            item_violin = this.add.sprite(1200,608, "item_violin");
-            item_violin.setScale(0.24);
-            item_violin.depth = item_violin.y;
+            let _x = 1200;
+            let _y = 608;
+            let _pos_local = "pos_item_violin"
+            //recover position from localStorage
+            if (localStorage.getItem(_pos_local) != null && local_owner == local_wallet) {
+                let _json = localStorage.getItem(_pos_local);
+                _pos = JSON.parse(_json);
+                _x = _pos[0];
+                _y = _pos[1];
+            }
+            item_violin = this.add.sprite(_x, _y, "item_violin")
+                .setScale(0.2)
+                .setOrigin(0.5)
+                .setDepth(_y)
+                .setInteractive({ draggable: true, useHandCursor: true })
+                .on("drag", () => {
+                    if (this.sys.game.scale.gameSize._width == 1280) {
+                        item_violin.x = game.input.activePointer.x;
+                        item_violin.y = game.input.activePointer.y;
+                    } else {
+                        item_violin.x = game.input.activePointer.y;
+                        item_violin.y = 960 - game.input.activePointer.x;
+                    }
+                    item_violin.depth = item_violin.y;
+                })
+                .on("dragend", () => {
+                    let _pos = [item_violin.x, item_violin.y];
+                    localStorage.setItem(_pos_local, JSON.stringify(_pos));
+                });
         }
 
         //34:musicbox
