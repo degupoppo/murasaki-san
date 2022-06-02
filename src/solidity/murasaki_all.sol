@@ -2734,7 +2734,7 @@ contract Murasaki_Function_Crafting is Ownable {
         Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
         require(mfs.check_owner(_summoner, msg.sender));
         require(ms.mining_status(_summoner) == 0 && ms.farming_status(_summoner) == 0 && ms.crafting_status(_summoner) == 0);
-        require(mfs.calc_satiety(_summoner) >= 20 && mfs.calc_happy(_summoner) >= 20);
+        require(mfs.calc_satiety(_summoner) >= 10 && mfs.calc_happy(_summoner) >= 10);
         require(ms.level(_summoner) >= 3);
         //check item_type
         require(

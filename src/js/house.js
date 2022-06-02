@@ -5,6 +5,26 @@
 
 /*
 
+    育成型NFTの深慮
+        ぬいちゃんシステム上でランダム性の高いNFTをつくる
+        むらさきさんの行動によって結果が変わる
+        独自ステータスを持つ
+        何が生えるかわからない植木鉢
+            うごうごする花を沢山用意する
+                色を変えるなど
+        何が生まれるかわからない卵
+            小さな生物をたくさん用意する
+                ちょうちょなど？
+                
+    マルチプレイの検討
+        扉を出てフィールドへ出かける
+        フィールド上では十字キーなどでキャラクターを操作する
+        他のプレイヤーの位置を同期して表示する
+            10人まで、など上限を決めるか
+        外のフィールドへ出てゆくインセンティブ設計が必要
+            土地の概念を導入する？
+            このフィールドでしかできないことはなんだろうか
+
     ハート経済の深慮
         ハートを消費する行動
             ぬいちゃんのクラフト
@@ -30,6 +50,11 @@
     帽子の普遍的な位置合わせ
     パンケーキ
     すし
+    ライフカウンター（スコア表示）
+    アイパッド（ステータス表示）
+    積み木カウンター
+    ピアノ
+    ラグ
 
 */
 
@@ -3588,19 +3613,26 @@ function update() {
             && local_items_flag[_item_id] != true
         ) {
             local_items_flag[_item_id] = true;
-            let _x = 60;
-            let _y = 700;
-            item_hat_helmet = this.add.sprite(_x, _y, "item_hat_helmet").setOrigin(0.5).setScale(0.20);
+            //let _x = 60;
+            //let _y = 700;
+            let _x = 530;
+            let _y = 255;
+            item_hat_helmet = this.add.sprite(_x, _y, "item_hat_helmet")
+                .setOrigin(0.5)
+                .setScale(0.20)
+                .setAngle(90);
             item_hat_helmet.setInteractive({useHandCursor: true});
             item_hat_helmet.on('pointerdown', () => {
                 if (item_wearing_hat == 0) {
                     item_wearing_hat = item_hat_helmet;
                     murasakisan.on_click();
                     sound_hat.play();
+                    item_hat_helmet.setAngle(0);
                 } else if (item_wearing_hat == item_hat_helmet) {
                     item_wearing_hat = 0;
                     item_hat_helmet.x = _x;
                     item_hat_helmet.y = _y;
+                    item_hat_helmet.setAngle(90);
                 }
             });
         }
@@ -3651,7 +3683,7 @@ function update() {
         ) {
             local_items_flag[_item_id] = true;
             let _x = 600;
-            let _y = 360;
+            let _y = 380;
             let _pos_local = "pos_item_vase"
             //recover position from localStorage
             if (localStorage.getItem(_pos_local) != null && local_owner == local_wallet) {
@@ -3661,7 +3693,7 @@ function update() {
                 _y = _pos[1];
             }
             item_vase = this.add.sprite(_x, _y, "item_vase")
-                .setScale(0.2)
+                .setScale(0.18)
                 .setOrigin(0.5)
                 .setDepth(_y)
                 .setInteractive({ draggable: true, useHandCursor: true })
@@ -3705,19 +3737,26 @@ function update() {
             && local_items_flag[_item_id] != true
         ) {
             local_items_flag[_item_id] = true;
-            let _x = 240;
-            let _y = 275;
-            item_hat_mugiwara = this.add.sprite(_x, _y, "item_hat_mugiwara").setOrigin(0.5).setScale(0.25);
+            //let _x = 240;
+            //let _y = 275;
+            let _x = 450;
+            let _y = 255;
+            item_hat_mugiwara = this.add.sprite(_x, _y, "item_hat_mugiwara")
+                .setOrigin(0.5)
+                .setScale(0.25)
+                .setAngle(90);
             item_hat_mugiwara.setInteractive({useHandCursor: true});
             item_hat_mugiwara.on('pointerdown', () => {
                 if (item_wearing_hat == 0) {
                     item_wearing_hat = item_hat_mugiwara;
                     murasakisan.on_click();
                     sound_hat.play();
+                    item_hat_mugiwara.setAngle(0);
                 } else if (item_wearing_hat == item_hat_mugiwara) {
                     item_wearing_hat = 0;
                     item_hat_mugiwara.x = _x;
                     item_hat_mugiwara.y = _y;
+                    item_hat_mugiwara.setAngle(90);
                 }
             });
         }
@@ -3850,11 +3889,14 @@ function update() {
             && local_items_flag[_item_id] != true
         ) {
             local_items_flag[_item_id] = true;
-            item_musicbox = this.add.sprite(510,360, "item_musicbox").setOrigin(0.5);
-            item_musicbox.setScale(0.35);
-            item_musicbox.setInteractive({useHandCursor: true});
+            let _x = 505;
+            let _y = 370;
+            item_musicbox = this.add.sprite(_x, _y, "item_musicbox")
+                .setOrigin(0.5)
+                .setScale(0.30)
+                .setInteractive({useHandCursor: true})
+                .setDepth(_y);
             item_musicbox.on('pointerdown', () => music() );
-            item_musicbox.depth = item_musicbox.y;
         }
 
         //35:dr_bitco
@@ -3891,8 +3933,10 @@ function update() {
             && local_items_flag[_item_id] != true
         ) {
             local_items_flag[_item_id] = true;
-            let _x = 800;
-            let _y = 810;
+            //let _x = 800;
+            //let _y = 810;
+            let _x = 690;
+            let _y = 255;
             item_hat_knit = this.add.sprite(_x, _y, "item_hat_knit").setOrigin(0.5).setScale(0.20);
             item_hat_knit.setInteractive({useHandCursor: true});
             item_hat_knit.on('pointerdown', () => {
@@ -3915,19 +3959,26 @@ function update() {
             && local_items_flag[_item_id] != true
         ) {
             local_items_flag[_item_id] = true;
-            _x = 700;
-            _y = 380;
-            item_hat_mortarboard = this.add.sprite(_x, _y, "item_hat_mortarboard").setOrigin(0.5).setScale(0.20);
+            //_x = 700;
+            //_y = 380;
+            _x = 610;
+            _y = 260;
+            item_hat_mortarboard = this.add.sprite(_x, _y, "item_hat_mortarboard")
+                .setOrigin(0.5)
+                .setScale(0.20)
+                .setAngle(90);
             item_hat_mortarboard.setInteractive({useHandCursor: true});
             item_hat_mortarboard.on('pointerdown', () => {
                 if (item_wearing_hat == 0) {
                     item_wearing_hat = item_hat_mortarboard;
                     murasakisan.on_click();
                     sound_hat.play();
+                    item_hat_mortarboard.setAngle(0);
                 } else if (item_wearing_hat == item_hat_mortarboard) {
                     item_wearing_hat = 0;
                     item_hat_mortarboard.x = _x;
                     item_hat_mortarboard.y = _y;
+                    item_hat_mortarboard.setAngle(90);
                 }
             });
         }
@@ -3953,7 +4004,7 @@ function update() {
                     let _x = 650;
                     let _y = 500;
                     _array_bank[i] = scene.add.sprite(_x + i*50, _y, "item_bank")
-                        .setScale(0.3)
+                        .setScale(0.275)
                         .setOrigin(0.5)
                         .setInteractive({useHandCursor: true})
                         .on("pointerover", () => _array_bank[i].setTexture("item_bank_broken") )
@@ -4004,7 +4055,7 @@ function update() {
                     let _x = 550;
                     let _y = 490;
                     _array_bank[i] = scene.add.sprite(_x - i*50, _y, "item_pouch")
-                        .setScale(0.25)
+                        .setScale(0.225)
                         .setOrigin(0.5)
                         .setInteractive({useHandCursor: true})
                         .on("pointerover", () => _array_bank[i].setTexture("item_pouch_broken") )
