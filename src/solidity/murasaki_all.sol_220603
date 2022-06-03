@@ -5,20 +5,6 @@ pragma solidity ^0.8.7;
 
 /*
 
-    tiny heartの非NFT化
-        NFTのままだとコスト支払いがとてもやりにくい
-            gas代もかさむし、リソースとしての使い勝手が悪い
-        msに記録されるcoin/materialなどと同等のパラメータとする
-        coin/materialとは違い、summoner間を移動する機能は持たせないこととする
-            継続的なゲームプレイの指標のようなもの
-            coin/materialはRMTで得ることもできる
-        heart経済によって、高級アイテムのバランス調整を行う
-            1週間, 1ヶ月で得られる平均heart量
-            上記をもとに、アイテムのコスト設定を深慮する
-                ex: ぬいちゃんは1ヶ月分、◯◯は1週間分、など
-            burn上限10個が撤廃されるので、コストは自由に決められる
-                heart 100個要求のアイテムなども可能
-
     スコア補正の深慮
         単純にスコア差ならば、高Lv低スコアの個体がExp+となってしまう
         つまり、何もせずにLvだけ上げていた個体が恩恵を受けやすい
@@ -1582,7 +1568,6 @@ contract Murasaki_Strage is Ownable {
     //dymanic, resouse
     mapping(uint32 => uint32) public coin;
     mapping(uint32 => uint32) public material;
-    mapping(uint32 => uint32) public heart;
 
     //dynamic, treating
     mapping(uint32 => uint32) public last_feeding_time;
@@ -1664,10 +1649,6 @@ contract Murasaki_Strage is Ownable {
     function set_material(uint32 _summoner, uint32 _value) external {
         require(permitted_address[msg.sender] == true);
         material[_summoner] = _value;
-    }
-    function set_heart(uint32 _summoner, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
-        heart[_summoner] = _value;
     }
     function set_last_feeding_time(uint32 _summoner, uint32 _value) external {
         require(permitted_address[msg.sender] == true);
@@ -2050,11 +2031,6 @@ contract Murasaki_Function_Share is Ownable {
 
     //calc heart
     function calc_heart(uint32 _summoner) public view returns (uint32) {
-        Murasaki_Strage ms = Murasaki_Strage(murasaki_strage_address);
-        return ms.heart(_summoner);
-    }
-    /*
-    function calc_heart(uint32 _summoner) public view returns (uint32) {
         //Tiny_Heart th = Tiny_Heart(tiny_heart_address);
         Murasaki_Main mm = Murasaki_Main(murasaki_main_address);
         address _owner = mm.ownerOf(_summoner);
@@ -2062,7 +2038,6 @@ contract Murasaki_Function_Share is Ownable {
         //uint32 _heart = uint32(th.balanceOf(_owner));
         return _heart;
     }
-    */
 
     //call_name_from_summoner
     function call_name_from_summoner(uint32 _summoner) external view returns (string memory) {
@@ -2726,41 +2701,6 @@ contract Murasaki_Function_Crafting is Ownable {
     function start_crafting(uint32 _summoner, uint32 _item_type) public {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
-        //Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
-        require(mfs.check_owner(_summoner, msg.sender));
-        require(ms.mining_status(_summoner) == 0 && ms.farming_status(_summoner) == 0 && ms.crafting_status(_summoner) == 0);
-        require(mfs.calc_satiety(_summoner) >= 10 && mfs.calc_happy(_summoner) >= 10);
-        require(ms.level(_summoner) >= 3);
-        //check item_type
-        require(
-            _item_type <= 64        //normal items
-            || _item_type == 194    //coin bag
-            || _item_type == 195    //material bag
-            || _item_type == 196    //mail
-            || _item_type == 197    //nui
-        );
-        //get dc, cost, heart
-        uint32[4] memory _dc_table = get_item_dc(_item_type);
-        uint32 _coin = _dc_table[2];
-        uint32 _material = _dc_table[3];
-        uint32 _heart = get_heart_required(_item_type);
-        //check coin, material, heart
-        require(ms.coin(_summoner) >= _coin);
-        require(ms.material(_summoner) >= _material);
-        require(ms.heart(_summoner) >= _heart);
-        //pay coin, material, heart
-        ms.set_coin(_summoner, ms.coin(_summoner) - _coin);
-        ms.set_material(_summoner, ms.material(_summoner) - _material);
-        ms.set_heart(_summoner, ms.heart(_summoner) - _heart);
-        //start crafting
-        ms.set_crafting_item_type(_summoner, _item_type);
-        ms.set_crafting_status(_summoner, 1);
-        ms.set_crafting_start_time(_summoner, uint32(block.timestamp));
-    }
-    /*
-    function start_crafting(uint32 _summoner, uint32 _item_type) public {
-        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
-        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
         require(mfs.check_owner(_summoner, msg.sender));
         require(ms.mining_status(_summoner) == 0 && ms.farming_status(_summoner) == 0 && ms.crafting_status(_summoner) == 0);
         require(mfs.calc_satiety(_summoner) >= 10 && mfs.calc_happy(_summoner) >= 10);
@@ -2831,7 +2771,6 @@ contract Murasaki_Function_Crafting is Ownable {
         ms.set_crafting_status(_summoner, 1);
         ms.set_crafting_start_time(_summoner, uint32(block.timestamp));
     }
-    */
     event Crafting(uint32 indexed _summoner, uint32 _item_type, uint32 _item);
     function stop_crafting(uint32 _summoner) public {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
@@ -2936,79 +2875,10 @@ contract Murasaki_Function_Crafting is Ownable {
         return mfcc.get_heart_required(_item_type);
     }
 
-    //create tiny heart
-    event Heart(uint32 indexed _summoner_from, uint32 _summoner_to);
-    function _create_tiny_heart(uint32 _summoner_from) internal {
-        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
-        Murasaki_Main mm = Murasaki_Main(mfs.murasaki_main_address());
-        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
-        //get random _to_summoner
-        uint32 _count_summoners = mm.next_summoner() - 1;
-        uint32 _summoner_to = mfs.dn(_summoner_from, _count_summoners) + 1;
-        //check _to_summoner
-        bool _isActive = ms.isActive(_summoner_to);
-        address _walleto_to;
-        if (
-            _isActive == true
-            && ms.level(_summoner_to) >= 3
-            && mfs.calc_satiety(_summoner_to) >= 10
-            && mfs.calc_happy(_summoner_to) >= 10
-        ) {
-            //when _summoner_to is active
-            _walleto_to = mm.ownerOf(_summoner_to);
-        } else {
-            //when _summoner_to is not active, wallet = msg.sender
-            _walleto_to = msg.sender;
-            _summoner_to = _summoner_from;
-        }
-        //create tiny heart
-        //uint32 _seed = mfs.seed(_created_summoner);
-        //mc.craft(193, _created_summoner, _to_wallet, _seed);
-        //ms.set_heart(_summoner_from, ms.heart(_summoner_from) + 1);
-        ms.set_heart(_summoner_to, ms.heart(_summoner_to) + 1);
-        //update score
-        Murasaki_Strage_Score mss = Murasaki_Strage_Score(mfs.murasaki_strage_score_address());
-        uint32 _total_heart_received = mss.total_heart_received(_summoner_to);
-        mss.set_total_heart_received(_summoner_to, _total_heart_received + 1);
-        //event
-        emit Heart(_summoner_from, _summoner_to);        
-    }
-    /*
+    //tiny heart
     //choice random summoner and transfer tiny heart to it
     //when not-active summoner was selected, msg.sender will get it instedlly.
     event Heart(uint32 indexed _summoner_from, uint32 _summoner_to);
-    function _create_tiny_heart(uint32 _created_summoner) internal {
-        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
-        Murasaki_Main mm = Murasaki_Main(mfs.murasaki_main_address());
-        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
-        Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
-        //get random _to_summoner
-        uint32 _count_summoners = mm.next_summoner() - 1;
-        uint32 _to_summoner = mfs.dn(_created_summoner, _count_summoners) + 1;
-        //check _to_summoner: when not active summoner, transfer to msg.sender
-        bool _isActive = ms.isActive(_to_summoner);
-        address _to_wallet;
-        if (
-            _isActive == true
-            //&& ms.level(_to_summoner) >= 3
-            //&& mfs.calc_satiety(_to_summoner) >= 20
-            && mfs.calc_happy(_to_summoner) >= 10
-        ) {
-            _to_wallet = mm.ownerOf(_to_summoner);
-        } else {
-            _to_wallet = msg.sender;
-            _to_summoner = _created_summoner;
-        }
-        //create tiny heart
-        uint32 _seed = mfs.seed(_created_summoner);
-        mc.craft(193, _created_summoner, _to_wallet, _seed);
-        //update score
-        Murasaki_Strage_Score mss = Murasaki_Strage_Score(mfs.murasaki_strage_score_address());
-        uint32 _total_heart_received = mss.total_heart_received(_to_summoner);
-        mss.set_total_heart_received(_to_summoner, _total_heart_received + 1);
-        //event
-        emit Heart(_created_summoner, _to_summoner);
-    }
     function _create_tiny_heart(uint32 _created_summoner) internal {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Main mm = Murasaki_Main(mfs.murasaki_main_address());
@@ -3066,7 +2936,6 @@ contract Murasaki_Function_Crafting is Ownable {
         emit Heart(_summoner_to, _summoner_from);
         emit Heart(_summoner_from, _summoner_to);
     }
-    */
 
     //upgrade item
     event Upgrade(uint32 indexed _summoner, uint32 _item_type, uint32 _item);
@@ -3253,10 +3122,10 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
     //get item dc
     function get_item_dc(uint32 _item_type) public view returns (uint32[4] memory) {
         //return: level, dc, coin, material
-        uint32 _level = 999999;
-        uint32 _dc = 999999;
-        uint32 _coin = 999999;
-        uint32 _material = 999999;
+        uint32 _level;
+        uint32 _dc;
+        uint32 _coin;
+        uint32 _material;
         //193: tiny heart, uncraftable
         //194: coin bag
         if (_item_type == 194){
@@ -3289,7 +3158,7 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
             _coin = 10;
             _material = 10;
         //1-64: normal items
-        } else if (_item_type <= 64 {
+        } else {
             _level = level_table[_item_type];
             _dc = dc_table[_item_type];
             _coin = coin_table[_item_type];
@@ -3300,12 +3169,12 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
     
     //get heart required
     function get_heart_required(uint32 _item_type) public pure returns (uint32) {
-        if (_item_type <= 64) {
+        if (_item_type <= 196) {
             return 0;
-        } else if (_item_type == 197) { //nui
-            return 10;
+        } else if (_item_type == 197) {
+            return 1;
         } else {
-            return 999999;
+            return 0;
         }
     }
 
@@ -4058,17 +3927,9 @@ contract Murasaki_Mail is Ownable {
         emit Open_Mail(_summoner_to, _mail.summoner_from);
     }
     function _create_tiny_heart(uint32 _summoner_to, uint32 _summoner_from) internal {
-        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
-        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
-        ms.set_heart(_summoner_to, ms.heart(_summoner_to) + 1);
-        ms.set_heart(_summoner_from, ms.heart(_summoner_from) + 1);
-    }
-    /*
-    function _create_tiny_heart(uint32 _summoner_to, uint32 _summoner_from) internal {
         Murasaki_Function_Crafting mfc = Murasaki_Function_Crafting(murasaki_function_crafting_address);
         mfc.create_tiny_heart(_summoner_to, _summoner_from);
     }
-    */
 }
 
 

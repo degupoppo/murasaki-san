@@ -5,6 +5,13 @@
 
 /*
 
+    新コントラ群への対応
+        craft周りの整備
+            heart要求値の取得
+                heart要求は0でも表示させるか
+            heart数のsend
+            heart数の取得
+
     育成型NFTの深慮
         ぬいちゃんシステム上でランダム性の高いNFTをつくる
         むらさきさんの行動によって結果が変わる
@@ -62,6 +69,103 @@
 //---global variants-------------------------------------------------------------------------------------------------
 
 
+function init_global_variants() {
+    turn = 0;
+
+    //on chain static status
+    summoner = -1;
+    local_birth_time = Date.now();
+
+    //on chain global status
+    SPEED = 1;
+    BASE_SEC = 86400;
+
+    //on chain dynamic status
+    local_class = 0;
+    local_strength = 0;
+    local_dexterity = 0;
+    local_intelligence = 0;
+    local_luck = 0;
+    local_level = 0;
+    local_last_feeding_time = 0;
+    local_last_grooming_time = 0;
+    local_coin = 0;
+    local_exp = 0;
+    local_mining_status = 0;
+    local_mining_start_time = 0;
+    local_next_exp_required = 0;
+    local_material = 0;
+    local_farming_status = 0;
+    local_farming_start_time = 0;
+    local_crafting_status = 0;
+    local_crafting_start_time = 0;
+    local_crafting_item_type = 0;
+    local_items = [0] * 256;
+    local_heart = 0;
+    local_wallet = "0x0000000000000000000000000000000000000001";
+    local_owner = "0x0000000000000000000000000000000000000000";
+    local_name_str = "(unnamed)";
+    local_notPetrified = true;
+    local_isActive = 0;
+    local_rolled_dice = 0;
+    local_last_rolled_dice = 0;
+    local_last_dice_roll_time = Date.now();
+    local_mail_sending_interval = -1;
+
+    //local using variants
+    previous_local_last_feeding_time = 0;
+    previous_local_last_grooming_time = 0;
+    previous_local_level = 0;
+    previous_local_mining_status = -1;
+    previous_local_farming_status = -1;
+    previous_local_crafting_status = -1;
+    previous_local_exp = 0.01;
+    previous_local_coin = 0;
+    previous_local_material = 0;
+    previous_local_items = [0] * 256;
+    previous_local_name_str = "[0] * 256";
+    local_coin_calc = 0;
+    local_material_calc = 0;
+    local_crafting_calc = 0;
+    flag_music = 0;
+    bgm = 0;
+    local_items_flag = new Array(256).fill(0);
+    global_selected_crafting_item = 0;
+    global_selected_crafting_item_dc = 0;
+    global_selected_crafting_item_required_heart = 0;
+    last_sync_time = 0;
+    mode = "";
+    text_wallet = "";
+    screen_coin = 0;
+    screen_coin_delta = 0;
+    screen_material = 0;
+    screen_material_delta = 0;
+    screen_exp = 0;
+    screen_exp_delta = 0;
+    count_sync = 0;
+    happy = 0;
+    previous_happy = 0;
+    satiety = 0;
+    previous_satiety = 0;
+    screen_happy = 0;
+    screen_happy_delta = 0;
+    screen_satiety = 0;
+    screen_satiety_delta = 0;
+    previous_local_item194 = 0;
+    previous_local_item195 = 0;
+    previous_local_item196 = 0;
+    previous_local_item197 = 0;
+    item_wearing_hat = 0;
+    flag_doneFp = 0;
+    previsou_local_rolled_dice = 0;
+    flag_dice_rolling = 0;
+    flag_name_minting = 0;
+    flag_mail = false;
+}
+
+init_global_variants();
+
+/*
 let turn = 0;
 
 //on chain static status
@@ -153,6 +257,7 @@ let previsou_local_rolled_dice = 0;
 let flag_dice_rolling = 0;
 let flag_name_minting = 0;
 let flag_mail = false;
+*/
 
 
 //---html-----------------------------------------------------------------------------------------------------
@@ -334,8 +439,9 @@ async function contract_update_statics(_summoner) {
     let _owner = await contract_mm.methods.ownerOf(_summoner).call();
     local_owner = _owner;
     let contract_mffg = await new web3.eth.Contract(abi_murasaki_function_feeding_and_grooming, contract_murasaki_function_feeding_and_grooming);
-    local_notPetrified = await contract_mffg.methods.not_petrified(_summoner).call();
-    //local_notPetrified = await contract_mfs.methods.not_petrified(_summoner).call();
+    //***TODO***
+    //local_notPetrified = await contract_mffg.methods.not_petrified(_summoner).call();
+    local_notPetrified = await contract_mfs.methods.not_petrified(_summoner).call();
 }
 
 //update mining/farming/crafting
@@ -3403,70 +3509,63 @@ function update() {
 
     if (turn % 150 == 30) {
 
-        if (
-            previous_local_mining_status != local_mining_status ||
-            previous_local_farming_status != local_farming_status ||
-            previous_local_crafting_status != local_crafting_status
-            ) {
+        //grooming
+        if (local_farming_status == 1 || local_crafting_status == 1 || local_mining_status == 1) {
+            button_grooming.setTexture("button_grooming_unable");
+            button_grooming.disableInteractive();
+        }else {
+            button_grooming.setTexture("button_grooming_enable");
+            button_grooming.on('pointerover', () => button_grooming.setTexture("button_grooming_pointerover"));
+            button_grooming.on('pointerout', () => button_grooming.setTexture("button_grooming_enable"));
+            button_grooming.setInteractive();
+        }
 
-            //grooming
-            if (local_farming_status == 1 || local_crafting_status == 1 || local_mining_status == 1) {
-                button_grooming.setTexture("button_grooming_unable");
-                button_grooming.disableInteractive();
-            }else {
-                button_grooming.setTexture("button_grooming_enable");
-                button_grooming.on('pointerover', () => button_grooming.setTexture("button_grooming_pointerover"));
-                button_grooming.on('pointerout', () => button_grooming.setTexture("button_grooming_enable"));
-                button_grooming.setInteractive();
-            }
+        //mining
+        if (local_farming_status == 1 || local_crafting_status == 1 || local_level <= 1) {
+            button_mining.setTexture("button_mining_unable");
+            button_mining.disableInteractive();
+        }else if (local_mining_status == 1) {
+            button_mining.setTexture("button_mining_working");
+            button_mining.on('pointerover', () => button_mining.setTexture("button_mining_pointerover_stop"));
+            button_mining.on('pointerout', () => button_mining.setTexture("button_mining_working"));
+            button_mining.setInteractive();
+        }else {
+            button_mining.setTexture("button_mining_enable");
+            button_mining.on('pointerover', () => button_mining.setTexture("button_mining_pointerover"));
+            button_mining.on('pointerout', () => button_mining.setTexture("button_mining_enable"));
+            button_mining.setInteractive();
+        }
 
-            //mining
-            if (local_farming_status == 1 || local_crafting_status == 1 || local_level <= 1) {
-                button_mining.setTexture("button_mining_unable");
-                button_mining.disableInteractive();
-            }else if (local_mining_status == 1) {
-                button_mining.setTexture("button_mining_working");
-                button_mining.on('pointerover', () => button_mining.setTexture("button_mining_pointerover_stop"));
-                button_mining.on('pointerout', () => button_mining.setTexture("button_mining_working"));
-                button_mining.setInteractive();
-            }else {
-                button_mining.setTexture("button_mining_enable");
-                button_mining.on('pointerover', () => button_mining.setTexture("button_mining_pointerover"));
-                button_mining.on('pointerout', () => button_mining.setTexture("button_mining_enable"));
-                button_mining.setInteractive();
-            }
+        //farming
+        if (local_mining_status == 1 || local_crafting_status == 1 || local_level <= 1) {
+            button_farming.setTexture("button_farming_unable");
+            button_farming.disableInteractive();
+        }else if (local_farming_status == 1) {
+            button_farming.setTexture("button_farming_working");
+            button_farming.on('pointerover', () => button_farming.setTexture("button_farming_pointerover_stop"));
+            button_farming.on('pointerout', () => button_farming.setTexture("button_farming_working"));
+            button_farming.setInteractive();
+        }else {
+            button_farming.setTexture("button_farming_enable");
+            button_farming.on('pointerover', () => button_farming.setTexture("button_farming_pointerover"));
+            button_farming.on('pointerout', () => button_farming.setTexture("button_farming_enable"));
+            button_farming.setInteractive();
+        }
 
-            //farming
-            if (local_mining_status == 1 || local_crafting_status == 1 || local_level <= 1) {
-                button_farming.setTexture("button_farming_unable");
-                button_farming.disableInteractive();
-            }else if (local_farming_status == 1) {
-                button_farming.setTexture("button_farming_working");
-                button_farming.on('pointerover', () => button_farming.setTexture("button_farming_pointerover_stop"));
-                button_farming.on('pointerout', () => button_farming.setTexture("button_farming_working"));
-                button_farming.setInteractive();
-            }else {
-                button_farming.setTexture("button_farming_enable");
-                button_farming.on('pointerover', () => button_farming.setTexture("button_farming_pointerover"));
-                button_farming.on('pointerout', () => button_farming.setTexture("button_farming_enable"));
-                button_farming.setInteractive();
-            }
-
-            //crafting
-            if (local_mining_status == 1 || local_farming_status == 1 || local_level <= 2) {
-                button_crafting.setTexture("button_crafting_unable");
-                button_crafting.disableInteractive();
-            }else if (local_crafting_status == 1) {
-                button_crafting.setTexture("button_crafting_working");
-                button_crafting.on('pointerover', () => button_crafting.setTexture("button_crafting_pointerover_stop"));
-                button_crafting.on('pointerout', () => button_crafting.setTexture("button_crafting_working"));
-                button_crafting.setInteractive();
-            }else {
-                button_crafting.setTexture("button_crafting_enable");
-                button_crafting.on('pointerover', () => button_crafting.setTexture("button_crafting_pointerover"));
-                button_crafting.on('pointerout', () => button_crafting.setTexture("button_crafting_enable"));
-                button_crafting.setInteractive();
-            }
+        //crafting
+        if (local_mining_status == 1 || local_farming_status == 1 || local_level <= 2) {
+            button_crafting.setTexture("button_crafting_unable");
+            button_crafting.disableInteractive();
+        }else if (local_crafting_status == 1) {
+            button_crafting.setTexture("button_crafting_working");
+            button_crafting.on('pointerover', () => button_crafting.setTexture("button_crafting_pointerover_stop"));
+            button_crafting.on('pointerout', () => button_crafting.setTexture("button_crafting_working"));
+            button_crafting.setInteractive();
+        }else {
+            button_crafting.setTexture("button_crafting_enable");
+            button_crafting.on('pointerover', () => button_crafting.setTexture("button_crafting_pointerover"));
+            button_crafting.on('pointerout', () => button_crafting.setTexture("button_crafting_enable"));
+            button_crafting.setInteractive();
         }
 
         //level-up button triggered by exp change

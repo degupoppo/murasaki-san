@@ -5,6 +5,20 @@ pragma solidity ^0.8.7;
 
 /*
 
+    heart経済の深慮
+        heartを得る行動
+            誰かのcraftによる受け取り
+                受動的
+                1/w程度
+                happy, satietyが10以上、レベル3以上で受け取り可能
+            猫mail
+                能動的
+                2/3d = 4/w程度
+            合計：5/w, 20/m程度
+        heartを支払う行動
+            nuiちゃんクラフト, 30要求
+            後半のアイテムクラフト時, 1w分, 5個程度要求
+
     tiny heartの非NFT化
         NFTのままだとコスト支払いがとてもやりにくい
             gas代もかさむし、リソースとしての使い勝手が悪い
@@ -1749,13 +1763,6 @@ contract Murasaki_Strage is Ownable {
 
 contract Murasaki_Strage_Score is Ownable {
 
-    /*
-    permittion require:
-        function_feeding_and_grooming
-        function_mining_and_farming
-        function_crafting
-    */
-
     //permitted address
     mapping(address => bool) public permitted_address;
 
@@ -1893,7 +1900,7 @@ contract Murasaki_Strage_Nui is Ownable {
 }
 
 
-//---Murasaki_Function------------------------------------------------------------------------------------------------------------------
+//---Function------------------------------------------------------------------------------------------------------------------
 
 
 //===*Share======================================================================================================
@@ -1982,6 +1989,7 @@ contract Murasaki_Function_Share is Ownable {
         _res[24] = ms.last_total_crafting_sec(_summoner);
         _res[25] = ms.last_grooming_time_plus_working_time(_summoner);
         _res[26] = ms.update_time(_summoner);
+        _res[27] = ms.heart(_summoner);
         return _res;
     }
     function get_static_status_array(uint32 _summoner) external view returns (uint32[5] memory) {
@@ -4069,6 +4077,36 @@ contract Murasaki_Mail is Ownable {
         mfc.create_tiny_heart(_summoner_to, _summoner_from);
     }
     */
+}
+
+
+//---Admin------------------------------------------------------------------------------------------------------------------
+
+
+contract Murasaki_Admin is Ownable {
+
+    //approval required: murasaki_craft
+
+    //address
+    address public murasaki_function_share_address;
+    function _set1_murasaki_function_share_address(address _address) external onlyOwner {
+        murasaki_function_share_address = _address;
+    }
+
+    //craft nui
+    function craft_nui(uint32 _summoner, uint32 _score) external {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Main mm = Murasaki_Main(murasaki_main_address);
+        Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
+        Murasaki_Strage_Nui msn = Murasaki_Strage_Nui(mfs.murasaki_strage_nui_address());
+        address _owner = mm.ownerOf(_summoner);
+        uint32 _seed = mfs.seed(_summoner);
+        uint32 _item_type = 197;
+        uint32 _item_crafting = mc.next_item();
+        mc.craft(_item_type, _summoner, _owner, _seed);
+        msn.set_summoner(_item_crafting, _summoner);
+        msn.set_score(_item_crafting, _score);
+    }
 }
 
 
