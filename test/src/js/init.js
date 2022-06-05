@@ -36,6 +36,8 @@ async function initialize_contract() {
     let contract_msn = new web3.eth.Contract(abi_murasaki_strage_nui, contract_murasaki_strage_nui);
     //market
     let contract_mmt = new web3.eth.Contract(abi_murasaki_item_market, contract_murasaki_item_market);
+    //admin
+    let contract_adm = new web3.eth.Contract(abi_murasaki_admin, contract_murasaki_admin);
 
     //set contracts
 
@@ -53,9 +55,11 @@ async function initialize_contract() {
     */
     
     //set nft,ntt    
-    contract_mm.methods._set_murasaki_function_address(contract_murasaki_function_summon_and_levelup).send({from:wallet});
-    contract_mn.methods._set_murasaki_function_address(contract_murasaki_function_name).send({from:wallet});
+    contract_mm.methods._add_permitted_address(contract_murasaki_function_summon_and_levelup).send({from:wallet});
+    contract_mn.methods._add_permitted_address(contract_murasaki_function_name).send({from:wallet});
     contract_mc.methods._add_permitted_address(contract_murasaki_function_crafting).send({from:wallet});
+    contract_mc.methods._add_permitted_address(contract_murasaki_admin).send({from:wallet});
+    contract_mn.methods._add_permitted_address(contract_murasaki_admin).send({from:wallet});
     //set function
     contract_mfs.methods._set1_murasaki_main_address(contract_murasaki_main).send({from:wallet});
     contract_mfs.methods._set2_murasaki_strage_address(contract_murasaki_strage).send({from:wallet});
@@ -88,10 +92,11 @@ async function initialize_contract() {
     contract_mss.methods._add_permitted_address(contract_murasaki_function_crafting).send({from:wallet});
     contract_mss.methods._add_permitted_address(contract_murasaki_function_name).send({from:wallet});
     contract_msn.methods._add_permitted_address(contract_murasaki_function_crafting).send({from:wallet});
+    contract_msn.methods._add_permitted_address(contract_murasaki_admin).send({from:wallet});
     //market
-    contract_mmt.methods._set1_murasaki_function_share_address(contract_murasaki_function_share).send({from:wallet});    
-    //approval
-    //mmt -> mc
+    contract_mmt.methods._set1_murasaki_function_share_address(contract_murasaki_function_share).send({from:wallet});
+    //admin
+    contract_adm.methods._set1_murasaki_function_share_address(contract_murasaki_function_share).send({from:wallet});
 }
 
 async function test() {
@@ -119,7 +124,7 @@ async function test() {
 
 }
 
-//initialize_contract();
+initialize_contract();
 //set_speed(365*100);
-set_speed(1);
+//set_speed(1);
 //test();
