@@ -5,6 +5,10 @@
 
 /*
 
+    インフレ対策の深慮
+        coin, material, heartはどんどんインフレしてゆく
+        そのため、常にユースケースの要求値を少し多めに設定する
+        
     スコアボードの更新の実装
 
     新コントラ群への対応
@@ -13,7 +17,7 @@
                 heart要求は0でも表示させるか
             heart数のsend
             heart数の取得
-        nui周りの整備
+     ok nui周りの整備
          ok feeding/grooming時にアクティブぬいのidを渡す
             nuiの位置記憶を実装
             mcで197をcraft, 自分のwallet, 自分のsummoner
@@ -3893,7 +3897,7 @@ function update_checkItem(this_scene) {
         });
     }
 
-    //###20: Asnya
+    //###20:Asnya
     _item_id = 20;
     if (
         (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
@@ -3936,7 +3940,7 @@ function update_checkItem(this_scene) {
         */
     }
 
-    //###21: Switch
+    //###21:Switch
     _item_id = 21;
     if (
         (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
@@ -3974,7 +3978,7 @@ function update_checkItem(this_scene) {
         item_switch.depth = item_switch.y;
     }
 
-    //###22: Choco. Bread -> Feeding()
+    //###22:Choco. Bread -> Feeding()
 
     //###33:violin
     _item_id = 33;
@@ -4238,6 +4242,14 @@ function update_checkItem(this_scene) {
                 let _x = 1070 + i*30;
                 let _y = 520 + i*30;
                 let _item_id = _array_item197[i];
+                let _pos_local = "pos_item_asnya_" + _item_id;
+                //recover position from localStorage
+                if (localStorage.getItem(_pos_local) != null && local_owner == local_wallet) {
+                    let _json = localStorage.getItem(_pos_local);
+                    _pos = JSON.parse(_json);
+                    _x = _pos[0];
+                    _y = _pos[1];
+                }
                 let _item_nui = await contract_get_item_nui(_item_id);
                 let _summoner = _item_nui[0];
                 let _class = _item_nui[1];
@@ -4292,6 +4304,8 @@ function update_checkItem(this_scene) {
                         _array_nui_text[i].y = _array_nui[i].y+68;
                         _array_nui_text[i].visible = true;
                         sound_nui.play();
+                        let _pos = [_array_nui[i].x, _array_nui[i].y];
+                        localStorage.setItem(_pos_local, JSON.stringify(_pos));
                     })
                     .on("pointerover", () => {
                         _array_nui_text[i].visible = true;
