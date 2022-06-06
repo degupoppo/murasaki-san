@@ -3302,6 +3302,12 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
     function get_heart_required(uint32 _item_type) public pure returns (uint32) {
         if (_item_type <= 64) {
             return 0;
+        } else if (_item_type == 194) { //bank
+            return 0;
+        } else if (_item_type == 195) { //puch
+            return 0;
+        } else if (_item_type == 196) { //mail
+            return 0;
         } else if (_item_type == 197) { //nui
             return 20;
         } else {
@@ -3618,6 +3624,13 @@ contract Murasaki_Function_Name is Ownable {
     function withdraw(address rec)public onlyOwner{
         payable(rec).transfer(address(this).balance);
     }
+    
+    //nameplate item_type
+    uint32 public nameplate_item_type = 1;
+    //set dice item_type
+    function _set2_nameplate_item_type(uint32 _item_type) external onlyOwner {
+        nameplate_item_type = _item_type;
+    }
 
     //mint
     event Name(uint32 indexed _summoner, string _name_str, uint32 _name_id);
@@ -3627,6 +3640,9 @@ contract Murasaki_Function_Name is Ownable {
         Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
         //owner check
         require(mfs.check_owner(_summoner, msg.sender));
+        //check nameplate possession
+        address _owner = mfs.get_owner(_summoner);
+        require(mfs.get_balance_of_type_specific(_owner, nameplate_item_type) > 0);        
         //name check
         require(validate_name(_name_str));
         require(mn.isMinted(_name_str) == false);
@@ -3740,10 +3756,10 @@ contract World_Dice is Ownable {
     //variants
     mapping(uint32 => uint32[4]) public rolled_dice;
     mapping(uint32 => uint32) public last_dice_roll_time;
-    uint32 public dice_item_type = 36;
+    uint32 public dice_item_type = 3;
     uint32 public buffer_sec = 14400;  //4 hr
 
-    //set dice item_type    
+    //set dice item_type
     function _set2_dice_item_type(uint32 _item_type) external onlyOwner {
         dice_item_type = _item_type;
     }

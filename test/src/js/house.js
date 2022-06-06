@@ -5,13 +5,68 @@
 
 /*
 
+    NFT絵の表示の実装
+        別PJのNFT絵を取得して額縁に表示させる
+    
+    アイテムクラフト時のハート要求の実装
+        後半アイテムではハートを少し要求する
+
+    dApps Staking報酬案
+        最低金額でもstakeしてくれたらluck+固定値
+        たくさんstakeしてくれたら最大でluck+固定値x2
+        ただし指数関数増加でx2に無限大で近づくとする
+        dapps staking済みwalletの取得方法を考える
+
+    帽子の普遍的な位置合わせ
+
+    walletとの連携機能の実装
+        せっかくのNTTなので、walletに紐付けられている感じをもたせる
+        Astar walletに住むペットのイメージなので。
+        NFT額縁
+            walletにあるNFTをランダムで表示
+            PJはある程度指定しておく
+        Wallet Visualizer
+            walletの活動度によって変化する何かを実装する。
+                入っているトークンが表示される水槽？
+                walletの古さによって水草の数が増える？
+                その日のトランザクション数によって変化させる？
+            デイリートランザクション：天気などすぐ移り変わるもの
+            古さ：木の大きさなどゆっくりと一方向に増えてゆくもの
+            トークン数：天気よりはゆっくりと増減するもの
+            
+    メール送信成功のメッセージを実装
+        相手がメールを開けたことがわかるように
+
+    宝石箱NFT
+        宝石NFTを所有する宝石箱NFTの考案
+        変化する状態を有し、NFTを所有するNFT、NFT2.0型
+        tokenURLはsvgではなく絵にしてみたい
+        シンプルに1コントラで完結させてみたい
+        heart経済の主軸に据えられるか
+        構想
+            宝石NFTを所有する
+            変化するパラメータを有する
+                レベル
+        ERC-3664で作製してみる
+            本当はmmもERC-3664が良いのかもしれないが、
+            NFTではなくNTTなので大変だろうか。
+            また、変数が多すぎて3664でカバーできるのだろうか。
+                
     インフレ対策の深慮
         coin, material, heartはどんどんインフレしてゆく
         そのため、常にユースケースの要求値を少し多めに設定する
-        
-    スコアボードの更新の実装
+        coin, materialは掘らなければexp多くもらえるトレードオフなので、インフレしにくいか
+        heartはきちんと計算しないと余ってしまいそう
+            一方で、summoner間を移動できないので、デフレにしすぎると足りなくて詰む
+            少し高コストで、heartを売ることも可能にしてもよいだろうか
+                4つ消費して作製するNFT: big heart
+                coin/materialを500ずつ要求？
+                あるいは、ハート5個で作って解体時はハート4個だけ得る、など。
 
-    新コントラ群への対応
+ ok スコアボードの更新の実装
+        アニメーションは難しいか
+
+ ok 新コントラ群への対応
      ok craft周りの整備
             heart要求値の取得
                 heart要求は0でも表示させるか
@@ -22,10 +77,7 @@
             nuiの位置記憶を実装
             mcで197をcraft, 自分のwallet, 自分のsummoner
             msnでscore=1118000, summoner=自分
-        item順序の再考
-
-    NFT絵の表示の実装
-        別PJのNFT絵を取得して額縁に表示させる
+     ok item順序の再考
 
     heart経済の深慮
         heartを得る行動
@@ -61,9 +113,6 @@
                 ex: ぬいちゃんは1ヶ月分、◯◯は1週間分、など
             burn上限10個が撤廃されるので、コストは自由に決められる
                 heart 100個要求のアイテムなども可能
-
-    宝石箱NFT
-        宝石NFTを所有する宝石箱NFTの考案
 
     育成型NFTの深慮
         ぬいちゃんシステム上でランダム性の高いNFTをつくる
@@ -101,13 +150,11 @@
                 これで1週間に平均3個程度
                 ぬいちゃんの要求が8個だとすると、3週間分ていど。
 
-    メール送信成功のメッセージを実装
-    メール送受信時の動的アクションの実装
+ ok メール送受信時の動的アクションの実装
         送信時の猫のアニメーション
         受診時の猫のアニメーション
         メールの表示・非表示
         
-    帽子の普遍的な位置合わせ
     パンケーキ
     すし
     ライフカウンター（スコア表示）
@@ -217,103 +264,10 @@ function init_global_variants() {
     flag_mail = false;
     active_nui_id = 0;
     flag_radarchart = 0;
+    previous_local_score = 0;
 }
 
 init_global_variants();
-
-/*
-let turn = 0;
-
-//on chain static status
-let summoner = -1;
-let local_birth_time;
-
-//on chain global status
-let SPEED = 1;
-let BASE_SEC = 86400;
-
-//on chain dynamic status
-let local_class = 0;
-let local_strength = 0;
-let local_dexterity = 0;
-let local_intelligence = 0;
-let local_luck = 0;
-let local_level = 0;
-let local_last_feeding_time = 0;
-let local_last_grooming_time = 0;
-let local_coin = 0;
-let local_exp = 0;
-let local_mining_status;
-let local_mining_start_time = 0;
-let local_next_exp_required = 0;
-let local_material = 0;
-let local_farming_status;
-let local_farming_start_time = 0;
-let local_crafting_status;
-let local_crafting_start_time = 0;
-let local_crafting_item_type = 0;
-let local_items;
-let local_heart = 0;
-let local_wallet;
-let local_owner = "0x0000000000000000000000000000000000000000";
-let local_name_str = "(unnamed)";
-let local_notPetrified = true;
-let local_isActive;
-let local_rolled_dice = 0;
-let local_last_rolled_dice = 0;
-let local_last_dice_roll_time;
-let local_mail_sending_interval = -1;
-
-//local using variants
-let previous_local_last_feeding_time = 0;
-let previous_local_last_grooming_time = 0;
-let previous_local_level = 0;
-let previous_local_mining_status;
-let previous_local_farming_status;
-let previous_local_crafting_status;
-let previous_local_exp = 0.01;
-let previous_local_coin = 0;
-let previous_local_material = 0;
-let previous_local_items;
-let previous_local_name_str;
-let local_coin_calc;
-let local_material_calc;
-let local_crafting_calc;
-let flag_music = 0;
-let bgm = 0;
-let local_items_flag = new Array(256).fill(0);
-let global_selected_crafting_item = 0;
-let global_selected_crafting_item_dc;
-let global_selected_crafting_item_required_heart;
-let last_sync_time = 0;
-let mode = "";
-let text_wallet;
-let screen_coin = 0;
-let screen_coin_delta = 0;
-let screen_material = 0;
-let screen_material_delta = 0;
-let screen_exp = 0;
-let screen_exp_delta = 0;
-let count_sync = 0;
-let happy = 0;
-let previous_happy = 0;
-let satiety = 0;
-let previous_satiety = 0;
-let screen_happy = 0;
-let screen_happy_delta = 0;
-let screen_satiety = 0;
-let screen_satiety_delta = 0;
-let previous_local_item194 = 0;
-let previous_local_item195 = 0;
-let previous_local_item196 = 0;
-let previous_local_item197 = 0;
-let item_wearing_hat = 0;
-let flag_doneFp = 0;
-let previsou_local_rolled_dice = 0;
-let flag_dice_rolling = 0;
-let flag_name_minting = 0;
-let flag_mail = false;
-*/
 
 
 //---html-----------------------------------------------------------------------------------------------------
@@ -495,8 +449,6 @@ async function contract_update_statics(_summoner) {
     let _owner = await contract_mm.methods.ownerOf(_summoner).call();
     local_owner = _owner;
     let contract_mffg = await new web3.eth.Contract(abi_murasaki_function_feeding_and_grooming, contract_murasaki_function_feeding_and_grooming);
-    //***TODO***
-    //local_notPetrified = await contract_mffg.methods.not_petrified(_summoner).call();
     local_notPetrified = await contract_mfs.methods.not_petrified(_summoner).call();
 }
 
@@ -591,7 +543,7 @@ async function contract_update_status(_summoner) {
         
         //check mail
         contract_check_mail(summoner);
-        if (local_items[1] > 0) {
+        if (local_items[20] > 0) {
             contract_calc_sending_interval(summoner);
         }
         
@@ -994,12 +946,12 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             var li = [0,10,20,30,150,160,170,180,190,200,210,330,340,350]
             this.moving_degree = li[Math.floor(Math.random() * li.length)];
             //out of area check
-            if (this.x < 100 && this.moving_degree > 90 && this.moving_degree <270) {
+            if (this.x < 200 && this.moving_degree > 90 && this.moving_degree <270) {
                 this.moving_degree -= 180;
-            }else if (this.x > 1100 && (this.moving_degree < 90 || this.moving_degree > 270)) {
+            }else if (this.x > 1000 && (this.moving_degree < 90 || this.moving_degree > 270)) {
                 this.moving_degree -= 180;
             }
-            if (this.y > 860 && this.moving_degree > 180) {
+            if (this.y > 760 && this.moving_degree > 180) {
                 this.moving_degree = 360 - this.moving_degree;
             }else if (this.y < 500 && this.moving_degree < 180) {
                 this.moving_degree = 360 - this.moving_degree;
@@ -1409,12 +1361,12 @@ class Pet extends Phaser.GameObjects.Sprite{
         return this.mode;
     }
     on_click() {
-        /***
+        /*
         if (this.mode == "resting" || this.mode == "moving") {
             this.count = 0;
             this.mode = "hugging";
         }
-        ***/
+        */
     }
     resting(){
 	    this.count += 1;
@@ -1907,6 +1859,7 @@ function open_window_craft (scene) {
             text_select_item.setText('"'+array_item_name[_item]+'"');
             //console.log("modified_dc:", _dc);
             //***TODO*** nuichan, dirty code, urgent 
+            /*
             if (_item == 197) {
                 let _heart_required = await contract_get_heart_required(_item);
                 global_selected_crafting_item_required_heart = _heart_required;
@@ -1916,6 +1869,11 @@ function open_window_craft (scene) {
                 text_crafting_selected_item_heart.setText("");
                 icon_crafting_heart.visible = false;
             }
+            */
+            let _heart_required = await contract_get_heart_required(_item);
+            global_selected_crafting_item_required_heart = _heart_required;
+            text_crafting_selected_item_heart.setText(_heart_required);
+            icon_crafting_heart.visible = true;
         } else {
             text_crafting_selected_item_ohana.setText("");
             text_crafting_selected_item_kusa.setText("");
@@ -1956,6 +1914,15 @@ function open_window_craft (scene) {
         }
         */
         let _color = "black";
+        if (rarity == "common") {
+            _color = "black";
+        }else if (rarity == "uncommon") {
+            _color = "black";
+        }else if (rarity == "rare") {
+            _color = "black";
+        }else{
+            _color = "gray";
+        }
         let obj = scene.add.text(_x, _y, _text)
             .setFontSize(30).setFontFamily("Arial")
             .setInteractive({useHandCursor: true})
@@ -1975,8 +1942,6 @@ function open_window_craft (scene) {
     group_window_crafting.add(scene.add.sprite(640, 480, "window").setInteractive())
 
     //create item list text
-    button_crafting_close = create_button(1070, 820, "Cancel", 0, scene);
-    group_window_crafting.add(button_crafting_close);
     let _x = 170;
     let _y = 80;
     let _y_add = 40;
@@ -1998,18 +1963,34 @@ function open_window_craft (scene) {
         eval(`_button  = create_button(_x, _y + _y_add *  ${i}, '[' + local_items[${i}] + ',' + local_items[${i+64}] + ',' + local_items[${i+128}] + '] ' + array_item_name[${i}],  ${i},  scene, _rarity);`)
         group_window_crafting.add(_button);
     }
+    item1_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  1, "item_kanban").setScale(0.125);
+    item2_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  2, "mr_astar_right").setScale(0.08);
+    item3_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  3, "item_dice").setScale(0.18);
+    item4_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  4, "item_hat_helmet").setScale(0.1);
+    item5_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  5, "item_sushi").setScale(0.1);
+    item6_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  6, "item_crown").setScale(0.15);
+    item7_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  7, "item_ribbon").setScale(0.12);
+    item8_icon = scene.add.sprite(_x-25, _y+12 + _y_add *  8, "item_window").setScale(0.12);
+    item9_icon = scene.add.sprite(_x-25, _y+12 + _y_add *  9, "item_hat_knit").setScale(0.14);
+
+    /*
     item1_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  1, "mr_astar_right").setScale(0.08);
     item2_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  2, "item_crown").setScale(0.15);
     item3_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  3, "item_fortune_statue").setScale(0.15);
     item4_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  4, "item_hat_helmet").setScale(0.1);
     item5_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  5, "item_kanban").setScale(0.1);
     item6_icon = scene.add.sprite(_x-25, _y+12 + _y_add *  6, "item_ribbon").setScale(0.12);
+    */
+
     group_window_crafting.add(item1_icon);
     group_window_crafting.add(item2_icon);
     group_window_crafting.add(item3_icon);
     group_window_crafting.add(item4_icon);
     group_window_crafting.add(item5_icon);
     group_window_crafting.add(item6_icon);
+    group_window_crafting.add(item7_icon);
+    group_window_crafting.add(item8_icon);
+    group_window_crafting.add(item9_icon);
 
     //farming_item
     _x = 520;
@@ -2028,18 +2009,32 @@ function open_window_craft (scene) {
         eval(`_button  = create_button(_x, _y + _y_add *  ${i-16}, '[' + local_items[${i}] + ',' + local_items[${i+64}] + ',' + local_items[${i+128}] + '] ' + array_item_name[${i}],  ${i},  scene, _rarity);`)
         group_window_crafting.add(_button);
     }
+    item17_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  1, "item_musicbox").setScale(0.15);
+    item18_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  2, "item_hat_mugiwara").setScale(0.15);
+    item19_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  3, "ms_ether_right").setScale(0.08);
+    item20_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  4, "item_cushion").setScale(0.075);
+    item21_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  5, "uni").setScale(0.1);
+    item22_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  6, "item_fortune_statue").setScale(0.15);
+    item23_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  7, "item_asnya").setScale(0.1);
+    item24_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  8, "rug-pull").setScale(0.15);
+    item25_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  9, "item_vase").setScale(0.08);
+    /*
     item17_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  1, "item_vase").setScale(0.08);
     item18_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  2, "ms_ether_right").setScale(0.08);
     item19_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  3, "item_hat_mugiwara").setScale(0.15);
     item20_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  4, "item_asnya").setScale(0.1);
     item21_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  5, "item_switch").setScale(0.1);
     item22_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  6, "item_chocolate_bread").setScale(0.25);
+    */
     group_window_crafting.add(item17_icon);
     group_window_crafting.add(item18_icon);
     group_window_crafting.add(item19_icon);
     group_window_crafting.add(item20_icon);
     group_window_crafting.add(item21_icon);
     group_window_crafting.add(item22_icon);
+    group_window_crafting.add(item23_icon);
+    group_window_crafting.add(item24_icon);
+    group_window_crafting.add(item25_icon);
 
     //crafting_item
     _x = 870;
@@ -2059,32 +2054,66 @@ function open_window_craft (scene) {
         eval(`_button  = create_button(_x, _y + _y_add *  ${i-32}, '[' + local_items[${i}] + ',' + local_items[${i+64}] + ',' + local_items[${i+128}] + '] ' + array_item_name[${i}],  ${i},  scene, _rarity);`)
         group_window_crafting.add(_button);
     }
+    item33_icon = scene.add.sprite(_x-25, _y+17 + _y_add *  1, "item_pad_on").setScale(0.12);
+    item34_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  2, "item_score_board").setScale(0.12);
+    item35_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  3, "item_hat_mortarboard").setScale(0.14);
+    item36_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  4, "dr_bitco_right").setScale(0.08);
+    item37_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  5, "item_pancake").setScale(0.14);
+    item38_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  6, "item_violin").setScale(0.08);
+    item39_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  7, "item_piano").setScale(0.08);
+    item40_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  8, "item_switch").setScale(0.1);
+    item41_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  9, "item_lanthanum").setScale(0.08);
+    /*
     item33_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  1, "item_violin").setScale(0.08);
     item34_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  2, "item_musicbox").setScale(0.12);
     item35_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  3, "dr_bitco_right").setScale(0.08);
     item36_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  4, "item_dice").setScale(0.18);
     item37_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  5, "item_hat_knit").setScale(0.14);
     item38_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  6, "item_hat_mortarboard").setScale(0.14);
+    */
     group_window_crafting.add(item33_icon);
     group_window_crafting.add(item34_icon);
     group_window_crafting.add(item35_icon);
     group_window_crafting.add(item36_icon);
     group_window_crafting.add(item37_icon);
     group_window_crafting.add(item38_icon);
+    group_window_crafting.add(item39_icon);
+    group_window_crafting.add(item40_icon);
+    group_window_crafting.add(item41_icon);
+
+    //special items
+    let _rarity;
 
     //coin/material bag
-    button_crafting_item194  = create_button(170, 80 + 40*17, "[" +local_items[194]+ "] Ohana Bank", 194,  scene);
-    button_crafting_item195  = create_button(520, 80 + 40*17, "[" +local_items[195]+ "] Kusa Pouch", 195,  scene);
+    if (local_items[194] > 0) { _rarity = "common" } else { _rarity = null }
+    button_crafting_item194  = create_button(170, 80 + 40*17, "[" +local_items[194]+ "] Ohana Bank", 194,  scene, _rarity);
+    if (local_items[195] > 0) { _rarity = "common" } else { _rarity = null }
+    button_crafting_item195  = create_button(520, 80 + 40*17, "[" +local_items[195]+ "] Kusa Pouch", 195,  scene, _rarity);
+    item194_icon = scene.add.sprite(170-25, 80+17 + 40*17, "item_bank").setScale(0.16);
+    item195_icon = scene.add.sprite(520-25, 80+17 + 40*17, "item_kusa_pouch").setScale(0.05);
     group_window_crafting.add(button_crafting_item194);
     group_window_crafting.add(button_crafting_item195);
+    group_window_crafting.add(item194_icon);
+    group_window_crafting.add(item195_icon);
     
     //mail
-    button_crafting_item196  = create_button(870, 80 + 40*17, "[" +local_items[196]+ "] Mail", 196,  scene);
+    if (local_items[196] > 0) { _rarity = "common" } else { _rarity = null }
+    button_crafting_item196  = create_button(870, 80 + 40*17, "[" +local_items[196]+ "] Cat Mail", 196,  scene, _rarity);
+    item196_icon = scene.add.sprite(870-25, 80+15 + 40*17, "item_mail").setScale(0.05);
     group_window_crafting.add(button_crafting_item196);
+    group_window_crafting.add(item196_icon);
 
     //nui
-    button_crafting_item197  = create_button(870, 80 + 40*18, "[" +local_items[197]+ "] Nui", 197,  scene);
+    if (local_items[197] > 0) { _rarity = "common" } else { _rarity = null }
+    button_crafting_item197  = create_button(870, 80 + 40*18, "[" +local_items[197]+ "] Coddly Toy", 197,  scene, _rarity);
+    item197_icon = scene.add.sprite(870-25, 80+20 + 40*18, "item_nui").setScale(0.15);
     group_window_crafting.add(button_crafting_item197);
+    group_window_crafting.add(item197_icon);
+
+    //calcel
+    _rarity = "common";
+    button_crafting_close = create_button(1070, 840, "Cancel", 0, scene, _rarity);
+    group_window_crafting.add(button_crafting_close);
     
     //depth
     group_window_crafting.setDepth(9999 + 100);
@@ -2153,8 +2182,45 @@ function open_window_summon(scene) {
     group_window_summon.add(button_cancel);
     //depth
     group_window_summon.setDepth(9999 + 1);
-}
+};
 
+
+//===fireworks
+function fireworks(scene) {
+    const { FloatBetween } = Phaser.Math;
+    const emitterConfig = {
+        alpha: { start: 1, end: 0, ease: 'Cubic.easeIn' },
+        angle: { start: 0, end: 360, steps: 100 },
+        blendMode: 'ADD',
+        frame: { frames: ['red', 'yellow', 'green', 'blue'], cycle: true, quantity: 500 },
+        //frequency: 2000,
+        frequency: 500,
+        gravityY: 300,
+        lifespan: 1000,
+        quantity: 500,
+        reserve: 500,
+        scale: { min: 0.05, max: 0.15 },
+        speed: { min: 300, max: 600 },
+        x: 512, y: 384,
+    };
+    const particles = scene.add.particles('flares');
+    const emitter = particles.createEmitter(emitterConfig);
+    const { width, height } = scene.scale;
+    scene.time.addEvent({
+        delay: 250,
+        startAt: 0,
+        repeat: 10,
+        callback: () => {
+            emitter.setPosition(width * FloatBetween(0.25, 0.75), height * FloatBetween(0, 0.5));
+        },
+    });
+    scene.time.addEvent({
+        delay: 2400,
+        callback: () => {
+            emitter.stop();
+        }
+    });
+};
 
 //---config-----------------------------------------------------------------------------------------------------
 
@@ -2412,6 +2478,10 @@ function preload() {
     });
     //this.load.plugin('rextexteditplugin', 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rextexteditplugin.min.js', true);
     this.load.plugin('rextexteditplugin', 'lib/rextexteditplugin.min.js', true);
+    
+    //===fireworks
+    //https://codepen.io/samme/pen/eYEearb
+    this.load.atlas('flares', 'src/fireworks/flares.png', 'src/fireworks/flares.json');
 }
 
 
@@ -2911,26 +2981,10 @@ function create() {
 
     let font_arg = {font: "18px Arial", fill: "#000"};
 
-    //age
-    //text_age_time =     this.add.text(1213, 67, "***", font_arg);
-    //text_age_time =     this.add.text(120, 80, "***", font_arg);
-    //text_age_time.depth = 1;
-    //icon_age = this.add.sprite(1200,77, "icon_age");
-    //icon_age.setScale(0.06);
-
     //debug info
     text_turn = this.add.text(230, 940, "***", {font: "14px Arial", fill: "#727171"});
     text_sync_time = this.add.text(330, 940, "***", {font: "14px Arial", fill: "#727171"});
     text_wallet = this.add.text(430, 940, "***", {font: "14px Arial", fill: "#727171"});
-    //text_speed =        this.add.text(10, 910, "***", font_arg);
-    //text_mode = this.add.text(1150, 916, "***", {font: "14px Arial", fill: "#727171"});
-    //text_turn = this.add.text(250, 916, "***", {font: "14px Arial", fill: "#727171"});
-    //text_sync_time = this.add.text(250, 928, "***", {font: "14px Arial", fill: "#727171"});
-    //text_wallet = this.add.text(250, 940, "***", {font: "14px Arial", fill: "#727171"});
-    //text_turn = this.add.text(10, 916, "***", {font: "14px Arial", fill: "#ffffff"});
-    //text_sync_time = this.add.text(10, 928, "***", {font: "14px Arial", fill: "#ffffff"});
-    //text_wallet = this.add.text(10, 940, "***", {font: "14px Arial", fill: "#ffffff"});
-    //text_info = this.add.text(5, 945, "", {font: "12px Arial", fill: "#ffffff", backgroundColor: "#898989"});
 
     //satiety
     icon_satiety = this.add.sprite(30,25, "icon_satiety");
@@ -3403,12 +3457,12 @@ function update_parametersWithoutAnimation(this_scene) {
     let _owner2 = local_owner.slice(-4);
     let _text = "";
     if (local_owner == local_wallet || local_owner == "0x0000000000000000000000000000000000000000") {
-        _text += "owner: " + _owner1 + "..." + _owner2 + ", ";
+        _text += "living in: " + _owner1 + "..." + _owner2 + ", ";
         text_wallet.setText(_text);
         text_wallet.setColor("#727171");
     } else {
-        _text += "owner: " + _owner1 + "..." + _owner2 + ", ";
-        _text += "not owned by you.";
+        _text += "living in: " + _owner1 + "..." + _owner2 + ", ";
+        _text += "not your wallet.";
         text_wallet.setText(_text);
         text_wallet.setColor("blue");
     }
@@ -3430,6 +3484,10 @@ function update_checkModeChange(this_scene) {
 
     //level up
     } else if (local_level > previous_local_level) {
+        //fireworks
+        if (previous_local_level > 0) {
+            fireworks(this_scene);
+        }
         //update radarchart
         if (flag_radarchart == 1) {
             draw_radarchart(this_scene);
@@ -3475,11 +3533,13 @@ function update_checkModeChange(this_scene) {
             group_food.add(item_pudding);
         }
         */
+        /*
         if (local_items[22] > 0) {
             item_chocolate_bread = this_scene.add.sprite(650, 840+20, "item_chocolate_bread").setScale(0.4).setOrigin(0.5);
             item_chocolate_bread.depth = 9999;
             group_food.add(item_chocolate_bread);
         }
+        */
         sound_feeding.play();
 
     //grooming check, continue
@@ -3633,10 +3693,37 @@ function update_checkButtonActivation(this_scene) {
 //=== check item
 function update_checkItem(this_scene) {
 
+    //debug
+    //local_items = [1] * 256;
+
     let _item_id;
 
-    //###1:Ms. Astar
+    //###1:Nameplate
     _item_id = 1;
+    if (
+        (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+        && local_items_flag[_item_id] != true
+    ) {
+        local_items_flag[_item_id] = true;
+        group_kanban.setVisible(true);
+    }
+    if (local_items_flag[_item_id] == true) {
+        if (local_name_str == "") {
+            if (text_kanban.text == "") {
+                text_kanban.setText("(enter name)");
+            }
+            text_kanban.setInteractive();
+            group_mint_name.setVisible(true);
+        } else {
+            text_kanban.setText(local_name_str);
+            text_kanban.disableInteractive();
+            group_mint_name.setVisible(false);
+        }
+        text_id.setText("#"+summoner);
+    }
+    
+    //###2:Ms.Astar
+    _item_id = 2;
     if (
         (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
         && local_items_flag[_item_id] != true
@@ -3650,38 +3737,53 @@ function update_checkItem(this_scene) {
             "mr_astar_left",
             "mining"
         ).setScale(0.12);
-        
-        
-        //cushion
-        item_cushion = this_scene.add.sprite(90, 620, "item_cushion").setScale(0.25).setOrigin(0.5);
-        item_cushion.depth = item_cushion.y - 50;
-        
-        //cat
-        cat = this_scene.add.sprite(90, 610, "cat_sleeping").setScale(0.12).setOrigin(0.5)
-            .setInteractive({useHandCursor: true})
-            .on("pointerdown", () => {contract_send_mail(summoner)})
-            .setVisible(false);
-        cat.depth = item_cushion.y + 1;
-        
-        //mail
-        if (local_items[196] > 0) {
-            mail = this_scene.add.sprite(40, 645, "item_mail").setScale(0.06).setOrigin(0.5);
-            mail.depth = item_cushion.y + 2;
-        }
-        
-        //mail_sending_interval
-        text_sending_interval = this_scene.add.text(70, 640, "00h:00m", {font: "15px Arial", fill: "#ffffff"});
-        text_sending_interval.depth = item_cushion.depth + 1;
-
-        //cake
-        //tiny_crown
-        //pancake
-        //sushi
-        
     }
     
-    //###2:Crown
-    _item_id = 2;
+    //###3:Dice
+    _item_id = 3;
+    if (
+        (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+        && local_items_flag[_item_id] != true
+    ) {
+        local_items_flag[_item_id] = true;
+        dice = new Dice(this_scene, 400, 600).setScale(0.3);
+    }
+
+    //###4:Helment
+    _item_id = 4;
+    if (
+        (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+        && local_items_flag[_item_id] != true
+    ) {
+        local_items_flag[_item_id] = true;
+        //let _x = 60;
+        //let _y = 700;
+        let _x = 530;
+        let _y = 255;
+        item_hat_helmet = this_scene.add.sprite(_x, _y, "item_hat_helmet")
+            .setOrigin(0.5)
+            .setScale(0.20)
+            .setAngle(90);
+        item_hat_helmet.setInteractive({useHandCursor: true});
+        item_hat_helmet.on('pointerdown', () => {
+            if (item_wearing_hat == 0) {
+                item_wearing_hat = item_hat_helmet;
+                murasakisan.on_click();
+                sound_hat.play();
+                item_hat_helmet.setAngle(0);
+            } else if (item_wearing_hat == item_hat_helmet) {
+                item_wearing_hat = 0;
+                item_hat_helmet.x = _x;
+                item_hat_helmet.y = _y;
+                item_hat_helmet.setAngle(90);
+            }
+        });
+    }
+
+    //###5:*Sushi
+    
+    //###6:Crown
+    _item_id = 6;
     if (
         (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
         && local_items_flag[_item_id] != true
@@ -3704,8 +3806,192 @@ function update_checkItem(this_scene) {
         //console.log(item_crown.anims.is);
     }
     
-    //###3:Fortune Statue
-    _item_id = 3;
+    //###7:Ribbon
+    _item_id = 7;
+    if (
+        (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+        && local_items_flag[_item_id] != true
+    ) {
+        local_items_flag[_item_id] = true;
+        //item_ribbon = this.add.sprite(1057, 443, "item_ribbon").setScale(0.5).setOrigin(0.5);
+        item_ribbon = this_scene.add.sprite(1037, 401, "item_ribbon").setScale(0.15).setOrigin(0.5);
+        item_ribbon.depth = 9999;
+    }
+
+    //###8:*Window
+    
+    //###9:Knit Hat
+    _item_id = 9;
+    if (
+        (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+        && local_items_flag[_item_id] != true
+    ) {
+        local_items_flag[_item_id] = true;
+        //let _x = 800;
+        //let _y = 810;
+        let _x = 690;
+        let _y = 255;
+        item_hat_knit = this_scene.add.sprite(_x, _y, "item_hat_knit").setOrigin(0.5).setScale(0.20);
+        item_hat_knit.setInteractive({useHandCursor: true});
+        item_hat_knit.on('pointerdown', () => {
+            if (item_wearing_hat == 0) {
+                item_wearing_hat = item_hat_knit;
+                murasakisan.on_click();
+                sound_hat.play();
+            } else if (item_wearing_hat == item_hat_knit) {
+                item_wearing_hat = 0;
+                item_hat_knit.x = _x;
+                item_hat_knit.y = _y;
+            }
+        });
+    }
+
+    //###17:Musicbox
+    _item_id = 17;
+    if (
+        (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+        && local_items_flag[_item_id] != true
+    ) {
+        local_items_flag[_item_id] = true;
+        let _x = 505;
+        let _y = 370;
+        item_musicbox = this_scene.add.sprite(_x, _y, "item_musicbox")
+            .setOrigin(0.5)
+            .setScale(0.30)
+            .setInteractive({useHandCursor: true})
+            .setDepth(_y);
+        item_musicbox.on('pointerdown', () => music() );
+    }
+
+    //###18:Straw Hat
+    _item_id = 18;
+    if (
+        (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+        && local_items_flag[_item_id] != true
+    ) {
+        local_items_flag[_item_id] = true;
+        //let _x = 240;
+        //let _y = 275;
+        let _x = 450;
+        let _y = 255;
+        item_hat_mugiwara = this_scene.add.sprite(_x, _y, "item_hat_mugiwara")
+            .setOrigin(0.5)
+            .setScale(0.25)
+            .setAngle(90);
+        item_hat_mugiwara.setInteractive({useHandCursor: true});
+        item_hat_mugiwara.on('pointerdown', () => {
+            if (item_wearing_hat == 0) {
+                item_wearing_hat = item_hat_mugiwara;
+                murasakisan.on_click();
+                sound_hat.play();
+                item_hat_mugiwara.setAngle(0);
+            } else if (item_wearing_hat == item_hat_mugiwara) {
+                item_wearing_hat = 0;
+                item_hat_mugiwara.x = _x;
+                item_hat_mugiwara.y = _y;
+                item_hat_mugiwara.setAngle(90);
+            }
+        });
+    }
+
+    //###19:Ms.Ether
+    _item_id = 19;
+    if (
+        (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+        && local_items_flag[_item_id] != true
+    ) {
+        local_items_flag[_item_id] = true;
+        ms_ether = new Pet(
+            this_scene, 
+            400 + Math.random()*300, 
+            500 + Math.random()*200, 
+            "ms_ether_right", 
+            "ms_ether_left",
+            "farming"
+        ).setScale(0.12);
+    }
+
+    //###20:*Cat Cushion
+    _item_id = 20;
+    if (
+        (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+        && local_items_flag[_item_id] != true
+    ) {
+        local_items_flag[_item_id] = true;
+
+        //cushion
+        item_cushion = this_scene.add.sprite(90, 620, "item_cushion").setScale(0.25).setOrigin(0.5);
+        item_cushion.depth = item_cushion.y - 50;
+        
+        //text_sending_interval
+        text_sending_interval = this_scene.add.text(70, 640, "00h:00m", {font: "15px Arial", fill: "#ffffff"})
+            .setDepth(item_cushion.depth + 1);
+
+        //cat
+        cat = this_scene.add.sprite(90, 610, "cat_sleeping")
+            .setScale(0.12)
+            .setOrigin(0.5)
+            .setInteractive({useHandCursor: true})
+            .on("pointerdown", () => {contract_send_mail(summoner)})
+            .setVisible(false);
+        cat.depth = item_cushion.y + 1;
+        
+        //mail
+        mail = this_scene.add.sprite(40, 645, "item_mail")
+            .setScale(0.06)
+            .setOrigin(0.5)
+            .setDepth(item_cushion.y + 2)
+            .setVisible(false);
+    }
+    
+    //when possess cushion
+    if (local_items_flag[_item_id] == true) {
+        
+        //check sending interval
+        if (
+            local_mail_sending_interval != -1
+            && typeof text_sending_interval != "undefined"
+            && typeof cat != "undefined"
+        ) {
+            if (local_mail_sending_interval == 0) {
+                text_sending_interval.setText("");
+                cat.visible = true;
+            } else {
+                let _d = Math.floor(local_mail_sending_interval / (60 * 60 * 24));
+                let _hr = Math.floor(local_mail_sending_interval % 86400 / 3600);
+                let _min = Math.floor(local_mail_sending_interval % 3600 / 60);
+                let _text = _d + "d:" + _hr + "h:" + _min + "m";
+                text_sending_interval.setText(_text).setFill("#ffffff");
+                cat.visible = false;
+            }
+        }
+
+        //check item mail
+        if (local_items[196] > 0) {
+            mail.visible = true;
+        } else {
+            mail.visible = false;
+        }
+    }
+    
+    //check mail receiving, independent from cushion possession
+    if (flag_mail) {
+        cat_others = this_scene.add.sprite(800, 700, "cat_sitting").setScale(0.12).setOrigin(0.5)
+            .setInteractive({useHandCursor: true})
+            .on("pointerdown", () => {contract_open_mail(summoner)});            
+        cat_others.depth = cat_others.y;
+    } else {
+        try {
+            cat_others.destroy(true);
+        } catch (error) {
+            ;
+        }
+    }
+
+    //###21:Uni
+    
+    //###22:Fortune Statue
+    _item_id = 22;
     if (
         (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
         && local_items_flag[_item_id] != true
@@ -3742,77 +4028,48 @@ function update_checkItem(this_scene) {
             });
     }
     
-    //###4:helment
-    _item_id = 4;
+    //###23:Asnya
+    _item_id = 23;
     if (
         (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
         && local_items_flag[_item_id] != true
     ) {
         local_items_flag[_item_id] = true;
-        //let _x = 60;
-        //let _y = 700;
-        let _x = 530;
-        let _y = 255;
-        item_hat_helmet = this_scene.add.sprite(_x, _y, "item_hat_helmet")
-            .setOrigin(0.5)
-            .setScale(0.20)
-            .setAngle(90);
-        item_hat_helmet.setInteractive({useHandCursor: true});
-        item_hat_helmet.on('pointerdown', () => {
-            if (item_wearing_hat == 0) {
-                item_wearing_hat = item_hat_helmet;
-                murasakisan.on_click();
-                sound_hat.play();
-                item_hat_helmet.setAngle(0);
-            } else if (item_wearing_hat == item_hat_helmet) {
-                item_wearing_hat = 0;
-                item_hat_helmet.x = _x;
-                item_hat_helmet.y = _y;
-                item_hat_helmet.setAngle(90);
-            }
-        });
-    }
-    
-    //###5:Nameplate
-    _item_id = 5;
-    if (
-        (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
-        && local_items_flag[_item_id] != true
-    ) {
-        local_items_flag[_item_id] = true;
-        group_kanban.setVisible(true);
-    }
-    //if (local_items_flag[_item_id] == true && previous_local_name_str != local_name_str) {
-    if (local_items_flag[_item_id] == true) {
-        //if (local_name_str == "" && local_items[_item_id] != 0) {
-        if (local_name_str == "") {
-            if (text_kanban.text == "") {
-                text_kanban.setText("(enter name)");
-            }
-            text_kanban.setInteractive();
-            group_mint_name.setVisible(true);
-        } else {
-            text_kanban.setText(local_name_str);
-            text_kanban.disableInteractive();
-            group_mint_name.setVisible(false);
+        let _x = 590;
+        let _y = 140;
+        let _pos_local = "pos_item_asnya"
+        //recover position from localStorage
+        if (localStorage.getItem(_pos_local) != null && local_owner == local_wallet) {
+            let _json = localStorage.getItem(_pos_local);
+            _pos = JSON.parse(_json);
+            _x = _pos[0];
+            _y = _pos[1];
         }
-        text_id.setText("#"+summoner);
+        item_asnya = this_scene.add.sprite(_x, _y, "item_asnya")
+            .setScale(0.25)
+            .setOrigin(0.5)
+            .setDepth(_y)
+            .setInteractive({ draggable: true, useHandCursor: true })
+            .on("drag", () => {
+                if (this_scene.sys.game.scale.gameSize._width == 1280) {
+                    item_asnya.x = game.input.activePointer.x;
+                    item_asnya.y = game.input.activePointer.y;
+                } else {
+                    item_asnya.x = game.input.activePointer.y;
+                    item_asnya.y = 960 - game.input.activePointer.x;
+                }
+                item_asnya.depth = item_asnya.y;
+            })
+            .on("dragend", () => {
+                let _pos = [item_asnya.x, item_asnya.y];
+                localStorage.setItem(_pos_local, JSON.stringify(_pos));
+            });
     }
-    
-    //###6:Ribbon
-    _item_id = 6;
-    if (
-        (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
-        && local_items_flag[_item_id] != true
-    ) {
-        local_items_flag[_item_id] = true;
-        //item_ribbon = this.add.sprite(1057, 443, "item_ribbon").setScale(0.5).setOrigin(0.5);
-        item_ribbon = this_scene.add.sprite(1037, 401, "item_ribbon").setScale(0.15).setOrigin(0.5);
-        item_ribbon.depth = 9999;
-    }
-    
-    //###17:vase
-    _item_id = 17;
+
+    //###24:*Rug-Pull
+
+    //###25:Flowerpot
+    _item_id = 25;
     if (
         (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
         && local_items_flag[_item_id] != true
@@ -3848,140 +4105,130 @@ function update_checkItem(this_scene) {
                 localStorage.setItem(_pos_local, JSON.stringify(_pos));
             });
     }
-    
-    //###18:ms_ether
-    _item_id = 18;
-    if (
-        (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
-        && local_items_flag[_item_id] != true
-    ) {
-        local_items_flag[_item_id] = true;
-        ms_ether = new Pet(
-            this_scene, 
-            400 + Math.random()*300, 
-            500 + Math.random()*200, 
-            "ms_ether_right", 
-            "ms_ether_left",
-            "farming"
-        ).setScale(0.12);
-    }
-    
-    //###19:straw_hat
-    _item_id = 19;
-    if (
-        (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
-        && local_items_flag[_item_id] != true
-    ) {
-        local_items_flag[_item_id] = true;
-        //let _x = 240;
-        //let _y = 275;
-        let _x = 450;
-        let _y = 255;
-        item_hat_mugiwara = this_scene.add.sprite(_x, _y, "item_hat_mugiwara")
-            .setOrigin(0.5)
-            .setScale(0.25)
-            .setAngle(90);
-        item_hat_mugiwara.setInteractive({useHandCursor: true});
-        item_hat_mugiwara.on('pointerdown', () => {
-            if (item_wearing_hat == 0) {
-                item_wearing_hat = item_hat_mugiwara;
-                murasakisan.on_click();
-                sound_hat.play();
-                item_hat_mugiwara.setAngle(0);
-            } else if (item_wearing_hat == item_hat_mugiwara) {
-                item_wearing_hat = 0;
-                item_hat_mugiwara.x = _x;
-                item_hat_mugiwara.y = _y;
-                item_hat_mugiwara.setAngle(90);
-            }
-        });
-    }
 
-    //###20:Asnya
-    _item_id = 20;
+    //###33:*Table
+    _item_id = 33;
     if (
         (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
         && local_items_flag[_item_id] != true
     ) {
         local_items_flag[_item_id] = true;
-        let _x = 590;
-        let _y = 140;
-        let _pos_local = "pos_item_asnya"
-        //recover position from localStorage
-        if (localStorage.getItem(_pos_local) != null && local_owner == local_wallet) {
-            let _json = localStorage.getItem(_pos_local);
-            _pos = JSON.parse(_json);
-            _x = _pos[0];
-            _y = _pos[1];
-        }
-        item_asnya = this_scene.add.sprite(_x, _y, "item_asnya")
+        //status pad
+        let _x = 700;
+        let _y = 390;
+        item_pad = this_scene.add.sprite(_x, _y, "item_pad_on")
             .setScale(0.25)
             .setOrigin(0.5)
             .setDepth(_y)
-            .setInteractive({ draggable: true, useHandCursor: true })
-            .on("drag", () => {
-                if (this_scene.sys.game.scale.gameSize._width == 1280) {
-                    item_asnya.x = game.input.activePointer.x;
-                    item_asnya.y = game.input.activePointer.y;
+            .setInteractive({useHandCursor: true})
+            .on('pointerdown', () => {
+                if (flag_radarchart == 0) {
+                    flag_radarchart = 1;
+                    draw_radarchart(this_scene);
+                    item_pad.setTexture("item_pad_on");
+                    sound_pad.play();
                 } else {
-                    item_asnya.x = game.input.activePointer.y;
-                    item_asnya.y = 960 - game.input.activePointer.x;
+                    flag_radarchart = 0;
+                    group_chart.destroy(true);
+                    item_pad.setTexture("item_pad_off");
+                    //init_global_variants();
                 }
-                item_asnya.depth = item_asnya.y;
-            })
-            .on("dragend", () => {
-                let _pos = [item_asnya.x, item_asnya.y];
-                localStorage.setItem(_pos_local, JSON.stringify(_pos));
             });
-        /*
-        local_items_flag[_item_id] = true;
-        item_asnya = this.add.sprite(590, 140, "item_asnya").setOrigin(0.5).setScale(0.25);
-        item_asnya.depth = item_asnya.y;
-        */
+        flag_radarchart = 1;
+        draw_radarchart(this_scene);
     }
 
-    //###21:Switch
-    _item_id = 21;
+    //###34:*Score Board
+    _item_id = 34;
+    if (
+        (
+            (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+            && local_items_flag[_item_id] != true
+        ) || (
+        local_items_flag[_item_id] == true 
+        && local_score != previous_local_score
+        )
+    ) {
+        local_items_flag[_item_id] = true;
+        //score counter
+        try {
+            group_score_counter.destroy(true);
+        } catch (error) {
+        }
+        group_score_counter = this_scene.add.group();
+        let _array_score = ("00000000" + local_score).slice(-7).split("");
+        let _len_score = local_score.toString().length;
+        let _font_arg = {font: "16px Arial", fill: "#0000ff"};
+        for (let i = 0; i < 7; i++) {
+            let _x = 1095 + i*25;
+            let _y = 245;
+            let _text = _array_score.shift()
+            _img = this_scene.add.image(_x, _y, "icon_counter")
+                .setOrigin(0.5)
+                .setScale(0.06)
+                .setDepth(1000);
+            group_score_counter.add(_img);
+            if (_len_score + i + 1 > 7) {
+                _txt = this_scene.add.text(_x-2, _y, _text, _font_arg)
+                    .setOrigin(0.5)
+                    .setDepth(1001);
+                group_score_counter.add(_txt);
+            }
+        }
+    }
+    
+    //###35:Mortarboard
+    _item_id = 35;
     if (
         (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
         && local_items_flag[_item_id] != true
     ) {
         local_items_flag[_item_id] = true;
-        item_switch = this_scene.add.sprite(1230,300, "item_switch").setOrigin(0.5);
-        item_switch.setScale(0.25);
-        item_switch.anims.play("item_switch_off", true);
-        item_switch.setInteractive({useHandCursor: true});
-        back_black = this_scene.add.image(640, 480, "back_black");
-        back_black.depth = 9999+1;
-        back_black.visible = false;
-        item_switch.on('pointerdown', () => {
-            if (item_switch.anims.currentAnim.key == "item_switch_off") {
-                item_switch.anims.play("item_switch_on", true);
-                back_black.visible = true;
-                sound_switch.play();
-                back_neon.visible = true;
-                text_kanban.setColor("white");
-                if (typeof item_nui != "undefined") {
-                    item_nui.anims.play("item_nui_alive", true);
-                }
-            } else {
-                item_switch.anims.play("item_switch_off", true);
-                back_black.visible = false;
-                sound_switch.play();
-                back_neon.visible = false;
-                text_kanban.setColor("black");
-                if (typeof item_nui != "undefined") {
-                    item_nui.anims.play("item_nui", true);
-                }
+        //_x = 700;
+        //_y = 380;
+        _x = 610;
+        _y = 260;
+        item_hat_mortarboard = this_scene.add.sprite(_x, _y, "item_hat_mortarboard")
+            .setOrigin(0.5)
+            .setScale(0.20)
+            .setAngle(90);
+        item_hat_mortarboard.setInteractive({useHandCursor: true});
+        item_hat_mortarboard.on('pointerdown', () => {
+            if (item_wearing_hat == 0) {
+                item_wearing_hat = item_hat_mortarboard;
+                murasakisan.on_click();
+                sound_hat.play();
+                item_hat_mortarboard.setAngle(0);
+            } else if (item_wearing_hat == item_hat_mortarboard) {
+                item_wearing_hat = 0;
+                item_hat_mortarboard.x = _x;
+                item_hat_mortarboard.y = _y;
+                item_hat_mortarboard.setAngle(90);
             }
         });
-        item_switch.depth = item_switch.y;
     }
 
-    //###22:Choco. Bread -> Feeding()
+    //###36:Dr.Bitco
+    _item_id = 36;
+    if (
+        (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+        && local_items_flag[_item_id] != true
+    ) {
+        local_items_flag[_item_id] = true;
+        dr_bitco = new Pet(
+            this_scene, 
+            400 + Math.random()*300, 
+            500 + Math.random()*200, 
+            "dr_bitco_right", 
+            "dr_bitco_left",
+            "crafting"
+        ).setScale(0.11);
+    }
 
-    //###33:violin
-    _item_id = 33;
+    //###37:Pancake
+
+    //###38:Violin
+    _item_id = 38;
     if (
         (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
         && local_items_flag[_item_id] != true
@@ -4018,108 +4265,47 @@ function update_checkItem(this_scene) {
             });
     }
 
-    //###34:musicbox
-    _item_id = 34;
-    if (
-        (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
-        && local_items_flag[_item_id] != true
-    ) {
-        local_items_flag[_item_id] = true;
-        let _x = 505;
-        let _y = 370;
-        item_musicbox = this_scene.add.sprite(_x, _y, "item_musicbox")
-            .setOrigin(0.5)
-            .setScale(0.30)
-            .setInteractive({useHandCursor: true})
-            .setDepth(_y);
-        item_musicbox.on('pointerdown', () => music() );
-    }
+    //###39:Piano
 
-    //###35:dr_bitco
-    _item_id = 35;
+    //###40:Light Switch
+    _item_id = 40;
     if (
         (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
         && local_items_flag[_item_id] != true
     ) {
         local_items_flag[_item_id] = true;
-        dr_bitco = new Pet(
-            this_scene, 
-            400 + Math.random()*300, 
-            500 + Math.random()*200, 
-            "dr_bitco_right", 
-            "dr_bitco_left",
-            "crafting"
-        ).setScale(0.11);
-    }
-
-    //###36:dice
-    _item_id = 36;
-    if (
-        (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
-        && local_items_flag[_item_id] != true
-    ) {
-        local_items_flag[_item_id] = true;
-        dice = new Dice(this_scene, 400, 600).setScale(0.3);
-    }
-
-    //###37:Knit Hat
-    _item_id = 37;
-    if (
-        (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
-        && local_items_flag[_item_id] != true
-    ) {
-        local_items_flag[_item_id] = true;
-        //let _x = 800;
-        //let _y = 810;
-        let _x = 690;
-        let _y = 255;
-        item_hat_knit = this_scene.add.sprite(_x, _y, "item_hat_knit").setOrigin(0.5).setScale(0.20);
-        item_hat_knit.setInteractive({useHandCursor: true});
-        item_hat_knit.on('pointerdown', () => {
-            if (item_wearing_hat == 0) {
-                item_wearing_hat = item_hat_knit;
-                murasakisan.on_click();
-                sound_hat.play();
-            } else if (item_wearing_hat == item_hat_knit) {
-                item_wearing_hat = 0;
-                item_hat_knit.x = _x;
-                item_hat_knit.y = _y;
+        item_switch = this_scene.add.sprite(1230,300, "item_switch").setOrigin(0.5);
+        item_switch.setScale(0.25);
+        item_switch.anims.play("item_switch_off", true);
+        item_switch.setInteractive({useHandCursor: true});
+        back_black = this_scene.add.image(640, 480, "back_black");
+        back_black.depth = 9999+1;
+        back_black.visible = false;
+        item_switch.on('pointerdown', () => {
+            if (item_switch.anims.currentAnim.key == "item_switch_off") {
+                item_switch.anims.play("item_switch_on", true);
+                back_black.visible = true;
+                sound_switch.play();
+                back_neon.visible = true;
+                text_kanban.setColor("white");
+                if (typeof item_nui != "undefined") {
+                    item_nui.anims.play("item_nui_alive", true);
+                }
+            } else {
+                item_switch.anims.play("item_switch_off", true);
+                back_black.visible = false;
+                sound_switch.play();
+                back_neon.visible = false;
+                text_kanban.setColor("black");
+                if (typeof item_nui != "undefined") {
+                    item_nui.anims.play("item_nui", true);
+                }
             }
         });
+        item_switch.depth = item_switch.y;
     }
-
-    //###38:Mortarboard
-    _item_id = 38;
-    if (
-        (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
-        && local_items_flag[_item_id] != true
-    ) {
-        local_items_flag[_item_id] = true;
-        //_x = 700;
-        //_y = 380;
-        _x = 610;
-        _y = 260;
-        item_hat_mortarboard = this_scene.add.sprite(_x, _y, "item_hat_mortarboard")
-            .setOrigin(0.5)
-            .setScale(0.20)
-            .setAngle(90);
-        item_hat_mortarboard.setInteractive({useHandCursor: true});
-        item_hat_mortarboard.on('pointerdown', () => {
-            if (item_wearing_hat == 0) {
-                item_wearing_hat = item_hat_mortarboard;
-                murasakisan.on_click();
-                sound_hat.play();
-                item_hat_mortarboard.setAngle(0);
-            } else if (item_wearing_hat == item_hat_mortarboard) {
-                item_wearing_hat = 0;
-                item_hat_mortarboard.x = _x;
-                item_hat_mortarboard.y = _y;
-                item_hat_mortarboard.setAngle(90);
-            }
-        });
-    }
-
-    //###194:ohana_bank
+    
+    //###194:Ohana Bank
     if (local_items[194] != previous_local_item194) {
         // define async function
         async function _do(scene) {
@@ -4170,7 +4356,7 @@ function update_checkItem(this_scene) {
         _do(this_scene);
     }
 
-    //###195:kusa_pouch
+    //###195:Kusa Pouch
     if (local_items[195] != previous_local_item195) {
         // define async function
         async function _do(scene) {
@@ -4221,7 +4407,7 @@ function update_checkItem(this_scene) {
         _do(this_scene);
     }
 
-    //###197:nuichan
+    //###197:Nuichan
     if (local_items[197] != previous_local_item197) {
         // define async function
         async function _do(scene) {
@@ -4274,7 +4460,7 @@ function update_checkItem(this_scene) {
                     _y+68,
                     _text,
                     {font: "15px Arial", fill: "#000000", backgroundColor: "#ffffff"}
-                ).setOrigin(0.5);
+                ).setOrigin(0.5).setDepth(9999);
                 _array_nui_text[i].visible = false;
                 _array_nui[i] = scene.add.sprite(_x, _y, "item_nui")
                     .setOrigin(0.5)
@@ -4322,83 +4508,6 @@ function update_checkItem(this_scene) {
             }
         }
         _do(this_scene);
-
-        //score counter
-        group_score_counter = this_scene.add.group();
-        let _array_score = ("00000000" + local_score).slice(-7).split("");
-        let _len_score = local_score.toString().length;
-        let _font_arg = {font: "16px Arial", fill: "#0000ff"};
-        for (let i = 0; i < 7; i++) {
-            //let _x = 1135 + i*18;
-            //let _y = 555 + i*19;
-            let _x = 1095 + i*25;
-            let _y = 245;
-            let _text = _array_score.shift()
-            _img = this_scene.add.image(_x, _y, "icon_counter")
-                .setOrigin(0.5)
-                .setScale(0.06)
-                .setDepth(1000);
-            group_score_counter.add(_img);
-            if (_len_score + i + 1 > 7) {
-                _txt = this_scene.add.text(_x-2, _y, _text, _font_arg)
-                    .setOrigin(0.5)
-                    .setDepth(1001);
-                group_score_counter.add(_txt);
-            }
-        }
-        //after creation            
-        
-        //status pad
-        let _x = 700;
-        let _y = 390;
-        item_pad = this_scene.add.sprite(_x, _y, "item_pad_on")
-            .setScale(0.25)
-            .setOrigin(0.5)
-            .setDepth(_y)
-            .setInteractive({useHandCursor: true})
-            .on('pointerdown', () => {
-                if (flag_radarchart == 0) {
-                    flag_radarchart = 1;
-                    draw_radarchart(this_scene);
-                    item_pad.setTexture("item_pad_on");
-                    sound_pad.play();
-                } else {
-                    flag_radarchart = 0;
-                    group_chart.destroy(true);
-                    item_pad.setTexture("item_pad_off");
-                    //init_global_variants();
-                }
-            });
-        flag_radarchart = 1;
-        draw_radarchart(this_scene);
-    }
-
-
-    //check mail
-    if (flag_mail) {
-        cat_others = this_scene.add.sprite(800, 700, "cat_sitting").setScale(0.12).setOrigin(0.5)
-            .setInteractive({useHandCursor: true})
-            .on("pointerdown", () => {contract_open_mail(summoner)});            
-        cat_others.depth = cat_others.y;
-    }
-    //calc sending interval
-    if (
-        local_mail_sending_interval != -1
-        && typeof text_sending_interval != "undefined"
-        && typeof cat != "undefined"
-    ) {
-        if (local_mail_sending_interval == 0) {
-            text_sending_interval.setText("");
-            cat.visible = true;
-        } else {
-            let _d = Math.floor(local_mail_sending_interval / (60 * 60 * 24));
-            let _hr = Math.floor(local_mail_sending_interval % 86400 / 3600);
-            let _min = Math.floor(local_mail_sending_interval % 3600 / 60);
-            let _text = _d + "d:" + _hr + "h:" + _min + "m";
-            text_sending_interval.setText(_text).setFill("#ffffff");
-            cat.visible = false;
-            //console.log(local_mail_sending_interval);
-        }
     }
     
     previous_local_items = local_items;
@@ -4408,6 +4517,7 @@ function update_checkItem(this_scene) {
     previous_local_item197 = local_items[197];
     previous_local_rolled_dice = local_rolled_dice;
     previous_local_name_str = local_name_str;
+    previous_local_score = local_score;
 }
 
 
@@ -4420,7 +4530,7 @@ function update() {
 
     //debug
     if (turn % 20 == 0) {
-        console.log(Math.round(game.input.mousePointer.x), Math.round(game.input.mousePointer.y));
+        //console.log(Math.round(game.input.mousePointer.x), Math.round(game.input.mousePointer.y));
     }
     
     //protection code
