@@ -5,7 +5,12 @@ pragma solidity ^0.8.7;
 
 /*
 
-    Proxyの実装
+    要求_item_idの整備
+        _item_idテーブルが確定してから
+        nameplateにrequire
+        murasaki_mailにクッションをrequire
+
+ ok Proxyの実装
         他のプロジェクトがwalletからsummonerのステータスを参照しやすくするため
         walletを引数に渡し、各ステータスを返すフレームワーク
             age, class, seed
@@ -17,11 +22,6 @@ pragma solidity ^0.8.7;
             補正後のstr, dex, int, luck
             total_exp, coin, material, heart
         proxyではなく、何かしらの専用コントラでもよいか
-
-    要求_item_idの整備
-        _item_idテーブルが確定してから
-        nameplateにrequire
-        murasaki_mailにクッションをrequire
 
  ok スコア補正の深慮
         単純にスコア差ならば、高Lv低スコアの個体がExp+となってしまう
@@ -3314,7 +3314,7 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
     //get heart required
     function get_heart_required(uint32 _item_type) public pure returns (uint32) {
         if (_item_type <= 64) {
-            return 0;
+            return heart_table[_item_type];
         } else if (_item_type == 194) { //bank
             return 0;
         } else if (_item_type == 195) { //puch
@@ -3602,6 +3602,79 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
         4500,
         4725,
         4950,
+        //49-63: unreserved
+        99999,
+        99999,
+        99999,
+        99999,
+        99999,
+        99999,
+        99999,
+        99999,
+        99999,
+        99999,
+        99999,
+        99999,
+        99999,
+        99999,
+        99999
+    ];
+
+    //item heart
+    uint32[64] public heart_table = [
+        //0:dummy
+        0,
+        //1-16: mining item
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        //17-32: farming item
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        //33-48: crafting item
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
         //49-63: unreserved
         99999,
         99999,
@@ -4098,6 +4171,194 @@ contract Murasaki_Mail is Ownable {
         mfc.create_tiny_heart(_summoner_to, _summoner_from);
     }
     */
+}
+
+
+//---Info------------------------------------------------------------------------------------------------------------------
+
+
+contract Murasaki_Info is Ownable {
+
+    //address
+    address public murasaki_function_share_address;
+    address public murasaki_function_mining_and_farming_address;
+    address public murasaki_function_crafting_address;
+    
+    //admin, set address
+    function _set1_murasaki_function_share_address(address _address) external onlyOwner {
+        murasaki_function_share_address = _address;
+    }
+    function _set2_murasaki_function_mining_and_farming_address(address _address) external onlyOwner {
+        murasaki_function_mining_and_farming_address = _address;
+    }
+    function _set3_murasaki_function_crafting_address(address _address) external onlyOwner {
+        murasaki_function_crafting_address = _address;
+    }
+    
+    //call each info from wallet
+    function summoner(address _wallet) public view returns (uint32) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Main mm = Murasaki_Main(mfs.murasaki_main_address());
+        uint32 _summoner = mm.tokenOf(_wallet);
+        if (_summoner == 0) {
+            return 0;
+        }
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        bool _isActive = ms.isActive(_summoner);
+        if (_isActive) {
+            return _summoner;
+        } else {
+            return 0;
+        }
+    }
+    function class(address _wallet) external view returns (uint32) {
+        uint32 _summoner = summoner(_wallet);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Main mm = Murasaki_Main(mfs.murasaki_main_address());
+        return mm.class(_summoner);
+    }
+    function age(address _wallet) external view returns (uint32) {
+        uint32 _summoner = summoner(_wallet);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Main mm = Murasaki_Main(mfs.murasaki_main_address());
+        uint32 _now = uint32(block.timestamp);
+        uint32 _age = _now - mm.summoned_time(_summoner);
+        return _age;
+    }
+    function name(address _wallet) external view returns (string memory) {
+        uint32 _summoner = summoner(_wallet);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Name mn = Murasaki_Name(mfs.murasaki_name_address());
+        return mn.names(_summoner);
+    }
+    function satiety(address _wallet) external view returns (uint32) {
+        uint32 _summoner = summoner(_wallet);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        return mfs.calc_satiety(_summoner);
+    }
+    function happy(address _wallet) external view returns (uint32) {
+        uint32 _summoner = summoner(_wallet);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        return mfs.calc_happy(_summoner);
+    }
+    function level(address _wallet) external view returns (uint32) {
+        uint32 _summoner = summoner(_wallet);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        return ms.level(_summoner);
+    }
+    function exp(address _wallet) external view returns (uint32) {
+        uint32 _summoner = summoner(_wallet);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        return ms.exp(_summoner);
+    }
+    function strength(address _wallet) public view returns (uint32) {
+        uint32 _summoner = summoner(_wallet);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        return ms.strength(_summoner);
+    }
+    function dexterity(address _wallet) public view returns (uint32) {
+        uint32 _summoner = summoner(_wallet);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        return ms.dexterity(_summoner);
+    }
+    function intelligence(address _wallet) public view returns (uint32) {
+        uint32 _summoner = summoner(_wallet);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        return ms.intelligence(_summoner);
+    }
+    function luck(address _wallet) public view returns (uint32) {
+        uint32 _summoner = summoner(_wallet);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        return ms.luck(_summoner);
+    }
+    function strength_withItems(address _wallet) external view returns (uint32) {
+        uint32 _str = strength(_wallet);
+        Murasaki_Function_Mining_and_Farming mfmf = Murasaki_Function_Mining_and_Farming(murasaki_function_mining_and_farming_address);
+        _str += mfmf.count_mining_items(_wallet);
+        return _str;
+    }
+    function dexterity_withItems(address _wallet) external view returns (uint32) {
+        uint32 _dex = dexterity(_wallet);
+        Murasaki_Function_Mining_and_Farming mfmf = Murasaki_Function_Mining_and_Farming(murasaki_function_mining_and_farming_address);
+        _dex += mfmf.count_farming_items(_wallet);
+        return _dex;
+    }
+    function intelligence_withItems(address _wallet) external view returns (uint32) {
+        uint32 _int = intelligence(_wallet);
+        Murasaki_Function_Crafting mfc = Murasaki_Function_Crafting(murasaki_function_crafting_address);
+        _int += mfc.count_crafting_items(_wallet);
+        return _int;
+    }
+    function luck_withItems(address _wallet) external view returns (uint32) {
+        uint32 _summoner = summoner(_wallet);
+        uint32 _luk = luck(_wallet);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        _luk += mfs.calc_heart(_summoner) * 1;
+        return _luk;
+    }
+    function coin(address _wallet) external view returns (uint32) {
+        uint32 _summoner = summoner(_wallet);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        return ms.coin(_summoner);
+    }
+    function material(address _wallet) external view returns (uint32) {
+        uint32 _summoner = summoner(_wallet);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        return ms.material(_summoner);
+    }
+    function heart(address _wallet) external view returns (uint32) {
+        uint32 _summoner = summoner(_wallet);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        return ms.heart(_summoner);
+    }
+    function total_exp_gained(address _wallet) external view returns (uint32) {
+        uint32 _summoner = summoner(_wallet);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage_Score mss = Murasaki_Strage_Score(mfs.murasaki_strage_score_address());
+        return mss.total_exp_gained(_summoner);
+    }
+    function total_coin_mined(address _wallet) external view returns (uint32) {
+        uint32 _summoner = summoner(_wallet);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage_Score mss = Murasaki_Strage_Score(mfs.murasaki_strage_score_address());
+        return mss.total_coin_mined(_summoner);
+    }
+    function total_material_farmed(address _wallet) external view returns (uint32) {
+        uint32 _summoner = summoner(_wallet);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage_Score mss = Murasaki_Strage_Score(mfs.murasaki_strage_score_address());
+        return mss.total_material_farmed(_summoner);
+    }
+    function total_item_crafted(address _wallet) external view returns (uint32) {
+        uint32 _summoner = summoner(_wallet);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage_Score mss = Murasaki_Strage_Score(mfs.murasaki_strage_score_address());
+        return mss.total_item_crafted(_summoner);
+    }
+    function total_heart_received(address _wallet) external view returns (uint32) {
+        uint32 _summoner = summoner(_wallet);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage_Score mss = Murasaki_Strage_Score(mfs.murasaki_strage_score_address());
+        return mss.total_heart_received(_summoner);
+    }
+    function score(address _wallet) external view returns (uint32) {
+        uint32 _summoner = summoner(_wallet);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        return mfs.calc_score(_summoner);
+    }
+    function item_possess(address _wallet, uint32 _item_type) external view returns (uint32) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        return mfs.get_balance_of_type_specific(_wallet, _item_type);
+    }
 }
 
 

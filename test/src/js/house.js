@@ -5,10 +5,36 @@
 
 /*
 
-    NFT絵の表示の実装
-        別PJのNFT絵を取得して額縁に表示させる
+    walletが所持するトークンの利用
+        ホワイトリスト方式
+            Astar系
+                ASTR
+                SDN
+                BAI
+                LAY
+                ARSW
+            ステーブル
+                USDC
+                USDT
+                BUSD
+                DAI
+            他チェーン
+                BTC
+                ETH
+                BNB
+                MATIC
+
+    walletが所持するNFTの利用
+        ホワイトリスト方式
+            AstarDegen
+            AstarCat
+            AstarWitch
+            AstarPunck
+            AstarBot
+        NFT絵を取得して額縁内に表示させる
+        クリックする度に絵が変わる
     
-    アイテムクラフト時のハート要求の実装
+ ok アイテムクラフト時のハート要求の実装
         後半アイテムではハートを少し要求する
 
     dApps Staking報酬案
@@ -155,14 +181,6 @@
         送信時の猫のアニメーション
         受診時の猫のアニメーション
         メールの表示・非表示
-        
-    パンケーキ
-    すし
-    ライフカウンター（スコア表示）
-    アイパッド（ステータス表示）
-    積み木カウンター
-    ピアノ
-    ラグ
 
 */
 
@@ -976,6 +994,26 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         }else if (this.count < this.moving_count) {
             this.x += Math.cos(this.moving_degree * (Math.PI/180)) * this.moving_speed;
             this.y -= Math.sin(this.moving_degree * (Math.PI/180)) * this.moving_speed;
+            //***TODO*** coin
+            if (this.count == 2 && Math.random()*100 >= 50) {
+                function checkOverlap(spriteA, spriteB) {
+                    var boundsA = spriteA.getBounds();
+                    boundsA.width *= 0.8;
+                    boundsA.height *= 0.8;
+                    //boundsA.x += 50;
+                    //boundsA.y += 50;
+                    //console.log(boundsA);
+                    var boundsB = spriteB.getBounds();
+                    return Phaser.Geom.Intersects.RectangleToRectangle(boundsA, boundsB);
+                }
+                for (i = 0; i < group_coin.getLength(); i++) {
+                //for (i = 0; i < 14; i++) {
+                    if (checkOverlap(this, group_coin.getChildren()[i])){
+                        group_coin.getChildren()[i].on_click();
+                        break;
+                    }
+                }
+            }
         //return to resting
         }else if (this.count >= this.moving_count) {
             this.mode = "resting";
@@ -1664,6 +1702,119 @@ class Dice extends Phaser.GameObjects.Sprite{
             //this.text_rolled_number.setText(Math.round(Math.random()*20));
             this.text_rolled_number.setText(this.count / 2 % 20 + 1);
             this.text_next_time.setText("Rolling!").setFill("#ff0000");
+        }
+    }
+}
+
+
+//---coin-----------------------------------------------------------------------------------------------------
+
+
+class Coin extends Phaser.GameObjects.Sprite{
+    constructor(scene, x, y, img){
+        super(scene, x, y, img);
+        this.scene.add.existing(this);
+        this.setInteractive({ useHandCursor: true });
+        this.on("pointerdown", function (pointer) {
+            this.on_click();
+        }, this);
+        this.speed_x = 0;
+        this.speed_y = 0;
+        this.count = 0;
+        this.line_y = y;      //initial value of line_y, the same as first position of y
+        this.line_y_max = 500;  //max floor position
+        this.line_y_min = 800;
+        this.line_x_r = 1200;   //right side
+        this.line_x_l = 50;     //left side
+    }
+    on_click() {
+        this.speed_x = 8 + Math.random() * 5;
+        
+        if (Math.random() > 0.5) {
+            this.speed_x *= -1;
+        }
+        
+        /*
+        //DOES NOT WORK in phone
+        //if (game.input.mousePointer.x > this.x) {
+        if (game.input.activePointer.position.x > this.x) {
+        //if (game.input.pointer1.x > this.x) {
+            this.speed_x *= -1;
+        }
+        */
+
+        this.speed_y = 8 + Math.random() * 5;
+        this.count = 0;
+        //define constant of y = b - a * x
+        this.a = Math.random() * 0.8 - 0.4;
+        this.b = this.y + this.a * this.x;
+        //sound
+        sound_dice.play();
+    }
+    update(){
+        this.count += 1;
+        if (this.count % 2 == 0) {
+            return 0;
+        }
+        //dept
+        //this.depth = this.line_y;
+        //check speed
+        if (
+            Math.abs(this.speed_x) <= 0.5
+            && Math.abs(this.speed_y) <= 0.5
+            && this.line_y - this.y <= 1
+        ) {
+            ;
+        } else {
+            //when moving
+            //define line_y
+            this.line_y = this.b - this.a * this.x;
+            if (this.line_y < this.line_y_max) {
+                this.line_y = this.line_y_max;
+            }
+            if (this.line_y > this.line_y_min) {
+                this.line_y = this.line_y_min;
+            }
+            //reducing x speed, -/+
+            if (this.speed_x > 0) {
+                //friction, when speed_y = 0
+                if (Math.abs(this.speed_y) <= 0.5) {
+                    this.speed_x -= 0.1 * 3;
+                } else {
+                    this.speed_x -= 0.1;
+                }
+            } else {
+                if (Math.abs(this.speed_y) <= 0.5) {
+                    this.speed_x += 0.1 * 3;
+                } else {
+                    this.speed_x += 0.1;
+                }
+            }
+            //reduction of y speed
+            this.speed_y -= 0.98;
+            //position moving
+            this.x += this.speed_x;
+            this.y -= this.speed_y;
+            //increase angle
+            this.angle += this.speed_x * 5;
+            //refrection y
+            if (this.y >= this.line_y) {
+                this.y = this.line_y;
+                this.speed_y *= -0.5;   //bounce coefficient
+                if (Math.abs(this.speed_y) > 0.5) {
+                    sound_dice_impact.play();
+                }
+            }
+            //refrection x
+            if (this.x >= this.line_x_r) {
+                this.x = this.line_x_r;
+                this.speed_x *= -0.9;   //bounce coefficient
+                sound_dice_impact.play();
+            } else if (this.x <= this.line_x_l) {
+                this.x = this.line_x_l;
+                this.speed_x *= -0.9;
+                sound_dice_impact.play();
+            }
         }
     }
 }
@@ -2483,6 +2634,64 @@ function preload() {
     //===fireworks
     //https://codepen.io/samme/pen/eYEearb
     this.load.atlas('flares', 'src/fireworks/flares.png', 'src/fireworks/flares.json');
+    
+    //===coin
+    this.load.image("coin_color_ACA", "src/png/coin_color_ACA.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_color_ASTR", "src/png/coin_color_ASTR.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_color_BNB", "src/png/coin_color_BNB.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_color_BTC", "src/png/coin_color_BTC.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_color_BUSD", "src/png/coin_color_BUSD.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_color_DAI", "src/png/coin_color_DAI.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_color_DOT", "src/png/coin_color_DOT.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_color_ETH", "src/png/coin_color_ETH.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_color_GLMR", "src/png/coin_color_GLMR.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_color_LAY", "src/png/coin_color_LAY.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_color_MATIC", "src/png/coin_color_MATIC.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_color_SDN", "src/png/coin_color_SDN.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_color_USDC", "src/png/coin_color_USDC.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_color_USDT", "src/png/coin_color_USDT.png", {frameWidth: 200, frameHeight: 200});
+    array_image_coin = [
+        "coin_color_ACA",
+        "coin_color_ASTR",
+        "coin_color_BNB",
+        "coin_color_BTC",
+        "coin_color_BUSD",
+        "coin_color_DAI",
+        "coin_color_DOT",
+        "coin_color_ETH",
+        "coin_color_GLMR",
+        "coin_color_LAY",
+        "coin_color_MATIC",
+        "coin_color_SDN",
+        "coin_color_USDC",
+        "coin_color_USDT",
+    ];
+    /*
+    this.load.image("coin_ASTR", "src/png/coin_ASTR.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_BNB", "src/png/coin_BNB.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_BTC", "src/png/coin_BTC.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_BUSD", "src/png/coin_BUSD.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_DAI", "src/png/coin_DAI.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_ETH", "src/png/coin_ETH.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_JPYC", "src/png/coin_JPYC.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_LAY", "src/png/coin_LAY.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_MATIC", "src/png/coin_MATIC.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_USDC", "src/png/coin_USDC.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_USDT", "src/png/coin_USDT.png", {frameWidth: 200, frameHeight: 200});
+    array_image_coin = [
+        "coin_ASTR",
+        "coin_BNB",
+        "coin_BTC",
+        "coin_BUSD",
+        "coin_DAI",
+        "coin_ETH",
+        "coin_JPYC",
+        "coin_LAY",
+        "coin_MATIC",
+        "coin_USDC",
+        "coin_USDT"
+    ];
+    */
 }
 
 
@@ -3080,6 +3289,28 @@ function create() {
     group_mint_name.add(icon_name_kusa);
     group_mint_name.add(text_name_kusa);
     group_mint_name.setVisible(false);
+    
+    //===coin
+    group_coin = this.add.group();
+    for (i = 0; i < array_image_coin.length; i++) {
+        let _x = 100 + Math.random() * 900;
+        let _y = 550 + Math.random() * 200;
+        let _img = array_image_coin[i];
+        coin = new Coin(this, _x, _y, _img)
+            .setOrigin(0.5)
+            .setScale(0.15)
+            .setAlpha(0.7)
+            .setDepth(2);
+        group_coin.add(coin);
+        /*
+        this.add.image(_x, _y, _img)
+            .setOrigin(0.5)
+            .setScale(0.15)
+            .setAlpha(0.7)
+            .setDepth(2);
+        */
+    }
+    group_coin.runChildUpdate = true;
 }
 
 
@@ -3561,7 +3792,8 @@ function update_checkModeChange(this_scene) {
         murasakisan.target_y = 880;
         sound_mining.play();
     }else if (local_mining_status == 0 & murasakisan.mode == "mining") {
-        murasakisan.set_mode = "resting";
+        murasakisan.set_mode = "hugging";
+        //murasakisan.set_mode = "resting";
         //icon invisible
         icon_mining.visible = false;
         sound_earn.play();
@@ -3576,7 +3808,8 @@ function update_checkModeChange(this_scene) {
         murasakisan.target_y = 450;
         sound_farming.play();
     }else if (local_farming_status == 0 & murasakisan.mode == "farming") {
-        murasakisan.set_mode = "resting";
+        murasakisan.set_mode = "hugging";
+        //murasakisan.set_mode = "resting";
         //icon invisible
         icon_farming.visible = false;
         sound_earn.play();
@@ -3592,7 +3825,8 @@ function update_checkModeChange(this_scene) {
         text_select_item.setText('"'+array_item_name[local_crafting_item_type]+'"')
         sound_crafting.play();
     }else if (local_crafting_status == 0 & murasakisan.mode == "crafting") {
-        murasakisan.set_mode = "resting";
+        murasakisan.set_mode = "hugging";
+        //murasakisan.set_mode = "resting";
         text_select_item.setText(">> Select Item <<")
         //icon invisible
         icon_crafting_time_remining.visible = false;
@@ -4564,6 +4798,11 @@ function update() {
     //update dice
     if (typeof dice != "undefined" && turn % 2 == 0) {
         dice.update();
+    }
+
+    //update coin
+    if (typeof group_coin != "undefined" && turn % 2 == 1) {
+        //group_coin.update();
     }
 
     //update radarchart

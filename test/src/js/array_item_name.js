@@ -1,6 +1,4 @@
-let array_item_name = [
-    //0
-    "dummy",
+let _array_name_base = [
     //1-16
     "Nameplate",
     "Mr. Astar",
@@ -11,7 +9,7 @@ let array_item_name = [
     "Ribbon",
     "Window",
     "Knit Hat",
-    "---",
+    "Picture Frame",
     "---",
     "---",
     "---",
@@ -28,7 +26,100 @@ let array_item_name = [
     "Asnya",
     "Rug-Pull",
     "Flowerpot",
+    "Photo Frame",
     "---",
+    "---",
+    "---",
+    "---",
+    "---",
+    "---",
+    //33-48
+    "Tablet",
+    "Score Board",
+    "Mortarboard",
+    "Dr. Bitco",
+    "Pancake",
+    "Violin",
+    "Piano",
+    "Light Switch",
+    "Lanthanum",
+    "Coin Basket",
+    "---",
+    "---",
+    "---",
+    "---",
+    "---",
+    "(Test Item)",
+    //49-64
+    "---",
+    "---",
+    "---",
+    "---",
+    "---",
+    "---",
+    "---",
+    "---",
+    "---",
+    "---",
+    "---",
+    "---",
+    "---",
+    "---",
+    "---",
+    "---",
+];
+
+let _array_name_sp = [
+    //193, heart
+    "Tiny Heart",
+    //194, Ohana Piggy Bank
+    "Ohana Bank",
+    //195, Kusa Pouch
+    "Kusa Pouch",
+    //196, Cat Mail
+    "Cat Mail",
+    //197, Nui
+    "Coddly Toy"
+];
+
+let array_item_name = ["dummy"]; //dummy, 0
+array_item_name = array_item_name.concat(_array_name_base);    //common, 1-64
+array_item_name = array_item_name.concat(_array_name_base);    //uncommon, 65-128
+array_item_name = array_item_name.concat(_array_name_base);    //rare, 129-192
+array_item_name = array_item_name.concat(_array_name_sp);      //special, 193-
+
+/*
+let array_item_name = [
+    //0
+    "dummy",
+    //1-16
+    "Nameplate",
+    "Mr. Astar",
+    "Dice",
+    "Helmet",
+    "Sushi",
+    "Crown",
+    "Ribbon",
+    "Window",
+    "Knit Hat",
+    "Picture Frame",
+    "---",
+    "---",
+    "---",
+    "---",
+    "---",
+    "---",
+    //17-32
+    "Music Box",
+    "Straw Hat",
+    "Ms. Ether",
+    "Cat Cushion",
+    "Uni",
+    "Fortune Statue",
+    "Asnya",
+    "Rug-Pull",
+    "Flowerpot",
+    "Photo Frame",
     "---",
     "---",
     "---",
@@ -215,3 +306,4 @@ let array_item_name = [
     "Cat Mail",
     "Coddly Toy",
 ]
+*/
