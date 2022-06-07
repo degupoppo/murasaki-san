@@ -16,6 +16,7 @@
         たくさんstakeしてくれたら最大でluck+固定値x2
         ただし指数関数増加でx2に無限大で近づくとする
         dapps staking済みwalletの取得方法を考える
+            walletを引数で渡し、true, falseで返すコントラがベストか
 
     帽子の普遍的な位置合わせ
 

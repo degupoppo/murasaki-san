@@ -5,6 +5,19 @@ pragma solidity ^0.8.7;
 
 /*
 
+    Proxyの実装
+        他のプロジェクトがwalletからsummonerのステータスを参照しやすくするため
+        walletを引数に渡し、各ステータスを返すフレームワーク
+            age, class, seed
+            スコア, レベル
+            coin, material, heart
+            itemの所持総数
+            特定のitemの所持数
+            str, dex, int, luck
+            補正後のstr, dex, int, luck
+            total_exp, coin, material, heart
+        proxyではなく、何かしらの専用コントラでもよいか
+
     要求_item_idの整備
         _item_idテーブルが確定してから
         nameplateにrequire
