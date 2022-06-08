@@ -5,6 +5,24 @@
 
 /*
 
+    新NFT群の考案
+        トレードインセンティブ
+            トレードが必然的に必要
+            トレードしたほうが有利になる
+            一人で集めるのは効率が悪いように設計
+        ERC-3664
+            動的なパラメータを有する
+            他の静的NFTを所有する
+            一方向に、ポジティブな方向にのみ動的に変化させたい
+        dApps Staking
+            所有するだけか、あるいはstakingすることでリワードを得られる機構
+            staking報酬の計算式を深慮する
+            報酬効率を上げるためにはトレードしたほうが良いように
+        heart経済
+            heartを消費する機構を組み込む
+        構想
+            宝石NFTを所有する宝石箱NFT
+
     walletが所持するトークンの利用
         ホワイトリスト方式
             Astar系
@@ -23,46 +41,33 @@
                 ETH
                 BNB
                 MATIC
+        walletに所持しているトークンが入っているtoken bascketアイテム
+        クリックで床にトークンボールがばらまかれる
+        再度クリックでお片付け
 
     walletが所持するNFTの利用
         ホワイトリスト方式
             AstarDegen
-            AstarCat
+            AstarCats
             AstarWitch
-            AstarPunck
-            AstarBot
+            AstarPunks
+            AstarBots
+            Astarians
+            Templa
         NFT絵を取得して額縁内に表示させる
         クリックする度に絵が変わる
-    
- ok アイテムクラフト時のハート要求の実装
-        後半アイテムではハートを少し要求する
 
-    dApps Staking報酬案
-        最低金額でもstakeしてくれたらluck+固定値
-        たくさんstakeしてくれたら最大でluck+固定値x2
-        ただし指数関数増加でx2に無限大で近づくとする
-        dapps staking済みwalletの取得方法を考える
-            walletを引数で渡し、true, falseで返すコントラがベストか
+    レベルアップの演出の実装
+        花火の音の実装, emitter
+        summonerの専用アニメーションの用意
+        レベルアップの文字の表示
 
     帽子の普遍的な位置合わせ
-
-    walletとの連携機能の実装
-        せっかくのNTTなので、walletに紐付けられている感じをもたせる
-        Astar walletに住むペットのイメージなので。
-        NFT額縁
-            walletにあるNFTをランダムで表示
-            PJはある程度指定しておく
-        Wallet Visualizer
-            walletの活動度によって変化する何かを実装する。
-                入っているトークンが表示される水槽？
-                walletの古さによって水草の数が増える？
-                その日のトランザクション数によって変化させる？
-            デイリートランザクション：天気などすぐ移り変わるもの
-            古さ：木の大きさなどゆっくりと一方向に増えてゆくもの
-            トークン数：天気よりはゆっくりと増減するもの
             
     メール送信成功のメッセージを実装
         相手がメールを開けたことがわかるように
+
+2nd                
 
     宝石箱NFT
         宝石NFTを所有する宝石箱NFTの考案
@@ -78,7 +83,29 @@
             本当はmmもERC-3664が良いのかもしれないが、
             NFTではなくNTTなので大変だろうか。
             また、変数が多すぎて3664でカバーできるのだろうか。
-                
+
+    dApps Staking報酬案
+        最低金額でもstakeしてくれたらluck+固定値
+        たくさんstakeしてくれたら最大でluck+固定値x2
+        ただし指数関数増加でx2に無限大で近づくとする
+        dapps staking済みwalletの取得方法を考える
+            walletを引数で渡し、true, falseで返すコントラがベストか
+
+    walletとの連携機能の実装
+        せっかくのNTTなので、walletに紐付けられている感じをもたせる
+        Astar walletに住むペットのイメージなので。
+        NFT額縁
+            walletにあるNFTをランダムで表示
+            PJはある程度指定しておく
+        Wallet Visualizer
+            walletの活動度によって変化する何かを実装する。
+                入っているトークンが表示される水槽？
+                walletの古さによって水草の数が増える？
+                その日のトランザクション数によって変化させる？
+            デイリートランザクション：天気などすぐ移り変わるもの
+            古さ：木の大きさなどゆっくりと一方向に増えてゆくもの
+            トークン数：天気よりはゆっくりと増減するもの
+
     インフレ対策の深慮
         coin, material, heartはどんどんインフレしてゆく
         そのため、常にユースケースの要求値を少し多めに設定する
@@ -89,57 +116,6 @@
                 4つ消費して作製するNFT: big heart
                 coin/materialを500ずつ要求？
                 あるいは、ハート5個で作って解体時はハート4個だけ得る、など。
-
- ok スコアボードの更新の実装
-        アニメーションは難しいか
-
- ok 新コントラ群への対応
-     ok craft周りの整備
-            heart要求値の取得
-                heart要求は0でも表示させるか
-            heart数のsend
-            heart数の取得
-     ok nui周りの整備
-         ok feeding/grooming時にアクティブぬいのidを渡す
-            nuiの位置記憶を実装
-            mcで197をcraft, 自分のwallet, 自分のsummoner
-            msnでscore=1118000, summoner=自分
-     ok item順序の再考
-
-    heart経済の深慮
-        heartを得る行動
-            誰かのcraftによる受け取り
-                受動的
-                1/w程度
-                happy, satietyが10以上、レベル3以上で受け取り可能
-            猫mail
-                能動的
-                2/3d = 4/w程度
-            合計：5/w, 20/m程度
-        heartを支払う行動
-            nuiちゃんクラフト, 30要求
-            後半のアイテムクラフト時, 1w分, 5個程度要求
-        heartによるluck補正も再考する
-            heart 1 = luck 0.01
-                +0.2/m
-                +2.4/y
-        heartの消費方法をもっと考える
-            バランスとしては20個/mなので、その程度は消費する方法を考える
-            宝石1個作るのに3つとか使うか。
-
- ok tiny heartの非NFT化
-        NFTのままだとコスト支払いがとてもやりにくい
-            gas代もかさむし、リソースとしての使い勝手が悪い
-        msに記録されるcoin/materialなどと同等のパラメータとする
-        coin/materialとは違い、summoner間を移動する機能は持たせないこととする
-            継続的なゲームプレイの指標のようなもの
-            coin/materialはRMTで得ることもできる
-        heart経済によって、高級アイテムのバランス調整を行う
-            1週間, 1ヶ月で得られる平均heart量
-            上記をもとに、アイテムのコスト設定を深慮する
-                ex: ぬいちゃんは1ヶ月分、◯◯は1週間分、など
-            burn上限10個が撤廃されるので、コストは自由に決められる
-                heart 100個要求のアイテムなども可能
 
     育成型NFTの深慮
         ぬいちゃんシステム上でランダム性の高いNFTをつくる
@@ -176,11 +152,6 @@
             少しさびしいが、猫は7日サイクルにするか
                 これで1週間に平均3個程度
                 ぬいちゃんの要求が8個だとすると、3週間分ていど。
-
- ok メール送受信時の動的アクションの実装
-        送信時の猫のアニメーション
-        受診時の猫のアニメーション
-        メールの表示・非表示
 
 */
 
@@ -924,6 +895,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         if (this.mode == "resting" || this.mode == "moving") {
             this.count = 0;
             this.mode = "hugging";
+            //fireworks(this.scene);
         }
     }
     
@@ -998,11 +970,10 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             if (this.count == 2 && Math.random()*100 >= 50) {
                 function checkOverlap(spriteA, spriteB) {
                     var boundsA = spriteA.getBounds();
-                    boundsA.width *= 0.8;
-                    boundsA.height *= 0.8;
-                    //boundsA.x += 50;
-                    //boundsA.y += 50;
-                    //console.log(boundsA);
+                    boundsA.x += boundsA.width/4;
+                    boundsA.y += boundsA.height/2;
+                    boundsA.width /= 2;
+                    boundsA.height /= 3;
                     var boundsB = spriteB.getBounds();
                     return Phaser.Geom.Intersects.RectangleToRectangle(boundsA, boundsB);
                 }
@@ -1728,7 +1699,8 @@ class Coin extends Phaser.GameObjects.Sprite{
         this.line_x_l = 50;     //left side
     }
     on_click() {
-        this.speed_x = 8 + Math.random() * 5;
+        this.speed_x = 8 + Math.random() * 4;
+        //this.speed_x = 8 + Math.random() * 5;
         
         if (Math.random() > 0.5) {
             this.speed_x *= -1;
@@ -1743,7 +1715,8 @@ class Coin extends Phaser.GameObjects.Sprite{
         }
         */
 
-        this.speed_y = 8 + Math.random() * 5;
+        this.speed_y = 6 + Math.random() * 4;
+        //this.speed_y = 8 + Math.random() * 5;
         this.count = 0;
         //define constant of y = b - a * x
         this.a = Math.random() * 0.8 - 0.4;
@@ -2009,19 +1982,7 @@ function open_window_craft (scene) {
             icon_crafting_kusa.visible = true;
             icon_crafting_time.visible = true;
             text_select_item.setText('"'+array_item_name[_item]+'"');
-            //console.log("modified_dc:", _dc);
-            //***TODO*** nuichan, dirty code, urgent 
-            /*
-            if (_item == 197) {
-                let _heart_required = await contract_get_heart_required(_item);
-                global_selected_crafting_item_required_heart = _heart_required;
-                text_crafting_selected_item_heart.setText(_heart_required);
-                icon_crafting_heart.visible = true;
-            } else {
-                text_crafting_selected_item_heart.setText("");
-                icon_crafting_heart.visible = false;
-            }
-            */
+            //get herat required
             let _heart_required = await contract_get_heart_required(_item);
             global_selected_crafting_item_required_heart = _heart_required;
             text_crafting_selected_item_heart.setText(_heart_required);
@@ -2504,6 +2465,7 @@ function preload() {
     this.load.audio("system", "src/sound/system.mp3");
     this.load.audio("nui", "src/sound/nui.mp3");
     this.load.audio("pad", "src/sound/pad2.mp3");
+    this.load.audio("fireworks", "src/sound/fireworks.mp3");
 
     //===item_basic===
     this.load.image("item_table", "src/png/item_basic_table.png", {frameWidth: 370, frameHeight: 320});
@@ -3017,7 +2979,6 @@ function create() {
     //text
     //text_crafting_calc = this.add.text(775, 155, "", {font: "18px Arial", fill: "#000"});
     text_crafting_calc = this.add.text(_x+75, _y+5, "", {font: "18px Arial", fill: "#000"}).setDepth(9999);
-    //crafting_window ***TODO***
     //select crafting_item_type
     text_select_item = this.add.text(_x+50, _y-30, ">> Select Item <<", {font: "30px Arial", fill: "#000", backgroundColor: "#ecd9ff"})
                 .setDepth(9999)
@@ -3148,11 +3109,13 @@ function create() {
     sound_system = this.sound.add("system", {volume:0.2});
     sound_nui = this.sound.add("nui", {volume:0.2});
     sound_pad = this.sound.add("pad", {volume:0.2});
+    sound_fireworks = this.sound.add("fireworks", {volume:0.2});
 
     //=== create summoner ===
 
-    murasakisan = new Murasakisan(this, 500 + Math.random()*200, 640 + Math.random()*100);
-    murasakisan.setScale(0.45);
+    murasakisan = new Murasakisan(this, 500 + Math.random()*200, 640 + Math.random()*100)
+        .setOrigin(0.5)
+        .setScale(0.45);
 
     //=== system message ===
 
@@ -4867,6 +4830,66 @@ function update() {
 
 //---end------------------------------------------------------------------------------------------------------
 /*
+
+ ok メール送受信時の動的アクションの実装
+        送信時の猫のアニメーション
+        受診時の猫のアニメーション
+        メールの表示・非表示
+
+ ok アイテムクラフト時のハート要求の実装
+        後半アイテムではハートを少し要求する
+
+ ok スコアボードの更新の実装
+        アニメーションは難しいか
+
+ ok 新コントラ群への対応
+     ok craft周りの整備
+            heart要求値の取得
+                heart要求は0でも表示させるか
+            heart数のsend
+            heart数の取得
+     ok nui周りの整備
+         ok feeding/grooming時にアクティブぬいのidを渡す
+            nuiの位置記憶を実装
+            mcで197をcraft, 自分のwallet, 自分のsummoner
+            msnでscore=1118000, summoner=自分
+     ok item順序の再考
+
+    heart経済の深慮
+        heartを得る行動
+            誰かのcraftによる受け取り
+                受動的
+                1/w程度
+                happy, satietyが10以上、レベル3以上で受け取り可能
+            猫mail
+                能動的
+                2/3d = 4/w程度
+            合計：5/w, 20/m程度
+        heartを支払う行動
+            nuiちゃんクラフト, 30要求
+            後半のアイテムクラフト時, 1w分, 5個程度要求
+        heartによるluck補正も再考する
+            heart 1 = luck 0.01
+                +0.2/m
+                +2.4/y
+        heartの消費方法をもっと考える
+            バランスとしては20個/mなので、その程度は消費する方法を考える
+            宝石1個作るのに3つとか使うか。
+
+ ok tiny heartの非NFT化
+        NFTのままだとコスト支払いがとてもやりにくい
+            gas代もかさむし、リソースとしての使い勝手が悪い
+        msに記録されるcoin/materialなどと同等のパラメータとする
+        coin/materialとは違い、summoner間を移動する機能は持たせないこととする
+            継続的なゲームプレイの指標のようなもの
+            coin/materialはRMTで得ることもできる
+        heart経済によって、高級アイテムのバランス調整を行う
+            1週間, 1ヶ月で得られる平均heart量
+            上記をもとに、アイテムのコスト設定を深慮する
+                ex: ぬいちゃんは1ヶ月分、◯◯は1週間分、など
+            burn上限10個が撤廃されるので、コストは自由に決められる
+                heart 100個要求のアイテムなども可能
+
         _item_id = 36;
         if (
             (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
