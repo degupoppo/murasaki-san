@@ -5,6 +5,8 @@
 
 /*
 
+1st
+
     新NFT群の考案
         トレードインセンティブ
             トレードが必然的に必要
@@ -20,8 +22,21 @@
             報酬効率を上げるためにはトレードしたほうが良いように
         heart経済
             heartを消費する機構を組み込む
-        構想
+        以上を踏まえての構想
             宝石NFTを所有する宝石箱NFT
+            宝石箱NFTはERC3664規格、宝石NFTはERC721規格
+            宝石NFTをburnすることで宝石箱NFTの宝石所持attributeを加算する
+            宝石箱の所持宝石数に応じてstakingのリワードが変わる
+            他の人が集めていない宝石はリワード効率大
+                トレードでなにか1種類を集めたほうが有利な機構
+            その他、全種類1個ずつなど、何かしらの「役」があってもよいだろうか
+                チートイツ、四暗刻、など。
+                これも、足りないものをトレードで手に入れたほうが有利
+            取得はランダムで、ランダムが最も効率が悪くなるようにする
+            また、特定の組合せの宝石をburnすることで、上位の宝石を入手できる
+        宝石NFTの取得方法
+            heartを消費する
+            
 
     walletが所持するトークンの利用
         ホワイトリスト方式
@@ -42,6 +57,7 @@
                 BNB
                 MATIC
         walletに所持しているトークンが入っているtoken bascketアイテム
+            アイテムクリエイト時に、各トークンのコントラクトから所持数を取得する
         クリックで床にトークンボールがばらまかれる
         再度クリックでお片付け
 
@@ -255,6 +271,7 @@ function init_global_variants() {
     active_nui_id = 0;
     flag_radarchart = 0;
     previous_local_score = 0;
+    flag_tokenBall = 0;
 }
 
 init_global_variants();
@@ -966,8 +983,12 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         }else if (this.count < this.moving_count) {
             this.x += Math.cos(this.moving_degree * (Math.PI/180)) * this.moving_speed;
             this.y -= Math.sin(this.moving_degree * (Math.PI/180)) * this.moving_speed;
-            //***TODO*** coin
-            if (this.count == 2 && Math.random()*100 >= 50) {
+            //***TODO*** tokenBall
+                if (
+                    flag_tokenBall == 1
+                    && this.count == 2 
+                    && Math.random()*100 >= 50
+                ) {
                 function checkOverlap(spriteA, spriteB) {
                     var boundsA = spriteA.getBounds();
                     boundsA.x += boundsA.width/4;
@@ -977,10 +998,10 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
                     var boundsB = spriteB.getBounds();
                     return Phaser.Geom.Intersects.RectangleToRectangle(boundsA, boundsB);
                 }
-                for (i = 0; i < group_coin.getLength(); i++) {
+                for (i = 0; i < group_tokenBall.getLength(); i++) {
                 //for (i = 0; i < 14; i++) {
-                    if (checkOverlap(this, group_coin.getChildren()[i])){
-                        group_coin.getChildren()[i].on_click();
+                    if (checkOverlap(this, group_tokenBall.getChildren()[i])){
+                        group_tokenBall.getChildren()[i].on_click();
                         break;
                     }
                 }
@@ -1678,10 +1699,10 @@ class Dice extends Phaser.GameObjects.Sprite{
 }
 
 
-//---coin-----------------------------------------------------------------------------------------------------
+//---tokenBall-----------------------------------------------------------------------------------------------------
 
 
-class Coin extends Phaser.GameObjects.Sprite{
+class tokenBall extends Phaser.GameObjects.Sprite{
     constructor(scene, x, y, img){
         super(scene, x, y, img);
         this.scene.add.existing(this);
@@ -1719,6 +1740,15 @@ class Coin extends Phaser.GameObjects.Sprite{
         //this.speed_y = 8 + Math.random() * 5;
         this.count = 0;
         //define constant of y = b - a * x
+        this.a = Math.random() * 0.8 - 0.4;
+        this.b = this.y + this.a * this.x;
+        //sound
+        sound_dice.play();
+    }
+    on_summon() {
+        this.speed_x = -1 * (5 + Math.random() * 10);
+        this.speed_y = 10 + Math.random() * 10;
+        this.count = 0;
         this.a = Math.random() * 0.8 - 0.4;
         this.b = this.y + this.a * this.x;
         //sound
@@ -2364,7 +2394,7 @@ let config = {
     },
 };
 
-let game = new Phaser.Game(config);
+game = new Phaser.Game(config);
 
 
 //---preload-----------------------------------------------------------------------------------------------------
@@ -2508,6 +2538,7 @@ function preload() {
     this.load.image("item_hat_mortarboard", "src/png/item_hat_mortarboard.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("item_pad_on", "src/png/item_pad_on.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("item_pad_off", "src/png/item_pad_off.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_gauge", "src/png/item_gauge.png", {frameWidth: 370, frameHeight: 306});
     
     //===cat===
     this.load.image("item_mail", "src/png/item_mail.png", {frameWidth: 757, frameHeight: 757});
@@ -2597,7 +2628,7 @@ function preload() {
     //https://codepen.io/samme/pen/eYEearb
     this.load.atlas('flares', 'src/fireworks/flares.png', 'src/fireworks/flares.json');
     
-    //===coin
+    //===tokenBall
     this.load.image("coin_color_ACA", "src/png/coin_color_ACA.png", {frameWidth: 200, frameHeight: 200});
     this.load.image("coin_color_ASTR", "src/png/coin_color_ASTR.png", {frameWidth: 200, frameHeight: 200});
     this.load.image("coin_color_BNB", "src/png/coin_color_BNB.png", {frameWidth: 200, frameHeight: 200});
@@ -2607,12 +2638,13 @@ function preload() {
     this.load.image("coin_color_DOT", "src/png/coin_color_DOT.png", {frameWidth: 200, frameHeight: 200});
     this.load.image("coin_color_ETH", "src/png/coin_color_ETH.png", {frameWidth: 200, frameHeight: 200});
     this.load.image("coin_color_GLMR", "src/png/coin_color_GLMR.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_color_KSM", "src/png/coin_color_KSM.png", {frameWidth: 200, frameHeight: 200});
     this.load.image("coin_color_LAY", "src/png/coin_color_LAY.png", {frameWidth: 200, frameHeight: 200});
     this.load.image("coin_color_MATIC", "src/png/coin_color_MATIC.png", {frameWidth: 200, frameHeight: 200});
     this.load.image("coin_color_SDN", "src/png/coin_color_SDN.png", {frameWidth: 200, frameHeight: 200});
     this.load.image("coin_color_USDC", "src/png/coin_color_USDC.png", {frameWidth: 200, frameHeight: 200});
     this.load.image("coin_color_USDT", "src/png/coin_color_USDT.png", {frameWidth: 200, frameHeight: 200});
-    array_image_coin = [
+    array_image_tokenBall = [
         "coin_color_ACA",
         "coin_color_ASTR",
         "coin_color_BNB",
@@ -2622,6 +2654,7 @@ function preload() {
         "coin_color_DOT",
         "coin_color_ETH",
         "coin_color_GLMR",
+        "coin_color_KSM",
         "coin_color_LAY",
         "coin_color_MATIC",
         "coin_color_SDN",
@@ -3252,28 +3285,6 @@ function create() {
     group_mint_name.add(icon_name_kusa);
     group_mint_name.add(text_name_kusa);
     group_mint_name.setVisible(false);
-    
-    //===coin
-    group_coin = this.add.group();
-    for (i = 0; i < array_image_coin.length; i++) {
-        let _x = 100 + Math.random() * 900;
-        let _y = 550 + Math.random() * 200;
-        let _img = array_image_coin[i];
-        coin = new Coin(this, _x, _y, _img)
-            .setOrigin(0.5)
-            .setScale(0.15)
-            .setAlpha(0.7)
-            .setDepth(2);
-        group_coin.add(coin);
-        /*
-        this.add.image(_x, _y, _img)
-            .setOrigin(0.5)
-            .setScale(0.15)
-            .setAlpha(0.7)
-            .setDepth(2);
-        */
-    }
-    group_coin.runChildUpdate = true;
 }
 
 
@@ -3904,6 +3915,67 @@ function update_checkItem(this_scene) {
     ) {
         local_items_flag[_item_id] = true;
         group_kanban.setVisible(true);
+        
+        //***TODO*** gauge
+        let _x = 1037;
+        let _y = 600;
+        item_gauge = this_scene.add.sprite(1037, 600, "item_gauge")
+            .setScale(0.2)
+            .setOrigin(0.5)
+            .setInteractive({useHandCursor: true})
+            .on('pointerdown', () => {
+                if (flag_tokenBall == 0) {
+                    flag_tokenBall = 1;
+                    murasakisan.on_click();
+                    group_tokenBall = this_scene.add.group();
+                    for (i = 0; i < array_image_tokenBall.length; i++) {
+                        let _img = array_image_tokenBall[i];
+                        _tokenBall = new tokenBall(this_scene, _x, _y, _img)
+                            .setOrigin(0.5)
+                            .setScale(0.15)
+                            .setAlpha(0.7)
+                            .setDepth(2);
+                        group_tokenBall.add(_tokenBall);
+                        _tokenBall.on_summon();
+                    }
+                    group_tokenBall.runChildUpdate = true;
+                } else {
+                    flag_tokenBall = 0;
+                    group_tokenBall.destroy(true);
+                }
+            });
+        
+        //***TODO*** frame
+        function _do(scene) {
+            console.log(0);
+            let _x2 = 500;
+            let _y2 = 300;
+            //scene.load.image("pic_nft", "src/png/item_violin.png");
+            //this_scene.load.image("nft_other", "https://ipfs.io/ipfs/QmQXHLEALj8K3iNnRwNBesDkVGm27BznTgaGPtmULtNb6C/10207.png");
+            //scene.load.image("item_violin", "https://ipfs.io/ipfs/QmQXHLEALj8K3iNnRwNBesDkVGm27BznTgaGPtmULtNb6C/10207.png", {frameWidth: 600, frameHeight: 600});
+            //this_scene.load.image("src/png/item_mail.png");
+            scene.load.on(
+                "complete", 
+                () => {
+                    console.log("ok");
+                },
+                scene
+            );
+            scene.load.start();
+            console.log(9);
+            /*
+            item_frame = scene.add.sprite(_x2, _y2, "pic_nft")
+                .setOrigin(0.5)
+                .setScale(0.2)
+                .setInteractive({useHandCursor: true})
+                .on("pointerdown", () => {
+                    ;
+                });
+            console.log(4);
+            */
+        }
+        _do(this_scene);
+
     }
     if (local_items_flag[_item_id] == true) {
         if (local_name_str == "") {
