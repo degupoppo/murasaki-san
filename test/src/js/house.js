@@ -9,17 +9,16 @@
 
     新NFT群の考案
         トレードインセンティブ
-            トレードが必然的に必要
-            トレードしたほうが有利になる
-            一人で集めるのは効率が悪いように設計
-        ERC-3664
-            動的なパラメータを有する
+            トレードしたほうが有利になる機構
+            一人で集めるのは効率が悪いように設計する
+        ERC3664
+            動的なパラメータを有するNFT規格
             他の静的NFTを所有する
             一方向に、ポジティブな方向にのみ動的に変化させたい
         dApps Staking
             所有するだけか、あるいはstakingすることでリワードを得られる機構
-            staking報酬の計算式を深慮する
-            報酬効率を上げるためにはトレードしたほうが良いように
+            リワード報酬の計算式を＊深慮＊する
+            報酬効率を上げるためにはトレードしたほうが良いように設計する
         heart経済
             heartを消費する機構を組み込む
         以上を踏まえての構想
@@ -28,17 +27,87 @@
             宝石NFTをburnすることで宝石箱NFTの宝石所持attributeを加算する
             宝石箱の所持宝石数に応じてstakingのリワードが変わる
             他の人が集めていない宝石はリワード効率大
-                トレードでなにか1種類を集めたほうが有利な機構
+                トレードでなにか1種類を特化して集めたほうが有利な機構
             その他、全種類1個ずつなど、何かしらの「役」があってもよいだろうか
                 チートイツ、四暗刻、など。
                 これも、足りないものをトレードで手に入れたほうが有利
             取得はランダムで、ランダムが最も効率が悪くなるようにする
             また、特定の組合せの宝石をburnすることで、上位の宝石を入手できる
         宝石NFTの取得方法
-            heartを消費する
-            
+            heart消費のメカニズムを組み込む
+            積極的に取りに行くというよりは、
+                何かのついでにもらえるかも、のほうがよいか
+            heart消費を主軸に据えすぎると、
+                coin/materialを稼ぐインセンティブが弱くなるので注意
+            うまく、お世話→クラフト→coin/material拡大再生産、
+                のメインストリームに噛ませていきたい
+            stakingリワードは強力なインセンティブなため、
+                リワードを最大化させる行動に最適化してゆく可能性が高い
+            やはり、最もシンプルなのは、heart経済ではなく宝石経済にすることだろうか
+                heartを貰えるタイミングで、ランダムな1種類の宝石をもらえる
+                その宝石を宝石箱NFTに格納してゆくことで、
+                    宝石箱NFTのレアリティ（相対的）が上がり、リワードが増える
+                しかしこれだと、ひたすら猫メール送るだけになり、
+                    Lv上げのインセンティブが弱くなるか
+            NFTがもらえる行動案（heart経済時）
+                レベルアップ時
+                    総数20個程度/2y
+                初めてのアイテムをクラフトした時
+                    総数48個程度/2y
+                    アイテムクラフトのインセンティブup
+                    フラグ管理が別途必要
+                    何でもクラフト時にすると、
+                        低レベルアイテムをひたすらクラフトし続けるスカムが可能でNG
+                アイテムをアップグレードした時
+                    同一アイテムを買い集めるインセンティブが生まれるか
+            NFTを格納する時
+                格納総数に応じてheartを消費する
+                あるいは、総格納数のアンロックにheart消費が必要、など
+                    宝石箱NFTのレベル上げにheartが必要なイメージ
+                    常に、少しだけ足りないバランスで。
+                    いくらでも宝石を格納できるようにすると、買い占めが可能になるので、
+                        heartにより格納スロットがアンロックするようにブレーキを掛ける
+                    そして、やはりheartは簡単にはsummoner間を移動できないようにする
+            NFTを取り出す時
+                いつでも取り出せる
+                取り出すときはheartは消費しない
+        リワード報酬の計算式
+            宝石の個数に比例
+            宝石の種類が単一であるほどレアリティ（スコア）が大きくなる
+                この係数設定が勘所か
+                ランダムではなく、色を揃えたほうがどのくらい有利にするか
+                また、似た色でも有利とするか、完全に単一ではないと駄目とするか
+                大きい上位宝石NFTを実装するなら、その係数をどうするか
 
-    walletが所持するトークンの利用
+    レベルアップの演出の実装
+        花火の音の実装, emitter
+        summonerの専用アニメーションの用意
+        レベルアップの文字の表示
+
+    帽子の普遍的な位置合わせ
+            
+    メール送信成功のメッセージを実装
+        相手がメールを開けたことがわかるように
+    
+    NFTのURL取得方法の実装
+    
+    Tokenのコントラクトの書き換え
+
+2nd                
+
+ ok walletが所持するNFTの利用
+        ホワイトリスト方式
+            AstarDegen
+            AstarCats
+            AstarWitch
+            AstarPunks
+            AstarBots
+            Astarians
+            Templa
+        NFT絵を取得して額縁内に表示させる
+        クリックする度に絵が変わる
+
+ ok walletが所持するトークンの利用
         ホワイトリスト方式
             Astar系
                 ASTR
@@ -60,30 +129,6 @@
             アイテムクリエイト時に、各トークンのコントラクトから所持数を取得する
         クリックで床にトークンボールがばらまかれる
         再度クリックでお片付け
-
-    walletが所持するNFTの利用
-        ホワイトリスト方式
-            AstarDegen
-            AstarCats
-            AstarWitch
-            AstarPunks
-            AstarBots
-            Astarians
-            Templa
-        NFT絵を取得して額縁内に表示させる
-        クリックする度に絵が変わる
-
-    レベルアップの演出の実装
-        花火の音の実装, emitter
-        summonerの専用アニメーションの用意
-        レベルアップの文字の表示
-
-    帽子の普遍的な位置合わせ
-            
-    メール送信成功のメッセージを実装
-        相手がメールを開けたことがわかるように
-
-2nd                
 
     宝石箱NFT
         宝石NFTを所有する宝石箱NFTの考案
@@ -272,6 +317,7 @@ function init_global_variants() {
     flag_radarchart = 0;
     previous_local_score = 0;
     flag_tokenBall = 0;
+    flag_loaded = 0;
 }
 
 init_global_variants();
@@ -623,6 +669,33 @@ async function call_name_from_summoner(_summoner) {
     let contract = await new web3.eth.Contract(abi_murasaki_function_name, contract_murasaki_function_name);
     let _name = await contract.methods.call_name_from_summoner(_summoner).call();
     return _name;
+}
+
+//call amount of token
+//https://qiita.com/ramo798/items/0cc2c556410c95b0b332
+async function call_amount_of_token(_contract_address) {
+    let web3 = await connect();
+    let wallet = await get_wallet(web3);
+    let minABI = [
+        {
+          constant: true,
+          inputs: [{ name: "_owner", type: "address" }],
+          name: "balanceOf",
+          outputs: [{ name: "balance", type: "uint256" }],
+          type: "function",
+        },
+        {
+          constant: true,
+          inputs: [],
+          name: "decimals",
+          outputs: [{ name: "", type: "uint8" }],
+          type: "function",
+        },
+    ];
+    let contract = await new web3.eth.Contract(minABI, _contract_address);
+    let balance = await contract.methods.balanceOf(wallet).call();
+    let decimal = await contract.methods.decimals().call();
+    return balance / (10 ** decimal);
 }
 
 //===send===
@@ -998,7 +1071,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
                     var boundsB = spriteB.getBounds();
                     return Phaser.Geom.Intersects.RectangleToRectangle(boundsA, boundsB);
                 }
-                for (i = 0; i < group_tokenBall.getLength(); i++) {
+                for (let i = 0; i < group_tokenBall.getLength(); i++) {
                 //for (i = 0; i < 14; i++) {
                     if (checkOverlap(this, group_tokenBall.getChildren()[i])){
                         group_tokenBall.getChildren()[i].on_click();
@@ -2365,6 +2438,7 @@ function fireworks(scene) {
     });
 };
 
+
 //---config-----------------------------------------------------------------------------------------------------
 
 
@@ -2539,6 +2613,7 @@ function preload() {
     this.load.image("item_pad_on", "src/png/item_pad_on.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("item_pad_off", "src/png/item_pad_off.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("item_gauge", "src/png/item_gauge.png", {frameWidth: 370, frameHeight: 306});
+    this.load.image("item_frame", "src/png/item_frame.png", {frameWidth: 370, frameHeight: 428});
     
     //===cat===
     this.load.image("item_mail", "src/png/item_mail.png", {frameWidth: 757, frameHeight: 757});
@@ -2579,33 +2654,37 @@ function preload() {
     let progressText_loading = this.add.text(490,420, "Loading...", {font: "20px monospace", fill: "#3D3D3D"});
     let percentText = this.add.text(510, 465, "", {font: "20px monospace", fill: "#3D3D3D"});
     this.load.on("progress", function(value) {
-        progressBar.clear();
-        progressBar.fillStyle(0xE62E8B, 1);
-        progressBar.fillRect(490, 460, 300 * value, 30);
-        percentText.setText( Math.round(value * 100) + "%");
-        if (value == 1) {
-            progressText_loading.setText("Completed!");
-            let _arr = [
-                "Making roasted sweet potatoes...",
-                "Brushing a teddy bear...",
-                "Looking for my shovel...",
-                "Polishing the watering can...",
-                "Assembling the sewing machine...",
-                "Counting flowers and grass...",
-                "Cleaning up the house...",
-                "Replacing the sand in the sandbox...",
-                "Adding fertilizer to the flowerpot...",
-                "treating a needle puncture wound...",
-                "Washing the dishes...",
-                "Putting a flower on the teddy bear...",
-            ];
-            let _index = Math.floor(Math.random() * _arr.length);
-            let _text = _arr[_index];            
-            progressText.setText(_text);
+        if (flag_loaded == 0) {
+            progressBar.clear();
+            progressBar.fillStyle(0xE62E8B, 1);
+            progressBar.fillRect(490, 460, 300 * value, 30);
+            percentText.setText( Math.round(value * 100) + "%");
+            if (value == 1) {
+                progressText_loading.setText("Completed!");
+                let _arr = [
+                    "Making roasted sweet potatoes...",
+                    "Brushing a teddy bear...",
+                    "Looking for my shovel...",
+                    "Polishing the watering can...",
+                    "Assembling the sewing machine...",
+                    "Counting flowers and grass...",
+                    "Cleaning up the house...",
+                    "Replacing the sand in the sandbox...",
+                    "Adding fertilizer to the flowerpot...",
+                    "treating a needle puncture wound...",
+                    "Washing the dishes...",
+                    "Putting a flower on the teddy bear...",
+                ];
+                let _index = Math.floor(Math.random() * _arr.length);
+                let _text = _arr[_index];            
+                progressText.setText(_text);
+            }
         }
     });
     this.load.on("fileprogress", function(file) {
-        progressText.setText("Loading asset: " + file.src);
+        if (flag_loaded == 0) {
+            progressText.setText("Loading asset: " + file.src);
+        }
     });
     this.load.on("complete", function() {
         progressBar.destroy();
@@ -2613,6 +2692,7 @@ function preload() {
         progressText.destroy();
         progressText_loading.destroy();
         percentText.destroy();
+        flag_loaded = 1;
     });
 
     //===input text===
@@ -2661,6 +2741,63 @@ function preload() {
         "coin_color_USDC",
         "coin_color_USDT",
     ];
+    dic_tokenBall_img = {
+        ACA:"coin_color_ACA",
+        ASTR:"coin_color_ASTR",
+        BNB:"coin_color_BNB",
+        BTC:"coin_color_BTC",
+        BUSD:"coin_color_BUSD",
+        DAI:"coin_color_DAI",
+        DOT:"coin_color_DOT",
+        ETH:"coin_color_ETH",
+        GLMR:"coin_color_GLMR",
+        KSM:"coin_color_KSM",
+        LAY:"coin_color_LAY",
+        MATIC:"coin_color_MATIC",
+        SDN:"coin_color_SDN",
+        USDC:"coin_color_USDC",
+        USDT:"coin_color_USDT"
+    }
+    //local
+    //***TODO*** contract
+    dic_tokenBall_contract = {
+        ACA:"0x2F2eB7682bE7AC2ADaa2E2389ddBC6C76D66671d",
+        ASTR:"0x2F2eB7682bE7AC2ADaa2E2389ddBC6C76D66671d",
+        BNB:"0x2F2eB7682bE7AC2ADaa2E2389ddBC6C76D66671d",
+        BTC:"0x2F2eB7682bE7AC2ADaa2E2389ddBC6C76D66671d",
+        BUSD:"0x2F2eB7682bE7AC2ADaa2E2389ddBC6C76D66671d",
+        DAI:"0x2F2eB7682bE7AC2ADaa2E2389ddBC6C76D66671d",
+        DOT:"0x2F2eB7682bE7AC2ADaa2E2389ddBC6C76D66671d",
+        ETH:"0x2F2eB7682bE7AC2ADaa2E2389ddBC6C76D66671d",
+        GLMR:"0x2F2eB7682bE7AC2ADaa2E2389ddBC6C76D66671d",
+        KSM:"0x2F2eB7682bE7AC2ADaa2E2389ddBC6C76D66671d",
+        LAY:"0x2F2eB7682bE7AC2ADaa2E2389ddBC6C76D66671d",
+        MATIC:"0x2F2eB7682bE7AC2ADaa2E2389ddBC6C76D66671d",
+        SDN:"0x2F2eB7682bE7AC2ADaa2E2389ddBC6C76D66671d",
+        USDC:"0x2F2eB7682bE7AC2ADaa2E2389ddBC6C76D66671d",
+        USDT:"0x2F2eB7682bE7AC2ADaa2E2389ddBC6C76D66671d"
+    }
+    
+    //shibuya
+    /*
+    dic_tokenBall_contract = {
+        ACA:"0x3099daC30217E92b26a9e53aaA5Ef975D530138f",
+        ASTR:"0x3099daC30217E92b26a9e53aaA5Ef975D530138f",
+        BNB:"0x3099daC30217E92b26a9e53aaA5Ef975D530138f",
+        BTC:"0x3099daC30217E92b26a9e53aaA5Ef975D530138f",
+        BUSD:"0x3099daC30217E92b26a9e53aaA5Ef975D530138f",
+        DAI:"0xC4195CE9383eA77aED21bd662ecad10a935Ed459",
+        DOT:"0x3099daC30217E92b26a9e53aaA5Ef975D530138f",
+        ETH:"0x3099daC30217E92b26a9e53aaA5Ef975D530138f",
+        GLMR:"0x3099daC30217E92b26a9e53aaA5Ef975D530138f",
+        KSM:"0x3099daC30217E92b26a9e53aaA5Ef975D530138f",
+        LAY:"0x3099daC30217E92b26a9e53aaA5Ef975D530138f",
+        MATIC:"0x3099daC30217E92b26a9e53aaA5Ef975D530138f",
+        SDN:"0x3099daC30217E92b26a9e53aaA5Ef975D530138f",
+        USDC:"0x37B76d58FAFc3Bc32E12E2e720F7a57Fc94bE871",
+        USDT:"0xa4C17AD6bEC86e1233499A9B174D1E2D466c7198"
+    }
+    */
     /*
     this.load.image("coin_ASTR", "src/png/coin_ASTR.png", {frameWidth: 200, frameHeight: 200});
     this.load.image("coin_BNB", "src/png/coin_BNB.png", {frameWidth: 200, frameHeight: 200});
@@ -3923,11 +4060,27 @@ function update_checkItem(this_scene) {
             .setScale(0.2)
             .setOrigin(0.5)
             .setInteractive({useHandCursor: true})
-            .on('pointerdown', () => {
+            .on('pointerdown', async function() {
                 if (flag_tokenBall == 0) {
                     flag_tokenBall = 1;
                     murasakisan.on_click();
                     group_tokenBall = this_scene.add.group();
+                    group_tokenBall.runChildUpdate = true;
+                    for (let _token in dic_tokenBall_contract) {
+                        let _contract = dic_tokenBall_contract[_token];
+                        let _amount = await call_amount_of_token(_contract);
+                        if (_amount > 0) {
+                            let _img = dic_tokenBall_img[_token];
+                            _tokenBall = new tokenBall(this_scene, _x, _y, _img)
+                                .setOrigin(0.5)
+                                .setScale(0.15)
+                                .setAlpha(0.7)
+                                .setDepth(2);
+                            group_tokenBall.add(_tokenBall);
+                            _tokenBall.on_summon();
+                        }
+                    }
+                    /*
                     for (i = 0; i < array_image_tokenBall.length; i++) {
                         let _img = array_image_tokenBall[i];
                         _tokenBall = new tokenBall(this_scene, _x, _y, _img)
@@ -3938,7 +4091,7 @@ function update_checkItem(this_scene) {
                         group_tokenBall.add(_tokenBall);
                         _tokenBall.on_summon();
                     }
-                    group_tokenBall.runChildUpdate = true;
+                    */
                 } else {
                     flag_tokenBall = 0;
                     group_tokenBall.destroy(true);
@@ -3946,23 +4099,117 @@ function update_checkItem(this_scene) {
             });
         
         //***TODO*** frame
-        function _do(scene) {
-            console.log(0);
+        function _get_nft_url() {
+            let _array = [
+                "ex_nft1.png",
+                "ex_nft2.png",
+                "ex_nft3.png",
+            ];
+            let _url = _array[Math.floor(Math.random() * _array.length)];
+            return _url;
+        }
+        let _x2 = 890;
+        let _y2 = 250;
+        let _url = _get_nft_url();
+        this_scene.load.image("pic_nft", _url);
+        this_scene.load.start()
+        this_scene.load.on(
+            "complete", 
+            () => {
+                item_frame = this_scene.add.image(_x2, _y2, "item_frame")
+                    .setOrigin(0.5)
+                    .setScale(0.25);
+                item_frame_inside = this_scene.add.sprite(_x2, _y2, "pic_nft")
+                    .setOrigin(0.5)
+                    .setScale(0.2)
+                    .setDisplaySize(67, 82)
+                    .setInteractive({useHandCursor: true})
+                    .on("pointerdown", () => {
+                        item_frame_inside.setTexture();
+                        this_scene.textures.remove("pic_nft");
+                        let _url = _get_nft_url();
+                        this_scene.load.image("pic_nft", _url);
+                        //console.log(_url);
+                        this_scene.load.start()
+                        this_scene.load.on(
+                            "complete", 
+                            () => {
+                                item_frame_inside.setTexture("pic_nft");
+                            });
+                    });
+            });
+        
+        /*
+        async function _load_nft_url(scene, _url) {
+            await scene.load.image("pic_nft", _url);
+            scene.load.on(
+                "complete", 
+                () => {
+                    console.log(1);
+                });
+            await scene.load.start();
+            console.log(2);
+        }
+        async function _do(scene) {
             let _x2 = 500;
             let _y2 = 300;
-            //scene.load.image("pic_nft", "src/png/item_violin.png");
+            let _url = _get_nft_url();
+            console.log(_url);
+            await _load_nft_url(scene, _url);
+            console.log(3);
+            item_frame = scene.add.sprite(_x2, _y2, "pic_nft")
+                .setOrigin(0.5)
+                .setDisplaySize(100, 100)
+                .setInteractive({useHandCursor: true})
+                .on("pointerdown", async function() {
+                    let _url = _get_nft_url();
+                    await _load_nft_url(scene, _url);
+                    item_frame.texture = "pic_nft";
+                    console.log(4);
+                });
+            
+        }
+        _do(this_scene);
+        /*
+        this_scene.load.image("pic_nft", _url);
+        this_scene.load.on(
+            "complete", 
+            () => {
+                item_frame = this_scene.add.sprite(_x2, _y2, "pic_nft")
+                    .setOrigin(0.5)
+                    //.setScale(0.2)
+                    .setDisplaySize(100, 100)
+                    .setInteractive({useHandCursor: true})
+                    .on("pointerdown", () => {
+                        ;
+                    });
+            });
+        scene.load.start();
+        
+        /*
+        function _do(scene) {
+            let _x2 = 500;
+            let _y2 = 300;
+            scene.load.image("pic_nft1", "ex_nft1.png");
+            scene.load.image("pic_nft2", "ex_nft2.png");
             //this_scene.load.image("nft_other", "https://ipfs.io/ipfs/QmQXHLEALj8K3iNnRwNBesDkVGm27BznTgaGPtmULtNb6C/10207.png");
             //scene.load.image("item_violin", "https://ipfs.io/ipfs/QmQXHLEALj8K3iNnRwNBesDkVGm27BznTgaGPtmULtNb6C/10207.png", {frameWidth: 600, frameHeight: 600});
             //this_scene.load.image("src/png/item_mail.png");
             scene.load.on(
                 "complete", 
                 () => {
-                    console.log("ok");
+                    item_frame = scene.add.sprite(_x2, _y2, "pic_nft")
+                        .setOrigin(0.5)
+                        //.setScale(0.2)
+                        .setDisplaySize(100, 100)
+                        .setInteractive({useHandCursor: true})
+                        .on("pointerdown", () => {
+                            ;
+                        });
                 },
                 scene
             );
             scene.load.start();
-            console.log(9);
             /*
             item_frame = scene.add.sprite(_x2, _y2, "pic_nft")
                 .setOrigin(0.5)
@@ -3973,8 +4220,8 @@ function update_checkItem(this_scene) {
                 });
             console.log(4);
             */
-        }
-        _do(this_scene);
+        //}
+        //_do(this_scene);
 
     }
     if (local_items_flag[_item_id] == true) {

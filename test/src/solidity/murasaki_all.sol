@@ -5,6 +5,25 @@ pragma solidity ^0.8.7;
 
 /*
 
+    ERC3664の精読
+        既存のERC721にERC3664のどの.solを追加すればよいのか
+        attributeの追加はどこにどの様に記載すればよいのか
+        attributeの値変更時のルールはどこにどの様に記載すればよいのか
+        NFTの所有は可能か、その都度burn, mintが必要か
+        ERC3664Updatableを継承したコード例：
+            https://github.com/LI-YONG-QI/Character/blob/ad64e79f6791d8f2966849020d71ec79de3d4a7e/src/contracts/Character.sol
+
+    dapps stakingリワードの実装
+        Astarbaseのドキュメント：
+            https://docs.astar.network/build/smart-contracts/ethereum-virtual-machine/astarbase
+        solidityコード：
+            if ASTARBASE.checkStakerStatusOnContract(address evmAddress, address stakingContract) > 0;
+            https://github.com/AstarNetwork/astarbase/blob/main/contract/example/BestProject.sol
+        上記solidityで特定コントラクトへのステーキング量を取得可能
+        これを取得してインセンティブを与える
+            luck補正か、heartの定期的エアドロか
+        shibuya上のastarbase, dapps stakingを利用してステーキング量取得を試す
+        
     要求_item_idの整備
         _item_idテーブルが確定してから
         nameplateにrequire
