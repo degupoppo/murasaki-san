@@ -7,11 +7,6 @@
 
 1st
 
-    Nui手動メモ
-        mcとmsnにwalletをpermit
-        mc.craftで197をsummoner,wallet指定してcraft
-        msnでnuiのitem_idにscore, summonerをセット
-
     新NFT群の考案
         トレードインセンティブ
             トレードしたほうが有利になる機構
@@ -100,6 +95,11 @@
 
 2nd                
 
+    Nui手動メモ
+        mcとmsnにwalletをpermit
+        mc.craftで197をsummoner,wallet指定してcraft
+        msnでnuiのitem_idにscore, summonerをセット
+        
  ok walletが所持するNFTの利用
         ホワイトリスト方式
             AstarDegen
@@ -4337,90 +4337,31 @@ function update_checkItem(this_scene) {
                     });
             });
         
-        /*
-        async function _load_nft_url(scene, _url) {
-            await scene.load.image("pic_nft", _url);
-            scene.load.on(
-                "complete", 
-                () => {
-                    console.log(1);
-                });
-            await scene.load.start();
-            console.log(2);
-        }
-        async function _do(scene) {
-            let _x2 = 500;
-            let _y2 = 300;
-            let _url = _get_nft_url();
-            console.log(_url);
-            await _load_nft_url(scene, _url);
-            console.log(3);
-            item_frame = scene.add.sprite(_x2, _y2, "pic_nft")
-                .setOrigin(0.5)
-                .setDisplaySize(100, 100)
-                .setInteractive({useHandCursor: true})
-                .on("pointerdown", async function() {
-                    let _url = _get_nft_url();
-                    await _load_nft_url(scene, _url);
-                    item_frame.texture = "pic_nft";
-                    console.log(4);
-                });
-            
-        }
-        _do(this_scene);
-        /*
-        this_scene.load.image("pic_nft", _url);
-        this_scene.load.on(
-            "complete", 
-            () => {
-                item_frame = this_scene.add.sprite(_x2, _y2, "pic_nft")
-                    .setOrigin(0.5)
-                    //.setScale(0.2)
-                    .setDisplaySize(100, 100)
-                    .setInteractive({useHandCursor: true})
-                    .on("pointerdown", () => {
-                        ;
-                    });
-            });
-        scene.load.start();
         
-        /*
-        function _do(scene) {
-            let _x2 = 500;
-            let _y2 = 300;
-            scene.load.image("pic_nft1", "ex_nft1.png");
-            scene.load.image("pic_nft2", "ex_nft2.png");
-            //this_scene.load.image("nft_other", "https://ipfs.io/ipfs/QmQXHLEALj8K3iNnRwNBesDkVGm27BznTgaGPtmULtNb6C/10207.png");
-            //scene.load.image("item_violin", "https://ipfs.io/ipfs/QmQXHLEALj8K3iNnRwNBesDkVGm27BznTgaGPtmULtNb6C/10207.png", {frameWidth: 600, frameHeight: 600});
-            //this_scene.load.image("src/png/item_mail.png");
-            scene.load.on(
-                "complete", 
-                () => {
-                    item_frame = scene.add.sprite(_x2, _y2, "pic_nft")
-                        .setOrigin(0.5)
-                        //.setScale(0.2)
-                        .setDisplaySize(100, 100)
-                        .setInteractive({useHandCursor: true})
-                        .on("pointerdown", () => {
-                            ;
-                        });
-                },
-                scene
-            );
-            scene.load.start();
-            /*
-            item_frame = scene.add.sprite(_x2, _y2, "pic_nft")
-                .setOrigin(0.5)
-                .setScale(0.2)
-                .setInteractive({useHandCursor: true})
-                .on("pointerdown", () => {
-                    ;
-                });
-            console.log(4);
-            */
-        //}
-        //_do(this_scene);
+        //***TODO*** cat cushion
+        //cushion
+        item_cushion = this_scene.add.sprite(90, 620, "item_cushion").setScale(0.25).setOrigin(0.5);
+        item_cushion.depth = item_cushion.y - 50;
+        
+        //text_sending_interval
+        text_sending_interval = this_scene.add.text(70, 640, "00h:00m", {font: "15px Arial", fill: "#ffffff"})
+            .setDepth(item_cushion.depth + 1);
 
+        //cat
+        cat = this_scene.add.sprite(90, 610, "cat_sleeping")
+            .setScale(0.12)
+            .setOrigin(0.5)
+            .setInteractive({useHandCursor: true})
+            .on("pointerdown", () => {contract_send_mail(summoner)})
+            .setVisible(false);
+        cat.depth = item_cushion.y + 1;
+        
+        //mail
+        mail = this_scene.add.sprite(40, 645, "item_mail")
+            .setScale(0.06)
+            .setOrigin(0.5)
+            .setDepth(item_cushion.y + 2)
+            .setVisible(false);
     }
     if (local_items_flag[_item_id] == true) {
         if (local_name_str == "") {
@@ -4435,6 +4376,37 @@ function update_checkItem(this_scene) {
             group_mint_name.setVisible(false);
         }
         text_id.setText("#"+summoner);
+    }
+    
+    //***TODO*** cat cushion
+    //when possess cushion
+    if (local_items_flag[_item_id] == true) {
+        
+        //check sending interval
+        if (
+            local_mail_sending_interval != -1
+            && typeof text_sending_interval != "undefined"
+            && typeof cat != "undefined"
+        ) {
+            if (local_mail_sending_interval == 0) {
+                text_sending_interval.setText("");
+                cat.visible = true;
+            } else {
+                let _d = Math.floor(local_mail_sending_interval / (60 * 60 * 24));
+                let _hr = Math.floor(local_mail_sending_interval % 86400 / 3600);
+                let _min = Math.floor(local_mail_sending_interval % 3600 / 60);
+                let _text = _d + "d:" + _hr + "h:" + _min + "m";
+                text_sending_interval.setText(_text).setFill("#ffffff");
+                cat.visible = false;
+            }
+        }
+
+        //check item mail
+        if (local_items[196] > 0) {
+            mail.visible = true;
+        } else {
+            mail.visible = false;
+        }
     }
     
     //###2:Ms.Astar
@@ -4627,6 +4599,7 @@ function update_checkItem(this_scene) {
     }
 
     //###20:*Cat Cushion
+    /*
     _item_id = 20;
     if (
         (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
@@ -4688,6 +4661,7 @@ function update_checkItem(this_scene) {
             mail.visible = false;
         }
     }
+    */
     
     //check mail receiving, independent from cushion possession
     if (flag_mail) {

@@ -2524,8 +2524,9 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable {
         uint32 _exp_add = 500 * (100 - _satiety) / 100;
         //nui boost
         if (_item_nui > 0) {
+            address _owner = mfs.get_owner(_summoner);
             Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
-            require(mc.ownerOf(_item_nui) == msg.sender);
+            require(mc.ownerOf(_item_nui) == _owner);
             uint32 _percent = mfs.calc_exp_addition_rate(_summoner, _item_nui);
             _exp_add = _exp_add * _percent/100;
         }
@@ -2611,8 +2612,9 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable {
         uint32 _exp_add = 3000 * (100 - _happy) / 100;
         //nui boost
         if (_item_nui > 0) {
+            address _owner = mfs.get_owner(_summoner);
             Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
-            require(mc.ownerOf(_item_nui) == msg.sender);
+            require(mc.ownerOf(_item_nui) == _owner);
             uint32 _percent = mfs.calc_exp_addition_rate(_summoner, _item_nui);
             _exp_add = _exp_add * _percent/100;
         }

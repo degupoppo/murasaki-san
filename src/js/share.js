@@ -103,7 +103,7 @@ const contract_murasaki_function_share =
 const contract_murasaki_function_summon_and_levelup = 
     "0x29F1320Beee67CD8d5C66665d682f17d56172AE7";
 const contract_murasaki_function_feeding_and_grooming = 
-    "0x27f704b91537c823AC3C3B6fB0761F6f223A0Fdb";
+    "0x2f587E40F5AB4fA1539084392B8d29b137505a63";
 const contract_murasaki_function_mining_and_farming = 
     "0x0E9236505bf31d4fB42E143690cB7E2E1c4fcc43";
 const contract_murasaki_function_crafting = 
