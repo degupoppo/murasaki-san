@@ -5,6 +5,184 @@
 
 /*
 
+1st
+
+    Nui手動メモ
+        mcとmsnにwalletをpermit
+        mc.craftで197をsummoner,wallet指定してcraft
+        msnでnuiのitem_idにscore, summonerをセット
+
+    新NFT群の考案
+        トレードインセンティブ
+            トレードしたほうが有利になる機構
+            一人で集めるのは効率が悪いように設計する
+        ERC3664
+            動的なパラメータを有するNFT規格
+            他の静的NFTを所有する
+            一方向に、ポジティブな方向にのみ動的に変化させたい
+        dApps Staking
+            所有するだけか、あるいはstakingすることでリワードを得られる機構
+            リワード報酬の計算式を＊深慮＊する
+            報酬効率を上げるためにはトレードしたほうが良いように設計する
+        heart経済
+            heartを消費する機構を組み込む
+        以上を踏まえての構想
+            宝石NFTを所有する宝石箱NFT
+            宝石箱NFTはERC3664規格、宝石NFTはERC721規格
+            宝石NFTをburnすることで宝石箱NFTの宝石所持attributeを加算する
+            宝石箱の所持宝石数に応じてstakingのリワードが変わる
+            他の人が集めていない宝石はリワード効率大
+                トレードでなにか1種類を特化して集めたほうが有利な機構
+            その他、全種類1個ずつなど、何かしらの「役」があってもよいだろうか
+                チートイツ、四暗刻、など。
+                これも、足りないものをトレードで手に入れたほうが有利
+            取得はランダムで、ランダムが最も効率が悪くなるようにする
+            また、特定の組合せの宝石をburnすることで、上位の宝石を入手できる
+        宝石NFTの取得方法
+            heart消費のメカニズムを組み込む
+            積極的に取りに行くというよりは、
+                何かのついでにもらえるかも、のほうがよいか
+            heart消費を主軸に据えすぎると、
+                coin/materialを稼ぐインセンティブが弱くなるので注意
+            うまく、お世話→クラフト→coin/material拡大再生産、
+                のメインストリームに噛ませていきたい
+            stakingリワードは強力なインセンティブなため、
+                リワードを最大化させる行動に最適化してゆく可能性が高い
+            やはり、最もシンプルなのは、heart経済ではなく宝石経済にすることだろうか
+                heartを貰えるタイミングで、ランダムな1種類の宝石をもらえる
+                その宝石を宝石箱NFTに格納してゆくことで、
+                    宝石箱NFTのレアリティ（相対的）が上がり、リワードが増える
+                しかしこれだと、ひたすら猫メール送るだけになり、
+                    Lv上げのインセンティブが弱くなるか
+            NFTがもらえる行動案（heart経済時）
+                レベルアップ時
+                    総数20個程度/2y
+                初めてのアイテムをクラフトした時
+                    総数48個程度/2y
+                    アイテムクラフトのインセンティブup
+                    フラグ管理が別途必要
+                    何でもクラフト時にすると、
+                        低レベルアイテムをひたすらクラフトし続けるスカムが可能でNG
+                アイテムをアップグレードした時
+                    同一アイテムを買い集めるインセンティブが生まれるか
+            NFTを格納する時
+                格納総数に応じてheartを消費する
+                あるいは、総格納数のアンロックにheart消費が必要、など
+                    宝石箱NFTのレベル上げにheartが必要なイメージ
+                    常に、少しだけ足りないバランスで。
+                    いくらでも宝石を格納できるようにすると、買い占めが可能になるので、
+                        heartにより格納スロットがアンロックするようにブレーキを掛ける
+                    そして、やはりheartは簡単にはsummoner間を移動できないようにする
+            NFTを取り出す時
+                いつでも取り出せる
+                取り出すときはheartは消費しない
+        リワード報酬の計算式
+            宝石の個数に比例
+            宝石の種類が単一であるほどレアリティ（スコア）が大きくなる
+                この係数設定が勘所か
+                ランダムではなく、色を揃えたほうがどのくらい有利にするか
+                また、似た色でも有利とするか、完全に単一ではないと駄目とするか
+                大きい上位宝石NFTを実装するなら、その係数をどうするか
+
+    レベルアップの演出の実装
+     ok 花火の音の実装, emitter
+        summonerの専用アニメーションの用意
+        レベルアップの文字の表示
+
+    帽子の普遍的な位置合わせ
+            
+    メール送信成功のメッセージを実装
+        相手がメールを開けたことがわかるように
+    
+    NFTのURL取得方法の実装
+    
+    Tokenのコントラクトの書き換え
+
+2nd                
+
+ ok walletが所持するNFTの利用
+        ホワイトリスト方式
+            AstarDegen
+            AstarCats
+            AstarWitch
+            AstarPunks
+            AstarBots
+            Astarians
+            Templa
+        NFT絵を取得して額縁内に表示させる
+        クリックする度に絵が変わる
+
+ ok walletが所持するトークンの利用
+        ホワイトリスト方式
+            Astar系
+                ASTR
+                SDN
+                BAI
+                LAY
+                ARSW
+            ステーブル
+                USDC
+                USDT
+                BUSD
+                DAI
+            他チェーン
+                BTC
+                ETH
+                BNB
+                MATIC
+        walletに所持しているトークンが入っているtoken bascketアイテム
+            アイテムクリエイト時に、各トークンのコントラクトから所持数を取得する
+        クリックで床にトークンボールがばらまかれる
+        再度クリックでお片付け
+
+    宝石箱NFT
+        宝石NFTを所有する宝石箱NFTの考案
+        変化する状態を有し、NFTを所有するNFT、NFT2.0型
+        tokenURLはsvgではなく絵にしてみたい
+        シンプルに1コントラで完結させてみたい
+        heart経済の主軸に据えられるか
+        構想
+            宝石NFTを所有する
+            変化するパラメータを有する
+                レベル
+        ERC-3664で作製してみる
+            本当はmmもERC-3664が良いのかもしれないが、
+            NFTではなくNTTなので大変だろうか。
+            また、変数が多すぎて3664でカバーできるのだろうか。
+
+    dApps Staking報酬案
+        最低金額でもstakeしてくれたらluck+固定値
+        たくさんstakeしてくれたら最大でluck+固定値x2
+        ただし指数関数増加でx2に無限大で近づくとする
+        dapps staking済みwalletの取得方法を考える
+            walletを引数で渡し、true, falseで返すコントラがベストか
+
+    walletとの連携機能の実装
+        せっかくのNTTなので、walletに紐付けられている感じをもたせる
+        Astar walletに住むペットのイメージなので。
+        NFT額縁
+            walletにあるNFTをランダムで表示
+            PJはある程度指定しておく
+        Wallet Visualizer
+            walletの活動度によって変化する何かを実装する。
+                入っているトークンが表示される水槽？
+                walletの古さによって水草の数が増える？
+                その日のトランザクション数によって変化させる？
+            デイリートランザクション：天気などすぐ移り変わるもの
+            古さ：木の大きさなどゆっくりと一方向に増えてゆくもの
+            トークン数：天気よりはゆっくりと増減するもの
+
+    インフレ対策の深慮
+        coin, material, heartはどんどんインフレしてゆく
+        そのため、常にユースケースの要求値を少し多めに設定する
+        coin, materialは掘らなければexp多くもらえるトレードオフなので、インフレしにくいか
+        heartはきちんと計算しないと余ってしまいそう
+            一方で、summoner間を移動できないので、デフレにしすぎると足りなくて詰む
+            少し高コストで、heartを売ることも可能にしてもよいだろうか
+                4つ消費して作製するNFT: big heart
+                coin/materialを500ずつ要求？
+                あるいは、ハート5個で作って解体時はハート4個だけ得る、など。
+
     育成型NFTの深慮
         ぬいちゃんシステム上でランダム性の高いNFTをつくる
         むらさきさんの行動によって結果が変わる
@@ -41,118 +219,114 @@
                 これで1週間に平均3個程度
                 ぬいちゃんの要求が8個だとすると、3週間分ていど。
 
-    メール送信成功のメッセージを実装
-    メール送受信時の動的アクションの実装
-        送信時の猫のアニメーション
-        受診時の猫のアニメーション
-        メールの表示・非表示
-        
-    帽子の普遍的な位置合わせ
-    パンケーキ
-    すし
-    ライフカウンター（スコア表示）
-    アイパッド（ステータス表示）
-    積み木カウンター
-    ピアノ
-    ラグ
-
 */
 
 
 //---global variants-------------------------------------------------------------------------------------------------
 
 
-let turn = 0;
+function init_global_variants() {
+    turn = 0;
 
-//on chain static status
-let summoner = -1;
-let local_birth_time;
+    //on chain static status
+    summoner = -1;
+    local_birth_time = Date.now();
 
-//on chain global status
-let SPEED = 1;
-let BASE_SEC = 86400;
+    //on chain global status
+    SPEED = 1;
+    BASE_SEC = 86400;
 
-//on chain dynamic status
-let local_class = 0;
-let local_strength = 0;
-let local_dexterity = 0;
-let local_intelligence = 0;
-let local_luck = 0;
-let local_level = 0;
-let local_last_feeding_time = 0;
-let local_last_grooming_time = 0;
-let local_coin = 0;
-let local_exp = 0;
-let local_mining_status;
-let local_mining_start_time = 0;
-let local_next_exp_required = 0;
-let local_material = 0;
-let local_farming_status;
-let local_farming_start_time = 0;
-let local_crafting_status;
-let local_crafting_start_time = 0;
-let local_crafting_item_type = 0;
-let local_items;
-let local_heart = 0;
-let local_wallet;
-let local_owner = "0x0000000000000000000000000000000000000000";
-let local_name_str = "(unnamed)";
-let local_notPetrified = true;
-let local_isActive;
-let local_rolled_dice = 0;
-let local_last_rolled_dice = 0;
-let local_last_dice_roll_time;
-let local_mail_sending_interval = -1;
+    //on chain dynamic status
+    local_class = 0;
+    local_strength = 0;
+    local_dexterity = 0;
+    local_intelligence = 0;
+    local_luck = 0;
+    local_level = 0;
+    local_last_feeding_time = 0;
+    local_last_grooming_time = 0;
+    local_coin = 0;
+    local_exp = 0;
+    local_mining_status = 0;
+    local_mining_start_time = 0;
+    local_next_exp_required = 0;
+    local_material = 0;
+    local_farming_status = 0;
+    local_farming_start_time = 0;
+    local_crafting_status = 0;
+    local_crafting_start_time = 0;
+    local_crafting_item_type = 0;
+    local_items = [0] * 256;
+    local_heart = 0;
+    local_wallet = "0x0000000000000000000000000000000000000001";
+    local_owner = "0x0000000000000000000000000000000000000000";
+    local_name_str = "(unnamed)";
+    local_notPetrified = true;
+    local_isActive = 0;
+    local_rolled_dice = 0;
+    local_last_rolled_dice = 0;
+    local_last_dice_roll_time = Date.now();
+    local_mail_sending_interval = -1;
+    local_score = 0;
 
-//local using variants
-let previous_local_last_feeding_time = 0;
-let previous_local_last_grooming_time = 0;
-let previous_local_level = 0;
-let previous_local_mining_status;
-let previous_local_farming_status;
-let previous_local_crafting_status;
-let previous_local_exp = 0.01;
-let previous_local_coin = 0;
-let previous_local_material = 0;
-let previous_local_items;
-let previous_local_name_str;
-let local_coin_calc;
-let local_material_calc;
-let local_crafting_calc;
-let flag_music = 0;
-let bgm = 0;
-let local_items_flag = new Array(256).fill(0);
-let global_selected_crafting_item = 0;
-let global_selected_crafting_item_dc;
-let global_selected_crafting_item_required_heart;
-let last_sync_time = 0;
-let mode = "";
-let text_wallet;
-let screen_coin = 0;
-let screen_coin_delta = 0;
-let screen_material = 0;
-let screen_material_delta = 0;
-let screen_exp = 0;
-let screen_exp_delta = 0;
-let count_sync = 0;
-let happy = 0;
-let previous_happy = 0;
-let satiety = 0;
-let previous_satiety = 0;
-let screen_happy = 0;
-let screen_happy_delta = 0;
-let screen_satiety = 0;
-let screen_satiety_delta = 0;
-let previous_local_item194 = 0;
-let previous_local_item195 = 0;
-let previous_local_item196 = 0;
-let previous_local_item197 = 0;
-let item_wearing_hat = 0;
-let flag_doneFp = 0;
-let previsou_local_rolled_dice = 0;
-let flag_dice_rolling = 0;
-let flag_name_minting = 0;
-let flag_mail = false;
+    //local using variants
+    previous_local_last_feeding_time = 0;
+    previous_local_last_grooming_time = 0;
+    previous_local_level = 0;
+    previous_local_mining_status = -1;
+    previous_local_farming_status = -1;
+    previous_local_crafting_status = -1;
+    previous_local_exp = 0.01;
+    previous_local_coin = 0;
+    previous_local_material = 0;
+    previous_local_items = [0] * 256;
+    previous_local_name_str = "[0] * 256";
+    local_coin_calc = 0;
+    local_material_calc = 0;
+    local_crafting_calc = 0;
+    flag_music = 0;
+    bgm = 0;
+    local_items_flag = new Array(256).fill(0);
+    global_selected_crafting_item = 0;
+    global_selected_crafting_item_dc = 0;
+    global_selected_crafting_item_required_heart = 0;
+    last_sync_time = 0;
+    mode = "";
+    //text_wallet = "";
+    screen_coin = 0;
+    screen_coin_delta = 0;
+    screen_material = 0;
+    screen_material_delta = 0;
+    screen_exp = 0;
+    screen_exp_delta = 0;
+    count_sync = 0;
+    happy = 0;
+    previous_happy = 0;
+    satiety = 0;
+    previous_satiety = 0;
+    screen_happy = 0;
+    screen_happy_delta = 0;
+    screen_satiety = 0;
+    screen_satiety_delta = 0;
+    previous_local_item194 = 0;
+    previous_local_item195 = 0;
+    previous_local_item196 = 0;
+    previous_local_item197 = 0;
+    item_wearing_hat = 0;
+    flag_doneFp = 0;
+    previsou_local_rolled_dice = 0;
+    flag_dice_rolling = 0;
+    flag_name_minting = 0;
+    flag_mail = false;
+    active_nui_id = 0;
+    flag_radarchart = 0;
+    previous_local_score = 0;
+    flag_tokenBall = 0;
+    flag_loaded = 0;
+    flag_item_update = 0;
+}
+
+init_global_variants();
 
 
 //---html-----------------------------------------------------------------------------------------------------
@@ -334,8 +508,7 @@ async function contract_update_statics(_summoner) {
     let _owner = await contract_mm.methods.ownerOf(_summoner).call();
     local_owner = _owner;
     let contract_mffg = await new web3.eth.Contract(abi_murasaki_function_feeding_and_grooming, contract_murasaki_function_feeding_and_grooming);
-    local_notPetrified = await contract_mffg.methods.not_petrified(_summoner).call();
-    //local_notPetrified = await contract_mfs.methods.not_petrified(_summoner).call();
+    local_notPetrified = await contract_mfs.methods.not_petrified(_summoner).call();
 }
 
 //update mining/farming/crafting
@@ -397,6 +570,7 @@ async function contract_update_status(_summoner) {
     local_crafting_status = Number(_dynamic_status[16]);
     local_crafting_start_time = Number(_dynamic_status[17]);
     local_crafting_item_type = Number(_dynamic_status[18]);
+    local_heart = Number(_dynamic_status[27]);
 
     //dice, when rolling, high frequency update
     if (flag_dice_rolling == 1 && local_items[36] > 0) {
@@ -410,13 +584,18 @@ async function contract_update_status(_summoner) {
             flag_name_minting = 0;
         }
     }
+    
+    if(flag_item_update == 1) {
+        local_items = await contract_mfs.methods.get_balance_of_type_array(local_owner).call();
+        flag_item_update = 0;
+    }
 
     //low frequency updates
     if (count_sync % 5 == 0) {
 
         //call item
         local_items = await contract_mfs.methods.get_balance_of_type_array(local_owner).call();
-        local_heart = Number(local_items[193]);
+        //local_heart = Number(local_items[193]);
 
         //update mining, farming, crafting calculation
         contract_update_working(_summoner);
@@ -428,9 +607,12 @@ async function contract_update_status(_summoner) {
         
         //check mail
         contract_check_mail(summoner);
-        if (local_items[1] > 0) {
+        if (local_items[20] > 0) {
             contract_calc_sending_interval(summoner);
         }
+        
+        //update score
+        local_score = await contract_mfs.methods.calc_score(_summoner).call();
     }
     
     //debug
@@ -500,6 +682,33 @@ async function call_name_from_summoner(_summoner) {
     return _name;
 }
 
+//call amount of token
+//https://qiita.com/ramo798/items/0cc2c556410c95b0b332
+async function call_amount_of_token(_contract_address) {
+    let web3 = await connect();
+    let wallet = await get_wallet(web3);
+    let minABI = [
+        {
+          constant: true,
+          inputs: [{ name: "_owner", type: "address" }],
+          name: "balanceOf",
+          outputs: [{ name: "balance", type: "uint256" }],
+          type: "function",
+        },
+        {
+          constant: true,
+          inputs: [],
+          name: "decimals",
+          outputs: [{ name: "", type: "uint8" }],
+          type: "function",
+        },
+    ];
+    let contract = await new web3.eth.Contract(minABI, _contract_address);
+    let balance = await contract.methods.balanceOf(wallet).call();
+    let decimal = await contract.methods.decimals().call();
+    return balance / (10 ** decimal);
+}
+
 //===send===
 
 //summon
@@ -545,7 +754,7 @@ async function contract_feeding(_summoner) {
     let web3 = await connect();
     let contract = await new web3.eth.Contract(abi_murasaki_function_feeding_and_grooming, contract_murasaki_function_feeding_and_grooming);
     let wallet = await get_wallet(web3);
-    contract.methods.feeding(_summoner).send({from:wallet});
+    contract.methods.feeding(_summoner, active_nui_id).send({from:wallet});
 }
 
 //grooming
@@ -553,7 +762,7 @@ async function contract_grooming(_summoner) {
     let web3 = await connect();
     let contract = await new web3.eth.Contract(abi_murasaki_function_feeding_and_grooming, contract_murasaki_function_feeding_and_grooming);
     let wallet = await get_wallet(web3);
-    contract.methods.grooming(_summoner).send({from:wallet});
+    contract.methods.grooming(_summoner, active_nui_id).send({from:wallet});
 }
 
 //mining
@@ -590,11 +799,14 @@ async function contract_crafting(_summoner) {
     let wallet = await get_wallet(web3);
     let _item_type = global_selected_crafting_item;
     if (local_crafting_status == 0) {
+        contract.methods.start_crafting(_summoner, _item_type).send({from:wallet});
+        /*
         if (_item_type == 197) {
             _contract_crafting_with_heart(_summoner, _item_type, global_selected_crafting_item_required_heart);
         } else {
             contract.methods.start_crafting(_summoner, _item_type).send({from:wallet});
         }
+        */
     }else {
         contract.methods.stop_crafting(_summoner).send({from:wallet});
     }
@@ -784,6 +996,8 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         if (this.mode == "resting" || this.mode == "moving") {
             this.count = 0;
             this.mode = "hugging";
+            //fireworks(this.scene);
+            //star(this.scene);
         }
     }
     
@@ -825,12 +1039,12 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             var li = [0,10,20,30,150,160,170,180,190,200,210,330,340,350]
             this.moving_degree = li[Math.floor(Math.random() * li.length)];
             //out of area check
-            if (this.x < 100 && this.moving_degree > 90 && this.moving_degree <270) {
+            if (this.x < 200 && this.moving_degree > 90 && this.moving_degree <270) {
                 this.moving_degree -= 180;
-            }else if (this.x > 1100 && (this.moving_degree < 90 || this.moving_degree > 270)) {
+            }else if (this.x > 1000 && (this.moving_degree < 90 || this.moving_degree > 270)) {
                 this.moving_degree -= 180;
             }
-            if (this.y > 860 && this.moving_degree > 180) {
+            if (this.y > 760 && this.moving_degree > 180) {
                 this.moving_degree = 360 - this.moving_degree;
             }else if (this.y < 500 && this.moving_degree < 180) {
                 this.moving_degree = 360 - this.moving_degree;
@@ -854,6 +1068,52 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         }else if (this.count < this.moving_count) {
             this.x += Math.cos(this.moving_degree * (Math.PI/180)) * this.moving_speed;
             this.y -= Math.sin(this.moving_degree * (Math.PI/180)) * this.moving_speed;
+
+            //***TODO*** tokenBall
+            if (
+                flag_tokenBall == 1
+                && this.count == 2 
+                && Math.random()*100 >= 50
+            ) {
+                function checkOverlap(spriteA, spriteB) {
+                    var boundsA = spriteA.getBounds();
+                    boundsA.x += boundsA.width/4;
+                    boundsA.y += boundsA.height/2;
+                    boundsA.width /= 2;
+                    boundsA.height /= 3;
+                    var boundsB = spriteB.getBounds();
+                    return Phaser.Geom.Intersects.RectangleToRectangle(boundsA, boundsB);
+                }
+                for (let i = 0; i < group_tokenBall.getLength(); i++) {
+                    if (checkOverlap(this, group_tokenBall.getChildren()[i])){
+                        group_tokenBall.getChildren()[i].on_click();
+                        break;
+                    }
+                }
+            }
+
+            //***TODO*** star
+            if (
+                this.count == 3
+                && Math.random()*100 >= 50
+            ) {
+                function checkOverlap(spriteA, spriteB) {
+                    var boundsA = spriteA.getBounds();
+                    boundsA.x += boundsA.width/4;
+                    boundsA.y += boundsA.height/2;
+                    boundsA.width /= 2;
+                    boundsA.height /= 3;
+                    var boundsB = spriteB.getBounds();
+                    return Phaser.Geom.Intersects.RectangleToRectangle(boundsA, boundsB);
+                }
+                for (let i = 0; i < group_star.getLength(); i++) {
+                    if (checkOverlap(this, group_star.getChildren()[i])){
+                        group_star.getChildren()[i].on_click();
+                        break;
+                    }
+                }
+            }
+
         //return to resting
         }else if (this.count >= this.moving_count) {
             this.mode = "resting";
@@ -1240,12 +1500,12 @@ class Pet extends Phaser.GameObjects.Sprite{
         return this.mode;
     }
     on_click() {
-        /***
+        /*
         if (this.mode == "resting" || this.mode == "moving") {
             this.count = 0;
             this.mode = "hugging";
         }
-        ***/
+        */
     }
     resting(){
 	    this.count += 1;
@@ -1452,6 +1712,9 @@ class Dice extends Phaser.GameObjects.Sprite{
             let _now = Date.now() / 1000;
             let _delta_sec = _now - local_last_dice_roll_time;
             let _next_sec = BASE_SEC - _delta_sec * SPEED;
+            if (_next_sec >= BASE_SEC) {
+                _next_sec = BASE_SEC - 1;
+            }
             if (_next_sec <= 0) {
                 this.text_next_time.setText("Dice Roll").setFill("#ff0000");
                 this.flag_tx = 1;
@@ -1539,6 +1802,243 @@ class Dice extends Phaser.GameObjects.Sprite{
             //this.text_rolled_number.setText(Math.round(Math.random()*20));
             this.text_rolled_number.setText(this.count / 2 % 20 + 1);
             this.text_next_time.setText("Rolling!").setFill("#ff0000");
+        }
+    }
+}
+
+
+//---tokenBall-----------------------------------------------------------------------------------------------------
+
+
+class tokenBall extends Phaser.GameObjects.Sprite{
+    constructor(scene, x, y, img){
+        super(scene, x, y, img);
+        this.scene.add.existing(this);
+        this.setInteractive({ useHandCursor: true });
+        this.on("pointerdown", function (pointer) {
+            this.on_click();
+        }, this);
+        this.speed_x = 0;
+        this.speed_y = 0;
+        this.count = 0;
+        this.line_y = y;      //initial value of line_y, the same as first position of y
+        this.line_y_max = 500;  //max floor position
+        this.line_y_min = 800;
+        this.line_x_r = 1200;   //right side
+        this.line_x_l = 50;     //left side
+    }
+    on_click() {
+        this.speed_x = 8 + Math.random() * 4;
+        //this.speed_x = 8 + Math.random() * 5;
+        
+        if (Math.random() > 0.5) {
+            this.speed_x *= -1;
+        }
+        
+        /*
+        //DOES NOT WORK in phone
+        //if (game.input.mousePointer.x > this.x) {
+        if (game.input.activePointer.position.x > this.x) {
+        //if (game.input.pointer1.x > this.x) {
+            this.speed_x *= -1;
+        }
+        */
+
+        this.speed_y = 6 + Math.random() * 4;
+        //this.speed_y = 8 + Math.random() * 5;
+        this.count = 0;
+        //define constant of y = b - a * x
+        this.a = Math.random() * 0.8 - 0.4;
+        this.b = this.y + this.a * this.x;
+        //sound
+        sound_dice.play();
+    }
+    on_summon() {
+        this.speed_x = -1 * (5 + Math.random() * 10);
+        this.speed_y = 10 + Math.random() * 10;
+        this.count = 0;
+        this.a = Math.random() * 0.8 - 0.4;
+        this.b = this.y + this.a * this.x;
+        //sound
+        //sound_dice.play();
+    }
+    update(){
+        this.count += 1;
+        if (this.count % 2 == 0) {
+            return 0;
+        }
+        //dept
+        //this.depth = this.line_y;
+        //check speed
+        if (
+            Math.abs(this.speed_x) <= 0.5
+            && Math.abs(this.speed_y) <= 0.5
+            && this.line_y - this.y <= 1
+        ) {
+            ;
+        } else {
+            //when moving
+            //define line_y
+            this.line_y = this.b - this.a * this.x;
+            if (this.line_y < this.line_y_max) {
+                this.line_y = this.line_y_max;
+            }
+            if (this.line_y > this.line_y_min) {
+                this.line_y = this.line_y_min;
+            }
+            //reducing x speed, -/+
+            if (this.speed_x > 0) {
+                //friction, when speed_y = 0
+                if (Math.abs(this.speed_y) <= 0.5) {
+                    this.speed_x -= 0.1 * 3;
+                } else {
+                    this.speed_x -= 0.1;
+                }
+            } else {
+                if (Math.abs(this.speed_y) <= 0.5) {
+                    this.speed_x += 0.1 * 3;
+                } else {
+                    this.speed_x += 0.1;
+                }
+            }
+            //reduction of y speed
+            this.speed_y -= 0.98;
+            //position moving
+            this.x += this.speed_x;
+            this.y -= this.speed_y;
+            //increase angle
+            this.angle += this.speed_x * 5;
+            //refrection y
+            if (this.y >= this.line_y) {
+                this.y = this.line_y;
+                this.speed_y *= -0.5;   //bounce coefficient
+                if (Math.abs(this.speed_y) > 0.5) {
+                    sound_dice_impact.play();
+                }
+            }
+            //refrection x
+            if (this.x >= this.line_x_r) {
+                this.x = this.line_x_r;
+                this.speed_x *= -0.9;   //bounce coefficient
+                sound_dice_impact.play();
+            } else if (this.x <= this.line_x_l) {
+                this.x = this.line_x_l;
+                this.speed_x *= -0.9;
+                sound_dice_impact.play();
+            }
+        }
+    }
+}
+
+
+//---Star-----------------------------------------------------------------------------------------------------
+
+
+class Star extends Phaser.GameObjects.Sprite{
+    constructor(scene, x, y, img){
+        super(scene, x, y, img);
+        this.scene.add.existing(this);
+        this.setInteractive({ useHandCursor: true });
+        this.on("pointerdown", function (pointer) {
+            this.on_click();
+        }, this);
+        this.speed_x = 0;
+        this.speed_y = 0;
+        this.count = 0;
+        this.line_y = y;      //initial value of line_y, the same as first position of y
+        this.line_y_max = 500;  //max floor position
+        this.line_y_min = 800;
+        this.line_x_r = 1200;   //right side
+        this.line_x_l = 50;     //left side
+    }
+    on_click() {
+        this.speed_x = 8 + Math.random() * 6;
+        if (Math.random() > 0.5) {
+            this.speed_x *= -1;
+        }
+        this.speed_y = 6 + Math.random() * 6;
+        this.count = 0;
+        //define constant of y = b - a * x
+        this.a = Math.random() * 0.8 - 0.4;
+        this.b = this.y + this.a * this.x;
+        //sound
+        sound_dice.play();
+    }
+    on_summon() {
+        this.x = 800 + Math.random() * 400;
+        this.y = -50;
+        this.speed_x = -10 - Math.random() * 5;
+        this.speed_y = -20;
+        this.count = 0;
+        this.a = Math.random() * 0.8 - 0.4;
+        this.b = this.line_y_max+100 + this.a * this.x;
+        //sound
+        //sound_dice.play();
+    }
+    update(){
+        this.count += 1;
+        if (this.count % 2 == 0) {
+            return 0;
+        }
+        //dept
+        //this.depth = this.line_y;
+        //check speed
+        if (
+            Math.abs(this.speed_x) <= 0.5
+            && Math.abs(this.speed_y) <= 0.5
+            && this.line_y - this.y <= 1
+        ) {
+            ;
+        } else {
+            //when moving
+            //define line_y
+            this.line_y = this.b - this.a * this.x;
+            if (this.line_y < this.line_y_max) {
+                this.line_y = this.line_y_max;
+            }
+            if (this.line_y > this.line_y_min) {
+                this.line_y = this.line_y_min;
+            }
+            //reducing x speed, -/+
+            if (this.speed_x > 0) {
+                //friction, when speed_y = 0
+                if (Math.abs(this.speed_y) <= 0.5) {
+                    this.speed_x -= 0.1 * 3;
+                } else {
+                    this.speed_x -= 0.1;
+                }
+            } else {
+                if (Math.abs(this.speed_y) <= 0.5) {
+                    this.speed_x += 0.1 * 3;
+                } else {
+                    this.speed_x += 0.1;
+                }
+            }
+            //reduction of y speed
+            this.speed_y -= 0.98;
+            //position moving
+            this.x += this.speed_x;
+            this.y -= this.speed_y;
+            //increase angle
+            this.angle += this.speed_x * 5;
+            //refrection y
+            if (this.y >= this.line_y) {
+                this.y = this.line_y;
+                this.speed_y *= -0.2;   //bounce coefficient
+                if (Math.abs(this.speed_y) > 0.5) {
+                    sound_dice_impact.play();
+                }
+            }
+            //refrection x
+            if (this.x >= this.line_x_r) {
+                this.x = this.line_x_r;
+                this.speed_x *= -0.9;   //bounce coefficient
+                sound_dice_impact.play();
+            } else if (this.x <= this.line_x_l) {
+                this.x = this.line_x_l;
+                this.speed_x *= -0.9;
+                sound_dice_impact.play();
+            }
         }
     }
 }
@@ -1733,17 +2233,11 @@ function open_window_craft (scene) {
             icon_crafting_kusa.visible = true;
             icon_crafting_time.visible = true;
             text_select_item.setText('"'+array_item_name[_item]+'"');
-            //console.log("modified_dc:", _dc);
-            //***TODO*** nuichan, dirty code, urgent 
-            if (_item == 197) {
-                let _heart_required = await contract_get_heart_required(_item);
-                global_selected_crafting_item_required_heart = _heart_required;
-                text_crafting_selected_item_heart.setText(_heart_required);
-                icon_crafting_heart.visible = true;
-            } else {
-                text_crafting_selected_item_heart.setText("");
-                icon_crafting_heart.visible = false;
-            }
+            //get herat required
+            let _heart_required = await contract_get_heart_required(_item);
+            global_selected_crafting_item_required_heart = _heart_required;
+            text_crafting_selected_item_heart.setText(_heart_required);
+            icon_crafting_heart.visible = true;
         } else {
             text_crafting_selected_item_ohana.setText("");
             text_crafting_selected_item_kusa.setText("");
@@ -1784,6 +2278,15 @@ function open_window_craft (scene) {
         }
         */
         let _color = "black";
+        if (rarity == "common") {
+            _color = "black";
+        }else if (rarity == "uncommon") {
+            _color = "black";
+        }else if (rarity == "rare") {
+            _color = "black";
+        }else{
+            _color = "gray";
+        }
         let obj = scene.add.text(_x, _y, _text)
             .setFontSize(30).setFontFamily("Arial")
             .setInteractive({useHandCursor: true})
@@ -1803,8 +2306,6 @@ function open_window_craft (scene) {
     group_window_crafting.add(scene.add.sprite(640, 480, "window").setInteractive())
 
     //create item list text
-    button_crafting_close = create_button(1070, 820, "Cancel", 0, scene);
-    group_window_crafting.add(button_crafting_close);
     let _x = 170;
     let _y = 80;
     let _y_add = 40;
@@ -1826,18 +2327,34 @@ function open_window_craft (scene) {
         eval(`_button  = create_button(_x, _y + _y_add *  ${i}, '[' + local_items[${i}] + ',' + local_items[${i+64}] + ',' + local_items[${i+128}] + '] ' + array_item_name[${i}],  ${i},  scene, _rarity);`)
         group_window_crafting.add(_button);
     }
+    item1_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  1, "item_kanban").setScale(0.125);
+    item2_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  2, "mr_astar_right").setScale(0.08);
+    item3_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  3, "item_dice").setScale(0.18);
+    item4_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  4, "item_hat_helmet").setScale(0.1);
+    item5_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  5, "item_sushi").setScale(0.1);
+    item6_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  6, "item_crown").setScale(0.15);
+    item7_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  7, "item_ribbon").setScale(0.12);
+    item8_icon = scene.add.sprite(_x-25, _y+12 + _y_add *  8, "item_window").setScale(0.12);
+    item9_icon = scene.add.sprite(_x-25, _y+12 + _y_add *  9, "item_hat_knit").setScale(0.14);
+
+    /*
     item1_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  1, "mr_astar_right").setScale(0.08);
     item2_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  2, "item_crown").setScale(0.15);
     item3_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  3, "item_fortune_statue").setScale(0.15);
     item4_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  4, "item_hat_helmet").setScale(0.1);
     item5_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  5, "item_kanban").setScale(0.1);
     item6_icon = scene.add.sprite(_x-25, _y+12 + _y_add *  6, "item_ribbon").setScale(0.12);
+    */
+
     group_window_crafting.add(item1_icon);
     group_window_crafting.add(item2_icon);
     group_window_crafting.add(item3_icon);
     group_window_crafting.add(item4_icon);
     group_window_crafting.add(item5_icon);
     group_window_crafting.add(item6_icon);
+    group_window_crafting.add(item7_icon);
+    group_window_crafting.add(item8_icon);
+    group_window_crafting.add(item9_icon);
 
     //farming_item
     _x = 520;
@@ -1856,18 +2373,32 @@ function open_window_craft (scene) {
         eval(`_button  = create_button(_x, _y + _y_add *  ${i-16}, '[' + local_items[${i}] + ',' + local_items[${i+64}] + ',' + local_items[${i+128}] + '] ' + array_item_name[${i}],  ${i},  scene, _rarity);`)
         group_window_crafting.add(_button);
     }
+    item17_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  1, "item_musicbox").setScale(0.15);
+    item18_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  2, "item_hat_mugiwara").setScale(0.15);
+    item19_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  3, "ms_ether_right").setScale(0.08);
+    item20_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  4, "item_cushion").setScale(0.075);
+    item21_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  5, "uni").setScale(0.1);
+    item22_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  6, "item_fortune_statue").setScale(0.15);
+    item23_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  7, "item_asnya").setScale(0.1);
+    item24_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  8, "rug-pull").setScale(0.15);
+    item25_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  9, "item_vase").setScale(0.08);
+    /*
     item17_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  1, "item_vase").setScale(0.08);
     item18_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  2, "ms_ether_right").setScale(0.08);
     item19_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  3, "item_hat_mugiwara").setScale(0.15);
     item20_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  4, "item_asnya").setScale(0.1);
     item21_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  5, "item_switch").setScale(0.1);
     item22_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  6, "item_chocolate_bread").setScale(0.25);
+    */
     group_window_crafting.add(item17_icon);
     group_window_crafting.add(item18_icon);
     group_window_crafting.add(item19_icon);
     group_window_crafting.add(item20_icon);
     group_window_crafting.add(item21_icon);
     group_window_crafting.add(item22_icon);
+    group_window_crafting.add(item23_icon);
+    group_window_crafting.add(item24_icon);
+    group_window_crafting.add(item25_icon);
 
     //crafting_item
     _x = 870;
@@ -1887,32 +2418,66 @@ function open_window_craft (scene) {
         eval(`_button  = create_button(_x, _y + _y_add *  ${i-32}, '[' + local_items[${i}] + ',' + local_items[${i+64}] + ',' + local_items[${i+128}] + '] ' + array_item_name[${i}],  ${i},  scene, _rarity);`)
         group_window_crafting.add(_button);
     }
+    item33_icon = scene.add.sprite(_x-25, _y+17 + _y_add *  1, "item_pad_on").setScale(0.12);
+    item34_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  2, "item_score_board").setScale(0.12);
+    item35_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  3, "item_hat_mortarboard").setScale(0.14);
+    item36_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  4, "dr_bitco_right").setScale(0.08);
+    item37_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  5, "item_pancake").setScale(0.14);
+    item38_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  6, "item_violin").setScale(0.08);
+    item39_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  7, "item_piano").setScale(0.08);
+    item40_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  8, "item_switch").setScale(0.1);
+    item41_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  9, "item_lanthanum").setScale(0.08);
+    /*
     item33_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  1, "item_violin").setScale(0.08);
     item34_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  2, "item_musicbox").setScale(0.12);
     item35_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  3, "dr_bitco_right").setScale(0.08);
     item36_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  4, "item_dice").setScale(0.18);
     item37_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  5, "item_hat_knit").setScale(0.14);
     item38_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  6, "item_hat_mortarboard").setScale(0.14);
+    */
     group_window_crafting.add(item33_icon);
     group_window_crafting.add(item34_icon);
     group_window_crafting.add(item35_icon);
     group_window_crafting.add(item36_icon);
     group_window_crafting.add(item37_icon);
     group_window_crafting.add(item38_icon);
+    group_window_crafting.add(item39_icon);
+    group_window_crafting.add(item40_icon);
+    group_window_crafting.add(item41_icon);
+
+    //special items
+    let _rarity;
 
     //coin/material bag
-    button_crafting_item194  = create_button(170, 80 + 40*17, "[" +local_items[194]+ "] Ohana Bank", 194,  scene);
-    button_crafting_item195  = create_button(520, 80 + 40*17, "[" +local_items[195]+ "] Kusa Pouch", 195,  scene);
+    if (local_items[194] > 0) { _rarity = "common" } else { _rarity = null }
+    button_crafting_item194  = create_button(170, 80 + 40*17, "[" +local_items[194]+ "] Ohana Bank", 194,  scene, _rarity);
+    if (local_items[195] > 0) { _rarity = "common" } else { _rarity = null }
+    button_crafting_item195  = create_button(520, 80 + 40*17, "[" +local_items[195]+ "] Kusa Pouch", 195,  scene, _rarity);
+    item194_icon = scene.add.sprite(170-25, 80+17 + 40*17, "item_bank").setScale(0.16);
+    item195_icon = scene.add.sprite(520-25, 80+17 + 40*17, "item_kusa_pouch").setScale(0.05);
     group_window_crafting.add(button_crafting_item194);
     group_window_crafting.add(button_crafting_item195);
+    group_window_crafting.add(item194_icon);
+    group_window_crafting.add(item195_icon);
     
     //mail
-    button_crafting_item196  = create_button(870, 80 + 40*17, "[" +local_items[196]+ "] Mail", 196,  scene);
+    if (local_items[196] > 0) { _rarity = "common" } else { _rarity = null }
+    button_crafting_item196  = create_button(870, 80 + 40*17, "[" +local_items[196]+ "] Cat Mail", 196,  scene, _rarity);
+    item196_icon = scene.add.sprite(870-25, 80+15 + 40*17, "item_mail").setScale(0.05);
     group_window_crafting.add(button_crafting_item196);
+    group_window_crafting.add(item196_icon);
 
     //nui
-    button_crafting_item197  = create_button(870, 80 + 40*18, "[" +local_items[197]+ "] Nui", 197,  scene);
+    if (local_items[197] > 0) { _rarity = "common" } else { _rarity = null }
+    button_crafting_item197  = create_button(870, 80 + 40*18, "[" +local_items[197]+ "] Coddly Toy", 197,  scene, _rarity);
+    item197_icon = scene.add.sprite(870-25, 80+20 + 40*18, "item_nui").setScale(0.15);
     group_window_crafting.add(button_crafting_item197);
+    group_window_crafting.add(item197_icon);
+
+    //calcel
+    _rarity = "common";
+    button_crafting_close = create_button(1070, 840, "Cancel", 0, scene, _rarity);
+    group_window_crafting.add(button_crafting_close);
     
     //depth
     group_window_crafting.setDepth(9999 + 100);
@@ -1981,6 +2546,71 @@ function open_window_summon(scene) {
     group_window_summon.add(button_cancel);
     //depth
     group_window_summon.setDepth(9999 + 1);
+};
+
+
+//===fireworks
+function fireworks(scene) {
+    sound_fireworks2.play();
+    const { FloatBetween } = Phaser.Math;
+    const emitterConfig = {
+        alpha: { start: 1, end: 0, ease: 'Cubic.easeIn' },
+        angle: { start: 0, end: 360, steps: 100 },
+        blendMode: 'ADD',
+        frame: { frames: ['red', 'yellow', 'green', 'blue'], cycle: true, quantity: 500 },
+        //frequency: 2000,
+        frequency: 500,
+        gravityY: 300,
+        lifespan: 1000,
+        quantity: 500,
+        reserve: 500,
+        scale: { min: 0.05, max: 0.15 },
+        speed: { min: 300, max: 600 },
+        x: 512, y: 384,
+    };
+    const particles = scene.add.particles('flares');
+    const emitter = particles.createEmitter(emitterConfig);
+    emitter.onParticleEmit( () => {
+        sound_fireworks.play();
+    });
+    const { width, height } = scene.scale;
+    scene.time.addEvent({
+        delay: 250,
+        startAt: 0,
+        repeat: 10,
+        callback: () => {
+            emitter.setPosition(width * FloatBetween(0.25, 0.75), height * FloatBetween(0, 0.5));
+        },
+    });
+    scene.time.addEvent({
+        delay: 2400,
+        callback: () => {
+            emitter.stop();
+        }
+    });
+};
+
+
+//===star
+function star(scene) {
+    let _array = [
+        "star_blue",
+        "star_green",
+        "star_orange",
+        "star_pink",
+        "star_purple",
+        "star_red",
+        "star_skyblue",
+        "star_yellow",
+    ];
+    let _img = _array[Math.floor(Math.random() * _array.length)];
+    let _star = new Star(scene, 300, -100, _img)
+        .setOrigin(0.5)
+        .setScale(0.15)
+        .setAlpha(1)
+        .setDepth(2);
+    _star.on_summon();
+    group_star.add(_star);
 }
 
 
@@ -2013,7 +2643,7 @@ let config = {
     },
 };
 
-let game = new Phaser.Game(config);
+game = new Phaser.Game(config);
 
 
 //---preload-----------------------------------------------------------------------------------------------------
@@ -2081,6 +2711,9 @@ function preload() {
     this.load.spritesheet("dr_bitco_right", "src/png/pet_dr_bitco_right.png", {frameWidth: 600, frameHeight: 600});
     this.load.spritesheet("dr_bitco_left", "src/png/pet_dr_bitco_left.png", {frameWidth: 600, frameHeight: 600});
 
+    //===nft===
+    //this.load.image("nft_other", "https://ipfs.io/ipfs/QmQXHLEALj8K3iNnRwNBesDkVGm27BznTgaGPtmULtNb6C/10207.png");
+
     //===music===
     this.load.audio("bgm1", "src/music/Morning_2.mp3");
     this.load.audio("bgm2", "src/music/Roll_Roll_Roll.mp3");
@@ -2110,6 +2743,10 @@ function preload() {
     this.load.audio("window_cancel", "src/sound/window_cancel.mp3");
     this.load.audio("system", "src/sound/system.mp3");
     this.load.audio("nui", "src/sound/nui.mp3");
+    this.load.audio("pad", "src/sound/pad2.mp3");
+    this.load.audio("fireworks", "src/sound/fireworks.mp3");
+    this.load.audio("fireworks2", "src/sound/fireworks2.mp3");
+    this.load.audio("basket", "src/sound/basket.mp3");
 
     //===item_basic===
     this.load.image("item_table", "src/png/item_basic_table.png", {frameWidth: 370, frameHeight: 320});
@@ -2150,7 +2787,21 @@ function preload() {
     this.load.image("item_pouch", "src/png/item_pouch.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("item_pouch_broken", "src/png/item_pouch_broken.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("item_hat_mortarboard", "src/png/item_hat_mortarboard.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_pad_on", "src/png/item_pad_on.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_pad_off", "src/png/item_pad_off.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_gauge", "src/png/item_gauge.png", {frameWidth: 370, frameHeight: 306});
+    this.load.image("item_frame", "src/png/item_frame.png", {frameWidth: 370, frameHeight: 428});
     
+    //===star===
+    this.load.image("star_blue", "src/png/star_blue.png", {frameWidth: 200, frameHeight: 191});
+    this.load.image("star_green", "src/png/star_green.png", {frameWidth: 200, frameHeight: 191});
+    this.load.image("star_orange", "src/png/star_orange.png", {frameWidth: 200, frameHeight: 191});
+    this.load.image("star_pink", "src/png/star_pink.png", {frameWidth: 200, frameHeight: 191});
+    this.load.image("star_purple", "src/png/star_purple.png", {frameWidth: 200, frameHeight: 191});
+    this.load.image("star_red", "src/png/star_red.png", {frameWidth: 200, frameHeight: 191});
+    this.load.image("star_skyblue", "src/png/star_skyblue.png", {frameWidth: 200, frameHeight: 191});
+    this.load.image("star_yellow", "src/png/star_yellow.png", {frameWidth: 200, frameHeight: 191});
+        
     //===cat===
     this.load.image("item_mail", "src/png/item_mail.png", {frameWidth: 757, frameHeight: 757});
     this.load.image("cat_sitting", "src/png/cat_sitting.png", {frameWidth: 772, frameHeight: 769});
@@ -2171,6 +2822,9 @@ function preload() {
     this.load.image("icon_satiety", "src/png/icon_system_satiety.png", {frameWidth: 500, frameHeight: 500});
     this.load.image("icon_happy", "src/png/icon_system_happy.png", {frameWidth: 500, frameHeight: 500});
 
+    //===icon_counter===
+    this.load.image("icon_counter", "src/png/icon_clover.png", {frameWidth: 507, frameHeight: 507});
+
     //===icon_status===
     this.load.image("icon_str", "src/png/icon_status_str.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("icon_dex", "src/png/icon_status_dex.png", {frameWidth: 370, frameHeight: 320});
@@ -2187,33 +2841,37 @@ function preload() {
     let progressText_loading = this.add.text(490,420, "Loading...", {font: "20px monospace", fill: "#3D3D3D"});
     let percentText = this.add.text(510, 465, "", {font: "20px monospace", fill: "#3D3D3D"});
     this.load.on("progress", function(value) {
-        progressBar.clear();
-        progressBar.fillStyle(0xE62E8B, 1);
-        progressBar.fillRect(490, 460, 300 * value, 30);
-        percentText.setText( Math.round(value * 100) + "%");
-        if (value == 1) {
-            progressText_loading.setText("Completed!");
-            let _arr = [
-                "Making roasted sweet potatoes...",
-                "Brushing a teddy bear...",
-                "Looking for my shovel...",
-                "Polishing the watering can...",
-                "Assembling the sewing machine...",
-                "Counting flowers and grass...",
-                "Cleaning up the house...",
-                "Replacing the sand in the sandbox...",
-                "Adding fertilizer to the flowerpot...",
-                "treating a needle puncture wound...",
-                "Washing the dishes...",
-                "Putting a flower on the teddy bear...",
-            ];
-            let _index = Math.floor(Math.random() * _arr.length);
-            let _text = _arr[_index];            
-            progressText.setText(_text);
+        if (flag_loaded == 0) {
+            progressBar.clear();
+            progressBar.fillStyle(0xE62E8B, 1);
+            progressBar.fillRect(490, 460, 300 * value, 30);
+            percentText.setText( Math.round(value * 100) + "%");
+            if (value == 1) {
+                progressText_loading.setText("Completed!");
+                let _arr = [
+                    "Making roasted sweet potatoes...",
+                    "Brushing a teddy bear...",
+                    "Looking for my shovel...",
+                    "Polishing the watering can...",
+                    "Assembling the sewing machine...",
+                    "Counting flowers and grass...",
+                    "Cleaning up the house...",
+                    "Replacing the sand in the sandbox...",
+                    "Adding fertilizer to the flowerpot...",
+                    "treating a needle puncture wound...",
+                    "Washing the dishes...",
+                    "Putting a flower on the teddy bear...",
+                ];
+                let _index = Math.floor(Math.random() * _arr.length);
+                let _text = _arr[_index];            
+                progressText.setText(_text);
+            }
         }
     });
     this.load.on("fileprogress", function(file) {
-        progressText.setText("Loading asset: " + file.src);
+        if (flag_loaded == 0) {
+            progressText.setText("Loading asset: " + file.src);
+        }
     });
     this.load.on("complete", function() {
         progressBar.destroy();
@@ -2221,6 +2879,7 @@ function preload() {
         progressText.destroy();
         progressText_loading.destroy();
         percentText.destroy();
+        flag_loaded = 1;
     });
 
     //===input text===
@@ -2231,6 +2890,127 @@ function preload() {
     });
     //this.load.plugin('rextexteditplugin', 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rextexteditplugin.min.js', true);
     this.load.plugin('rextexteditplugin', 'lib/rextexteditplugin.min.js', true);
+    
+    //===fireworks
+    //https://codepen.io/samme/pen/eYEearb
+    this.load.atlas('flares', 'src/fireworks/flares.png', 'src/fireworks/flares.json');
+    
+    //===tokenBall
+    this.load.image("coin_color_ACA", "src/png/coin_color_ACA.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_color_ASTR", "src/png/coin_color_ASTR.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_color_BNB", "src/png/coin_color_BNB.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_color_BTC", "src/png/coin_color_BTC.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_color_BUSD", "src/png/coin_color_BUSD.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_color_DAI", "src/png/coin_color_DAI.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_color_DOT", "src/png/coin_color_DOT.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_color_ETH", "src/png/coin_color_ETH.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_color_GLMR", "src/png/coin_color_GLMR.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_color_KSM", "src/png/coin_color_KSM.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_color_LAY", "src/png/coin_color_LAY.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_color_MATIC", "src/png/coin_color_MATIC.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_color_SDN", "src/png/coin_color_SDN.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_color_USDC", "src/png/coin_color_USDC.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_color_USDT", "src/png/coin_color_USDT.png", {frameWidth: 200, frameHeight: 200});
+    array_image_tokenBall = [
+        "coin_color_ACA",
+        "coin_color_ASTR",
+        "coin_color_BNB",
+        "coin_color_BTC",
+        "coin_color_BUSD",
+        "coin_color_DAI",
+        "coin_color_DOT",
+        "coin_color_ETH",
+        "coin_color_GLMR",
+        "coin_color_KSM",
+        "coin_color_LAY",
+        "coin_color_MATIC",
+        "coin_color_SDN",
+        "coin_color_USDC",
+        "coin_color_USDT",
+    ];
+    dic_tokenBall_img = {
+        ACA:"coin_color_ACA",
+        ASTR:"coin_color_ASTR",
+        BNB:"coin_color_BNB",
+        BTC:"coin_color_BTC",
+        BUSD:"coin_color_BUSD",
+        DAI:"coin_color_DAI",
+        DOT:"coin_color_DOT",
+        ETH:"coin_color_ETH",
+        GLMR:"coin_color_GLMR",
+        KSM:"coin_color_KSM",
+        LAY:"coin_color_LAY",
+        MATIC:"coin_color_MATIC",
+        SDN:"coin_color_SDN",
+        USDC:"coin_color_USDC",
+        USDT:"coin_color_USDT"
+    }
+    //local
+    //***TODO*** contract
+    dic_tokenBall_contract = {
+        ACA:"0x2F2eB7682bE7AC2ADaa2E2389ddBC6C76D66671d",
+        ASTR:"0x2F2eB7682bE7AC2ADaa2E2389ddBC6C76D66671d",
+        BNB:"0x2F2eB7682bE7AC2ADaa2E2389ddBC6C76D66671d",
+        BTC:"0x2F2eB7682bE7AC2ADaa2E2389ddBC6C76D66671d",
+        BUSD:"0x2F2eB7682bE7AC2ADaa2E2389ddBC6C76D66671d",
+        DAI:"0x2F2eB7682bE7AC2ADaa2E2389ddBC6C76D66671d",
+        DOT:"0x2F2eB7682bE7AC2ADaa2E2389ddBC6C76D66671d",
+        ETH:"0x2F2eB7682bE7AC2ADaa2E2389ddBC6C76D66671d",
+        GLMR:"0x2F2eB7682bE7AC2ADaa2E2389ddBC6C76D66671d",
+        KSM:"0x2F2eB7682bE7AC2ADaa2E2389ddBC6C76D66671d",
+        LAY:"0x2F2eB7682bE7AC2ADaa2E2389ddBC6C76D66671d",
+        MATIC:"0x2F2eB7682bE7AC2ADaa2E2389ddBC6C76D66671d",
+        SDN:"0x2F2eB7682bE7AC2ADaa2E2389ddBC6C76D66671d",
+        USDC:"0x2F2eB7682bE7AC2ADaa2E2389ddBC6C76D66671d",
+        USDT:"0x2F2eB7682bE7AC2ADaa2E2389ddBC6C76D66671d"
+    }
+    
+    //shibuya
+    /*
+    dic_tokenBall_contract = {
+        ACA:"0x3099daC30217E92b26a9e53aaA5Ef975D530138f",
+        ASTR:"0x3099daC30217E92b26a9e53aaA5Ef975D530138f",
+        BNB:"0x3099daC30217E92b26a9e53aaA5Ef975D530138f",
+        BTC:"0x3099daC30217E92b26a9e53aaA5Ef975D530138f",
+        BUSD:"0x3099daC30217E92b26a9e53aaA5Ef975D530138f",
+        DAI:"0xC4195CE9383eA77aED21bd662ecad10a935Ed459",
+        DOT:"0x3099daC30217E92b26a9e53aaA5Ef975D530138f",
+        ETH:"0x3099daC30217E92b26a9e53aaA5Ef975D530138f",
+        GLMR:"0x3099daC30217E92b26a9e53aaA5Ef975D530138f",
+        KSM:"0x3099daC30217E92b26a9e53aaA5Ef975D530138f",
+        LAY:"0x3099daC30217E92b26a9e53aaA5Ef975D530138f",
+        MATIC:"0x3099daC30217E92b26a9e53aaA5Ef975D530138f",
+        SDN:"0x3099daC30217E92b26a9e53aaA5Ef975D530138f",
+        USDC:"0x37B76d58FAFc3Bc32E12E2e720F7a57Fc94bE871",
+        USDT:"0xa4C17AD6bEC86e1233499A9B174D1E2D466c7198"
+    }
+    */
+    /*
+    this.load.image("coin_ASTR", "src/png/coin_ASTR.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_BNB", "src/png/coin_BNB.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_BTC", "src/png/coin_BTC.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_BUSD", "src/png/coin_BUSD.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_DAI", "src/png/coin_DAI.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_ETH", "src/png/coin_ETH.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_JPYC", "src/png/coin_JPYC.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_LAY", "src/png/coin_LAY.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_MATIC", "src/png/coin_MATIC.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_USDC", "src/png/coin_USDC.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_USDT", "src/png/coin_USDT.png", {frameWidth: 200, frameHeight: 200});
+    array_image_coin = [
+        "coin_ASTR",
+        "coin_BNB",
+        "coin_BTC",
+        "coin_BUSD",
+        "coin_DAI",
+        "coin_ETH",
+        "coin_JPYC",
+        "coin_LAY",
+        "coin_MATIC",
+        "coin_USDC",
+        "coin_USDT"
+    ];
+    */
 }
 
 
@@ -2469,6 +3249,10 @@ function create() {
     item_gold2.visible = false;
     item_gold3.visible = false;
 
+    //=== nft ===
+
+    //nft_other = this.add.sprite(500, 500, "nft_other").setOrigin(0.5).setScale(0.1);
+
     //=== click button ===
 
     let _x;
@@ -2524,11 +3308,13 @@ function create() {
     icon_crafting_kusa.visible = false;
     //icon_clock
     //icon_crafting_time = this.add.sprite(900, 165, "icon_clock");
-    icon_crafting_time = this.add.sprite(_x+200, _y+15, "icon_clock").setDepth(9999);
+    //icon_crafting_time = this.add.sprite(_x+200, _y+15, "icon_clock").setDepth(9999);
+    icon_crafting_time = this.add.sprite(_x+58, _y+42, "icon_clock").setDepth(9999);
     icon_crafting_time.setScale(0.09);
     icon_crafting_time.visible = false;
     //icon_heart
-    icon_crafting_heart = this.add.sprite(_x+58, _y+40, "icon_heart").setDepth(9999);
+    //icon_crafting_heart = this.add.sprite(_x+58, _y+40, "icon_heart").setDepth(9999);
+    icon_crafting_heart = this.add.sprite(_x+200, _y+13, "icon_heart").setDepth(9999);
     icon_crafting_heart.setScale(0.08);
     icon_crafting_heart.visible = false;
     //text
@@ -2537,8 +3323,10 @@ function create() {
     //text_crafting_selected_item_time = this.add.text(914, 155, "", {font: "18px Arial", fill: "#000"});
     text_crafting_selected_item_ohana = this.add.text(_x+72, _y+5, "", {font: "18px Arial", fill: "#000", backgroundColor: "#ecd9ff"}).setDepth(9999);
     text_crafting_selected_item_kusa = this.add.text(_x+142, _y+5, "", {font: "18px Arial", fill: "#000", backgroundColor: "#ecd9ff"}).setDepth(9999);
-    text_crafting_selected_item_time = this.add.text(_x+214, _y+5, "", {font: "18px Arial", fill: "#000", backgroundColor: "#ecd9ff"}).setDepth(9999);
-    text_crafting_selected_item_heart = this.add.text(_x+72, _y+32, "", {font: "18px Arial", fill: "#000", backgroundColor: "#ecd9ff"}).setDepth(9999);
+    //text_crafting_selected_item_time = this.add.text(_x+214, _y+5, "", {font: "18px Arial", fill: "#000", backgroundColor: "#ecd9ff"}).setDepth(9999);
+    //text_crafting_selected_item_heart = this.add.text(_x+72, _y+32, "", {font: "18px Arial", fill: "#000", backgroundColor: "#ecd9ff"}).setDepth(9999);
+    text_crafting_selected_item_heart = this.add.text(_x+214, _y+5, "", {font: "18px Arial", fill: "#000", backgroundColor: "#ecd9ff"}).setDepth(9999);
+    text_crafting_selected_item_time = this.add.text(_x+72, _y+32, "", {font: "18px Arial", fill: "#000", backgroundColor: "#ecd9ff"}).setDepth(9999);
     //--craftimg info
     //icon_clock
     //icon_crafting_time_remining = this.add.sprite(760,165, "icon_clock");
@@ -2548,7 +3336,6 @@ function create() {
     //text
     //text_crafting_calc = this.add.text(775, 155, "", {font: "18px Arial", fill: "#000"});
     text_crafting_calc = this.add.text(_x+75, _y+5, "", {font: "18px Arial", fill: "#000"}).setDepth(9999);
-    //crafting_window ***TODO***
     //select crafting_item_type
     text_select_item = this.add.text(_x+50, _y-30, ">> Select Item <<", {font: "30px Arial", fill: "#000", backgroundColor: "#ecd9ff"})
                 .setDepth(9999)
@@ -2678,11 +3465,16 @@ function create() {
     sound_window_cancel = this.sound.add("window_cancel", {volume:0.2});
     sound_system = this.sound.add("system", {volume:0.2});
     sound_nui = this.sound.add("nui", {volume:0.2});
+    sound_pad = this.sound.add("pad", {volume:0.2});
+    sound_fireworks = this.sound.add("fireworks", {volume:0.2});
+    sound_fireworks2 = this.sound.add("fireworks2", {volume:0.2});
+    sound_basket = this.sound.add("basket", {volume:0.2});
 
     //=== create summoner ===
 
-    murasakisan = new Murasakisan(this, 500 + Math.random()*200, 640 + Math.random()*100);
-    murasakisan.setScale(0.45);
+    murasakisan = new Murasakisan(this, 500 + Math.random()*200, 640 + Math.random()*100)
+        .setOrigin(0.5)
+        .setScale(0.45);
 
     //=== system message ===
 
@@ -2721,26 +3513,10 @@ function create() {
 
     let font_arg = {font: "18px Arial", fill: "#000"};
 
-    //age
-    //text_age_time =     this.add.text(1213, 67, "***", font_arg);
-    //text_age_time =     this.add.text(120, 80, "***", font_arg);
-    //text_age_time.depth = 1;
-    //icon_age = this.add.sprite(1200,77, "icon_age");
-    //icon_age.setScale(0.06);
-
     //debug info
     text_turn = this.add.text(230, 940, "***", {font: "14px Arial", fill: "#727171"});
     text_sync_time = this.add.text(330, 940, "***", {font: "14px Arial", fill: "#727171"});
     text_wallet = this.add.text(430, 940, "***", {font: "14px Arial", fill: "#727171"});
-    //text_speed =        this.add.text(10, 910, "***", font_arg);
-    //text_mode = this.add.text(1150, 916, "***", {font: "14px Arial", fill: "#727171"});
-    //text_turn = this.add.text(250, 916, "***", {font: "14px Arial", fill: "#727171"});
-    //text_sync_time = this.add.text(250, 928, "***", {font: "14px Arial", fill: "#727171"});
-    //text_wallet = this.add.text(250, 940, "***", {font: "14px Arial", fill: "#727171"});
-    //text_turn = this.add.text(10, 916, "***", {font: "14px Arial", fill: "#ffffff"});
-    //text_sync_time = this.add.text(10, 928, "***", {font: "14px Arial", fill: "#ffffff"});
-    //text_wallet = this.add.text(10, 940, "***", {font: "14px Arial", fill: "#ffffff"});
-    //text_info = this.add.text(5, 945, "", {font: "12px Arial", fill: "#ffffff", backgroundColor: "#898989"});
 
     //satiety
     icon_satiety = this.add.sprite(30,25, "icon_satiety");
@@ -2835,14 +3611,34 @@ function create() {
     group_mint_name.add(icon_name_kusa);
     group_mint_name.add(text_name_kusa);
     group_mint_name.setVisible(false);
+    
+    //===star===
+    group_star = this.add.group();
+    group_star.runChildUpdate = true;
+
 }
 
 
 //---update-----------------------------------------------------------------------------------------------------
 
 
-//update system message
-function update_systemMessage() {
+//=== protection
+function protection_code(this_scene) {
+    if (location.hostname != "murasaki-san.com" && location.hostname != "www.murasaki-san.com") {
+        while(true){
+            const d1 = new Date();
+            while (true) {
+              const d2 = new Date();
+              if (d2 - d1 > 2000) {
+                break;
+              }
+            }
+        }
+    }
+}
+
+//=== system message
+function update_systemMessage(this_scene) {
     //if (summoner == -1) {
     if (count_sync == 0) {
         text_system_message.setText(" --- Connecting to Astar Network --- ");
@@ -2861,15 +3657,1609 @@ function update_systemMessage() {
     }
 }
 
-//main function
+
+//=== sync time
+function update_syncTime(this_scene) {
+    if (last_sync_time == 0) {
+        text_sync_time.setText("synced: ####");
+        text_sync_time.setColor("#ff0000");
+    } else {
+        let _delta = Math.round( (Date.now() - last_sync_time) / 1000 );
+        text_sync_time.setText("synced: " + ("0000" + _delta).slice(-4));
+        if (_delta >= 30) {
+            text_sync_time.setColor("#ff0000");
+        } else {
+            text_sync_time.setColor("#727171");
+        }
+    }
+}
+
+
+//=== numeric animation
+function update_numericAnimation(this_scene) {
+
+    //coin
+    if (screen_coin_delta != 0) {
+        let _p = (100 - screen_coin_easing)/100;
+        if (_p < 1) {
+            let _easing = 1 - Math.pow(1 - _p, 4);  //easeOutQuart: https://easings.net/ja#easeOutQuart
+            let _screen_coin = screen_coin + screen_coin_delta * _easing;
+            text_coin.setText("Ohana: " + Math.round(_screen_coin) );
+            screen_coin_easing -= 1;
+        } else {
+            text_coin.setText("Ohana: " + local_coin);
+            screen_coin_delta = 0;
+        }
+    }
+
+    //material
+    if (screen_material_delta != 0) {
+        let _p = (100 - screen_material_easing)/100;
+        if (_p < 1) {
+            let _easing = 1 - Math.pow(1 - _p, 4);  //easeOutQuart: https://easings.net/ja#easeOutQuart
+            let _screen_material = screen_material + screen_material_delta * _easing;
+            text_material.setText("Kusa: " + Math.round(_screen_material) );
+            screen_material_easing -= 1;
+        } else {
+            text_material.setText("Kusa: " + local_material);
+            screen_material_delta = 0;
+        }
+    }
+
+    //exp
+    if (screen_exp_delta != 0) {
+        let _p = (100 - screen_exp_easing)/100;
+        if (_p < 1) {
+            let _easing = 1 - Math.pow(1 - _p, 4); 
+            let _screen_exp = screen_exp + screen_exp_delta * _easing;
+            text_exp.setText(Math.round(_screen_exp) + " / " + local_next_exp_required);
+            //bar
+            let _bar_exp = _screen_exp / local_next_exp_required * 100;
+            bar_exp.scaleX = _bar_exp / 100;
+            screen_exp_easing -= 1;
+        } else {
+            if (local_exp > local_next_exp_required) {
+                text_exp.setText(local_next_exp_required + " / " + local_next_exp_required);
+                screen_exp = local_next_exp_required;   //***TODO*** not best
+            } else {
+                text_exp.setText(local_exp + " / " + local_next_exp_required);
+                screen_exp = local_exp;   //***TODO*** not best
+            }
+            //bar
+            let _bar_exp = local_exp / local_next_exp_required * 100;
+            if (_bar_exp > 100) {_bar_exp = 100;}
+            bar_exp.scaleX = _bar_exp / 100;
+            screen_exp_delta = 0;
+        }
+    }
+    
+    //satiety
+    if (screen_satiety_delta != 0) {
+        let _p = (100 - screen_satiety_easing)/100;
+        if (_p < 1) {
+            let _easing = 1 - Math.pow(1 - _p, 4);
+            let _screen_satiety = screen_satiety + screen_satiety_delta * _easing;
+            text_satiety.setText(Math.round(_screen_satiety) + "%");
+            screen_satiety_easing -= 1;
+            //bar
+            bar_satiety.scaleX = _screen_satiety / 100;
+        } else {
+            text_satiety.setText(Math.round(satiety) + "%");
+            //bar
+            bar_satiety.scaleX = satiety / 100;
+            screen_satiety_delta = 0;
+        }
+    }
+
+    //happy
+    if (screen_happy_delta != 0) {
+        let _p = (100 - screen_happy_easing)/100;
+        if (_p < 1) {
+            let _easing = 1 - Math.pow(1 - _p, 4);
+            let _screen_happy = screen_happy + screen_happy_delta * _easing;
+            text_happy.setText(Math.round(_screen_happy) + "%");
+            screen_happy_easing -= 1;
+            //bar
+            bar_happy.scaleX = _screen_happy / 100;
+        } else {
+            text_happy.setText(Math.round(happy) + "%");
+            //bar
+            bar_happy.scaleX = happy / 100;
+            screen_happy_delta = 0;
+        }
+    }
+}
+
+
+//=== parameters with animation
+function update_parametersWithAnimation(this_scene) {
+
+    //coin
+    if (previous_local_coin != local_coin) {
+        //count animation
+        screen_coin = previous_local_coin;
+        screen_coin_delta = local_coin - previous_local_coin;
+        screen_coin_easing = 100;
+        //earning text
+        if (count_sync > 3) {
+            let _delta = local_coin - previous_local_coin;
+            let _sign = "";
+            if (_delta > 0) {
+                _sign = "+";
+            }
+            if (_delta >= local_coin_calc * 1.5) {
+                text_coin_earned.setText(_sign + _delta + " lucky♪");
+            } else {
+                text_coin_earned.setText(_sign + _delta);
+            }
+            text_coin_earned_count = 5;
+        }
+    }
+    //earning text clean-up
+    if (text_coin_earned_count > 0) {
+        text_coin_earned_count -= 1;
+        if (text_coin_earned_count == 0) {
+            text_coin_earned.setText("");
+        }
+    }
+
+    //material
+    if (previous_local_material != local_material) {
+        //count animation
+        screen_material = previous_local_material;
+        screen_material_delta = local_material - previous_local_material;
+        screen_material_easing = 100;
+        //earning text
+        if (count_sync > 3) {
+            let _delta = local_material - previous_local_material;
+            let _sign = ""; //no need when minus
+            if (_delta > 0) {
+                _sign = "+";
+            }
+            if (_delta >= local_material_calc * 1.5) {
+                text_material_earned.setText(_sign + _delta + " lucky♪");
+            } else {
+                text_material_earned.setText(_sign + _delta);
+            }
+            text_material_earned_count = 5;
+        }
+    }
+    //earning text clean-up
+    if (text_material_earned_count > 0) {
+        text_material_earned_count -= 1;
+        if (text_material_earned_count == 0) {
+            text_material_earned.setText("");
+        }
+    }
+
+    //exp   //***TODO*** not best
+    if (
+        previous_local_exp != local_exp 
+        && screen_exp < local_next_exp_required
+    ) {
+        //count animation
+        screen_exp = previous_local_exp;
+        if (local_exp > local_next_exp_required) {
+            screen_exp_delta = local_next_exp_required - previous_local_exp;
+        } else {
+            screen_exp_delta = local_exp - previous_local_exp;
+        }
+        screen_exp_easing = 100;
+        //earning text
+        if (count_sync > 3) {
+            let _delta = local_exp - previous_local_exp;
+            let _sign = ""; //no need when minus
+            if (_delta > 0) {
+                _sign = "+";
+            }
+            text_exp_earned.setText(_sign + _delta);
+            text_exp_earned_count = 5;
+        }
+    }
+    //earning text clean-up
+    if (text_exp_earned_count > 0) {
+        text_exp_earned_count -= 1;
+        if (text_exp_earned_count == 0) {
+            text_exp_earned.setText("");
+        }
+    }
+
+    //update time
+    let now_time = Date.now() / 1000;
+
+    //satiety
+    let base_satiety = 86400 / 2 / SPEED;
+    satiety = Math.round( (base_satiety - (now_time - local_last_feeding_time)) / base_satiety * 100 );
+    if (satiety < 0) { satiety = 0; }
+    if (satiety > 100) { satiety = 100; }
+    if (satiety != previous_satiety) {
+        screen_satiety = previous_satiety;
+        screen_satiety_delta = satiety - previous_satiety;
+        screen_satiety_easing = 100;
+    }
+
+    //happy
+    let base_happy = 86400 * 3 / SPEED;
+    happy = Math.round( (base_happy - (now_time - local_last_grooming_time)) / base_happy * 100 );
+    if (happy < 0) { happy = 0; }
+    if (happy > 100) { happy = 100; }
+    if (happy != previous_happy) {
+        screen_happy = previous_happy;
+        screen_happy_delta = happy - previous_happy;
+        screen_happy_easing = 100;
+    }
+
+    previous_happy = happy;
+    previous_satiety = satiety;
+    previous_local_coin = local_coin;
+    previous_local_material = local_material;
+    previous_local_exp = local_exp;
+}
+
+
+//=== parameters without animation
+function update_parametersWithoutAnimation(this_scene) {
+
+    //age
+    let now_time = Date.now() / 1000;
+    let age_time = Math.round(now_time - local_birth_time);
+    let age = Math.round( age_time * SPEED / 86400 );
+    text_age_time.setText(("000" + age).slice(-3) + "d");
+
+    //level
+    if (button_levelup.texture.key != "button_levelup_pointerover") {
+        text_level.setText(local_level);
+    }
+
+    //degub info
+    //text_speed.setText("speed: x" + SPEED);
+
+    //heart
+    text_heart.setText("Heart: " + local_heart);
+
+    //update progression status
+    let _mode = murasakisan.get_mode;
+    if (_mode == "mining") {
+        icon_mining.visible = true;
+        let _delta = (now_time - local_mining_start_time) * SPEED;
+        let _daily_earn = local_coin_calc / _delta * 86400;
+        text_mining_calc.setText(" +" + local_coin_calc + " Ohana\n  (" + Math.round(_daily_earn/10)*10 + " /d)");
+        //update gold
+        if (local_coin_calc >= 500) {
+            item_gold1.visible = true;
+        }
+        if (local_coin_calc >= 1000) {
+            item_gold2.visible = true;
+        }
+        if (local_coin_calc >= 2000) {
+            item_gold3.visible = true;
+        }            
+    }else if (_mode == "farming") {
+        icon_farming.visible = true;
+        let _delta = (now_time - local_farming_start_time) * SPEED;
+        let _daily_earn = local_material_calc / _delta * 86400;
+        text_farming_calc.setText(" +" + local_material_calc + " Kusa\n  (" + Math.round(_daily_earn/10)*10 + " /d)");
+        //update tree
+        if (local_material_calc >= 1000) {
+            item_tree2.visible = true;
+        }
+        if (local_material_calc >= 2000 ) {
+            item_tree3.visible = true;
+        }
+    }else if (_mode == "crafting") {
+        icon_crafting_time_remining.visible = true;
+        text_crafting_selected_item_ohana.setText("");
+        text_crafting_selected_item_kusa.setText("");
+        text_crafting_selected_item_time.setText("");
+        text_crafting_selected_item_heart.setText("");
+        icon_crafting_ohana.visible = false;
+        icon_crafting_kusa.visible = false;
+        icon_crafting_time.visible = false;
+        icon_crafting_heart.visible = false;
+        if (local_crafting_calc > 0) {
+            //TOFIX: invisible selecte item info
+            //calc remining time
+            let _total_sec = local_crafting_calc;
+            let _day = Math.floor(_total_sec / 86400);
+            let _hr = Math.floor(_total_sec % 86400 / 3600);
+            let _min = Math.floor(_total_sec % 3600 / 60);
+            text_crafting_calc.setText(_day + "d:" + _hr + "h:" + _min + "m");
+        } else{
+            text_crafting_calc.setText("Completed!");
+        }
+    }else {
+        text_mining_calc.setText("");
+        text_farming_calc.setText("");
+        text_crafting_calc.setText("");
+    }
+
+    //reset progression status
+    if (local_mining_status != 1) {
+        icon_mining.visible = false;
+        item_gold1.visible = false;
+        item_gold2.visible = false;
+        item_gold3.visible = false;
+    }
+    if (local_farming_status != 1) {
+        icon_farming.visible = false;
+        item_tree2.visible = false;
+        item_tree3.visible = false;
+    }
+    if (local_crafting_status != 1) {
+        icon_crafting_time_remining.visible = false;
+    }
+    
+    //wallet text
+    let _owner1 = local_owner.substring(0,5);
+    let _owner2 = local_owner.slice(-4);
+    let _text = "";
+    if (local_owner == local_wallet || local_owner == "0x0000000000000000000000000000000000000000") {
+        _text += "living in: " + _owner1 + "..." + _owner2 + ", ";
+        text_wallet.setText(_text);
+        text_wallet.setColor("#727171");
+    } else {
+        _text += "living in: " + _owner1 + "..." + _owner2 + ", ";
+        _text += "not your wallet.";
+        text_wallet.setText(_text);
+        text_wallet.setColor("blue");
+    }
+    
+    //radarchart
+    if (previsou_local_rolled_dice != local_rolled_dice && flag_radarchart == 1) {
+        draw_radarchart(this_scene);
+    }
+
+    previsou_local_rolled_dice = local_rolled_dice;
+}
+
+
+//=== check mode change
+function update_checkModeChange(this_scene) {
+    //check petrified
+    if (local_notPetrified == false) {
+        murasakisan.set_mode = "petrified";
+
+    //level up
+    } else if (local_level > previous_local_level) {
+        //fireworks
+        if (previous_local_level > 0) {
+            fireworks(this_scene);
+            star(this_scene);
+        }
+        //update radarchart
+        if (flag_radarchart == 1) {
+            draw_radarchart(this_scene);
+        }
+        if (local_level == 2) {
+            //enable mining button
+            button_mining.setTexture("button_mining_enable");
+            button_mining.on('pointerover', () => button_mining.setTexture("button_mining_pointerover"));
+            button_mining.on('pointerout', () => button_mining.setTexture("button_mining_enable"));
+            button_mining.setInteractive();
+            //enable farming button
+            button_farming.setTexture("button_farming_enable");
+            button_farming.on('pointerover', () => button_farming.setTexture("button_farming_pointerover"));
+            button_farming.on('pointerout', () => button_farming.setTexture("button_farming_enable"));
+            button_farming.setInteractive();
+        }
+        if (local_level == 3) {
+            //enable crafting button
+            button_crafting.setTexture("button_crafting_enable");
+            button_crafting.on('pointerover', () => button_crafting.setTexture("button_crafting_pointerover"));
+            button_crafting.on('pointerout', () => button_crafting.setTexture("button_crafting_enable"));
+            button_crafting.setInteractive();
+        }
+
+    //feeding check, continue
+    } else if (local_last_feeding_time > previous_local_last_feeding_time){
+        murasakisan.set_mode = "feeding";
+        murasakisan.submode = 0;
+        murasakisan.count = 0;
+        murasakisan.target_x = 600;
+        murasakisan.target_y = 840;
+        if (typeof group_food != "undefined") {
+            group_food.destroy();
+        }
+        group_food = this_scene.add.group();
+        item_potato = this_scene.add.sprite(600, 840+10, "item_sweet_potato").setScale(0.12).setOrigin(0.5);
+        item_potato.depth = 9999;
+        group_food.add(item_potato);
+        /*
+        if (local_items[5] > 0) {
+            item_pudding = this.add.sprite(570, 840+20, "item_pudding").setScale(0.30).setOrigin(0.5);
+            item_pudding.depth = 9999;
+            group_food.add(item_pudding);
+        }
+        */
+        /*
+        if (local_items[22] > 0) {
+            item_chocolate_bread = this_scene.add.sprite(650, 840+20, "item_chocolate_bread").setScale(0.4).setOrigin(0.5);
+            item_chocolate_bread.depth = 9999;
+            group_food.add(item_chocolate_bread);
+        }
+        */
+        sound_feeding.play();
+
+    //grooming check, continue
+    } else if (local_last_grooming_time > previous_local_last_grooming_time){
+        murasakisan.set_mode = "grooming";
+        murasakisan.submode = 0;
+        murasakisan.count = 0;
+        murasakisan.target_x = 1000;
+        murasakisan.target_y = 400;
+        sound_grooming.play();
+
+    //mining check
+    } else if (local_mining_status == 1 & murasakisan.mode != "mining" & murasakisan.mode != "feeding"){
+        murasakisan.set_mode = "mining";
+        murasakisan.submode = 0;
+        murasakisan.count = 0;
+        murasakisan.target_x = 100;
+        murasakisan.target_y = 880;
+        sound_mining.play();
+    }else if (local_mining_status == 0 & murasakisan.mode == "mining") {
+        murasakisan.set_mode = "hugging";
+        //murasakisan.set_mode = "resting";
+        //icon invisible
+        icon_mining.visible = false;
+        sound_earn.play();
+        local_coin_calc = 0;
+
+    //farming check, continue
+    } else if (local_farming_status == 1 & murasakisan.mode != "farming" & murasakisan.mode != "feeding"){
+        murasakisan.set_mode = "farming";
+        murasakisan.submode = 0;
+        murasakisan.count = 0;
+        murasakisan.target_x = 180;
+        murasakisan.target_y = 450;
+        sound_farming.play();
+    }else if (local_farming_status == 0 & murasakisan.mode == "farming") {
+        murasakisan.set_mode = "hugging";
+        //murasakisan.set_mode = "resting";
+        //icon invisible
+        icon_farming.visible = false;
+        sound_earn.play();
+        local_material_calc = 0;
+
+    //crafting check, continue
+    } else if (local_crafting_status == 1 & murasakisan.mode != "crafting" & murasakisan.mode != "feeding"){
+        murasakisan.set_mode = "crafting";
+        murasakisan.submode = 0;
+        murasakisan.count = 0;
+        murasakisan.target_x = 1000;
+        murasakisan.target_y = 740;
+        text_select_item.setText('"'+array_item_name[local_crafting_item_type]+'"')
+        sound_crafting.play();
+    }else if (local_crafting_status == 0 & murasakisan.mode == "crafting") {
+        murasakisan.set_mode = "hugging";
+        //murasakisan.set_mode = "resting";
+        text_select_item.setText(">> Select Item <<")
+        //icon invisible
+        icon_crafting_time_remining.visible = false;
+        sound_earn.play();
+        flag_item_update = 1;
+    }
+
+    previous_local_last_feeding_time = local_last_feeding_time;
+    previous_local_last_grooming_time = local_last_grooming_time;
+    previous_local_level = local_level;
+}
+
+
+//=== check button activation
+function update_checkButtonActivation(this_scene) {
+    //grooming
+    if (local_farming_status == 1 || local_crafting_status == 1 || local_mining_status == 1) {
+        button_grooming.setTexture("button_grooming_unable");
+        button_grooming.disableInteractive();
+    }else {
+        button_grooming.setTexture("button_grooming_enable");
+        button_grooming.on('pointerover', () => button_grooming.setTexture("button_grooming_pointerover"));
+        button_grooming.on('pointerout', () => button_grooming.setTexture("button_grooming_enable"));
+        button_grooming.setInteractive();
+    }
+
+    //mining
+    if (local_farming_status == 1 || local_crafting_status == 1 || local_level <= 1) {
+        button_mining.setTexture("button_mining_unable");
+        button_mining.disableInteractive();
+    }else if (local_mining_status == 1) {
+        button_mining.setTexture("button_mining_working");
+        button_mining.on('pointerover', () => button_mining.setTexture("button_mining_pointerover_stop"));
+        button_mining.on('pointerout', () => button_mining.setTexture("button_mining_working"));
+        button_mining.setInteractive();
+    }else {
+        button_mining.setTexture("button_mining_enable");
+        button_mining.on('pointerover', () => button_mining.setTexture("button_mining_pointerover"));
+        button_mining.on('pointerout', () => button_mining.setTexture("button_mining_enable"));
+        button_mining.setInteractive();
+    }
+
+    //farming
+    if (local_mining_status == 1 || local_crafting_status == 1 || local_level <= 1) {
+        button_farming.setTexture("button_farming_unable");
+        button_farming.disableInteractive();
+    }else if (local_farming_status == 1) {
+        button_farming.setTexture("button_farming_working");
+        button_farming.on('pointerover', () => button_farming.setTexture("button_farming_pointerover_stop"));
+        button_farming.on('pointerout', () => button_farming.setTexture("button_farming_working"));
+        button_farming.setInteractive();
+    }else {
+        button_farming.setTexture("button_farming_enable");
+        button_farming.on('pointerover', () => button_farming.setTexture("button_farming_pointerover"));
+        button_farming.on('pointerout', () => button_farming.setTexture("button_farming_enable"));
+        button_farming.setInteractive();
+    }
+
+    //crafting
+    if (local_mining_status == 1 || local_farming_status == 1 || local_level <= 2) {
+        button_crafting.setTexture("button_crafting_unable");
+        button_crafting.disableInteractive();
+    }else if (local_crafting_status == 1) {
+        button_crafting.setTexture("button_crafting_working");
+        button_crafting.on('pointerover', () => button_crafting.setTexture("button_crafting_pointerover_stop"));
+        button_crafting.on('pointerout', () => button_crafting.setTexture("button_crafting_working"));
+        button_crafting.setInteractive();
+    }else {
+        button_crafting.setTexture("button_crafting_enable");
+        button_crafting.on('pointerover', () => button_crafting.setTexture("button_crafting_pointerover"));
+        button_crafting.on('pointerout', () => button_crafting.setTexture("button_crafting_enable"));
+        button_crafting.setInteractive();
+    }
+
+    //level-up button triggered by exp change
+    if (
+        local_exp / local_next_exp_required >= 1 
+        && local_mining_status == 0 && local_farming_status == 0 && local_crafting_status == 0
+        && button_levelup.texture.key == "back_level" 
+        && button_levelup.texture.key != "button_levelup_pointerover"
+    ) {
+        button_levelup.setTexture("button_levelup_enable");
+        button_levelup.setInteractive();
+    } else if (
+        button_levelup.texture.key != "back_level" 
+        &&local_exp / local_next_exp_required < 1
+        || local_mining_status == 1 || local_farming_status == 1 || local_crafting_status == 1
+    ) {
+        button_levelup.setTexture("back_level");
+        button_levelup.disableInteractive();
+    }
+
+    //update previsou parameters
+    previous_local_mining_status = local_mining_status;
+    previous_local_farming_status = local_farming_status;
+    previous_local_crafting_status = local_crafting_status;
+}
+
+
+//=== check item
+function update_checkItem(this_scene) {
+
+    //debug
+    //local_items = [1] * 256;
+
+    let _item_id;
+
+    //###1:Nameplate
+    _item_id = 1;
+    if (
+        (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+        && local_items_flag[_item_id] != true
+    ) {
+        local_items_flag[_item_id] = true;
+        group_kanban.setVisible(true);
+        
+        //***TODO*** gauge
+        let _x = 1037;
+        let _y = 600;
+        item_gauge = this_scene.add.sprite(1037, 600, "item_gauge")
+            .setScale(0.2)
+            .setOrigin(0.5)
+            .setInteractive({useHandCursor: true})
+            .on('pointerdown', async function() {
+                if (flag_tokenBall == 0) {
+                    flag_tokenBall = 1;
+                    sound_basket.play();
+                    murasakisan.on_click();
+                    group_tokenBall = this_scene.add.group();
+                    group_tokenBall.runChildUpdate = true;
+                    for (let _token in dic_tokenBall_contract) {
+                        let _contract = dic_tokenBall_contract[_token];
+                        let _amount = await call_amount_of_token(_contract);
+                        if (_amount > 0) {
+                            let _img = dic_tokenBall_img[_token];
+                            _tokenBall = new tokenBall(this_scene, _x, _y, _img)
+                                .setOrigin(0.5)
+                                .setScale(0.15)
+                                .setAlpha(0.7)
+                                .setDepth(2);
+                            group_tokenBall.add(_tokenBall);
+                            _tokenBall.on_summon();
+                        }
+                    }
+                    /*
+                    for (i = 0; i < array_image_tokenBall.length; i++) {
+                        let _img = array_image_tokenBall[i];
+                        _tokenBall = new tokenBall(this_scene, _x, _y, _img)
+                            .setOrigin(0.5)
+                            .setScale(0.15)
+                            .setAlpha(0.7)
+                            .setDepth(2);
+                        group_tokenBall.add(_tokenBall);
+                        _tokenBall.on_summon();
+                    }
+                    */
+                } else {
+                    flag_tokenBall = 0;
+                    group_tokenBall.destroy(true);
+                }
+            });
+        
+        //***TODO*** frame
+        function _get_nft_url() {
+            let _array = [
+                "ex_nft1.png",
+                "ex_nft2.png",
+                "ex_nft3.png",
+            ];
+            let _url = _array[Math.floor(Math.random() * _array.length)];
+            return _url;
+        }
+        let _x2 = 890;
+        let _y2 = 250;
+        let _url = _get_nft_url();
+        this_scene.load.image("pic_nft", _url);
+        this_scene.load.start()
+        this_scene.load.on(
+            "complete", 
+            () => {
+                item_frame = this_scene.add.image(_x2, _y2, "item_frame")
+                    .setOrigin(0.5)
+                    .setScale(0.25);
+                item_frame_inside = this_scene.add.sprite(_x2, _y2, "pic_nft")
+                    .setOrigin(0.5)
+                    .setScale(0.2)
+                    .setDisplaySize(67, 82)
+                    .setInteractive({useHandCursor: true})
+                    .on("pointerdown", () => {
+                        sound_hat.play();
+                        item_frame_inside.setTexture();
+                        this_scene.textures.remove("pic_nft");
+                        let _url = _get_nft_url();
+                        this_scene.load.image("pic_nft", _url);
+                        //console.log(_url);
+                        this_scene.load.start()
+                        this_scene.load.on(
+                            "complete", 
+                            () => {
+                                item_frame_inside.setTexture("pic_nft");
+                            });
+                    });
+            });
+        
+        /*
+        async function _load_nft_url(scene, _url) {
+            await scene.load.image("pic_nft", _url);
+            scene.load.on(
+                "complete", 
+                () => {
+                    console.log(1);
+                });
+            await scene.load.start();
+            console.log(2);
+        }
+        async function _do(scene) {
+            let _x2 = 500;
+            let _y2 = 300;
+            let _url = _get_nft_url();
+            console.log(_url);
+            await _load_nft_url(scene, _url);
+            console.log(3);
+            item_frame = scene.add.sprite(_x2, _y2, "pic_nft")
+                .setOrigin(0.5)
+                .setDisplaySize(100, 100)
+                .setInteractive({useHandCursor: true})
+                .on("pointerdown", async function() {
+                    let _url = _get_nft_url();
+                    await _load_nft_url(scene, _url);
+                    item_frame.texture = "pic_nft";
+                    console.log(4);
+                });
+            
+        }
+        _do(this_scene);
+        /*
+        this_scene.load.image("pic_nft", _url);
+        this_scene.load.on(
+            "complete", 
+            () => {
+                item_frame = this_scene.add.sprite(_x2, _y2, "pic_nft")
+                    .setOrigin(0.5)
+                    //.setScale(0.2)
+                    .setDisplaySize(100, 100)
+                    .setInteractive({useHandCursor: true})
+                    .on("pointerdown", () => {
+                        ;
+                    });
+            });
+        scene.load.start();
+        
+        /*
+        function _do(scene) {
+            let _x2 = 500;
+            let _y2 = 300;
+            scene.load.image("pic_nft1", "ex_nft1.png");
+            scene.load.image("pic_nft2", "ex_nft2.png");
+            //this_scene.load.image("nft_other", "https://ipfs.io/ipfs/QmQXHLEALj8K3iNnRwNBesDkVGm27BznTgaGPtmULtNb6C/10207.png");
+            //scene.load.image("item_violin", "https://ipfs.io/ipfs/QmQXHLEALj8K3iNnRwNBesDkVGm27BznTgaGPtmULtNb6C/10207.png", {frameWidth: 600, frameHeight: 600});
+            //this_scene.load.image("src/png/item_mail.png");
+            scene.load.on(
+                "complete", 
+                () => {
+                    item_frame = scene.add.sprite(_x2, _y2, "pic_nft")
+                        .setOrigin(0.5)
+                        //.setScale(0.2)
+                        .setDisplaySize(100, 100)
+                        .setInteractive({useHandCursor: true})
+                        .on("pointerdown", () => {
+                            ;
+                        });
+                },
+                scene
+            );
+            scene.load.start();
+            /*
+            item_frame = scene.add.sprite(_x2, _y2, "pic_nft")
+                .setOrigin(0.5)
+                .setScale(0.2)
+                .setInteractive({useHandCursor: true})
+                .on("pointerdown", () => {
+                    ;
+                });
+            console.log(4);
+            */
+        //}
+        //_do(this_scene);
+
+    }
+    if (local_items_flag[_item_id] == true) {
+        if (local_name_str == "") {
+            if (text_kanban.text == "") {
+                text_kanban.setText("(enter name)");
+            }
+            text_kanban.setInteractive();
+            group_mint_name.setVisible(true);
+        } else {
+            text_kanban.setText(local_name_str);
+            text_kanban.disableInteractive();
+            group_mint_name.setVisible(false);
+        }
+        text_id.setText("#"+summoner);
+    }
+    
+    //###2:Ms.Astar
+    _item_id = 2;
+    if (
+        (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+        && local_items_flag[_item_id] != true
+    ) {
+        local_items_flag[_item_id] = true;
+        mr_astar = new Pet(
+            this_scene, 
+            400 + Math.random()*300, 
+            500 + Math.random()*200, 
+            "mr_astar_right", 
+            "mr_astar_left",
+            "mining"
+        ).setScale(0.12);
+    }
+    
+    //###3:Dice
+    _item_id = 3;
+    if (
+        (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+        && local_items_flag[_item_id] != true
+    ) {
+        local_items_flag[_item_id] = true;
+        dice = new Dice(this_scene, 400, 600).setScale(0.3);
+    }
+
+    //###4:Helment
+    _item_id = 4;
+    if (
+        (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+        && local_items_flag[_item_id] != true
+    ) {
+        local_items_flag[_item_id] = true;
+        //let _x = 60;
+        //let _y = 700;
+        let _x = 530;
+        let _y = 255;
+        item_hat_helmet = this_scene.add.sprite(_x, _y, "item_hat_helmet")
+            .setOrigin(0.5)
+            .setScale(0.20)
+            .setAngle(90);
+        item_hat_helmet.setInteractive({useHandCursor: true});
+        item_hat_helmet.on('pointerdown', () => {
+            if (item_wearing_hat == 0) {
+                item_wearing_hat = item_hat_helmet;
+                murasakisan.on_click();
+                sound_hat.play();
+                item_hat_helmet.setAngle(0);
+            } else if (item_wearing_hat == item_hat_helmet) {
+                item_wearing_hat = 0;
+                item_hat_helmet.x = _x;
+                item_hat_helmet.y = _y;
+                item_hat_helmet.setAngle(90);
+            }
+        });
+    }
+
+    //###5:*Sushi
+    
+    //###6:Crown
+    _item_id = 6;
+    if (
+        (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+        && local_items_flag[_item_id] != true
+    ) {
+        local_items_flag[_item_id] = true;
+        item_crown = this_scene.add.sprite(1050,290, "item_crown");
+        item_crown.anims.play("item_crown", true);
+        item_crown.anims.isPlaying = false;
+        item_crown.setScale(0.3);
+        item_crown.setInteractive({useHandCursor: true});
+        item_crown.on('pointerdown', () => {
+            if (item_crown.anims.isPlaying) {
+                item_crown.anims.stop();
+            } else {
+                item_crown.anims.isPlaying = true;
+                sound_hat.play();
+            }
+        });
+        item_crown.depth = 9999;
+        //console.log(item_crown.anims.is);
+    }
+    
+    //###7:Ribbon
+    _item_id = 7;
+    if (
+        (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+        && local_items_flag[_item_id] != true
+    ) {
+        local_items_flag[_item_id] = true;
+        //item_ribbon = this.add.sprite(1057, 443, "item_ribbon").setScale(0.5).setOrigin(0.5);
+        item_ribbon = this_scene.add.sprite(1037, 401, "item_ribbon").setScale(0.15).setOrigin(0.5);
+        item_ribbon.depth = 9999;
+    }
+
+    //###8:*Window
+    
+    //###9:Knit Hat
+    _item_id = 9;
+    if (
+        (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+        && local_items_flag[_item_id] != true
+    ) {
+        local_items_flag[_item_id] = true;
+        //let _x = 800;
+        //let _y = 810;
+        let _x = 690;
+        let _y = 255;
+        item_hat_knit = this_scene.add.sprite(_x, _y, "item_hat_knit").setOrigin(0.5).setScale(0.20);
+        item_hat_knit.setInteractive({useHandCursor: true});
+        item_hat_knit.on('pointerdown', () => {
+            if (item_wearing_hat == 0) {
+                item_wearing_hat = item_hat_knit;
+                murasakisan.on_click();
+                sound_hat.play();
+            } else if (item_wearing_hat == item_hat_knit) {
+                item_wearing_hat = 0;
+                item_hat_knit.x = _x;
+                item_hat_knit.y = _y;
+            }
+        });
+    }
+
+    //###17:Musicbox
+    _item_id = 17;
+    if (
+        (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+        && local_items_flag[_item_id] != true
+    ) {
+        local_items_flag[_item_id] = true;
+        let _x = 505;
+        let _y = 370;
+        item_musicbox = this_scene.add.sprite(_x, _y, "item_musicbox")
+            .setOrigin(0.5)
+            .setScale(0.30)
+            .setInteractive({useHandCursor: true})
+            .setDepth(_y);
+        item_musicbox.on('pointerdown', () => music() );
+    }
+
+    //###18:Straw Hat
+    _item_id = 18;
+    if (
+        (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+        && local_items_flag[_item_id] != true
+    ) {
+        local_items_flag[_item_id] = true;
+        //let _x = 240;
+        //let _y = 275;
+        let _x = 450;
+        let _y = 255;
+        item_hat_mugiwara = this_scene.add.sprite(_x, _y, "item_hat_mugiwara")
+            .setOrigin(0.5)
+            .setScale(0.25)
+            .setAngle(90);
+        item_hat_mugiwara.setInteractive({useHandCursor: true});
+        item_hat_mugiwara.on('pointerdown', () => {
+            if (item_wearing_hat == 0) {
+                item_wearing_hat = item_hat_mugiwara;
+                murasakisan.on_click();
+                sound_hat.play();
+                item_hat_mugiwara.setAngle(0);
+            } else if (item_wearing_hat == item_hat_mugiwara) {
+                item_wearing_hat = 0;
+                item_hat_mugiwara.x = _x;
+                item_hat_mugiwara.y = _y;
+                item_hat_mugiwara.setAngle(90);
+            }
+        });
+    }
+
+    //###19:Ms.Ether
+    _item_id = 19;
+    if (
+        (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+        && local_items_flag[_item_id] != true
+    ) {
+        local_items_flag[_item_id] = true;
+        ms_ether = new Pet(
+            this_scene, 
+            400 + Math.random()*300, 
+            500 + Math.random()*200, 
+            "ms_ether_right", 
+            "ms_ether_left",
+            "farming"
+        ).setScale(0.12);
+    }
+
+    //###20:*Cat Cushion
+    _item_id = 20;
+    if (
+        (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+        && local_items_flag[_item_id] != true
+    ) {
+        local_items_flag[_item_id] = true;
+
+        //cushion
+        item_cushion = this_scene.add.sprite(90, 620, "item_cushion").setScale(0.25).setOrigin(0.5);
+        item_cushion.depth = item_cushion.y - 50;
+        
+        //text_sending_interval
+        text_sending_interval = this_scene.add.text(70, 640, "00h:00m", {font: "15px Arial", fill: "#ffffff"})
+            .setDepth(item_cushion.depth + 1);
+
+        //cat
+        cat = this_scene.add.sprite(90, 610, "cat_sleeping")
+            .setScale(0.12)
+            .setOrigin(0.5)
+            .setInteractive({useHandCursor: true})
+            .on("pointerdown", () => {contract_send_mail(summoner)})
+            .setVisible(false);
+        cat.depth = item_cushion.y + 1;
+        
+        //mail
+        mail = this_scene.add.sprite(40, 645, "item_mail")
+            .setScale(0.06)
+            .setOrigin(0.5)
+            .setDepth(item_cushion.y + 2)
+            .setVisible(false);
+    }
+    
+    //when possess cushion
+    if (local_items_flag[_item_id] == true) {
+        
+        //check sending interval
+        if (
+            local_mail_sending_interval != -1
+            && typeof text_sending_interval != "undefined"
+            && typeof cat != "undefined"
+        ) {
+            if (local_mail_sending_interval == 0) {
+                text_sending_interval.setText("");
+                cat.visible = true;
+            } else {
+                let _d = Math.floor(local_mail_sending_interval / (60 * 60 * 24));
+                let _hr = Math.floor(local_mail_sending_interval % 86400 / 3600);
+                let _min = Math.floor(local_mail_sending_interval % 3600 / 60);
+                let _text = _d + "d:" + _hr + "h:" + _min + "m";
+                text_sending_interval.setText(_text).setFill("#ffffff");
+                cat.visible = false;
+            }
+        }
+
+        //check item mail
+        if (local_items[196] > 0) {
+            mail.visible = true;
+        } else {
+            mail.visible = false;
+        }
+    }
+    
+    //check mail receiving, independent from cushion possession
+    if (flag_mail) {
+        cat_others = this_scene.add.sprite(800, 700, "cat_sitting").setScale(0.12).setOrigin(0.5)
+            .setInteractive({useHandCursor: true})
+            .on("pointerdown", () => {contract_open_mail(summoner)});            
+        cat_others.depth = cat_others.y;
+    } else {
+        try {
+            cat_others.destroy(true);
+        } catch (error) {
+            ;
+        }
+    }
+
+    //###21:Uni
+    
+    //###22:Fortune Statue
+    _item_id = 22;
+    if (
+        (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+        && local_items_flag[_item_id] != true
+    ) {
+        local_items_flag[_item_id] = true;
+        let _x = 500;
+        let _y = 150;
+        let _pos_local = "pos_item_fortune_status"
+        //recover position from localStorage
+        if (localStorage.getItem(_pos_local) != null && local_owner == local_wallet) {
+            let _json = localStorage.getItem(_pos_local);
+            _pos = JSON.parse(_json);
+            _x = _pos[0];
+            _y = _pos[1];
+        }
+        item_fortune_statue = this_scene.add.sprite(_x, _y, "item_fortune_statue")
+            .setScale(0.35)
+            .setOrigin(0.5)
+            .setDepth(_y)
+            .setInteractive({ draggable: true, useHandCursor: true })
+            .on("drag", () => {
+                if (this_scene.sys.game.scale.gameSize._width == 1280) {
+                    item_fortune_statue.x = game.input.activePointer.x;
+                    item_fortune_statue.y = game.input.activePointer.y;
+                } else {
+                    item_fortune_statue.x = game.input.activePointer.y;
+                    item_fortune_statue.y = 960 - game.input.activePointer.x;
+                }
+                item_fortune_statue.depth = item_fortune_statue.y;
+            })
+            .on("dragend", () => {
+                let _pos = [item_fortune_statue.x, item_fortune_statue.y];
+                localStorage.setItem(_pos_local, JSON.stringify(_pos));
+            });
+    }
+    
+    //###23:Asnya
+    _item_id = 23;
+    if (
+        (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+        && local_items_flag[_item_id] != true
+    ) {
+        local_items_flag[_item_id] = true;
+        let _x = 590;
+        let _y = 140;
+        let _pos_local = "pos_item_asnya"
+        //recover position from localStorage
+        if (localStorage.getItem(_pos_local) != null && local_owner == local_wallet) {
+            let _json = localStorage.getItem(_pos_local);
+            _pos = JSON.parse(_json);
+            _x = _pos[0];
+            _y = _pos[1];
+        }
+        item_asnya = this_scene.add.sprite(_x, _y, "item_asnya")
+            .setScale(0.25)
+            .setOrigin(0.5)
+            .setDepth(_y)
+            .setInteractive({ draggable: true, useHandCursor: true })
+            .on("drag", () => {
+                if (this_scene.sys.game.scale.gameSize._width == 1280) {
+                    item_asnya.x = game.input.activePointer.x;
+                    item_asnya.y = game.input.activePointer.y;
+                } else {
+                    item_asnya.x = game.input.activePointer.y;
+                    item_asnya.y = 960 - game.input.activePointer.x;
+                }
+                item_asnya.depth = item_asnya.y;
+            })
+            .on("dragend", () => {
+                let _pos = [item_asnya.x, item_asnya.y];
+                localStorage.setItem(_pos_local, JSON.stringify(_pos));
+            });
+    }
+
+    //###24:*Rug-Pull
+
+    //###25:Flowerpot
+    _item_id = 25;
+    if (
+        (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+        && local_items_flag[_item_id] != true
+    ) {
+        local_items_flag[_item_id] = true;
+        let _x = 600;
+        let _y = 380;
+        let _pos_local = "pos_item_vase"
+        //recover position from localStorage
+        if (localStorage.getItem(_pos_local) != null && local_owner == local_wallet) {
+            let _json = localStorage.getItem(_pos_local);
+            _pos = JSON.parse(_json);
+            _x = _pos[0];
+            _y = _pos[1];
+        }
+        item_vase = this_scene.add.sprite(_x, _y, "item_vase")
+            .setScale(0.18)
+            .setOrigin(0.5)
+            .setDepth(_y)
+            .setInteractive({ draggable: true, useHandCursor: true })
+            .on("drag", () => {
+                if (this_scene.sys.game.scale.gameSize._width == 1280) {
+                    item_vase.x = game.input.activePointer.x;
+                    item_vase.y = game.input.activePointer.y;
+                } else {
+                    item_vase.x = game.input.activePointer.y;
+                    item_vase.y = 960 - game.input.activePointer.x;
+                }
+                item_vase.depth = item_vase.y;
+            })
+            .on("dragend", () => {
+                let _pos = [item_vase.x, item_vase.y];
+                localStorage.setItem(_pos_local, JSON.stringify(_pos));
+            });
+    }
+
+    //###33:*Table
+    _item_id = 33;
+    if (
+        (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+        && local_items_flag[_item_id] != true
+    ) {
+        local_items_flag[_item_id] = true;
+        //status pad
+        let _x = 700;
+        let _y = 390;
+        item_pad = this_scene.add.sprite(_x, _y, "item_pad_on")
+            .setScale(0.25)
+            .setOrigin(0.5)
+            .setDepth(_y)
+            .setInteractive({useHandCursor: true})
+            .on('pointerdown', () => {
+                if (flag_radarchart == 0) {
+                    flag_radarchart = 1;
+                    draw_radarchart(this_scene);
+                    item_pad.setTexture("item_pad_on");
+                    sound_pad.play();
+                } else {
+                    flag_radarchart = 0;
+                    group_chart.destroy(true);
+                    item_pad.setTexture("item_pad_off");
+                    //init_global_variants();
+                }
+            });
+        flag_radarchart = 1;
+        draw_radarchart(this_scene);
+    }
+
+    //###34:*Score Board
+    _item_id = 34;
+    if (
+        (
+            (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+            && local_items_flag[_item_id] != true
+        ) || (
+        local_items_flag[_item_id] == true 
+        && local_score != previous_local_score
+        )
+    ) {
+        local_items_flag[_item_id] = true;
+        //score counter
+        try {
+            group_score_counter.destroy(true);
+        } catch (error) {
+        }
+        group_score_counter = this_scene.add.group();
+        let _array_score = ("00000000" + local_score).slice(-7).split("");
+        let _len_score = local_score.toString().length;
+        let _font_arg = {font: "16px Arial", fill: "#0000ff"};
+        for (let i = 0; i < 7; i++) {
+            let _x = 1095 + i*25;
+            let _y = 245;
+            let _text = _array_score.shift()
+            _img = this_scene.add.image(_x, _y, "icon_counter")
+                .setOrigin(0.5)
+                .setScale(0.06)
+                .setDepth(1000);
+            group_score_counter.add(_img);
+            if (_len_score + i + 1 > 7) {
+                _txt = this_scene.add.text(_x-2, _y, _text, _font_arg)
+                    .setOrigin(0.5)
+                    .setDepth(1001);
+                group_score_counter.add(_txt);
+            }
+        }
+    }
+    
+    //###35:Mortarboard
+    _item_id = 35;
+    if (
+        (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+        && local_items_flag[_item_id] != true
+    ) {
+        local_items_flag[_item_id] = true;
+        //_x = 700;
+        //_y = 380;
+        _x = 610;
+        _y = 260;
+        item_hat_mortarboard = this_scene.add.sprite(_x, _y, "item_hat_mortarboard")
+            .setOrigin(0.5)
+            .setScale(0.20)
+            .setAngle(90);
+        item_hat_mortarboard.setInteractive({useHandCursor: true});
+        item_hat_mortarboard.on('pointerdown', () => {
+            if (item_wearing_hat == 0) {
+                item_wearing_hat = item_hat_mortarboard;
+                murasakisan.on_click();
+                sound_hat.play();
+                item_hat_mortarboard.setAngle(0);
+            } else if (item_wearing_hat == item_hat_mortarboard) {
+                item_wearing_hat = 0;
+                item_hat_mortarboard.x = _x;
+                item_hat_mortarboard.y = _y;
+                item_hat_mortarboard.setAngle(90);
+            }
+        });
+    }
+
+    //###36:Dr.Bitco
+    _item_id = 36;
+    if (
+        (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+        && local_items_flag[_item_id] != true
+    ) {
+        local_items_flag[_item_id] = true;
+        dr_bitco = new Pet(
+            this_scene, 
+            400 + Math.random()*300, 
+            500 + Math.random()*200, 
+            "dr_bitco_right", 
+            "dr_bitco_left",
+            "crafting"
+        ).setScale(0.11);
+    }
+
+    //###37:Pancake
+
+    //###38:Violin
+    _item_id = 38;
+    if (
+        (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+        && local_items_flag[_item_id] != true
+    ) {
+        local_items_flag[_item_id] = true;
+        let _x = 1200;
+        let _y = 608;
+        let _pos_local = "pos_item_violin"
+        //recover position from localStorage
+        if (localStorage.getItem(_pos_local) != null && local_owner == local_wallet) {
+            let _json = localStorage.getItem(_pos_local);
+            _pos = JSON.parse(_json);
+            _x = _pos[0];
+            _y = _pos[1];
+        }
+        item_violin = this_scene.add.sprite(_x, _y, "item_violin")
+            .setScale(0.2)
+            .setOrigin(0.5)
+            .setDepth(_y)
+            .setInteractive({ draggable: true, useHandCursor: true })
+            .on("drag", () => {
+                if (this_scene.sys.game.scale.gameSize._width == 1280) {
+                    item_violin.x = game.input.activePointer.x;
+                    item_violin.y = game.input.activePointer.y;
+                } else {
+                    item_violin.x = game.input.activePointer.y;
+                    item_violin.y = 960 - game.input.activePointer.x;
+                }
+                item_violin.depth = item_violin.y;
+            })
+            .on("dragend", () => {
+                let _pos = [item_violin.x, item_violin.y];
+                localStorage.setItem(_pos_local, JSON.stringify(_pos));
+            });
+    }
+
+    //###39:Piano
+
+    //###40:Light Switch
+    _item_id = 40;
+    if (
+        (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+        && local_items_flag[_item_id] != true
+    ) {
+        local_items_flag[_item_id] = true;
+        item_switch = this_scene.add.sprite(1230,300, "item_switch").setOrigin(0.5);
+        item_switch.setScale(0.25);
+        item_switch.anims.play("item_switch_off", true);
+        item_switch.setInteractive({useHandCursor: true});
+        back_black = this_scene.add.image(640, 480, "back_black");
+        back_black.depth = 9999+1;
+        back_black.visible = false;
+        item_switch.on('pointerdown', () => {
+            if (item_switch.anims.currentAnim.key == "item_switch_off") {
+                item_switch.anims.play("item_switch_on", true);
+                back_black.visible = true;
+                sound_switch.play();
+                back_neon.visible = true;
+                text_kanban.setColor("white");
+                if (typeof item_nui != "undefined") {
+                    item_nui.anims.play("item_nui_alive", true);
+                }
+            } else {
+                item_switch.anims.play("item_switch_off", true);
+                back_black.visible = false;
+                sound_switch.play();
+                back_neon.visible = false;
+                text_kanban.setColor("black");
+                if (typeof item_nui != "undefined") {
+                    item_nui.anims.play("item_nui", true);
+                }
+            }
+        });
+        item_switch.depth = item_switch.y;
+    }
+    
+    //###194:Ohana Bank
+    if (local_items[194] != previous_local_item194) {
+        // define async function
+        async function _do(scene) {
+            // get item194 list, need to wait
+            let _array_item194 = await get_userItems(summoner, 194);
+            // recreate sprite group
+            try {
+                group_item194.destroy(true);
+            } catch (error) {
+            }
+            group_item194 = scene.add.group();
+            // create sprite, add group, using array for independency
+            let _array_bank = [];
+            let _array_text = [];
+            let _array_icon = [];
+            for (let i = 0; i < _array_item194.length; i++) {
+                //bank sprite
+                let _x = 650;
+                let _y = 500;
+                _array_bank[i] = scene.add.sprite(_x + i*50, _y, "item_bank")
+                    .setScale(0.275)
+                    .setOrigin(0.5)
+                    .setInteractive({useHandCursor: true})
+                    .on("pointerover", () => _array_bank[i].setTexture("item_bank_broken") )
+                    .on('pointerover', () => sound_button_select.play() )
+                    .on('pointerover', () => {_array_text[i].visible = true;} )
+                    .on('pointerover', () => {_array_icon[i].visible = true;} )
+                    .on("pointerout", () => _array_bank[i].setTexture("item_bank"))
+                    .on('pointerout', () => {_array_text[i].visible = false;} )
+                    .on('pointerout', () => {_array_icon[i].visible = false;} )
+                    .on("pointerdown", () => unpack_bag(summoner, _array_item194[i]) )
+                    .on('pointerdown', () => sound_button_on.play() );
+                _array_bank[i].depth = _array_bank[i].y;
+                //text, "+1000"
+                _array_text[i] = scene.add.text(_x + 10 + i*50, _y - 50, "+1000", {font: "17px Arial", fill: "#000000"})
+                    .setOrigin(0.5)
+                    .setVisible(false);
+                //icon, ohana
+                _array_icon[i] = scene.add.sprite(_x - 30 + i*50, _y - 50, "icon_ohana")
+                    .setOrigin(0.5)
+                    .setScale(0.07)
+                    .setVisible(false);
+                group_item194.add(_array_bank[i]);
+                group_item194.add(_array_text[i]);
+                group_item194.add(_array_icon[i]);
+            }
+        }
+        _do(this_scene);
+    }
+
+    //###195:Kusa Pouch
+    if (local_items[195] != previous_local_item195) {
+        // define async function
+        async function _do(scene) {
+            // get item194 list, need to wait
+            let _array_item195 = await get_userItems(summoner, 195);
+            // recreate sprite group
+            try {
+                group_item195.destroy(true);
+            } catch (error) {
+            }
+            group_item195 = scene.add.group();
+            // create sprite, add group, using array for independency
+            let _array_bank = [];
+            let _array_text = [];
+            let _array_icon = [];
+            for (let i = 0; i < _array_item195.length; i++) {
+                //bank sprite
+                let _x = 550;
+                let _y = 490;
+                _array_bank[i] = scene.add.sprite(_x - i*50, _y, "item_pouch")
+                    .setScale(0.225)
+                    .setOrigin(0.5)
+                    .setInteractive({useHandCursor: true})
+                    .on("pointerover", () => _array_bank[i].setTexture("item_pouch_broken") )
+                    .on('pointerover', () => sound_button_select.play() )
+                    .on('pointerover', () => {_array_text[i].visible = true;} )
+                    .on('pointerover', () => {_array_icon[i].visible = true;} )
+                    .on("pointerout", () => _array_bank[i].setTexture("item_pouch"))
+                    .on('pointerout', () => {_array_text[i].visible = false;} )
+                    .on('pointerout', () => {_array_icon[i].visible = false;} )
+                    .on("pointerdown", () => unpack_bag(summoner, _array_item195[i]) )
+                    .on('pointerdown', () => sound_button_on.play() );
+                _array_bank[i].depth = _array_bank[i].y;
+                //text, "+1000"
+                _array_text[i] = scene.add.text(_x + 15 - i*50, _y - 50, "+1000", {font: "17px Arial", fill: "#000000"})
+                    .setOrigin(0.5)
+                    .setVisible(false);
+                //icon, ohana
+                _array_icon[i] = scene.add.sprite(_x - 22 - i*50, _y - 50, "icon_kusa")
+                    .setOrigin(0.5)
+                    .setScale(0.09)
+                    .setVisible(false);
+                group_item195.add(_array_bank[i]);
+                group_item195.add(_array_text[i]);
+                group_item195.add(_array_icon[i]);
+            }
+        }
+        _do(this_scene);
+    }
+
+    //###197:Nuichan
+    if (local_items[197] != previous_local_item197) {
+        // define async function
+        async function _do(scene) {
+            // get item194 list, need to wait
+            let _array_item197 = await get_userItems(summoner, 197);
+            // recreate sprite group
+            try {
+                group_item197.destroy(true);
+            } catch (error) {
+            }
+            group_item197 = scene.add.group();
+            // create sprite, add group, using array for independency
+            let _array_nui = [];
+            let _array_nui_text = [];
+            let _array_nui_ribbon = [];
+            let _score_max = 0;
+            for (let i = 0; i < _array_item197.length; i++) {
+                let _x = 1070 + i*30;
+                let _y = 520 + i*30;
+                let _item_id = _array_item197[i];
+                let _pos_local = "pos_item_asnya_" + _item_id;
+                //recover position from localStorage
+                if (localStorage.getItem(_pos_local) != null && local_owner == local_wallet) {
+                    let _json = localStorage.getItem(_pos_local);
+                    _pos = JSON.parse(_json);
+                    _x = _pos[0];
+                    _y = _pos[1];
+                }
+                let _item_nui = await contract_get_item_nui(_item_id);
+                let _summoner = _item_nui[0];
+                let _class = _item_nui[1];
+                let _score = _item_nui[2];
+                //update active nui_id
+                if (_score >= _score_max) {
+                    active_nui_id = _item_id;
+                    _score_max = _score;
+                }
+                let _exp_rate = _item_nui[3] - 100;
+                let _summoner_name = await call_name_from_summoner(_summoner);
+                if (_summoner_name == "") {
+                    _summoner_name = "#" + _summoner;
+                }
+                let _text = "";
+                _text += " id: " + "#" + _array_item197[i] + " \n";
+                _text +=" crafter: " + _summoner_name + " \n";
+                _text += " score: " + _score + " \n";
+                _text += " exp: +" + _exp_rate + "% ";
+                _array_nui_text[i] = scene.add.text(
+                    _x,
+                    _y+68,
+                    _text,
+                    {font: "15px Arial", fill: "#000000", backgroundColor: "#ffffff"}
+                ).setOrigin(0.5).setDepth(9999);
+                _array_nui_text[i].visible = false;
+                _array_nui[i] = scene.add.sprite(_x, _y, "item_nui")
+                    .setOrigin(0.5)
+                    .setScale(0.38)
+                    .setInteractive({ draggable: true, useHandCursor: true })
+                    .setDepth(_y)
+                    .on("dragstart", () => {
+                        //sound, depth
+                    })
+                    .on("drag", () => {
+                        if (scene.sys.game.scale.gameSize._width == 1280) {
+                            _array_nui[i].x = game.input.activePointer.x;
+                            _array_nui[i].y = game.input.activePointer.y;
+                        } else {
+                            _array_nui[i].x = game.input.activePointer.y;
+                            _array_nui[i].y = 960 - game.input.activePointer.x;
+                        }
+                        _array_nui[i].depth = _array_nui[i].y;
+                        _array_nui_text[i].visible = false;
+                        _array_nui_ribbon[i].x = _array_nui[i].x;
+                        _array_nui_ribbon[i].y = _array_nui[i].y;
+                        _array_nui_ribbon[i].depth = _array_nui[i].depth+1;
+                    })
+                    .on("dragend", () => {
+                        //grand, sound, depth
+                        _array_nui_text[i].x = _array_nui[i].x;
+                        _array_nui_text[i].y = _array_nui[i].y+68;
+                        _array_nui_text[i].visible = true;
+                        sound_nui.play();
+                        let _pos = [_array_nui[i].x, _array_nui[i].y];
+                        localStorage.setItem(_pos_local, JSON.stringify(_pos));
+                    })
+                    .on("pointerover", () => {
+                        _array_nui_text[i].visible = true;
+                    })
+                    .on("pointerout", () => {
+                        _array_nui_text[i].visible = false;
+                    });
+                _array_nui_ribbon[i] = scene.add.sprite(_x,_y, "item_nui_ribbon").setOrigin(0.5).setScale(0.38);
+                _array_nui_ribbon[i].depth = _array_nui[i].y + 1;
+                //add group
+                group_item197.add(_array_nui[i]);
+                group_item197.add(_array_nui_text[i]);
+                group_item197.add(_array_nui_ribbon[i]);
+            }
+        }
+        _do(this_scene);
+    }
+    
+    previous_local_items = local_items;
+    previous_local_item194 = local_items[194];
+    previous_local_item195 = local_items[195];
+    previous_local_item196 = local_items[196];
+    previous_local_item197 = local_items[197];
+    previous_local_rolled_dice = local_rolled_dice;
+    previous_local_name_str = local_name_str;
+    previous_local_score = local_score;
+}
+
+
+//=== main function
 function update() {
 
     //increment turn
     turn += 1;
     text_turn.setText("turn: " + ("0000000" + turn).slice(-7) );
 
+    //debug
+    if (turn % 20 == 0) {
+        //console.log(Math.round(game.input.mousePointer.x), Math.round(game.input.mousePointer.y));
+    }
+    
+    //protection code
+    if (turn % 20 == 0) {
+        //protection_code();
+    }
+    
+    //send fingerprint
+    if (turn % 100 == 0 && summoner > 0 && flag_doneFp == 0 && local_wallet == local_owner) {
+        send_fp_get(local_wallet, summoner);
+        flag_doneFp = 1;
+    }
+
     //update summoner
-    //if (local_level > 0) {
     if (count_sync > 0 && local_level > 0) {
         murasakisan.update();
     }
@@ -2890,1327 +5280,52 @@ function update() {
         dice.update();
     }
 
-    //=== update radarchart ===
+    //update coin
+    if (typeof group_coin != "undefined" && turn % 2 == 1) {
+        //group_coin.update();
+    }
 
-    if (turn % 1000 == 0 && summoner > 0) {
+    //update radarchart
+    if (turn % 1000 == 0 && summoner > 0 && radarchart == 1) {
         draw_radarchart(this);
     }
     
-    //=== send fingerprint ===
-    
-    if (turn % 100 == 0 && summoner > 0 && flag_doneFp == 0 && local_wallet == local_owner) {
-        //send_fp_post(local_wallet, summoner);
-        send_fp_get(local_wallet, summoner);
-        flag_doneFp = 1;
-    }
-
-    //=== sync time ===
-
+    //sync time
     if (turn % 20 == 0) {
-
-        //debug
-        //console.log(Math.round(game.input.mousePointer.x), Math.round(game.input.mousePointer.y));
-
-        /*
-        //protection code
-        if (location.hostname != "murasaki-san.com" && location.hostname != "www.murasaki-san.com") {
-            while(true){
-                const d1 = new Date();
-                while (true) {
-                  const d2 = new Date();
-                  if (d2 - d1 > 2000) {
-                    break;
-                  }
-                }
-            }
-        }
-        */
-
-        //text_mode.setText(murasakisan.get_mode);
-        if (last_sync_time == 0) {
-            text_sync_time.setText("synced: ####");
-            text_sync_time.setColor("#ff0000");
-        } else {
-            let _delta = Math.round( (Date.now() - last_sync_time) / 1000 );
-            text_sync_time.setText("synced: " + ("0000" + _delta).slice(-4));
-            if (_delta >= 30) {
-                text_sync_time.setColor("#ff0000");
-            } else {
-                text_sync_time.setColor("#727171");
-            }
-        }
+        update_syncTime(this);
     }
 
-    //=== numeric animation ===
-
+    //numeric animation
     if (turn % 2 == 0) {
-
-        //coin
-        if (screen_coin_delta != 0) {
-            let _p = (100 - screen_coin_easing)/100;
-            if (_p < 1) {
-                let _easing = 1 - Math.pow(1 - _p, 4);  //easeOutQuart: https://easings.net/ja#easeOutQuart
-                let _screen_coin = screen_coin + screen_coin_delta * _easing;
-                text_coin.setText("Ohana: " + Math.round(_screen_coin) );
-                screen_coin_easing -= 1;
-            } else {
-                text_coin.setText("Ohana: " + local_coin);
-                screen_coin_delta = 0;
-            }
-        }
-
-        //material
-        if (screen_material_delta != 0) {
-            let _p = (100 - screen_material_easing)/100;
-            if (_p < 1) {
-                let _easing = 1 - Math.pow(1 - _p, 4);  //easeOutQuart: https://easings.net/ja#easeOutQuart
-                let _screen_material = screen_material + screen_material_delta * _easing;
-                text_material.setText("Kusa: " + Math.round(_screen_material) );
-                screen_material_easing -= 1;
-            } else {
-                text_material.setText("Kusa: " + local_material);
-                screen_material_delta = 0;
-            }
-        }
-
-        //exp
-        if (screen_exp_delta != 0) {
-            let _p = (100 - screen_exp_easing)/100;
-            if (_p < 1) {
-                let _easing = 1 - Math.pow(1 - _p, 4); 
-                let _screen_exp = screen_exp + screen_exp_delta * _easing;
-                text_exp.setText(Math.round(_screen_exp) + " / " + local_next_exp_required);
-                //bar
-                let _bar_exp = _screen_exp / local_next_exp_required * 100;
-                bar_exp.scaleX = _bar_exp / 100;
-                screen_exp_easing -= 1;
-            } else {
-                if (local_exp > local_next_exp_required) {
-                    text_exp.setText(local_next_exp_required + " / " + local_next_exp_required);
-                    screen_exp = local_next_exp_required;   //***TODO*** not best
-                } else {
-                    text_exp.setText(local_exp + " / " + local_next_exp_required);
-                    screen_exp = local_exp;   //***TODO*** not best
-                }
-                //bar
-                let _bar_exp = local_exp / local_next_exp_required * 100;
-                if (_bar_exp > 100) {_bar_exp = 100;}
-                bar_exp.scaleX = _bar_exp / 100;
-                screen_exp_delta = 0;
-            }
-        }
-        
-        //satiety
-        if (screen_satiety_delta != 0) {
-            let _p = (100 - screen_satiety_easing)/100;
-            if (_p < 1) {
-                let _easing = 1 - Math.pow(1 - _p, 4);
-                let _screen_satiety = screen_satiety + screen_satiety_delta * _easing;
-                text_satiety.setText(Math.round(_screen_satiety) + "%");
-                screen_satiety_easing -= 1;
-                //bar
-                bar_satiety.scaleX = _screen_satiety / 100;
-            } else {
-                text_satiety.setText(Math.round(satiety) + "%");
-                //bar
-                bar_satiety.scaleX = satiety / 100;
-                screen_satiety_delta = 0;
-            }
-        }
-
-        //happy
-        if (screen_happy_delta != 0) {
-            let _p = (100 - screen_happy_easing)/100;
-            if (_p < 1) {
-                let _easing = 1 - Math.pow(1 - _p, 4);
-                let _screen_happy = screen_happy + screen_happy_delta * _easing;
-                text_happy.setText(Math.round(_screen_happy) + "%");
-                screen_happy_easing -= 1;
-                //bar
-                bar_happy.scaleX = _screen_happy / 100;
-            } else {
-                text_happy.setText(Math.round(happy) + "%");
-                //bar
-                bar_happy.scaleX = happy / 100;
-                screen_happy_delta = 0;
-            }
-        }
+        update_numericAnimation(this);
     }
 
-    //=== update parameters with animation ===
-
+    //parameters with animation
     if (turn % 150 == 0) {
-
-        //coin
-        if (previous_local_coin != local_coin) {
-            //count animation
-            screen_coin = previous_local_coin;
-            screen_coin_delta = local_coin - previous_local_coin;
-            screen_coin_easing = 100;
-            //earning text
-            if (count_sync > 3) {
-                let _delta = local_coin - previous_local_coin;
-                let _sign = "";
-                if (_delta > 0) {
-                    _sign = "+";
-                }
-                if (_delta >= local_coin_calc * 1.5) {
-                    text_coin_earned.setText(_sign + _delta + " lucky♪");
-                } else {
-                    text_coin_earned.setText(_sign + _delta);
-                }
-                text_coin_earned_count = 5;
-            }
-        }
-        //earning text clean-up
-        if (text_coin_earned_count > 0) {
-            text_coin_earned_count -= 1;
-            if (text_coin_earned_count == 0) {
-                text_coin_earned.setText("");
-            }
-        }
-
-        //material
-        if (previous_local_material != local_material) {
-            //count animation
-            screen_material = previous_local_material;
-            screen_material_delta = local_material - previous_local_material;
-            screen_material_easing = 100;
-            //earning text
-            if (count_sync > 3) {
-                let _delta = local_material - previous_local_material;
-                let _sign = ""; //no need when minus
-                if (_delta > 0) {
-                    _sign = "+";
-                }
-                if (_delta >= local_material_calc * 1.5) {
-                    text_material_earned.setText(_sign + _delta + " lucky♪");
-                } else {
-                    text_material_earned.setText(_sign + _delta);
-                }
-                text_material_earned_count = 5;
-            }
-        }
-        //earning text clean-up
-        if (text_material_earned_count > 0) {
-            text_material_earned_count -= 1;
-            if (text_material_earned_count == 0) {
-                text_material_earned.setText("");
-            }
-        }
-
-        //exp   //***TODO*** not best
-        if (
-            previous_local_exp != local_exp 
-            && screen_exp < local_next_exp_required
-        ) {
-            //count animation
-            screen_exp = previous_local_exp;
-            if (local_exp > local_next_exp_required) {
-                screen_exp_delta = local_next_exp_required - previous_local_exp;
-            } else {
-                screen_exp_delta = local_exp - previous_local_exp;
-            }
-            screen_exp_easing = 100;
-            //earning text
-            if (count_sync > 3) {
-                let _delta = local_exp - previous_local_exp;
-                let _sign = ""; //no need when minus
-                if (_delta > 0) {
-                    _sign = "+";
-                }
-                text_exp_earned.setText(_sign + _delta);
-                text_exp_earned_count = 5;
-            }
-        }
-        //earning text clean-up
-        if (text_exp_earned_count > 0) {
-            text_exp_earned_count -= 1;
-            if (text_exp_earned_count == 0) {
-                text_exp_earned.setText("");
-            }
-        }
-
-        //update time
-        let now_time = Date.now() / 1000;
-
-        //satiety
-        let base_satiety = 86400 / 2 / SPEED;
-        satiety = Math.round( (base_satiety - (now_time - local_last_feeding_time)) / base_satiety * 100 );
-        if (satiety < 0) { satiety = 0; }
-        if (satiety > 100) { satiety = 100; }
-        if (satiety != previous_satiety) {
-            screen_satiety = previous_satiety;
-            screen_satiety_delta = satiety - previous_satiety;
-            screen_satiety_easing = 100;
-        }
-
-        //happy
-        let base_happy = 86400 * 3 / SPEED;
-        happy = Math.round( (base_happy - (now_time - local_last_grooming_time)) / base_happy * 100 );
-        if (happy < 0) { happy = 0; }
-        if (happy > 100) { happy = 100; }
-        if (happy != previous_happy) {
-            screen_happy = previous_happy;
-            screen_happy_delta = happy - previous_happy;
-            screen_happy_easing = 100;
-        }
-
-        previous_happy = happy;
-        previous_satiety = satiety;
-        previous_local_coin = local_coin;
-        previous_local_material = local_material;
-        previous_local_exp = local_exp;
+        update_parametersWithAnimation(this);
     }
 
-    //=== update parameters without animation ===
-
+    //parameters without animation
     if (turn % 150 == 10) {
-
-        //age
-        let now_time = Date.now() / 1000;
-        let age_time = Math.round(now_time - local_birth_time);
-        let age = Math.round( age_time * SPEED / 86400 );
-        text_age_time.setText(("000" + age).slice(-3) + "d");
-
-        //level
-        if (button_levelup.texture.key != "button_levelup_pointerover") {
-            text_level.setText(local_level);
-        }
-
-        //degub info
-        //text_speed.setText("speed: x" + SPEED);
-
-        //heart
-        text_heart.setText("Heart: " + local_heart);
-
-        //update progression status
-        let _mode = murasakisan.get_mode;
-        if (_mode == "mining") {
-            icon_mining.visible = true;
-            let _delta = (now_time - local_mining_start_time) * SPEED;
-            let _daily_earn = local_coin_calc / _delta * 86400;
-            text_mining_calc.setText(" +" + local_coin_calc + " Ohana\n  (" + Math.round(_daily_earn/10)*10 + " /d)");
-            //update gold
-            if (local_coin_calc >= 500) {
-                item_gold1.visible = true;
-            }
-            if (local_coin_calc >= 1000) {
-                item_gold2.visible = true;
-            }
-            if (local_coin_calc >= 2000) {
-                item_gold3.visible = true;
-            }            
-        }else if (_mode == "farming") {
-            icon_farming.visible = true;
-            let _delta = (now_time - local_farming_start_time) * SPEED;
-            let _daily_earn = local_material_calc / _delta * 86400;
-            text_farming_calc.setText(" +" + local_material_calc + " Kusa\n  (" + Math.round(_daily_earn/10)*10 + " /d)");
-            //update tree
-            if (local_material_calc >= 1000) {
-                item_tree2.visible = true;
-            }
-            if (local_material_calc >= 2000 ) {
-                item_tree3.visible = true;
-            }
-        }else if (_mode == "crafting") {
-            icon_crafting_time_remining.visible = true;
-            text_crafting_selected_item_ohana.setText("");
-            text_crafting_selected_item_kusa.setText("");
-            text_crafting_selected_item_time.setText("");
-            text_crafting_selected_item_heart.setText("");
-            icon_crafting_ohana.visible = false;
-            icon_crafting_kusa.visible = false;
-            icon_crafting_time.visible = false;
-            icon_crafting_heart.visible = false;
-            if (local_crafting_calc > 0) {
-                //TOFIX: invisible selecte item info
-                //calc remining time
-                let _total_sec = local_crafting_calc;
-                let _day = Math.floor(_total_sec / 86400);
-                let _hr = Math.floor(_total_sec % 86400 / 3600);
-                let _min = Math.floor(_total_sec % 3600 / 60);
-                text_crafting_calc.setText(_day + "d:" + _hr + "h:" + _min + "m");
-            } else{
-                text_crafting_calc.setText("Completed!");
-            }
-        }else {
-            text_mining_calc.setText("");
-            text_farming_calc.setText("");
-            text_crafting_calc.setText("");
-        }
-
-        //reset progression status
-        if (local_mining_status != 1) {
-            icon_mining.visible = false;
-            item_gold1.visible = false;
-            item_gold2.visible = false;
-            item_gold3.visible = false;
-        }
-        if (local_farming_status != 1) {
-            icon_farming.visible = false;
-            item_tree2.visible = false;
-            item_tree3.visible = false;
-        }
-        if (local_crafting_status != 1) {
-            icon_crafting_time_remining.visible = false;
-        }
-        
-        //wallet text
-        let _owner1 = local_owner.substring(0,5);
-        let _owner2 = local_owner.slice(-4);
-        let _text = "";
-        if (local_owner == local_wallet || local_owner == "0x0000000000000000000000000000000000000000") {
-            _text += "owner: " + _owner1 + "..." + _owner2 + ", ";
-            text_wallet.setText(_text);
-            text_wallet.setColor("#727171");
-        } else {
-            _text += "owner: " + _owner1 + "..." + _owner2 + ", ";
-            _text += "not owned by you.";
-            text_wallet.setText(_text);
-            text_wallet.setColor("blue");
-        }
-        
-        //radarchart
-        if (previsou_local_rolled_dice != local_rolled_dice) {
-            draw_radarchart(this);
-        }
-
-        previsou_local_rolled_dice = local_rolled_dice;
+        update_parametersWithoutAnimation(this);
     }
 
-    //=== check mode change ===
-
+    //check mode change
     if (turn % 150 == 20) {
-
-        //check petrified
-        if (local_notPetrified == false) {
-            murasakisan.set_mode = "petrified";
-
-        //level up
-        } else if (local_level > previous_local_level) {
-            //update radarchart
-            draw_radarchart(this);
-            if (local_level == 2) {
-                //enable mining button
-                button_mining.setTexture("button_mining_enable");
-                button_mining.on('pointerover', () => button_mining.setTexture("button_mining_pointerover"));
-                button_mining.on('pointerout', () => button_mining.setTexture("button_mining_enable"));
-                button_mining.setInteractive();
-                //enable farming button
-                button_farming.setTexture("button_farming_enable");
-                button_farming.on('pointerover', () => button_farming.setTexture("button_farming_pointerover"));
-                button_farming.on('pointerout', () => button_farming.setTexture("button_farming_enable"));
-                button_farming.setInteractive();
-            }
-            if (local_level == 3) {
-                //enable crafting button
-                button_crafting.setTexture("button_crafting_enable");
-                button_crafting.on('pointerover', () => button_crafting.setTexture("button_crafting_pointerover"));
-                button_crafting.on('pointerout', () => button_crafting.setTexture("button_crafting_enable"));
-                button_crafting.setInteractive();
-            }
-
-        //feeding check, continue
-        } else if (local_last_feeding_time > previous_local_last_feeding_time){
-            murasakisan.set_mode = "feeding";
-            murasakisan.submode = 0;
-            murasakisan.count = 0;
-            murasakisan.target_x = 600;
-            murasakisan.target_y = 840;
-            if (typeof group_food != "undefined") {
-                group_food.destroy();
-            }
-            group_food = this.add.group();
-            item_potato = this.add.sprite(600, 840+10, "item_sweet_potato").setScale(0.12).setOrigin(0.5);
-            item_potato.depth = 9999;
-            group_food.add(item_potato);
-            /*
-            if (local_items[5] > 0) {
-                item_pudding = this.add.sprite(570, 840+20, "item_pudding").setScale(0.30).setOrigin(0.5);
-                item_pudding.depth = 9999;
-                group_food.add(item_pudding);
-            }
-            */
-            if (local_items[22] > 0) {
-                item_chocolate_bread = this.add.sprite(650, 840+20, "item_chocolate_bread").setScale(0.4).setOrigin(0.5);
-                item_chocolate_bread.depth = 9999;
-                group_food.add(item_chocolate_bread);
-            }
-            sound_feeding.play();
-
-        //grooming check, continue
-        } else if (local_last_grooming_time > previous_local_last_grooming_time){
-            murasakisan.set_mode = "grooming";
-            murasakisan.submode = 0;
-            murasakisan.count = 0;
-            murasakisan.target_x = 1000;
-            murasakisan.target_y = 400;
-            sound_grooming.play();
-
-        //mining check
-        } else if (local_mining_status == 1 & murasakisan.mode != "mining" & murasakisan.mode != "feeding"){
-            murasakisan.set_mode = "mining";
-            murasakisan.submode = 0;
-            murasakisan.count = 0;
-            murasakisan.target_x = 100;
-            murasakisan.target_y = 880;
-            sound_mining.play();
-        }else if (local_mining_status == 0 & murasakisan.mode == "mining") {
-            murasakisan.set_mode = "resting";
-            //icon invisible
-            icon_mining.visible = false;
-            sound_earn.play();
-
-        //farming check, continue
-        } else if (local_farming_status == 1 & murasakisan.mode != "farming" & murasakisan.mode != "feeding"){
-            murasakisan.set_mode = "farming";
-            murasakisan.submode = 0;
-            murasakisan.count = 0;
-            murasakisan.target_x = 180;
-            murasakisan.target_y = 450;
-            sound_farming.play();
-        }else if (local_farming_status == 0 & murasakisan.mode == "farming") {
-            murasakisan.set_mode = "resting";
-            //icon invisible
-            icon_farming.visible = false;
-            sound_earn.play();
-
-        //crafting check, continue
-        } else if (local_crafting_status == 1 & murasakisan.mode != "crafting" & murasakisan.mode != "feeding"){
-            murasakisan.set_mode = "crafting";
-            murasakisan.submode = 0;
-            murasakisan.count = 0;
-            murasakisan.target_x = 1000;
-            murasakisan.target_y = 740;
-            text_select_item.setText('"'+array_item_name[local_crafting_item_type]+'"')
-            sound_crafting.play();
-        }else if (local_crafting_status == 0 & murasakisan.mode == "crafting") {
-            murasakisan.set_mode = "resting";
-            text_select_item.setText(">> Select Item <<")
-            //draw_radarchart(this);  //update radarchart
-            //icon invisible
-            icon_crafting_time_remining.visible = false;
-            sound_earn.play();
-        }
-
-        previous_local_last_feeding_time = local_last_feeding_time;
-        previous_local_last_grooming_time = local_last_grooming_time;
-        previous_local_level = local_level;
+        update_checkModeChange(this);
     }
 
-    //=== check button activation ===
-
+    //check button activation
     if (turn % 150 == 30) {
-
-        if (
-            previous_local_mining_status != local_mining_status ||
-            previous_local_farming_status != local_farming_status ||
-            previous_local_crafting_status != local_crafting_status
-            ) {
-
-            //grooming
-            if (local_farming_status == 1 || local_crafting_status == 1 || local_mining_status == 1) {
-                button_grooming.setTexture("button_grooming_unable");
-                button_grooming.disableInteractive();
-            }else {
-                button_grooming.setTexture("button_grooming_enable");
-                button_grooming.on('pointerover', () => button_grooming.setTexture("button_grooming_pointerover"));
-                button_grooming.on('pointerout', () => button_grooming.setTexture("button_grooming_enable"));
-                button_grooming.setInteractive();
-            }
-
-            //mining
-            if (local_farming_status == 1 || local_crafting_status == 1 || local_level <= 1) {
-                button_mining.setTexture("button_mining_unable");
-                button_mining.disableInteractive();
-            }else if (local_mining_status == 1) {
-                button_mining.setTexture("button_mining_working");
-                button_mining.on('pointerover', () => button_mining.setTexture("button_mining_pointerover_stop"));
-                button_mining.on('pointerout', () => button_mining.setTexture("button_mining_working"));
-                button_mining.setInteractive();
-            }else {
-                button_mining.setTexture("button_mining_enable");
-                button_mining.on('pointerover', () => button_mining.setTexture("button_mining_pointerover"));
-                button_mining.on('pointerout', () => button_mining.setTexture("button_mining_enable"));
-                button_mining.setInteractive();
-            }
-
-            //farming
-            if (local_mining_status == 1 || local_crafting_status == 1 || local_level <= 1) {
-                button_farming.setTexture("button_farming_unable");
-                button_farming.disableInteractive();
-            }else if (local_farming_status == 1) {
-                button_farming.setTexture("button_farming_working");
-                button_farming.on('pointerover', () => button_farming.setTexture("button_farming_pointerover_stop"));
-                button_farming.on('pointerout', () => button_farming.setTexture("button_farming_working"));
-                button_farming.setInteractive();
-            }else {
-                button_farming.setTexture("button_farming_enable");
-                button_farming.on('pointerover', () => button_farming.setTexture("button_farming_pointerover"));
-                button_farming.on('pointerout', () => button_farming.setTexture("button_farming_enable"));
-                button_farming.setInteractive();
-            }
-
-            //crafting
-            if (local_mining_status == 1 || local_farming_status == 1 || local_level <= 2) {
-                button_crafting.setTexture("button_crafting_unable");
-                button_crafting.disableInteractive();
-            }else if (local_crafting_status == 1) {
-                button_crafting.setTexture("button_crafting_working");
-                button_crafting.on('pointerover', () => button_crafting.setTexture("button_crafting_pointerover_stop"));
-                button_crafting.on('pointerout', () => button_crafting.setTexture("button_crafting_working"));
-                button_crafting.setInteractive();
-            }else {
-                button_crafting.setTexture("button_crafting_enable");
-                button_crafting.on('pointerover', () => button_crafting.setTexture("button_crafting_pointerover"));
-                button_crafting.on('pointerout', () => button_crafting.setTexture("button_crafting_enable"));
-                button_crafting.setInteractive();
-            }
-        }
-
-        //level-up button triggered by exp change
-        if (
-            local_exp / local_next_exp_required >= 1 
-            && local_mining_status == 0 && local_farming_status == 0 && local_crafting_status == 0
-            && button_levelup.texture.key == "back_level" 
-            && button_levelup.texture.key != "button_levelup_pointerover"
-        ) {
-            button_levelup.setTexture("button_levelup_enable");
-            button_levelup.setInteractive();
-        } else if (
-            button_levelup.texture.key != "back_level" 
-            &&local_exp / local_next_exp_required < 1
-            || local_mining_status == 1 || local_farming_status == 1 || local_crafting_status == 1
-        ) {
-            button_levelup.setTexture("back_level");
-            button_levelup.disableInteractive();
-        }
-
-        //update previsou parameters
-        previous_local_mining_status = local_mining_status;
-        previous_local_farming_status = local_farming_status;
-        previous_local_crafting_status = local_crafting_status;
+        update_checkButtonActivation(this);
     }
 
-    //=== check item ===
-
+    //check item
     if (turn % 150 == 40 && local_items != previous_local_items) {
-
-        let _item_id;
-
-        //1:Ms. Astar
-        _item_id = 1;
-        if (
-            (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
-            && local_items_flag[_item_id] != true
-        ) {
-            local_items_flag[_item_id] = true;
-            mr_astar = new Pet(
-                this, 
-                400 + Math.random()*300, 
-                500 + Math.random()*200, 
-                "mr_astar_right", 
-                "mr_astar_left",
-                "mining"
-            ).setScale(0.12);
-            
-            
-            //cushion
-            item_cushion = this.add.sprite(90, 620, "item_cushion").setScale(0.25).setOrigin(0.5);
-            item_cushion.depth = item_cushion.y - 50;
-            
-            //cat
-            cat = this.add.sprite(90, 610, "cat_sleeping").setScale(0.12).setOrigin(0.5)
-                .setInteractive({useHandCursor: true})
-                .on("pointerdown", () => {contract_send_mail(summoner)})
-                .setVisible(false);
-            cat.depth = item_cushion.y + 1;
-            
-            //mail
-            if (local_items[196] > 0) {
-                mail = this.add.sprite(40, 645, "item_mail").setScale(0.06).setOrigin(0.5);
-                mail.depth = item_cushion.y + 2;
-            }
-            
-            //mail_sending_interval
-            text_sending_interval = this.add.text(70, 640, "00h:00m", {font: "15px Arial", fill: "#ffffff"});
-            text_sending_interval.depth = item_cushion.depth + 1;
-
-            //cake
-            //tiny_crown
-            //pancake
-            //sushi
-            
-        }
-        
-        //2:Crown
-        _item_id = 2;
-        if (
-            (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
-            && local_items_flag[_item_id] != true
-        ) {
-            local_items_flag[_item_id] = true;
-            item_crown = this.add.sprite(1050,290, "item_crown");
-            item_crown.anims.play("item_crown", true);
-            item_crown.anims.isPlaying = false;
-            item_crown.setScale(0.3);
-            item_crown.setInteractive({useHandCursor: true});
-            item_crown.on('pointerdown', () => {
-                if (item_crown.anims.isPlaying) {
-                    item_crown.anims.stop();
-                } else {
-                    item_crown.anims.isPlaying = true;
-                    sound_hat.play();
-                }
-            });
-            item_crown.depth = 9999;
-            //console.log(item_crown.anims.is);
-        }
-        
-        //3:Fortune Statue
-        _item_id = 3;
-        if (
-            (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
-            && local_items_flag[_item_id] != true
-        ) {
-            local_items_flag[_item_id] = true;
-            let _x = 500;
-            let _y = 150;
-            let _pos_local = "pos_item_fortune_status"
-            //recover position from localStorage
-            if (localStorage.getItem(_pos_local) != null && local_owner == local_wallet) {
-                let _json = localStorage.getItem(_pos_local);
-                _pos = JSON.parse(_json);
-                _x = _pos[0];
-                _y = _pos[1];
-            }
-            item_fortune_statue = this.add.sprite(_x, _y, "item_fortune_statue")
-                .setScale(0.35)
-                .setOrigin(0.5)
-                .setDepth(_y)
-                .setInteractive({ draggable: true, useHandCursor: true })
-                .on("drag", () => {
-                    if (this.sys.game.scale.gameSize._width == 1280) {
-                        item_fortune_statue.x = game.input.activePointer.x;
-                        item_fortune_statue.y = game.input.activePointer.y;
-                    } else {
-                        item_fortune_statue.x = game.input.activePointer.y;
-                        item_fortune_statue.y = 960 - game.input.activePointer.x;
-                    }
-                    item_fortune_statue.depth = item_fortune_statue.y;
-                })
-                .on("dragend", () => {
-                    let _pos = [item_fortune_statue.x, item_fortune_statue.y];
-                    localStorage.setItem(_pos_local, JSON.stringify(_pos));
-                });
-        }
-        
-        //4:helment
-        _item_id = 4;
-        if (
-            (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
-            && local_items_flag[_item_id] != true
-        ) {
-            local_items_flag[_item_id] = true;
-            //let _x = 60;
-            //let _y = 700;
-            let _x = 530;
-            let _y = 255;
-            item_hat_helmet = this.add.sprite(_x, _y, "item_hat_helmet")
-                .setOrigin(0.5)
-                .setScale(0.20)
-                .setAngle(90);
-            item_hat_helmet.setInteractive({useHandCursor: true});
-            item_hat_helmet.on('pointerdown', () => {
-                if (item_wearing_hat == 0) {
-                    item_wearing_hat = item_hat_helmet;
-                    murasakisan.on_click();
-                    sound_hat.play();
-                    item_hat_helmet.setAngle(0);
-                } else if (item_wearing_hat == item_hat_helmet) {
-                    item_wearing_hat = 0;
-                    item_hat_helmet.x = _x;
-                    item_hat_helmet.y = _y;
-                    item_hat_helmet.setAngle(90);
-                }
-            });
-        }
-        
-        //5:Nameplate
-        _item_id = 5;
-        if (
-            (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
-            && local_items_flag[_item_id] != true
-        ) {
-            local_items_flag[_item_id] = true;
-            group_kanban.setVisible(true);
-        }
-        //if (local_items_flag[_item_id] == true && previous_local_name_str != local_name_str) {
-        if (local_items_flag[_item_id] == true) {
-            //if (local_name_str == "" && local_items[_item_id] != 0) {
-            if (local_name_str == "") {
-                if (text_kanban.text == "") {
-                    text_kanban.setText("(enter name)");
-                }
-                text_kanban.setInteractive();
-                group_mint_name.setVisible(true);
-            } else {
-                text_kanban.setText(local_name_str);
-                text_kanban.disableInteractive();
-                group_mint_name.setVisible(false);
-            }
-            text_id.setText("#"+summoner);
-        }
-        
-        //6:Ribbon
-        _item_id = 6;
-        if (
-            (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
-            && local_items_flag[_item_id] != true
-        ) {
-            local_items_flag[_item_id] = true;
-            //item_ribbon = this.add.sprite(1057, 443, "item_ribbon").setScale(0.5).setOrigin(0.5);
-            item_ribbon = this.add.sprite(1037, 401, "item_ribbon").setScale(0.15).setOrigin(0.5);
-            item_ribbon.depth = 9999;
-        }
-        
-        //17:vase
-        _item_id = 17;
-        if (
-            (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
-            && local_items_flag[_item_id] != true
-        ) {
-            local_items_flag[_item_id] = true;
-            let _x = 600;
-            let _y = 380;
-            let _pos_local = "pos_item_vase"
-            //recover position from localStorage
-            if (localStorage.getItem(_pos_local) != null && local_owner == local_wallet) {
-                let _json = localStorage.getItem(_pos_local);
-                _pos = JSON.parse(_json);
-                _x = _pos[0];
-                _y = _pos[1];
-            }
-            item_vase = this.add.sprite(_x, _y, "item_vase")
-                .setScale(0.18)
-                .setOrigin(0.5)
-                .setDepth(_y)
-                .setInteractive({ draggable: true, useHandCursor: true })
-                .on("drag", () => {
-                    if (this.sys.game.scale.gameSize._width == 1280) {
-                        item_vase.x = game.input.activePointer.x;
-                        item_vase.y = game.input.activePointer.y;
-                    } else {
-                        item_vase.x = game.input.activePointer.y;
-                        item_vase.y = 960 - game.input.activePointer.x;
-                    }
-                    item_vase.depth = item_vase.y;
-                })
-                .on("dragend", () => {
-                    let _pos = [item_vase.x, item_vase.y];
-                    localStorage.setItem(_pos_local, JSON.stringify(_pos));
-                });
-        }
-        
-        //18:ms_ether
-        _item_id = 18;
-        if (
-            (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
-            && local_items_flag[_item_id] != true
-        ) {
-            local_items_flag[_item_id] = true;
-            ms_ether = new Pet(
-                this, 
-                400 + Math.random()*300, 
-                500 + Math.random()*200, 
-                "ms_ether_right", 
-                "ms_ether_left",
-                "farming"
-            ).setScale(0.12);
-        }
-        
-        //19:straw_hat
-        _item_id = 19;
-        if (
-            (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
-            && local_items_flag[_item_id] != true
-        ) {
-            local_items_flag[_item_id] = true;
-            //let _x = 240;
-            //let _y = 275;
-            let _x = 450;
-            let _y = 255;
-            item_hat_mugiwara = this.add.sprite(_x, _y, "item_hat_mugiwara")
-                .setOrigin(0.5)
-                .setScale(0.25)
-                .setAngle(90);
-            item_hat_mugiwara.setInteractive({useHandCursor: true});
-            item_hat_mugiwara.on('pointerdown', () => {
-                if (item_wearing_hat == 0) {
-                    item_wearing_hat = item_hat_mugiwara;
-                    murasakisan.on_click();
-                    sound_hat.play();
-                    item_hat_mugiwara.setAngle(0);
-                } else if (item_wearing_hat == item_hat_mugiwara) {
-                    item_wearing_hat = 0;
-                    item_hat_mugiwara.x = _x;
-                    item_hat_mugiwara.y = _y;
-                    item_hat_mugiwara.setAngle(90);
-                }
-            });
-        }
-
-        //20: Asnya
-        _item_id = 20;
-        if (
-            (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
-            && local_items_flag[_item_id] != true
-        ) {
-            local_items_flag[_item_id] = true;
-            let _x = 590;
-            let _y = 140;
-            let _pos_local = "pos_item_asnya"
-            //recover position from localStorage
-            if (localStorage.getItem(_pos_local) != null && local_owner == local_wallet) {
-                let _json = localStorage.getItem(_pos_local);
-                _pos = JSON.parse(_json);
-                _x = _pos[0];
-                _y = _pos[1];
-            }
-            item_asnya = this.add.sprite(_x, _y, "item_asnya")
-                .setScale(0.25)
-                .setOrigin(0.5)
-                .setDepth(_y)
-                .setInteractive({ draggable: true, useHandCursor: true })
-                .on("drag", () => {
-                    if (this.sys.game.scale.gameSize._width == 1280) {
-                        item_asnya.x = game.input.activePointer.x;
-                        item_asnya.y = game.input.activePointer.y;
-                    } else {
-                        item_asnya.x = game.input.activePointer.y;
-                        item_asnya.y = 960 - game.input.activePointer.x;
-                    }
-                    item_asnya.depth = item_asnya.y;
-                })
-                .on("dragend", () => {
-                    let _pos = [item_asnya.x, item_asnya.y];
-                    localStorage.setItem(_pos_local, JSON.stringify(_pos));
-                });
-            /*
-            local_items_flag[_item_id] = true;
-            item_asnya = this.add.sprite(590, 140, "item_asnya").setOrigin(0.5).setScale(0.25);
-            item_asnya.depth = item_asnya.y;
-            */
-        }
-
-        //21: Switch
-        _item_id = 21;
-        if (
-            (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
-            && local_items_flag[_item_id] != true
-        ) {
-            local_items_flag[_item_id] = true;
-            item_switch = this.add.sprite(1230,300, "item_switch").setOrigin(0.5);
-            item_switch.setScale(0.25);
-            item_switch.anims.play("item_switch_off", true);
-            item_switch.setInteractive({useHandCursor: true});
-            back_black = this.add.image(640, 480, "back_black");
-            back_black.depth = 9999+1;
-            back_black.visible = false;
-            item_switch.on('pointerdown', () => {
-                if (item_switch.anims.currentAnim.key == "item_switch_off") {
-                    item_switch.anims.play("item_switch_on", true);
-                    back_black.visible = true;
-                    sound_switch.play();
-                    back_neon.visible = true;
-                    text_kanban.setColor("white");
-                    if (typeof item_nui != "undefined") {
-                        item_nui.anims.play("item_nui_alive", true);
-                    }
-                } else {
-                    item_switch.anims.play("item_switch_off", true);
-                    back_black.visible = false;
-                    sound_switch.play();
-                    back_neon.visible = false;
-                    text_kanban.setColor("black");
-                    if (typeof item_nui != "undefined") {
-                        item_nui.anims.play("item_nui", true);
-                    }
-                }
-            });
-            item_switch.depth = item_switch.y;
-        }
-
-        //22: Choco. Bread -> Feeding()
-
-        //33:violin
-        _item_id = 33;
-        if (
-            (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
-            && local_items_flag[_item_id] != true
-        ) {
-            local_items_flag[_item_id] = true;
-            let _x = 1200;
-            let _y = 608;
-            let _pos_local = "pos_item_violin"
-            //recover position from localStorage
-            if (localStorage.getItem(_pos_local) != null && local_owner == local_wallet) {
-                let _json = localStorage.getItem(_pos_local);
-                _pos = JSON.parse(_json);
-                _x = _pos[0];
-                _y = _pos[1];
-            }
-            item_violin = this.add.sprite(_x, _y, "item_violin")
-                .setScale(0.2)
-                .setOrigin(0.5)
-                .setDepth(_y)
-                .setInteractive({ draggable: true, useHandCursor: true })
-                .on("drag", () => {
-                    if (this.sys.game.scale.gameSize._width == 1280) {
-                        item_violin.x = game.input.activePointer.x;
-                        item_violin.y = game.input.activePointer.y;
-                    } else {
-                        item_violin.x = game.input.activePointer.y;
-                        item_violin.y = 960 - game.input.activePointer.x;
-                    }
-                    item_violin.depth = item_violin.y;
-                })
-                .on("dragend", () => {
-                    let _pos = [item_violin.x, item_violin.y];
-                    localStorage.setItem(_pos_local, JSON.stringify(_pos));
-                });
-        }
-
-        //34:musicbox
-        _item_id = 34;
-        if (
-            (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
-            && local_items_flag[_item_id] != true
-        ) {
-            local_items_flag[_item_id] = true;
-            let _x = 505;
-            let _y = 370;
-            item_musicbox = this.add.sprite(_x, _y, "item_musicbox")
-                .setOrigin(0.5)
-                .setScale(0.30)
-                .setInteractive({useHandCursor: true})
-                .setDepth(_y);
-            item_musicbox.on('pointerdown', () => music() );
-        }
-
-        //35:dr_bitco
-        _item_id = 35;
-        if (
-            (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
-            && local_items_flag[_item_id] != true
-        ) {
-            local_items_flag[_item_id] = true;
-            dr_bitco = new Pet(
-                this, 
-                400 + Math.random()*300, 
-                500 + Math.random()*200, 
-                "dr_bitco_right", 
-                "dr_bitco_left",
-                "crafting"
-            ).setScale(0.11);
-        }
-
-        //36:dice
-        _item_id = 36;
-        if (
-            (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
-            && local_items_flag[_item_id] != true
-        ) {
-            local_items_flag[_item_id] = true;
-            dice = new Dice(this, 400, 600).setScale(0.3);
-        }
-
-        //37:Knit Hat
-        _item_id = 37;
-        if (
-            (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
-            && local_items_flag[_item_id] != true
-        ) {
-            local_items_flag[_item_id] = true;
-            //let _x = 800;
-            //let _y = 810;
-            let _x = 690;
-            let _y = 255;
-            item_hat_knit = this.add.sprite(_x, _y, "item_hat_knit").setOrigin(0.5).setScale(0.20);
-            item_hat_knit.setInteractive({useHandCursor: true});
-            item_hat_knit.on('pointerdown', () => {
-                if (item_wearing_hat == 0) {
-                    item_wearing_hat = item_hat_knit;
-                    murasakisan.on_click();
-                    sound_hat.play();
-                } else if (item_wearing_hat == item_hat_knit) {
-                    item_wearing_hat = 0;
-                    item_hat_knit.x = _x;
-                    item_hat_knit.y = _y;
-                }
-            });
-        }
-
-        //38:Mortarboard
-        _item_id = 38;
-        if (
-            (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
-            && local_items_flag[_item_id] != true
-        ) {
-            local_items_flag[_item_id] = true;
-            //_x = 700;
-            //_y = 380;
-            _x = 610;
-            _y = 260;
-            item_hat_mortarboard = this.add.sprite(_x, _y, "item_hat_mortarboard")
-                .setOrigin(0.5)
-                .setScale(0.20)
-                .setAngle(90);
-            item_hat_mortarboard.setInteractive({useHandCursor: true});
-            item_hat_mortarboard.on('pointerdown', () => {
-                if (item_wearing_hat == 0) {
-                    item_wearing_hat = item_hat_mortarboard;
-                    murasakisan.on_click();
-                    sound_hat.play();
-                    item_hat_mortarboard.setAngle(0);
-                } else if (item_wearing_hat == item_hat_mortarboard) {
-                    item_wearing_hat = 0;
-                    item_hat_mortarboard.x = _x;
-                    item_hat_mortarboard.y = _y;
-                    item_hat_mortarboard.setAngle(90);
-                }
-            });
-        }
-
-        //194:ohana_bank
-        if (local_items[194] != previous_local_item194) {
-            // define async function
-            async function _do(scene) {
-                // get item194 list, need to wait
-                let _array_item194 = await get_userItems(summoner, 194);
-                // recreate sprite group
-                try {
-                    group_item194.destroy(true);
-                } catch (error) {
-                }
-                group_item194 = scene.add.group();
-                // create sprite, add group, using array for independency
-                let _array_bank = [];
-                let _array_text = [];
-                let _array_icon = [];
-                for (let i = 0; i < _array_item194.length; i++) {
-                    //bank sprite
-                    let _x = 650;
-                    let _y = 500;
-                    _array_bank[i] = scene.add.sprite(_x + i*50, _y, "item_bank")
-                        .setScale(0.275)
-                        .setOrigin(0.5)
-                        .setInteractive({useHandCursor: true})
-                        .on("pointerover", () => _array_bank[i].setTexture("item_bank_broken") )
-                        .on('pointerover', () => sound_button_select.play() )
-                        .on('pointerover', () => {_array_text[i].visible = true;} )
-                        .on('pointerover', () => {_array_icon[i].visible = true;} )
-                        .on("pointerout", () => _array_bank[i].setTexture("item_bank"))
-                        .on('pointerout', () => {_array_text[i].visible = false;} )
-                        .on('pointerout', () => {_array_icon[i].visible = false;} )
-                        .on("pointerdown", () => unpack_bag(summoner, _array_item194[i]) )
-                        .on('pointerdown', () => sound_button_on.play() );
-                    _array_bank[i].depth = _array_bank[i].y;
-                    //text, "+1000"
-                    _array_text[i] = scene.add.text(_x + 10 + i*50, _y - 50, "+1000", {font: "17px Arial", fill: "#000000"})
-                        .setOrigin(0.5)
-                        .setVisible(false);
-                    //icon, ohana
-                    _array_icon[i] = scene.add.sprite(_x - 30 + i*50, _y - 50, "icon_ohana")
-                        .setOrigin(0.5)
-                        .setScale(0.07)
-                        .setVisible(false);
-                    group_item194.add(_array_bank[i]);
-                    group_item194.add(_array_text[i]);
-                    group_item194.add(_array_icon[i]);
-                }
-            }
-            _do(this);
-        }
-
-        //195:kusa_pouch
-        if (local_items[195] != previous_local_item195) {
-            // define async function
-            async function _do(scene) {
-                // get item194 list, need to wait
-                let _array_item195 = await get_userItems(summoner, 195);
-                // recreate sprite group
-                try {
-                    group_item195.destroy(true);
-                } catch (error) {
-                }
-                group_item195 = scene.add.group();
-                // create sprite, add group, using array for independency
-                let _array_bank = [];
-                let _array_text = [];
-                let _array_icon = [];
-                for (let i = 0; i < _array_item195.length; i++) {
-                    //bank sprite
-                    let _x = 550;
-                    let _y = 490;
-                    _array_bank[i] = scene.add.sprite(_x - i*50, _y, "item_pouch")
-                        .setScale(0.225)
-                        .setOrigin(0.5)
-                        .setInteractive({useHandCursor: true})
-                        .on("pointerover", () => _array_bank[i].setTexture("item_pouch_broken") )
-                        .on('pointerover', () => sound_button_select.play() )
-                        .on('pointerover', () => {_array_text[i].visible = true;} )
-                        .on('pointerover', () => {_array_icon[i].visible = true;} )
-                        .on("pointerout", () => _array_bank[i].setTexture("item_pouch"))
-                        .on('pointerout', () => {_array_text[i].visible = false;} )
-                        .on('pointerout', () => {_array_icon[i].visible = false;} )
-                        .on("pointerdown", () => unpack_bag(summoner, _array_item195[i]) )
-                        .on('pointerdown', () => sound_button_on.play() );
-                    _array_bank[i].depth = _array_bank[i].y;
-                    //text, "+1000"
-                    _array_text[i] = scene.add.text(_x + 15 - i*50, _y - 50, "+1000", {font: "17px Arial", fill: "#000000"})
-                        .setOrigin(0.5)
-                        .setVisible(false);
-                    //icon, ohana
-                    _array_icon[i] = scene.add.sprite(_x - 22 - i*50, _y - 50, "icon_kusa")
-                        .setOrigin(0.5)
-                        .setScale(0.09)
-                        .setVisible(false);
-                    group_item195.add(_array_bank[i]);
-                    group_item195.add(_array_text[i]);
-                    group_item195.add(_array_icon[i]);
-                }
-            }
-            _do(this);
-        }
-
-        //197:nuichan
-        if (local_items[197] != previous_local_item197) {
-            // define async function
-            async function _do(scene) {
-                // get item194 list, need to wait
-                let _array_item197 = await get_userItems(summoner, 197);
-                // recreate sprite group
-                try {
-                    group_item197.destroy(true);
-                } catch (error) {
-                }
-                group_item197 = scene.add.group();
-                // create sprite, add group, using array for independency
-                let _array_nui = [];
-                let _array_nui_text = [];
-                let _array_nui_ribbon = [];
-                for (let i = 0; i < _array_item197.length; i++) {
-                    let _x = 1070 + i*30;
-                    let _y = 520 + i*30;
-                    let _item_id = _array_item197[i];
-                    let _item_nui = await contract_get_item_nui(_item_id);
-                    let _summoner = _item_nui[0];
-                    let _class = _item_nui[1];
-                    let _score = _item_nui[2];
-                    let _exp_rate = _item_nui[3] - 100;
-                    let _summoner_name = await call_name_from_summoner(_summoner);
-                    if (_summoner_name == "") {
-                        _summoner_name = "#" + _summoner;
-                    }
-                    let _text = "";
-                    _text += " id: " + "#" + _array_item197[i] + " \n";
-                    _text +=" crafter: " + _summoner_name + " \n";
-                    _text += " score: " + _score + " \n";
-                    _text += " exp: +" + _exp_rate + "% ";
-                    _array_nui_text[i] = scene.add.text(
-                        _x,
-                        _y+68,
-                        _text,
-                        {font: "15px Arial", fill: "#000000", backgroundColor: "#ffffff"}
-                    ).setOrigin(0.5);
-                    _array_nui_text[i].visible = false;
-                    _array_nui[i] = scene.add.sprite(_x, _y, "item_nui")
-                        .setOrigin(0.5)
-                        .setScale(0.38)
-                        .setInteractive({ draggable: true, useHandCursor: true })
-                        .setDepth(_y)
-                        .on("dragstart", () => {
-                            //sound, depth
-                        })
-                        .on("drag", () => {
-                            if (scene.sys.game.scale.gameSize._width == 1280) {
-                                _array_nui[i].x = game.input.activePointer.x;
-                                _array_nui[i].y = game.input.activePointer.y;
-                            } else {
-                                _array_nui[i].x = game.input.activePointer.y;
-                                _array_nui[i].y = 960 - game.input.activePointer.x;
-                            }
-                            _array_nui[i].depth = _array_nui[i].y;
-                            _array_nui_text[i].visible = false;
-                            _array_nui_ribbon[i].x = _array_nui[i].x;
-                            _array_nui_ribbon[i].y = _array_nui[i].y;
-                            _array_nui_ribbon[i].depth = _array_nui[i].depth+1;
-                        })
-                        .on("dragend", () => {
-                            //grand, sound, depth
-                            _array_nui_text[i].x = _array_nui[i].x;
-                            _array_nui_text[i].y = _array_nui[i].y+68;
-                            _array_nui_text[i].visible = true;
-                            sound_nui.play();
-                        })
-                        .on("pointerover", () => {
-                            _array_nui_text[i].visible = true;
-                        })
-                        .on("pointerout", () => {
-                            _array_nui_text[i].visible = false;
-                        });
-                    _array_nui_ribbon[i] = scene.add.sprite(_x,_y, "item_nui_ribbon").setOrigin(0.5).setScale(0.38);
-                    _array_nui_ribbon[i].depth = _array_nui[i].y + 1;
-                    //add group
-                    group_item197.add(_array_nui[i]);
-                    group_item197.add(_array_nui_text[i]);
-                    group_item197.add(_array_nui_ribbon[i]);
-                }
-            }
-            _do(this);
-        }
-
-
-        //check mail
-        if (flag_mail) {
-            cat_others = this.add.sprite(800, 700, "cat_sitting").setScale(0.12).setOrigin(0.5)
-                .setInteractive({useHandCursor: true})
-                .on("pointerdown", () => {contract_open_mail(summoner)});            
-            cat_others.depth = cat_others.y;
-        }
-        //calc sending interval
-        if (
-            local_mail_sending_interval != -1
-            && typeof text_sending_interval != "undefined"
-            && typeof cat != "undefined"
-        ) {
-            if (local_mail_sending_interval == 0) {
-                text_sending_interval.setText("");
-                cat.visible = true;
-            } else {
-                let _d = Math.floor(local_mail_sending_interval / (60 * 60 * 24));
-                let _hr = Math.floor(local_mail_sending_interval % 86400 / 3600);
-                let _min = Math.floor(local_mail_sending_interval % 3600 / 60);
-                let _text = _d + "d:" + _hr + "h:" + _min + "m";
-                text_sending_interval.setText(_text).setFill("#ffffff");
-                cat.visible = false;
-                //console.log(local_mail_sending_interval);
-            }
-        }
-        
-        previous_local_items = local_items;
-        previous_local_item194 = local_items[194];
-        previous_local_item195 = local_items[195];
-        previous_local_item196 = local_items[196];
-        previous_local_item197 = local_items[197];
-        previous_local_rolled_dice = local_rolled_dice;
-        previous_local_name_str = local_name_str;
+        update_checkItem(this);
     }
 
-    //=== update system message ===
-    
+    //system message
     //blink message
     if (turn % 300 == 50) {
         text_system_message.setText("");
@@ -4220,16 +5335,10 @@ function update() {
         update_systemMessage();
     }
 
-    //=== update onchain data ===
-
+    //update onchain data
     if (turn % 500 == 80 || turn == 50) {
-        //console.log(summoner);
-        //when no summoner argument, load summoner id from wallet
-        //if (summoner == -1) {
         if (count_sync == 0 || local_notPetrified == false || summoner == 0) {
-            //can not get summoner id directry, update summoner id is better.
             contract_update_all();
-        //when summoner is loaded, update summoner status
         } else if (summoner > 0) {
             contract_update_status(summoner);
         }
@@ -4238,6 +5347,66 @@ function update() {
 
 //---end------------------------------------------------------------------------------------------------------
 /*
+
+ ok メール送受信時の動的アクションの実装
+        送信時の猫のアニメーション
+        受診時の猫のアニメーション
+        メールの表示・非表示
+
+ ok アイテムクラフト時のハート要求の実装
+        後半アイテムではハートを少し要求する
+
+ ok スコアボードの更新の実装
+        アニメーションは難しいか
+
+ ok 新コントラ群への対応
+     ok craft周りの整備
+            heart要求値の取得
+                heart要求は0でも表示させるか
+            heart数のsend
+            heart数の取得
+     ok nui周りの整備
+         ok feeding/grooming時にアクティブぬいのidを渡す
+            nuiの位置記憶を実装
+            mcで197をcraft, 自分のwallet, 自分のsummoner
+            msnでscore=1118000, summoner=自分
+     ok item順序の再考
+
+    heart経済の深慮
+        heartを得る行動
+            誰かのcraftによる受け取り
+                受動的
+                1/w程度
+                happy, satietyが10以上、レベル3以上で受け取り可能
+            猫mail
+                能動的
+                2/3d = 4/w程度
+            合計：5/w, 20/m程度
+        heartを支払う行動
+            nuiちゃんクラフト, 30要求
+            後半のアイテムクラフト時, 1w分, 5個程度要求
+        heartによるluck補正も再考する
+            heart 1 = luck 0.01
+                +0.2/m
+                +2.4/y
+        heartの消費方法をもっと考える
+            バランスとしては20個/mなので、その程度は消費する方法を考える
+            宝石1個作るのに3つとか使うか。
+
+ ok tiny heartの非NFT化
+        NFTのままだとコスト支払いがとてもやりにくい
+            gas代もかさむし、リソースとしての使い勝手が悪い
+        msに記録されるcoin/materialなどと同等のパラメータとする
+        coin/materialとは違い、summoner間を移動する機能は持たせないこととする
+            継続的なゲームプレイの指標のようなもの
+            coin/materialはRMTで得ることもできる
+        heart経済によって、高級アイテムのバランス調整を行う
+            1週間, 1ヶ月で得られる平均heart量
+            上記をもとに、アイテムのコスト設定を深慮する
+                ex: ぬいちゃんは1ヶ月分、◯◯は1週間分、など
+            burn上限10個が撤廃されるので、コストは自由に決められる
+                heart 100個要求のアイテムなども可能
+
         _item_id = 36;
         if (
             (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)

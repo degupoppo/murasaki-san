@@ -242,7 +242,7 @@ async function update_userItems() {
         //_html += "</center></td><td><center>";
         //_html += _wallet1 + "..." + _wallet2;
         _html += "</center></td><td><center>";
-        _html += "<input type='number' id='" + "input_price_" + _item + "'>";
+        _html += "<input type='number' style='width:80px;' id='" + "input_price_" + _item + "'>";
         _html += "&nbsp;&nbsp;";
         _html += "<button onclick='list_item(" + _item + ");'>";
         _html += "Sell";
