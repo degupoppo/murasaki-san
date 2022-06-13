@@ -375,7 +375,7 @@ async function get_recent_activity() {
     let wallet = await get_wallet(web3);
     let contract = await new web3.eth.Contract(abi_murasaki_item_market, contract_murasaki_item_market);
     let _block_latest = await web3.eth.getBlockNumber();
-    console.log({_block_latest});
+    //console.log({_block_latest});
     let _block_from = _block_latest - 10000;
     let events = await contract.getPastEvents("Buy", {
             fromBlock: _block_from,

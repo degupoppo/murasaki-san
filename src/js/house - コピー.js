@@ -25,7 +25,13 @@
             しかし、dapps stakingのリワードが運営利益とみなされるのならば、
             利益の分配権とみなされるだろうか。
         大本のmurasaki-san NTTは、mint時に「寄付」を受けるとするか。
-        あるいは, walletに紐付けられたNTTにしてしまい、自由に売買できなくすれば回避できるか？
+
+    Updateコードのリファクタリング
+        group_forUpdateを作製してchildUpdateをtrueにする。
+        diceやsummoner, starなどupdateを持つclassはここに集約する
+        update頻度は個別のclass.update()内でturn % == 2などで調整する
+        本体のupdate()内には情報の更新などのみを記載する
+        また、可能であれば、fps=30で軽量化を図る
 
     新NFT群の考案
         トレードインセンティブ
@@ -121,13 +127,6 @@
     Tokenのコントラクトの書き換え
 
 2nd                
-
- ok Updateコードのリファクタリング
-        group_forUpdateを作製してchildUpdateをtrueにする。
-        diceやsummoner, starなどupdateを持つclassはここに集約する
-        update頻度は個別のclass.update()内でturn % == 2などで調整する
-        本体のupdate()内には情報の更新などのみを記載する
-        また、可能であれば、fps=30で軽量化を図る
 
     Nui手動メモ
         mcとmsnにwalletをpermit
@@ -1085,8 +1084,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
                 this.moving_degree += 360;
             }
             //determine speed, count
-            //this.moving_speed = 0.5 + Math.random() * 0.3;  //0.5-0.8
-            this.moving_speed = 0.6 + Math.random() * 0.4;  //0.5-0.8
+            this.moving_speed = 0.5 + Math.random() * 0.3;  //0.5-0.8
             this.moving_count = 70 + Math.random() * 30;    //70-100
             //determine left or right
             if (this.moving_degree > 90 && this.moving_degree <= 270) {
@@ -1169,10 +1167,8 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         }else if (this.submode == 1) {
             let delta_x = this.target_x - this.x;
             let delta_y = this.target_y - this.y;
-            //let delta_x2 = delta_x / (Math.abs(delta_x) + Math.abs(delta_y)) * 1.9;
-            //let delta_y2 = delta_y / (Math.abs(delta_x) + Math.abs(delta_y)) * 1.9;
-            let delta_x2 = delta_x / (Math.abs(delta_x) + Math.abs(delta_y)) * 2.2;
-            let delta_y2 = delta_y / (Math.abs(delta_x) + Math.abs(delta_y)) * 2.2;
+            let delta_x2 = delta_x / (Math.abs(delta_x) + Math.abs(delta_y)) * 1.9;
+            let delta_y2 = delta_y / (Math.abs(delta_x) + Math.abs(delta_y)) * 1.9;
             this.x += delta_x2;
             this.y += delta_y2;
             if (this.x > this.target_x-10 
@@ -1271,8 +1267,8 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         }else if (this.submode == 1) {
             let delta_x = this.target_x - this.x;
             let delta_y = this.target_y - this.y;
-            let delta_x2 = delta_x / (Math.abs(delta_x) + Math.abs(delta_y)) * 2.2;
-            let delta_y2 = delta_y / (Math.abs(delta_x) + Math.abs(delta_y)) * 2.2;
+            let delta_x2 = delta_x / (Math.abs(delta_x) + Math.abs(delta_y)) * 1.9;
+            let delta_y2 = delta_y / (Math.abs(delta_x) + Math.abs(delta_y)) * 1.9;
             this.x += delta_x2;
             this.y += delta_y2;
             if (this.x > this.target_x-10 
@@ -1323,8 +1319,8 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         }else if (this.submode == 1) {
             let delta_x = this.target_x - this.x;
             let delta_y = this.target_y - this.y;
-            let delta_x2 = delta_x / (Math.abs(delta_x) + Math.abs(delta_y)) * 1.5;
-            let delta_y2 = delta_y / (Math.abs(delta_x) + Math.abs(delta_y)) * 1.5;
+            let delta_x2 = delta_x / (Math.abs(delta_x) + Math.abs(delta_y)) * 1.2;
+            let delta_y2 = delta_y / (Math.abs(delta_x) + Math.abs(delta_y)) * 1.2;
             this.x += delta_x2;
             this.y += delta_y2;
             if (this.x > this.target_x-10 
@@ -1371,8 +1367,8 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         }else if (this.submode == 1) {
             let delta_x = this.target_x - this.x;
             let delta_y = this.target_y - this.y;
-            let delta_x2 = delta_x / (Math.abs(delta_x) + Math.abs(delta_y)) * 1.5;
-            let delta_y2 = delta_y / (Math.abs(delta_x) + Math.abs(delta_y)) * 1.5;
+            let delta_x2 = delta_x / (Math.abs(delta_x) + Math.abs(delta_y)) * 1.2;
+            let delta_y2 = delta_y / (Math.abs(delta_x) + Math.abs(delta_y)) * 1.2;
             this.x += delta_x2;
             this.y += delta_y2;
             if (this.x > this.target_x-10 
@@ -1405,8 +1401,8 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         }else if (this.submode == 1) {
             let delta_x = this.target_x - this.x;
             let delta_y = this.target_y - this.y;
-            let delta_x2 = delta_x / (Math.abs(delta_x) + Math.abs(delta_y)) * 1.5;
-            let delta_y2 = delta_y / (Math.abs(delta_x) + Math.abs(delta_y)) * 1.5;
+            let delta_x2 = delta_x / (Math.abs(delta_x) + Math.abs(delta_y)) * 1.2;
+            let delta_y2 = delta_y / (Math.abs(delta_x) + Math.abs(delta_y)) * 1.2;
             this.x += delta_x2;
             this.y += delta_y2;
             if (this.x > this.target_x-10 
@@ -1493,27 +1489,25 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
     
     //===update()
     update(){
-        if (count_sync > 0 && local_level > 0) {
-            if (this.mode == "resting") {this.resting();}
-            else if (this.mode == "moving") {this.moving();}
-            else if (this.mode == "feeding") {this.feeding();}
-            else if (this.mode == "crying") {this.crying();}
-            else if (this.mode == "sleeping") {this.sleeping();}
-            else if (this.mode == "grooming") {this.grooming();}
-            else if (this.mode == "mining") {this.mining();}
-            else if (this.mode == "hugging") {this.hugging();}
-            else if (this.mode == "farming") {this.farming();}
-            else if (this.mode == "crafting") {this.crafting();}
-            else if (this.mode == "hungry") {this.hungry();}
-            else if (this.mode == "petrified") {this.petrified();}
-            else if (this.mode == "listning") {this.listning();}
-            //draw item_wearing_hat
-            if (item_wearing_hat != 0) {
-                this.update_item_wearing_hat();
-            }
-            //depth
-            this.depth = this.y;
+        if (this.mode == "resting") {this.resting();}
+        else if (this.mode == "moving") {this.moving();}
+        else if (this.mode == "feeding") {this.feeding();}
+        else if (this.mode == "crying") {this.crying();}
+        else if (this.mode == "sleeping") {this.sleeping();}
+        else if (this.mode == "grooming") {this.grooming();}
+        else if (this.mode == "mining") {this.mining();}
+        else if (this.mode == "hugging") {this.hugging();}
+        else if (this.mode == "farming") {this.farming();}
+        else if (this.mode == "crafting") {this.crafting();}
+        else if (this.mode == "hungry") {this.hungry();}
+        else if (this.mode == "petrified") {this.petrified();}
+        else if (this.mode == "listning") {this.listning();}
+        //draw item_wearing_hat
+        if (item_wearing_hat != 0) {
+            this.update_item_wearing_hat();
         }
+        //depth
+        this.depth = this.y;
     }
 }
 
@@ -1615,8 +1609,7 @@ class Pet extends Phaser.GameObjects.Sprite{
                 this.moving_degree += 360;
             }
             //determine speed, count
-            //this.moving_speed = 0.2 + Math.random() * 0.1;  //0.3-0.5
-            this.moving_speed = 0.3 + Math.random() * 0.2;  //0.3-0.5
+            this.moving_speed = 0.2 + Math.random() * 0.1;  //0.3-0.5
             this.moving_count = 70 + Math.random() * 30;    //70-100
             //determine left or right
             if (this.moving_degree > 90 && this.moving_degree <= 270) {
@@ -1765,11 +1758,6 @@ class Dice extends Phaser.GameObjects.Sprite{
     //===update()
     update(){
         this.count += 1;
-        /*
-        if (this.count % 2 == 0) {
-            return 0;
-        }
-        */
         //dept
         this.depth = this.line_y;
         this.text_rolled_number.depth = this.line_y + 1;
@@ -1829,20 +1817,19 @@ class Dice extends Phaser.GameObjects.Sprite{
             if (this.speed_x > 0) {
                 //friction, when speed_y = 0
                 if (Math.abs(this.speed_y) <= 0.5) {
-                    this.speed_x -= 0.1 * 2.5;
+                    this.speed_x -= 0.1 * 3;
                 } else {
                     this.speed_x -= 0.1;
                 }
             } else {
                 if (Math.abs(this.speed_y) <= 0.5) {
-                    this.speed_x += 0.1 * 2.5;
+                    this.speed_x += 0.1 * 3;
                 } else {
                     this.speed_x += 0.1;
                 }
             }
             //reduction of y speed
-            //this.speed_y -= 0.98;
-            this.speed_y -= 0.75;
+            this.speed_y -= 0.98;
             //position moving
             this.x += this.speed_x;
             this.y -= this.speed_y;
@@ -1851,7 +1838,7 @@ class Dice extends Phaser.GameObjects.Sprite{
             //refrection y
             if (this.y >= this.line_y) {
                 this.y = this.line_y;
-                this.speed_y *= -0.3;   //bounce coefficient
+                this.speed_y *= -0.5;   //bounce coefficient
                 if (Math.abs(this.speed_y) > 0.5) {
                     sound_dice_impact.play();
                 }
@@ -1900,7 +1887,7 @@ class tokenBall extends Phaser.GameObjects.Sprite{
     
     //===on_click
     on_click() {
-        this.speed_x = 6 + Math.random() * 4;
+        this.speed_x = 8 + Math.random() * 4;
         //this.speed_x = 8 + Math.random() * 5;
         
         if (Math.random() > 0.5) {
@@ -1929,8 +1916,7 @@ class tokenBall extends Phaser.GameObjects.Sprite{
     //===on_summon
     on_summon() {
         this.speed_x = -1 * (5 + Math.random() * 10);
-        this.speed_y = 8 + Math.random() * 8;
-        //this.speed_y = 5 + Math.random() * 5;
+        this.speed_y = 10 + Math.random() * 10;
         this.count = 0;
         this.a = Math.random() * 0.8 - 0.4;
         this.b = this.y + this.a * this.x;
@@ -1941,11 +1927,9 @@ class tokenBall extends Phaser.GameObjects.Sprite{
     //===update()
     update(){
         this.count += 1;
-        /*
         if (this.count % 2 == 0) {
             return 0;
         }
-        */
         //dept
         //this.depth = this.line_y;
         //check speed
@@ -1969,20 +1953,19 @@ class tokenBall extends Phaser.GameObjects.Sprite{
             if (this.speed_x > 0) {
                 //friction, when speed_y = 0
                 if (Math.abs(this.speed_y) <= 0.5) {
-                    this.speed_x -= 0.1 * 2;
+                    this.speed_x -= 0.1 * 3;
                 } else {
                     this.speed_x -= 0.1;
                 }
             } else {
                 if (Math.abs(this.speed_y) <= 0.5) {
-                    this.speed_x += 0.1 * 2;
+                    this.speed_x += 0.1 * 3;
                 } else {
                     this.speed_x += 0.1;
                 }
             }
             //reduction of y speed
-            //this.speed_y -= 0.98;
-            this.speed_y -= 0.75;
+            this.speed_y -= 0.98;
             //position moving
             this.x += this.speed_x;
             this.y -= this.speed_y;
@@ -1991,8 +1974,7 @@ class tokenBall extends Phaser.GameObjects.Sprite{
             //refrection y
             if (this.y >= this.line_y) {
                 this.y = this.line_y;
-                //this.speed_y *= -0.5;   //bounce coefficient
-                this.speed_y *= -0.3;   //bounce coefficient
+                this.speed_y *= -0.5;   //bounce coefficient
                 if (Math.abs(this.speed_y) > 0.5) {
                     sound_dice_impact.play();
                 }
@@ -2035,11 +2017,11 @@ class Star extends Phaser.GameObjects.Sprite{
     
     //===on_click
     on_click() {
-        this.speed_x = 6 + Math.random() * 4;
+        this.speed_x = 8 + Math.random() * 6;
         if (Math.random() > 0.5) {
             this.speed_x *= -1;
         }
-        this.speed_y = 6 + Math.random() * 4;
+        this.speed_y = 6 + Math.random() * 6;
         this.count = 0;
         //define constant of y = b - a * x
         this.a = Math.random() * 0.8 - 0.4;
@@ -2064,11 +2046,9 @@ class Star extends Phaser.GameObjects.Sprite{
     //===update()
     update(){
         this.count += 1;
-        /*
         if (this.count % 2 == 0) {
             return;
         }
-        */
         //dept
         //this.depth = this.line_y;
         //check speed
@@ -2092,19 +2072,19 @@ class Star extends Phaser.GameObjects.Sprite{
             if (this.speed_x > 0) {
                 //friction, when speed_y = 0
                 if (Math.abs(this.speed_y) <= 0.5) {
-                    this.speed_x -= 0.1 * 2.5;
+                    this.speed_x -= 0.1 * 3;
                 } else {
                     this.speed_x -= 0.1;
                 }
             } else {
                 if (Math.abs(this.speed_y) <= 0.5) {
-                    this.speed_x += 0.1 * 2.5;
+                    this.speed_x += 0.1 * 3;
                 } else {
                     this.speed_x += 0.1;
                 }
             }
             //reduction of y speed
-            this.speed_y -= 0.75;
+            this.speed_y -= 0.98;
             //position moving
             this.x += this.speed_x;
             this.y -= this.speed_y;
@@ -2113,7 +2093,7 @@ class Star extends Phaser.GameObjects.Sprite{
             //refrection y
             if (this.y >= this.line_y) {
                 this.y = this.line_y;
-                this.speed_y *= -0.3;   //bounce coefficient
+                this.speed_y *= -0.2;   //bounce coefficient
                 if (Math.abs(this.speed_y) > 0.5) {
                     sound_dice_impact.play();
                 }
@@ -2642,7 +2622,6 @@ function summon_star(scene, _type) {
         .setDepth(2);
     _star.on_summon();
     group_star.add(_star);
-    group_update.add(_star);
 }
 
 
@@ -3497,6 +3476,11 @@ function create() {
     sound_fireworks2 = this.sound.add("fireworks2", {volume:0.2});
     sound_basket = this.sound.add("basket", {volume:0.2});
 
+    //===summoner
+    murasakisan = new Murasakisan(this, 500 + Math.random()*200, 640 + Math.random()*100)
+        .setOrigin(0.5)
+        .setScale(0.45);
+
     //===system message
     //system message
     text_system_message = this.add.text(640, 420, "", {
@@ -3628,7 +3612,8 @@ function create() {
     group_mint_name.setVisible(false);
     
     //===star
-    //group_star.runChildUpdate = true;
+    group_star = this.add.group();
+    group_star.runChildUpdate = true;
     
     //===pet
     /*
@@ -3637,16 +3622,8 @@ function create() {
     */
     
     //===group
-    group_star = this.add.group();
-    //group_pet = this.add.group();
     group_update = this.add.group();
-    group_update.runChildUpdate = true;
-
-    //===summoner
-    murasakisan = new Murasakisan(this, 500 + Math.random()*200, 640 + Math.random()*100)
-        .setOrigin(0.5)
-        .setScale(0.45);
-    group_update.add(murasakisan);
+        .runChildUpdate = true;
 }
 
 
@@ -4293,7 +4270,7 @@ function update_checkItem(this_scene) {
                     sound_basket.play();
                     murasakisan.on_click();
                     group_tokenBall = this_scene.add.group();
-                    //group_tokenBall.runChildUpdate = true;
+                    group_tokenBall.runChildUpdate = true;
                     for (let _token in dic_tokenBall_contract) {
                         let _contract = dic_tokenBall_contract[_token];
                         let _amount = await call_amount_of_token(_contract);
@@ -4302,10 +4279,9 @@ function update_checkItem(this_scene) {
                             _tokenBall = new tokenBall(this_scene, _x, _y, _img)
                                 .setOrigin(0.5)
                                 .setScale(0.15)
-                                .setAlpha(1)
+                                .setAlpha(0.7)
                                 .setDepth(2);
                             group_tokenBall.add(_tokenBall);
-                            group_update.add(_tokenBall);
                             _tokenBall.on_summon();
                         }
                     }
@@ -4443,7 +4419,7 @@ function update_checkItem(this_scene) {
         }
     }
     
-    //###2:Mr.Astar
+    //###2:Ms.Astar
     _item_id = 2;
     if (
         (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
@@ -4458,7 +4434,6 @@ function update_checkItem(this_scene) {
             "mr_astar_left",
             "mining"
         ).setScale(0.12);
-        group_update.add(mr_astar);
     }
     
     //###3:Dice
@@ -4469,7 +4444,6 @@ function update_checkItem(this_scene) {
     ) {
         local_items_flag[_item_id] = true;
         dice = new Dice(this_scene, 400, 600).setScale(0.3);
-        group_update.add(dice);
     }
 
     //###4:Helment
@@ -4632,7 +4606,6 @@ function update_checkItem(this_scene) {
             "ms_ether_left",
             "farming"
         ).setScale(0.12);
-        group_update.add(ms_ether);
     }
 
     //###20:*Cat Cushion
@@ -4702,9 +4675,7 @@ function update_checkItem(this_scene) {
     
     //check mail receiving, independent from cushion possession
     if (flag_mail) {
-        cat_others = this_scene.add.sprite(800, 700, "cat_sitting")
-            .setScale(0.12)
-            .setOrigin(0.5)
+        cat_others = this_scene.add.sprite(800, 700, "cat_sitting").setScale(0.12).setOrigin(0.5)
             .setInteractive({useHandCursor: true})
             .on("pointerdown", () => {contract_open_mail(summoner)});            
         cat_others.depth = cat_others.y;
@@ -4951,7 +4922,6 @@ function update_checkItem(this_scene) {
             "dr_bitco_left",
             "crafting"
         ).setScale(0.11);
-        group_update.add(dr_bitco);
     }
 
     //###37:Pancake
@@ -5271,8 +5241,7 @@ function update(time, delta) {
     //increment turn
     turn += 1;
     text_turn.setText("turn: " + ("0000000" + turn).slice(-7) );
-    //House of Murasaki-san #1, 0x....0, 592 Astar Network, Polkadot, Web3.0
-    //Living in 0x0000000000000000000000, 592 Astar Network, Polkadot, Web3.0
+    
 
     //debug
     /*
@@ -5294,7 +5263,6 @@ function update(time, delta) {
         flag_doneFp = 1;
     }
     
-    /*
     //update summoner
     if (count_sync > 0 && local_level > 0) {
         murasakisan.update();
@@ -5315,7 +5283,6 @@ function update(time, delta) {
     if (typeof dice != "undefined" && turn % 2 == 0) {
         dice.update();
     }
-    */
 
     //radarchart
     if (turn % 1000 == 0 && summoner > 0 && radarchart == 1) {

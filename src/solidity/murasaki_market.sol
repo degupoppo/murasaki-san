@@ -664,7 +664,7 @@ contract Murasaki_Market_Item is Initializable, ERC721Holder {
     event SetFeeBps(uint feeBps);
 
     //IERC721 public rarity;
-    uint public feeBps = 100;
+    uint public feeBps = 500;
     address public owner = msg.sender;
     uint private lock = 1;
     EnumerableSet.UintSet private set;
