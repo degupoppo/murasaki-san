@@ -226,14 +226,17 @@
 
 
 function init_global_variants() {
+    turn = 0;
 
-    //===on_chain static
+    //on chain static status
     summoner = -1;
     local_birth_time = Date.now();
+
+    //on chain global status
     SPEED = 1;
     BASE_SEC = 86400;
 
-    //===on_chain dynamic
+    //on chain dynamic status
     local_class = 0;
     local_strength = 0;
     local_dexterity = 0;
@@ -266,7 +269,7 @@ function init_global_variants() {
     local_mail_sending_interval = -1;
     local_score = 0;
 
-    //===local previous
+    //local using variants
     previous_local_last_feeding_time = 0;
     previous_local_last_grooming_time = 0;
     previous_local_level = 0;
@@ -278,20 +281,10 @@ function init_global_variants() {
     previous_local_material = 0;
     previous_local_items = [0] * 256;
     previous_local_name_str = "[0] * 256";
-    previous_local_item194 = 0;
-    previous_local_item195 = 0;
-    previous_local_item196 = 0;
-    previous_local_item197 = 0;
-    previsou_local_rolled_dice = 0;
-    previous_local_score = 0;
-    previous_satiety = 0;
-    previous_happy = 0;
-    
-    //===local etc
-    turn = 0;
     local_coin_calc = 0;
     local_material_calc = 0;
     local_crafting_calc = 0;
+    flag_music = 0;
     bgm = 0;
     local_items_flag = new Array(256).fill(0);
     global_selected_crafting_item = 0;
@@ -299,6 +292,7 @@ function init_global_variants() {
     global_selected_crafting_item_required_heart = 0;
     last_sync_time = 0;
     mode = "";
+    //text_wallet = "";
     screen_coin = 0;
     screen_coin_delta = 0;
     screen_material = 0;
@@ -307,25 +301,29 @@ function init_global_variants() {
     screen_exp_delta = 0;
     count_sync = 0;
     happy = 0;
+    previous_happy = 0;
     satiety = 0;
+    previous_satiety = 0;
     screen_happy = 0;
     screen_happy_delta = 0;
     screen_satiety = 0;
     screen_satiety_delta = 0;
+    previous_local_item194 = 0;
+    previous_local_item195 = 0;
+    previous_local_item196 = 0;
+    previous_local_item197 = 0;
     item_wearing_hat = 0;
-    active_nui_id = 0;
-
-    //===flag
-    flag_music = 0;
-    flag_radarchart = 0;
     flag_doneFp = 0;
+    previsou_local_rolled_dice = 0;
     flag_dice_rolling = 0;
     flag_name_minting = 0;
     flag_mail = false;
+    active_nui_id = 0;
+    flag_radarchart = 0;
+    previous_local_score = 0;
     flag_tokenBall = 0;
     flag_loaded = 0;
     flag_item_update = 0;
-    flag_summon_star = 0;
 }
 
 init_global_variants();
@@ -458,7 +456,7 @@ async function send_fp_get(_wallet, _summoner) {
 //---web3-----------------------------------------------------------------------------------------------------
 
 
-//===call
+//===call===
 
 //update summoner of wallet
 async function contract_update_summoner_of_wallet() {
@@ -711,7 +709,7 @@ async function call_amount_of_token(_contract_address) {
     return balance / (10 ** decimal);
 }
 
-//===send
+//===send===
 
 //summon
 async function contract_summon(_class) {
@@ -802,6 +800,13 @@ async function contract_crafting(_summoner) {
     let _item_type = global_selected_crafting_item;
     if (local_crafting_status == 0) {
         contract.methods.start_crafting(_summoner, _item_type).send({from:wallet});
+        /*
+        if (_item_type == 197) {
+            _contract_crafting_with_heart(_summoner, _item_type, global_selected_crafting_item_required_heart);
+        } else {
+            contract.methods.start_crafting(_summoner, _item_type).send({from:wallet});
+        }
+        */
     }else {
         contract.methods.stop_crafting(_summoner).send({from:wallet});
     }
@@ -824,6 +829,7 @@ async function _contract_crafting_with_heart(_summoner, _item_type_to_craft, _he
             _heart_count += 1;
         }
         if (_heart_count >= _heart_required) {
+            //console.log(_summoner, _item_type, _array_heart);
             contract.methods.start_crafting_with_heart(_summoner, _item_type_to_craft, _array_heart).send({from:wallet});
             break
         }
@@ -953,7 +959,7 @@ async function dice_roll(_summoner) {
 }
 
 
-//---class:Murasakisan-----------------------------------------------------------------------------------------------------
+//---summoner-----------------------------------------------------------------------------------------------------
 
 
 class Murasakisan extends Phaser.GameObjects.Sprite{
@@ -986,15 +992,15 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         return this.mode;
     }
     
-    //===on_click
     on_click() {
         if (this.mode == "resting" || this.mode == "moving") {
             this.count = 0;
             this.mode = "hugging";
+            //fireworks(this.scene);
+            //star(this.scene);
         }
     }
     
-    //===resting
     resting(){
 	    this.count += 1;
         if (this.count == 1) {
@@ -1025,7 +1031,6 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         }
     }
     
-    //===moving
     moving() {
         this.count += 1;
         //determine direction
@@ -1110,13 +1115,13 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             }
 
         //return to resting
-        } else if (this.count >= this.moving_count) {
+        }else if (this.count >= this.moving_count) {
             this.mode = "resting";
             this.count = 0;
         }
     }
     
-    //===feeding
+    //send: last_nutrition_time
     feeding() {
         this.count += 1;
         if (this.submode == 0) {
@@ -1158,7 +1163,6 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         }
     }
     
-    //===crying
     crying() {
         this.count += 1;
         if (this.count == 1){
@@ -1172,7 +1176,6 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         }
     }
     
-    //===hungry
     hungry() {
         this.count += 1;
         if (this.count == 1){
@@ -1186,7 +1189,6 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         }
     }
     
-    //===petrified
     petrified() {
         this.count += 1;
         if (this.count == 1){
@@ -1194,7 +1196,6 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         }
     }
     
-    //===sleeping
     sleeping() {
         this.count += 1;
         if (this.count == 1){
@@ -1205,7 +1206,6 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         }
     }
     
-    //===listning
     listning() {
         this.count += 1;
         if (this.count == 1){
@@ -1216,7 +1216,6 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         }
     }
     
-    //===grooming
     grooming() {
         this.count += 1;
         if (this.submode == 0) {
@@ -1268,7 +1267,6 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         }
     }
     
-    //===mining
     mining() {
         this.count += 1;
         if (this.submode == 0) {
@@ -1302,7 +1300,6 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         }
     }
     
-    //===hugging
     hugging() {
         this.count += 1;
         if (this.count % 200 == 50) {
@@ -1316,7 +1313,6 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         }
     }
     
-    //===farming
     farming() {
         this.count += 1;
         if (this.submode == 0) {
@@ -1350,7 +1346,6 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         }
     }
     
-    //===crafting
     crafting() {
         this.count += 1;
         if (this.submode == 0) {
@@ -1385,7 +1380,6 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         }
     }
     
-    //===update wearing_hat
     update_item_wearing_hat() {
 
         if (
@@ -1452,7 +1446,6 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         item_wearing_hat.depth = this.y + 1;
     }
     
-    //===update()
     update(){
         if (this.mode == "resting") {this.resting();}
         else if (this.mode == "moving") {this.moving();}
@@ -1477,7 +1470,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
 }
 
 
-//---class:Pet-----------------------------------------------------------------------------------------------------
+//---pet-----------------------------------------------------------------------------------------------------
 
 
 class Pet extends Phaser.GameObjects.Sprite{
@@ -1506,8 +1499,6 @@ class Pet extends Phaser.GameObjects.Sprite{
     get get_mode(){
         return this.mode;
     }
-
-    //===on_click
     on_click() {
         /*
         if (this.mode == "resting" || this.mode == "moving") {
@@ -1516,8 +1507,6 @@ class Pet extends Phaser.GameObjects.Sprite{
         }
         */
     }
-
-    //===resting
     resting(){
 	    this.count += 1;
         if (this.count == 1) {
@@ -1549,8 +1538,6 @@ class Pet extends Phaser.GameObjects.Sprite{
             }
         }
     }
-
-    //===moving
     moving() {
         this.count += 1;
         //determine direction
@@ -1594,8 +1581,6 @@ class Pet extends Phaser.GameObjects.Sprite{
             this.count = 0;
         }
     }
-
-    //===working
     working() {
         this.count += 1;
         if (this.submode == 0) {
@@ -1629,8 +1614,6 @@ class Pet extends Phaser.GameObjects.Sprite{
             }
         }
     }
-
-    //===sleeping
     /*
     sleeping() {
         this.count += 1;
@@ -1642,9 +1625,8 @@ class Pet extends Phaser.GameObjects.Sprite{
         }
     }
     */
-
-    //===update()
     update(){
+        //console.log(this.version, this.mode, this.count);
         if (this.mode == "resting") {this.resting();}
         else if (this.mode == "moving") {this.moving();}
         //else if (this.mode == "sleeping") {this.sleeping();}
@@ -1655,7 +1637,7 @@ class Pet extends Phaser.GameObjects.Sprite{
 }
 
 
-//---class:Dice-----------------------------------------------------------------------------------------------------
+//---dice-----------------------------------------------------------------------------------------------------
 
 class Dice extends Phaser.GameObjects.Sprite{
     constructor(scene, x, y){
@@ -1687,8 +1669,6 @@ class Dice extends Phaser.GameObjects.Sprite{
         });
         this.on("pointerout", () => {this.setTexture("item_dice");} );
     }
-    
-    //===on_click
     on_click() {
         this.speed_x = 8 + Math.random() * 5;
         
@@ -1719,8 +1699,6 @@ class Dice extends Phaser.GameObjects.Sprite{
         //sound
         sound_dice.play();
     }
-    
-    //===update()
     update(){
         this.count += 1;
         //dept
@@ -1829,7 +1807,7 @@ class Dice extends Phaser.GameObjects.Sprite{
 }
 
 
-//---class:tokenBall-----------------------------------------------------------------------------------------------------
+//---tokenBall-----------------------------------------------------------------------------------------------------
 
 
 class tokenBall extends Phaser.GameObjects.Sprite{
@@ -1849,8 +1827,6 @@ class tokenBall extends Phaser.GameObjects.Sprite{
         this.line_x_r = 1200;   //right side
         this.line_x_l = 50;     //left side
     }
-    
-    //===on_click
     on_click() {
         this.speed_x = 8 + Math.random() * 4;
         //this.speed_x = 8 + Math.random() * 5;
@@ -1877,8 +1853,6 @@ class tokenBall extends Phaser.GameObjects.Sprite{
         //sound
         sound_dice.play();
     }
-    
-    //===on_summon
     on_summon() {
         this.speed_x = -1 * (5 + Math.random() * 10);
         this.speed_y = 10 + Math.random() * 10;
@@ -1888,8 +1862,6 @@ class tokenBall extends Phaser.GameObjects.Sprite{
         //sound
         //sound_dice.play();
     }
-    
-    //===update()
     update(){
         this.count += 1;
         if (this.count % 2 == 0) {
@@ -1959,7 +1931,7 @@ class tokenBall extends Phaser.GameObjects.Sprite{
 }
 
 
-//---class:Star-----------------------------------------------------------------------------------------------------
+//---Star-----------------------------------------------------------------------------------------------------
 
 
 class Star extends Phaser.GameObjects.Sprite{
@@ -1979,8 +1951,6 @@ class Star extends Phaser.GameObjects.Sprite{
         this.line_x_r = 1200;   //right side
         this.line_x_l = 50;     //left side
     }
-    
-    //===on_click
     on_click() {
         this.speed_x = 8 + Math.random() * 6;
         if (Math.random() > 0.5) {
@@ -1994,8 +1964,6 @@ class Star extends Phaser.GameObjects.Sprite{
         //sound
         sound_dice.play();
     }
-    
-    //===on_summon
     on_summon() {
         this.x = 800 + Math.random() * 400;
         this.y = -50;
@@ -2007,12 +1975,10 @@ class Star extends Phaser.GameObjects.Sprite{
         //sound
         //sound_dice.play();
     }
-    
-    //===update()
     update(){
         this.count += 1;
         if (this.count % 2 == 0) {
-            return;
+            return 0;
         }
         //dept
         //this.depth = this.line_y;
@@ -2078,10 +2044,10 @@ class Star extends Phaser.GameObjects.Sprite{
 }
 
 
-//---functions-----------------------------------------------------------------------------------------------------
+//---accessory-----------------------------------------------------------------------------------------------------
 
 
-//===bar
+//===bar===
 function makeBar(scene, x, y, color) {
     //draw the bar
     let bar = scene.add.graphics();
@@ -2096,7 +2062,7 @@ function makeBar(scene, x, y, color) {
     return bar;
 }
 
-//===button
+//===button===
 //TODO: send transaction
 class Button {
     constructor(x, y, label, scene, callback) {
@@ -2115,7 +2081,7 @@ class Button {
     }
 }
 
-//===music
+//===music===
 function music() {
     if (flag_music == 0) {
         if (bgm == bgm1) {
@@ -2135,7 +2101,7 @@ function music() {
     }
 }
 
-//===radar chart
+//===rader chart===
 function radarchart(scene, x0, y0, r, str, dex, int, luk, str_item, dex_item, int_item, luk_item) {
     //base
     let base = 25;
@@ -2163,9 +2129,24 @@ function radarchart(scene, x0, y0, r, str, dex, int, luk, str_item, dex_item, in
     let x4d = -r * (int+int_item)/base;
     //remove old chart
     try {
+        /*
+        radar_b1.setVisible(false);
+        radar_b2.setVisible(false);
+        radar_b3.setVisible(false);
+        radar_g1.setVisible(false);
+        radar_g2.setVisible(false);
+        radar_g3.setVisible(false);
+        text_str.setVisible(false);
+        text_dex.setVisible(false);
+        text_luk.setVisible(false);
+        text_int.setVisible(false);
+        icon_str.setVisible(false);
+        icon_dex.setVisible(false);
+        icon_luk.setVisible(false);
+        icon_int.setVisible(false);
+        */
         group_chart.destroy(true);
     } catch(error) {
-        ;
     }
     //draw
     group_chart = scene.add.group();
@@ -2184,6 +2165,23 @@ function radarchart(scene, x0, y0, r, str, dex, int, luk, str_item, dex_item, in
     group_chart.add(scene.add.sprite(x0+r-5+10, y0-30, "icon_dex").setOrigin(0.5).setScale(0.12));
     group_chart.add(scene.add.sprite(x0-15-12, y0+r-5+14, "icon_luk").setOrigin(0.5).setScale(0.10));
     group_chart.add(scene.add.sprite(x0-r-20+16, y0-10-16, "icon_int").setOrigin(0.5).setScale(0.10));
+    /*
+    radar_b1 = scene.add.polygon(x0+r, y0+r, [0,-r,r,0,0,r,-r,0], 0xDADADA, 0.4);
+    radar_b2 = scene.add.polygon(x0+r*0.75, y0+r*0.75, [0,-r*0.75,r*0.75,0,0,r*0.75,-r*0.75,0], 0xDADADA, 0.4);
+    radar_b3 = scene.add.polygon(x0+r/2, y0+r/2, [0,-r/2,r/2,0,0,r/2,-r/2,0], 0xDADADA, 0.4);
+    radar_g1 = scene.add.polygon(x0+(-x4d+x2d)/2, y0+(-y1d+y3d)/2, [x1,y1d,x2d,y2,x3,y3d,x4d,y4], 0x54C3F1, 1);
+    radar_g2 = scene.add.polygon(x0+(-x4i+x2i)/2, y0+(-y1i+y3i)/2, [x1,y1i,x2i,y2,x3,y3i,x4i,y4], 0xF9C270, 1);
+    radar_g3 = scene.add.polygon(x0+(-x4+x2)/2, y0+(-y1+y3)/2, [x1,y1,x2,y2,x3,y3,x4,y4], 0xFFF67F, 1);
+    let font_arg = {font: "17px Arial", fill: "#000000"};
+    text_str = scene.add.text(x0-15, y0-r-25, "STR"+"\n"+(Math.round( (str+str_item)*100 )/100).toFixed(2), font_arg);
+    text_dex = scene.add.text(x0+r-5, y0-10, "DEX"+"\n"+(Math.round( (dex+dex_item)*100 )/100).toFixed(2), font_arg);
+    text_luk = scene.add.text(x0-15, y0+r-7, "LUK"+"\n"+(Math.round( (luk+luk_item+local_rolled_dice/100)*100 )/100).toFixed(2), font_arg);
+    text_int = scene.add.text(x0-r-20, y0-12, "INT"+"\n"+(Math.round( (int+int_item)*100 )/100).toFixed(2), font_arg);
+    icon_str = scene.add.sprite(x0-15-10, y0-r-25+20, "icon_str").setOrigin(0.5).setScale(0.12);
+    icon_dex = scene.add.sprite(x0+r-5+10, y0-30, "icon_dex").setOrigin(0.5).setScale(0.12);
+    icon_luk = scene.add.sprite(x0-15-12, y0+r-5+14, "icon_luk").setOrigin(0.5).setScale(0.10);
+    icon_int = scene.add.sprite(x0-r-20+16, y0-10-16, "icon_int").setOrigin(0.5).setScale(0.10);
+    */
 }
 async function draw_radarchart(scene) {
         let _x = 1160;
@@ -2194,7 +2192,7 @@ async function draw_radarchart(scene) {
 }
 
 
-//===window:craft
+//===window craft===
 function open_window_craft (scene) {
 
     sound_window_open.play();
@@ -2325,6 +2323,7 @@ function open_window_craft (scene) {
             _rarity = "empty";
         }
         //use eval to create dynamic variants
+        //eval(`button_crafting_item${i}  = create_button(_x, _y + _y_add *  ${i}, '[' + local_items[${i}] + ',' + local_items[${i+64}] + ',' + local_items[${i+128}] + '] ' + array_item_name[${i}],  ${i},  scene);`)
         eval(`_button  = create_button(_x, _y + _y_add *  ${i}, '[' + local_items[${i}] + ',' + local_items[${i+64}] + ',' + local_items[${i+128}] + '] ' + array_item_name[${i}],  ${i},  scene, _rarity);`)
         group_window_crafting.add(_button);
     }
@@ -2337,6 +2336,16 @@ function open_window_craft (scene) {
     item7_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  7, "item_ribbon").setScale(0.12);
     item8_icon = scene.add.sprite(_x-25, _y+12 + _y_add *  8, "item_window").setScale(0.12);
     item9_icon = scene.add.sprite(_x-25, _y+12 + _y_add *  9, "item_hat_knit").setScale(0.14);
+
+    /*
+    item1_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  1, "mr_astar_right").setScale(0.08);
+    item2_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  2, "item_crown").setScale(0.15);
+    item3_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  3, "item_fortune_statue").setScale(0.15);
+    item4_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  4, "item_hat_helmet").setScale(0.1);
+    item5_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  5, "item_kanban").setScale(0.1);
+    item6_icon = scene.add.sprite(_x-25, _y+12 + _y_add *  6, "item_ribbon").setScale(0.12);
+    */
+
     group_window_crafting.add(item1_icon);
     group_window_crafting.add(item2_icon);
     group_window_crafting.add(item3_icon);
@@ -2360,6 +2369,7 @@ function open_window_craft (scene) {
         }else{
             _rarity = "empty";
         }
+        //eval(`button_crafting_item${i}  = create_button(_x, _y + _y_add *  ${i-16}, '[' + local_items[${i}] + ',' + local_items[${i+64}] + ',' + local_items[${i+128}] + '] ' + array_item_name[${i}],  ${i},  scene);`)
         eval(`_button  = create_button(_x, _y + _y_add *  ${i-16}, '[' + local_items[${i}] + ',' + local_items[${i+64}] + ',' + local_items[${i+128}] + '] ' + array_item_name[${i}],  ${i},  scene, _rarity);`)
         group_window_crafting.add(_button);
     }
@@ -2372,6 +2382,14 @@ function open_window_craft (scene) {
     item23_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  7, "item_asnya").setScale(0.1);
     item24_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  8, "rug-pull").setScale(0.15);
     item25_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  9, "item_vase").setScale(0.08);
+    /*
+    item17_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  1, "item_vase").setScale(0.08);
+    item18_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  2, "ms_ether_right").setScale(0.08);
+    item19_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  3, "item_hat_mugiwara").setScale(0.15);
+    item20_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  4, "item_asnya").setScale(0.1);
+    item21_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  5, "item_switch").setScale(0.1);
+    item22_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  6, "item_chocolate_bread").setScale(0.25);
+    */
     group_window_crafting.add(item17_icon);
     group_window_crafting.add(item18_icon);
     group_window_crafting.add(item19_icon);
@@ -2395,6 +2413,8 @@ function open_window_craft (scene) {
         }else{
             _rarity = "empty";
         }
+        //eval(`button_crafting_item${i}  = create_button(_x, _y + _y_add *  ${i-32}, '[' + local_items[${i}] + ',' + local_items[${i+64}] + '] ' + array_item_name[${i}],  ${i},  scene);`);
+        //eval(`button_crafting_item${i}  = create_button(_x, _y + _y_add *  ${i-32}, '[' + local_items[${i}] + ',' + local_items[${i+64}] + ',' + local_items[${i+128}] + '] ' + array_item_name[${i}],  ${i},  scene);`)
         eval(`_button  = create_button(_x, _y + _y_add *  ${i-32}, '[' + local_items[${i}] + ',' + local_items[${i+64}] + ',' + local_items[${i+128}] + '] ' + array_item_name[${i}],  ${i},  scene, _rarity);`)
         group_window_crafting.add(_button);
     }
@@ -2407,6 +2427,14 @@ function open_window_craft (scene) {
     item39_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  7, "item_piano").setScale(0.08);
     item40_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  8, "item_switch").setScale(0.1);
     item41_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  9, "item_lanthanum").setScale(0.08);
+    /*
+    item33_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  1, "item_violin").setScale(0.08);
+    item34_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  2, "item_musicbox").setScale(0.12);
+    item35_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  3, "dr_bitco_right").setScale(0.08);
+    item36_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  4, "item_dice").setScale(0.18);
+    item37_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  5, "item_hat_knit").setScale(0.14);
+    item38_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  6, "item_hat_mortarboard").setScale(0.14);
+    */
     group_window_crafting.add(item33_icon);
     group_window_crafting.add(item34_icon);
     group_window_crafting.add(item35_icon);
@@ -2453,10 +2481,11 @@ function open_window_craft (scene) {
     
     //depth
     group_window_crafting.setDepth(9999 + 100);
+    
 }
 
 
-//===window:summon
+//===window summon===
 function open_window_summon(scene) {
     //close window and summon
     function close_window_summon(_class) {
@@ -2517,11 +2546,11 @@ function open_window_summon(scene) {
     group_window_summon.add(button_cancel);
     //depth
     group_window_summon.setDepth(9999 + 1);
-}
+};
 
 
-//===draw_firework
-function draw_firework(scene) {
+//===fireworks
+function fireworks(scene) {
     sound_fireworks2.play();
     const { FloatBetween } = Phaser.Math;
     const emitterConfig = {
@@ -2559,27 +2588,22 @@ function draw_firework(scene) {
             emitter.stop();
         }
     });
-}
+};
 
 
-//===summon_star
-function summon_star(scene, _type) {
-    let _dic = {
-        201:"star_blue",
-        202:"star_green",
-        203:"star_orange",
-        204:"star_pink",
-        205:"star_purple",
-        206:"star_red",
-        207:"star_skyblue",
-        208:"star_yellow",
-        209:"star_yellow",
-        210:"star_yellow",
-        211:"star_yellow",
-        212:"star_yellow",
-    }
-    //let _img = _array[Math.floor(Math.random() * _array.length)];
-    let _img = _dic[_type];
+//===star
+function star(scene) {
+    let _array = [
+        "star_blue",
+        "star_green",
+        "star_orange",
+        "star_pink",
+        "star_purple",
+        "star_red",
+        "star_skyblue",
+        "star_yellow",
+    ];
+    let _img = _array[Math.floor(Math.random() * _array.length)];
     let _star = new Star(scene, 300, -100, _img)
         .setOrigin(0.5)
         .setScale(0.15)
@@ -2590,7 +2614,7 @@ function summon_star(scene, _type) {
 }
 
 
-//---phaser3:config-----------------------------------------------------------------------------------------------------
+//---config-----------------------------------------------------------------------------------------------------
 
 
 let config = {
@@ -2602,7 +2626,7 @@ let config = {
         autoCenter: Phaser.Scale.CENTER_BOTH,
         width: 1280,
         height: 960,
-        //fps: 10,
+        fps: 30,
     },
     scene: {
         preload: preload,
@@ -2617,21 +2641,194 @@ let config = {
     dom: {
         createContainer: true
     },
-    fps: {
-        target: 60,
-        forceSetTimeOut: true
-    },
 };
 
 game = new Phaser.Game(config);
 
 
-//---phaser3:preload-----------------------------------------------------------------------------------------------------
+//---preload-----------------------------------------------------------------------------------------------------
 
 
 function preload() {
 
-    //===loading screen
+    //===back===
+    this.load.image("back", "src/png/background.png");
+    this.load.image("back_black", "src/png/background_black.png");
+    this.load.image("window", "src/png/background_window.png");
+    this.load.image("back_neon", "src/png/background_neon.png", {frameWidth: 500, frameHeight: 500});
+
+    //===murasaki-san===
+    this.load.spritesheet("murasaki_right", "src/png/murasaki_right.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("murasaki_left", "src/png/murasaki_left.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("murasaki_sleeping", "src/png/murasaki_sleeping2.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("murasaki_feeding", "src/png/murasaki_feeding.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("murasaki_feeding_happy_right", "src/png/murasaki_feeding_happy_right.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("murasaki_feeding_happy_left", "src/png/murasaki_feeding_happy_left.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("murasaki_crying", "src/png/murasaki_crying.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("murasaki_mining", "src/png/murasaki_mining.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("murasaki_hugging", "src/png/murasaki_hugging.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("murasaki_farming", "src/png/murasaki_farming.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("murasaki_grooming", "src/png/murasaki_grooming3.png", {frameWidth: 720, frameHeight: 622});
+    this.load.spritesheet("murasaki_crafting", "src/png/murasaki_crafting.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("murasaki_working_left", "src/png/murasaki_working_left.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("murasaki_working_right", "src/png/murasaki_working_right.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("murasaki_click", "src/png/murasaki_click.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("murasaki_stone", "src/png/murasaki_stone.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("murasaki_hungry", "src/png/murasaki_hungry.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("murasaki_listning", "src/png/murasaki_listning.png", {frameWidth: 370, frameHeight: 320});
+
+    //===button===
+    this.load.image("button_feeding", "src/png/button_feeding.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_feeding_pointerover", "src/png/button_feeding_pointerover.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_mining_enable", "src/png/button_mining_enable.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_mining_unable", "src/png/button_mining_unable.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_mining_pointerover", "src/png/button_mining_pointerover.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_mining_working", "src/png/button_mining_working.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_mining_pointerover_stop", "src/png/button_mining_pointerover_stop.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_farming_enable", "src/png/button_farming_enable.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_farming_unable", "src/png/button_farming_unable.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_farming_pointerover", "src/png/button_farming_pointerover.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_farming_working", "src/png/button_farming_working.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_farming_pointerover_stop", "src/png/button_farming_pointerover_stop.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_crafting_enable", "src/png/button_crafting_enable.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_crafting_unable", "src/png/button_crafting_unable.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_crafting_pointerover", "src/png/button_crafting_pointerover.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_crafting_working", "src/png/button_crafting_working.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_crafting_pointerover_stop", "src/png/button_crafting_pointerover_stop.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_grooming_enable", "src/png/button_grooming_enable.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_grooming_unable", "src/png/button_grooming_unable.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_grooming_pointerover", "src/png/button_grooming_pointerover.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_levelup_enable", "src/png/button_levelup_enable.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_levelup_unable", "src/png/button_levelup_unable.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_levelup_pointerover", "src/png/button_levelup_pointerover.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("back_level", "src/png/button_level.png", {frameWidth: 500, frameHeight: 500});
+
+    //===pet===
+    this.load.spritesheet("mr_astar_right", "src/png/pet_mr_astar_right.png", {frameWidth: 600, frameHeight: 600});
+    this.load.spritesheet("mr_astar_left", "src/png/pet_mr_astar_left.png", {frameWidth: 600, frameHeight: 600});
+    this.load.spritesheet("ms_ether_right", "src/png/pet_ms_ether_right.png", {frameWidth: 600, frameHeight: 600});
+    this.load.spritesheet("ms_ether_left", "src/png/pet_ms_ether_left.png", {frameWidth: 600, frameHeight: 600});
+    this.load.spritesheet("dr_bitco_right", "src/png/pet_dr_bitco_right.png", {frameWidth: 600, frameHeight: 600});
+    this.load.spritesheet("dr_bitco_left", "src/png/pet_dr_bitco_left.png", {frameWidth: 600, frameHeight: 600});
+
+    //===music===
+    this.load.audio("bgm1", "src/music/Morning_2.mp3");
+    this.load.audio("bgm2", "src/music/Roll_Roll_Roll.mp3");
+    this.load.audio("bgm3", "src/music/amaoto.mp3");
+
+    //===sound===
+    this.load.audio("button_on", "src/sound/button_on.mp3");
+    this.load.audio("button_select", "src/sound/button_select.mp3");
+    this.load.audio("feeding", "src/sound/feeding.mp3");
+    this.load.audio("grooming", "src/sound/grooming.mp3");
+    this.load.audio("mining", "src/sound/mining.mp3");
+    this.load.audio("mining_during", "src/sound/mining_during.mp3");
+    this.load.audio("farming", "src/sound/farming.mp3");
+    this.load.audio("farming_during", "src/sound/farming_during.mp3");
+    this.load.audio("crafting", "src/sound/crafting.mp3");
+    this.load.audio("crafting_during", "src/sound/crafting_during.mp3");
+    this.load.audio("happy", "src/sound/happy.mp3");
+    this.load.audio("earn", "src/sound/earn.wav");
+    this.load.audio("dice", "src/sound/dice.mp3");
+    this.load.audio("dice_impact", "src/sound/dice_impact.mp3");
+    this.load.audio("hat", "src/sound/hat.mp3");
+    this.load.audio("unhappy", "src/sound/unhappy.mp3");
+    this.load.audio("switch", "src/sound/switch.mp3");
+    this.load.audio("window_open", "src/sound/window_open.mp3");
+    this.load.audio("window_pointerover", "src/sound/window_pointerover.mp3");
+    this.load.audio("window_select", "src/sound/window_select.mp3");
+    this.load.audio("window_cancel", "src/sound/window_cancel.mp3");
+    this.load.audio("system", "src/sound/system.mp3");
+    this.load.audio("nui", "src/sound/nui.mp3");
+    this.load.audio("pad", "src/sound/pad2.mp3");
+    this.load.audio("fireworks", "src/sound/fireworks.mp3");
+    this.load.audio("fireworks2", "src/sound/fireworks2.mp3");
+    this.load.audio("basket", "src/sound/basket.mp3");
+
+    //===item_basic===
+    this.load.image("item_table", "src/png/item_basic_table.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_misin", "src/png/item_basic_misin.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_tree1", "src/png/item_basic_tree1.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_tree2", "src/png/item_basic_tree2.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_tree3", "src/png/item_basic_tree3.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_bear", "src/png/item_basic_bear.png", {frameWidth: 720, frameHeight: 622});
+    this.load.image("item_sweet_potato", "src/png/item_basic_sweet_potato.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("item_gold1", "src/png/item_basic_gold1.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_gold2", "src/png/item_basic_gold2.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_gold3", "src/png/item_basic_gold3.png", {frameWidth: 370, frameHeight: 320});
+
+    //===item_craft===
+    this.load.spritesheet("item_musicbox", "src/png/item_musicbox.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_violin", "src/png/item_violin.png", {frameWidth: 600, frameHeight: 600});
+    this.load.image("item_vase", "src/png/item_vase.png", {frameWidth: 300, frameHeight: 300});
+    this.load.image("item_kanban", "src/png/item_kanban4.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("item_crown", "src/png/item_crown.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_pudding", "src/png/item_pudding2.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_chocolate_bread", "src/png/item_chocolate_bread.png", {frameWidth: 643, frameHeight: 477});
+    this.load.image("item_fortune_statue", "src/png/item_fortune_statue.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_ribbon", "src/png/item_ribbon3.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_hat_tiny_crown", "src/png/item_hat_tiny_crown.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_kusa_pouch", "src/png/item_kusa_pouch.png", {frameWidth: 636, frameHeight: 895});
+    this.load.image("item_dice", "src/png/item_dice.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("item_dice_pointerover", "src/png/item_dice_pointerover.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("item_hat_knit", "src/png/item_hat_knit.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_hat_mugiwara", "src/png/item_hat_mugiwara.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_bank", "src/png/item_bank.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_bank_broken", "src/png/item_bank_broken.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_hat_helmet", "src/png/item_hat_helmet.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_asnya", "src/png/item_asnya.png", {frameWidth: 500, frameHeight: 500});
+    //this.load.image("item_nui", "src/png/item_nui.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("item_nui", "src/png/item_nui2.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("item_nui_ribbon", "src/png/item_nui_ribbon.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("item_switch", "src/png/item_switch.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_pouch", "src/png/item_pouch.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_pouch_broken", "src/png/item_pouch_broken.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_hat_mortarboard", "src/png/item_hat_mortarboard.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_pad_on", "src/png/item_pad_on.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_pad_off", "src/png/item_pad_off.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_gauge", "src/png/item_gauge.png", {frameWidth: 370, frameHeight: 306});
+    this.load.image("item_frame", "src/png/item_frame.png", {frameWidth: 370, frameHeight: 428});
+    
+    //===star===
+    this.load.image("star_blue", "src/png/star_blue.png", {frameWidth: 200, frameHeight: 191});
+    this.load.image("star_green", "src/png/star_green.png", {frameWidth: 200, frameHeight: 191});
+    this.load.image("star_orange", "src/png/star_orange.png", {frameWidth: 200, frameHeight: 191});
+    this.load.image("star_pink", "src/png/star_pink.png", {frameWidth: 200, frameHeight: 191});
+    this.load.image("star_purple", "src/png/star_purple.png", {frameWidth: 200, frameHeight: 191});
+    this.load.image("star_red", "src/png/star_red.png", {frameWidth: 200, frameHeight: 191});
+    this.load.image("star_skyblue", "src/png/star_skyblue.png", {frameWidth: 200, frameHeight: 191});
+    this.load.image("star_yellow", "src/png/star_yellow.png", {frameWidth: 200, frameHeight: 191});
+        
+    //===cat===
+    this.load.image("item_mail", "src/png/item_mail.png", {frameWidth: 757, frameHeight: 757});
+    this.load.image("cat_sitting", "src/png/cat_sitting.png", {frameWidth: 772, frameHeight: 769});
+    this.load.image("cat_sleeping", "src/png/cat_sleeping.png", {frameWidth: 759, frameHeight: 759});
+    
+    //===item_craft_todo===
+    //this.load.image("item_mushroom", "src/png/item_mushroom.png", {frameWidth: 300, frameHeight: 300});
+    //this.load.image("item_horsetail", "src/png/item_horsetail.png", {frameWidth: 300, frameHeight: 300});
+    this.load.image("item_cushion", "src/png/item_cushion.png", {frameWidth: 663, frameHeight: 447});
+
+    //===icon_system===
+    this.load.image("icon_kusa", "src/png/icon_system_kusa.png", {frameWidth: 350, frameHeight: 350});
+    this.load.image("icon_ohana", "src/png/icon_system_ohana.png", {frameWidth: 350, frameHeight: 350});
+    this.load.image("icon_clock", "src/png/icon_system_clock.png", {frameWidth: 225, frameHeight: 225});
+    this.load.image("icon_heart", "src/png/icon_system_heart.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("icon_rotate", "src/png/icon_system_rotate.png", {frameWidth: 980, frameHeight: 818});
+    this.load.image("icon_home", "src/png/icon_system_home.png", {frameWidth: 512, frameHeight: 512});
+    this.load.image("icon_satiety", "src/png/icon_system_satiety.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("icon_happy", "src/png/icon_system_happy.png", {frameWidth: 500, frameHeight: 500});
+
+    //===icon_counter===
+    this.load.image("icon_counter", "src/png/icon_clover.png", {frameWidth: 507, frameHeight: 507});
+
+    //===icon_status===
+    this.load.image("icon_str", "src/png/icon_status_str.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("icon_dex", "src/png/icon_status_dex.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("icon_int", "src/png/icon_status_int.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("icon_luk", "src/png/icon_status_luk.png", {frameWidth: 370, frameHeight: 320});
+
+    //===loading screen===
     //https://gamedevacademy.org/creating-a-preloading-screen-in-phaser-3/?a=13
     let progressBar = this.add.graphics();
     let progressBox = this.add.graphics();
@@ -2682,188 +2879,13 @@ function preload() {
         flag_loaded = 1;
     });
 
-    //===back
-    this.load.image("back", "src/png/background.png");
-    this.load.image("back_black", "src/png/background_black.png");
-    this.load.image("window", "src/png/background_window.png");
-    this.load.image("back_neon", "src/png/background_neon.png", {frameWidth: 500, frameHeight: 500});
-
-    //===murasaki-san
-    this.load.spritesheet("murasaki_right", "src/png/murasaki_right.png", {frameWidth: 370, frameHeight: 320});
-    this.load.spritesheet("murasaki_left", "src/png/murasaki_left.png", {frameWidth: 370, frameHeight: 320});
-    this.load.spritesheet("murasaki_sleeping", "src/png/murasaki_sleeping2.png", {frameWidth: 370, frameHeight: 320});
-    this.load.spritesheet("murasaki_feeding", "src/png/murasaki_feeding.png", {frameWidth: 370, frameHeight: 320});
-    this.load.spritesheet("murasaki_feeding_happy_right", "src/png/murasaki_feeding_happy_right.png", {frameWidth: 370, frameHeight: 320});
-    this.load.spritesheet("murasaki_feeding_happy_left", "src/png/murasaki_feeding_happy_left.png", {frameWidth: 370, frameHeight: 320});
-    this.load.spritesheet("murasaki_crying", "src/png/murasaki_crying.png", {frameWidth: 370, frameHeight: 320});
-    this.load.spritesheet("murasaki_mining", "src/png/murasaki_mining.png", {frameWidth: 370, frameHeight: 320});
-    this.load.spritesheet("murasaki_hugging", "src/png/murasaki_hugging.png", {frameWidth: 370, frameHeight: 320});
-    this.load.spritesheet("murasaki_farming", "src/png/murasaki_farming.png", {frameWidth: 370, frameHeight: 320});
-    this.load.spritesheet("murasaki_grooming", "src/png/murasaki_grooming3.png", {frameWidth: 720, frameHeight: 622});
-    this.load.spritesheet("murasaki_crafting", "src/png/murasaki_crafting.png", {frameWidth: 370, frameHeight: 320});
-    this.load.spritesheet("murasaki_working_left", "src/png/murasaki_working_left.png", {frameWidth: 370, frameHeight: 320});
-    this.load.spritesheet("murasaki_working_right", "src/png/murasaki_working_right.png", {frameWidth: 370, frameHeight: 320});
-    this.load.spritesheet("murasaki_click", "src/png/murasaki_click.png", {frameWidth: 370, frameHeight: 320});
-    this.load.spritesheet("murasaki_stone", "src/png/murasaki_stone.png", {frameWidth: 370, frameHeight: 320});
-    this.load.spritesheet("murasaki_hungry", "src/png/murasaki_hungry.png", {frameWidth: 370, frameHeight: 320});
-    this.load.spritesheet("murasaki_listning", "src/png/murasaki_listning.png", {frameWidth: 370, frameHeight: 320});
-
-    //===button
-    this.load.image("button_feeding", "src/png/button_feeding.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("button_feeding_pointerover", "src/png/button_feeding_pointerover.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("button_mining_enable", "src/png/button_mining_enable.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("button_mining_unable", "src/png/button_mining_unable.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("button_mining_pointerover", "src/png/button_mining_pointerover.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("button_mining_working", "src/png/button_mining_working.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("button_mining_pointerover_stop", "src/png/button_mining_pointerover_stop.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("button_farming_enable", "src/png/button_farming_enable.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("button_farming_unable", "src/png/button_farming_unable.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("button_farming_pointerover", "src/png/button_farming_pointerover.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("button_farming_working", "src/png/button_farming_working.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("button_farming_pointerover_stop", "src/png/button_farming_pointerover_stop.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("button_crafting_enable", "src/png/button_crafting_enable.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("button_crafting_unable", "src/png/button_crafting_unable.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("button_crafting_pointerover", "src/png/button_crafting_pointerover.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("button_crafting_working", "src/png/button_crafting_working.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("button_crafting_pointerover_stop", "src/png/button_crafting_pointerover_stop.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("button_grooming_enable", "src/png/button_grooming_enable.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("button_grooming_unable", "src/png/button_grooming_unable.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("button_grooming_pointerover", "src/png/button_grooming_pointerover.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("button_levelup_enable", "src/png/button_levelup_enable.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("button_levelup_unable", "src/png/button_levelup_unable.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("button_levelup_pointerover", "src/png/button_levelup_pointerover.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("back_level", "src/png/button_level.png", {frameWidth: 500, frameHeight: 500});
-
-    //===pet
-    this.load.spritesheet("mr_astar_right", "src/png/pet_mr_astar_right.png", {frameWidth: 600, frameHeight: 600});
-    this.load.spritesheet("mr_astar_left", "src/png/pet_mr_astar_left.png", {frameWidth: 600, frameHeight: 600});
-    this.load.spritesheet("ms_ether_right", "src/png/pet_ms_ether_right.png", {frameWidth: 600, frameHeight: 600});
-    this.load.spritesheet("ms_ether_left", "src/png/pet_ms_ether_left.png", {frameWidth: 600, frameHeight: 600});
-    this.load.spritesheet("dr_bitco_right", "src/png/pet_dr_bitco_right.png", {frameWidth: 600, frameHeight: 600});
-    this.load.spritesheet("dr_bitco_left", "src/png/pet_dr_bitco_left.png", {frameWidth: 600, frameHeight: 600});
-
-    //===music
-    this.load.audio("bgm1", "src/music/Morning_2.mp3");
-    this.load.audio("bgm2", "src/music/Roll_Roll_Roll.mp3");
-    this.load.audio("bgm3", "src/music/amaoto.mp3");
-
-    //===sound
-    this.load.audio("button_on", "src/sound/button_on.mp3");
-    this.load.audio("button_select", "src/sound/button_select.mp3");
-    this.load.audio("feeding", "src/sound/feeding.mp3");
-    this.load.audio("grooming", "src/sound/grooming.mp3");
-    this.load.audio("mining", "src/sound/mining.mp3");
-    this.load.audio("mining_during", "src/sound/mining_during.mp3");
-    this.load.audio("farming", "src/sound/farming.mp3");
-    this.load.audio("farming_during", "src/sound/farming_during.mp3");
-    this.load.audio("crafting", "src/sound/crafting.mp3");
-    this.load.audio("crafting_during", "src/sound/crafting_during.mp3");
-    this.load.audio("happy", "src/sound/happy.mp3");
-    this.load.audio("earn", "src/sound/earn.wav");
-    this.load.audio("dice", "src/sound/dice.mp3");
-    this.load.audio("dice_impact", "src/sound/dice_impact.mp3");
-    this.load.audio("hat", "src/sound/hat.mp3");
-    this.load.audio("unhappy", "src/sound/unhappy.mp3");
-    this.load.audio("switch", "src/sound/switch.mp3");
-    this.load.audio("window_open", "src/sound/window_open.mp3");
-    this.load.audio("window_pointerover", "src/sound/window_pointerover.mp3");
-    this.load.audio("window_select", "src/sound/window_select.mp3");
-    this.load.audio("window_cancel", "src/sound/window_cancel.mp3");
-    this.load.audio("system", "src/sound/system.mp3");
-    this.load.audio("nui", "src/sound/nui.mp3");
-    this.load.audio("pad", "src/sound/pad2.mp3");
-    this.load.audio("fireworks", "src/sound/fireworks.mp3");
-    this.load.audio("fireworks2", "src/sound/fireworks2.mp3");
-    this.load.audio("basket", "src/sound/basket.mp3");
-
-    //===item_basic
-    this.load.image("item_table", "src/png/item_basic_table.png", {frameWidth: 370, frameHeight: 320});
-    this.load.image("item_misin", "src/png/item_basic_misin.png", {frameWidth: 370, frameHeight: 320});
-    this.load.image("item_tree1", "src/png/item_basic_tree1.png", {frameWidth: 370, frameHeight: 320});
-    this.load.image("item_tree2", "src/png/item_basic_tree2.png", {frameWidth: 370, frameHeight: 320});
-    this.load.image("item_tree3", "src/png/item_basic_tree3.png", {frameWidth: 370, frameHeight: 320});
-    this.load.image("item_bear", "src/png/item_basic_bear.png", {frameWidth: 720, frameHeight: 622});
-    this.load.image("item_sweet_potato", "src/png/item_basic_sweet_potato.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("item_gold1", "src/png/item_basic_gold1.png", {frameWidth: 370, frameHeight: 320});
-    this.load.image("item_gold2", "src/png/item_basic_gold2.png", {frameWidth: 370, frameHeight: 320});
-    this.load.image("item_gold3", "src/png/item_basic_gold3.png", {frameWidth: 370, frameHeight: 320});
-
-    //===item_craft
-    this.load.spritesheet("item_musicbox", "src/png/item_musicbox.png", {frameWidth: 370, frameHeight: 320});
-    this.load.image("item_violin", "src/png/item_violin.png", {frameWidth: 600, frameHeight: 600});
-    this.load.image("item_vase", "src/png/item_vase.png", {frameWidth: 300, frameHeight: 300});
-    this.load.image("item_kanban", "src/png/item_kanban4.png", {frameWidth: 370, frameHeight: 320});
-    this.load.spritesheet("item_crown", "src/png/item_crown.png", {frameWidth: 370, frameHeight: 320});
-    this.load.image("item_pudding", "src/png/item_pudding2.png", {frameWidth: 370, frameHeight: 320});
-    this.load.image("item_chocolate_bread", "src/png/item_chocolate_bread.png", {frameWidth: 643, frameHeight: 477});
-    this.load.image("item_fortune_statue", "src/png/item_fortune_statue.png", {frameWidth: 370, frameHeight: 320});
-    this.load.image("item_ribbon", "src/png/item_ribbon3.png", {frameWidth: 370, frameHeight: 320});
-    this.load.image("item_hat_tiny_crown", "src/png/item_hat_tiny_crown.png", {frameWidth: 370, frameHeight: 320});
-    this.load.image("item_kusa_pouch", "src/png/item_kusa_pouch.png", {frameWidth: 636, frameHeight: 895});
-    this.load.image("item_dice", "src/png/item_dice.png", {frameWidth: 200, frameHeight: 200});
-    this.load.image("item_dice_pointerover", "src/png/item_dice_pointerover.png", {frameWidth: 200, frameHeight: 200});
-    this.load.image("item_hat_knit", "src/png/item_hat_knit.png", {frameWidth: 370, frameHeight: 320});
-    this.load.image("item_hat_mugiwara", "src/png/item_hat_mugiwara.png", {frameWidth: 370, frameHeight: 320});
-    this.load.image("item_bank", "src/png/item_bank.png", {frameWidth: 370, frameHeight: 320});
-    this.load.image("item_bank_broken", "src/png/item_bank_broken.png", {frameWidth: 370, frameHeight: 320});
-    this.load.image("item_hat_helmet", "src/png/item_hat_helmet.png", {frameWidth: 370, frameHeight: 320});
-    this.load.image("item_asnya", "src/png/item_asnya.png", {frameWidth: 500, frameHeight: 500});
-    //this.load.image("item_nui", "src/png/item_nui.png", {frameWidth: 370, frameHeight: 320});
-    this.load.spritesheet("item_nui", "src/png/item_nui2.png", {frameWidth: 370, frameHeight: 320});
-    this.load.spritesheet("item_nui_ribbon", "src/png/item_nui_ribbon.png", {frameWidth: 370, frameHeight: 320});
-    this.load.spritesheet("item_switch", "src/png/item_switch.png", {frameWidth: 370, frameHeight: 320});
-    this.load.image("item_pouch", "src/png/item_pouch.png", {frameWidth: 370, frameHeight: 320});
-    this.load.image("item_pouch_broken", "src/png/item_pouch_broken.png", {frameWidth: 370, frameHeight: 320});
-    this.load.image("item_hat_mortarboard", "src/png/item_hat_mortarboard.png", {frameWidth: 370, frameHeight: 320});
-    this.load.image("item_pad_on", "src/png/item_pad_on.png", {frameWidth: 370, frameHeight: 320});
-    this.load.image("item_pad_off", "src/png/item_pad_off.png", {frameWidth: 370, frameHeight: 320});
-    this.load.image("item_gauge", "src/png/item_gauge.png", {frameWidth: 370, frameHeight: 306});
-    this.load.image("item_frame", "src/png/item_frame.png", {frameWidth: 370, frameHeight: 428});
-    
-    //===star
-    this.load.image("star_blue", "src/png/star_blue.png", {frameWidth: 200, frameHeight: 191});
-    this.load.image("star_green", "src/png/star_green.png", {frameWidth: 200, frameHeight: 191});
-    this.load.image("star_orange", "src/png/star_orange.png", {frameWidth: 200, frameHeight: 191});
-    this.load.image("star_pink", "src/png/star_pink.png", {frameWidth: 200, frameHeight: 191});
-    this.load.image("star_purple", "src/png/star_purple.png", {frameWidth: 200, frameHeight: 191});
-    this.load.image("star_red", "src/png/star_red.png", {frameWidth: 200, frameHeight: 191});
-    this.load.image("star_skyblue", "src/png/star_skyblue.png", {frameWidth: 200, frameHeight: 191});
-    this.load.image("star_yellow", "src/png/star_yellow.png", {frameWidth: 200, frameHeight: 191});
-        
-    //===cat
-    this.load.image("item_mail", "src/png/item_mail.png", {frameWidth: 757, frameHeight: 757});
-    this.load.image("cat_sitting", "src/png/cat_sitting.png", {frameWidth: 772, frameHeight: 769});
-    this.load.image("cat_sleeping", "src/png/cat_sleeping.png", {frameWidth: 759, frameHeight: 759});
-    
-    //===item_craft_todo
-    this.load.image("item_cushion", "src/png/item_cushion.png", {frameWidth: 663, frameHeight: 447});
-
-    //===icon_system
-    this.load.image("icon_kusa", "src/png/icon_system_kusa.png", {frameWidth: 350, frameHeight: 350});
-    this.load.image("icon_ohana", "src/png/icon_system_ohana.png", {frameWidth: 350, frameHeight: 350});
-    this.load.image("icon_clock", "src/png/icon_system_clock.png", {frameWidth: 225, frameHeight: 225});
-    this.load.image("icon_heart", "src/png/icon_system_heart.png", {frameWidth: 370, frameHeight: 320});
-    this.load.image("icon_rotate", "src/png/icon_system_rotate.png", {frameWidth: 980, frameHeight: 818});
-    this.load.image("icon_home", "src/png/icon_system_home.png", {frameWidth: 512, frameHeight: 512});
-    this.load.image("icon_satiety", "src/png/icon_system_satiety.png", {frameWidth: 500, frameHeight: 500});
-    this.load.image("icon_happy", "src/png/icon_system_happy.png", {frameWidth: 500, frameHeight: 500});
-
-    //===icon_counter
-    this.load.image("icon_counter", "src/png/icon_clover.png", {frameWidth: 507, frameHeight: 507});
-
-    //===icon_status
-    this.load.image("icon_str", "src/png/icon_status_str.png", {frameWidth: 370, frameHeight: 320});
-    this.load.image("icon_dex", "src/png/icon_status_dex.png", {frameWidth: 370, frameHeight: 320});
-    this.load.image("icon_int", "src/png/icon_status_int.png", {frameWidth: 370, frameHeight: 320});
-    this.load.image("icon_luk", "src/png/icon_status_luk.png", {frameWidth: 370, frameHeight: 320});
-
-    //===plugin: rexuiplugin
-    //need for nameplate
+    //===input text===
     this.load.scenePlugin({
         key: 'rexuiplugin',
         url: "lib/rexuiplugin.min.js",
         sceneKey: 'rexUI'
     });
+    //this.load.plugin('rextexteditplugin', 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rextexteditplugin.min.js', true);
     this.load.plugin('rextexteditplugin', 'lib/rextexteditplugin.min.js', true);
     
     //===fireworks
@@ -2941,6 +2963,7 @@ function preload() {
         USDT:"0x2F2eB7682bE7AC2ADaa2E2389ddBC6C76D66671d"
     }
     */
+    
     //shibuya
     dic_tokenBall_contract = {
         ACA:"0x3099daC30217E92b26a9e53aaA5Ef975D530138f",
@@ -2962,19 +2985,21 @@ function preload() {
 }
 
 
-//---phaser3:create-----------------------------------------------------------------------------------------------------
+//---create-----------------------------------------------------------------------------------------------------
 
 
 function create() {
 
-    //===back image
+    //=== back image ===
+
     this.add.image(640, 480, "back");
     back_neon = this.add.image(900, 180, "back_neon").setOrigin(0.5).setScale(0.3);
     back_neon.angle += 10;
     back_neon.visible = false;
     back_neon.depth = 9999+11;
 
-    //===animation murasaki
+    //=== animation murasaki ===
+
     this.anims.create({
         key: "murasaki_right",
         frames: this.anims.generateFrameNumbers("murasaki_right", {start:0, end:3}),
@@ -3078,7 +3103,8 @@ function create() {
         repeat: -1
     });
 
-    //===animation pet
+    //=== animation pet ===
+
     this.anims.create({
         key: "mr_astar_right",
         frames: this.anims.generateFrameNumbers("mr_astar_right", {start:0, end:1}),
@@ -3116,7 +3142,8 @@ function create() {
         repeat: -1
     });
     
-    //===animation item
+    //=== animation item ===
+    
     this.anims.create({
         key: "item_musicbox_on",
         frames: this.anims.generateFrameNumbers("item_musicbox", {start:1, end:2}),
@@ -3166,149 +3193,120 @@ function create() {
         repeat: -1
     });
     
-    //===item_basic
-    item_bear = this.add.sprite(1000,400, "item_bear")
-        .setScale(0.45);
-    item_table = this.add.sprite(600,870, "item_table")
-        .setOrigin(0.5)
-        .setScale(0.6)
-        .setDepth(870-50);
-    item_misin = this.add.sprite(1000,830, "item_misin")
-        .setOrigin(0.5)
-        .setScale(0.8)
-        .setDepth(830-100);
-    item_tree1 = this.add.sprite(100,420, "item_tree1")
-        .setOrigin(0.5)
-        .setScale(0.7)
-        .setDepth(420);
-    item_tree2 = this.add.sprite(100,420, "item_tree2")
-        .setOrigin(0.5)
-        .setScale(0.7)
-        .setDepth(420+1);
-    item_tree3 = this.add.sprite(100,420, "item_tree3")
-        .setOrigin(0.5)
-        .setScale(0.7)
-        .setDepth(420+2);
+    //=== item_basic ===
+
+    item_bear = this.add.sprite(1000,400, "item_bear");
+    item_bear.scaleX = item_bear.scaleX * 0.45;
+    item_bear.scaleY = item_bear.scaleY * 0.45;
+    item_table = this.add.sprite(600,870, "item_table").setOrigin(0.5).setScale(0.6);
+    item_table.depth = item_table.y-50;
+    item_misin = this.add.sprite(1000,830, "item_misin").setOrigin(0.5).setScale(0.8);
+    item_misin.depth = item_misin.y-100;
+    item_tree1 = this.add.sprite(100,420, "item_tree1").setOrigin(0.5).setScale(0.7);
+    item_tree2 = this.add.sprite(100,420, "item_tree2").setOrigin(0.5).setScale(0.7);
+    item_tree3 = this.add.sprite(100,420, "item_tree3").setOrigin(0.5).setScale(0.7);
+    item_tree1.depth = item_tree1.y;
+    item_tree2.depth = item_tree1.y - 1;
+    item_tree3.depth = item_tree1.y - 2;
     item_tree2.visible = false;
     item_tree3.visible = false;
-    item_gold1 = this.add.sprite(130,750, "item_gold1")
-        .setOrigin(0.5)
-        .setScale(0.7)
-        .setDepth(750);
-    item_gold2 = this.add.sprite(130,750, "item_gold2")
-        .setOrigin(0.5)
-        .setScale(0.7)
-        .setDepth(750+1);
-    item_gold3 = this.add.sprite(130,750, "item_gold3")
-        .setOrigin(0.5)
-        .setScale(0.7)
-        .setDepth(750+2);
+    item_gold1 = this.add.sprite(130,750, "item_gold1").setOrigin(0.5).setScale(0.7);
+    item_gold2 = this.add.sprite(130,750, "item_gold2").setOrigin(0.5).setScale(0.7);
+    item_gold3 = this.add.sprite(130,750, "item_gold3").setOrigin(0.5).setScale(0.7);
+    item_gold1.depth = item_gold1.y;
+    item_gold2.depth = item_gold2.y+1;
+    item_gold3.depth = item_gold3.y+2;
     item_gold1.visible = false;
     item_gold2.visible = false;
     item_gold3.visible = false;
 
-    //===click button
+    //=== nft ===
+
+    //nft_other = this.add.sprite(500, 500, "nft_other").setOrigin(0.5).setScale(0.1);
+
+    //=== click button ===
+
     let _x;
     let _y;
 
     //feeding
-    _x = 460;
-    _y = 870;
-    button_feeding = this.add.sprite(_x, _y, "button_feeding")
-        .setScale(0.16)
-        .setInteractive({useHandCursor: true})
-        .on('pointerdown', () => sound_button_on.play() )
-        .on('pointerdown', () => contract_feeding(summoner) )
-        .on('pointerover', () => sound_button_select.play())
-        .on('pointerover', () => button_feeding.setTexture("button_feeding_pointerover"))
-        .on('pointerout', () => button_feeding.setTexture("button_feeding"));
+    button_feeding = this.add.sprite(460,870, "button_feeding");
+    button_feeding.scaleX = button_feeding.scaleX * 0.16;
+    button_feeding.scaleY = button_feeding.scaleY * 0.16;
+    button_feeding.setInteractive({useHandCursor: true});
+    button_feeding.on('pointerdown', () => sound_button_on.play() );
+    button_feeding.on('pointerdown', () => contract_feeding(summoner) );
+    button_feeding.on('pointerover', () => sound_button_select.play());
+    button_feeding.on('pointerover', () => button_feeding.setTexture("button_feeding_pointerover"));
+    button_feeding.on('pointerout', () => button_feeding.setTexture("button_feeding"));
 
     //grooming
-    _x = 1150;
-    _y = 400;
-    button_grooming = this.add.sprite(_x, _y, "button_grooming_unable")
-        .setScale(0.16)
-        .setInteractive({useHandCursor: true})
-        .on('pointerdown', () => sound_button_on.play() )
-        .on('pointerdown', () => contract_grooming(summoner) )
-        .on('pointerover', () => sound_button_select.play())
-        .on('pointerover', () => button_grooming.setTexture("button_grooming_pointerover"))
-        .on('pointerout', () => button_grooming.setTexture("button_grooming"))
-        .disableInteractive();
+    button_grooming = this.add.sprite(1150,400, "button_grooming_unable");
+    button_grooming.scaleX = button_grooming.scaleX * 0.16;
+    button_grooming.scaleY = button_grooming.scaleY * 0.16;
+    button_grooming.setInteractive({useHandCursor: true});
+    button_grooming.on('pointerdown', () => sound_button_on.play() );
+    button_grooming.on('pointerdown', () => contract_grooming(summoner) );
+    button_grooming.on('pointerover', () => sound_button_select.play());
+    button_grooming.on('pointerover', () => button_grooming.setTexture("button_grooming_pointerover"));
+    button_grooming.on('pointerout', () => button_grooming.setTexture("button_grooming"));
+    button_grooming.disableInteractive();
 
     //crafting
     _x = 800;
     _y = 870;
-    button_crafting = this.add.sprite(_x, _y, "button_crafting_unable")
-        .setScale(0.16)
-        .setInteractive({useHandCursor: true})
-        .on('pointerdown', () => sound_button_on.play() )
-        .on('pointerdown', () => contract_crafting(summoner) )
-        .on('pointerover', () => sound_button_select.play())
-        .on('pointerover', () => button_crafting.setTexture("button_crafting_pointerover"))
-        .on('pointerout', () => button_crafting.setTexture("button_crafting_enable"))
-        .disableInteractive();
-
-    //--crafting_selected_info
+    //button_crafting = this.add.sprite(700,150, "button_crafting_unable");
+    button_crafting = this.add.sprite(_x, _y, "button_crafting_unable");
+    button_crafting.scaleX = button_crafting.scaleX * 0.16;
+    button_crafting.scaleY = button_crafting.scaleY * 0.16;
+    button_crafting.setInteractive({useHandCursor: true});
+    button_crafting.on('pointerdown', () => sound_button_on.play() );
+    button_crafting.on('pointerdown', () => contract_crafting(summoner) );
+    button_crafting.on('pointerover', () => sound_button_select.play());
+    button_crafting.on('pointerover', () => button_crafting.setTexture("button_crafting_pointerover"));
+    button_crafting.on('pointerout', () => button_crafting.setTexture("button_crafting_enable"));
+    button_crafting.disableInteractive();
+    //--select item
     //icon_ohana
-    icon_crafting_ohana = this.add.sprite(_x+58, _y+13, "icon_ohana")
-        .setDepth(9999)
-        .setScale(0.07)
-        .setVisible(false);
+    //icon_crafting_ohana = this.add.sprite(758, 163, "icon_ohana");
+    icon_crafting_ohana = this.add.sprite(_x+58, _y+13, "icon_ohana").setDepth(9999);
+    icon_crafting_ohana.setScale(0.07);
+    icon_crafting_ohana.visible = false;
     //icon_kusa
-    icon_crafting_kusa = this.add.sprite(_x+130, _y+15, "icon_kusa")
-        .setDepth(9999)
-        .setScale(0.09)
-        .setVisible(false);
+    //icon_crafting_kusa = this.add.sprite(830, 165, "icon_kusa");
+    icon_crafting_kusa = this.add.sprite(_x+130, _y+15, "icon_kusa").setDepth(9999);
+    icon_crafting_kusa.setScale(0.09);
+    icon_crafting_kusa.visible = false;
     //icon_clock
-    icon_crafting_time = this.add.sprite(_x+58, _y+42, "icon_clock")
-        .setDepth(9999)
-        .setScale(0.09)
-        .setVisible(false);
+    //icon_crafting_time = this.add.sprite(900, 165, "icon_clock");
+    //icon_crafting_time = this.add.sprite(_x+200, _y+15, "icon_clock").setDepth(9999);
+    icon_crafting_time = this.add.sprite(_x+58, _y+42, "icon_clock").setDepth(9999);
+    icon_crafting_time.setScale(0.09);
+    icon_crafting_time.visible = false;
     //icon_heart
-    icon_crafting_heart = this.add.sprite(_x+200, _y+13, "icon_heart")
-        .setDepth(9999)
-        .setScale(0.08)
-        .setVisible(false);
+    //icon_crafting_heart = this.add.sprite(_x+58, _y+40, "icon_heart").setDepth(9999);
+    icon_crafting_heart = this.add.sprite(_x+200, _y+13, "icon_heart").setDepth(9999);
+    icon_crafting_heart.setScale(0.08);
+    icon_crafting_heart.visible = false;
     //text
-    text_crafting_selected_item_ohana = this.add.text(
-        _x+72, 
-        _y+5, 
-        "", 
-        {font: "18px Arial", fill: "#000", backgroundColor: "#ecd9ff"}
-    ).setDepth(9999);
-    text_crafting_selected_item_kusa = this.add.text(
-        _x+142, 
-        _y+5, 
-        "", 
-        {font: "18px Arial", fill: "#000", backgroundColor: "#ecd9ff"}
-    ).setDepth(9999);
-    text_crafting_selected_item_heart = this.add.text(
-        _x+214, 
-        _y+5, 
-        "", 
-        {font: "18px Arial", fill: "#000", backgroundColor: "#ecd9ff"}
-    ).setDepth(9999);
-    text_crafting_selected_item_time = this.add.text(
-        _x+72, 
-        _y+32, 
-        "", 
-        {font: "18px Arial", fill: "#000", backgroundColor: "#ecd9ff"}
-    ).setDepth(9999);
-
-    //--craftimg_now_info
+    //text_crafting_selected_item_ohana = this.add.text(772, 155, "", {font: "18px Arial", fill: "#000"});
+    //text_crafting_selected_item_kusa = this.add.text(842, 155, "", {font: "18px Arial", fill: "#000"});
+    //text_crafting_selected_item_time = this.add.text(914, 155, "", {font: "18px Arial", fill: "#000"});
+    text_crafting_selected_item_ohana = this.add.text(_x+72, _y+5, "", {font: "18px Arial", fill: "#000", backgroundColor: "#ecd9ff"}).setDepth(9999);
+    text_crafting_selected_item_kusa = this.add.text(_x+142, _y+5, "", {font: "18px Arial", fill: "#000", backgroundColor: "#ecd9ff"}).setDepth(9999);
+    //text_crafting_selected_item_time = this.add.text(_x+214, _y+5, "", {font: "18px Arial", fill: "#000", backgroundColor: "#ecd9ff"}).setDepth(9999);
+    //text_crafting_selected_item_heart = this.add.text(_x+72, _y+32, "", {font: "18px Arial", fill: "#000", backgroundColor: "#ecd9ff"}).setDepth(9999);
+    text_crafting_selected_item_heart = this.add.text(_x+214, _y+5, "", {font: "18px Arial", fill: "#000", backgroundColor: "#ecd9ff"}).setDepth(9999);
+    text_crafting_selected_item_time = this.add.text(_x+72, _y+32, "", {font: "18px Arial", fill: "#000", backgroundColor: "#ecd9ff"}).setDepth(9999);
+    //--craftimg info
     //icon_clock
-    icon_crafting_time_remining = this.add.sprite(_x+60, _y+15, "icon_clock")
-        .setDepth(9999)
-        .setScale(0.09)
-        .setVisible(false);
+    //icon_crafting_time_remining = this.add.sprite(760,165, "icon_clock");
+    icon_crafting_time_remining = this.add.sprite(_x+60, _y+15, "icon_clock").setDepth(9999);
+    icon_crafting_time_remining.setScale(0.09);
+    icon_crafting_time_remining.visible = false;
     //text
-    text_crafting_calc = this.add.text(
-        _x+75, 
-        _y+5, 
-        "", 
-        {font: "18px Arial", fill: "#000"}
-    ).setDepth(9999);
+    //text_crafting_calc = this.add.text(775, 155, "", {font: "18px Arial", fill: "#000"});
+    text_crafting_calc = this.add.text(_x+75, _y+5, "", {font: "18px Arial", fill: "#000"}).setDepth(9999);
     //select crafting_item_type
     text_select_item = this.add.text(_x+50, _y-30, ">> Select Item <<", {font: "30px Arial", fill: "#000", backgroundColor: "#ecd9ff"})
                 .setDepth(9999)
@@ -3325,58 +3323,59 @@ function create() {
     //mining
     _x = 60;
     _y = 760;
-    button_mining = this.add.sprite(_x, _y, "button_mining_unable")
-        .setScale(0.16)
-        .setInteractive({useHandCursor: true})
-        .on('pointerdown', () => sound_button_on.play() )
-        .on('pointerdown', () => contract_mining(summoner) )
-        .on('pointerover', () => sound_button_select.play())
-        .on('pointerover', () => button_mining.setTexture("button_mining_pointerover"))
-        .on('pointerout', () => button_mining.setTexture("button_mining_enable"))
-        .disableInteractive();
+    button_mining = this.add.sprite(_x, _y, "button_mining_unable");
+    button_mining.scaleX = button_mining.scaleX * 0.16;
+    button_mining.scaleY = button_mining.scaleY * 0.16;
+    button_mining.setInteractive({useHandCursor: true});
+    button_mining.on('pointerdown', () => sound_button_on.play() );
+    button_mining.on('pointerdown', () => contract_mining(summoner) );
+    button_mining.on('pointerover', () => sound_button_select.play());
+    button_mining.on('pointerover', () => button_mining.setTexture("button_mining_pointerover"));
+    button_mining.on('pointerout', () => button_mining.setTexture("button_mining_enable"));
+    button_mining.disableInteractive();
     //icon
-    icon_mining = this.add.sprite(_x+55, _y-22, "icon_ohana")
-        .setScale(0.07)
-        .setVisible(false);
+    icon_mining = this.add.sprite(_x+55, _y-22, "icon_ohana");
+    icon_mining.setScale(0.07);
+    icon_mining.visible = false;
     //text
     text_mining_calc = this.add.text(_x+67, _y-30, "", {font: "18px Arial", fill: "#000"});
 
     //farming
-    _x = 240;
-    _y = 340;
-    button_farming = this.add.sprite(_x, _y, "button_farming_unable")
-        .setScale(0.16)
-        .setInteractive({useHandCursor: true})
-        .on('pointerdown', () => sound_button_on.play() )
-        .on('pointerdown', () => contract_farming(summoner) )
-        .on('pointerover', () => sound_button_select.play())
-        .on('pointerover', () => button_farming.setTexture("button_farming_pointerover"))
-        .on('pointerout', () => button_farming.setTexture("button_farming_enable"))
-        .disableInteractive();
+    //button_farming = this.add.sprite(300,150, "button_farming_unable");
+    button_farming = this.add.sprite(240,340, "button_farming_unable");
+    button_farming.scaleX = button_farming.scaleX * 0.16;
+    button_farming.scaleY = button_farming.scaleY * 0.16;
+    button_farming.setInteractive({useHandCursor: true});
+    button_farming.on('pointerdown', () => sound_button_on.play() );
+    button_farming.on('pointerdown', () => contract_farming(summoner) );
+    button_farming.on('pointerover', () => sound_button_select.play());
+    button_farming.on('pointerover', () => button_farming.setTexture("button_farming_pointerover"));
+    button_farming.on('pointerout', () => button_farming.setTexture("button_farming_enable"));
+    button_farming.disableInteractive();
     //icon
-    icon_farming = this.add.sprite(_x+55, _y-20, "icon_kusa")
-        .setScale(0.09)
-        .setVisible(false);
+    icon_farming = this.add.sprite(295,320, "icon_kusa");
+    icon_farming.setScale(0.09);
+    icon_farming.visible = false;
     //text
-    text_farming_calc = this.add.text(_x+65, _y-30, "", {font: "18px Arial", fill: "#000"});
+    text_farming_calc = this.add.text(305, 310, "", {font: "18px Arial", fill: "#000"});
 
     //level
-    _x = 1240;
-    _y = 35;
-    button_levelup = this.add.sprite(_x, _y, "back_level")
-        .setScale(0.11)
-        .setInteractive({useHandCursor: true})
-        .on('pointerdown', () => sound_button_on.play() )
-        .on('pointerdown', () => contract_level_up(summoner) )
-        .on('pointerover', () => sound_button_select.play())
-        .on('pointerover', () => button_levelup.setTexture("button_levelup_pointerover"))
-        .on('pointerover', () => text_level.setText(""))
-        .on('pointerout', () => button_levelup.setTexture("button_levelup_enable"))
-        .on('pointerout', () => text_level.setText(local_level))
-        .disableInteractive();
-    text_level = this.add.text(_x, _y+7, "0", {font: "bold 26px Verdana", fill: "#E5004F"}).setOrigin(0.5);
+    button_levelup = this.add.sprite(1240, 35, "back_level");
+    button_levelup.scaleX = button_levelup.scaleX * 0.11;
+    button_levelup.scaleY = button_levelup.scaleY * 0.11;
+    button_levelup.setInteractive({useHandCursor: true});
+    button_levelup.on('pointerdown', () => sound_button_on.play() );
+    button_levelup.on('pointerdown', () => contract_level_up(summoner) );
+    button_levelup.on('pointerover', () => sound_button_select.play());
+    button_levelup.on('pointerover', () => button_levelup.setTexture("button_levelup_pointerover"));
+    button_levelup.on('pointerover', () => text_level.setText(""));
+    button_levelup.on('pointerout', () => button_levelup.setTexture("button_levelup_enable"));
+    button_levelup.on('pointerout', () => text_level.setText(local_level));
+    button_levelup.disableInteractive();
+    text_level = this.add.text(1240, 42, "0", {font: "bold 26px Verdana", fill: "#E5004F"}).setOrigin(0.5);
 
-    //===system click button
+    //=== system click button ===
+
     //icon_rotate
     icon_rotate = this.add.sprite(1235,915, "icon_rotate")
         .setOrigin(0.5)
@@ -3405,14 +3404,15 @@ function create() {
                 window.location.href = "./";
         });
 
-    //===music
+    //=== music ===
+
     //sound out of focus
     this.sound.pauseOnBlur = false
     bgm1 = this.sound.add("bgm1", {volume:0.1, loop:true});
     bgm2 = this.sound.add("bgm2", {volume:0.1, loop:true});
     bgm3 = this.sound.add("bgm3", {volume:0.1, loop:true});
 
-    //===sound
+    //sound
     sound_button_select = this.sound.add("button_select", {volume:0.2});
     sound_button_on = this.sound.add("button_on", {volume:0.2});
     sound_feeding = this.sound.add("feeding", {volume:0.1});
@@ -3441,12 +3441,14 @@ function create() {
     sound_fireworks2 = this.sound.add("fireworks2", {volume:0.2});
     sound_basket = this.sound.add("basket", {volume:0.2});
 
-    //===summoner
+    //=== create summoner ===
+
     murasakisan = new Murasakisan(this, 500 + Math.random()*200, 640 + Math.random()*100)
         .setOrigin(0.5)
         .setScale(0.45);
 
-    //===system message
+    //=== system message ===
+
     //system message
     text_system_message = this.add.text(640, 420, "", {
         font: "32px Arial", 
@@ -3478,7 +3480,8 @@ function create() {
         .on("pointerout", () => text_curePetrification.setStyle({ fontSize: 28, fontFamily: "Arial", fill: '#E62E8B' }));
     text_curePetrification.visible = false;
 
-    //===status
+    //=== status ===
+
     let font_arg = {font: "18px Arial", fill: "#000"};
 
     //debug info
@@ -3487,8 +3490,9 @@ function create() {
     text_wallet = this.add.text(430, 940, "***", {font: "14px Arial", fill: "#727171"});
 
     //satiety
-    icon_satiety = this.add.sprite(30,25, "icon_satiety")
-        .setScale(0.08);
+    icon_satiety = this.add.sprite(30,25, "icon_satiety");
+    //icon_satiety = this.add.sprite(30,25, "button_feeding");
+    icon_satiety.setScale(0.08);
     bar_satiety_back = makeBar(this, 55, 15, 0xF8C5AC);
     bar_satiety_back.scaleX = 1;
     bar_satiety = makeBar(this, 55, 15, 0xE60012);
@@ -3496,6 +3500,7 @@ function create() {
     text_satiety = this.add.text(60, 16, "0%", {font: "17px Arial", fill: "#ffffff"});
 
     //happy
+    //icon_happy = this.add.sprite(245,25, "button_grooming_enable");
     icon_happy = this.add.sprite(245,25, "icon_happy");
     icon_happy.setScale(0.08);
     bar_happy_back = makeBar(this, 270, 15, 0xFCE2BA);
@@ -3515,47 +3520,49 @@ function create() {
     text_exp_earned_count = 0;
 
     //coin
-    icon_ohana = this.add.sprite(668,23, "icon_ohana")
-        .setScale(0.07);
+    icon_ohana = this.add.sprite(668,23, "icon_ohana");
+    icon_ohana.setScale(0.07);
     text_coin = this.add.text(685, 15, "Ohana: 0", {font: "17px Arial", fill: "#000", backgroundColor: "#FFF200"});
     text_coin_earned = this.add.text(685, 38, "", {font: "17px Arial", fill: "#000000"});
     text_coin_earned_count = 0;
 
     //material
-    icon_kusa = this.add.sprite(815, 25, "icon_kusa")
-        .setScale(0.09);
+    icon_kusa = this.add.sprite(815, 25, "icon_kusa");
+    icon_kusa.setScale(0.09);
     text_material = this.add.text(830, 15, "Kusa: 0", {font: "17px Arial", fill: "#000", backgroundColor: "#D7E7AF"});
     text_material_earned = this.add.text(830, 38, "", {font: "17px Arial", fill: "#000000"});
     text_material_earned_count = 0;
 
+    //level
+    //text_level = this.add.text(1220, 42, "0", {font: "bold 26px Verdana", fill: "#E5004F"}).setOrigin(0.5);
+
     //heart
-    icon_heart = this.add.sprite(960, 21, "icon_heart")
-        .setScale(0.08);
+    icon_heart = this.add.sprite(960, 21, "icon_heart");
+    icon_heart.setScale(0.08);
     text_heart = this.add.text(975, 15, "***", {font: "17px Arial", fill: "#000", backgroundColor: "#FDEEED"});
 
     //name
     _x = 85;
     _y = 100;
-    item_kanban = this.add.sprite(85, 100, "item_kanban")
-        .setScale(0.4);
-    text_kanban = this.add.text(_x+2, _y+17, "", {font: "17px Arial", fill: "#000000"})
-        .setOrigin(0.5)
-	    .setInteractive().on('pointerdown', () => {this.rexUI.edit(text_kanban)})
-        .setDepth(9999+2);
+    item_kanban = this.add.sprite(85, 100, "item_kanban");
+    item_kanban.setScale(0.4);
+    text_kanban = this.add.text(_x+2, _y+17, "", {font: "17px Arial", fill: "#000000"}).setOrigin(0.5);
+	text_kanban.setInteractive().on('pointerdown', () => {this.rexUI.edit(text_kanban)});
+    text_kanban.depth = 9999+2;
     text_mint_name = this.add.text(_x+80, _y-5, "[MINT NAME]", {font: "17px Arial", fill: "#000000"})
         .setInteractive({useHandCursor: true})
         .on("pointerover", () => text_mint_name.setStyle({ fontSize: 17, fontFamily: "Arial", fill: '#ffff00' }))
         .on("pointerout", () => text_mint_name.setStyle({ fontSize: 17, fontFamily: "Arial", fill: '#000000' }));
-    text_mint_name.setInteractive()
-        .on("pointerdown", () => {
-            contract_mint_name(summoner, text_kanban.text);
-            flag_name_minting = 1;
-        });
-    icon_name_ohana = this.add.sprite(_x+88, _y+25, "icon_ohana")
-        .setScale(0.05);
+    text_mint_name.setInteractive().on("pointerdown", () => {
+        contract_mint_name(summoner, text_kanban.text);
+        flag_name_minting = 1;
+    });
+    //text_mint_name.visible = false;
+    icon_name_ohana = this.add.sprite(_x+88, _y+25, "icon_ohana");
+    icon_name_ohana.setScale(0.05);
     text_name_ohana = this.add.text(_x+100, _y+17, "100", {font: "17px Arial", fill: "#000000"});
-    icon_name_kusa = this.add.sprite(_x+140, _y+25, "icon_kusa")
-        .setScale(0.07);
+    icon_name_kusa = this.add.sprite(_x+140, _y+25, "icon_kusa");
+    icon_name_kusa.setScale(0.07);
     text_name_kusa = this.add.text(_x+150, _y+17, "100", {font: "17px Arial", fill: "#000000"});
     //id
     text_id = this.add.text(_x-45, _y+32, "#100", {font: "14px Arial", fill: "#000000"});
@@ -3576,16 +3583,17 @@ function create() {
     group_mint_name.add(text_name_kusa);
     group_mint_name.setVisible(false);
     
-    //===star
+    //===star===
     group_star = this.add.group();
     group_star.runChildUpdate = true;
+
 }
 
 
-//---phaser3:update-----------------------------------------------------------------------------------------------------
+//---update-----------------------------------------------------------------------------------------------------
 
 
-//===protection
+//=== protection
 function protection_code(this_scene) {
     if (location.hostname != "murasaki-san.com" && location.hostname != "www.murasaki-san.com") {
         while(true){
@@ -3600,7 +3608,7 @@ function protection_code(this_scene) {
     }
 }
 
-//===system message
+//=== system message
 function update_systemMessage(this_scene) {
     //if (summoner == -1) {
     if (count_sync == 0) {
@@ -3621,7 +3629,7 @@ function update_systemMessage(this_scene) {
 }
 
 
-//===sync time
+//=== sync time
 function update_syncTime(this_scene) {
     if (last_sync_time == 0) {
         text_sync_time.setText("synced: ####");
@@ -3638,7 +3646,7 @@ function update_syncTime(this_scene) {
 }
 
 
-//===numeric animation
+//=== numeric animation
 function update_numericAnimation(this_scene) {
 
     //coin
@@ -3734,7 +3742,7 @@ function update_numericAnimation(this_scene) {
 }
 
 
-//===param with animation
+//=== parameters with animation
 function update_parametersWithAnimation(this_scene) {
 
     //coin
@@ -3860,7 +3868,7 @@ function update_parametersWithAnimation(this_scene) {
 }
 
 
-//===param without animation
+//=== parameters without animation
 function update_parametersWithoutAnimation(this_scene) {
 
     //age
@@ -3976,7 +3984,7 @@ function update_parametersWithoutAnimation(this_scene) {
 }
 
 
-//===mode
+//=== check mode change
 function update_checkModeChange(this_scene) {
     //check petrified
     if (local_notPetrified == false) {
@@ -3986,8 +3994,8 @@ function update_checkModeChange(this_scene) {
     } else if (local_level > previous_local_level) {
         //fireworks
         if (previous_local_level > 0) {
-            draw_firework(this_scene);
-            summon_star(this_scene);
+            fireworks(this_scene);
+            star(this_scene);
         }
         //update radarchart
         if (flag_radarchart == 1) {
@@ -4109,7 +4117,7 @@ function update_checkModeChange(this_scene) {
 }
 
 
-//===button
+//=== check button activation
 function update_checkButtonActivation(this_scene) {
     //grooming
     if (local_farming_status == 1 || local_crafting_status == 1 || local_mining_status == 1) {
@@ -4195,7 +4203,7 @@ function update_checkButtonActivation(this_scene) {
 }
 
 
-//===items
+//=== check item
 function update_checkItem(this_scene) {
 
     //debug
@@ -5160,21 +5168,6 @@ function update_checkItem(this_scene) {
             }
         }
         _do(this_scene);
-        
-        //###201-212:Star
-        if (flag_summon_star == 0) {
-            let _timeout = 0;
-            for (let i = 201; i <= 212; i++) {
-                let _count = local_items[i];
-                for (let j = 1; j <= _count; j++) {
-                    setTimeout(function(){
-                        summon_star(this_scene, i);
-                    }, _timeout);
-                    _timeout += 500;
-                }
-            }
-            flag_summon_star = 1;
-        }
     }
     
     previous_local_items = local_items;
@@ -5188,48 +5181,29 @@ function update_checkItem(this_scene) {
 }
 
 
-//===update()
-function update(time, delta) {
+//=== main function
+function update() {
 
-    //console.log(delta);
-
-    /*
-    this.timer += delta
-    if (this.timer > 16.5) {  
-        this.timer = 0;
-        //g.gameTick++;
-        //increment turn
-        turn += 1;
-        text_turn.setText("turn: " + ("0000000" + turn).slice(-7) );
-    }
-    */
-
-    
     //increment turn
     turn += 1;
     text_turn.setText("turn: " + ("0000000" + turn).slice(-7) );
-    
 
     //debug
-    /*
     if (turn % 20 == 0) {
-        console.log(Math.round(game.input.mousePointer.x), Math.round(game.input.mousePointer.y));
+        //console.log(Math.round(game.input.mousePointer.x), Math.round(game.input.mousePointer.y));
     }
-    */
     
     //protection code
-    /*
-    if (turn % 100 == 10) {
-        protection_code();
+    if (turn % 20 == 0) {
+        //protection_code();
     }
-    */
     
     //send fingerprint
     if (turn % 100 == 0 && summoner > 0 && flag_doneFp == 0 && local_wallet == local_owner) {
         send_fp_get(local_wallet, summoner);
         flag_doneFp = 1;
     }
-    
+
     //update summoner
     if (count_sync > 0 && local_level > 0) {
         murasakisan.update();
@@ -5319,6 +5293,157 @@ function update(time, delta) {
 //---end------------------------------------------------------------------------------------------------------
 /*
 
+ ok メール送受信時の動的アクションの実装
+        送信時の猫のアニメーション
+        受診時の猫のアニメーション
+        メールの表示・非表示
 
+ ok アイテムクラフト時のハート要求の実装
+        後半アイテムではハートを少し要求する
+
+ ok スコアボードの更新の実装
+        アニメーションは難しいか
+
+ ok 新コントラ群への対応
+     ok craft周りの整備
+            heart要求値の取得
+                heart要求は0でも表示させるか
+            heart数のsend
+            heart数の取得
+     ok nui周りの整備
+         ok feeding/grooming時にアクティブぬいのidを渡す
+            nuiの位置記憶を実装
+            mcで197をcraft, 自分のwallet, 自分のsummoner
+            msnでscore=1118000, summoner=自分
+     ok item順序の再考
+
+    heart経済の深慮
+        heartを得る行動
+            誰かのcraftによる受け取り
+                受動的
+                1/w程度
+                happy, satietyが10以上、レベル3以上で受け取り可能
+            猫mail
+                能動的
+                2/3d = 4/w程度
+            合計：5/w, 20/m程度
+        heartを支払う行動
+            nuiちゃんクラフト, 30要求
+            後半のアイテムクラフト時, 1w分, 5個程度要求
+        heartによるluck補正も再考する
+            heart 1 = luck 0.01
+                +0.2/m
+                +2.4/y
+        heartの消費方法をもっと考える
+            バランスとしては20個/mなので、その程度は消費する方法を考える
+            宝石1個作るのに3つとか使うか。
+
+ ok tiny heartの非NFT化
+        NFTのままだとコスト支払いがとてもやりにくい
+            gas代もかさむし、リソースとしての使い勝手が悪い
+        msに記録されるcoin/materialなどと同等のパラメータとする
+        coin/materialとは違い、summoner間を移動する機能は持たせないこととする
+            継続的なゲームプレイの指標のようなもの
+            coin/materialはRMTで得ることもできる
+        heart経済によって、高級アイテムのバランス調整を行う
+            1週間, 1ヶ月で得られる平均heart量
+            上記をもとに、アイテムのコスト設定を深慮する
+                ex: ぬいちゃんは1ヶ月分、◯◯は1週間分、など
+            burn上限10個が撤廃されるので、コストは自由に決められる
+                heart 100個要求のアイテムなども可能
+
+        _item_id = 36;
+        if (
+            (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+            && local_items_flag[_item_id] != true
+        ) {
+            local_items_flag[_item_id] = true;
+            item_dice = this.add.sprite(1000, 700, "item_dice").setOrigin(0.5).setScale(0.3);
+            item_dice.setInteractive({useHandCursor: true});
+            item_dice.on("pointerdown", () => {dice_roll(summoner);});
+            async function _get_rolled_dice(scene) {
+                let _rolled_dice = await get_rolled_dice(summoner);
+                _rolled_dice = _rolled_dice /10;
+                item_dice_text = scene.add.text(999,698, _rolled_dice, {font: "14px Arial Bold", fill: "#ffffff"}).setOrigin(0.5);
+                let _last_dice_roll_time = await get_last_dice_roll_time(summoner); 
+                let _now = Date.now() / 1000;
+                let _delta_sec = _now - _last_dice_roll_time;
+                
+                let _day = Math.floor(_delta_sec / 86400);
+                let _hr = Math.floor(_delta_sec % 86400 / 3600);
+                let _min = Math.floor(_delta_sec % 3600 / 60);
+                let _text = _day + "d:" + _hr + "h:" + _min + "m";
+                
+                item_dice_text = scene.add.text(999,748, _text, {font: "14px Arial Bold", fill: "#000000"}).setOrigin(0.5);
+            }
+            _get_rolled_dice(this);
+            //item_needle_cushion = this.add.sprite(790,350, "item_needle_cushion").setOrigin(0.5).setScale(0.3);        
+        //check rolled_dice_text
+        } else if (
+            local_items_flag[_item_id] == true
+            && previous_local_dice != local_dice
+        ) {
+            async function _get_rolled_dice(scene) {
+                let _res = await get_rolled_dice(summoner);
+                _res = _res /10;
+                item_dice_text.setText(_res);
+            }
+            _get_rolled_dice(this);
+        }
+        
+//get_rolled_dice
+async function get_rolled_dice(_summoner) {
+    let web3 = await connect();
+    let wallet = await get_wallet(web3);
+    let contract = await new web3.eth.Contract(abi_world_dice, contract_world_dice);
+    let _res = await contract.methods.get_last_rolled_dice(_summoner).call();
+    return _res;    
+}
+
+//last_dice_roll_time
+async function get_last_dice_roll_time(_summoner) {
+    let web3 = await connect();
+    let wallet = await get_wallet(web3);
+    let contract = await new web3.eth.Contract(abi_world_dice, contract_world_dice);
+    let _res = await contract.methods.last_dice_roll_time(_summoner).call();
+    return _res;
+}
+
+ ng メール・ハート使用時のapproveチェックとapproveのUIの実装
+
+ ok heart要求アイテムの整備
+        heart要求値のコード化の整理
+        web3js側での参照方法の整備
+            現在はweb3js, contract双方で独立してコードしてしまっている
+        heart要求値を返すcontractを整備して組み入れる
+
+ ok summon時, petrified時の挙動確認
+ ok カンバンmint時の挙動確認
+
+ ok かんばんのアイテム化
+ ok ダイスはラックにのみ補正をかける
+        すべてのluck参照処理時にdice値を足す
+        レーダーチャートに青色でdice補正を表示する
+    
+ ok イベントの実装
+        https://qiita.com/crazy_traveler/items/a00c7f0b69f242607aef
+        定期的に情報を読みに行くのではなく、
+        eventを発行し、フロントエンド側でeventの発行を購読して待っておく
+        tx→comfirmまでの待ちも表現できるか
+        https://web3js.readthedocs.io/en/v1.2.11/web3-eth-contract.html#contract-events
+        contract.events.allEvents({filter: {summoner: [summoner]})
+        msやmcでitem生成時, status変更時にemit飛ばせればよかったが後の祭り
+            よって、functionでevent発行してみる
+        Eventポイント
+            feeding
+            grooming
+            mining/farming/crafting
+                start, stop
+        これらのイベント観測時にblockchainを読みに行く
+            ホントはevent内容だけでfrontendに反映したいが、流石に複雑になりすぎている
+        また、イベント観測時以外でも定期的に読みに行く
+        
+ ok 市場のイベントの実装
+        過去トレードを履歴表示する
 
 */
