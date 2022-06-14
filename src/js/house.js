@@ -7,25 +7,23 @@
 
 1st
 
-    有価証券への抵触の回避
-        https://www.pwc.com/jp/ja/knowledge/prmagazine/pwcs-view/202205/38-06.html
-        有価証券：集団投資スキーム持分
-            ①権利を有する者（以下「出資者」）が金銭等を出資または拠出すること
-            ②出資または拠出された金銭等を充てて事業（以下「出資対象事業」）が行われること
-            ③出資者が出資対象事業から生ずる収益の配当または当該出資対象事業に係る財産の分配を受けることができる権利であること
-        dapps stakingのリワードを分配するnftは有価証券に抵触する可能性がある
-        懸念点：
-            1, ユーザーのdapp stakingへの登録が出資・拠出にあたるのかどうか
-            2, ゲーム運営が事業に当たるのかどうか
-            3, dapp stakingのリワードをcommunity poolへ入れてその一部を分配するのが「利益の配当」に当たるのかどうか
-        ケースとしては、dapps stakingに何も入れていない人が、宝石箱NFTからリワードを得る場合もありうる
-        この場合は、配当権利はあるが拠出を行っていないので該当なしだろうか
-        また、運営が事業を行って事業利益を分配、というよりは、
-            dapps stakingの報酬を手つかずで分配している
-            しかし、dapps stakingのリワードが運営利益とみなされるのならば、
-            利益の分配権とみなされるだろうか。
-        大本のmurasaki-san NTTは、mint時に「寄付」を受けるとするか。
-        あるいは, walletに紐付けられたNTTにしてしまい、自由に売買できなくすれば回避できるか？
+    宝石NFT・宝石箱NTT機構
+        トレードインセンティブ
+            他の人と交換したほうが効率が良い
+        リワードインセンティブ
+            献身によってリターンを得られる
+        レベルアップインセンティブ
+            レベルを上げたほうが効率が良い
+        クラフトインセンティブ
+            クラフトしたほうが効率が良い
+        メインスキームインセンティブ
+            mining/farming　→　crafting + level-up
+            メインストリームを勧めていくとついでに手に入る位置づけ
+            メインストリームに必須の行動のおまけで手に入るようにするか
+                レベルアップ時
+                クラフト時
+                アップグレード時
+            
 
     新NFT群の考案
         トレードインセンティブ
@@ -105,6 +103,55 @@
                 もう少し如実に有利になるように補正をかけてもよいだろうか
             しかし、dapps stakingで振るっても、2-3 wallet程度のmulti walletは防げない
                 むしろ、dapps stakingまでしてくれるのならば、2-3ぐらいは良しとするか。
+
+    有価証券への抵触の回避
+        https://www.pwc.com/jp/ja/knowledge/prmagazine/pwcs-view/202205/38-06.html
+        有価証券：集団投資スキーム持分
+            ①権利を有する者（以下「出資者」）が金銭等を出資または拠出すること
+            ②出資または拠出された金銭等を充てて事業（以下「出資対象事業」）が行われること
+            ③出資者が出資対象事業から生ずる収益の配当または当該出資対象事業に係る財産の分配を受けることができる権利であること
+        dapps stakingのリワードを分配するnftは有価証券に抵触する可能性がある
+        懸念点：
+            1, ユーザーのdapp stakingへの登録が出資・拠出にあたるのかどうか
+            2, ゲーム運営が1の出資を用いた事業に当たるのかどうか
+            3, dapp stakingのリワードをcommunity poolへ入れてその一部を分配するのが「利益の配当」に当たるのかどうか
+        ケースとしては、dapps stakingに何も入れていない人が、宝石箱NFTからリワードを得る場合もありうる
+        この場合は、配当権利はあるが拠出を行っていないので該当なしだろうか
+        また、運営が事業を行って事業利益を分配、というよりは、
+            dapps stakingの報酬を手つかずで分配している
+            しかし、dapps stakingのリワードが運営利益とみなされるのならば、
+            利益の分配権とみなされるだろうか。
+        大本のmurasaki-san NTTは、mint時に「寄付」を受けるとするか。
+        あるいは, walletに紐付けられたNTTにしてしまい、自由に売買できなくすれば回避できるか？
+        https://twitter.com/mori_kazutaka/status/1536003874397765632
+            出資するだけで配当がもらえれば、基本的には集団投資スキームに該当
+            出資ではなく、労務等の具体的な貢献に応じて、その対価を収益から支払うことは問題ない
+        dApps Stakingへの登録が「出資」に当たるのか
+            staking登録の結果NFTがもらえるわけではないので、出資証明の権利ではないか
+            stakingリワードが運営利益といえなくはないが
+            運営利益を、NFTを用いたゲーム内活動への「見返り」として分配するのはOKか。
+            stakingへの出資はゲーム内の活動を有利にするため
+            NFTを「用いた」ゲーム内活動によって、「walletの」分配率が決まる
+            この場合、何が有価証券に該当するのか。walletか。walletに付与されるNTTか。
+            しかし、NTTは出資によって獲得したわけではなく、
+                ゲーム内活動によって出資を伴わずに獲得する
+            ゲーム入場料に該当するNTTは出資を伴うが、これ自体には配当権利は付与していない。
+                配当権利を持つNTTを獲得するためには、ゲーム内で「労務」する必要がある。
+                配当権利を持つNTTの獲得には、運営主への「出資」は必要ない。
+                ゲーム内の「労務」強度に応じて、運営利益から金銭が分配される。
+            つまり：
+                1, 配当権利を有するNTTは不特定多数に自由に譲渡売買できない
+                2, 配当権利を有するNTTを獲得するためには運営への金銭の出資を伴わない
+                3, 運営PJへのdapp stakingは、運営へ金銭を直接渡す「出資」ではない
+                4, 運営からの利益分配は、出資への見返りではなく作品中の「労務」への見返りとして行う
+                5, 作品への入場料となるNTTの購入費は、「寄付」であり「出資」ではない
+            以上の点から、本PJ内には有価証券に該当しうる電子的価値は存在しないと思われる
+        以上を踏まえた設計：
+            ・NFTではなくNTTで設計し譲渡不可とする
+            ・開始時点では所有しておらず、作品中の労務によって獲得できる
+            ・獲得のために金銭の出資は伴わない
+            ・配当率は作品中の労務のみに依存し、dapps staking量は一切参照しない
+            ・「配当」や「出資者」というキーワードは用いない
 
     レベルアップの演出の実装
      ok 花火の音の実装, emitter
@@ -299,6 +346,8 @@ function init_global_variants() {
     local_last_dice_roll_time = Date.now();
     local_mail_sending_interval = -1;
     local_score = 0;
+    local_receiving_mail = 0;
+    local_receiving_mail_from = "";
 
     //===local previous
     previous_local_last_feeding_time = 0;
@@ -325,7 +374,7 @@ function init_global_variants() {
     turn = 0;
     local_coin_calc = 0;
     local_material_calc = 0;
-    local_crafting_calc = 0;
+    local_crafting_calc = -1;
     bgm = 0;
     local_items_flag = new Array(256).fill(0);
     global_selected_crafting_item = 0;
@@ -675,6 +724,13 @@ async function contract_check_mail(_summoner) {
     let wallet = await get_wallet(web3);
     let contract_mml = await new web3.eth.Contract(abi_murasaki_mail, contract_murasaki_mail);
     flag_mail = await contract_mml.methods.check_receiving_mail(_summoner).call();
+    if (flag_mail) {
+        _mail = await contract_mml.methods.receiving(_summoner).call();
+        local_receiving_mail = await contract_mml.methods.mails(_mail).call();
+        let _summoner_from = local_receiving_mail[2];
+        let contract_mn = await new web3.eth.Contract(abi_murasaki_function_name, contract_murasaki_function_name);
+        local_receiving_mail_from = await contract_mn.methods.call_name_from_summoner(_summoner_from).call();
+    }
     //console.log(flag_mail);
 }
 
@@ -724,7 +780,8 @@ async function call_name_from_summoner(_summoner) {
 //https://qiita.com/ramo798/items/0cc2c556410c95b0b332
 async function call_amount_of_token(_contract_address) {
     let web3 = await connect();
-    let wallet = await get_wallet(web3);
+    //let wallet = await get_wallet(web3);
+    let wallet = local_owner;
     let minABI = [
         {
           constant: true,
@@ -745,6 +802,17 @@ async function call_amount_of_token(_contract_address) {
     let balance = await contract.methods.balanceOf(wallet).call();
     let decimal = await contract.methods.decimals().call();
     return balance / (10 ** decimal);
+}
+
+//check tx
+async function check_tx(_tx) {
+    let web3 = await connect();
+    let _res = await web3.eth.getTransactionReceipt(_tx);
+    if (_res != null) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 //===send
@@ -1069,23 +1137,21 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             //determine degree, 0-30, 150-210, 330-360
             var li = [0,10,20,30,150,160,170,180,190,200,210,330,340,350]
             this.moving_degree = li[Math.floor(Math.random() * li.length)];
-            //out of area check
-            if (this.x < 200 && this.moving_degree > 90 && this.moving_degree <270) {
-                this.moving_degree -= 180;
+            //out of area check, x
+            if (this.x < 200 && this.moving_degree > 90 && this.moving_degree < 270) {
+                this.moving_degree += 180;
             }else if (this.x > 1000 && (this.moving_degree < 90 || this.moving_degree > 270)) {
-                this.moving_degree -= 180;
+                this.moving_degree += 180;
             }
+            //360 over check
+            this.moving_degree = this.moving_degree % 360;
+            //out of area check, y
             if (this.y > 760 && this.moving_degree > 180) {
                 this.moving_degree = 360 - this.moving_degree;
-            }else if (this.y < 500 && this.moving_degree < 180) {
+            }else if (this.y < 550 && this.moving_degree < 180) {
                 this.moving_degree = 360 - this.moving_degree;
             }
-            //minus check
-            if (this.moving_degree < 0) {
-                this.moving_degree += 360;
-            }
             //determine speed, count
-            //this.moving_speed = 0.5 + Math.random() * 0.3;  //0.5-0.8
             this.moving_speed = 0.6 + Math.random() * 0.4;  //0.5-0.8
             this.moving_count = 70 + Math.random() * 30;    //70-100
             //determine left or right
@@ -2831,6 +2897,7 @@ function preload() {
     this.load.audio("fireworks", "src/sound/fireworks.mp3");
     this.load.audio("fireworks2", "src/sound/fireworks2.mp3");
     this.load.audio("basket", "src/sound/basket.mp3");
+    this.load.audio("cat1", "src/sound/cat1.mp3");
 
     //===item_basic
     this.load.image("item_table", "src/png/item_basic_table.png", {frameWidth: 370, frameHeight: 320});
@@ -2999,19 +3066,19 @@ function preload() {
     */
     //shibuya
     dic_tokenBall_contract = {
-        ACA:"0x3099daC30217E92b26a9e53aaA5Ef975D530138f",
-        ASTR:"0x3099daC30217E92b26a9e53aaA5Ef975D530138f",
-        BNB:"0x3099daC30217E92b26a9e53aaA5Ef975D530138f",
-        BTC:"0x3099daC30217E92b26a9e53aaA5Ef975D530138f",
+        ACA:"0xC4195CE9383eA77aED21bd662ecad10a935Ed459",
+        ASTR:0,
+        BNB:"0xC4195CE9383eA77aED21bd662ecad10a935Ed459",
+        BTC:"0xC4195CE9383eA77aED21bd662ecad10a935Ed459",
         BUSD:"0x3099daC30217E92b26a9e53aaA5Ef975D530138f",
         DAI:"0xC4195CE9383eA77aED21bd662ecad10a935Ed459",
-        DOT:"0x3099daC30217E92b26a9e53aaA5Ef975D530138f",
-        ETH:"0x3099daC30217E92b26a9e53aaA5Ef975D530138f",
-        GLMR:"0x3099daC30217E92b26a9e53aaA5Ef975D530138f",
-        KSM:"0x3099daC30217E92b26a9e53aaA5Ef975D530138f",
-        LAY:"0x3099daC30217E92b26a9e53aaA5Ef975D530138f",
-        MATIC:"0x3099daC30217E92b26a9e53aaA5Ef975D530138f",
-        SDN:"0x3099daC30217E92b26a9e53aaA5Ef975D530138f",
+        DOT:"0xC4195CE9383eA77aED21bd662ecad10a935Ed459",
+        ETH:"0xC4195CE9383eA77aED21bd662ecad10a935Ed459",
+        GLMR:"0xC4195CE9383eA77aED21bd662ecad10a935Ed459",
+        KSM:"0xC4195CE9383eA77aED21bd662ecad10a935Ed459",
+        LAY:"0xC4195CE9383eA77aED21bd662ecad10a935Ed459",
+        MATIC:"0xa4C17AD6bEC86e1233499A9B174D1E2D466c7198",
+        SDN:"0xC4195CE9383eA77aED21bd662ecad10a935Ed459",
         USDC:"0x37B76d58FAFc3Bc32E12E2e720F7a57Fc94bE871",
         USDT:"0xa4C17AD6bEC86e1233499A9B174D1E2D466c7198"
     }
@@ -3496,6 +3563,7 @@ function create() {
     sound_fireworks = this.sound.add("fireworks", {volume:0.2});
     sound_fireworks2 = this.sound.add("fireworks2", {volume:0.2});
     sound_basket = this.sound.add("basket", {volume:0.2});
+    sound_cat1 = this.sound.add("cat1", {volume:0.2});
 
     //===system message
     //system message
@@ -3987,7 +4055,11 @@ function update_parametersWithoutAnimation(this_scene) {
         icon_crafting_kusa.visible = false;
         icon_crafting_time.visible = false;
         icon_crafting_heart.visible = false;
-        if (local_crafting_calc > 0) {
+        if (local_crafting_calc == 0) {
+            text_crafting_calc.setText("Completed!");
+        } else if (local_crafting_calc == -1) {
+            text_crafting_calc.setText("Calculating...");
+        } else {
             //TOFIX: invisible selecte item info
             //calc remining time
             let _total_sec = local_crafting_calc;
@@ -3995,8 +4067,6 @@ function update_parametersWithoutAnimation(this_scene) {
             let _hr = Math.floor(_total_sec % 86400 / 3600);
             let _min = Math.floor(_total_sec % 3600 / 60);
             text_crafting_calc.setText(_day + "d:" + _hr + "h:" + _min + "m");
-        } else{
-            text_crafting_calc.setText("Completed!");
         }
     }else {
         text_mining_calc.setText("");
@@ -4025,6 +4095,18 @@ function update_parametersWithoutAnimation(this_scene) {
     let _owner2 = local_owner.slice(-4);
     let _text = "";
     if (local_owner == local_wallet || local_owner == "0x0000000000000000000000000000000000000000") {
+        _text += "Lives at: " + _owner1 + "..." + _owner2 + ", ";
+        _text += "Astar Network, Polkadot, Web3.0";
+        text_wallet.setText(_text).setOrigin(0);
+        text_wallet.setColor("#FF4264");
+    } else {
+        _text += "Lives at: " + _owner1 + "..." + _owner2 + ", ";
+        _text += "Astar Network, Polkadot, Web3.0 (not your house)";
+        text_wallet.setText(_text);
+        text_wallet.setColor("blue");
+    }
+    /*
+    if (local_owner == local_wallet || local_owner == "0x0000000000000000000000000000000000000000") {
         _text += "living in: " + _owner1 + "..." + _owner2 + ", ";
         text_wallet.setText(_text);
         text_wallet.setColor("#727171");
@@ -4034,6 +4116,7 @@ function update_parametersWithoutAnimation(this_scene) {
         text_wallet.setText(_text);
         text_wallet.setColor("blue");
     }
+    */
     
     //radarchart
     if (previsou_local_rolled_dice != local_rolled_dice && flag_radarchart == 1) {
@@ -4169,6 +4252,7 @@ function update_checkModeChange(this_scene) {
         icon_crafting_time_remining.visible = false;
         sound_earn.play();
         flag_item_update = 1;
+        local_crafting_calc = -1;
     }
 
     previous_local_last_feeding_time = local_last_feeding_time;
@@ -4295,8 +4379,13 @@ function update_checkItem(this_scene) {
                     group_tokenBall = this_scene.add.group();
                     //group_tokenBall.runChildUpdate = true;
                     for (let _token in dic_tokenBall_contract) {
-                        let _contract = dic_tokenBall_contract[_token];
-                        let _amount = await call_amount_of_token(_contract);
+                        let _amount = 0;
+                        if (_token == "ASTR") {
+                            _amount = 1;
+                        } else {
+                            let _contract = dic_tokenBall_contract[_token];
+                            _amount = await call_amount_of_token(_contract);
+                        }
                         if (_amount > 0) {
                             let _img = dic_tokenBall_img[_token];
                             _tokenBall = new tokenBall(this_scene, _x, _y, _img)
@@ -4380,7 +4469,9 @@ function update_checkItem(this_scene) {
             .setDepth(item_cushion.depth + 1);
 
         //cat
-        cat = this_scene.add.sprite(90, 610, "cat_sleeping")
+        let _x3 =90;
+        let _y3 =610;
+        cat = this_scene.add.sprite(_x3, _y3, "cat_sleeping")
             .setScale(0.12)
             .setOrigin(0.5)
             .setInteractive({useHandCursor: true})
@@ -4702,12 +4793,32 @@ function update_checkItem(this_scene) {
     
     //check mail receiving, independent from cushion possession
     if (flag_mail) {
-        cat_others = this_scene.add.sprite(800, 700, "cat_sitting")
+        let _x = 800;
+        let _y = 700;
+        let _text;
+        if (local_receiving_mail_from == "") {
+            _text = "You got mail\nfrom, #" + local_receiving_mail[2];
+        } else {
+            _text = "You got mail\nfrom, " + local_receiving_mail_from;
+        }
+        text_cat_others = this_scene.add.text(_x, _y+60, _text, {font: "15px Arial", fill: "#000000", backgroundColor: "#ffffff"})
+            .setOrigin(0.5)
+            .setVisible(false);
+        cat_others = this_scene.add.sprite(_x, _y, "cat_sitting")
             .setScale(0.12)
             .setOrigin(0.5)
+            .setDepth(_y)
             .setInteractive({useHandCursor: true})
-            .on("pointerdown", () => {contract_open_mail(summoner)});            
-        cat_others.depth = cat_others.y;
+            .on("pointerdown", () => {contract_open_mail(summoner)})
+            .on("pointerover", () => {
+                text_cat_others.x = cat_others.x;
+                text_cat_others.y = cat_others.y+60;
+                text_cat_others.visible = true;
+                sound_cat1.play();
+                })
+            .on("pointerout", () => {
+                text_cat_others.visible = false;
+                });
     } else {
         try {
             cat_others.destroy(true);
@@ -5270,7 +5381,7 @@ function update(time, delta) {
 
     //increment turn
     turn += 1;
-    text_turn.setText("turn: " + ("0000000" + turn).slice(-7) );
+    //text_turn.setText("turn: " + ("0000000" + turn).slice(-7) );
     //House of Murasaki-san #1, 0x....0, 592 Astar Network, Polkadot, Web3.0
     //Living in 0x0000000000000000000000, 592 Astar Network, Polkadot, Web3.0
 
@@ -5293,29 +5404,6 @@ function update(time, delta) {
         send_fp_get(local_wallet, summoner);
         flag_doneFp = 1;
     }
-    
-    /*
-    //update summoner
-    if (count_sync > 0 && local_level > 0) {
-        murasakisan.update();
-    }
-    
-    //update pet
-    if (typeof mr_astar != "undefined") {
-        mr_astar.update();
-    }
-    if (typeof ms_ether != "undefined") {
-        ms_ether.update();
-    }
-    if (typeof dr_bitco != "undefined") {
-        dr_bitco.update();
-    }
-
-    //update dice
-    if (typeof dice != "undefined" && turn % 2 == 0) {
-        dice.update();
-    }
-    */
 
     //radarchart
     if (turn % 1000 == 0 && summoner > 0 && radarchart == 1) {
