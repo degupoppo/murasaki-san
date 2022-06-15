@@ -7,6 +7,35 @@
 
 1st
 
+    実績コントラクトの実装
+        実績達成をtrue/falseで判定するfunction
+            1つの実績につき1 function
+        達成済み実績をtrue/falseで記憶するstorage
+            achievement uint32[256]のようなarray
+        新たに達成した実績の数をuint32でreturnするfunction
+            もしくはarrayでreturnする
+            達成時は項目を表示させたいため
+        実績判定のタイミングをどうするか
+            mining/farmin時などにいちいち行っていたらgas代かさむか
+            level-up時にまとめて行うか
+        実績案
+            coin/material
+                gain 1,000
+                gain 10,000
+                gain 100,000...
+            craft
+                craft 10
+                craft 30
+                craft 100...
+            heart
+                received 10
+                received 30
+                received 100...
+            level-up
+                level 3
+                level 10
+                level 30...
+
     宝石NFT・宝石箱NTT機構
         トレードインセンティブ
             他の人と交換したほうが効率が良い
@@ -23,7 +52,16 @@
                 レベルアップ時
                 クラフト時
                 アップグレード時
-            
+                スコア達成時
+                実績達成時
+                    10個クラフト
+                    10個heart受け取り
+                    coin 10,000 mine
+                    kusa 10,000 farm
+            実績管理で行う
+                メインストリームに合致した実績を導入し
+                その報酬として宝石NFTを得る
+                トレードが頻発するよう、ある程度の数を得られるように調整する
 
     新NFT群の考案
         トレードインセンティブ
@@ -33,6 +71,7 @@
             動的なパラメータを有するNFT規格
             他の静的NFTを所有する
             一方向に、ポジティブな方向にのみ動的に変化させたい
+            → 有価証券とみなされる恐れがあるので、NFTではなくNTTにする
         dApps Staking
             所有するだけか、あるいはstakingすることでリワードを得られる機構
             リワード報酬の計算式を＊深慮＊する
@@ -3501,7 +3540,7 @@ function create() {
 
     //===system click button
     //icon_rotate
-    icon_rotate = this.add.sprite(1235,915, "icon_rotate")
+    icon_rotate = this.add.sprite(1235,915-15, "icon_rotate")
         .setOrigin(0.5)
         .setScale(0.075)
         .setInteractive({useHandCursor: true})
@@ -3519,7 +3558,7 @@ function create() {
         });
 
     //icon_home
-    icon_home = this.add.sprite(1155,915, "icon_home")
+    icon_home = this.add.sprite(1155,915-15, "icon_home")
         .setOrigin(0.5)
         .setScale(0.15)
         .setInteractive({useHandCursor: true})
@@ -3601,9 +3640,15 @@ function create() {
     let font_arg = {font: "18px Arial", fill: "#000"};
 
     //debug info
-    text_turn = this.add.text(230, 940, "***", {font: "14px Arial", fill: "#727171"});
-    text_sync_time = this.add.text(330, 940, "***", {font: "14px Arial", fill: "#727171"});
-    text_wallet = this.add.text(430, 940, "***", {font: "14px Arial", fill: "#727171"});
+    //text_turn = this.add.text(230, 940, "***", {font: "14px Arial", fill: "#727171"});
+    //text_sync_time = this.add.text(330, 940, "***", {font: "14px Arial", fill: "#727171"});
+    text_sync_time = this.add.text(1275, 955, "***", {font: "14px Arial", fill: "#727171"})
+        .setOrigin(1)
+        .setDepth(9999);
+    //text_wallet = this.add.text(430, 940, "***", {font: "14px Arial", fill: "#727171"});
+    text_wallet = this.add.text(1250, 955, "***", {font: "14px Arial", fill: "#727171"})
+        .setOrigin(1)
+        .setDepth(9999);
 
     //satiety
     icon_satiety = this.add.sprite(30,25, "icon_satiety")
@@ -3760,11 +3805,16 @@ function update_systemMessage(this_scene) {
 //===sync time
 function update_syncTime(this_scene) {
     if (last_sync_time == 0) {
-        text_sync_time.setText("synced: ####");
+        //text_sync_time.setText("synced: ####");
+        text_sync_time.setText("##");
         text_sync_time.setColor("#ff0000");
     } else {
         let _delta = Math.round( (Date.now() - last_sync_time) / 1000 );
-        text_sync_time.setText("synced: " + ("0000" + _delta).slice(-4));
+        if (_delta > 99) {
+            _delta = 99;
+        }
+        //text_sync_time.setText("synced: " + ("0000" + _delta).slice(-4));
+        text_sync_time.setText(("00" + _delta).slice(-2));
         if (_delta >= 30) {
             text_sync_time.setColor("#ff0000");
         } else {
@@ -4095,13 +4145,20 @@ function update_parametersWithoutAnimation(this_scene) {
     let _owner2 = local_owner.slice(-4);
     let _text = "";
     if (local_owner == local_wallet || local_owner == "0x0000000000000000000000000000000000000000") {
-        _text += "Lives at: " + _owner1 + "..." + _owner2 + ", ";
-        _text += "Astar Network, Polkadot, Web3.0";
-        text_wallet.setText(_text).setOrigin(0);
+        _text += "Lives at: ";
+        _text += "house #" + summoner + ", ";
+        //_text += local_owner + ", ";
+        _text += _owner1 + "..." + _owner2 + ", ";
+        _text += "Astar Network EVM, Polkadot, Web3.";
+        text_wallet.setText(_text);
         text_wallet.setColor("#FF4264");
     } else {
-        _text += "Lives at: " + _owner1 + "..." + _owner2 + ", ";
-        _text += "Astar Network, Polkadot, Web3.0 (not your house)";
+        _text += "Lives at: ";
+        _text += "house #" + summoner + ", ";
+        //_text += local_owner + ", ";
+        _text += _owner1 + "..." + _owner2 + ", ";
+        _text += "Astar Network EVM, Polkadot, Web3.";
+        _text += " (not your wallet)";
         text_wallet.setText(_text);
         text_wallet.setColor("blue");
     }

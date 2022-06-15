@@ -3,7 +3,50 @@
 pragma solidity ^0.8.7;
 
 
+//---ToDo------------------------------------------------------------------------------------------------------------------
+
+
 /*
+
+    クラフトの中断機能の実装？
+        中断時は資源が返ってくるか、レジュームできるのか、どちらが良いか
+        レジュームは、上書きか、個別か。
+        レジュームの残り時間は表現が難しい。
+        再開時のコストはどうするか。
+
+    実績コントラクトの実装
+        実績達成をtrue/falseで判定するfunction
+            1つの実績につき1 function
+        達成済み実績をtrue/falseで記憶するstorage
+            achievement uint32[256]のようなarray
+        新たに達成した実績の数をuint32でreturnするfunction
+            もしくはarrayでreturnする
+            達成時は項目を表示させたいため
+        実績判定のタイミングをどうするか
+            mining/farmin時などにいちいち行っていたらgas代かさむか
+            level-up時にまとめて行うか
+        実績案
+            coin/material
+                gain 1,000
+                gain 10,000
+                gain 100,000...
+            craft
+                craft 10
+                craft 30
+                craft 100...
+            heart
+                received 10
+                received 30
+                received 100...
+            level-up
+                level 3
+                level 10
+                level 30...
+        実績判定のコストが嵩むので、例えば100個以上とかは不可能だろう
+            まず、2年間で何個starを獲得させるか
+                Lvだけならば20個程度
+                +a実績で20個程度とするか
+            これならば、判定のたびにfor 20してもそこまで嵩まないだろうか
 
     宝石NFTの実装
         宝石箱NFTはまだ時間がかかるとしても、
@@ -4545,10 +4588,261 @@ contract Murasaki_Info is Ownable {
 }
 
 
-//---Admin------------------------------------------------------------------------------------------------------------------
+//---*Murasaki_Achievement-----------------------------------------------------------------------------------------------------
+
+
+contract Murasaki_Achievement is Ownable {
+
+    //permitted address
+    mapping(address => bool) public permitted_address;
+
+    //admin, add or remove permitted_address
+    function _add_permitted_address(address _address) external onlyOwner {
+        permitted_address[_address] = true;
+    }
+    function _remove_permitted_address(address _address) external onlyOwner {
+        permitted_address[_address] = false;
+    }
+
+    //name
+    string constant public name = "Murasaki Achievement";
+    string constant public symbol = "MA";
+    
+    //achievement
+    mapping(uint32 => bool[256]) public achievement;
+    
+    //set achievement
+    function set_achievement(uint32 _summoner, uint32 _id, bool _bool) external {
+        require(permitted_address[msg.sender] == true);
+        achievement[_summoner][_id] = _bool;
+    }
+    
+    //call achievement as array
+    function get_achievement(uint32 _summoner) external view returns (bool[256] memory) {
+        return achievement[_summoner];
+    }
+    
+}
+
+
+//---Function_Achievement-----------------------------------------------------------------------------------------------------
+
+
+contract Murasaki_Function_Achievement is Ownable {
+
+    //address
+    address public murasaki_function_share_address;
+    function _set1_murasaki_function_share_address(address _address) external onlyOwner {
+        murasaki_function_share_address = _address;
+    }
+        
+    //admin. withdraw
+    function withdraw(address rec)public onlyOwner{
+        payable(rec).transfer(address(this).balance);
+    }
+
+    //
+    function check_achieve_1(uint32 _summoner) public view returns (bool) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        if (ms.level(_summoner) >= 3) {
+            return true;
+        }
+        return false;
+    }
+    function check_achieve_2(uint32 _summoner) public view returns (bool) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        if (ms.level(_summoner) >= 6) {
+            return true;
+        }
+        return false;
+    }
+    function check_achieve_3(uint32 _summoner) public view returns (bool) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        if (ms.level(_summoner) >= 9) {
+            return true;
+        }
+        return false;
+    }
+    function check_achieve_4(uint32 _summoner) public view returns (bool) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        if (ms.level(_summoner) >= 12) {
+            return true;
+        }
+        return false;
+    }
+    function check_achieve_5(uint32 _summoner) public view returns (bool) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        if (ms.level(_summoner) >= 15) {
+            return true;
+        }
+        return false;
+    }
+    function check_achieve_6(uint32 _summoner) public view returns (bool) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        if (ms.level(_summoner) >= 18) {
+            return true;
+        }
+        return false;
+    }
+    function check_achieve_7(uint32 _summoner) public view returns (bool) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage_Score mss = Murasaki_Strage_Score(mfs.murasaki_strage_score_address());
+        if (mss.total_coin_mined(_summoner) >= 10000) {
+            return true;
+        }
+        return false;
+    }
+    function check_achieve_8(uint32 _summoner) public view returns (bool) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage_Score mss = Murasaki_Strage_Score(mfs.murasaki_strage_score_address());
+        if (mss.total_coin_mined(_summoner) >= 30000) {
+            return true;
+        }
+        return false;
+    }
+    function check_achieve_9(uint32 _summoner) public view returns (bool) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage_Score mss = Murasaki_Strage_Score(mfs.murasaki_strage_score_address());
+        if (mss.total_coin_mined(_summoner) >= 60000) {
+            return true;
+        }
+        return false;
+    }
+    function check_achieve_10(uint32 _summoner) public view returns (bool) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage_Score mss = Murasaki_Strage_Score(mfs.murasaki_strage_score_address());
+        if (mss.total_coin_mined(_summoner) >= 100000) {
+            return true;
+        }
+        return false;
+    }
+    function check_achieve_11(uint32 _summoner) public view returns (bool) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage_Score mss = Murasaki_Strage_Score(mfs.murasaki_strage_score_address());
+        if (mss.total_coin_mined(_summoner) >= 150000) {
+            return true;
+        }
+        return false;
+    }
+    function check_achieve_12(uint32 _summoner) public view returns (bool) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage_Score mss = Murasaki_Strage_Score(mfs.murasaki_strage_score_address());
+        if (mss.total_coin_mined(_summoner) >= 210000) {
+            return true;
+        }
+        return false;
+    }
+    function check_achieve_13(uint32 _summoner) public view returns (bool) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage_Score mss = Murasaki_Strage_Score(mfs.murasaki_strage_score_address());
+        if (mss.total_material_farmed(_summoner) >= 10000) {
+            return true;
+        }
+        return false;
+    }
+    function check_achieve_14(uint32 _summoner) public view returns (bool) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage_Score mss = Murasaki_Strage_Score(mfs.murasaki_strage_score_address());
+        if (mss.total_material_farmed(_summoner) >= 30000) {
+            return true;
+        }
+        return false;
+    }
+    function check_achieve_15(uint32 _summoner) public view returns (bool) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage_Score mss = Murasaki_Strage_Score(mfs.murasaki_strage_score_address());
+        if (mss.total_material_farmed(_summoner) >= 60000) {
+            return true;
+        }
+        return false;
+    }
+    function check_achieve_16(uint32 _summoner) public view returns (bool) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage_Score mss = Murasaki_Strage_Score(mfs.murasaki_strage_score_address());
+        if (mss.total_material_farmed(_summoner) >= 100000) {
+            return true;
+        }
+        return false;
+    }
+    function check_achieve_17(uint32 _summoner) public view returns (bool) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage_Score mss = Murasaki_Strage_Score(mfs.murasaki_strage_score_address());
+        if (mss.total_material_farmed(_summoner) >= 150000) {
+            return true;
+        }
+        return false;
+    }
+    function check_achieve_18(uint32 _summoner) public view returns (bool) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage_Score mss = Murasaki_Strage_Score(mfs.murasaki_strage_score_address());
+        if (mss.total_material_farmed(_summoner) >= 210000) {
+            return true;
+        }
+        return false;
+    }
+    function check_achieve_19(uint32 _summoner) public view returns (bool) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage_Score mss = Murasaki_Strage_Score(mfs.murasaki_strage_score_address());
+        if (mss.total_item_crafted(_summoner) >= 3) {
+            return true;
+        }
+        return false;
+    }
+    function check_achieve_20(uint32 _summoner) public view returns (bool) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage_Score mss = Murasaki_Strage_Score(mfs.murasaki_strage_score_address());
+        if (mss.total_item_crafted(_summoner) >= 6) {
+            return true;
+        }
+        return false;
+    }
+    function check_achieve_21(uint32 _summoner) public view returns (bool) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage_Score mss = Murasaki_Strage_Score(mfs.murasaki_strage_score_address());
+        if (mss.total_item_crafted(_summoner) >= 10) {
+            return true;
+        }
+        return false;
+    }
+    function check_achieve_22(uint32 _summoner) public view returns (bool) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage_Score mss = Murasaki_Strage_Score(mfs.murasaki_strage_score_address());
+        if (mss.total_item_crafted(_summoner) >= 15) {
+            return true;
+        }
+        return false;
+    }
+    function check_achieve_23(uint32 _summoner) public view returns (bool) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage_Score mss = Murasaki_Strage_Score(mfs.murasaki_strage_score_address());
+        if (mss.total_item_crafted(_summoner) >= 21) {
+            return true;
+        }
+        return false;
+    }
+    function check_achieve_24(uint32 _summoner) public view returns (bool) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage_Score mss = Murasaki_Strage_Score(mfs.murasaki_strage_score_address());
+        if (mss.total_item_crafted(_summoner) >= 28) {
+            return true;
+        }
+        return false;
+    }
+}
+
+
+//---old------------------------------------------------------------------------------------------------------------------
 
 
 /*
+
+
 contract Murasaki_Admin is Ownable {
 
     //approval required: murasaki_craft
@@ -4576,13 +4870,7 @@ contract Murasaki_Admin is Ownable {
         mn.update_name(_summoner + 10000, _name_str);
     }
 }
-*/
 
-
-//---old------------------------------------------------------------------------------------------------------------------
-
-
-/*
 
  ok mcコントラの改造
         permit型に修正する
