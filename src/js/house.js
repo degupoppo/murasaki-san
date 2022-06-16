@@ -854,6 +854,49 @@ async function check_tx(_tx) {
     }
 }
 
+//event_heart
+/*
+async function get_event_heart_receiving() {
+    let web3 = await connect();
+    let wallet = await get_wallet(web3);
+    let contract = await new web3.eth.Contract(abi_murasaki_item_market, contract_murasaki_item_market);
+    let _block_latest = await web3.eth.getBlockNumber();
+    //console.log({_block_latest});
+    let _block_from = _block_latest - 10000;
+    let events = await contract.getPastEvents("Buy", {
+            fromBlock: _block_from,
+            toBlock: _block_latest
+    })
+    if (events) {
+        for (let event of events) {
+            let _block = event.blockNumber;
+            let _item_id = event.returnValues[0];
+            let _wallet_seller = event.returnValues[1];
+            let _wallet_buyer = event.returnValues[2];
+            let _price = web3.utils.fromWei(event.returnValues[3]);
+            let contract_mm = await new web3.eth.Contract(abi_murasaki_main, contract_murasaki_main);
+            let _summoner_seller = await contract_mm.methods.tokenOf(_wallet_seller).call();  //have not summoned yet: 0
+            let _summoner_buyer = await contract_mm.methods.tokenOf(_wallet_buyer).call();  //have not summoned yet: 0
+            let _name_seller = await call_name_from_summoner(_summoner_seller);
+            if (_name_seller == "") {
+                _name_seller = "#" + _summoner_seller;
+            }
+            let _name_buyer = await call_name_from_summoner(_summoner_buyer);
+            if (_name_buyer == "") {
+                _name_buyer = "#" + _summoner_buyer;
+            }
+            let contract_mc = await new web3.eth.Contract(abi_murasaki_craft, contract_murasaki_craft);
+            let _item = await contract_mc.methods.items(_item_id).call();
+            let _item_type = _item[0];
+            let _item_name = array_item_name[_item_type];
+            let _text = "&nbsp;&nbsp;&nbsp;" + _block + " : <u>" + _name_buyer + "</u> bought <b>" + _item_name + "</b> from <u>" + _name_seller + "</u> for <b>" + _price + " $ASTR</b>.<br>"
+            recentActivity.innerHTML += _text;
+        }
+    }
+}
+*/
+
+
 //===send
 
 //summon
@@ -4301,6 +4344,7 @@ function update_checkModeChange(this_scene) {
         murasakisan.target_y = 740;
         text_select_item.setText('"'+array_item_name[local_crafting_item_type]+'"')
         sound_crafting.play();
+        local_crafting_calc = -1;
     }else if (local_crafting_status == 0 & murasakisan.mode == "crafting") {
         murasakisan.set_mode = "hugging";
         //murasakisan.set_mode = "resting";
@@ -4309,7 +4353,6 @@ function update_checkModeChange(this_scene) {
         icon_crafting_time_remining.visible = false;
         sound_earn.play();
         flag_item_update = 1;
-        local_crafting_calc = -1;
     }
 
     previous_local_last_feeding_time = local_last_feeding_time;

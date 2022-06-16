@@ -8,6 +8,11 @@ pragma solidity ^0.8.7;
 
 /*
 
+    mining/farmingの上限時間の設定
+        happy <= 0で掘れなくなるのが理想だが、実装できるだろうか。
+            last_grooming_timeでいけそう。
+        妥協点として、3d以上放置しても報酬は増えない。
+
     クラフトの中断機能の実装？
         中断時は資源が返ってくるか、レジュームできるのか、どちらが良いか
         レジュームは、上書きか、個別か。
@@ -2015,7 +2020,7 @@ contract Murasaki_Strage_Nui is Ownable {
 //---Function------------------------------------------------------------------------------------------------------------------
 
 
-//===*Share======================================================================================================
+//===Share======================================================================================================
 
 
 contract Murasaki_Function_Share is Ownable {
@@ -2358,7 +2363,7 @@ contract Murasaki_Function_Share is Ownable {
 }
 
 
-//===*Summon_and_LevelUp======================================================================================================
+//===Summon_and_LevelUp======================================================================================================
 
 
 contract Murasaki_Function_Summon_and_LevelUp is Ownable {
@@ -2575,18 +2580,9 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable {
         }
         //luck challenge
         if (mfs.luck_challenge(_summoner)) {
-            _exp_add = _exp_add * 3 / 2;
+            //_exp_add = _exp_add * 3 / 2;
+            _exp_add = _exp_add * 2;
         }
-        /*
-        uint32 _luck_mod = ms.luck(_summoner) + mfs.calc_heart(_summoner) * 1;
-        //world dice boost
-        World_Dice wd = World_Dice(mfs.world_dice_address());
-        uint32 _rolled_dice = wd.get_rolled_dice(_summoner);
-        _luck_mod += _rolled_dice;
-        if (mfs.d1000(_summoner) <= _luck_mod/10) {
-            _exp_add = _exp_add * 3 / 2;
-        }
-        */
         uint32 _exp = ms.exp(_summoner) + _exp_add;
         ms.set_exp(_summoner, _exp);
         ms.set_last_feeding_time(_summoner, _now);
@@ -2609,20 +2605,6 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable {
     function not_petrified(uint32 _summoner) internal view returns (bool) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         return mfs.not_petrified(_summoner);
-        /*
-        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
-        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
-        uint32 SPEED = ms.SPEED();
-        uint32 BASE_SEC = ms.BASE_SEC();
-        uint32 DAY_PETRIFIED = ms.DAY_PETRIFIED();
-        uint32 _now = uint32(block.timestamp);
-        uint32 _delta_sec = _now - ms.last_feeding_time(_summoner);
-        if ( _delta_sec >= BASE_SEC * DAY_PETRIFIED *100/SPEED) {
-            return false;
-        }else {
-            return true;
-        }
-        */
     }
     event Cure_Petrification(uint32 indexed _summoner, uint _price);
     function cure_petrification(uint32 _summoner) external payable {
@@ -2663,18 +2645,9 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable {
         }
         //luck challenge
         if (mfs.luck_challenge(_summoner)) {
-            _exp_add = _exp_add * 3 / 2;
+            //_exp_add = _exp_add * 3 / 2;
+            _exp_add = _exp_add * 2;
         }
-        /*
-        uint32 _luck_mod = ms.luck(_summoner) + mfs.calc_heart(_summoner) * 1;
-        //world dice boost
-        World_Dice wd = World_Dice(mfs.world_dice_address());
-        uint32 _rolled_dice = wd.get_rolled_dice(_summoner);
-        _luck_mod += _rolled_dice;
-        if (mfs.d1000(_summoner) <= _luck_mod/10) {
-            _exp_add = _exp_add * 3 / 2;
-        }
-        */
         //add exp
         uint32 _exp = ms.exp(_summoner) + _exp_add;
         ms.set_exp(_summoner, _exp);
@@ -2745,20 +2718,9 @@ contract Murasaki_Function_Mining_and_Farming is Ownable {
         uint32 _delta = calc_mining(_summoner);
         //luck challenge
         if (mfs.luck_challenge(_summoner)) {
-            _delta = _delta * 3 / 2;
+            //_delta = _delta * 3 / 2;
+            _delta = _delta * 2;
         }
-        /*
-        //luck modification
-        uint32 _luck_mod = ms.luck(_summoner) + mfs.calc_heart(_summoner) * 1;
-        //world dice boost
-        World_Dice wd = World_Dice(mfs.world_dice_address());
-        //uint32 _rolled_dice = wd.get_rolled_dice(_summoner);
-        //_luck_mod += _rolled_dice;
-        _luck_mod += wd.get_rolled_dice(_summoner);
-        if (mfs.d1000(_summoner) <= _luck_mod/10) {
-            _delta = _delta * 3 / 2;
-        }
-        */
         //add coin
         uint32 _coin = ms.coin(_summoner) + _delta;
         ms.set_coin(_summoner, _coin);
@@ -2785,8 +2747,18 @@ contract Murasaki_Function_Mining_and_Farming is Ownable {
         uint32 BASE_SEC = ms.BASE_SEC();
         require(ms.mining_status(_summoner) == 1);
         uint32 _now = uint32(block.timestamp);
-        uint32 _delta = (_now - ms.mining_start_time(_summoner)) * SPEED/100;   //sec
-        _delta = _delta * 1000 / BASE_SEC; // 1 day = +1000
+        //uint32 _delta = (_now - ms.mining_start_time(_summoner)) * SPEED/100;   //sec
+        uint32 _delta = _now - ms.mining_start_time(_summoner);   //sec
+        //happy limit: if happy=0, no more earning
+        uint32 _delta_grooming = _now - ms.last_grooming_time(_summoner);
+        uint32 _base_grooming = BASE_SEC *3;
+        if (_delta_grooming >= _base_grooming) {
+            _delta = ms.last_grooming_time(_summoner) + BASE_SEC * 3;
+        }
+        //speed boost
+        _delta = _delta * SPEED / 100;
+        //1day = +1000
+        _delta = _delta * 1000 / BASE_SEC;
         //status, level, item boost
         uint32 _mod = ms.strength(_summoner) + ms.level(_summoner)*100 + count_mining_items(msg.sender);
         //5%/point, 100 -> 1.00
@@ -2843,18 +2815,9 @@ contract Murasaki_Function_Mining_and_Farming is Ownable {
         uint32 _delta = calc_farming(_summoner);
         //luck challenge
         if (mfs.luck_challenge(_summoner)) {
-            _delta = _delta * 3 / 2;
+            //_delta = _delta * 3 / 2;
+            _delta = _delta * 2;
         }
-        /*
-        //luck modification
-        uint32 _luck_mod = ms.luck(_summoner) + mfs.calc_heart(_summoner) * 1;
-        //world dice boost
-        World_Dice wd = World_Dice(mfs.world_dice_address());
-        _luck_mod += wd.get_rolled_dice(_summoner);
-        if (mfs.d1000(_summoner) <= _luck_mod/10) {
-            _delta = _delta * 3 / 2;
-        }
-        */
         //add coin
         uint32 _material = ms.material(_summoner) + _delta;
         ms.set_material(_summoner, _material);
@@ -2881,8 +2844,21 @@ contract Murasaki_Function_Mining_and_Farming is Ownable {
         uint32 BASE_SEC = ms.BASE_SEC();
         require(ms.farming_status(_summoner) == 1);
         uint32 _now = uint32(block.timestamp);
+        uint32 _delta = _now - ms.farming_start_time(_summoner);   //sec
+        //happy limit: if happy=0, no more earning
+        uint32 _delta_grooming = _now - ms.last_grooming_time(_summoner);
+        uint32 _base_grooming = BASE_SEC *3;
+        if (_delta_grooming >= _base_grooming) {
+            _delta = ms.last_grooming_time(_summoner) + BASE_SEC * 3;
+        }
+        //speed boost
+        _delta = _delta * SPEED / 100;
+        //1day = +1000
+        _delta = _delta * 1000 / BASE_SEC;
+        /*
         uint32 _delta = (_now - ms.farming_start_time(_summoner)) * SPEED/100;  //sec
         _delta = _delta * 1000 / BASE_SEC; // 1 day = +1000
+        */
         //status and item boost
         uint32 _mod = ms.dexterity(_summoner) + ms.level(_summoner)*100 + count_farming_items(msg.sender);
         //5%/point, 100 -> 1.00
@@ -2919,7 +2895,7 @@ contract Murasaki_Function_Mining_and_Farming is Ownable {
 }
 
 
-//===*Crafting======================================================================================================
+//===Crafting======================================================================================================
 
 
 contract Murasaki_Function_Crafting is Ownable {
@@ -2974,81 +2950,6 @@ contract Murasaki_Function_Crafting is Ownable {
         ms.set_crafting_status(_summoner, 1);
         ms.set_crafting_start_time(_summoner, uint32(block.timestamp));
     }
-    /*
-    function start_crafting(uint32 _summoner, uint32 _item_type) public {
-        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
-        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
-        require(mfs.check_owner(_summoner, msg.sender));
-        require(ms.mining_status(_summoner) == 0 && ms.farming_status(_summoner) == 0 && ms.crafting_status(_summoner) == 0);
-        require(mfs.calc_satiety(_summoner) >= 10 && mfs.calc_happy(_summoner) >= 10);
-        require(ms.level(_summoner) >= 3);
-        //check item_type
-        require(
-            _item_type <= 64        //normal items
-            || _item_type == 194    //coin bag
-            || _item_type == 195    //material bag
-            || _item_type == 196    //mail
-        );
-        uint32 _now = uint32(block.timestamp);
-        //get dc, cost
-        uint32[4] memory _dc_table = get_item_dc(_item_type);
-        uint32 _coin = _dc_table[2];
-        uint32 _material = _dc_table[3];
-        //check coin, material
-        require(ms.coin(_summoner) >= _coin && ms.material(_summoner) >= _material);
-        //pay coin/material
-        ms.set_coin(_summoner, ms.coin(_summoner) - _coin);
-        ms.set_material(_summoner, ms.material(_summoner) - _material);
-        //start crafting
-        ms.set_crafting_item_type(_summoner, _item_type);
-        ms.set_crafting_status(_summoner, 1);
-        ms.set_crafting_start_time(_summoner, _now);
-    }
-    //crafting, heart required
-    function start_crafting_with_heart(uint32 _summoner, uint32 _item_type, uint32[10] memory _item_hearts) public {
-        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
-        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
-        Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
-        require(mfs.check_owner(_summoner, msg.sender));
-        require(ms.mining_status(_summoner) == 0 && ms.farming_status(_summoner) == 0 && ms.crafting_status(_summoner) == 0);
-        require(mfs.calc_satiety(_summoner) >= 10 && mfs.calc_happy(_summoner) >= 10);
-        require(ms.level(_summoner) >= 3);
-        //check item_type
-        require(
-            _item_type == 197    //nui, heart require
-        );
-        //count correct hearts
-        uint32 _count_hearts = 0;
-        for (uint i = 0; i <= 9; i++) {
-            if (_item_hearts[i] != 0) {
-                if (mc.ownerOf(_item_hearts[i]) == msg.sender) {
-                    _count_hearts += 1;
-                }
-            }
-        }
-        //check hert count
-        require(_count_hearts >= get_heart_required(_item_type));
-        //uint32 _now = uint32(block.timestamp);
-        //get dc, cost
-        uint32[4] memory _dc_table = get_item_dc(_item_type);
-        uint32 _coin = _dc_table[2];
-        uint32 _material = _dc_table[3];
-        //check coin, material
-        require(ms.coin(_summoner) >= _coin && ms.material(_summoner) >= _material);
-        //pay coin/material
-        ms.set_coin(_summoner, ms.coin(_summoner) - _coin);
-        ms.set_material(_summoner, ms.material(_summoner) - _material);
-        //burn hearts
-        for (uint i = 0; i < _count_hearts; i++) {
-            //_burn(msg.sender, _item_hearts[i]);
-            _burn(_item_hearts[i]);
-        }
-        //start crafting
-        ms.set_crafting_item_type(_summoner, _item_type);
-        ms.set_crafting_status(_summoner, 1);
-        ms.set_crafting_start_time(_summoner, uint32(block.timestamp));
-    }
-    */
     event Crafting(uint32 indexed _summoner, uint32 _item_type, uint32 _item);
     function stop_crafting(uint32 _summoner) public {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
@@ -3071,17 +2972,6 @@ contract Murasaki_Function_Crafting is Ownable {
             if (mfs.luck_challenge(_summoner)) {
                 _item_type += 64;
             }
-            /*
-            //rare challenge
-            uint32 _luck_mod = ms.luck(_summoner) + mfs.calc_heart(_summoner) * 1;
-            //world dice boost
-            World_Dice wd = World_Dice(mfs.world_dice_address());
-            uint32 _rolled_dice = wd.get_rolled_dice(_summoner);
-            _luck_mod += _rolled_dice;
-            if (mfs.d1000(_summoner) <= _luck_mod/10) {
-                _item_type += 64;
-            }
-            */
             //craft
             Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
             //uint32 _crafting_item = mc.next_item();
@@ -3196,100 +3086,6 @@ contract Murasaki_Function_Crafting is Ownable {
         //event
         emit Heart(_summoner_from, _summoner_to);        
     }
-    /*
-    //choice random summoner and transfer tiny heart to it
-    //when not-active summoner was selected, msg.sender will get it instedlly.
-    event Heart(uint32 indexed _summoner_from, uint32 _summoner_to);
-    function _create_tiny_heart(uint32 _created_summoner) internal {
-        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
-        Murasaki_Main mm = Murasaki_Main(mfs.murasaki_main_address());
-        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
-        Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
-        //get random _to_summoner
-        uint32 _count_summoners = mm.next_summoner() - 1;
-        uint32 _to_summoner = mfs.dn(_created_summoner, _count_summoners) + 1;
-        //check _to_summoner: when not active summoner, transfer to msg.sender
-        bool _isActive = ms.isActive(_to_summoner);
-        address _to_wallet;
-        if (
-            _isActive == true
-            //&& ms.level(_to_summoner) >= 3
-            //&& mfs.calc_satiety(_to_summoner) >= 20
-            && mfs.calc_happy(_to_summoner) >= 10
-        ) {
-            _to_wallet = mm.ownerOf(_to_summoner);
-        } else {
-            _to_wallet = msg.sender;
-            _to_summoner = _created_summoner;
-        }
-        //create tiny heart
-        uint32 _seed = mfs.seed(_created_summoner);
-        mc.craft(193, _created_summoner, _to_wallet, _seed);
-        //update score
-        Murasaki_Strage_Score mss = Murasaki_Strage_Score(mfs.murasaki_strage_score_address());
-        uint32 _total_heart_received = mss.total_heart_received(_to_summoner);
-        mss.set_total_heart_received(_to_summoner, _total_heart_received + 1);
-        //event
-        emit Heart(_created_summoner, _to_summoner);
-    }
-    function _create_tiny_heart(uint32 _created_summoner) internal {
-        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
-        Murasaki_Main mm = Murasaki_Main(mfs.murasaki_main_address());
-        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
-        Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
-        //get random _to_summoner
-        uint32 _count_summoners = mm.next_summoner() - 1;
-        uint32 _to_summoner = mfs.dn(_created_summoner, _count_summoners) + 1;
-        //check _to_summoner: when not active summoner, transfer to msg.sender
-        bool _isActive = ms.isActive(_to_summoner);
-        address _to_wallet;
-        if (
-            _isActive == true
-            //&& ms.level(_to_summoner) >= 3
-            //&& mfs.calc_satiety(_to_summoner) >= 20
-            && mfs.calc_happy(_to_summoner) >= 10
-        ) {
-            _to_wallet = mm.ownerOf(_to_summoner);
-        } else {
-            _to_wallet = msg.sender;
-            _to_summoner = _created_summoner;
-        }
-        //create tiny heart
-        uint32 _seed = mfs.seed(_created_summoner);
-        mc.craft(193, _created_summoner, _to_wallet, _seed);
-        //update score
-        Murasaki_Strage_Score mss = Murasaki_Strage_Score(mfs.murasaki_strage_score_address());
-        uint32 _total_heart_received = mss.total_heart_received(_to_summoner);
-        mss.set_total_heart_received(_to_summoner, _total_heart_received + 1);
-        //event
-        emit Heart(_created_summoner, _to_summoner);
-    }
-    //tiny heart, external, for Murasaki_Mail, ***duplicated, DirtyCode***
-    function create_tiny_heart(uint32 _summoner_to, uint32 _summoner_from) external {
-        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
-        Murasaki_Main mm = Murasaki_Main(mfs.murasaki_main_address());
-        Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
-        //only from Murasaki_Mail
-        require(msg.sender == mfs.murasaki_mail_address());
-        //get wallet
-        address _wallet_to = mm.ownerOf(_summoner_to);
-        address _wallet_from = mm.ownerOf(_summoner_from);
-        //create
-        uint32 _seed_from = mfs.seed(_summoner_from);
-        mc.craft(193, _summoner_from, _wallet_to, _seed_from);
-        uint32 _seed_to = mfs.seed(_summoner_to);
-        mc.craft(193, _summoner_to, _wallet_from, _seed_to);
-        //update score
-        Murasaki_Strage_Score mss = Murasaki_Strage_Score(mfs.murasaki_strage_score_address());
-        uint32 _total_heart_received_to = mss.total_heart_received(_summoner_to);
-        mss.set_total_heart_received(_summoner_to, _total_heart_received_to + 1);
-        uint32 _total_heart_received_from = mss.total_heart_received(_summoner_from);
-        mss.set_total_heart_received(_summoner_from, _total_heart_received_from + 1);
-        //event
-        emit Heart(_summoner_to, _summoner_from);
-        emit Heart(_summoner_from, _summoner_to);
-    }
-    */
 
     //upgrade item
     event Upgrade(uint32 indexed _summoner, uint32 _item_type, uint32 _item);
@@ -3314,9 +3110,6 @@ contract Murasaki_Function_Crafting is Ownable {
     	    && _item_type3 == _item_type1
     	);
         //burn (transfer) lower rank items
-        //_burn(msg.sender, _item1);
-        //_burn(msg.sender, _item2);
-        //_burn(msg.sender, _item3);
         _burn(_item1);
         _burn(_item2);
         _burn(_item3);
@@ -3388,7 +3181,7 @@ contract Murasaki_Function_Crafting is Ownable {
 }
 
 
-//===*Crafting_Codex======================================================================================================
+//===Crafting_Codex======================================================================================================
 
 
 contract Murasaki_Function_Crafting_Codex is Ownable {
@@ -4027,7 +3820,7 @@ contract Murasaki_Function_Name is Ownable {
 
 
 
-//---*World_Dice------------------------------------------------------------------------------------------------------------------
+//---World_Dice------------------------------------------------------------------------------------------------------------------
 
 
 contract World_Dice is Ownable {
@@ -4213,7 +4006,7 @@ contract World_Dice is Ownable {
 }
 
 
-//---*Murasaki_Mail-----------------------------------------------------------------------------------------------------
+//---Murasaki_Mail-----------------------------------------------------------------------------------------------------
 
 
 contract Murasaki_Mail is Ownable {
@@ -4625,7 +4418,7 @@ contract Murasaki_Achievement is Ownable {
 }
 
 
-//---Function_Achievement-----------------------------------------------------------------------------------------------------
+//---*Function_Achievement-----------------------------------------------------------------------------------------------------
 
 
 contract Murasaki_Function_Achievement is Ownable {
