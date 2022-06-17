@@ -220,4 +220,3 @@ const contract_astarcats =
     "0x8b5d62f396Ca3C6cF19803234685e693733f9779";
 */
 
-

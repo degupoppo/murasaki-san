@@ -8,12 +8,12 @@ pragma solidity ^0.8.7;
 
 /*
 
-    mining/farmingの上限時間の設定
+ ok mining/farmingの上限時間の設定
         happy <= 0で掘れなくなるのが理想だが、実装できるだろうか。
             last_grooming_timeでいけそう。
         妥協点として、3d以上放置しても報酬は増えない。
 
-    クラフトの中断機能の実装？
+ ng クラフトの中断機能の実装？
         中断時は資源が返ってくるか、レジュームできるのか、どちらが良いか
         レジュームは、上書きか、個別か。
         レジュームの残り時間は表現が難しい。
@@ -4006,7 +4006,7 @@ contract World_Dice is Ownable {
 }
 
 
-//---Murasaki_Mail-----------------------------------------------------------------------------------------------------
+//---*Murasaki_Mail-----------------------------------------------------------------------------------------------------
 
 
 contract Murasaki_Mail is Ownable {
@@ -4040,7 +4040,7 @@ contract Murasaki_Mail is Ownable {
     //interval, both of sending interval & receving limit
     uint32 public interval_sec = 60 * 60 * 24 * 3;    // 3 days
     uint32 public item_type_of_mail = 196;
-    uint32 public item_type_of_cushion = 1; //***TODO***
+    uint32 public item_type_of_cushion = 1; //***TODO*** _item_type
 
     //admin, set variants
     function set_interval_sec(uint32 _value) external onlyOwner {
@@ -4167,7 +4167,7 @@ contract Murasaki_Mail is Ownable {
         require(check_receiving_mail(_summoner_to));
         //get mail
         uint32 _mail_id = receiving[_summoner_to];
-        Mail memory _mail = mails[_mail_id];
+        Mail storage _mail = mails[_mail_id];
         receiving[_summoner_to] = 0;
         //open mail
         uint32 _now = uint32(block.timestamp);

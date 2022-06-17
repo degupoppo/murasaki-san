@@ -199,7 +199,7 @@
 
     帽子の普遍的な位置合わせ
             
-    メール送信成功のメッセージを実装
+ ok メール送信成功のメッセージを実装
         相手がメールを開けたことがわかるように
     
     NFTのURL取得方法の実装
@@ -404,10 +404,11 @@ function init_global_variants() {
     previous_local_item195 = 0;
     previous_local_item196 = 0;
     previous_local_item197 = 0;
-    previsou_local_rolled_dice = 0;
+    previous_local_rolled_dice = 0;
     previous_local_score = 0;
     previous_satiety = 0;
     previous_happy = 0;
+    previous_local_heart = 0;
     
     //===local etc
     turn = 0;
@@ -436,6 +437,7 @@ function init_global_variants() {
     screen_satiety_delta = 0;
     item_wearing_hat = 0;
     active_nui_id = 0;
+    text_event_heart = "";
 
     //===flag
     flag_music = 0;
@@ -587,7 +589,7 @@ async function contract_update_summoner_of_wallet() {
     if (summoner <= 0) {
         let web3 = await connect();
         let wallet = await get_wallet(web3);
-        let contract_mm = await new web3.eth.Contract(abi_murasaki_main, contract_murasaki_main);
+        let contract_mm = new web3.eth.Contract(abi_murasaki_main, contract_murasaki_main);
         summoner = await contract_mm.methods.tokenOf(wallet).call();  //have not summoned yet: 0
     }
 }
@@ -599,18 +601,18 @@ async function contract_update_name(_summoner) {
     }
     let web3 = await connect();
     let wallet = await get_wallet(web3);
-    let contract_mn = await new web3.eth.Contract(abi_murasaki_function_name, contract_murasaki_function_name);
-    local_name_str = await contract_mn.methods.call_name_from_summoner(_summoner).call();
+    let contract_mfn = new web3.eth.Contract(abi_murasaki_function_name, contract_murasaki_function_name);
+    local_name_str = await contract_mfn.methods.call_name_from_summoner(_summoner).call();
 }
 
 //update dice
 async function contract_update_dice(_summoner) {
     let web3 = await connect();
     let wallet = await get_wallet(web3);
-    let contract_d = await new web3.eth.Contract(abi_world_dice, contract_world_dice);
-    local_rolled_dice = await contract_d.methods.get_rolled_dice(_summoner).call();
-    local_last_rolled_dice = await contract_d.methods.get_last_rolled_dice(_summoner).call();
-    local_last_dice_roll_time = await contract_d.methods.last_dice_roll_time(_summoner).call();
+    let contract_wd = await new web3.eth.Contract(abi_world_dice, contract_world_dice);
+    local_rolled_dice = await contract_wd.methods.get_rolled_dice(_summoner).call();
+    local_last_rolled_dice = await contract_wd.methods.get_last_rolled_dice(_summoner).call();
+    local_last_dice_roll_time = await contract_wd.methods.last_dice_roll_time(_summoner).call();
 }
 
 //update static_parameters
@@ -653,7 +655,7 @@ async function contract_update_working(_summoner) {
     }
 }
 
-//update dynamic_parameters
+//===update dynamic_parameters
 async function contract_update_status(_summoner) {
 
     let web3 = await connect();
@@ -755,6 +757,7 @@ async function contract_update_all() {
     await contract_update_statics(summoner);
     await contract_update_name(summoner);
     await contract_update_status(summoner);
+    await contract_update_event_heart();
 }
 
 //check mail
@@ -855,46 +858,61 @@ async function check_tx(_tx) {
 }
 
 //event_heart
-/*
-async function get_event_heart_receiving() {
+async function contract_update_event_heart() {
     let web3 = await connect();
     let wallet = await get_wallet(web3);
-    let contract = await new web3.eth.Contract(abi_murasaki_item_market, contract_murasaki_item_market);
+    let contract_mml = new web3.eth.Contract(abi_murasaki_mail, contract_murasaki_mail);
+    let contract_mfc = new web3.eth.Contract(abi_murasaki_function_crafting, contract_murasaki_function_crafting);
     let _block_latest = await web3.eth.getBlockNumber();
-    //console.log({_block_latest});
-    let _block_from = _block_latest - 10000;
-    let events = await contract.getPastEvents("Buy", {
+    let _block_from = _block_latest - 3000;
+    let _events_mc = await contract_mfc.getPastEvents("Heart", {
             fromBlock: _block_from,
             toBlock: _block_latest
     })
-    if (events) {
-        for (let event of events) {
-            let _block = event.blockNumber;
-            let _item_id = event.returnValues[0];
-            let _wallet_seller = event.returnValues[1];
-            let _wallet_buyer = event.returnValues[2];
-            let _price = web3.utils.fromWei(event.returnValues[3]);
-            let contract_mm = await new web3.eth.Contract(abi_murasaki_main, contract_murasaki_main);
-            let _summoner_seller = await contract_mm.methods.tokenOf(_wallet_seller).call();  //have not summoned yet: 0
-            let _summoner_buyer = await contract_mm.methods.tokenOf(_wallet_buyer).call();  //have not summoned yet: 0
-            let _name_seller = await call_name_from_summoner(_summoner_seller);
-            if (_name_seller == "") {
-                _name_seller = "#" + _summoner_seller;
+    let _text = "";
+    if (_events_mc) {
+        for (let event of _events_mc) {
+            let _summoner_to = event.returnValues[1];
+            if (_summoner_to == summoner) {
+                //let _block = event.blockNumber;
+                let _summoner_from = event.returnValues[0];
+                let _name_from = await call_name_from_summoner(_summoner_from);
+                if (_name_from == "") {
+                    _name_from = "#" + _summoner_from;
+                }
+                _text += " +1 from " + _name_from + " (item craf) \n";
             }
-            let _name_buyer = await call_name_from_summoner(_summoner_buyer);
-            if (_name_buyer == "") {
-                _name_buyer = "#" + _summoner_buyer;
-            }
-            let contract_mc = await new web3.eth.Contract(abi_murasaki_craft, contract_murasaki_craft);
-            let _item = await contract_mc.methods.items(_item_id).call();
-            let _item_type = _item[0];
-            let _item_name = array_item_name[_item_type];
-            let _text = "&nbsp;&nbsp;&nbsp;" + _block + " : <u>" + _name_buyer + "</u> bought <b>" + _item_name + "</b> from <u>" + _name_seller + "</u> for <b>" + _price + " $ASTR</b>.<br>"
-            recentActivity.innerHTML += _text;
         }
     }
+    let _events_ml = await contract_mml.getPastEvents("Open_Mail", {
+            fromBlock: _block_from,
+            toBlock: _block_latest
+    })
+    if (_events_ml) {
+        for (let event of _events_ml) {
+            let _summoner_to = event.returnValues[0];
+            let _summoner_from = event.returnValues[1];
+            if (_summoner_to == summoner) {
+                //let _block = event.blockNumber;
+                let _name_from = await call_name_from_summoner(_summoner_from);
+                if (_name_from == "") {
+                    _name_from = "#" + _summoner_from;
+                }
+                _text += " +1 from " + _name_from + " (mail receiving) \n";
+            }
+            if (_summoner_from == summoner) {
+                //let _block = event.blockNumber;
+                let _name_to = await call_name_from_summoner(_summoner_to);
+                if (_name_to == "") {
+                    _name_to = "#" + _summoner_to;
+                }
+                _text += " +1 from " + _name_to + " (mail sending) \n";
+            }
+        }
+    }
+    _text = _text.slice(0, -2);
+    text_event_heart.setText(_text);
 }
-*/
 
 
 //===send
@@ -3738,7 +3756,13 @@ function create() {
     //heart
     icon_heart = this.add.sprite(960, 21, "icon_heart")
         .setScale(0.08);
-    text_heart = this.add.text(975, 15, "***", {font: "17px Arial", fill: "#000", backgroundColor: "#FDEEED"});
+    text_event_heart = this.add.text(1045, 40, "", {font: "17px Arial", fill: "#000", backgroundColor: "#FDEEED"})
+        .setOrigin(1,0)
+        .setVisible(false);
+    text_heart = this.add.text(975, 15, "***", {font: "17px Arial", fill: "#000", backgroundColor: "#FDEEED"})
+        .setInteractive()
+        .on("pointerover", () => text_event_heart.setVisible(true))
+        .on("pointerout", () => text_event_heart.setVisible(false));
 
     //name
     _x = 85;
@@ -4108,6 +4132,9 @@ function update_parametersWithoutAnimation(this_scene) {
 
     //heart
     text_heart.setText("Heart: " + local_heart);
+    if (local_heart != previous_local_heart) {
+        contract_update_event_heart();
+    }
 
     //update progression status
     let _mode = murasakisan.get_mode;
@@ -4219,11 +4246,12 @@ function update_parametersWithoutAnimation(this_scene) {
     */
     
     //radarchart
-    if (previsou_local_rolled_dice != local_rolled_dice && flag_radarchart == 1) {
+    if (previous_local_rolled_dice != local_rolled_dice && flag_radarchart == 1) {
         draw_radarchart(this_scene);
     }
 
-    previsou_local_rolled_dice = local_rolled_dice;
+    previous_local_rolled_dice = local_rolled_dice;
+    previous_local_heart = local_heart;
 }
 
 
