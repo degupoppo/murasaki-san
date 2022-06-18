@@ -879,7 +879,7 @@ async function contract_update_event_heart() {
                 if (_name_from == "") {
                     _name_from = "#" + _summoner_from;
                 }
-                _text += " +1 from " + _name_from + " (item craf) \n";
+                _text += " +1 from " + _name_from + " (item crafting) \n";
             }
         }
     }
