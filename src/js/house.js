@@ -19,11 +19,12 @@
             mining/farmin時などにいちいち行っていたらgas代かさむか
             level-up時にまとめて行うか
         実績案
-            coin/material
+            coin/material:max 500,000
                 gain 1,000
                 gain 10,000
                 gain 100,000...
-            craft
+            craft:0-48
+                4,8,12,16,20,24
                 craft 10
                 craft 30
                 craft 100...
@@ -31,10 +32,8 @@
                 received 10
                 received 30
                 received 100...
-            level-up
-                level 3
-                level 10
-                level 30...
+            level-up:1-20
+                3,6,9,12,15,18
 
     宝石NFT・宝石箱NTT機構
         トレードインセンティブ
@@ -699,7 +698,7 @@ async function contract_update_status(_summoner) {
     local_heart = Number(_dynamic_status[27]);
 
     //dice, when rolling, high frequency update
-    if (flag_dice_rolling == 1 && local_items[36] > 0) {
+    if (flag_dice_rolling == 1 && local_items[3] > 0) {
         await contract_update_dice(_summoner);
     }
     
@@ -727,7 +726,7 @@ async function contract_update_status(_summoner) {
         contract_update_working(_summoner);
 
         //update dice
-        if (flag_dice_rolling == 0 && local_items[36] > 0) {
+        if (flag_dice_rolling == 0 && local_items[3] > 0) {
             await contract_update_dice(_summoner);
         }
         
@@ -2034,7 +2033,7 @@ class Dice extends Phaser.GameObjects.Sprite{
             }
         }
         //dice rolling
-        if (flag_dice_rolling == 1 && this.count % 2 == 0) {
+        if (flag_dice_rolling == 1 && this.count % 4 == 0) {
             //this.text_rolled_number.setText(Math.round(Math.random()*20));
             this.text_rolled_number.setText(this.count / 2 % 20 + 1);
             this.text_next_time.setText("Rolling!").setFill("#ff0000");
