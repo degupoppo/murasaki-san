@@ -868,6 +868,7 @@ async function contract_update_event_heart() {
             fromBlock: _block_from,
             toBlock: _block_latest
     })
+    //console.log(_events_mc);
     let _text = "";
     if (_events_mc) {
         for (let event of _events_mc) {
@@ -887,6 +888,7 @@ async function contract_update_event_heart() {
             fromBlock: _block_from,
             toBlock: _block_latest
     })
+    //console.log(_events_ml);
     if (_events_ml) {
         for (let event of _events_ml) {
             let _summoner_to = event.returnValues[0];
@@ -910,6 +912,7 @@ async function contract_update_event_heart() {
         }
     }
     _text = _text.slice(0, -2);
+    //console.log(_text);
     text_event_heart.setText(_text);
 }
 
