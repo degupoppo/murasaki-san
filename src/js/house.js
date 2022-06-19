@@ -4366,8 +4366,8 @@ function update_checkModeChange(this_scene) {
         murasakisan.set_mode = "farming";
         murasakisan.submode = 0;
         murasakisan.count = 0;
-        murasakisan.target_x = 170;
-        murasakisan.target_y = 440;
+        murasakisan.target_x = 180;
+        murasakisan.target_y = 450;
         sound_farming.play();
     }else if (local_farming_status == 0 & murasakisan.mode == "farming") {
         murasakisan.set_mode = "hugging";
