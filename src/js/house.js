@@ -3004,6 +3004,7 @@ function preload() {
     //===item_basic
     this.load.image("item_table", "src/png/item_basic_table.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("item_misin", "src/png/item_basic_misin.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_tree0", "src/png/item_basic_tree0.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("item_tree1", "src/png/item_basic_tree1.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("item_tree2", "src/png/item_basic_tree2.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("item_tree3", "src/png/item_basic_tree3.png", {frameWidth: 370, frameHeight: 320});
@@ -3402,18 +3403,23 @@ function create() {
         .setOrigin(0.5)
         .setScale(0.8)
         .setDepth(830-100);
-    item_tree1 = this.add.sprite(100,420, "item_tree1")
+    item_tree0 = this.add.sprite(100,400, "item_tree0")
         .setOrigin(0.5)
         .setScale(0.7)
         .setDepth(420);
-    item_tree2 = this.add.sprite(100,420, "item_tree2")
-        .setOrigin(0.5)
-        .setScale(0.7)
-        .setDepth(420+1);
-    item_tree3 = this.add.sprite(100,420, "item_tree3")
+    item_tree1 = this.add.sprite(100,400, "item_tree1")
         .setOrigin(0.5)
         .setScale(0.7)
         .setDepth(420+2);
+    item_tree2 = this.add.sprite(100,400, "item_tree2")
+        .setOrigin(0.5)
+        .setScale(0.7)
+        .setDepth(420+1);
+    item_tree3 = this.add.sprite(100,400, "item_tree3")
+        .setOrigin(0.5)
+        .setScale(0.7)
+        .setDepth(420);
+    item_tree1.visible = false;
     item_tree2.visible = false;
     item_tree3.visible = false;
     item_gold1 = this.add.sprite(130,750, "item_gold1")
@@ -4161,6 +4167,10 @@ function update_parametersWithoutAnimation(this_scene) {
         let _daily_earn = local_material_calc / _delta * 86400;
         text_farming_calc.setText(" +" + local_material_calc + " Kusa\n  (" + Math.round(_daily_earn/10)*10 + " /d)");
         //update tree
+        if (local_material_calc >= 500) {
+            item_tree0.visible = false;
+            item_tree1.visible = true;
+        }
         if (local_material_calc >= 1000) {
             item_tree2.visible = true;
         }
@@ -4205,6 +4215,8 @@ function update_parametersWithoutAnimation(this_scene) {
     }
     if (local_farming_status != 1) {
         icon_farming.visible = false;
+        item_tree0.visible = true;
+        item_tree1.visible = false;
         item_tree2.visible = false;
         item_tree3.visible = false;
     }
@@ -4354,8 +4366,8 @@ function update_checkModeChange(this_scene) {
         murasakisan.set_mode = "farming";
         murasakisan.submode = 0;
         murasakisan.count = 0;
-        murasakisan.target_x = 180;
-        murasakisan.target_y = 450;
+        murasakisan.target_x = 170;
+        murasakisan.target_y = 440;
         sound_farming.play();
     }else if (local_farming_status == 0 & murasakisan.mode == "farming") {
         murasakisan.set_mode = "hugging";
