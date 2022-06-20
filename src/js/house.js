@@ -7,6 +7,26 @@
 
 1st
 
+    dapps stakingシステムの再考案
+        メインコンセプト
+            本作品の中心は、craft → 部屋がにぎやかになってゆくというUX
+                craftをより効率的に行うためには、summonerがlv-upしたほうが有利。
+            このコンセプトを阻害しないように機構を組み込む
+        ベターコンセプト
+            トレードインセンティブ
+                マーケットを積極的に使ったほうが「有利」になる機構を組み込む
+            アンチボット
+                マルチウォレット型ボットに対して耐性のある機構を組み込む
+            ステークインセンティブ
+                より多くstakingしたプレイヤーが有利になる機構を組み込む
+        以上を踏まえた設計
+            houseのcomfortableをスコアとして数字化する
+                異なる種類のアイテムがたくさんあるほどスコアが高くなる
+                comfortableが一定値以上でstakingリワードを得られる
+            
+                
+        
+
     実績コントラクトの実装
         実績達成をtrue/falseで判定するfunction
             1つの実績につき1 function
@@ -1054,7 +1074,6 @@ async function contract_send_mail(_summoner) {
             break;
         }
     }
-    console.log(_item_mail);
     if (_item_mail != 0) {
         let contract_mm = await new web3.eth.Contract(abi_murasaki_mail, contract_murasaki_mail);
         contract_mm.methods.send_mail(_summoner, _item_mail).send({from:wallet});
@@ -3538,7 +3557,7 @@ function create() {
         _x+75, 
         _y+5, 
         "", 
-        {font: "18px Arial", fill: "#000"}
+        {font: "18px Arial", fill: "#000", backgroundColor: "#ecd9ff"}
     ).setDepth(9999);
     //select crafting_item_type
     text_select_item = this.add.text(_x+50, _y-30, ">> Select Item <<", {font: "30px Arial", fill: "#000", backgroundColor: "#ecd9ff"})
@@ -4170,11 +4189,19 @@ function update_parametersWithoutAnimation(this_scene) {
         if (local_material_calc >= 500) {
             item_tree0.visible = false;
             item_tree1.visible = true;
+            item_tree2.visible = false;
+            item_tree3.visible = false;
         }
         if (local_material_calc >= 1000) {
+            item_tree0.visible = false;
+            item_tree1.visible = false;
             item_tree2.visible = true;
+            item_tree3.visible = false;
         }
         if (local_material_calc >= 2000 ) {
+            item_tree0.visible = false;
+            item_tree1.visible = false;
+            item_tree2.visible = false;
             item_tree3.visible = true;
         }
     }else if (_mode == "crafting") {
@@ -4188,9 +4215,14 @@ function update_parametersWithoutAnimation(this_scene) {
         icon_crafting_time.visible = false;
         icon_crafting_heart.visible = false;
         if (local_crafting_calc == 0) {
-            text_crafting_calc.setText("Completed!");
+            text_crafting_calc
+                .setText("Completed!")
+                .setFill("#FF0000");
         } else if (local_crafting_calc == -1) {
-            text_crafting_calc.setText("Calculating...");
+            text_crafting_calc
+                .setText("Calculating...")
+                .setFill("#0000FF");
+            
         } else {
             //TOFIX: invisible selecte item info
             //calc remining time
@@ -4198,7 +4230,9 @@ function update_parametersWithoutAnimation(this_scene) {
             let _day = Math.floor(_total_sec / 86400);
             let _hr = Math.floor(_total_sec % 86400 / 3600);
             let _min = Math.floor(_total_sec % 3600 / 60);
-            text_crafting_calc.setText(_day + "d:" + _hr + "h:" + _min + "m");
+            text_crafting_calc
+                .setText(_day + "d:" + _hr + "h:" + _min + "m")
+                .setFill("#0000FF");
         }
     }else {
         text_mining_calc.setText("");
