@@ -7,6 +7,16 @@
 
 1st
 
+    電光掲示板の実装
+        craftやfeedingなど、他キャラの行動の情報を流す電光掲示板
+            craft
+            level-up
+            mining
+            farming
+        上記イベントを監視してランダムで表示させる
+        前回表示時～今回までの間にlogをすべて取得し、ランダムで1つ表示させる
+        何もlogがなければ表示させないか、なにか適当なテキストを表示させる。
+
     dapps stakingシステムの再考案
         メインコンセプト
             本作品の中心は、craft → 部屋がにぎやかになってゆくというUX
@@ -23,9 +33,6 @@
             houseのcomfortableをスコアとして数字化する
                 異なる種類のアイテムがたくさんあるほどスコアが高くなる
                 comfortableが一定値以上でstakingリワードを得られる
-            
-                
-        
 
     実績コントラクトの実装
         実績達成をtrue/falseで判定するfunction
@@ -883,13 +890,16 @@ async function contract_update_event_heart() {
     let contract_mml = new web3.eth.Contract(abi_murasaki_mail, contract_murasaki_mail);
     let contract_mfc = new web3.eth.Contract(abi_murasaki_function_crafting, contract_murasaki_function_crafting);
     let _block_latest = await web3.eth.getBlockNumber();
-    let _block_from = _block_latest - 3000;
+    let _block_from = _block_latest - 5000;
+    //let _block_from = _block_latest - 50000;
+    let _text = "";
+
+    //event craft
     let _events_mc = await contract_mfc.getPastEvents("Heart", {
             fromBlock: _block_from,
             toBlock: _block_latest
     })
     //console.log(_events_mc);
-    let _text = "";
     if (_events_mc) {
         for (let event of _events_mc) {
             let _summoner_to = event.returnValues[1];
@@ -897,6 +907,7 @@ async function contract_update_event_heart() {
                 //let _block = event.blockNumber;
                 let _summoner_from = event.returnValues[0];
                 let _name_from = await call_name_from_summoner(_summoner_from);
+                //let _name_from = "";
                 if (_name_from == "") {
                     _name_from = "#" + _summoner_from;
                 }
@@ -904,10 +915,12 @@ async function contract_update_event_heart() {
             }
         }
     }
+    
+    //event mail
     let _events_ml = await contract_mml.getPastEvents("Open_Mail", {
             fromBlock: _block_from,
             toBlock: _block_latest
-    })
+    });
     //console.log(_events_ml);
     if (_events_ml) {
         for (let event of _events_ml) {
@@ -916,6 +929,7 @@ async function contract_update_event_heart() {
             if (_summoner_to == summoner) {
                 //let _block = event.blockNumber;
                 let _name_from = await call_name_from_summoner(_summoner_from);
+                //let _name_from = "";
                 if (_name_from == "") {
                     _name_from = "#" + _summoner_from;
                 }
@@ -924,6 +938,7 @@ async function contract_update_event_heart() {
             if (_summoner_from == summoner) {
                 //let _block = event.blockNumber;
                 let _name_to = await call_name_from_summoner(_summoner_to);
+                //let _name_to = "";
                 if (_name_to == "") {
                     _name_to = "#" + _summoner_to;
                 }
@@ -931,8 +946,21 @@ async function contract_update_event_heart() {
             }
         }
     }
+    
     _text = _text.slice(0, -2);
     //console.log(_text);
+    
+    
+    _contract = new web3.eth.Contract(abi_murasaki_function_feeding_and_grooming, contract_murasaki_function_feeding_and_grooming);
+    let _res = await _contract.getPastEvents("Feeding", {
+            fromBlock: _block_from,
+            toBlock: _block_latest
+    });
+    console.log(_res);
+    _text += _res[0].returnValues[0];
+    console.log(_text);
+
+
     text_event_heart.setText(_text);
 }
 
