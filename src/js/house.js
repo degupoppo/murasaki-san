@@ -921,7 +921,8 @@ async function contract_update_event_heart() {
             fromBlock: _block_from,
             toBlock: _block_latest
     });
-    //console.log(_events_ml);
+    console.log(_block_from, _block_latest);
+    console.log(_events_ml);
     if (_events_ml) {
         for (let event of _events_ml) {
             let _summoner_to = event.returnValues[0];
@@ -948,9 +949,8 @@ async function contract_update_event_heart() {
     }
     
     _text = _text.slice(0, -2);
-    //console.log(_text);
-    
-    
+
+    /*
     _contract = new web3.eth.Contract(abi_murasaki_function_feeding_and_grooming, contract_murasaki_function_feeding_and_grooming);
     let _res = await _contract.getPastEvents("Feeding", {
             fromBlock: _block_from,
@@ -959,7 +959,7 @@ async function contract_update_event_heart() {
     console.log(_res);
     _text += _res[0].returnValues[0];
     console.log(_text);
-
+    */
 
     text_event_heart.setText(_text);
 }
