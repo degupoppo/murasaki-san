@@ -46,6 +46,11 @@ async function connect() {
     return web3;
 }
 
+async function wss() {
+    let web3 = await new Web3("wss://rpc.shibuya.astar.network");
+    return web3;
+}
+
 //get wallet
 async function get_wallet() {
     let web3 = await connect();

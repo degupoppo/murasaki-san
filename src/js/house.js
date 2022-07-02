@@ -7,6 +7,15 @@
 
 1st
 
+    walletのagetとnonceによって成長する何かの実装
+        age(最初のtxからの時間）とnonceからwalletの使い込み度を算出する
+            nonce/age * 5を最大値として、基本的にはnonce値に比例する
+            ただし、age若いのにnonceだけ多いbot walletはnonce上限に引っかかる
+        2年で最大成長
+            理想は24段階
+            多くて大変なので、12段階程度か
+            理想的には、葉っぱ1枚単位で増やしたいが、難しいか。        
+
     電光掲示板の実装
         craftやfeedingなど、他キャラの行動の情報を流す電光掲示板
             craft
@@ -464,6 +473,7 @@ function init_global_variants() {
     item_wearing_hat = 0;
     active_nui_id = 0;
     text_event_heart = "";
+    text_event_random = " ";
 
     //===flag
     flag_music = 0;
@@ -890,7 +900,7 @@ async function contract_update_event_heart() {
     let contract_mml = new web3.eth.Contract(abi_murasaki_mail, contract_murasaki_mail);
     let contract_mfc = new web3.eth.Contract(abi_murasaki_function_crafting, contract_murasaki_function_crafting);
     let _block_latest = await web3.eth.getBlockNumber();
-    let _block_from = _block_latest - 5000;
+    let _block_from = _block_latest - 7200; //1 day
     //let _block_from = _block_latest - 50000;
     let _text = "";
 
@@ -962,6 +972,140 @@ async function contract_update_event_heart() {
     */
 
     text_event_heart.setText(_text);
+}
+
+//event random
+async function contract_update_event_random() {
+    //let web3 = await connect();
+    let web3 = await wss();
+    let wallet = await get_wallet(web3);
+    let contract_mfsl = await new web3.eth.Contract(abi_murasaki_function_summon_and_levelup, contract_murasaki_function_summon_and_levelup);
+    let contract_mffg = await new web3.eth.Contract(abi_murasaki_function_feeding_and_grooming, contract_murasaki_function_feeding_and_grooming);
+    let contract_mfmf = await new web3.eth.Contract(abi_murasaki_function_mining_and_farming, contract_murasaki_function_mining_and_farming);
+    let contract_mfc = await new web3.eth.Contract(abi_murasaki_function_crafting, contract_murasaki_function_crafting);
+    //let contract_mml = new web3.eth.Contract(abi_murasaki_mail, contract_murasaki_mail);
+    let _block_latest = await web3.eth.getBlockNumber();
+    let _block_from = _block_latest - 300;  //60 min
+    //let _block_from = _block_latest - 50000;
+    /*
+    //summon
+    let _events_summon = await contract_mfsl.getPastEvents("Summon", {
+            fromBlock: _block_from,
+            toBlock: _block_latest
+    })
+    */
+    //Level-up
+    let _events_levelup = await contract_mfsl.getPastEvents("Level_up", {
+            fromBlock: _block_from,
+            toBlock: _block_latest
+    })
+    //Feeding
+    let _events_feeding = await contract_mffg.getPastEvents("Feeding", {
+            fromBlock: _block_from,
+            toBlock: _block_latest
+    })
+    //Grooming
+    let _events_grooming = await contract_mffg.getPastEvents("Grooming", {
+            fromBlock: _block_from,
+            toBlock: _block_latest
+    })
+    //Mining
+    let _events_mining = await contract_mfmf.getPastEvents("Mining", {
+            fromBlock: _block_from,
+            toBlock: _block_latest
+    })
+    //Farming
+    let _events_farming = await contract_mfmf.getPastEvents("Farming", {
+            fromBlock: _block_from,
+            toBlock: _block_latest
+    })
+    //Crafting
+    let _events_crafting = await contract_mfc.getPastEvents("Crafting", {
+            fromBlock: _block_from,
+            toBlock: _block_latest
+    })
+    /*
+    //Upgrade
+    let _events_upgrade = await contract_mfc.getPastEvents("Upgrade", {
+            fromBlock: _block_from,
+            toBlock: _block_latest
+    })
+    */
+    let _array = [];
+    _array = _array.concat(
+        //_events_summon,
+        _events_levelup,
+        _events_feeding,
+        _events_grooming,
+        _events_mining,
+        _events_farming,
+        _events_crafting,
+        //_events_upgrade,
+    )
+    console.log(_array);
+    let _text = "";
+    if (_array.length > 0) {
+        let _event = _array[Math.floor(Math.random() * _array.length)];
+        let _block = _event.blockNumber
+        let _name = _event.event;
+        let _summoner = _event.returnValues["_summoner"];
+        let _summoner_name = await call_name_from_summoner(_summoner);
+        if (_summoner_name == "") {
+            _summoner_name = "#" + _summoner;
+        }
+        let _value = _event.returnValues[1];
+        _text += "[Murasaki News] ";
+        if (_name == "Level_up") {
+            _text += _block;
+            _text += ": ";
+            _text += _summoner_name;
+            _text += " leveled up to ";
+            _text += _value;
+            _text += "!";
+        } else if (_name == "Feeding") {
+            _text += _block;
+            _text += ": ";
+            _text += _summoner_name;
+            _text += " was feeded and gained ";
+            _text += _value;
+            _text += " Exp!";
+        } else if (_name == "Grooming") {
+            _text += _block;
+            _text += ": ";
+            _text += _summoner_name;
+            _text += " was groomed and gained ";
+            _text += _value;
+            _text += " Exp!";
+        } else if (_name == "Mining") {
+            _text += _block;
+            _text += ": ";
+            _text += _summoner_name;
+            _text += " completed mining and earned ";
+            _text += _value;
+            _text += " ohana!";
+        } else if (_name == "Farming") {
+            _text += _block;
+            _text += ": ";
+            _text += _summoner_name;
+            _text += " completed farming and earned ";
+            _text += _value;
+            _text += " kusa!";
+        } else if (_name == "Crafting") {
+            let _item_name = array_item_name[_value];
+            _text += _block;
+            _text += ": ";
+            _text += _summoner_name;
+            _text += " crafted ";
+            _text += _item_name;
+            _text += "!";
+        /*
+        } else if (_name == "Upgrade") {
+            ;
+        */
+        }
+        _text += "              ";
+    text_event_random = _text;
+    }
 }
 
 
@@ -3092,6 +3236,7 @@ function preload() {
     this.load.image("item_pad_off", "src/png/item_pad_off.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("item_gauge", "src/png/item_gauge.png", {frameWidth: 370, frameHeight: 306});
     this.load.image("item_frame", "src/png/item_frame.png", {frameWidth: 370, frameHeight: 428});
+    this.load.image("item_wall_sticker", "src/png/item_wall_sticker.png");
     
     //===star
     this.load.image("star_blue", "src/png/star_blue.png", {frameWidth: 200, frameHeight: 191});
@@ -3768,53 +3913,75 @@ function create() {
 
     //satiety
     icon_satiety = this.add.sprite(30,25, "icon_satiety")
-        .setScale(0.08);
-    bar_satiety_back = makeBar(this, 55, 15, 0xF8C5AC);
+        .setScale(0.08)
+        .setDepth(9999);
+    bar_satiety_back = makeBar(this, 55, 15, 0xF8C5AC)
+        .setDepth(9999);
     bar_satiety_back.scaleX = 1;
-    bar_satiety = makeBar(this, 55, 15, 0xE60012);
+    bar_satiety = makeBar(this, 55, 15, 0xE60012)
+        .setDepth(9999);
     bar_satiety.scaleX = 0;
-    text_satiety = this.add.text(60, 16, "0%", {font: "17px Arial", fill: "#ffffff"});
+    text_satiety = this.add.text(60, 16, "0%", {font: "17px Arial", fill: "#ffffff"})
+        .setDepth(9999);
 
     //happy
-    icon_happy = this.add.sprite(245,25, "icon_happy");
-    icon_happy.setScale(0.08);
-    bar_happy_back = makeBar(this, 270, 15, 0xFCE2BA);
+    icon_happy = this.add.sprite(245,25, "icon_happy")
+        .setScale(0.08)
+        .setDepth(9999);
+    bar_happy_back = makeBar(this, 270, 15, 0xFCE2BA)
+        .setDepth(9999);
     bar_happy_back.scaleX = 1;
-    bar_happy = makeBar(this, 270, 15, 0xF39800);
+    bar_happy = makeBar(this, 270, 15, 0xF39800)
+        .setDepth(9999);
     bar_happy.scaleX = 0;
-    text_happy = this.add.text(275, 16, "0%", {font: "17px Arial", fill: "#ffffff"});
+    text_happy = this.add.text(275, 16, "0%", {font: "17px Arial", fill: "#ffffff"})
+        .setDepth(9999);
 
     //exp
-    this.add.text(440, 15, "Exp:", font_arg);
-    bar_exp_back = makeBar(this, 480, 15, 0xBBCCE9);
+    this.add.text(440, 15, "Exp:", font_arg)
+        .setDepth(9999);
+    bar_exp_back = makeBar(this, 480, 15, 0xBBCCE9)
+        .setDepth(9999);
     bar_exp_back.scaleX = 1;
-    bar_exp = makeBar(this, 480, 15, 0x0068B7);
+    bar_exp = makeBar(this, 480, 15, 0x0068B7)
+        .setDepth(9999);
     bar_exp.scaleX = 0;
-    text_exp = this.add.text(485, 16, "0 / 0", {font: "17px Arial", fill: "#ffffff"});
-    text_exp_earned = this.add.text(480, 38, "", {font: "17px Arial", fill: "#000000"});
+    text_exp = this.add.text(485, 16, "0 / 0", {font: "17px Arial", fill: "#ffffff"})
+        .setDepth(9999);
+    text_exp_earned = this.add.text(480, 38, "", {font: "17px Arial", fill: "#000000"})
+        .setDepth(9999);
     text_exp_earned_count = 0;
 
     //coin
     icon_ohana = this.add.sprite(668,23, "icon_ohana")
-        .setScale(0.07);
-    text_coin = this.add.text(685, 15, "Ohana: 0", {font: "17px Arial", fill: "#000", backgroundColor: "#FFF200"});
-    text_coin_earned = this.add.text(685, 38, "", {font: "17px Arial", fill: "#000000"});
+        .setScale(0.07)
+        .setDepth(9999);
+    text_coin = this.add.text(685, 15, "Ohana: 0", {font: "17px Arial", fill: "#000", backgroundColor: "#FFF200"})
+        .setDepth(9999);
+    text_coin_earned = this.add.text(685, 38, "", {font: "17px Arial", fill: "#000000"})
+        .setDepth(9999);
     text_coin_earned_count = 0;
 
     //material
     icon_kusa = this.add.sprite(815, 25, "icon_kusa")
-        .setScale(0.09);
-    text_material = this.add.text(830, 15, "Kusa: 0", {font: "17px Arial", fill: "#000", backgroundColor: "#D7E7AF"});
-    text_material_earned = this.add.text(830, 38, "", {font: "17px Arial", fill: "#000000"});
+        .setScale(0.09)
+        .setDepth(9999);
+    text_material = this.add.text(830, 15, "Kusa: 0", {font: "17px Arial", fill: "#000", backgroundColor: "#D7E7AF"})
+        .setDepth(9999);
+    text_material_earned = this.add.text(830, 38, "", {font: "17px Arial", fill: "#000000"})
+        .setDepth(9999);
     text_material_earned_count = 0;
 
     //heart
     icon_heart = this.add.sprite(960, 21, "icon_heart")
-        .setScale(0.08);
+        .setScale(0.08)
+        .setDepth(9999);
     text_event_heart = this.add.text(1045, 40, "", {font: "17px Arial", fill: "#000", backgroundColor: "#FDEEED"})
         .setOrigin(1,0)
-        .setVisible(false);
+        .setVisible(false)
+        .setDepth(9999);
     text_heart = this.add.text(975, 15, "***", {font: "17px Arial", fill: "#000", backgroundColor: "#FDEEED"})
+        .setDepth(9999)
         .setInteractive()
         .on("pointerover", () => text_event_heart.setVisible(true))
         .on("pointerout", () => text_event_heart.setVisible(false));
@@ -4039,6 +4206,15 @@ function update_numericAnimation(this_scene) {
             screen_happy_delta = 0;
         }
     }
+
+    //bbs
+    if (
+        typeof item_bbs_text != "undefined" 
+        && item_bbs_text.text != "undefined" 
+        && turn % 5 == 0
+    ) {
+        item_bbs_text.text = item_bbs_text.text.substr(1,) + item_bbs_text.text[0];
+    }
 }
 
 
@@ -4159,7 +4335,7 @@ function update_parametersWithAnimation(this_scene) {
         screen_happy_delta = happy - previous_happy;
         screen_happy_easing = 100;
     }
-
+    
     previous_happy = happy;
     previous_satiety = satiety;
     previous_local_coin = local_coin;
@@ -4640,10 +4816,12 @@ function update_checkItem(this_scene) {
             () => {
                 item_frame = this_scene.add.image(_x2, _y2, "item_frame")
                     .setOrigin(0.5)
-                    .setScale(0.25);
+                    .setScale(0.25)
+                    .setDepth(_y2);
                 item_frame_inside = this_scene.add.sprite(_x2, _y2, "pic_nft")
                     .setOrigin(0.5)
                     .setScale(0.2)
+                    .setDepth(_y2)
                     .setDisplaySize(67, 82)
                     .setInteractive({useHandCursor: true})
                     .on("pointerdown", () => {
@@ -4689,6 +4867,22 @@ function update_checkItem(this_scene) {
             .setOrigin(0.5)
             .setDepth(item_cushion.y + 2)
             .setVisible(false);
+        
+        //***TODO*** wall sticker
+        item_wall_sticker = this_scene.add.image(640, 480, "item_wall_sticker")
+            .setDepth(1)
+            .setAlpha(0.2);
+        
+        
+        //***TODO*** bbs
+        item_bbs_text = this_scene.add.text(
+            250, 
+            940, 
+            "", 
+            {font: "14px Arial", fill: "#ffffff", backgroundColor: "#000000"}
+        )
+            .setOrigin(0)
+            .setDepth(9999);
 
     }
     //nameplate, after craft
@@ -4736,6 +4930,12 @@ function update_checkItem(this_scene) {
         } else {
             mail.visible = false;
         }
+    }
+    
+    //***TODO*** bbs
+    if (local_items_flag[_item_id] == true) {
+        contract_update_event_random();
+        item_bbs_text.setText(text_event_random);
     }
     
     //###2:Mr.Astar
@@ -5332,8 +5532,13 @@ function update_checkItem(this_scene) {
                 sound_switch.play();
                 back_neon.visible = true;
                 text_kanban.setColor("white");
+                /*
                 if (typeof item_nui != "undefined") {
                     item_nui.anims.play("item_nui_alive", true);
+                }
+                */
+                if (typeof group_item197 != "undefined") {
+                    group_item197.children.entries[0].anims.play("item_nui_alive", true);
                 }
             } else {
                 item_switch.anims.play("item_switch_off", true);
@@ -5341,8 +5546,13 @@ function update_checkItem(this_scene) {
                 sound_switch.play();
                 back_neon.visible = false;
                 text_kanban.setColor("black");
+                /*
                 if (typeof item_nui != "undefined") {
                     item_nui.anims.play("item_nui", true);
+                }
+                */
+                if (typeof group_item197 != "undefined") {
+                    group_item197.children.entries[0].anims.play("item_nui", true);
                 }
             }
         });
