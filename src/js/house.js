@@ -380,7 +380,7 @@
 //---global variants-------------------------------------------------------------------------------------------------
 
 
-function init_global_variants() {
+async function init_global_variants() {
 
     //===on_chain static
     summoner = -1;
@@ -486,6 +486,9 @@ function init_global_variants() {
     flag_loaded = 0;
     flag_item_update = 0;
     flag_summon_star = 0;
+    
+    //wss, use for call
+    web3_wss = await wss();
 }
 
 init_global_variants();
@@ -978,6 +981,7 @@ async function contract_update_event_heart() {
 async function contract_update_event_random() {
     //let web3 = await connect();
     let web3 = await wss();
+    //let web3 = web3_wss;
     let wallet = await get_wallet(web3);
     let contract_mfsl = await new web3.eth.Contract(abi_murasaki_function_summon_and_levelup, contract_murasaki_function_summon_and_levelup);
     let contract_mffg = await new web3.eth.Contract(abi_murasaki_function_feeding_and_grooming, contract_murasaki_function_feeding_and_grooming);
@@ -1054,7 +1058,7 @@ async function contract_update_event_random() {
             _summoner_name = "#" + _summoner;
         }
         let _value = _event.returnValues[1];
-        _text += "[Murasaki News] ";
+        _text += "[Murasaki news] ";
         if (_name == "Level_up") {
             _text += _block;
             _text += ": ";
@@ -1068,14 +1072,14 @@ async function contract_update_event_random() {
             _text += _summoner_name;
             _text += " was feeded and gained ";
             _text += _value;
-            _text += " Exp!";
+            _text += " exp!";
         } else if (_name == "Grooming") {
             _text += _block;
             _text += ": ";
             _text += _summoner_name;
             _text += " was groomed and gained ";
             _text += _value;
-            _text += " Exp!";
+            _text += " exp!";
         } else if (_name == "Mining") {
             _text += _block;
             _text += ": ";
@@ -2552,7 +2556,7 @@ function music() {
 //===radar chart
 function radarchart(scene, x0, y0, r, str, dex, int, luk, str_item, dex_item, int_item, luk_item) {
     //base
-    let base = 25;
+    let base = 30;
     //calc (x,y) from status
     //main
     let x1 = 0;
