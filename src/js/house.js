@@ -7,6 +7,29 @@
 
 1st
 
+    収集NFTの再考
+        ハートを得るタイミングで手に入る多種類NFT
+            所持することでluckが上昇する
+            同じ種類を集めてupgradeすると上位NFT化できる
+            上位NFTは3個→5個分の効果、など
+            luckを効果的に上げる主な手段とする
+        upgradeのUIの実装
+            marketのupgradeでは味気ないか
+        取得方法の再考
+            craft時に受動的に
+            mail時に能動的に
+            もう1つぐらいなにか
+                他のsummonerとのインタラクションが必須にしたい
+                例えば、ダイスで20出たらとかではなくて。
+        宝石箱の実装
+            集めたNFTを入れておく入れ物
+        作品内での立ち位置と、獲得時の演出を深慮する
+            星なら空から降ってくる
+            宝石ならないないさんが持ってきてくれる、など。
+        一方通行で溜め込むだけで、消費はさせない
+            クラフトの消費アイテムとしては要求されない
+            1キャラに集中させてluckをブーストできるので、レベルキャップをもうける？
+
     walletのagetとnonceによって成長する何かの実装
         age(最初のtxからの時間）とnonceからwalletの使い込み度を算出する
             nonce/age * 5を最大値として、基本的にはnonce値に比例する
@@ -3294,7 +3317,8 @@ function preload() {
     this.load.image("item_gauge", "src/png/item_gauge.png", {frameWidth: 370, frameHeight: 306});
     this.load.image("item_frame", "src/png/item_frame.png", {frameWidth: 370, frameHeight: 428});
     this.load.image("item_wall_sticker", "src/png/item_wall_sticker.png");
-    this.load.image("item_floor_sticker", "src/png/item_floor_sticker.png");
+    this.load.image("item_floor_sticker1", "src/png/item_floor_sticker1.png");
+    this.load.image("item_floor_sticker2", "src/png/item_floor_sticker2.png");
     this.load.image("item_window", "src/png/item_window.png");
     
     //===star
@@ -4933,9 +4957,12 @@ function update_checkItem(this_scene) {
             .setAlpha(0.25);
 
         //***TODO*** floor sticker
-        item_floor_sticker = this_scene.add.image(640, 480, "item_floor_sticker")
+        item_floor_sticker1 = this_scene.add.image(640, 480, "item_floor_sticker1")
             .setDepth(2)
-            .setAlpha(0.4);
+            .setAlpha(0.3);
+        item_floor_sticker2 = this_scene.add.image(640, 480, "item_floor_sticker2")
+            .setDepth(3)
+            .setAlpha(0.7);
         
         //***TODO*** bbs
         item_bbs_text = this_scene.add.text(
