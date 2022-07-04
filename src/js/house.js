@@ -14,7 +14,20 @@
         2年で最大成長
             理想は24段階
             多くて大変なので、12段階程度か
-            理想的には、葉っぱ1枚単位で増やしたいが、難しいか。        
+            理想的には、葉っぱ1枚単位で増やしたいが、難しいか。
+        wallet ageの取得
+            web3.eth.getTransactionCount(address, block)が使えそう。
+                取得が少し遅い。
+            最大値は1年。1年以上古いwalletはすべて同じnonce上限とする。
+            1年前から順にさかのぼってゆき、1ヶ月ごとに刻む。
+            2592000 block/month (1block = 12sec計算）
+            初めてnonceが検出された月をageとする。
+        age scoreの算出
+            1日5 txを上限として、age scoreを算出する。
+            age=5mならば、age scoreの上限は900、1mで150上限が増える。
+            1年でscore=1800がmaxとする。
+            txばっかり飛ばしていても、wallet ageが1年経ってないものは上限にぶつかる
+            逆に、wallet ageが古くても、tx飛ばして使い込んでいなければscoreは小さい。
 
     電光掲示板の実装
         craftやfeedingなど、他キャラの行動の情報を流す電光掲示板
@@ -43,7 +56,7 @@
                 異なる種類のアイテムがたくさんあるほどスコアが高くなる
                 comfortableが一定値以上でstakingリワードを得られる
 
-    実績コントラクトの実装
+ ng 実績コントラクトの実装
         実績達成をtrue/falseで判定するfunction
             1つの実績につき1 function
         達成済み実績をtrue/falseで記憶するstorage
@@ -486,6 +499,7 @@ async function init_global_variants() {
     flag_loaded = 0;
     flag_item_update = 0;
     flag_summon_star = 0;
+    flag_onLight = true;
     
     //wss, use for call
     web3_wss = await wss();
@@ -1110,6 +1124,35 @@ async function contract_update_event_random() {
         _text += "              ";
     text_event_random = _text;
     }
+}
+
+
+//get_aget
+//0-1m = age1, 1-2m = age2, >12m = age12
+async function get_ageScore(_wallet){
+    let web3 = await connect();
+    //get nonce
+    let _nonceNow = await web3.eth.getTransactionCount(_wallet);
+    //get month age, min=1, max=12
+    let _lastBlock = await web3.eth.getBlockNumber();
+    let _age = 1;
+    let _count = 1;
+    while (_count < 12) {
+        let _block = _lastBlock - _count * 216000;  // =1m, 1block/12sec
+        let _nonce = await web3.eth.getTransactionCount(_wallet, _block);
+        if(_nonce == 0) {
+            break;
+        }
+        _count += 1;
+    }
+    _age = _count;  //min=1, max=12
+    //calc ageScore, min=0, max=1800
+    let _ageScore = _nonceNow;
+    let _ageScore_limit = _age * 150;   // 5tx/day, 150tx/m
+    if (_ageScore >= _ageScore_limit) {
+        _ageScore = _ageScore_limit;
+    }
+    return _ageScore;
 }
 
 
@@ -2427,6 +2470,7 @@ class Star extends Phaser.GameObjects.Sprite{
     //===update()
     update(){
         this.count += 1;
+        
         /*
         if (this.count % 2 == 0) {
             return;
@@ -2492,6 +2536,15 @@ class Star extends Phaser.GameObjects.Sprite{
                 sound_dice_impact.play();
             }
         }
+
+        //light control
+        if (flag_onLight == true) {
+            this.depth = 1;
+        } else {
+            this.depth = 9999+12;
+        }
+        //console.log(flag_onLight);
+
     }
 }
 
@@ -3241,6 +3294,8 @@ function preload() {
     this.load.image("item_gauge", "src/png/item_gauge.png", {frameWidth: 370, frameHeight: 306});
     this.load.image("item_frame", "src/png/item_frame.png", {frameWidth: 370, frameHeight: 428});
     this.load.image("item_wall_sticker", "src/png/item_wall_sticker.png");
+    this.load.image("item_floor_sticker", "src/png/item_floor_sticker.png");
+    this.load.image("item_window", "src/png/item_window.png");
     
     //===star
     this.load.image("star_blue", "src/png/star_blue.png", {frameWidth: 200, frameHeight: 191});
@@ -4876,7 +4931,11 @@ function update_checkItem(this_scene) {
         item_wall_sticker = this_scene.add.image(640, 480, "item_wall_sticker")
             .setDepth(1)
             .setAlpha(0.2);
-        
+
+        //***TODO*** floor sticker
+        item_floor_sticker = this_scene.add.image(640, 480, "item_floor_sticker")
+            .setDepth(1)
+            .setAlpha(0.3);
         
         //***TODO*** bbs
         item_bbs_text = this_scene.add.text(
@@ -4887,6 +4946,12 @@ function update_checkItem(this_scene) {
         )
             .setOrigin(0)
             .setDepth(9999);
+
+        //***TODO*** window
+        item_window = this_scene.add.image(100, 240, "item_window")
+            .setScale(0.4)
+            .setOrigin(0.5)
+            .setDepth(2);
 
     }
     //nameplate, after craft
@@ -5544,6 +5609,7 @@ function update_checkItem(this_scene) {
                 if (typeof group_item197 != "undefined") {
                     group_item197.children.entries[0].anims.play("item_nui_alive", true);
                 }
+                flag_onLight = false;
             } else {
                 item_switch.anims.play("item_switch_off", true);
                 back_black.visible = false;
@@ -5558,6 +5624,7 @@ function update_checkItem(this_scene) {
                 if (typeof group_item197 != "undefined") {
                     group_item197.children.entries[0].anims.play("item_nui", true);
                 }
+                flag_onLight = true;
             }
         });
         item_switch.depth = item_switch.y;

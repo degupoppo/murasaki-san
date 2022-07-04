@@ -87,29 +87,29 @@ let _array_name_sp = [
     //200
     "---",
     //201
-    "Garnet",
+    "Red Twinkle",
     //202
-    "Amethyst",
+    "Orange Sparkle",
     //203
-    "Aquamarine",
+    "Yellow Twinkle",
     //204
-    "Diamond",
+    "Green Sparkle",
     //205
-    "Emerald",
+    "Blue Twinkle",
     //206
-    "Pearl",
+    "Purple Sparkle",
     //207
-    "Ruby",
+    "Black Twinkle",
     //208
-    "Peridot",
+    "Pink Sparkle",
     //209
-    "Sapphire",
+    "White Twinkle",
     //210
-    "Opal",
+    "Gold Sparkle",
     //211
-    "Topaz",
+    "Shilver Twinkle",
     //212
-    "Turquoise",
+    "Skyblue Sparkle",
 ];
 
 let array_item_name = ["dummy"]; //dummy, 0
