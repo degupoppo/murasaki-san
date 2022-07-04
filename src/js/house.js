@@ -486,7 +486,7 @@ async function init_global_variants() {
     item_wearing_hat = 0;
     active_nui_id = 0;
     text_event_heart = "";
-    text_event_random = " ";
+    text_event_random = "[Murasaki news]                                                  ";
 
     //===flag
     flag_music = 0;
