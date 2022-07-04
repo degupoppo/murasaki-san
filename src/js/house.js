@@ -4930,12 +4930,12 @@ function update_checkItem(this_scene) {
         //***TODO*** wall sticker
         item_wall_sticker = this_scene.add.image(640, 480, "item_wall_sticker")
             .setDepth(1)
-            .setAlpha(0.2);
+            .setAlpha(0.25);
 
         //***TODO*** floor sticker
         item_floor_sticker = this_scene.add.image(640, 480, "item_floor_sticker")
-            .setDepth(1)
-            .setAlpha(0.3);
+            .setDepth(2)
+            .setAlpha(0.4);
         
         //***TODO*** bbs
         item_bbs_text = this_scene.add.text(
