@@ -42,7 +42,7 @@ let _array_name_base = [
     "Violin",
     "Piano",
     "Light Switch",
-    "Lanthanum",
+    "Lantern",
     "Token Basket",
     "Electric Board",
     "---",

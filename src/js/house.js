@@ -510,6 +510,8 @@ async function init_global_variants() {
     active_nui_id = 0;
     text_event_heart = "";
     text_event_random = "[Murasaki news]                                                  ";
+    turn_forFPS = 0;
+    time_forFPS = Date.now();
 
     //===flag
     flag_music = 0;
@@ -525,7 +527,7 @@ async function init_global_variants() {
     flag_onLight = true;
     
     //wss, use for call
-    web3_wss = await wss();
+    //web3_wss = await wss();
 }
 
 init_global_variants();
@@ -971,8 +973,8 @@ async function contract_update_event_heart() {
             fromBlock: _block_from,
             toBlock: _block_latest
     });
-    console.log(_block_from, _block_latest);
-    console.log(_events_ml);
+    //console.log(_block_from, _block_latest);
+    //console.log(_events_ml);
     if (_events_ml) {
         for (let event of _events_ml) {
             let _summoner_to = event.returnValues[0];
@@ -1016,17 +1018,19 @@ async function contract_update_event_heart() {
 
 //event random
 async function contract_update_event_random() {
-    //let web3 = await connect();
-    let web3 = await wss();
+    let web3 = await connect();
+    //let web3 = await wss();
     //let web3 = web3_wss;
     let wallet = await get_wallet(web3);
     let contract_mfsl = await new web3.eth.Contract(abi_murasaki_function_summon_and_levelup, contract_murasaki_function_summon_and_levelup);
     let contract_mffg = await new web3.eth.Contract(abi_murasaki_function_feeding_and_grooming, contract_murasaki_function_feeding_and_grooming);
     let contract_mfmf = await new web3.eth.Contract(abi_murasaki_function_mining_and_farming, contract_murasaki_function_mining_and_farming);
     let contract_mfc = await new web3.eth.Contract(abi_murasaki_function_crafting, contract_murasaki_function_crafting);
-    //let contract_mml = new web3.eth.Contract(abi_murasaki_mail, contract_murasaki_mail);
+    let contract_d = await new web3.eth.Contract(abi_world_dice, contract_world_dice);
+    let contract_mml = new web3.eth.Contract(abi_murasaki_mail, contract_murasaki_mail);
     let _block_latest = await web3.eth.getBlockNumber();
-    let _block_from = _block_latest - 300;  //60 min
+    //let _block_from = _block_latest - 300;  //60 min
+    let _block_from = _block_latest - 7200;  //24 h
     //let _block_from = _block_latest - 50000;
     /*
     //summon
@@ -1065,6 +1069,16 @@ async function contract_update_event_random() {
             fromBlock: _block_from,
             toBlock: _block_latest
     })
+    //Dice_roll
+    let _events_dice = await contract_d.getPastEvents("Dice_Roll", {
+            fromBlock: _block_from,
+            toBlock: _block_latest
+    })
+    //Mail
+    let _events_mail = await contract_mml.getPastEvents("allEvents", {
+            fromBlock: _block_from,
+            toBlock: _block_latest
+    })
     /*
     //Upgrade
     let _events_upgrade = await contract_mfc.getPastEvents("Upgrade", {
@@ -1081,13 +1095,25 @@ async function contract_update_event_random() {
         _events_mining,
         _events_farming,
         _events_crafting,
+        _events_dice,
+        _events_mail,
         //_events_upgrade,
     )
     console.log(_array);
     let _text = "";
     if (_array.length > 0) {
         let _event = _array[Math.floor(Math.random() * _array.length)];
-        let _block = _event.blockNumber
+        let _blockNumber = _event.blockNumber;
+        let _block = await web3.eth.getBlock(_blockNumber);
+        let _timestamp = _block.timestamp;
+        let _now = Date.now() /1000;
+        let _delta_min = Math.round( (_now - _timestamp) / 60 );
+        let _text_time = "";
+        if (_delta_min == 0) {
+            _text_time = "just now: ";
+        } else {
+            _text_time = _delta_min + " min ago: ";
+        }
         let _name = _event.event;
         let _summoner = _event.returnValues["_summoner"];
         let _summoner_name = await call_name_from_summoner(_summoner);
@@ -1097,54 +1123,74 @@ async function contract_update_event_random() {
         let _value = _event.returnValues[1];
         _text += "[Murasaki news] ";
         if (_name == "Level_up") {
-            _text += _block;
-            _text += ": ";
+            _text += _text_time;
             _text += _summoner_name;
             _text += " leveled up to ";
             _text += _value;
             _text += "!";
         } else if (_name == "Feeding") {
-            _text += _block;
-            _text += ": ";
+            _text += _text_time;
             _text += _summoner_name;
             _text += " was feeded and gained ";
             _text += _value;
             _text += " exp!";
         } else if (_name == "Grooming") {
-            _text += _block;
-            _text += ": ";
+            _text += _text_time;
             _text += _summoner_name;
             _text += " was groomed and gained ";
             _text += _value;
             _text += " exp!";
         } else if (_name == "Mining") {
-            _text += _block;
-            _text += ": ";
+            _text += _text_time;
             _text += _summoner_name;
             _text += " completed mining and earned ";
             _text += _value;
             _text += " ohana!";
         } else if (_name == "Farming") {
-            _text += _block;
-            _text += ": ";
+            _text += _text_time;
             _text += _summoner_name;
             _text += " completed farming and earned ";
             _text += _value;
             _text += " kusa!";
         } else if (_name == "Crafting") {
             let _item_name = array_item_name[_value];
-            _text += _block;
-            _text += ": ";
+            _text += _text_time;
             _text += _summoner_name;
             _text += " crafted ";
             _text += _item_name;
+            _text += "!";
+        } else if (_name == "Dice_Roll") {
+            _text += _text_time;
+            _text += _summoner_name;
+            _text += " rolled dice and got ";
+            _text += _value;
+            _text += "!";
+        } else if (_name == "Send_Mail") {
+            _summoner_to_name = await call_name_from_summoner(_value);
+            if (_summoner_to_name == "") {
+                _summoner_to_name = "#" + _value;
+            }
+            _text += _text_time;
+            _text += _summoner_name;
+            _text += " send mail to ";
+            _text += _summoner_to_name;
+            _text += "!";
+        } else if (_name == "Open_Mail") {
+            _summoner_from_name = await call_name_from_summoner(_value);
+            if (_summoner_from_name == "") {
+                _summoner_from_name = "#" + _value;
+            }
+            _text += _text_time;
+            _text += _summoner_name;
+            _text += " opened mail from ";
+            _text += _summoner_from_name;
             _text += "!";
         /*
         } else if (_name == "Upgrade") {
             ;
         */
         }
-        _text += "              ";
+        _text += "                    ";
     text_event_random = _text;
     }
 }
@@ -2034,6 +2080,9 @@ class Pet extends Phaser.GameObjects.Sprite{
             }else if (this.x > 1100 && (this.moving_degree < 90 || this.moving_degree > 270)) {
                 this.moving_degree -= 180;
             }
+            //360 over check
+            this.moving_degree = this.moving_degree % 360;
+            //out of area check, y
             if (this.y > 860 && this.moving_degree > 180) {
                 this.moving_degree = 360 - this.moving_degree;
             }else if (this.y < 500 && this.moving_degree < 180) {
@@ -2566,7 +2615,6 @@ class Star extends Phaser.GameObjects.Sprite{
         } else {
             this.depth = 9999+12;
         }
-        //console.log(flag_onLight);
 
     }
 }
@@ -3113,7 +3161,7 @@ let config = {
         createContainer: true
     },
     fps: {
-        target: 60,
+        target: 50,
         forceSetTimeOut: true
     },
 };
@@ -3320,6 +3368,7 @@ function preload() {
     this.load.image("item_floor_sticker1", "src/png/item_floor_sticker1.png");
     this.load.image("item_floor_sticker2", "src/png/item_floor_sticker2.png");
     this.load.image("item_window", "src/png/item_window.png");
+    this.load.image("item_lantern", "src/png/item_lantern.png");
     
     //===star
     this.load.image("star_blue", "src/png/star_blue.png", {frameWidth: 200, frameHeight: 191});
@@ -3984,7 +4033,10 @@ function create() {
     let font_arg = {font: "18px Arial", fill: "#000"};
 
     //debug info
-    //text_turn = this.add.text(230, 940, "***", {font: "14px Arial", fill: "#727171"});
+    //text_turn = this.add.text(250, 920, "***", {font: "14px Arial", fill: "#727171"});
+    text_turn = this.add.text(5, 955, "***", {font: "14px Arial", fill: "#303030"})
+        .setOrigin(0,1)
+        .setDepth(2);
     //text_sync_time = this.add.text(330, 940, "***", {font: "14px Arial", fill: "#727171"});
     text_sync_time = this.add.text(1275, 955, "***", {font: "14px Arial", fill: "#727171"})
         .setOrigin(1)
@@ -4111,19 +4163,9 @@ function create() {
     group_mint_name.add(icon_name_kusa);
     group_mint_name.add(text_name_kusa);
     group_mint_name.setVisible(false);
-    
-    //===star
-    //group_star.runChildUpdate = true;
-    
-    //===pet
-    /*
-    group_pet = this.add.group();
-    group_pet.runChildUpdate = true;
-    */
-    
+        
     //===group
     group_star = this.add.group();
-    //group_pet = this.add.group();
     group_update = this.add.group();
     group_update.runChildUpdate = true;
 
@@ -4980,6 +5022,12 @@ function update_checkItem(this_scene) {
             .setOrigin(0.5)
             .setDepth(2);
 
+        //***TODO*** lantern
+        item_lantern = this_scene.add.image(1200, 800, "item_lantern")
+            .setScale(0.4)
+            .setOrigin(0.5)
+            .setDepth(2);
+
     }
     //nameplate, after craft
     if (local_items_flag[_item_id] == true) {
@@ -5636,6 +5684,9 @@ function update_checkItem(this_scene) {
                 if (typeof group_item197 != "undefined") {
                     group_item197.children.entries[0].anims.play("item_nui_alive", true);
                 }
+                if (typeof item_lantern != "undefined") {
+                    item_lantern.setDepth(9999+10);
+                }
                 flag_onLight = false;
             } else {
                 item_switch.anims.play("item_switch_off", true);
@@ -5650,6 +5701,9 @@ function update_checkItem(this_scene) {
                 */
                 if (typeof group_item197 != "undefined") {
                     group_item197.children.entries[0].anims.play("item_nui", true);
+                }
+                if (typeof item_lantern != "undefined") {
+                    item_lantern.setDepth(2);
                 }
                 flag_onLight = true;
             }
@@ -5887,15 +5941,29 @@ function update_checkItem(this_scene) {
     previous_local_score = local_score;
 }
 
+function calc_fps() {
+    let _now = Date.now();
+    if (_now >= time_forFPS + 1000) {
+        time_forFPS = _now;
+        let _fps = turn - turn_forFPS;
+        turn_forFPS = turn; 
+        //text_turn.setText("FPS: " + _fps);
+        text_turn.setText(_fps + " fps");
+    }
+}
+
 
 //===update()
-function update(time, delta) {
+function update() {
 
     //increment turn
     turn += 1;
     //text_turn.setText("turn: " + ("0000000" + turn).slice(-7) );
-    //House of Murasaki-san #1, 0x....0, 592 Astar Network, Polkadot, Web3.0
-    //Living in 0x0000000000000000000000, 592 Astar Network, Polkadot, Web3.0
+    
+    //calc FPS
+    calc_fps();
+    
+    //return(0);
 
     //debug
     /*
