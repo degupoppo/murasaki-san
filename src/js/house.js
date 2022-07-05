@@ -15,12 +15,15 @@
             luckを効果的に上げる主な手段とする
         upgradeのUIの実装
             marketのupgradeでは味気ないか
+            うまくsummonerの行動として組み込みたいところだが。
+            ネックは、burnするアイテムの選択をどうするか。
         取得方法の再考
             craft時に受動的に
             mail時に能動的に
             もう1つぐらいなにか
                 他のsummonerとのインタラクションが必須にしたい
                 例えば、ダイスで20出たらとかではなくて。
+            しかし、あまりにも機会を増やすと部屋がNFTだらけになる。
         宝石箱の実装
             集めたNFTを入れておく入れ物
         作品内での立ち位置と、獲得時の演出を深慮する
@@ -509,7 +512,9 @@ async function init_global_variants() {
     item_wearing_hat = 0;
     active_nui_id = 0;
     text_event_heart = "";
-    text_event_random = "[Murasaki news]                                                  ";
+    //text_event_random = "[Murasaki news]                                                                                                    ";
+    text_event_random = "[Murasaki news]";
+    text_event_random = text_event_random.padStart(116, " ");
     turn_forFPS = 0;
     time_forFPS = Date.now();
 
@@ -1190,7 +1195,8 @@ async function contract_update_event_random() {
             ;
         */
         }
-        _text += "                    ";
+        //_text = _text.padStart(110, " ");
+        _text += "          ";
     text_event_random = _text;
     }
 }
@@ -3369,6 +3375,7 @@ function preload() {
     this.load.image("item_floor_sticker2", "src/png/item_floor_sticker2.png");
     this.load.image("item_window", "src/png/item_window.png");
     this.load.image("item_lantern", "src/png/item_lantern.png");
+    //this.load.image("item_newsbunner", "src/png/item_newsbunner.png");
     
     //===star
     this.load.image("star_blue", "src/png/star_blue.png", {frameWidth: 200, frameHeight: 191});
@@ -5012,9 +5019,10 @@ function update_checkItem(this_scene) {
             940, 
             "", 
             {font: "14px Arial", fill: "#ffffff", backgroundColor: "#000000"}
-        )
-            .setOrigin(0)
-            .setDepth(9999);
+            //{font: "14px Arial", fill: "#ffffff"}
+        ).setOrigin(0).setDepth(9999);
+        //item_newsbunner = this_scene.add.image(640, 485, "item_newsbunner")
+        //    .setDepth(900).setAlpha(0.8);
 
         //***TODO*** window
         item_window = this_scene.add.image(100, 240, "item_window")
@@ -5962,8 +5970,6 @@ function update() {
     
     //calc FPS
     calc_fps();
-    
-    //return(0);
 
     //debug
     /*
