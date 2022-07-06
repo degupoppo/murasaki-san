@@ -758,6 +758,8 @@ contract Murasaki_Market_Item is Initializable, ERC721Holder {
         payable(lister).transfer(get);
         set.remove(_item);
         mySet[lister].remove(_item);
+        //fee transfer
+        payable(mfs.feeTreasury_address()).transfer(address(this).balance);
         emit Buy(_item, lister, msg.sender, price, fee);
     }
 

@@ -7,8 +7,61 @@
 
 1st
 
+    バイバックコントラの実装
+        基本原則
+            ・treasury内のastr量に応じて価格調整する
+            ・ただし、最低買取価格は下がらない
+                必ず上昇してゆく
+                1年後をmaxとする
+            ・すべてのアイテムが一度に売られたとしても買い取れる値段設定
+        実装
+            まず、各アイテムの種類ごとの総mint数を得る
+            アイテムの種類ごとの割当トークン量を決める
+            割当トークン量を総mint数で割る
+
+    トレジャリーシステムの深慮
+        これまで
+            特定の成長型NFTを用意し、そのスコアによってairdrop
+            しかしこれではNFT成長へのインセンティブが強すぎて制御しづらい
+        次案
+            トレジャリーの資金でマーケット上のアイテムを最低価格で購入する
+            予め決めた論理的最低価格を下回っているアイテムをトレールして自動で買う
+            買ったアイテムは実質バーンされる
+            あるいは、売るときに「運営に売る」ボタンを別に作る
+            買い手は、summoner Lv3以上など、何かしらの制限をかける
+            また、アビトラ対策として、black listメカニズムを実装する
+                最低価格以下で売ったアイテムを即座に買い、運営に売りつけるアビトラが成り立つ
+                これらのwalletは発見次第black listへ入れる
+                walletのsummonerがLv3以上なので、multi walletは容易ではない。
+            black listは、マーケットコントラにもあっても良いかもしれない。
+                アビトラしたwalletはマーケットからも締め出す
+            アイテムごとの係数（利率）はあとから決められるように実装する。
+            トレジャリー内の総数に係数をかけ合わせた値が最低価格とするか。
+            アイテムを買ってトレジャリー内の総数が減れば、最低価格も下がってゆく。
+            どこかでinとoutが拮抗し、最低価格が定常状態になるはず。
+            dapps stakingをトレジャリーに当てる。
+                staking量が増えれば最低価格も上がる。
+            mint料金をトレジャリーに入れてしまうと、
+                最低価格が初期からどんどん下がってゆくので、心象的に良くない。
+                やはり「価格」は、その作品の「人気度」の可視化とみなされがち。
+                緩やかに上ってゆくのが理想
+                → 価格上昇数式を考えられたら、mint, donation, feeすべてトレジャリーに格納する
+                    流石に50%とするか。50%は運営の取り分。
+            トレジャリー全額を均等に割るのではなく、
+                トレジャリーの量が必ずin>outとなるように、一部のみを購入に充てる。
+                1年ほどかけて徐々に最低価格が上がってゆく設計にする。
+                つまり、今後全くinがなくなったとしても、
+                    常に今から1年後がmax値になるよう数式を組む。
+                inが増えればその分、1年後のmax値も増えるため、現在の価格も上がる。
+            トレジャリーに売ったアイテムは実質バーンなので、トレジャリーから買うことはできない。
+            mint fee, trading fee, donation, cure feeなどをtreajuryコントラへ転送する機構を実装する
+                理想はfeeを得ると同時に転送し、価値をいろいろなところに分散させない。
+                かつ、トレジャリーコントラは超気をつけて設計する。
+            feeを一元管理するfee contractと、分配専用のtreajuryコントラクトを実装する。
+            
+
     収集NFTの再考
-        ハートを得るタイミングで手に入る多種類NFT
+        今ハートを得るタイミングで代わりに手に入る多種類NFT
             所持することでluckが上昇する
             同じ種類を集めてupgradeすると上位NFT化できる
             上位NFTは3個→5個分の効果、など
@@ -665,80 +718,7 @@ async function send_fp_get(_wallet, _summoner) {
 //---web3-----------------------------------------------------------------------------------------------------
 
 
-//===call
-
-//update summoner of wallet
-async function contract_update_summoner_of_wallet() {
-    if (summoner <= 0) {
-        let web3 = await connect();
-        let wallet = await get_wallet(web3);
-        let contract_mm = new web3.eth.Contract(abi_murasaki_main, contract_murasaki_main);
-        summoner = await contract_mm.methods.tokenOf(wallet).call();  //have not summoned yet: 0
-    }
-}
-
-//update name
-async function contract_update_name(_summoner) {
-    if (local_isActive == false) {
-        return 0;
-    }
-    let web3 = await connect();
-    let wallet = await get_wallet(web3);
-    let contract_mfn = new web3.eth.Contract(abi_murasaki_function_name, contract_murasaki_function_name);
-    local_name_str = await contract_mfn.methods.call_name_from_summoner(_summoner).call();
-}
-
-//update dice
-async function contract_update_dice(_summoner) {
-    let web3 = await connect();
-    let wallet = await get_wallet(web3);
-    let contract_wd = await new web3.eth.Contract(abi_world_dice, contract_world_dice);
-    local_rolled_dice = await contract_wd.methods.get_rolled_dice(_summoner).call();
-    local_last_rolled_dice = await contract_wd.methods.get_last_rolled_dice(_summoner).call();
-    local_last_dice_roll_time = await contract_wd.methods.last_dice_roll_time(_summoner).call();
-}
-
-//update static_parameters
-async function contract_update_statics(_summoner) {
-    let web3 = await connect();
-    let wallet = await get_wallet(web3);
-    let contract_ms = await new web3.eth.Contract(abi_murasaki_strage, contract_murasaki_strage);
-    local_isActive = await contract_ms.methods.isActive(_summoner).call();
-    if (local_isActive == false) {
-        return 0;
-    }
-    SPEED = await contract_ms.methods.SPEED().call();   //220311: speed was modified as 100%=x1
-    SPEED = Number(SPEED) / 100;
-    let contract_mfs = await new web3.eth.Contract(abi_murasaki_function_share, contract_murasaki_function_share);
-    let _static_status = await contract_mfs.methods.get_static_status_array(_summoner).call();
-    local_class = Number(_static_status[0]);
-    local_birth_time = Number(_static_status[1]);
-    let contract_mm = await new web3.eth.Contract(abi_murasaki_main, contract_murasaki_main);
-    let _owner = await contract_mm.methods.ownerOf(_summoner).call();
-    local_owner = _owner;
-    let contract_mffg = await new web3.eth.Contract(abi_murasaki_function_feeding_and_grooming, contract_murasaki_function_feeding_and_grooming);
-    local_notPetrified = await contract_mfs.methods.not_petrified(_summoner).call();
-}
-
-//update mining/farming/crafting
-async function contract_update_working(_summoner) {
-    let web3 = await connect();
-    let wallet = await get_wallet(web3);
-    let contract_mfc = await new web3.eth.Contract(abi_murasaki_function_crafting, contract_murasaki_function_crafting);
-    let contract_mfmf = await new web3.eth.Contract(abi_murasaki_function_mining_and_farming, contract_murasaki_function_mining_and_farming);
-    if (local_mining_status == 1){
-        local_coin_calc = await contract_mfmf.methods.calc_mining(_summoner).call();
-        local_coin_calc = Number(local_coin_calc);
-    }else if (local_farming_status == 1) {
-        local_material_calc = await contract_mfmf.methods.calc_farming(_summoner).call();
-        local_material_calc = Number(local_material_calc);
-    }else if (local_crafting_status == 1) {
-        local_crafting_calc = await contract_mfc.methods.calc_crafting(_summoner).call();
-        local_crafting_calc = Number(local_crafting_calc);
-    }
-}
-
-//===update dynamic_parameters
+//===update status
 async function contract_update_status(_summoner) {
 
     let web3 = await connect();
@@ -794,7 +774,7 @@ async function contract_update_status(_summoner) {
         }
     }
     
-    if(flag_item_update == 1) {
+    if　(flag_item_update == 1) {
         local_items = await contract_mfs.methods.get_balance_of_type_array(local_owner).call();
         flag_item_update = 0;
     }
@@ -843,104 +823,10 @@ async function contract_update_all() {
     await contract_update_event_heart();
 }
 
-//check mail
-async function contract_check_mail(_summoner) {
-    let web3 = await connect();
-    let wallet = await get_wallet(web3);
-    let contract_mml = await new web3.eth.Contract(abi_murasaki_mail, contract_murasaki_mail);
-    flag_mail = await contract_mml.methods.check_receiving_mail(_summoner).call();
-    if (flag_mail) {
-        _mail = await contract_mml.methods.receiving(_summoner).call();
-        local_receiving_mail = await contract_mml.methods.mails(_mail).call();
-        let _summoner_from = local_receiving_mail[2];
-        let contract_mn = await new web3.eth.Contract(abi_murasaki_function_name, contract_murasaki_function_name);
-        local_receiving_mail_from = await contract_mn.methods.call_name_from_summoner(_summoner_from).call();
-    }
-    //console.log(flag_mail);
-}
 
-//calc mail sending interval
-async function contract_calc_sending_interval(_summoner) {
-    let web3 = await connect();
-    let wallet = await get_wallet(web3);
-    let contract_mml = await new web3.eth.Contract(abi_murasaki_mail, contract_murasaki_mail);
-    local_mail_sending_interval = await contract_mml.methods.calc_sending_interval(_summoner).call();
-}
+//===update event
 
-//get item_nui, summoner and score
-async function contract_get_item_nui(_item) {
-    let web3 = await connect();
-    let wallet = await get_wallet(web3);
-    let contract_msn = await new web3.eth.Contract(abi_murasaki_strage_nui, contract_murasaki_strage_nui);
-    /*
-    let _nui = await contract_msn.methods.nuis(_item).call();
-    return _nui;
-    */
-    let _summoner_of_nui = await contract_msn.methods.summoner(_item).call();
-    let _class = await contract_msn.methods.class(_item).call();
-    let _score = await contract_msn.methods.score(_item).call();
-    let contract_mfs = await new web3.eth.Contract(abi_murasaki_function_share, contract_murasaki_function_share);
-    let _exp_rate = await contract_mfs.methods.calc_exp_addition_rate(summoner, _item).call();
-    return [_summoner_of_nui, _class, _score, _exp_rate];
-}
-
-//get heart required
-async function contract_get_heart_required(_item_type) {
-    let web3 = await connect();
-    let wallet = await get_wallet(web3);
-    let contract = await new web3.eth.Contract(abi_murasaki_function_crafting, contract_murasaki_function_crafting);
-    let _heart_required = await contract.methods.get_heart_required(_item_type).call();
-    return _heart_required;
-}
-
-//call name from summoner id
-async function call_name_from_summoner(_summoner) {
-    let web3 = await connect();
-    let contract = await new web3.eth.Contract(abi_murasaki_function_name, contract_murasaki_function_name);
-    let _name = await contract.methods.call_name_from_summoner(_summoner).call();
-    return _name;
-}
-
-//call amount of token
-//https://qiita.com/ramo798/items/0cc2c556410c95b0b332
-async function call_amount_of_token(_contract_address) {
-    let web3 = await connect();
-    //let wallet = await get_wallet(web3);
-    let wallet = local_owner;
-    let minABI = [
-        {
-          constant: true,
-          inputs: [{ name: "_owner", type: "address" }],
-          name: "balanceOf",
-          outputs: [{ name: "balance", type: "uint256" }],
-          type: "function",
-        },
-        {
-          constant: true,
-          inputs: [],
-          name: "decimals",
-          outputs: [{ name: "", type: "uint8" }],
-          type: "function",
-        },
-    ];
-    let contract = await new web3.eth.Contract(minABI, _contract_address);
-    let balance = await contract.methods.balanceOf(wallet).call();
-    let decimal = await contract.methods.decimals().call();
-    return balance / (10 ** decimal);
-}
-
-//check tx
-async function check_tx(_tx) {
-    let web3 = await connect();
-    let _res = await web3.eth.getTransactionReceipt(_tx);
-    if (_res != null) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
-//event_heart
+//update event_heart
 async function contract_update_event_heart() {
     let web3 = await connect();
     let wallet = await get_wallet(web3);
@@ -1021,7 +907,7 @@ async function contract_update_event_heart() {
     text_event_heart.setText(_text);
 }
 
-//event random
+//update event random
 async function contract_update_event_random() {
     let web3 = await connect();
     //let web3 = await wss();
@@ -1201,8 +1087,107 @@ async function contract_update_event_random() {
     }
 }
 
+//===call
 
-//get_aget
+//check mail
+async function contract_check_mail(_summoner) {
+    let web3 = await connect();
+    let wallet = await get_wallet(web3);
+    let contract_mml = await new web3.eth.Contract(abi_murasaki_mail, contract_murasaki_mail);
+    flag_mail = await contract_mml.methods.check_receiving_mail(_summoner).call();
+    if (flag_mail) {
+        _mail = await contract_mml.methods.receiving(_summoner).call();
+        local_receiving_mail = await contract_mml.methods.mails(_mail).call();
+        let _summoner_from = local_receiving_mail[2];
+        let contract_mn = await new web3.eth.Contract(abi_murasaki_function_name, contract_murasaki_function_name);
+        local_receiving_mail_from = await contract_mn.methods.call_name_from_summoner(_summoner_from).call();
+    }
+    //console.log(flag_mail);
+}
+
+//calc mail sending interval
+async function contract_calc_sending_interval(_summoner) {
+    let web3 = await connect();
+    let wallet = await get_wallet(web3);
+    let contract_mml = await new web3.eth.Contract(abi_murasaki_mail, contract_murasaki_mail);
+    local_mail_sending_interval = await contract_mml.methods.calc_sending_interval(_summoner).call();
+}
+
+//get item_nui, summoner and score
+async function contract_get_item_nui(_item) {
+    let web3 = await connect();
+    let wallet = await get_wallet(web3);
+    let contract_msn = await new web3.eth.Contract(abi_murasaki_strage_nui, contract_murasaki_strage_nui);
+    /*
+    let _nui = await contract_msn.methods.nuis(_item).call();
+    return _nui;
+    */
+    let _summoner_of_nui = await contract_msn.methods.summoner(_item).call();
+    let _class = await contract_msn.methods.class(_item).call();
+    let _score = await contract_msn.methods.score(_item).call();
+    let contract_mfs = await new web3.eth.Contract(abi_murasaki_function_share, contract_murasaki_function_share);
+    let _exp_rate = await contract_mfs.methods.calc_exp_addition_rate(summoner, _item).call();
+    return [_summoner_of_nui, _class, _score, _exp_rate];
+}
+
+//get heart required
+async function contract_get_heart_required(_item_type) {
+    let web3 = await connect();
+    let wallet = await get_wallet(web3);
+    let contract = await new web3.eth.Contract(abi_murasaki_function_crafting, contract_murasaki_function_crafting);
+    let _heart_required = await contract.methods.get_heart_required(_item_type).call();
+    return _heart_required;
+}
+
+//call name from summoner id
+async function call_name_from_summoner(_summoner) {
+    let web3 = await connect();
+    let contract = await new web3.eth.Contract(abi_murasaki_function_name, contract_murasaki_function_name);
+    let _name = await contract.methods.call_name_from_summoner(_summoner).call();
+    return _name;
+}
+
+//call amount of token
+//https://qiita.com/ramo798/items/0cc2c556410c95b0b332
+async function call_amount_of_token(_contract_address) {
+    let web3 = await connect();
+    //let wallet = await get_wallet(web3);
+    let wallet = local_owner;
+    let minABI = [
+        {
+          constant: true,
+          inputs: [{ name: "_owner", type: "address" }],
+          name: "balanceOf",
+          outputs: [{ name: "balance", type: "uint256" }],
+          type: "function",
+        },
+        {
+          constant: true,
+          inputs: [],
+          name: "decimals",
+          outputs: [{ name: "", type: "uint8" }],
+          type: "function",
+        },
+    ];
+    let contract = await new web3.eth.Contract(minABI, _contract_address);
+    let balance = await contract.methods.balanceOf(wallet).call();
+    let decimal = await contract.methods.decimals().call();
+    return balance / (10 ** decimal);
+}
+
+//check tx
+async function check_tx(_tx) {
+    let web3 = await connect();
+    let _res = await web3.eth.getTransactionReceipt(_tx);
+    if (_res != null) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+
+//get and calc wallet age
 //0-1m = age1, 1-2m = age2, >12m = age12
 async function get_ageScore(_wallet){
     let web3 = await connect();
@@ -1228,6 +1213,92 @@ async function get_ageScore(_wallet){
         _ageScore = _ageScore_limit;
     }
     return _ageScore;
+}
+
+
+//update summoner of wallet
+async function contract_update_summoner_of_wallet() {
+    if (summoner <= 0) {
+        let web3 = await connect();
+        let wallet = await get_wallet(web3);
+        let contract_mm = new web3.eth.Contract(abi_murasaki_main, contract_murasaki_main);
+        summoner = await contract_mm.methods.tokenOf(wallet).call();  //have not summoned yet: 0
+    }
+}
+
+//update name
+async function contract_update_name(_summoner) {
+    if (local_isActive == false) {
+        return 0;
+    }
+    let web3 = await connect();
+    let wallet = await get_wallet(web3);
+    let contract_mfn = new web3.eth.Contract(abi_murasaki_function_name, contract_murasaki_function_name);
+    local_name_str = await contract_mfn.methods.call_name_from_summoner(_summoner).call();
+}
+
+//update dice
+async function contract_update_dice(_summoner) {
+    let web3 = await connect();
+    let wallet = await get_wallet(web3);
+    let contract_wd = await new web3.eth.Contract(abi_world_dice, contract_world_dice);
+    local_rolled_dice = await contract_wd.methods.get_rolled_dice(_summoner).call();
+    local_last_rolled_dice = await contract_wd.methods.get_last_rolled_dice(_summoner).call();
+    local_last_dice_roll_time = await contract_wd.methods.last_dice_roll_time(_summoner).call();
+}
+
+//update static_parameters
+async function contract_update_statics(_summoner) {
+    let web3 = await connect();
+    let wallet = await get_wallet(web3);
+    let contract_ms = await new web3.eth.Contract(abi_murasaki_strage, contract_murasaki_strage);
+    local_isActive = await contract_ms.methods.isActive(_summoner).call();
+    if (local_isActive == false) {
+        return 0;
+    }
+    SPEED = await contract_ms.methods.SPEED().call();   //220311: speed was modified as 100%=x1
+    SPEED = Number(SPEED) / 100;
+    let contract_mfs = await new web3.eth.Contract(abi_murasaki_function_share, contract_murasaki_function_share);
+    let _static_status = await contract_mfs.methods.get_static_status_array(_summoner).call();
+    local_class = Number(_static_status[0]);
+    local_birth_time = Number(_static_status[1]);
+    let contract_mm = await new web3.eth.Contract(abi_murasaki_main, contract_murasaki_main);
+    let _owner = await contract_mm.methods.ownerOf(_summoner).call();
+    local_owner = _owner;
+    let contract_mffg = await new web3.eth.Contract(abi_murasaki_function_feeding_and_grooming, contract_murasaki_function_feeding_and_grooming);
+    local_notPetrified = await contract_mfs.methods.not_petrified(_summoner).call();
+}
+
+//update mining/farming/crafting
+async function contract_update_working(_summoner) {
+    let web3 = await connect();
+    let wallet = await get_wallet(web3);
+    let contract_mfc = await new web3.eth.Contract(abi_murasaki_function_crafting, contract_murasaki_function_crafting);
+    let contract_mfmf = await new web3.eth.Contract(abi_murasaki_function_mining_and_farming, contract_murasaki_function_mining_and_farming);
+    if (local_mining_status == 1){
+        local_coin_calc = await contract_mfmf.methods.calc_mining(_summoner).call();
+        local_coin_calc = Number(local_coin_calc);
+    }else if (local_farming_status == 1) {
+        local_material_calc = await contract_mfmf.methods.calc_farming(_summoner).call();
+        local_material_calc = Number(local_material_calc);
+    }else if (local_crafting_status == 1) {
+        local_crafting_calc = await contract_mfc.methods.calc_crafting(_summoner).call();
+        local_crafting_calc = Number(local_crafting_calc);
+    }
+}
+
+//calc item
+async function contract_get_item_count(_summoner) {
+    let web3 = await connect();
+    let contract_mm = await new web3.eth.Contract(abi_murasaki_main, contract_murasaki_main);
+    let contract_mfmf = await new web3.eth.Contract(abi_murasaki_function_mining_and_farming, contract_murasaki_function_mining_and_farming);
+    let contract_mfc = await new web3.eth.Contract(abi_murasaki_function_crafting, contract_murasaki_function_crafting);
+    let _owner = await contract_mm.methods.ownerOf(_summoner).call();
+    let _mining_item_count = await contract_mfmf.methods.count_mining_items(_owner).call();
+    let _farming_item_count = await contract_mfmf.methods.count_farming_items(_owner).call();
+    let _crafting_item_count = await contract_mfc.methods.count_crafting_items(_owner).call();
+    let _luck_item_count = 0;
+    return [Number(_mining_item_count)/100, Number(_farming_item_count)/100, Number(_crafting_item_count)/100, _luck_item_count];
 }
 
 
@@ -1326,6 +1397,7 @@ async function contract_crafting(_summoner) {
         contract.methods.stop_crafting(_summoner).send({from:wallet});
     }
 }
+/*
 async function _contract_crafting_with_heart(_summoner, _item_type_to_craft, _heart_required) {
     let web3 = await connect();
     let contract = await new web3.eth.Contract(abi_murasaki_function_crafting, contract_murasaki_function_crafting);
@@ -1349,6 +1421,7 @@ async function _contract_crafting_with_heart(_summoner, _item_type_to_craft, _he
         }
     }
 }
+*/
 
 //send mail
 async function contract_send_mail(_summoner) {
@@ -1395,20 +1468,6 @@ async function contract_get_modified_dc(_summoner, _item_type) {
     let contract = await new web3.eth.Contract(abi_murasaki_function_crafting, contract_murasaki_function_crafting);
     let _modified_dc = await contract.methods.get_modified_dc(_summoner, _item_type).call();
     return _modified_dc;
-}
-
-//calc item
-async function contract_get_item_count(_summoner) {
-    let web3 = await connect();
-    let contract_mm = await new web3.eth.Contract(abi_murasaki_main, contract_murasaki_main);
-    let contract_mfmf = await new web3.eth.Contract(abi_murasaki_function_mining_and_farming, contract_murasaki_function_mining_and_farming);
-    let contract_mfc = await new web3.eth.Contract(abi_murasaki_function_crafting, contract_murasaki_function_crafting);
-    let _owner = await contract_mm.methods.ownerOf(_summoner).call();
-    let _mining_item_count = await contract_mfmf.methods.count_mining_items(_owner).call();
-    let _farming_item_count = await contract_mfmf.methods.count_farming_items(_owner).call();
-    let _crafting_item_count = await contract_mfc.methods.count_crafting_items(_owner).call();
-    let _luck_item_count = 0;
-    return [Number(_mining_item_count)/100, Number(_farming_item_count)/100, Number(_crafting_item_count)/100, _luck_item_count];
 }
 
 //mint name
@@ -3375,6 +3434,7 @@ function preload() {
     this.load.image("item_floor_sticker2", "src/png/item_floor_sticker2.png");
     this.load.image("item_window", "src/png/item_window.png");
     this.load.image("item_lantern", "src/png/item_lantern.png");
+    this.load.image("item_pancake", "src/png/item_pancake.png");
     //this.load.image("item_newsbunner", "src/png/item_newsbunner.png");
     
     //===star
@@ -4690,13 +4750,14 @@ function update_checkModeChange(this_scene) {
         item_potato = this_scene.add.sprite(600, 840+10, "item_sweet_potato").setScale(0.12).setOrigin(0.5);
         item_potato.depth = 9999;
         group_food.add(item_potato);
-        /*
-        if (local_items[5] > 0) {
-            item_pudding = this.add.sprite(570, 840+20, "item_pudding").setScale(0.30).setOrigin(0.5);
-            item_pudding.depth = 9999;
-            group_food.add(item_pudding);
+        
+        //***TODO*** pancake
+        //if (local_items[5] > 0) {
+        if (local_items[1] > 0) {
+            item_pancake = this_scene.add.sprite(565, 840+20, "item_pancake").setScale(0.12).setOrigin(0.5);
+            item_pancake.depth = 9999;
+            group_food.add(item_pancake);
         }
-        */
         /*
         if (local_items[22] > 0) {
             item_chocolate_bread = this_scene.add.sprite(650, 840+20, "item_chocolate_bread").setScale(0.4).setOrigin(0.5);
