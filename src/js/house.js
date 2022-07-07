@@ -4766,7 +4766,7 @@ function update_checkModeChange(this_scene) {
             item_sushi = this_scene.add.sprite(600+50, 840+10, "item_sushi")
                 .setScale(0.25)
                 .setOrigin(0.5)
-                .setDepth = 9999;
+                .setDepth(9999);
             group_food.add(item_sushi);
         }
 
