@@ -51,24 +51,38 @@ async function approve(_router, _token) {
     let web3 = await connect();
     let wallet = await get_wallet(web3);
     let token = new web3.eth.Contract(abi_erc20, _token);
-    let _value = Web3.utils.toWei('10000000000000', 'ether');
+    let _value = Web3.utils.toWei('1000000000000000000000000000', 'ether');
     token.methods.approve(_router, _value).send({from:wallet});
 }
 
 let _router = "";
 let _toke = "";
 
+/*
 _router = "0x680Bd747845f219bbA8424406743419Ea61383aE";
-_token = "0xDe2578Edec4669BA7F41c5d5D2386300bcEA4678";
+_token = "0xAeaaf0e2c81Af264101B9129C00F4440cCF0F720";
 approve(_router, _token);
 
 _router = "0x680Bd747845f219bbA8424406743419Ea61383aE";
-_token = "0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF";
+_token = "0x6a2d262D56735DbA19Dd70682B39F6bE9a931D98";
+approve(_router, _token);
+*/
+
+
+_router = "0x680Bd747845f219bbA8424406743419Ea61383aE";
+_token = "0x3795C36e7D12A8c252A20C5a7B455f7c57b60283";
 approve(_router, _token);
 
+_router = "0x680Bd747845f219bbA8424406743419Ea61383aE";
+_token = "0x6De33698e9e9b787e09d3Bd7771ef63557E148bb";
+approve(_router, _token);
+
+
+/*
 _router = "0x680Bd747845f219bbA8424406743419Ea61383aE";
 _token = "0x1fE622E91e54D6AD00B01917351Ea6081426764A";
 approve(_router, _token);
+*/
 
 
 
