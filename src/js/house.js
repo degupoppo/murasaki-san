@@ -3435,6 +3435,7 @@ function preload() {
     this.load.image("item_window", "src/png/item_window.png");
     this.load.image("item_lantern", "src/png/item_lantern.png");
     this.load.image("item_pancake", "src/png/item_pancake.png");
+    this.load.image("item_sushi", "src/png/item_sushi.png");
     //this.load.image("item_newsbunner", "src/png/item_newsbunner.png");
     
     //===star
@@ -4754,17 +4755,21 @@ function update_checkModeChange(this_scene) {
         //***TODO*** pancake
         //if (local_items[5] > 0) {
         if (local_items[1] > 0) {
-            item_pancake = this_scene.add.sprite(565, 840+20, "item_pancake").setScale(0.12).setOrigin(0.5);
+            item_pancake = this_scene.add.sprite(600-35, 840+10, "item_pancake").setScale(0.12).setOrigin(0.5);
             item_pancake.depth = 9999;
             group_food.add(item_pancake);
         }
-        /*
-        if (local_items[22] > 0) {
-            item_chocolate_bread = this_scene.add.sprite(650, 840+20, "item_chocolate_bread").setScale(0.4).setOrigin(0.5);
-            item_chocolate_bread.depth = 9999;
-            group_food.add(item_chocolate_bread);
+
+        //***TODO*** sushi
+        //if (local_items[5] > 0) {
+        if (local_items[1] > 0) {
+            item_sushi = this_scene.add.sprite(600+50, 840+10, "item_sushi")
+                .setScale(0.25)
+                .setOrigin(0.5)
+                .setDepth = 9999;
+            group_food.add(item_sushi);
         }
-        */
+
         sound_feeding.play();
 
     //grooming check, continue
@@ -5096,7 +5101,6 @@ function update_checkItem(this_scene) {
             .setScale(0.4)
             .setOrigin(0.5)
             .setDepth(2);
-
     }
     //nameplate, after craft
     if (local_items_flag[_item_id] == true) {
