@@ -51,7 +51,7 @@ async function approve(_router, _token) {
     let web3 = await connect();
     let wallet = await get_wallet(web3);
     let token = new web3.eth.Contract(abi_erc20, _token);
-    let _value = Web3.utils.toWei('1000000000000000000000000000', 'ether');
+    let _value = Web3.utils.toWei('115792089237316195423570985008687907853269984665640564039457584007913129639935', 'ether');
     token.methods.approve(_router, _value).send({from:wallet});
 }
 
