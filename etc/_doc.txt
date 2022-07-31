@@ -1,4 +1,9 @@
 
+
+    certbot --apache certonly
+    apiを選択
+    apache2をrestart
+
     ぬいぐるみシステムの考案
         後入りユーザーのキャッチアップと、
             先入りユーザーへのご褒美のシステム
