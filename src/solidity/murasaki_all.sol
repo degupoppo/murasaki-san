@@ -8,51 +8,6 @@ pragma solidity ^0.8.7;
 
 /*
 
- ok mining/farmingの上限時間の設定
-        happy <= 0で掘れなくなるのが理想だが、実装できるだろうか。
-            last_grooming_timeでいけそう。
-        妥協点として、3d以上放置しても報酬は増えない。
-
- ng クラフトの中断機能の実装？
-        中断時は資源が返ってくるか、レジュームできるのか、どちらが良いか
-        レジュームは、上書きか、個別か。
-        レジュームの残り時間は表現が難しい。
-        再開時のコストはどうするか。
-
-    実績コントラクトの実装
-        実績達成をtrue/falseで判定するfunction
-            1つの実績につき1 function
-        達成済み実績をtrue/falseで記憶するstorage
-            achievement uint32[256]のようなarray
-        新たに達成した実績の数をuint32でreturnするfunction
-            もしくはarrayでreturnする
-            達成時は項目を表示させたいため
-        実績判定のタイミングをどうするか
-            mining/farmin時などにいちいち行っていたらgas代かさむか
-            level-up時にまとめて行うか
-        実績案
-            coin/material
-                gain 1,000
-                gain 10,000
-                gain 100,000...
-            craft
-                craft 10
-                craft 30
-                craft 100...
-            heart
-                received 10
-                received 30
-                received 100...
-            level-up
-                level 3
-                level 10
-                level 30...
-        実績判定のコストが嵩むので、例えば100個以上とかは不可能だろう
-            まず、2年間で何個starを獲得させるか
-                Lvだけならば20個程度
-                +a実績で20個程度とするか
-            これならば、判定のたびにfor 20してもそこまで嵩まないだろうか
-
     宝石NFTの実装
         宝石箱NFTはまだ時間がかかるとしても、
             ERC721の宝石NFTは先に組み込んでおいてもいいだろうか。
@@ -81,48 +36,6 @@ pragma solidity ^0.8.7;
         _item_idテーブルが確定してから
         nameplateにrequire
         murasaki_mailにクッションをrequire
-
- ok 乱数コードの見直し
-        d1000などを先に叩いて小さい数字のタイミングでfeeding()を叩くなどが可能か
-        summonerのseed
-
- ok Luck補正コードのリファクタリング
-        heart, dice, stakingと複雑になりすぎた
-        mfs内にcalc_mod_luck()を実装し一元化する
-        あるいは, luck判定関数を作ってtrue/falseで返してもよいか
-
- ok dapps stakingリワードの実装
-        Astarbaseのドキュメント：
-            https://docs.astar.network/build/smart-contracts/ethereum-virtual-machine/astarbase
-        solidityコード：
-            if ASTARBASE.checkStakerStatusOnContract(address evmAddress, address stakingContract) > 0;
-            https://github.com/AstarNetwork/astarbase/blob/main/contract/example/BestProject.sol
-        上記solidityで特定コントラクトへのステーキング量を取得可能
-        これを取得してインセンティブを与える
-            luck補正か、heartの定期的エアドロか
-        shibuya上のastarbase, dapps stakingを利用してステーキング量取得を試す
-        
- ok Proxyの実装
-        他のプロジェクトがwalletからsummonerのステータスを参照しやすくするため
-        walletを引数に渡し、各ステータスを返すフレームワーク
-            age, class, seed
-            スコア, レベル
-            coin, material, heart
-            itemの所持総数
-            特定のitemの所持数
-            str, dex, int, luck
-            補正後のstr, dex, int, luck
-            total_exp, coin, material, heart
-        proxyではなく、何かしらの専用コントラでもよいか
-
- ok スコア補正の深慮
-        単純にスコア差ならば、高Lv低スコアの個体がExp+となってしまう
-        つまり、何もせずにLvだけ上げていた個体が恩恵を受けやすい
-        mining/farmingしてLv上げていない個体のぬいぐるみを買うとExp補正がかかってしまう
-        total_exp_gainedが同一になるのを上限とするか？
-        → exp_gainが最も寄与率が大きいので、とりあえず現行のままでやってみる
-
- ok nui存在時のexp補正の実装
 
 */
 
@@ -4405,7 +4318,66 @@ contract Murasaki_Info is Ownable {
 }
 
 
+//---Treasury------------------------------------------------------------------------------------------------------
+
+
+//===*feeTreasury======================================================================================================
+
+
+contract feeTreasury is Ownable {
+
+    //address
+    address public murasaki_function_share_address;
+    function _set1_murasaki_function_share_address(address _address) external onlyOwner {
+        murasaki_function_share_address = _address;
+    }
+
+    uint32 public treasury_rate = 50 * 100;    //0.01%, 5000=50%
+
+    //admin, set rate
+    function set_rate(uint32 _value) external onlyOwner {
+        treasury_rate = _value;
+    }
+
+    //admin. withdraw
+    function withdraw(address rec)public onlyOwner{
+        payable(rec).transfer(address(this).balance);
+    }
+    
+    //transfer for buybackTreasury
+    function transfer_for_buybackTreasury(address rec) external onlyOwner{
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        uint _amount_for_buybackTreasury = address(this).balance * treasury_rate / 10000;
+        payable(mfs.buybackTreasury_address()).transfer(_amount_for_buybackTreasury);
+        //payable(rec).transfer(address(this).balance);   // transfer the rest to dev wallet
+        withdraw(rec);
+    }
+}
+
+
+//===*buybackTreasury======================================================================================================
+
+
+contract buybackTreasury is Ownable {
+
+    //address
+    address public murasaki_function_share_address;
+    function _set1_murasaki_function_share_address(address _address) external onlyOwner {
+        murasaki_function_share_address = _address;
+    }
+
+    //admin. withdraw
+    function withdraw(address rec)public onlyOwner{
+        payable(rec).transfer(address(this).balance);
+    }
+}
+
+
+//---old------------------------------------------------------------------------------------------------------------------
+
+
 /*
+
 //---[NG] Murasaki_Achievement-----------------------------------------------------------------------------------------------------
 
 
@@ -4655,69 +4627,94 @@ contract Murasaki_Function_Achievement is Ownable {
         return false;
     }
 }
-*/
 
 
-//---Treasury------------------------------------------------------------------------------------------------------
+ ng 実績コントラクトの実装
+        実績達成をtrue/falseで判定するfunction
+            1つの実績につき1 function
+        達成済み実績をtrue/falseで記憶するstorage
+            achievement uint32[256]のようなarray
+        新たに達成した実績の数をuint32でreturnするfunction
+            もしくはarrayでreturnする
+            達成時は項目を表示させたいため
+        実績判定のタイミングをどうするか
+            mining/farmin時などにいちいち行っていたらgas代かさむか
+            level-up時にまとめて行うか
+        実績案
+            coin/material
+                gain 1,000
+                gain 10,000
+                gain 100,000...
+            craft
+                craft 10
+                craft 30
+                craft 100...
+            heart
+                received 10
+                received 30
+                received 100...
+            level-up
+                level 3
+                level 10
+                level 30...
+        実績判定のコストが嵩むので、例えば100個以上とかは不可能だろう
+            まず、2年間で何個starを獲得させるか
+                Lvだけならば20個程度
+                +a実績で20個程度とするか
+            これならば、判定のたびにfor 20してもそこまで嵩まないだろうか
 
+ ok mining/farmingの上限時間の設定
+        happy <= 0で掘れなくなるのが理想だが、実装できるだろうか。
+            last_grooming_timeでいけそう。
+        妥協点として、3d以上放置しても報酬は増えない。
 
-//===*feeTreasury======================================================================================================
+ ok 乱数コードの見直し
+        d1000などを先に叩いて小さい数字のタイミングでfeeding()を叩くなどが可能か
+        summonerのseed
 
+ ok Luck補正コードのリファクタリング
+        heart, dice, stakingと複雑になりすぎた
+        mfs内にcalc_mod_luck()を実装し一元化する
+        あるいは, luck判定関数を作ってtrue/falseで返してもよいか
 
-contract feeTreasury is Ownable {
+ ok dapps stakingリワードの実装
+        Astarbaseのドキュメント：
+            https://docs.astar.network/build/smart-contracts/ethereum-virtual-machine/astarbase
+        solidityコード：
+            if ASTARBASE.checkStakerStatusOnContract(address evmAddress, address stakingContract) > 0;
+            https://github.com/AstarNetwork/astarbase/blob/main/contract/example/BestProject.sol
+        上記solidityで特定コントラクトへのステーキング量を取得可能
+        これを取得してインセンティブを与える
+            luck補正か、heartの定期的エアドロか
+        shibuya上のastarbase, dapps stakingを利用してステーキング量取得を試す
+        
+ ok Proxyの実装
+        他のプロジェクトがwalletからsummonerのステータスを参照しやすくするため
+        walletを引数に渡し、各ステータスを返すフレームワーク
+            age, class, seed
+            スコア, レベル
+            coin, material, heart
+            itemの所持総数
+            特定のitemの所持数
+            str, dex, int, luck
+            補正後のstr, dex, int, luck
+            total_exp, coin, material, heart
+        proxyではなく、何かしらの専用コントラでもよいか
 
-    //address
-    address public murasaki_function_share_address;
-    function _set1_murasaki_function_share_address(address _address) external onlyOwner {
-        murasaki_function_share_address = _address;
-    }
+ ok スコア補正の深慮
+        単純にスコア差ならば、高Lv低スコアの個体がExp+となってしまう
+        つまり、何もせずにLvだけ上げていた個体が恩恵を受けやすい
+        mining/farmingしてLv上げていない個体のぬいぐるみを買うとExp補正がかかってしまう
+        total_exp_gainedが同一になるのを上限とするか？
+        → exp_gainが最も寄与率が大きいので、とりあえず現行のままでやってみる
 
-    uint32 public treasury_rate = 50 * 100;    //0.01%, 5000=50%
+ ok nui存在時のexp補正の実装
 
-    //admin, set rate
-    function set_rate(uint32 _value) external onlyOwner {
-        treasury_rate = _value;
-    }
-
-    //admin. withdraw
-    function withdraw(address rec)public onlyOwner{
-        payable(rec).transfer(address(this).balance);
-    }
-    
-    //transfer for buybackTreasury
-    function transfer_for_buybackTreasury(address rec) external onlyOwner{
-        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
-        uint _amount_for_buybackTreasury = address(this).balance * treasury_rate / 10000;
-        payable(mfs.buybackTreasury_address()).transfer(_amount_for_buybackTreasury);
-        //payable(rec).transfer(address(this).balance);   // transfer the rest to dev wallet
-        withdraw(rec);
-    }
-}
-
-
-//===*buybackTreasury======================================================================================================
-
-
-contract buybackTreasury is Ownable {
-
-    //address
-    address public murasaki_function_share_address;
-    function _set1_murasaki_function_share_address(address _address) external onlyOwner {
-        murasaki_function_share_address = _address;
-    }
-
-    //admin. withdraw
-    function withdraw(address rec)public onlyOwner{
-        payable(rec).transfer(address(this).balance);
-    }
-}
-
-
-//---old------------------------------------------------------------------------------------------------------------------
-
-
-/*
-
+ ng クラフトの中断機能の実装？
+        中断時は資源が返ってくるか、レジュームできるのか、どちらが良いか
+        レジュームは、上書きか、個別か。
+        レジュームの残り時間は表現が難しい。
+        再開時のコストはどうするか。
 
 contract Murasaki_Admin is Ownable {
 
