@@ -1513,6 +1513,7 @@ contract Murasaki_Craft is ERC721, Ownable{
         }
     }
     
+    /*
     //transfer from old contract
     function mint_old_item(address _old_contract, uint32 _loop_count) external onlyOwner {
         Murasaki_Craft  mc = Murasaki_Craft(_old_contract);
@@ -1535,6 +1536,7 @@ contract Murasaki_Craft is ERC721, Ownable{
             next_item++;
         }
     }
+    */
 
     //URI
     //Inspired by OraclizeAPI's implementation - MIT license
