@@ -5,6 +5,12 @@
 
 /*
 
+    トレジャリーコントラクトの整備と実装
+        バイバックコントラクト
+            amount / summoner number = mint fee とする
+            mint時は自動的に
+        運営金庫
+
     収集NFTの再考
         コンセプト
             他のsummonerとの関わりでのみ手に入る
@@ -117,7 +123,7 @@
             30dでmax開放となる
             ただ、これだとマーケットでの売り買い時に難しいか
             
-    walletのagetとnonceによって成長する何かの実装
+    walletのageとnonceによって成長する何かの実装
         age(最初のtxからの時間）とnonceからwalletの使い込み度を算出する
             nonce/age * 5を最大値として、基本的にはnonce値に比例する
             ただし、age若いのにnonceだけ多いbot walletはnonce上限に引っかかる
