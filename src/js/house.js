@@ -5,6 +5,65 @@
 
 /*
 
+    lootライクなランダムテキストの実装
+        summoner mint時にランダムでオリジナルのパラメータを設定する
+        パラメータによって何かしらの差をつけたいが・・・
+            ゲーム性には直接関係ない、愛着とストーリー性を持つものにする
+            早さや大きさなど、行動に影響したり変化したりしそうなものは避ける
+        項目案
+            出身地：火星、お花畑、滝壺、アンドロメダ星雲、とか意味不明な場所にする
+            好きな色：最初に設定する
+            正確：おっとり、
+            寿命：
+        出身地(Birthplace)：
+            fluffy
+            woolly
+            feathery
+                x
+            sweater
+            blanket
+            carpet
+            cushion
+            scarf
+            
+        main component:
+            kindness
+            braveness
+            love
+            pleasure
+            cuteness
+            cleverness
+        fluffy degree:
+        skin resilience:
+            inredible
+            marvelous
+            excellent
+            amazing
+            great
+            fabulous
+            wonderful
+            gorgeous
+            awesome
+            fantastic
+            lovely
+            brilliant
+            impressive
+            superb
+        character:
+            friendly
+            reliable
+            optimistic
+            frisky
+            thoughtful
+            honest
+            easygoing
+            tolerant
+            mild
+            affectionate
+            intelligent
+            patient            
+        
+
     収集NFTの再考
         コンセプト
             むらさきさんが集めている宝物
@@ -175,17 +234,6 @@
         実装
             market contractへのtransferはノーコストとする
             permitted addressで分岐させるか、別transfer関数を作るか
-
-    lootライクなランダムテキストの実装
-        summoner mint時にランダムでオリジナルのパラメータを設定する
-        パラメータによって何かしらの差をつけたいが・・・
-            ゲーム性には直接関係ない、愛着とストーリー性を持つものにする
-            早さや大きさなど、行動に影響したり変化したりしそうなものは避ける
-        項目案
-            出身地：火星、お花畑、滝壺、アンドロメダ星雲、とか意味不明な場所にする
-            好きな色：最初に設定する
-            正確：おっとり、
-            寿命：
 
     読み込みUIの改善
         すべて読み込みきってから描写する
