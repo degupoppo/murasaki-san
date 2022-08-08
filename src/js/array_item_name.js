@@ -11,11 +11,11 @@ let _array_name_base = [
     "Knit Hat",
     "Photo Frame",
     "Wall Sticker",
+    "Jewelry Box",
     "---",
     "---",
     "---",
-    "---",
-    "---",
+    "Door of Travel",
     //17-32
     "Music Box",
     "Straw Hat",
@@ -32,7 +32,7 @@ let _array_name_base = [
     "---",
     "---",
     "---",
-    "---",
+    "Key to Travel",
     //33-48
     "Tablet",
     "Score Board",
@@ -49,7 +49,7 @@ let _array_name_base = [
     "---",
     "---",
     "---",
-    "(Test Item)",
+    "Travel Bag",
     //49-64
     "---",
     "---",

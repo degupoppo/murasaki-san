@@ -5,19 +5,80 @@
 
 /*
 
+    効果音
+        https://soundeffect-lab.info/sound/button/
+        https://otologic.jp/free/se/motion-pop01.html
+        https://dova-s.jp/
+
+    etc
+        猫のアニメーション
+            sleepingとsitting
+        鳩時計のアニメーション
+            クリックで一定時間
+            サウンド
+        ピアノのサウンド
+            クリック時
+            曲？音だけ？
+        バッチ処理による軽量化
+            チェーン情報の一括取得、頻度向上
+        アクティブユーザーのカウント
+            全ユーザーを
+
     トレジャリーコントラクトの整備と実装
-        バイバックコントラクト
+        バイバック金庫
             amount / summoner number = mint fee とする
-            mint時は自動的に
+                あるいは、amount / active summoner number = mint fee
+                petrified summonerの数は除く
+            mint時は自動的にバイバックトレジャリーに50%, 運営金庫に50%入る
+            以降は、あらかじめ予定したインフレ率に従い、一週間か一ヶ月ごとに手動で追加する
         運営金庫
+            mint feeの50%が即座に入る
+            donationの100%が即座に入る
+            trading fee, dapps stakingのうち、バイバック金庫に入り切らなかったものが入る
+            運営報酬として個人walletへ支払う
+            残ったものはdapps stakingへ還元する
+        バッファー金庫
+            dapps staking, trading fee, その他feeはすべてここに一時的に格納される
+            週毎か月毎に、決められたインフレ率になるようにバイバック金庫へ移す
+            残りは運営金庫へ移して、その都度0にする。
+        弱点
+            mint過剰
+                mintだけしてtradingもdapps stakingもしないライトユーザーが大量につくと、
+                バイバック費用が全く釣り上がらずに物価が上がらない
+                どこかで非アクティブユーザーをふるい落とす機構が必要か
+                もうプレイしないユーザー（石化ユーザー）の分のバイバック料金は、
+                インフレ率計算時にアクティブユーザーで分けるようにするか。
+            インフレ資金不足
+                みなが盛んにゲームプレイしてもインフレには寄与しない
+                また、ユーザー数が短期間に増大するとむしろインフレしにくくなる。
+                mint feeの50%をdapps stakingしたリワードがインフレ率の基本なので、
+                何も追加がなければ年3.9%しかインフレしない。
+                dapps stakingに入れてるほどのファンユーザーの「比率」を
+                どれだけ増やせるかがインフレ率に寄与する。
+                1年インフレ率42%で、月率3%
+                これを実現するためには、dapps stakingに1120/summoner必要
+                10,000 stakingしてくれる人が10%いれば実現可能なライン
+            後半の経済破綻
+                アイテムはだいたい1週間に1個程度作製できる
+                序盤のアイテムはいくら売ってもバイバック金庫が枯渇しないが、
+                後半のアイテムは売り続けられると金庫が枯渇する。
+                育ちきったsummonerが一斉に集金に走ると、おそらく経済が終わるだろう
+                この辺、計算しておくか、デフレルールを設けるか、対策が必要
+                Lv10アイテムnormalを売り続けると103日で枯渇する（3.4ヶ月）
+                つまり、1年後に作っては売りの集金に走ったとしても、
+                バイバック金庫をシュリンクさせるには3-4ヶ月かかる
+                2年後にLv16のアイテムを売るとすると、およそ1.5ヶ月
 
     収集NFTの再考
         コンセプト
+            むらさきさんが集めている宝物
+                流れ星、金平糖、宝石の原石
             他のsummonerとの関わりでのみ手に入る
             マメなゲームプレイに応じて手に入る
-            すべての行動効率に＋されるluckを増やす主な手段
-            トレードするとより有利になる
-            upgradeして効果を高められる
+            luckを増やす主な手段
+                luckが増えるとすべての行動効率が増加する
+            トレードするとより有利になる機構
+            同型を集めてupgradeすることで効果を高められる
             集めるとお部屋がにぎやかになる
         今ハートを得るタイミングで代わりに手に入る多種類NFT
             所持することでluckが上昇する
@@ -44,6 +105,33 @@
             クラフトの消費アイテムとしては要求されない
             1キャラに集中させてluckをブーストできるので、レベルキャップをもうける？
         実装
+            見かけ：未定
+                流れ星、金平糖、宝石、きれいな石、あるいはそのいずれかに見える謎の個体
+            種類：ひとまず１２
+                トレードしないとランダム取得で効率悪いように
+                4だと少ない、12だと多すぎ？10か8か。あるいは12でも良いか。
+            レアリティ：3段階
+                itemと同じくnormal, uncommon, rare
+                下位3個をburnして上位1個をmintする
+                n*3 -> u = n*4, u*3 -> r = u*4 = n*16 (n*9 -> n*16)
+            取得理論値：
+                luckデザイン
+                    初期値3 + ダイス平均1 + staking3 + Lv分4 = 11 (1年後)
+                    1年後にNFTによって+4 = 15ぐらいを目安に設計する
+                0.01ならばn:400個, u:100個, r:25
+                0.05ならばn:80個, u:20個, r:5, この辺だろうか
+                    n*80/y = 6/mo = 3/2w
+                0.04ならばn:100個, u:25個, r:6.25
+                    n*100/y = 8/mo = 2/w
+                    クラフトは1/w, メールも1/wとすると, 合わせて2/w程度
+                    もう一つ取得メカニズムを入れたい場合は、初期値3を下げるか、単価を下げるか。
+            レベルキャップ：
+                市場買い占め→luckブーストを防ぐメカニズム
+                でないと、luck +100なども可能になってしまう
+                キャップはLvとするか、Ageとするか
+                    → やはりゲームプレイに応じて上がるLvが適切か
+                単純に、Lv20でmax+4として、0.2/Lvとするか
+                    これなら、相当課金しないとLvキャップを意識しなくて良いだろう
 
     バイバックシテムの深慮
         意味論
@@ -3130,6 +3218,10 @@ function preload() {
     this.load.audio("fireworks2", "src/sound/fireworks2.mp3");
     this.load.audio("basket", "src/sound/basket.mp3");
     this.load.audio("cat1", "src/sound/cat1.mp3");
+    this.load.audio("clock", "src/sound/clock.mp3");
+    this.load.audio("window", "src/sound/window.mp3");
+    this.load.audio("piano1", "src/sound/piano1.mp3");
+    this.load.audio("piano2", "src/sound/piano2.mp3");
 
     //===item_basic
     this.load.image("item_table", "src/png/item_basic_table.png", {frameWidth: 370, frameHeight: 320});
@@ -3188,6 +3280,7 @@ function preload() {
     this.load.image("item_piano_opened", "src/png/item_piano_opened.png");
     this.load.image("item_clock", "src/png/item_clock.png");
     this.load.image("item_clock_opened", "src/png/item_clock_opened.png");
+    this.load.spritesheet("item_clock_anim", "src/png/item_clock_anim.png", {frameWidth: 370, frameHeight: 320});
     this.load.image("item_window_day", "src/png/item_window_day.png");
     this.load.image("item_window_day_closed", "src/png/item_window_day_closed.png");
     this.load.image("item_window_night", "src/png/item_window_night.png");
@@ -3538,6 +3631,12 @@ function create() {
         frameRate: 1,
         repeat: -1
     });
+    this.anims.create({
+        key: "item_clock_anim",
+        frames: this.anims.generateFrameNumbers("item_clock_anim", {start:1, end:0}),
+        frameRate: 1,
+        repeat: 1
+    });
     
     //===item_basic
     item_bear = this.add.sprite(1000,400, "item_bear")
@@ -3819,6 +3918,10 @@ function create() {
     sound_fireworks2 = this.sound.add("fireworks2", {volume:0.2});
     sound_basket = this.sound.add("basket", {volume:0.2});
     sound_cat1 = this.sound.add("cat1", {volume:0.2});
+    sound_clock = this.sound.add("clock", {volume:0.2});
+    sound_window = this.sound.add("window", {volume:0.2});
+    sound_piano1 = this.sound.add("piano1", {volume:0.3});
+    sound_piano2 = this.sound.add("piano2", {volume:0.25});
 
     //===system message
     //system message
@@ -4852,6 +4955,7 @@ function update_checkItem(this_scene) {
             .setDepth(2)
             .setInteractive({useHandCursor: true})
             .on('pointerdown', () => {
+                sound_window.play();
                 if(item_window.texture == game.textures.get("item_window_day")){
                     item_window.setTexture("item_window_day_closed");
                 } else if (item_window.texture == game.textures.get("item_window_day_closed")) {
@@ -4871,6 +4975,11 @@ function update_checkItem(this_scene) {
             .setInteractive({useHandCursor: true})
             .on('pointerdown', () => {
                 if(item_piano.texture == game.textures.get("item_piano")){
+                    if(flag_onLight) {
+                        sound_piano1.play();
+                    } else {
+                        sound_piano2.play();
+                    }
                     item_piano.setTexture("item_piano_opened");
                 } else {
                     item_piano.setTexture("item_piano");
@@ -4878,17 +4987,22 @@ function update_checkItem(this_scene) {
             });
 
         //***TODO*** clock
-        item_clock = this_scene.add.image(990, 180, "item_clock")
+        //item_clock = this_scene.add.image(990, 180, "item_clock")
+        item_clock = this_scene.add.sprite(990, 180, "item_clock")
             .setScale(0.45)
             .setOrigin(0.5)
             .setDepth(2)
             .setInteractive({useHandCursor: true})
             .on('pointerdown', () => {
+                sound_clock.play();
+                item_clock.anims.play("item_clock_anim");
+                /*
                 if(item_clock.texture == game.textures.get("item_clock")){
                     item_clock.setTexture("item_clock_opened");
                 } else {
                     item_clock.setTexture("item_clock");
                 }
+                */
             });
 
         //***TODO*** lantern
