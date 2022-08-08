@@ -28,7 +28,7 @@ let _array_name_base = [
     "Flowerpot",
     "Photo Stand",
     "Floor Sticker",
-    "---",
+    "Dancing Cactus",
     "---",
     "---",
     "---",

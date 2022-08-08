@@ -3297,7 +3297,7 @@ function preload() {
     this.load.image("star_yellow", "src/png/star_yellow.png", {frameWidth: 200, frameHeight: 191});
         
     //===cat
-    this.load.image("item_mail", "src/png/item_mail.png", {frameWidth: 757, frameHeight: 757});
+    this.load.image("item_mail", "src/png/item_mail.png");
     this.load.image("cat_sitting", "src/png/cat_sitting.png", {frameWidth: 772, frameHeight: 769});
     this.load.image("cat_sleeping", "src/png/cat_sleeping.png", {frameWidth: 759, frameHeight: 759});
     
@@ -4918,8 +4918,8 @@ function update_checkItem(this_scene) {
         cat.depth = item_cushion.y + 1;
         
         //mail
-        mail = this_scene.add.sprite(40, 645, "item_mail")
-            .setScale(0.06)
+        mail = this_scene.add.sprite(75, 675, "item_mail")
+            .setScale(0.9)
             .setOrigin(0.5)
             .setDepth(item_cushion.y + 2)
             .setVisible(false);
