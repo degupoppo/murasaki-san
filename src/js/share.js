@@ -24,6 +24,9 @@ console.log(
 
 //connect to metamask
 async function connect() {
+    if (typeof window.ethereum !== 'undefined') {
+      console.log('MetaMask is installed!');
+    }
     const web3 = await new Web3(window.ethereum);
     //window.ethereum.enable();
     window.ethereum.request({

@@ -619,7 +619,7 @@ async function contract_update_status(_summoner) {
     }
 
     //low frequency updates
-    if (count_sync % 5 == 0) {
+    if (count_sync % 3 == 1) {
 
         //call item
         local_items = await contract_mfs.methods.get_balance_of_type_array(local_owner).call();
@@ -845,7 +845,8 @@ async function contract_update_event_random() {
             _text_time = _delta_min + " min ago: ";
         }
         let _name = _event.event;
-        let _summoner = _event.returnValues["_summoner"];
+        //let _summoner = _event.returnValues["_summoner"];
+        let _summoner = _event.returnValues[0];
         let _summoner_name = await call_name_from_summoner(_summoner);
         if (_summoner_name == "") {
             _summoner_name = "#" + _summoner;
@@ -1959,7 +1960,7 @@ class Pet extends Phaser.GameObjects.Sprite{
     	            this.target_y = murasakisan.target_y + 45;
     	        } else if (this.type == "crafting") {
     	            this.target_x = murasakisan.target_x + 45;
-    	            this.target_y = murasakisan.target_y + 30;
+    	            this.target_y = murasakisan.target_y + 20;
     	        }
 	            this.count = 0;
 	            this.submode = 0;
@@ -3692,11 +3693,13 @@ function create() {
     item_table = this.add.sprite(600,870, "item_table")
         .setOrigin(0.5)
         .setScale(0.6)
-        .setDepth(870-50);
-    item_misin = this.add.sprite(1000,830, "item_misin")
+        //.setDepth(870-50);
+        .setDepth(2);
+    item_misin = this.add.sprite(950,830, "item_misin")
         .setOrigin(0.5)
         .setScale(0.8)
-        .setDepth(830-100);
+        //.setDepth(830-100);
+        .setDepth(2);
     item_tree0 = this.add.sprite(100,400, "item_tree0")
         .setOrigin(0.5)
         .setScale(0.7)
@@ -3762,7 +3765,7 @@ function create() {
         .disableInteractive();
 
     //crafting
-    _x = 800;
+    _x = 820;
     _y = 870;
     button_crafting = this.add.sprite(_x, _y, "button_crafting_unable")
         .setScale(0.16)
@@ -3772,6 +3775,7 @@ function create() {
         .on('pointerover', () => sound_button_select.play())
         .on('pointerover', () => button_crafting.setTexture("button_crafting_pointerover"))
         .on('pointerout', () => button_crafting.setTexture("button_crafting_enable"))
+        .setDepth(3)
         .disableInteractive();
 
     //--crafting_selected_info
@@ -4724,7 +4728,7 @@ function update_checkModeChange(this_scene) {
         murasakisan.set_mode = "crafting";
         murasakisan.submode = 0;
         murasakisan.count = 0;
-        murasakisan.target_x = 1000;
+        murasakisan.target_x = 950;
         murasakisan.target_y = 740;
         text_select_item.setText('"'+array_item_name[local_crafting_item_type]+'"')
         sound_crafting.play();
@@ -4911,7 +4915,7 @@ function update_checkItem(this_scene) {
             return _url;
         }
         let _x2 = 890;
-        let _y2 = 250;
+        let _y2 = 300;
         let _url = _get_nft_url();
         this_scene.load.image("pic_nft", _url);
         this_scene.load.start()
@@ -5060,8 +5064,8 @@ function update_checkItem(this_scene) {
             .setDepth(2);
 
         //***TODO*** rugg
-        item_rugg = this_scene.add.image(600, 680, "item_rugg")
-            .setScale(0.8)
+        item_rugg = this_scene.add.image(600, 660, "item_rugg")
+            .setScale(1.2)
             .setOrigin(0.5)
             .setDepth(2);
     }
