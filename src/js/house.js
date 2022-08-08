@@ -1135,7 +1135,8 @@ async function contract_send_mail(_summoner) {
     let myListLength = await contract_mc.methods.myListLength(wallet).call();
     let myListsAt = await contract_mc.methods.myListsAt(wallet, 0, myListLength).call();
     let _item_mail = 0;
-    for (let i = 0; i < myListLength; i++) {
+    //for (let i = 0; i < myListLength; i++) {
+    for (let i = myListLength-1; i > 0; i--) {
         let _item = myListsAt[i];
         _items = await contract_mc.methods.items(_item).call();
         let _item_type = _items[0];
@@ -2645,7 +2646,7 @@ function open_window_craft (scene) {
     item5_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  5, "item_sushi").setScale(0.1);
     item6_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  6, "item_crown").setScale(0.15);
     item7_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  7, "item_ribbon").setScale(0.12);
-    item8_icon = scene.add.sprite(_x-25, _y+12 + _y_add *  8, "item_window").setScale(0.12);
+    item8_icon = scene.add.sprite(_x-25, _y+12 + _y_add *  8, "item_window_day").setScale(0.15);
     item9_icon = scene.add.sprite(_x-25, _y+12 + _y_add *  9, "item_hat_knit").setScale(0.14);
     group_window_crafting.add(item1_icon);
     group_window_crafting.add(item2_icon);
@@ -2680,7 +2681,7 @@ function open_window_craft (scene) {
     item21_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  5, "uni").setScale(0.1);
     item22_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  6, "item_fortune_statue").setScale(0.15);
     item23_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  7, "item_asnya").setScale(0.1);
-    item24_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  8, "rug-pull").setScale(0.15);
+    item24_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  8, "item_rugg").setScale(0.18);
     item25_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  9, "item_vase").setScale(0.08);
     group_window_crafting.add(item17_icon);
     group_window_crafting.add(item18_icon);
@@ -2714,9 +2715,12 @@ function open_window_craft (scene) {
     item36_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  4, "dr_bitco_right").setScale(0.08);
     item37_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  5, "item_pancake").setScale(0.14);
     item38_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  6, "item_violin").setScale(0.08);
-    item39_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  7, "item_piano").setScale(0.08);
+    item39_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  7, "item_piano").setScale(0.18);
     item40_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  8, "item_switch").setScale(0.1);
     item41_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  9, "item_lanthanum").setScale(0.08);
+    //item42_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  9, "item_lanthanum").setScale(0.08);
+    //item43_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  9, "item_lanthanum").setScale(0.08);
+    item44_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  12, "item_clock").setScale(0.18);
     group_window_crafting.add(item33_icon);
     group_window_crafting.add(item34_icon);
     group_window_crafting.add(item35_icon);
@@ -2726,6 +2730,9 @@ function open_window_craft (scene) {
     group_window_crafting.add(item39_icon);
     group_window_crafting.add(item40_icon);
     group_window_crafting.add(item41_icon);
+    //group_window_crafting.add(item41_icon);
+    //group_window_crafting.add(item41_icon);
+    group_window_crafting.add(item44_icon);
 
     //special items
     let _rarity;
@@ -2951,6 +2958,7 @@ function preload() {
     let progressText = this.add.text(490,520,"", {font: "20px monospace", fill: "#3D3D3D"}); 
     let progressText_loading = this.add.text(490,420, "Loading...", {font: "20px monospace", fill: "#3D3D3D"});
     let percentText = this.add.text(510, 465, "", {font: "20px monospace", fill: "#3D3D3D"});
+    /*
     this.load.on("progress", function(value) {
         if (flag_loaded == 0) {
             progressBar.clear();
@@ -2982,6 +2990,41 @@ function preload() {
     this.load.on("fileprogress", function(file) {
         if (flag_loaded == 0) {
             progressText.setText("Loading asset: " + file.src);
+        }
+    });
+    */
+    let _arr = [
+        "Making roasted sweet potatoes...",
+        "Brushing a teddy bear...",
+        "Looking for my shovel...",
+        "Polishing the watering can...",
+        "Assembling the sewing machine...",
+        "Counting flowers and grass...",
+        "Cleaning up the house...",
+        "Replacing the sand in the sandbox...",
+        "Adding fertilizer to the flowerpot...",
+        "treating a needle puncture wound...",
+        "Washing the dishes...",
+        "Putting a flower on the teddy bear...",
+        "Painting your murasaki-san purple...",
+        "Bathing the teddy bear...",
+        "Polishing the floor...",
+    ];
+    let _index1 = Math.floor(Math.random() * _arr.length);
+    let _index2 = Math.floor(Math.random() * _arr.length);
+    this.load.on("progress", function(value) {
+        if (flag_loaded == 0) {
+            progressBar.clear();
+            progressBar.fillStyle(0xE62E8B, 1);
+            progressBar.fillRect(490, 460, 300 * value, 30);
+            percentText.setText( Math.round(value * 100) + "%");
+            if (value > 0.5) {
+                let _text = _arr[_index1];            
+                progressText.setText(_text);
+            } else {
+                let _text = _arr[_index2];
+                progressText.setText(_text);
+            }
         }
     });
     this.load.on("complete", function() {
@@ -3140,6 +3183,15 @@ function preload() {
     this.load.image("item_pancake", "src/png/item_pancake.png");
     this.load.image("item_sushi", "src/png/item_sushi.png");
     //this.load.image("item_newsbunner", "src/png/item_newsbunner.png");
+    this.load.image("item_rugg", "src/png/item_rugg.png");
+    this.load.image("item_piano", "src/png/item_piano.png");
+    this.load.image("item_piano_opened", "src/png/item_piano_opened.png");
+    this.load.image("item_clock", "src/png/item_clock.png");
+    this.load.image("item_clock_opened", "src/png/item_clock_opened.png");
+    this.load.image("item_window_day", "src/png/item_window_day.png");
+    this.load.image("item_window_day_closed", "src/png/item_window_day_closed.png");
+    this.load.image("item_window_night", "src/png/item_window_night.png");
+    this.load.image("item_window_night_closed", "src/png/item_window_night_closed.png");
     
     //===star
     this.load.image("star_blue", "src/png/star_blue.png", {frameWidth: 200, frameHeight: 191});
@@ -4754,8 +4806,8 @@ function update_checkItem(this_scene) {
         //cat
         let _x3 =90;
         let _y3 =610;
-        cat = this_scene.add.sprite(_x3, _y3, "cat_sleeping")
-            .setScale(0.12)
+        cat = this_scene.add.sprite(_x3, _y3-10, "cat_sleeping")
+            .setScale(0.4)
             .setOrigin(0.5)
             .setInteractive({useHandCursor: true})
             .on("pointerdown", () => {contract_send_mail(summoner)})
@@ -4794,14 +4846,60 @@ function update_checkItem(this_scene) {
         //    .setDepth(900).setAlpha(0.8);
 
         //***TODO*** window
-        item_window = this_scene.add.image(100, 240, "item_window")
+        item_window = this_scene.add.image(110, 230, "item_window_day")
+            .setScale(0.58)
+            .setOrigin(0.5)
+            .setDepth(2)
+            .setInteractive({useHandCursor: true})
+            .on('pointerdown', () => {
+                if(item_window.texture == game.textures.get("item_window_day")){
+                    item_window.setTexture("item_window_day_closed");
+                } else if (item_window.texture == game.textures.get("item_window_day_closed")) {
+                    item_window.setTexture("item_window_day");
+                } else if (item_window.texture == game.textures.get("item_window_night")) {
+                    item_window.setTexture("item_window_night_closed");
+                } else if (item_window.texture == game.textures.get("item_window_night_closed")) {
+                    item_window.setTexture("item_window_night");
+                }
+            });
+
+        //***TODO*** piano
+        item_piano = this_scene.add.image(595, 375, "item_piano")
             .setScale(0.4)
             .setOrigin(0.5)
-            .setDepth(2);
+            .setDepth(2)
+            .setInteractive({useHandCursor: true})
+            .on('pointerdown', () => {
+                if(item_piano.texture == game.textures.get("item_piano")){
+                    item_piano.setTexture("item_piano_opened");
+                } else {
+                    item_piano.setTexture("item_piano");
+                }
+            });
+
+        //***TODO*** clock
+        item_clock = this_scene.add.image(990, 180, "item_clock")
+            .setScale(0.45)
+            .setOrigin(0.5)
+            .setDepth(2)
+            .setInteractive({useHandCursor: true})
+            .on('pointerdown', () => {
+                if(item_clock.texture == game.textures.get("item_clock")){
+                    item_clock.setTexture("item_clock_opened");
+                } else {
+                    item_clock.setTexture("item_clock");
+                }
+            });
 
         //***TODO*** lantern
         item_lantern = this_scene.add.image(1200, 800, "item_lantern")
             .setScale(0.4)
+            .setOrigin(0.5)
+            .setDepth(2);
+
+        //***TODO*** rugg
+        item_rugg = this_scene.add.image(600, 680, "item_rugg")
+            .setScale(0.8)
             .setOrigin(0.5)
             .setDepth(2);
     }
@@ -4857,7 +4955,7 @@ function update_checkItem(this_scene) {
         contract_update_event_random();
         item_bbs_text.setText(text_event_random);
     }
-    
+
     //###2:Mr.Astar
     _item_id = 2;
     if (
@@ -5129,7 +5227,7 @@ function update_checkItem(this_scene) {
             .setOrigin(0.5)
             .setVisible(false);
         cat_others = this_scene.add.sprite(_x, _y, "cat_sitting")
-            .setScale(0.12)
+            .setScale(0.4)
             .setOrigin(0.5)
             .setDepth(_y)
             .setInteractive({useHandCursor: true})
@@ -5438,13 +5536,14 @@ function update_checkItem(this_scene) {
         && local_items_flag[_item_id] != true
     ) {
         local_items_flag[_item_id] = true;
-        item_switch = this_scene.add.sprite(1230,300, "item_switch").setOrigin(0.5);
-        item_switch.setScale(0.25);
+        back_black = this_scene.add.image(640, 480, "back_black")
+            .setDepth(9999+1)
+            .setVisible(false);
+        item_switch = this_scene.add.sprite(1230,300, "item_switch")
+            .setOrigin(0.5)
+            .setScale(0.25)
+            .setInteractive({useHandCursor: true});
         item_switch.anims.play("item_switch_off", true);
-        item_switch.setInteractive({useHandCursor: true});
-        back_black = this_scene.add.image(640, 480, "back_black");
-        back_black.depth = 9999+1;
-        back_black.visible = false;
         item_switch.on('pointerdown', () => {
             if (item_switch.anims.currentAnim.key == "item_switch_off") {
                 item_switch.anims.play("item_switch_on", true);
@@ -5463,6 +5562,13 @@ function update_checkItem(this_scene) {
                 if (typeof item_lantern != "undefined") {
                     item_lantern.setDepth(9999+10);
                 }
+                if (typeof item_window != "undefined") {
+                    if(item_window.texture == game.textures.get("item_window_day")){
+                        item_window.setTexture("item_window_night");
+                    } else if (item_window.texture == game.textures.get("item_window_day_closed")) {
+                        item_window.setTexture("item_window_night_closed");
+                    }
+                }
                 flag_onLight = false;
             } else {
                 item_switch.anims.play("item_switch_off", true);
@@ -5480,6 +5586,13 @@ function update_checkItem(this_scene) {
                 }
                 if (typeof item_lantern != "undefined") {
                     item_lantern.setDepth(2);
+                }
+                if (typeof item_window != "undefined") {
+                    if (item_window.texture == game.textures.get("item_window_night")) {
+                        item_window.setTexture("item_window_day");
+                    } else if (item_window.texture == game.textures.get("item_window_night_closed")) {
+                        item_window.setTexture("item_window_day_closed");
+                    }
                 }
                 flag_onLight = true;
             }
