@@ -24,9 +24,11 @@ console.log(
 
 //connect to metamask
 async function connect() {
+    /*
     if (typeof window.ethereum !== 'undefined') {
       console.log('MetaMask is installed!');
     }
+    */
     const web3 = await new Web3(window.ethereum);
     //window.ethereum.enable();
     window.ethereum.request({
@@ -48,11 +50,13 @@ async function connect() {
     });
     return web3;
 }
+//const web3 = await connect();
 
 async function wss() {
     let web3 = await new Web3("wss://rpc.shibuya.astar.network");
     return web3;
 }
+//const wss3 = wss();
 
 //get wallet
 async function get_wallet() {
