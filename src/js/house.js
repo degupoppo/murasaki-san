@@ -3101,7 +3101,7 @@ let config = {
     },
     fps: {
         target: 50,
-        forceSetTimeOut: true
+        forceSetTimeOut: false
     },
 };
 

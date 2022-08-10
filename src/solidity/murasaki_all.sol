@@ -8,29 +8,8 @@ pragma solidity ^0.8.7;
 
 /*
 
-    宝石NFTの実装
-        宝石箱NFTはまだ時間がかかるとしても、
-            ERC721の宝石NFTは先に組み込んでおいてもいいだろうか。
-            でないと、また刷新が必要になってしまう。
-        誕生石に合わせて12種類
-        タイミングは：
-            レベルアップ
-            初めてのクラフト時
-                フラグ管理が必要
-            アップグレード時
-        番号は201-212を使用する
-        実相案：
-            d10+1で1-12のタイプを決定
-            200+_rdでidを決定
-            mint
-
-    ERC3664の精読
-        既存のERC721にERC3664のどの.solを追加すればよいのか
-        attributeの追加はどこにどの様に記載すればよいのか
-        attributeの値変更時のルールはどこにどの様に記載すればよいのか
-        NFTの所有は可能か、その都度burn, mintが必要か
-        ERC3664Updatableを継承したコード例：
-            https://github.com/LI-YONG-QI/Character/blob/ad64e79f6791d8f2966849020d71ec79de3d4a7e/src/contracts/Character.sol
+    収集NFTの実装
+        IDは
 
     要求_item_idの整備
         _item_idテーブルが確定してから
@@ -4379,6 +4358,31 @@ contract buybackTreasury is Ownable {
 
 
 /*
+
+    宝石NFTの実装
+        宝石箱NFTはまだ時間がかかるとしても、
+            ERC721の宝石NFTは先に組み込んでおいてもいいだろうか。
+            でないと、また刷新が必要になってしまう。
+        誕生石に合わせて12種類
+        タイミングは：
+            レベルアップ
+            初めてのクラフト時
+                フラグ管理が必要
+            アップグレード時
+        番号は201-212を使用する
+        実相案：
+            d10+1で1-12のタイプを決定
+            200+_rdでidを決定
+            mint
+
+    ERC3664の精読
+        既存のERC721にERC3664のどの.solを追加すればよいのか
+        attributeの追加はどこにどの様に記載すればよいのか
+        attributeの値変更時のルールはどこにどの様に記載すればよいのか
+        NFTの所有は可能か、その都度burn, mintが必要か
+        ERC3664Updatableを継承したコード例：
+            https://github.com/LI-YONG-QI/Character/blob/ad64e79f6791d8f2966849020d71ec79de3d4a7e/src/contracts/Character.sol
+
 
 //---[NG] Murasaki_Achievement-----------------------------------------------------------------------------------------------------
 
