@@ -9,9 +9,7 @@ pragma solidity ^0.8.7;
 /*
 
     収集NFTの実装
-        IDはnormal:201-212, uncommon:213-224, rare:225-236
-        upgradeに対応させる, preciousは+12
-        calc_heartの計算式を修正する
+        IDは
 
     要求_item_idの整備
         _item_idテーブルが確定してから
@@ -1611,7 +1609,7 @@ contract Murasaki_Strage is Ownable {
     //dymanic, resouse
     mapping(uint32 => uint32) public coin;
     mapping(uint32 => uint32) public material;
-    //mapping(uint32 => uint32) public heart;
+    mapping(uint32 => uint32) public heart;
 
     //dynamic, treating
     mapping(uint32 => uint32) public last_feeding_time;
@@ -1694,12 +1692,10 @@ contract Murasaki_Strage is Ownable {
         require(permitted_address[msg.sender] == true);
         material[_summoner] = _value;
     }
-    /*
     function set_heart(uint32 _summoner, uint32 _value) external {
         require(permitted_address[msg.sender] == true);
         heart[_summoner] = _value;
     }
-    */
     function set_last_feeding_time(uint32 _summoner, uint32 _value) external {
         require(permitted_address[msg.sender] == true);
         last_feeding_time[_summoner] = _value;
@@ -1796,7 +1792,7 @@ contract Murasaki_Strage_Score is Ownable {
     mapping(uint32 => uint32) public total_coin_mined;
     mapping(uint32 => uint32) public total_material_farmed;
     mapping(uint32 => uint32) public total_item_crafted;
-    mapping(uint32 => uint32) public total_precious_received;
+    mapping(uint32 => uint32) public total_heart_received;
 
     //set status
     function set_total_exp_gained(uint32 _summoner, uint32 _value) external {
@@ -1815,9 +1811,9 @@ contract Murasaki_Strage_Score is Ownable {
         require(permitted_address[msg.sender] == true);
         total_item_crafted[_summoner] = _value;
     }
-    function set_total_precious_received(uint32 _summoner, uint32 _value) external {
+    function set_total_heart_received(uint32 _summoner, uint32 _value) external {
         require(permitted_address[msg.sender] == true);
-        total_precious_received[_summoner] = _value;
+        total_heart_received[_summoner] = _value;
     }
 }
 
@@ -1854,7 +1850,7 @@ contract Murasaki_Strage_Nui is Ownable {
     mapping(uint32 => uint32) public total_coin_mined;
     mapping(uint32 => uint32) public total_material_farmed;
     mapping(uint32 => uint32) public total_item_crafted;
-    mapping(uint32 => uint32) public total_precious_received;
+    mapping(uint32 => uint32) public total_heart_received;
     mapping(uint32 => uint32) public score;
 
     //set status
@@ -1906,9 +1902,9 @@ contract Murasaki_Strage_Nui is Ownable {
         require(permitted_address[msg.sender] == true);
         total_item_crafted[_item_nui] = _value;
     }
-    function set_total_precious_received(uint32 _item_nui, uint32 _value) external {
+    function set_total_heart_received(uint32 _item_nui, uint32 _value) external {
         require(permitted_address[msg.sender] == true);
-        total_precious_received[_item_nui] = _value;
+        total_heart_received[_item_nui] = _value;
     }
     function set_score(uint32 _item_nui, uint32 _value) external {
         require(permitted_address[msg.sender] == true);
@@ -2024,7 +2020,7 @@ contract Murasaki_Function_Share is Ownable {
         _res[24] = ms.last_total_crafting_sec(_summoner);
         _res[25] = ms.last_grooming_time_plus_working_time(_summoner);
         _res[26] = ms.update_time(_summoner);
-        //_res[27] = ms.heart(_summoner);
+        _res[27] = ms.heart(_summoner);
         return _res;
     }
     function get_static_status_array(uint32 _summoner) external view returns (uint32[5] memory) {
@@ -2050,7 +2046,7 @@ contract Murasaki_Function_Share is Ownable {
     }
 
     //call items as array from summoner
-    function get_balance_of_type_array_from_summoner(uint32 _summoner) public view returns (uint32[256] memory) {
+    function get_balance_of_type_array_from_summoner(uint32 _summoner) external view returns (uint32[256] memory) {
         Murasaki_Main mm = Murasaki_Main(murasaki_main_address);
         address _owner = mm.ownerOf(_summoner);
         Murasaki_Craft mc = Murasaki_Craft(murasaki_craft_address);
@@ -2091,33 +2087,11 @@ contract Murasaki_Function_Share is Ownable {
         return _happy;
     }
 
-    //calc precious
-    function calc_precious(uint32 _summoner) public view returns (uint32) {
-        Murasaki_Strage ms = Murasaki_Strage(murasaki_strage_address);
-        uint32[256] memory _balance_of_type = get_balance_of_type_array_from_summoner(_summoner);
-        uint32 _precious_score = 0;
-        for (uint i = 201; i <= 212; i++) {
-            if (_balance_of_type[i+24] > 0) {
-                _precious_score += 3*16;
-            }else if (_balance_of_type[i+12] > 0) {
-                _precious_score += 3*4;
-            }else if (_balance_of_type[i] > 0) {
-                _precious_score += 3;
-            }
-        }
-        //level cap, 800/Lv20 = 40/Lv
-        uint32 _lv = ms.level(_summoner);
-        if (_precious_score > _lv*40) {
-            _precious_score = _lv*40;
-        }
-        return _precious_score;
-    }
-    /*
-    function calc_precious(uint32 _summoner) public view returns (uint32) {
+    //calc heart
+    function calc_heart(uint32 _summoner) public view returns (uint32) {
         Murasaki_Strage ms = Murasaki_Strage(murasaki_strage_address);
         return ms.heart(_summoner);
     }
-    */
     /*
     function calc_heart(uint32 _summoner) public view returns (uint32) {
         //Tiny_Heart th = Tiny_Heart(tiny_heart_address);
@@ -2146,13 +2120,13 @@ contract Murasaki_Function_Share is Ownable {
         uint32 _total_coin_mined = mss.total_coin_mined(_summoner);
         uint32 _total_material_farmed = mss.total_material_farmed(_summoner);
         uint32 _total_item_crafted = mss.total_item_crafted(_summoner);
-        uint32 _total_precious_received = mss.total_precious_received(_summoner);
+        uint32 _total_heart_received = mss.total_heart_received(_summoner);
         uint32 _score = 0;
         _score += _total_exp_gained;
         _score += _total_coin_mined;
         _score += _total_material_farmed;
         _score += _total_item_crafted * 3000 + _total_item_crafted ** 2 * 300;
-        _score += _total_precious_received * 500 + _total_precious_received ** 2 * 50;
+        _score += _total_heart_received * 500 + _total_heart_received ** 2 * 50;
         return _score;
     }
     
@@ -2230,8 +2204,7 @@ contract Murasaki_Function_Share is Ownable {
         Murasaki_Strage ms = Murasaki_Strage(murasaki_strage_address);
         World_Dice wd = World_Dice(world_dice_address);
         uint32 _luck = ms.luck(_summoner);
-        //_luck += calc_precious(_summoner) * 1;
-        _luck += calc_precious(_summoner);
+        _luck += calc_heart(_summoner) * 1;
         _luck += wd.get_rolled_dice(_summoner);
         _luck += get_luck_by_staking(_summoner);
         if (dn(_summoner, 10000) <= _luck) {
@@ -2459,12 +2432,11 @@ contract Murasaki_Function_Summon_and_LevelUp is Ownable {
             ms.set_next_exp_required(_summoner, 190000);
         }
         //mint_jewel
-        //_mint_jewel(_summoner);
+        _mint_jewel(_summoner);
         //event
         emit Level_up(_summoner, _next_level);
     }
 
-    /*
     //mint jewel
     event Jewel_mint(uint32 indexed _summoner, uint32 _item_type);
     function _mint_jewel(uint32 _summoner) internal {
@@ -2475,7 +2447,6 @@ contract Murasaki_Function_Summon_and_LevelUp is Ownable {
         mc.craft(_item_type, _summoner, msg.sender, _seed);
         emit Jewel_mint(_summoner, _item_type);
     }
-    */
 }
 
 
@@ -2881,15 +2852,15 @@ contract Murasaki_Function_Crafting is Ownable {
         uint32[4] memory _dc_table = get_item_dc(_item_type);
         uint32 _coin = _dc_table[2];
         uint32 _material = _dc_table[3];
-        //uint32 _heart = get_heart_required(_item_type);
+        uint32 _heart = get_heart_required(_item_type);
         //check coin, material, heart
         require(ms.coin(_summoner) >= _coin);
         require(ms.material(_summoner) >= _material);
-        //require(ms.heart(_summoner) >= _heart);
+        require(ms.heart(_summoner) >= _heart);
         //pay coin, material, heart
         ms.set_coin(_summoner, ms.coin(_summoner) - _coin);
         ms.set_material(_summoner, ms.material(_summoner) - _material);
-        //ms.set_heart(_summoner, ms.heart(_summoner) - _heart);
+        ms.set_heart(_summoner, ms.heart(_summoner) - _heart);
         //start crafting
         ms.set_crafting_item_type(_summoner, _item_type);
         ms.set_crafting_status(_summoner, 1);
@@ -2926,7 +2897,7 @@ contract Murasaki_Function_Crafting is Ownable {
             mc.craft(_item_type, _summoner, msg.sender, _seed);
             //when normal items, generate tiny heart and update score
             if (_item_type <= 128) {
-                _mint_precious(_summoner);
+                _create_tiny_heart(_summoner);
                 //update score
                 Murasaki_Strage_Score mss = Murasaki_Strage_Score(mfs.murasaki_strage_score_address());
                 uint32 _total_item_crafted = mss.total_item_crafted(_summoner);
@@ -2967,7 +2938,7 @@ contract Murasaki_Function_Crafting is Ownable {
         msn.set_total_coin_mined(_item_nui, mss.total_coin_mined(_summoner));
         msn.set_total_material_farmed(_item_nui, mss.total_material_farmed(_summoner));
         msn.set_total_item_crafted(_item_nui, mss.total_item_crafted(_summoner));
-        msn.set_total_precious_received(_item_nui, mss.total_precious_received(_summoner));
+        msn.set_total_heart_received(_item_nui, mss.total_heart_received(_summoner));
         msn.set_score(_item_nui, mfs.calc_score(_summoner));
     }
     //get modified dc, using codex
@@ -2990,21 +2961,18 @@ contract Murasaki_Function_Crafting is Ownable {
         Murasaki_Function_Crafting_Codex mfcc = Murasaki_Function_Crafting_Codex(murasaki_function_crafting_codex_address);
         return mfcc.get_item_dc(_item_type);
     }
-    /*
     //get heart required
     function get_heart_required(uint32 _item_type) public view returns (uint32) {
         Murasaki_Function_Crafting_Codex mfcc = Murasaki_Function_Crafting_Codex(murasaki_function_crafting_codex_address);
         return mfcc.get_heart_required(_item_type);
     }
-    */
 
-    //mint_precious
-    event Precious(uint32 indexed _summoner_to, uint32 _summoner_from, uint32 _item_type);
-    function _mint_precious(uint32 _summoner_from) internal {
+    //create tiny heart
+    event Heart(uint32 indexed _summoner_from, uint32 _summoner_to);
+    function _create_tiny_heart(uint32 _summoner_from) internal {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Main mm = Murasaki_Main(mfs.murasaki_main_address());
         Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
-        Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
         //get random _to_summoner
         uint32 _count_summoners = mm.next_summoner() - 1;
         uint32 _summoner_to = mfs.dn(_summoner_from, _count_summoners) + 1;
@@ -3024,19 +2992,17 @@ contract Murasaki_Function_Crafting is Ownable {
             _walleto_to = msg.sender;
             _summoner_to = _summoner_from;
         }
-        //mint precious
-        uint32 _seed = mfs.seed(_summoner_from);
-        uint32 _item_type = 200 + mfs.d10(_summoner_from) + 1;   //201-212
-        mc.craft(_item_type, _summoner_from, _walleto_to, _seed);
+        //create tiny heart
+        //uint32 _seed = mfs.seed(_created_summoner);
         //mc.craft(193, _created_summoner, _to_wallet, _seed);
         //ms.set_heart(_summoner_from, ms.heart(_summoner_from) + 1);
-        //ms.set_heart(_summoner_to, ms.heart(_summoner_to) + 1);
+        ms.set_heart(_summoner_to, ms.heart(_summoner_to) + 1);
         //update score
         Murasaki_Strage_Score mss = Murasaki_Strage_Score(mfs.murasaki_strage_score_address());
-        uint32 _total_precious_received = mss.total_precious_received(_summoner_to);
-        mss.set_total_precious_received(_summoner_to, _total_precious_received + 1);
+        uint32 _total_heart_received = mss.total_heart_received(_summoner_to);
+        mss.set_total_heart_received(_summoner_to, _total_heart_received + 1);
         //event
-        emit Precious(_summoner_to, _summoner_from, _item_type);        
+        emit Heart(_summoner_from, _summoner_to);        
     }
 
     //upgrade item
@@ -3056,7 +3022,7 @@ contract Murasaki_Function_Crafting is Ownable {
         (uint32 _item_type1, , ,) = mc.items(_item1);
         (uint32 _item_type2, , ,) = mc.items(_item2);
         (uint32 _item_type3, , ,) = mc.items(_item3);
-        require(_item_type1 <= 128 || (_item_type1 >= 201 && _item_type1 <= 224) );
+        require(_item_type1 <= 128);
     	require(
     	    _item_type2 == _item_type1
     	    && _item_type3 == _item_type1
@@ -3067,11 +3033,7 @@ contract Murasaki_Function_Crafting is Ownable {
         _burn(_item3);
         //mint upper rank item
         uint32 _seed = mfs.seed(_summoner);
-        if (_item_type1 <= 128) {   // normal item, +64
-            mc.craft(_item_type1 + 64, _summoner, msg.sender, _seed);
-        } else if (_item_type1 >= 201) {    // precious, +12
-            mc.craft(_item_type1 + 12, _summoner, msg.sender, _seed);
-        }
+        mc.craft(_item_type1 + 64, _summoner, msg.sender, _seed);
         //event
         emit Upgrade(_summoner, _item_type1, mc.next_item());
     }
@@ -3285,7 +3247,6 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
         return [_level, _dc, _coin, _material];
     }
     
-    /*
     //get heart required
     function get_heart_required(uint32 _item_type) public view returns (uint32) {
         if (_item_type <= 64) {
@@ -3302,7 +3263,6 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
             return 999999;
         }
     }
-    */
 
     //item level
     uint32[64] public level_table = [
@@ -3596,7 +3556,6 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
         99999
     ];
 
-    /*
     //item heart
     uint32[64] public heart_table = [
         //0:dummy
@@ -3669,7 +3628,6 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
         99999,
         99999
     ];
-    */
 }
 
 
@@ -4132,23 +4090,16 @@ contract Murasaki_Mail is Ownable {
         //open mail
         uint32 _now = uint32(block.timestamp);
         _mail.open_time = _now;
-        //mint precious
-        _mint_precious(_summoner_to, _mail.summoner_from);
+        //mint heart
+        _create_tiny_heart(_summoner_to, _mail.summoner_from);
         //event
         emit Open_Mail(_summoner_to, _mail.summoner_from);
     }
-    event Precious(uint32 indexed _summoner_to, uint32 _summoner_from, uint32 _item_type);
-    function _mint_precious(uint32 _summoner_to, uint32 _summoner_from) internal {
+    function _create_tiny_heart(uint32 _summoner_to, uint32 _summoner_from) internal {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
-        Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
-        Murasaki_Main mm = Murasaki_Main(mfs.murasaki_main_address());
-        uint32 _seed = mfs.seed(_summoner_to);
-        uint32 _item_type = 200 + mfs.d10(_summoner_to) + 1;   //201-212
-        mc.craft(_item_type, _summoner_from, mm.ownerOf(_summoner_to), _seed);
-        mc.craft(_item_type, _summoner_to, mm.ownerOf(_summoner_from), _seed);
-        emit Precious(_summoner_to, _summoner_from, _item_type);
-        //ms.set_heart(_summoner_to, ms.heart(_summoner_to) + 1);
-        //ms.set_heart(_summoner_from, ms.heart(_summoner_from) + 1);
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        ms.set_heart(_summoner_to, ms.heart(_summoner_to) + 1);
+        ms.set_heart(_summoner_from, ms.heart(_summoner_from) + 1);
     }
     /*
     function _create_tiny_heart(uint32 _summoner_to, uint32 _summoner_from) internal {
@@ -4156,170 +4107,6 @@ contract Murasaki_Mail is Ownable {
         mfc.create_tiny_heart(_summoner_to, _summoner_from);
     }
     */
-}
-
-
-//---Lootlike-------------------------------------------------------------------------------------------------------------
-
-
-contract Murasaki_Lootlike is Ownable {
-
-    //address
-    address public murasaki_function_share_address;
-
-    //admin, set address
-    function _set1_murasaki_function_share_address(address _address) external onlyOwner {
-        murasaki_function_share_address = _address;
-    }
-    
-    function get_birthplace(uint32 _summoner) public view returns (string memory) {
-        return pluckName(_summoner, "birthplace", birthplace);
-    }
-    function get_softness(uint32 _summoner) public view returns (string memory) {
-        return pluckName(_summoner, "softness", softness);
-    }
-    function get_fluffiness(uint32 _summoner) public view returns (string memory) {
-        return pluckName(_summoner, "fluffiness", fluffiness);
-    }
-    function get_elasticity(uint32 _summoner) public view returns (string memory) {
-        return pluckName(_summoner, "elasticity", elasticity);
-    }
-    function get_personality(uint32 _summoner) public view returns (string memory) {
-        return pluckName(_summoner, "personality", personality);
-    }
-    function get_allStatus(uint32 _summoner) public view returns (string[5] memory) {
-        string[5] memory _status;
-        _status[0] = get_birthplace(_summoner);
-        _status[1] = get_softness(_summoner);
-        _status[2] = get_fluffiness(_summoner);
-        _status[3] = get_elasticity(_summoner);
-        _status[4] = get_personality(_summoner);
-        return _status;
-    }
-
-    function toString(uint256 value) internal pure returns (string memory) {
-        // Inspired by OraclizeAPI's implementation - MIT licence
-        // https://github.com/oraclize/ethereum-api/blob/b42146b063c7d6ee1358846c198246239e9360e8/oraclizeAPI_0.4.25.sol
-        if (value == 0) {
-            return "0";
-        }
-        uint256 temp = value;
-        uint256 digits;
-        while (temp != 0) {
-            digits++;
-            temp /= 10;
-        }
-        bytes memory buffer = new bytes(digits);
-        while (value != 0) {
-            digits -= 1;
-            buffer[digits] = bytes1(uint8(48 + uint256(value % 10)));
-            value /= 10;
-        }
-        return string(buffer);
-    }
-    
-    function random(string memory input) internal pure returns (uint256) {
-        return uint256(keccak256(abi.encodePacked(input)));
-    }
-
-    function pluckName(uint32 _summoner, string memory keyPrefix, string[] memory sourceArray) internal view returns (string memory) {
-        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
-        address _owner = mfs.get_owner(_summoner);
-        //address _owner = address(this);
-        uint256 rand = random(string(abi.encodePacked(keyPrefix, abi.encodePacked(_owner, toString(_summoner)))));
-        string memory output = sourceArray[rand % sourceArray.length];
-        return output;
-    }
-
-    string[] private birthplace = [
-        "fluffy sweater",
-        "fluffy blanket",
-        "fluffy carpet",
-        "fluffy cushion",
-        "fluffy scarf",
-        "fluffy towel",
-        "woolly sweater",
-        "woolly blanket",
-        "woolly carpet",
-        "woolly cushion",
-        "woolly scarf",
-        "woolly towel",
-        "feathery sweater",
-        "feathery blanket",
-        "feathery carpet",
-        "feathery cushion",
-        "feathery scarf",
-        "feathery towel"
-    ];
-    
-    string[] private softness = [
-        "inredible",
-        "marvelous",
-        "excellent",
-        "amazing",
-        "great",
-        "fabulous",
-        "wonderful",
-        "gorgeous",
-        "awesome",
-        "fantastic",
-        "lovely",
-        "brilliant",
-        "impressive",
-        "superb"
-    ];
-    
-    string[] private fluffiness = [
-        "inredible",
-        "marvelous",
-        "excellent",
-        "amazing",
-        "great",
-        "fabulous",
-        "wonderful",
-        "gorgeous",
-        "awesome",
-        "fantastic",
-        "lovely",
-        "brilliant",
-        "impressive",
-        "superb"
-    ];
-
-    string[] private elasticity = [
-        "inredible",
-        "marvelous",
-        "excellent",
-        "amazing",
-        "great",
-        "fabulous",
-        "wonderful",
-        "gorgeous",
-        "awesome",
-        "fantastic",
-        "lovely",
-        "brilliant",
-        "impressive",
-        "superb"
-    ];
-    
-    string[] private personality = [
-        "friendly",
-        "reliable",
-        "optimistic",
-        "frisky",
-        "thoughtful",
-        "honest",
-        "easygoing",
-        "tolerant",
-        "mild",
-        "affectionate",
-        "intelligent",
-        "patient",
-        "faithful",
-        "innocent",
-        "gentle"
-    ];
 }
 
 
@@ -4448,7 +4235,7 @@ contract Murasaki_Info is Ownable {
         uint32 _summoner = summoner(_wallet);
         uint32 _luk = luck(_wallet);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
-        _luk += mfs.calc_precious(_summoner) * 1;
+        _luk += mfs.calc_heart(_summoner) * 1;
         _luk += mfs.get_luck_by_staking(_summoner);
         return _luk;
     }
@@ -4464,14 +4251,12 @@ contract Murasaki_Info is Ownable {
         Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
         return ms.material(_summoner);
     }
-    /*
     function heart(address _wallet) external view returns (uint32) {
         uint32 _summoner = summoner(_wallet);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
         return ms.heart(_summoner);
     }
-    */
     function total_exp_gained(address _wallet) external view returns (uint32) {
         uint32 _summoner = summoner(_wallet);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
@@ -4496,11 +4281,11 @@ contract Murasaki_Info is Ownable {
         Murasaki_Strage_Score mss = Murasaki_Strage_Score(mfs.murasaki_strage_score_address());
         return mss.total_item_crafted(_summoner);
     }
-    function total_precious_received(address _wallet) external view returns (uint32) {
+    function total_heart_received(address _wallet) external view returns (uint32) {
         uint32 _summoner = summoner(_wallet);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Strage_Score mss = Murasaki_Strage_Score(mfs.murasaki_strage_score_address());
-        return mss.total_precious_received(_summoner);
+        return mss.total_heart_received(_summoner);
     }
     function score(address _wallet) external view returns (uint32) {
         uint32 _summoner = summoner(_wallet);
@@ -4517,7 +4302,7 @@ contract Murasaki_Info is Ownable {
 //---Treasury------------------------------------------------------------------------------------------------------
 
 
-//===*bufferTreasury======================================================================================================
+//===*feeTreasury======================================================================================================
 
 
 contract feeTreasury is Ownable {
@@ -4555,24 +4340,6 @@ contract feeTreasury is Ownable {
 
 
 contract buybackTreasury is Ownable {
-
-    //address
-    address public murasaki_function_share_address;
-    function _set1_murasaki_function_share_address(address _address) external onlyOwner {
-        murasaki_function_share_address = _address;
-    }
-
-    //admin. withdraw
-    function withdraw(address rec)public onlyOwner{
-        payable(rec).transfer(address(this).balance);
-    }
-}
-
-
-//===*teamTreasury======================================================================================================
-
-
-contract teamTreasury is Ownable {
 
     //address
     address public murasaki_function_share_address;
