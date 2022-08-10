@@ -3100,8 +3100,10 @@ let config = {
         createContainer: true
     },
     fps: {
+        actualFps: 50,
+        targetFps: 50,
         target: 50,
-        forceSetTimeOut: false
+        forceSetTimeOut: true
     },
 };
 
