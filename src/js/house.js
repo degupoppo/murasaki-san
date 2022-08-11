@@ -11,21 +11,6 @@
         個別に必要なものもすべてinfoコントラに格納し、
         可能な限りarray化してUXから読み込みやすくする
 
-    precious NFTのUX実装
-        カウンターの実装
-            n,u,rを3つ表示する
-        レーダーチャートへの反映
-            計算式を修正する
-        キャラクタの実装
-            n,u,rの3種類を作成
-            classはstarやtokenBallに準じる
-            nは物質, uはまばたきつき目, rは＋口と自律的に動き回る
-        preciousBoxの実装
-            preciousたちの家
-            クリックでみんなが帰る
-        mint演出の実装
-            どこからくる？誰が持ってくる？
-    
     トレジャリーコントラクトの整備と実装
         バイバック金庫
             amount / summoner number = mint fee とする
@@ -71,6 +56,21 @@
                 バイバック金庫をシュリンクさせるには3-4ヶ月かかる
                 2年後にLv16のアイテムを売るとすると、およそ1.5ヶ月
 
+    precious NFTのUX実装
+        カウンターの実装
+            n,u,rを3つ表示する
+        レーダーチャートへの反映
+            計算式を修正する
+        キャラクタの実装
+            n,u,rの3種類を作成
+            classはstarやtokenBallに準じる
+            nは物質, uはまばたきつき目, rは＋口と自律的に動き回る
+        preciousBoxの実装
+            preciousたちの家
+            クリックでみんなが帰る
+        mint演出の実装
+            どこからくる？誰が持ってくる？
+    
  ok lootライクなランダムテキストの実装
         summoner mint時にランダムでオリジナルのパラメータを設定する
         パラメータによって何かしらの差をつけたいが・・・
@@ -1186,6 +1186,31 @@ async function contract_get_item_count(_summoner) {
     let _crafting_item_count = await contract_mfc.methods.count_crafting_items(_owner).call();
     let _luck_item_count = 0;
     return [Number(_mining_item_count)/100, Number(_farming_item_count)/100, Number(_crafting_item_count)/100, _luck_item_count];
+}
+
+//get nonce
+async function contract_get_nonce(_wallet_address) {
+    let _nonce = await web3.eth.getTransactionCount(_wallet_address);
+    return _nonce;
+}
+
+//get age
+async function contract_get_age(_wallet_address) {
+    let _lastBlock = await wss3.eth.getBlockNumber();
+    //console.log(1, _lastBlock);
+    let _age = 1;
+    //2592000 block/mo, 1block/12sec
+    for (let i = _lastBlock; i >= 216000; i -= 216000) {
+        //console.log(2, i);
+        let _transactionCount = await wss3.eth.getTransactionCount(_wallet_address, i);
+        //console.log(3, i, _transactionCount);
+        if (_transactionCount > 0) {
+            _age += 1;
+        } else {
+            return _age;
+        }
+    }
+    return _age;        
 }
 
 
@@ -3089,6 +3114,21 @@ function summon_star(scene, _type) {
     _star.on_summon();
     group_star.add(_star);
     group_update.add(_star);
+}
+
+
+//===calc wallet_score
+
+async function calc_wallet_score(wallet_address) {
+    let _nonce = await contract_get_nonce(wallet_address);
+    let _age = await contract_get_age(wallet_address); //mo
+    let _scoreMax = _age * 150; // 5tx/day, 150tx/mo
+    let _score = _nonce;
+    if (_score > _scoreMax) {
+        _score = _scoreMax;
+    }
+    console.log(_nonce, _age, _scoreMax, _score);
+    return _score;    
 }
 
 
