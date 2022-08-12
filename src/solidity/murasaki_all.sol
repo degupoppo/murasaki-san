@@ -8,7 +8,16 @@ pragma solidity ^0.8.7;
 
 /*
 
-    収集NFTの実装
+    Dapps Staking Luck Boostの見直し
+        上限をmax 100,000とする
+        レベルキャップを実装する
+        どのレベルでも100,000までluckが上昇するが、
+        レベルが高いほうが効率が良くなるよう計算する
+            Lv1では500以上は変わらない、ではない。
+            どんなレベルでも100,000までは掛け金に応じて有利になる
+        指数関数的に。
+
+ ok 収集NFTの実装
         IDはnormal:201-212, uncommon:213-224, rare:225-236
         upgradeに対応させる, preciousは+12
         calc_heartの計算式を修正する
