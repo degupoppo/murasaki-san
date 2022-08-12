@@ -1984,7 +1984,7 @@ contract Murasaki_Function_Share is Ownable {
         astarbase_address = _address;
     }
     function _setA_bufferTreqsury_address(address _address) external onlyOwner {
-        feeTreasury_address = _address;
+        bufferTreasury_address = _address;
     }
     function _setB_buybackTreasury_address(address _address) external onlyOwner {
         buybackTreasury_address = _address;
@@ -4433,6 +4433,7 @@ contract Murasaki_Info is Ownable {
         return mn.names(_summoner);
     }
     
+    /*
     //Murasaki_Craft
     function balance_of_item(uint32 _summoner) public view returns (uint32[256] memory) {
         address _owner = owner(_summoner);
@@ -4440,6 +4441,7 @@ contract Murasaki_Info is Ownable {
         Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
         return mc.get_balance_of_type(_owner);
     }
+    */
     
     //Murasaki_Strage
     function level(uint32 _summoner) public view returns (uint32) {
@@ -4712,7 +4714,7 @@ contract Murasaki_Info is Ownable {
     //get all
     function allDynamicStatus(uint32 _summoner) external view returns (uint32[64] memory) {
         uint32[64] memory _res;
-        _res[0] = class(_summoner);
+        //_res[0] = class(_summoner);
         _res[1] = age(_summoner);
         _res[2] = level(_summoner);
         _res[3] = exp(_summoner);
@@ -4754,6 +4756,26 @@ contract Murasaki_Info is Ownable {
         _res[39] = receiving_mail(_summoner);
         _res[40] = sending_interval(_summoner);
         return _res;
+    }
+    
+    function allStaticStatus(uint32 _summoner) external view returns (
+        uint32,
+        address,
+        string memory,
+        string[5] memory
+    ) {
+        uint32 _class = class(_summoner);
+        address _owner = owner(_summoner);
+        string memory _name = name(_summoner);
+        string[5] memory lootStatus = allStatus(_summoner);
+        return (_class, _owner, _name, lootStatus);
+    }
+
+    function allItems(uint32 _summoner) public view returns (uint32[256] memory) {
+        address _owner = owner(_summoner);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
+        return mc.get_balance_of_type(_owner);
     }
 }
 
@@ -4961,11 +4983,11 @@ contract bufferTreasury is Ownable {
         murasaki_function_share_address = _address;
     }
 
-    uint32 public treasury_rate = 50 * 100;    //0.01%, 5000=50%
+    uint32 public inflationRate = 300;    //300 = 3%
 
     //admin, set rate
-    function set_rate(uint32 _value) external onlyOwner {
-        treasury_rate = _value;
+    function set_inflationRate(uint32 _value) external onlyOwner {
+        inflationRate = _value;
     }
 
     //admin. withdraw all, for emergency
@@ -4973,10 +4995,18 @@ contract bufferTreasury is Ownable {
         payable(rec).transfer(address(this).balance);
     }
     
+    function calc_amount_by_inflationRate() public view returns (uint) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        //buybackTreasury bt = buybackTreasury(mfs.buybackTreasury_address());
+        uint _balanceOfBuybackTreajury = address(mfs.buybackTreasury_address()).balance;
+        uint _amountForTransfer = _balanceOfBuybackTreajury * inflationRate / 10000;
+        return _amountForTransfer;
+    }
+    
     //transfer for buybackTreasury and teamTreasury
     function transfer_for_buybackTreasury() external onlyOwner{
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
-        uint _amount_for_buybackTreasury = address(this).balance * treasury_rate / 10000;
+        uint _amount_for_buybackTreasury = calc_amount_by_inflationRate();
         payable(mfs.buybackTreasury_address()).transfer(_amount_for_buybackTreasury);
         payable(mfs.teamTreasury_address()).transfer(address(this).balance);
         //payable(rec).transfer(address(this).balance);   // transfer the rest to dev wallet
@@ -4998,8 +5028,112 @@ contract buybackTreasury is Ownable {
     }
 
     //admin. withdraw all, for emergency
-    function withdraw(address rec)public onlyOwner{
+    function withdraw(address rec) public onlyOwner{
         payable(rec).transfer(address(this).balance);
+    }
+    
+    uint public amount_paied = 0;
+    
+    function calc_amount_per_summoner() public view returns (uint) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Main mm = Murasaki_Main(mfs.murasaki_main_address());
+        uint32 _total_summoner = mm.next_summoner() - 1;
+        uint _amount_per_summoner = (amount_paied + address(this).balance) / _total_summoner;
+        return _amount_per_summoner;
+    }
+    
+    function calc_itemPrice_fromLevel(uint32 _item_level) public view returns (uint) {
+        uint32 _coefficient;
+        if (_item_level == 1) {
+            _coefficient = 10;
+        } else if (_item_level == 2) {
+            _coefficient = 20;
+        } else if (_item_level == 3) {
+            _coefficient = 33;
+        } else if (_item_level == 4) {
+            _coefficient = 50;
+        } else if (_item_level == 5) {
+            _coefficient = 70;
+        } else if (_item_level == 6) {
+            _coefficient = 93;
+        } else if (_item_level == 7) {
+            _coefficient = 120;
+        } else if (_item_level == 8) {
+            _coefficient = 150;
+        } else if (_item_level == 9) {
+            _coefficient = 183;
+        } else if (_item_level == 10) {
+            _coefficient = 220;
+        } else if (_item_level == 11) {
+            _coefficient = 260;
+        } else if (_item_level == 12) {
+            _coefficient = 303;
+        } else if (_item_level == 13) {
+            _coefficient = 350;
+        } else if (_item_level == 14) {
+            _coefficient = 400;
+        } else if (_item_level == 15) {
+            _coefficient = 453;
+        } else if (_item_level == 16) {
+            _coefficient = 510;
+        }
+        uint _price = calc_amount_per_summoner() * _coefficient / 3227;
+        return _price;
+    }
+    
+    function calc_buybackPrice(uint32 _item) public view returns (uint) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
+        (uint32 _item_type, , ,) = mc.items(_item);
+        uint32 _item_level = _item_type % 16;
+        if (_item_level == 0) {
+            _item_level = 16;
+        }
+        uint32 _item_rarity;
+        if (_item_type >= 129) {    //rare, x9
+            _item_rarity = 9;
+        } else if (_item_type >= 65) {  //uncommon, x3
+            _item_rarity = 3;
+        } else {    //common, x1
+            _item_rarity = 1;
+        }
+        uint _price = calc_itemPrice_fromLevel(_item_level) * _item_rarity;
+        return _price;
+    }
+    
+    function calc_buybackPrice_asArray() public view returns (uint[17] memory) {
+        uint[17] memory _res;
+        _res[1] = calc_itemPrice_fromLevel(1);
+        _res[2] = calc_itemPrice_fromLevel(2);
+        _res[3] = calc_itemPrice_fromLevel(3);
+        _res[4] = calc_itemPrice_fromLevel(4);
+        _res[5] = calc_itemPrice_fromLevel(5);
+        _res[6] = calc_itemPrice_fromLevel(6);
+        _res[7] = calc_itemPrice_fromLevel(7);
+        _res[8] = calc_itemPrice_fromLevel(8);
+        _res[9] = calc_itemPrice_fromLevel(9);
+        _res[10] = calc_itemPrice_fromLevel(10);
+        _res[11] = calc_itemPrice_fromLevel(11);
+        _res[12] = calc_itemPrice_fromLevel(12);
+        _res[13] = calc_itemPrice_fromLevel(13);
+        _res[14] = calc_itemPrice_fromLevel(14);
+        _res[15] = calc_itemPrice_fromLevel(15);
+        _res[16] = calc_itemPrice_fromLevel(16);
+        return _res;
+    }
+
+    event Buyback(uint32 indexed _summoner, uint32 _item, uint _price);    
+    function buyback(uint32 _summoner, uint32 _item) external {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Main mm = Murasaki_Main(mfs.murasaki_main_address());
+        Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
+        require(mm.ownerOf(_summoner) == msg.sender);
+        require(mc.ownerOf(_item) == msg.sender);
+        mc.safeTransferFrom(msg.sender, address(this), _item);
+        uint _price = calc_buybackPrice(_item);
+        amount_paied += _price;
+        payable(msg.sender).transfer(_price);
+        emit Buyback(_summoner, _item, _price);
     }
 }
 
@@ -5008,17 +5142,58 @@ contract buybackTreasury is Ownable {
 
 
 contract teamTreasury is Ownable {
+    //admin. withdraw all
+    function withdraw(address rec)public onlyOwner{
+        payable(rec).transfer(address(this).balance);
+    }
+}
+
+
+//---Governance------------------------------------------------------------------------------------------------------------
+
+
+contract Governance is Ownable {
 
     //address
     address public murasaki_function_share_address;
     function _set1_murasaki_function_share_address(address _address) external onlyOwner {
         murasaki_function_share_address = _address;
     }
-
     //admin. withdraw all
     function withdraw(address rec)public onlyOwner{
         payable(rec).transfer(address(this).balance);
     }
+    
+    uint32 public next_subject = 1;
+    struct subject {
+        uint32 suggested_time;
+        uint32 deadline;
+        bool choice0;
+        uint32 choice1;
+        uint32 choice2;
+        uint32 choice3;
+        uint32 choice4;
+        uint32 choice5;
+        uint32 choice6;
+        uint32 choice7;
+        uint32 choice8;
+        uint32 choice9;
+        uint32 choice10;
+    }
+    mapping(uint32 => subject) public subjects;
+    
+    function vote(uint32 _summoner, uint32 _subject) external {
+        require(_summoner == owner);
+        require(ms.level(_summoner) >= 3);
+        require(satiety >= 10);
+        require(deadline <= now);
+        ;
+    }
+    
+    function suggestion() external onlyOwner{
+        ;
+    }
+
 }
 
 
