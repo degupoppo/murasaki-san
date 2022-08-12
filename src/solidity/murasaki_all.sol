@@ -8,7 +8,7 @@ pragma solidity ^0.8.7;
 
 /*
 
-    Dapps Staking Luck Boostの見直し
+ ok Dapps Staking Luck Boostの見直し
         上限をmax 100,000とする
         レベルキャップを実装する
         どのレベルでも100,000までluckが上昇するが、
@@ -1944,8 +1944,10 @@ contract Murasaki_Function_Share is Ownable {
     address public murasaki_mail_address;
     address public murasaki_strage_nui_address;
     address public astarbase_address;
-    address public feeTreasury_address;
+    address public bufferTreasury_address;
     address public buybackTreasury_address;
+    address public teamTreasury_address;
+    address public murasaki_lootlike_address;
     
     //salt
     uint32 private _salt = 0;
@@ -1981,11 +1983,17 @@ contract Murasaki_Function_Share is Ownable {
     function _set9_astarbase_address(address _address) external onlyOwner {
         astarbase_address = _address;
     }
-    function _setA_feeTreqsury_address(address _address) external onlyOwner {
+    function _setA_bufferTreqsury_address(address _address) external onlyOwner {
         feeTreasury_address = _address;
     }
     function _setB_buybackTreasury_address(address _address) external onlyOwner {
         buybackTreasury_address = _address;
+    }
+    function _setC_teamTreasury_address(address _address) external onlyOwner {
+        teamTreasury_address = _address;
+    }
+    function _setD_murasaki_lootlike_address(address _address) external onlyOwner {
+        murasaki_lootlike_address = _address;
     }
 
     //check owner of summoner
@@ -2216,6 +2224,45 @@ contract Murasaki_Function_Share is Ownable {
     function get_luck_by_staking(uint32 _summoner) public view returns (uint32) {
         address _owner = get_owner(_summoner);
         uint32 _staker = calc_dapps_staking_amount(_owner);
+        Murasaki_Strage ms = Murasaki_Strage(murasaki_strage_address);
+        uint32 _level = ms.level(_summoner);
+        //luck_add = luck_addMin + (luck_addMax - luck_addMin) * (Lv-1)/(20-1)
+        uint32 _luck_addMin;
+        uint32 _luck_addMax;
+        if (_staker < 500) {
+            return 0;
+        } else if (_staker < 1000) {
+            _luck_addMin = 25;
+            _luck_addMax = 50;
+        } else if (_staker < 2000) {
+            _luck_addMin = 50;
+            _luck_addMax = 100;
+        } else if (_staker < 4000) {
+            _luck_addMin = 75;
+            _luck_addMax = 150;
+        } else if (_staker < 8000) {
+            _luck_addMin = 100;
+            _luck_addMax = 200;
+        } else if (_staker < 16000) {
+            _luck_addMin = 125;
+            _luck_addMax = 250;
+        } else if (_staker < 32000) {
+            _luck_addMin = 150;
+            _luck_addMax = 300;
+        } else if (_staker < 64000) {
+            _luck_addMin = 175;
+            _luck_addMax = 350;
+        } else {
+            _luck_addMin = 200;
+            _luck_addMax = 400;
+        }
+        uint32 _luck_add = _luck_addMin + (_luck_addMax - _luck_addMin) * (_level - 1) / 19;
+        return _luck_add;
+    }
+    /*
+    function get_luck_by_staking(uint32 _summoner) public view returns (uint32) {
+        address _owner = get_owner(_summoner);
+        uint32 _staker = calc_dapps_staking_amount(_owner);
         // y = [ 1 + { 5.7 / (x + 570) } ]^x
         if (_staker < 500) {
             return 0;
@@ -2233,6 +2280,7 @@ contract Murasaki_Function_Share is Ownable {
             return 300;
         }
     }
+    */
     
     //luck challenge
     function luck_challenge(uint32 _summoner) external view returns (bool) {
@@ -2363,8 +2411,9 @@ contract Murasaki_Function_Summon_and_LevelUp is Ownable {
         ms.set_last_total_crafting_sec(_summoner, 0);
         ms.set_last_grooming_time_plus_working_time(_summoner, _now - BASE_SEC * 100 / SPEED / 2);
         ms.set_isActive(_summoner, true);
-        //fee transfer
-        payable(mfs.feeTreasury_address()).transfer(address(this).balance);
+        //fee transfer, 50% for buyback, rest for team
+        payable(mfs.buybackTreasury_address()).transfer(address(this).balance/2);
+        payable(mfs.teamTreasury_address()).transfer(address(this).balance);
         //event
         emit Summon(_summoner, msg.sender, _class);
     }
@@ -2567,7 +2616,7 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable {
         ms.set_farming_status(_summoner, 0);
         ms.set_crafting_status(_summoner, 0);
         //fee transfer
-        payable(mfs.feeTreasury_address()).transfer(address(this).balance);
+        payable(mfs.bufferTreasury_address()).transfer(address(this).balance);
         //event
         emit Cure_Petrification(_summoner, _price);
     }
@@ -4155,6 +4204,12 @@ contract Murasaki_Mail is Ownable {
         uint32 _item_type = 200 + mfs.d10(_summoner_to) + 1;   //201-212
         mc.craft(_item_type, _summoner_from, mm.ownerOf(_summoner_to), _seed);
         mc.craft(_item_type, _summoner_to, mm.ownerOf(_summoner_from), _seed);
+        //update score
+        Murasaki_Strage_Score mss = Murasaki_Strage_Score(mfs.murasaki_strage_score_address());
+        uint32 _total_precious_received = mss.total_precious_received(_summoner_to);
+        mss.set_total_precious_received(_summoner_to, _total_precious_received + 1);
+        _total_precious_received = mss.total_precious_received(_summoner_from);
+        mss.set_total_precious_received(_summoner_from, _total_precious_received + 1);
         emit Precious(_summoner_to, _summoner_from, _item_type);
         //ms.set_heart(_summoner_to, ms.heart(_summoner_to) + 1);
         //ms.set_heart(_summoner_from, ms.heart(_summoner_from) + 1);
@@ -4353,6 +4408,374 @@ contract Murasaki_Info is Ownable {
         murasaki_function_crafting_address = _address;
     }
     
+    //Murasaki_Main
+    function owner(uint32 _summoner) public view returns (address) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        return mfs.get_owner(_summoner);
+    }
+    function class(uint32 _summoner) public view returns (uint32) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Main mm = Murasaki_Main(mfs.murasaki_main_address());
+        return mm.class(_summoner);
+    }
+    function age(uint32 _summoner) public view returns (uint32) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Main mm = Murasaki_Main(mfs.murasaki_main_address());
+        uint32 _now = uint32(block.timestamp);
+        uint32 _age = _now - mm.summoned_time(_summoner);
+        return _age;
+    }
+    
+    //Murasaki_Name
+    function name(uint32 _summoner) public view returns (string memory) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Name mn = Murasaki_Name(mfs.murasaki_name_address());
+        return mn.names(_summoner);
+    }
+    
+    //Murasaki_Craft
+    function balance_of_item(uint32 _summoner) public view returns (uint32[256] memory) {
+        address _owner = owner(_summoner);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
+        return mc.get_balance_of_type(_owner);
+    }
+    
+    //Murasaki_Strage
+    function level(uint32 _summoner) public view returns (uint32) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        return ms.level(_summoner);
+    }
+    function exp(uint32 _summoner) public view returns (uint32) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        return ms.exp(_summoner);
+    }
+    function strength(uint32 _summoner) public view returns (uint32) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        return ms.strength(_summoner);
+    }
+    function dexterity(uint32 _summoner) public view returns (uint32) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        return ms.dexterity(_summoner);
+    }
+    function intelligence(uint32 _summoner) public view returns (uint32) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        return ms.intelligence(_summoner);
+    }
+    function luck(uint32 _summoner) public view returns (uint32) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        return ms.luck(_summoner);
+    }
+    function next_exp_required(uint32 _summoner) public view returns (uint32) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        return ms.next_exp_required(_summoner);
+    }
+    /*
+    function last_level_up_time(uint32 _summoner) external view returns (uint32) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        return ms.last_level_up_time(_summoner);
+    }
+    */
+    function coin(uint32 _summoner) public view returns (uint32) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        return ms.coin(_summoner);
+    }
+    function material(uint32 _summoner) public view returns (uint32) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        return ms.material(_summoner);
+    }
+    function last_feeding_time(uint32 _summoner) public view returns (uint32) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        return ms.last_feeding_time(_summoner);
+    }
+    function last_grooming_time(uint32 _summoner) public view returns (uint32) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        return ms.last_grooming_time(_summoner);
+    }
+    function mining_status(uint32 _summoner) public view returns (uint32) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        return ms.mining_status(_summoner);
+    }
+    /*
+    function mining_start_time(uint32 _summoner) external view returns (uint32) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        return ms.mining_start_time(_summoner);
+    }
+    */
+    function farming_status(uint32 _summoner) public view returns (uint32) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        return ms.farming_status(_summoner);
+    }
+    /*
+    function farming_start_time(uint32 _summoner) external view returns (uint32) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        return ms.farming_start_time(_summoner);
+    }
+    */
+    function crafting_status(uint32 _summoner) public view returns (uint32) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        return ms.crafting_status(_summoner);
+    }
+    /*
+    function crafting_start_time(uint32 _summoner) external view returns (uint32) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        return ms.crafting_start_time(_summoner);
+    }
+    function crafting_item_type(uint32 _summoner) external view returns (uint32) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        return ms.crafting_item_type(_summoner);
+    }
+    */
+    function total_mining_sec(uint32 _summoner) public view returns (uint32) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        return ms.total_mining_sec(_summoner);
+    }
+    function total_farming_sec(uint32 _summoner) public view returns (uint32) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        return ms.total_farming_sec(_summoner);
+    }
+    function total_crafting_sec(uint32 _summoner) public view returns (uint32) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        return ms.total_crafting_sec(_summoner);
+    }
+    /*
+    function last_grooming_time_plus_working_time(uint32 _summoner) external view returns (uint32) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        return ms.last_grooming_time_plus_working_time(_summoner);
+    }
+    */
+
+    //Murasaki_Strage_Score
+    function total_exp_gained(uint32 _summoner) public view returns (uint32) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage_Score mss = Murasaki_Strage_Score(mfs.murasaki_strage_score_address());
+        return mss.total_exp_gained(_summoner);
+    }
+    function total_coin_mined(uint32 _summoner) public view returns (uint32) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage_Score mss = Murasaki_Strage_Score(mfs.murasaki_strage_score_address());
+        return mss.total_coin_mined(_summoner);
+    }
+    function total_material_farmed(uint32 _summoner) public view returns (uint32) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage_Score mss = Murasaki_Strage_Score(mfs.murasaki_strage_score_address());
+        return mss.total_material_farmed(_summoner);
+    }
+    function total_item_crafted(uint32 _summoner) public view returns (uint32) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage_Score mss = Murasaki_Strage_Score(mfs.murasaki_strage_score_address());
+        return mss.total_item_crafted(_summoner);
+    }
+    function total_precious_received(uint32 _summoner) public view returns (uint32) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage_Score mss = Murasaki_Strage_Score(mfs.murasaki_strage_score_address());
+        return mss.total_precious_received(_summoner);
+    }
+    
+    //Function_Share
+    function satiety(uint32 _summoner) public view returns (uint32) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        return mfs.calc_satiety(_summoner);
+    }
+    function happy(uint32 _summoner) public view returns (uint32) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        return mfs.calc_happy(_summoner);
+    }
+    function precious(uint32 _summoner) public view returns (uint32) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        return mfs.calc_precious(_summoner);
+    }
+    function not_petrified(uint32 _summoner) public view returns (uint32) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        bool _res = mfs.not_petrified(_summoner);
+        if (_res == true) {
+            return uint32(1);
+        } else {
+            return uint32(0);
+        }
+    }
+    function dapps_staking_amount(uint32 _summoner) public view returns (uint32) {
+        address _owner = owner(_summoner);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        return mfs.calc_dapps_staking_amount(_owner);
+    }
+    function luck_by_staking(uint32 _summoner) public view returns (uint32) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        return mfs.get_luck_by_staking(_summoner);
+    }
+    function score(uint32 _summoner) public view returns (uint32) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        return mfs.calc_score(_summoner);
+    }
+    
+    //Function_Working
+    function strength_withItems(uint32 _summoner) public view returns (uint32) {
+        address _owner = owner(_summoner);
+        uint32 _str = strength(_summoner);
+        Murasaki_Function_Mining_and_Farming mfmf = Murasaki_Function_Mining_and_Farming(murasaki_function_mining_and_farming_address);
+        _str += mfmf.count_mining_items(_owner);
+        return _str;
+    }
+    function dexterity_withItems(uint32 _summoner) public view returns (uint32) {
+        address _owner = owner(_summoner);
+        uint32 _dex = dexterity(_summoner);
+        Murasaki_Function_Mining_and_Farming mfmf = Murasaki_Function_Mining_and_Farming(murasaki_function_mining_and_farming_address);
+        _dex += mfmf.count_farming_items(_owner);
+        return _dex;
+    }
+    function intelligence_withItems(uint32 _summoner) public view returns (uint32) {
+        address _owner = owner(_summoner);
+        uint32 _int = intelligence(_summoner);
+        Murasaki_Function_Crafting mfc = Murasaki_Function_Crafting(murasaki_function_crafting_address);
+        _int += mfc.count_crafting_items(_owner);
+        return _int;
+    }
+    function luck_withItems(uint32 _summoner) public view returns (uint32) {
+        uint32 _luk = luck(_summoner);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        _luk += mfs.calc_precious(_summoner);
+        return _luk;
+    }
+    function luck_withItems_withStaking(uint32 _summoner) public view returns (uint32) {
+        uint32 _luk = luck_withItems(_summoner);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        _luk += mfs.get_luck_by_staking(_summoner);
+        return _luk;
+    }
+    
+    //Dice
+    function last_rolled_dice(uint32 _summoner) public view returns (uint32) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        World_Dice wd = World_Dice(mfs.world_dice_address());
+        return wd.get_last_rolled_dice(_summoner);
+    }
+    function last_dice_roll_time(uint32 _summoner) public view returns (uint32) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        World_Dice wd = World_Dice(mfs.world_dice_address());
+        return wd.last_dice_roll_time(_summoner);
+    }
+    function luck_withItems_withStaking_withDice(uint32 _summoner) public view returns (uint32) {
+        uint32 _luk = luck_withItems_withStaking(_summoner);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        World_Dice wd = World_Dice(mfs.world_dice_address());
+        _luk += wd.get_rolled_dice(_summoner);
+        return _luk;
+    }    
+    
+    //Mail
+    function receiving_mail(uint32 _summoner) public view returns (uint32) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Mail mml = Murasaki_Mail(mfs.murasaki_mail_address());
+        bool _res = mml.check_receiving_mail(_summoner);
+        if (_res == true) {
+            return uint32(1);
+        } else {
+            return uint32(0);
+        }
+    }
+    function sending_interval(uint32 _summoner) public view returns (uint32) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Mail mml = Murasaki_Mail(mfs.murasaki_mail_address());
+        return mml.calc_sending_interval(_summoner);
+    }
+    
+    //Lootlike
+    function allStatus(uint32 _summoner) public view returns (string[5] memory) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Lootlike mll = Murasaki_Lootlike(mfs.murasaki_lootlike_address());
+        return mll.get_allStatus(_summoner);
+    }
+    
+    //get all
+    function allDynamicStatus(uint32 _summoner) external view returns (uint32[64] memory) {
+        uint32[64] memory _res;
+        _res[0] = class(_summoner);
+        _res[1] = age(_summoner);
+        _res[2] = level(_summoner);
+        _res[3] = exp(_summoner);
+        _res[4] = strength(_summoner);
+        _res[5] = dexterity(_summoner);
+        _res[6] = intelligence(_summoner);
+        _res[7] = luck(_summoner);
+        _res[8] = next_exp_required(_summoner);
+        _res[9] = coin(_summoner);
+        _res[10] = material(_summoner);
+        _res[11] = last_feeding_time(_summoner);
+        _res[12] = last_grooming_time(_summoner);
+        _res[13] = mining_status(_summoner);
+        _res[14] = farming_status(_summoner);
+        _res[15] = crafting_status(_summoner);
+        _res[16] = total_mining_sec(_summoner);
+        _res[17] = total_farming_sec(_summoner);
+        _res[18] = total_crafting_sec(_summoner);
+        _res[19] = total_exp_gained(_summoner);
+        _res[20] = total_coin_mined(_summoner);
+        _res[21] = total_material_farmed(_summoner);
+        _res[22] = total_item_crafted(_summoner);
+        _res[23] = total_precious_received(_summoner);
+        _res[24] = satiety(_summoner);
+        _res[25] = happy(_summoner);
+        _res[26] = precious(_summoner);
+        _res[27] = not_petrified(_summoner);
+        _res[28] = dapps_staking_amount(_summoner);
+        _res[29] = luck_by_staking(_summoner);
+        _res[30] = score(_summoner);
+        _res[31] = strength_withItems(_summoner);
+        _res[32] = dexterity_withItems(_summoner);
+        _res[33] = intelligence_withItems(_summoner);
+        _res[34] = luck_withItems(_summoner);
+        _res[35] = luck_withItems_withStaking(_summoner);
+        _res[36] = last_rolled_dice(_summoner);
+        _res[37] = last_dice_roll_time(_summoner);
+        _res[38] = luck_withItems_withStaking_withDice(_summoner);
+        _res[39] = receiving_mail(_summoner);
+        _res[40] = sending_interval(_summoner);
+        return _res;
+    }
+}
+
+
+contract Murasaki_Info_fromWallet is Ownable {
+
+    //address
+    address public murasaki_function_share_address;
+    address public murasaki_function_mining_and_farming_address;
+    address public murasaki_function_crafting_address;
+    
+    //admin, set address
+    function _set1_murasaki_function_share_address(address _address) external onlyOwner {
+        murasaki_function_share_address = _address;
+    }
+    function _set2_murasaki_function_mining_and_farming_address(address _address) external onlyOwner {
+        murasaki_function_mining_and_farming_address = _address;
+    }
+    function _set3_murasaki_function_crafting_address(address _address) external onlyOwner {
+        murasaki_function_crafting_address = _address;
+    }
+    
     //call each info from wallet
     function summoner(address _wallet) public view returns (uint32) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
@@ -4529,7 +4952,8 @@ contract Murasaki_Info is Ownable {
 //===*bufferTreasury======================================================================================================
 
 
-contract feeTreasury is Ownable {
+//trading fee, cure fee, dapps staking, othe fees
+contract bufferTreasury is Ownable {
 
     //address
     address public murasaki_function_share_address;
@@ -4544,18 +4968,19 @@ contract feeTreasury is Ownable {
         treasury_rate = _value;
     }
 
-    //admin. withdraw
+    //admin. withdraw all, for emergency
     function withdraw(address rec)public onlyOwner{
         payable(rec).transfer(address(this).balance);
     }
     
-    //transfer for buybackTreasury
-    function transfer_for_buybackTreasury(address rec) external onlyOwner{
+    //transfer for buybackTreasury and teamTreasury
+    function transfer_for_buybackTreasury() external onlyOwner{
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         uint _amount_for_buybackTreasury = address(this).balance * treasury_rate / 10000;
         payable(mfs.buybackTreasury_address()).transfer(_amount_for_buybackTreasury);
+        payable(mfs.teamTreasury_address()).transfer(address(this).balance);
         //payable(rec).transfer(address(this).balance);   // transfer the rest to dev wallet
-        withdraw(rec);
+        //withdraw(rec);
     }
 }
 
@@ -4563,6 +4988,7 @@ contract feeTreasury is Ownable {
 //===*buybackTreasury======================================================================================================
 
 
+//for buyback items
 contract buybackTreasury is Ownable {
 
     //address
@@ -4571,7 +4997,7 @@ contract buybackTreasury is Ownable {
         murasaki_function_share_address = _address;
     }
 
-    //admin. withdraw
+    //admin. withdraw all, for emergency
     function withdraw(address rec)public onlyOwner{
         payable(rec).transfer(address(this).balance);
     }
@@ -4589,7 +5015,7 @@ contract teamTreasury is Ownable {
         murasaki_function_share_address = _address;
     }
 
-    //admin. withdraw
+    //admin. withdraw all
     function withdraw(address rec)public onlyOwner{
         payable(rec).transfer(address(this).balance);
     }
