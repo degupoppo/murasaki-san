@@ -54,6 +54,7 @@ async function connect() {
 
 async function wss() {
     let web3 = await new Web3("wss://rpc.shibuya.astar.network");
+    //let web3 = await new Web3("https://https://evm.shibuya.astar.network");
     return web3;
 }
 //const wss3 = wss();

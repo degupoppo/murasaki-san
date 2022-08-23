@@ -647,8 +647,8 @@ async function send_fp_get(_wallet, _summoner) {
 //===update status
 async function contract_update_status(_summoner) {
 
-    //let web3 = await connect();
-    let web3 = wss3;
+    let web3 = await connect();
+    //let web3 = wss3;
     let wallet = await get_wallet(web3);
 
     //contract
