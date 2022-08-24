@@ -44,7 +44,7 @@ async function connect() {
                 symbol: 'SBY',
                 decimals: 18
             },
-            rpcUrls: ["https://https://evm.shibuya.astar.network"],
+            rpcUrls: ["https://evm.shibuya.astar.network"],
             blockExplorerUrls: ['https://blockscout.com/shibuya'],
         }]
     });
