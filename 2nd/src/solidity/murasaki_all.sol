@@ -3855,7 +3855,13 @@ contract bufferTreasury is Ownable {
     function _set1_murasaki_function_share_address(address _address) external onlyOwner {
         murasaki_function_share_address = _address;
     }
-
+    
+    //receivable
+    receive() external payable {
+    }
+    fallback() external payable {
+    }
+    
     uint32 public inflationRate = 300;    //300 = 3%
 
     //admin, set rate
@@ -3905,6 +3911,12 @@ contract buybackTreasury is Ownable {
         payable(rec).transfer(address(this).balance);
     }
     
+    //receivable
+    receive() external payable {
+    }
+    fallback() external payable {
+    }
+
     uint public amount_paied = 0;
     
     function calc_amount_per_summoner() public view returns (uint) {
@@ -4018,6 +4030,11 @@ contract teamTreasury is Ownable {
     //admin. withdraw all
     function withdraw(address rec)public onlyOwner{
         payable(rec).transfer(address(this).balance);
+    }
+    //receivable
+    receive() external payable {
+    }
+    fallback() external payable {
     }
 }
 
@@ -4698,42 +4715,36 @@ contract Murasaki_Info is Ownable {
         Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
         return ms.mining_status(_summoner);
     }
-    /*
-    function mining_start_time(uint32 _summoner) external view returns (uint32) {
+    function mining_start_time(uint32 _summoner) public view returns (uint32) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
         return ms.mining_start_time(_summoner);
     }
-    */
     function farming_status(uint32 _summoner) public view returns (uint32) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
         return ms.farming_status(_summoner);
     }
-    /*
-    function farming_start_time(uint32 _summoner) external view returns (uint32) {
+    function farming_start_time(uint32 _summoner) public view returns (uint32) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
         return ms.farming_start_time(_summoner);
     }
-    */
     function crafting_status(uint32 _summoner) public view returns (uint32) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
         return ms.crafting_status(_summoner);
     }
-    /*
-    function crafting_start_time(uint32 _summoner) external view returns (uint32) {
+    function crafting_start_time(uint32 _summoner) public view returns (uint32) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
         return ms.crafting_start_time(_summoner);
     }
-    function crafting_item_type(uint32 _summoner) external view returns (uint32) {
+    function crafting_item_type(uint32 _summoner) public view returns (uint32) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
         return ms.crafting_item_type(_summoner);
     }
-    */
     function total_mining_sec(uint32 _summoner) public view returns (uint32) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
@@ -4898,6 +4909,18 @@ contract Murasaki_Info is Ownable {
         return mll.get_allStatus(_summoner);
     }
     
+    //isActive
+    function isActive(uint32 _summoner) public view returns (uint32) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        bool _isActive = ms.isActive(_summoner);
+        if (_isActive == true) {
+            return uint32(1);
+        } else {
+            return uint32(0);
+        }
+    }
+    
     //get all
     function allDynamicStatus(uint32 _summoner) external view returns (uint32[64] memory) {
         uint32[64] memory _res;
@@ -4915,33 +4938,38 @@ contract Murasaki_Info is Ownable {
         _res[11] = last_feeding_time(_summoner);
         _res[12] = last_grooming_time(_summoner);
         _res[13] = mining_status(_summoner);
-        _res[14] = farming_status(_summoner);
-        _res[15] = crafting_status(_summoner);
-        _res[16] = total_mining_sec(_summoner);
-        _res[17] = total_farming_sec(_summoner);
-        _res[18] = total_crafting_sec(_summoner);
-        _res[19] = total_exp_gained(_summoner);
-        _res[20] = total_coin_mined(_summoner);
-        _res[21] = total_material_farmed(_summoner);
-        _res[22] = total_item_crafted(_summoner);
-        _res[23] = total_precious_received(_summoner);
-        _res[24] = satiety(_summoner);
-        _res[25] = happy(_summoner);
-        _res[26] = precious(_summoner);
-        _res[27] = not_petrified(_summoner);
-        _res[28] = dapps_staking_amount(_summoner);
-        _res[29] = luck_by_staking(_summoner);
-        _res[30] = score(_summoner);
-        _res[31] = strength_withItems(_summoner);
-        _res[32] = dexterity_withItems(_summoner);
-        _res[33] = intelligence_withItems(_summoner);
-        _res[34] = luck_withItems(_summoner);
-        _res[35] = luck_withItems_withStaking(_summoner);
-        _res[36] = last_rolled_dice(_summoner);
-        _res[37] = last_dice_roll_time(_summoner);
-        _res[38] = luck_withItems_withStaking_withDice(_summoner);
-        _res[39] = receiving_mail(_summoner);
-        _res[40] = sending_interval(_summoner);
+        _res[14] = mining_start_time(_summoner);
+        _res[15] = farming_status(_summoner);
+        _res[16] = farming_start_time(_summoner);
+        _res[17] = crafting_status(_summoner);
+        _res[18] = crafting_start_time(_summoner);
+        _res[19] = crafting_item_type(_summoner);
+        _res[20] = total_mining_sec(_summoner);
+        _res[21] = total_farming_sec(_summoner);
+        _res[22] = total_crafting_sec(_summoner);
+        _res[23] = total_exp_gained(_summoner);
+        _res[24] = total_coin_mined(_summoner);
+        _res[25] = total_material_farmed(_summoner);
+        _res[26] = total_item_crafted(_summoner);
+        _res[27] = total_precious_received(_summoner);
+        _res[28] = satiety(_summoner);
+        _res[29] = happy(_summoner);
+        _res[30] = precious(_summoner);
+        _res[31] = not_petrified(_summoner);
+        _res[32] = dapps_staking_amount(_summoner);
+        _res[33] = luck_by_staking(_summoner);
+        _res[34] = score(_summoner);
+        _res[35] = strength_withItems(_summoner);
+        _res[36] = dexterity_withItems(_summoner);
+        _res[37] = intelligence_withItems(_summoner);
+        _res[38] = luck_withItems(_summoner);
+        _res[39] = luck_withItems_withStaking(_summoner);
+        _res[40] = last_rolled_dice(_summoner);
+        _res[41] = last_dice_roll_time(_summoner);
+        _res[42] = luck_withItems_withStaking_withDice(_summoner);
+        _res[43] = receiving_mail(_summoner);
+        _res[44] = sending_interval(_summoner);
+        _res[45] = isActive(_summoner);
         return _res;
     }
     
@@ -4965,6 +4993,9 @@ contract Murasaki_Info is Ownable {
         return mc.get_balance_of_type(_owner);
     }
 }
+
+
+//---Murasaki_Info_fromWallet
 
 
 contract Murasaki_Info_fromWallet is Ownable {
@@ -5157,7 +5188,7 @@ contract Murasaki_Info_fromWallet is Ownable {
 
 //---Governance
 
-
+/*
 contract Governance is Ownable {
 
     //address
@@ -5185,22 +5216,20 @@ contract Governance is Ownable {
         
 
     //view
-    function check_summoner(_summoner) public view return (bool) {
+    function check_summoner(uint32 _summoner) public view return (bool) {
         //require(_summoner == owner);
         //require(ms.level(_summoner) >= 3);
         //require(satiety >= 10);
         return true;
     }
     
-    function get_weight(_summoner) public view return (uint32) {
+    function get_weight(uint32 _summoner) public view return (uint32) {
         return 1;
     }
     
-    /*
     function _set_fluffy_coefficient(uint32 _fluffy_type) internal () {
         ;
     }
-    */
     
     //write
     function vote(uint32 _summoner, uint32 _subject_no, uint32 _select) external {
@@ -5224,6 +5253,7 @@ contract Governance is Ownable {
     }
 
 }
+*/
 
 
 //===old==================================================================================================================

@@ -28,6 +28,7 @@ async function initialize_contract() {
     //other
     let contract_wd = new web3.eth.Contract(abi_world_dice, contract_world_dice);
     let contract_mml = new web3.eth.Contract(abi_murasaki_mail, contract_murasaki_mail);
+    let contract_mll = new web3.eth.Contract(abi_murasaki_lootlike, contract_murasaki_lootlike);
     //strage
     let contract_ms = new web3.eth.Contract(abi_murasaki_strage, contract_murasaki_strage);
     let contract_mss = new web3.eth.Contract(abi_murasaki_strage_score, contract_murasaki_strage_score);
@@ -38,6 +39,11 @@ async function initialize_contract() {
     //let contract_adm = new web3.eth.Contract(abi_murasaki_admin, contract_murasaki_admin);
     //info
     let contract_info = new web3.eth.Contract(abi_murasaki_info, contract_murasaki_info);
+    let contract_info_fromWallet = new web3.eth.Contract(abi_murasaki_info_fromWallet, contract_murasaki_info_fromWallet);
+    //treajury
+    let contract_bft = new web3.eth.Contract(abi_bufferTreasury, contract_bufferTreasury);
+    let contract_bbt = new web3.eth.Contract(abi_buybackTreasury, contract_buybackTreasury);
+    let contract_tt = new web3.eth.Contract(abi_teamTreasury, contract_teamTreasury);
 
     //set contracts
 
@@ -50,7 +56,8 @@ async function initialize_contract() {
     //contract_mc.methods._add_permitted_address(contract_murasaki_admin).send({from:wallet});
     //contract_mc.methods._add_permitted_address(contract_murasaki_function_summon_and_levelup).send({from:wallet});
     //contract_mn.methods._add_permitted_address(contract_murasaki_admin).send({from:wallet});
-    //set function
+
+    //set function_share
     contract_mfs.methods._set1_murasaki_main_address(contract_murasaki_main).send({from:wallet});
     contract_mfs.methods._set2_murasaki_strage_address(contract_murasaki_strage).send({from:wallet});
     contract_mfs.methods._set3_murasaki_craft_address(contract_murasaki_craft).send({from:wallet});
@@ -59,10 +66,18 @@ async function initialize_contract() {
     contract_mfs.methods._set6_murasaki_strage_score_address(contract_murasaki_strage_score).send({from:wallet});
     contract_mfs.methods._set7_murasaki_mail_address(contract_murasaki_mail).send({from:wallet});
     contract_mfs.methods._set8_murasaki_strage_nui_address(contract_murasaki_strage_nui).send({from:wallet});
+    //contract_mfs.methods._set9_astarbase_address(contract_murasaki_strage_nui).send({from:wallet});
+    contract_mfs.methods._setA_bufferTreqsury_address(contract_bufferTreasury).send({from:wallet});
+    contract_mfs.methods._setB_buybackTreasury_address(contract_buybackTreasury).send({from:wallet});
+    contract_mfs.methods._setC_teamTreasury_address(contract_teamTreasury).send({from:wallet});
+    contract_mfs.methods._setD_murasaki_lootlike_address(contract_murasaki_lootlike).send({from:wallet});
+    
     //astarbase, local
-    //contract_mfs.methods._set9_astarbase_address("0x64582688EF82Bcce7F6260eE1384656e1D33b4bB").send({from:wallet});
+    contract_mfs.methods._set9_astarbase_address("0x64582688EF82Bcce7F6260eE1384656e1D33b4bB").send({from:wallet});
     //astarbase, shibuya
-    contract_mfs.methods._set9_astarbase_address("0xF183f51D3E8dfb2513c15B046F848D4a68bd3F5D").send({from:wallet});
+    //contract_mfs.methods._set9_astarbase_address("0xF183f51D3E8dfb2513c15B046F848D4a68bd3F5D").send({from:wallet});
+
+    //set other functions
     contract_mfsl.methods._set1_murasaki_function_share_address(contract_murasaki_function_share).send({from:wallet});
     contract_mffg.methods._set1_murasaki_function_share_address(contract_murasaki_function_share).send({from:wallet});
     contract_mfmf.methods._set1_murasaki_function_share_address(contract_murasaki_function_share).send({from:wallet});
@@ -70,10 +85,13 @@ async function initialize_contract() {
     contract_mfc.methods._set2_murasaki_function_crafting_codex_address(contract_murasaki_function_crafting_codex).send({from:wallet});
     contract_mfcc.methods._set1_murasaki_function_share_address(contract_murasaki_function_share).send({from:wallet});
     contract_mfn.methods._set1_murasaki_function_share_address(contract_murasaki_function_share).send({from:wallet});
-    //set other
+
+    //set others
     contract_wd.methods._set1_murasaki_function_share_address(contract_murasaki_function_share).send({from:wallet});
     contract_mml.methods._set1_murasaki_function_share_address(contract_murasaki_function_share).send({from:wallet});
     contract_mml.methods._set2_murasaki_function_crafting_address(contract_murasaki_function_crafting).send({from:wallet});
+    contract_mll.methods._set1_murasaki_function_share_address(contract_murasaki_function_share).send({from:wallet});
+
     //set strage
     contract_ms.methods._add_permitted_address(contract_murasaki_function_summon_and_levelup).send({from:wallet});
     contract_ms.methods._add_permitted_address(contract_murasaki_function_feeding_and_grooming).send({from:wallet});
@@ -96,6 +114,9 @@ async function initialize_contract() {
     contract_info.methods._set1_murasaki_function_share_address(contract_murasaki_function_share).send({from:wallet});
     contract_info.methods._set2_murasaki_function_mining_and_farming_address(contract_murasaki_function_mining_and_farming).send({from:wallet});
     contract_info.methods._set3_murasaki_function_crafting_address(contract_murasaki_function_crafting).send({from:wallet});
+    contract_info_fromWallet.methods._set1_murasaki_function_share_address(contract_murasaki_function_share).send({from:wallet});
+    contract_info_fromWallet.methods._set2_murasaki_function_mining_and_farming_address(contract_murasaki_function_mining_and_farming).send({from:wallet});
+    contract_info_fromWallet.methods._set3_murasaki_function_crafting_address(contract_murasaki_function_crafting).send({from:wallet});
 }
 
 async function test() {
@@ -123,8 +144,8 @@ async function test() {
 
 }
 
-//initialize_contract();
-set_speed(100*10);
+initialize_contract();
+//set_speed(100*10);
 //set_speed(100*365);
 //set_speed(100*1000);
 //test();

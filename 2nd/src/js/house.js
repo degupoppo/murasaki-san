@@ -17,6 +17,8 @@
         infoコントラから一括でバッチ処理で取得する
         個別の情報は仕方ないのでその都度取得する
         一度だけ読む情報もinfoからバッチで取得する
+
+    ゲーム読み込み・開始UIの深慮
         ゲーム画面はすべて読みこんでから表示させたい
         そのため、できるだけまとめて読み込み、読み込み完了をわかりやすくする
             ぬいちゃんと、walletスコアの取得がネック、さてどうするか。
@@ -440,6 +442,8 @@ async function init_global_variants() {
     local_score = 0;
     local_receiving_mail = 0;
     local_receiving_mail_from = "";
+    local_satiety = 0;
+    local_happy = 0;
 
     //---local previous
     previous_local_last_feeding_time = 0;
@@ -497,7 +501,8 @@ async function init_global_variants() {
     turn_forFPS = 0;
     time_forFPS = Date.now();
     web3 = await connect();
-    wss3 = await wss();
+    //wss3 = await wss();
+    wss = await connect();
 
     //---flag
     flag_music = 0;
@@ -646,11 +651,125 @@ async function send_fp_get(_wallet, _summoner) {
 //===web3========================================================--------
 
 
+//---update status2
+
+async function contract_update_dynamic_status(_summoner) {
+
+    let web3 = await connect();
+    let wallet = await get_wallet(web3);
+    let contract_info = await new web3.eth.Contract(abi_murasaki_info, contract_murasaki_info);
+    
+    //call info from chain
+    let _all_static_status = await contract_info.methods.allStaticStatus(_summoner).call();
+
+    //class, owner, name
+    local_class =   Number(_all_static_status[0]);
+    local_owner =   _all_static_status[1];
+    local_name =   _all_static_status[2];
+
+    //lootlike
+    let _res = _all_static_status[3];
+    local_birthplace =  _res[0];
+    local_spftmess =    _res[1];
+    local_fluffiness =  _res[2];
+    local_elasticity =  _res[3];
+    local_personality = _res[4];
+}
+
+async function contract_update_static_status(_summoner) {
+
+    let web3 = await connect();
+    let wallet = await get_wallet(web3);
+    let contract_info = await new web3.eth.Contract(abi_murasaki_info, contract_murasaki_info);
+    
+    //call info from chain
+    let _all_dynamic_status = await contract_info.methods.allDynamicStatus(_summoner).call();
+    let _all_items = await contract_info.methods.allItems(_summoner).call();
+    
+    //update local variants
+
+    //wallet
+    local_wallet = wallet;
+    
+    //isActive
+    let _res = Number(_all_dynamic_status[45]);
+    if (_res == 1) {
+        local_isActive = true;
+    } else {
+        local_isActive = false;
+    }
+
+    //status
+    local_level =               Number(_all_dynamic_status[2]);
+    local_exp =                 Number(_all_dynamic_status[3]);
+    local_strength =            Number(_all_dynamic_status[4])/100;
+    local_dexterity =           Number(_all_dynamic_status[5])/100;
+    local_intelligence =        Number(_all_dynamic_status[6])/100;
+    local_luck =                Number(_all_dynamic_status[7])/100;
+    local_next_exp_required =   Number(_all_dynamic_status[8]);
+
+    //coin, material, precious
+    local_coin =        Number(_all_dynamic_status[9]);
+    local_material =    Number(_all_dynamic_status[10]);
+    local_precious =    Number(_all_dynamic_status[30]);
+
+    //feeding, grooming
+    local_last_feeding_time =   Number(_all_dynamic_status[11]);
+    local_last_grooming_time =  Number(_all_dynamic_status[12]);
+
+    //working
+    local_mining_status =       Number(_all_dynamic_status[13]);
+    local_mining_start_time =   Number(_all_dynamic_status[14]);
+    local_farming_status =      Number(_all_dynamic_status[15]);
+    local_farming_start_time =  Number(_all_dynamic_status[16]);
+    local_crafting_status =     Number(_all_dynamic_status[17]);
+    local_crafting_start_time = Number(_all_dynamic_status[18]);
+    local_crafting_item_type =  Number(_all_dynamic_status[19]);
+
+    //dice
+    local_last_rolled_dice =    Number(_all_dynamic_status[40]);
+    local_last_dice_roll_time = Number(_all_dynamic_status[41]);
+
+    //score
+    local_score =   Number(_all_dynamic_status[34]);
+    
+    //satiety, happy
+    local_satiety = Number(_all_dynamic_status[28]);
+    local_happy =   Number(_all_dynamic_status[29]);
+
+    //dapps staking
+    local_dapps_staking_amount =    Number(_all_dynamic_status[32]);
+    local_luck_by_staking =         Number(_all_dynamic_status[33]);
+
+    //modified status
+    local_strength_withItems =      Number(_all_dynamic_status[33]);
+    local_dexterity_withItems =     Number(_all_dynamic_status[33]);
+    local_intelligence_withItems =  Number(_all_dynamic_status[33]);
+    local_luck_withItems =          Number(_all_dynamic_status[33]);
+    local_luck_withItems_withStaking =              Number(_all_dynamic_status[33]);
+    local_luck_withItems_withStaking_withDice =     Number(_all_dynamic_status[33]);
+    
+    //mail
+    local_mail_sending_interval =   Number(_all_dynamic_status[44]);
+    local_receiving_mail =          Number(_all_dynamic_status[44]);
+
+    //items
+    local_items = _all_items;
+
+    //update working status
+    contract_update_working(_summoner);
+    
+    //update last_sync_time
+    last_sync_time = Date.now();
+    count_sync += 1;
+}
+
+
 //---update status
 async function contract_update_status(_summoner) {
 
-    //let web3 = await connect();
-    let web3 = wss3;
+    let web3 = await connect();
+    //let web3 = wss3;
     let wallet = await get_wallet(web3);
 
     //contract
@@ -746,10 +865,12 @@ async function contract_update_status(_summoner) {
 //update_all, at the first
 async function contract_update_all() {
     await contract_update_summoner_of_wallet();
-    await contract_update_statics(summoner);
-    await contract_update_name(summoner);
-    await contract_update_status(summoner);
-    await contract_update_event_heart();
+    //await contract_update_statics(summoner);
+    //await contract_update_name(summoner);
+    //await contract_update_status(summoner);
+    await contract_update_static_status(summoner);
+    await contract_update_dynamic_status(summoner);
+    //await contract_update_event_heart();
 }
 
 
@@ -1202,7 +1323,7 @@ async function contract_update_statics(_summoner) {
 //update mining/farming/crafting
 async function contract_update_working(_summoner) {
     //let web3 = await connect();
-    let wallet = await get_wallet(web3);
+    //let wallet = await get_wallet(web3);
     let contract_mfc = await new web3.eth.Contract(abi_murasaki_function_crafting, contract_murasaki_function_crafting);
     let contract_mfmf = await new web3.eth.Contract(abi_murasaki_function_mining_and_farming, contract_murasaki_function_mining_and_farming);
     if (local_mining_status == 1){
@@ -2799,10 +2920,10 @@ function open_window_craft (scene) {
             icon_crafting_time.visible = true;
             text_select_item.setText('"'+array_item_name[_item]+'"');
             //get herat required
-            let _heart_required = await contract_get_heart_required(_item);
-            global_selected_crafting_item_required_heart = _heart_required;
-            text_crafting_selected_item_heart.setText(_heart_required);
-            icon_crafting_heart.visible = true;
+            //let _heart_required = await contract_get_heart_required(_item);
+            //global_selected_crafting_item_required_heart = _heart_required;
+            //text_crafting_selected_item_heart.setText(_heart_required);
+            //icon_crafting_heart.visible = true;
         } else {
             text_crafting_selected_item_ohana.setText("");
             text_crafting_selected_item_kusa.setText("");
@@ -4551,7 +4672,8 @@ function update_parametersWithAnimation(this_scene) {
 
     //satiety
     let base_satiety = 86400 / 2 / SPEED;
-    satiety = Math.round( (base_satiety - (now_time - local_last_feeding_time)) / base_satiety * 100 );
+    //satiety = Math.round( (base_satiety - (now_time - local_last_feeding_time)) / base_satiety * 100 );
+    satiety = local_satiety;
     if (satiety < 0) { satiety = 0; }
     if (satiety > 100) { satiety = 100; }
     if (satiety != previous_satiety) {
@@ -4562,7 +4684,8 @@ function update_parametersWithAnimation(this_scene) {
 
     //happy
     let base_happy = 86400 * 3 / SPEED;
-    happy = Math.round( (base_happy - (now_time - local_last_grooming_time)) / base_happy * 100 );
+    //happy = Math.round( (base_happy - (now_time - local_last_grooming_time)) / base_happy * 100 );
+    happy = local_happy;
     if (happy < 0) { happy = 0; }
     if (happy > 100) { happy = 100; }
     if (happy != previous_happy) {
@@ -6221,11 +6344,12 @@ function update() {
     }
 
     //update onchain data
-    if (turn % 500 == 70 || turn == 50) {
+    if (turn % 250 == 70 || turn == 50) {
         if (count_sync == 0 || local_notPetrified == false || summoner == 0) {
             contract_update_all();
         } else if (summoner > 0) {
-            contract_update_status(summoner);
+            contract_update_static_status(summoner);
+            //contract_update_status(summoner);
         }
     }
 }
