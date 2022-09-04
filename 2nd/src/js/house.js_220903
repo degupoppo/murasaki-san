@@ -63,6 +63,206 @@
             頻度は月1回か、2週間に1回程度
             参加でfluffy 1匹もらえる？
         実装
+            
+
+ ok infoコントラの実装と整理
+        UXとのinteractionは基本的にinfoコントラを介す
+        定期的に取得する情報はarrayとして一度に取得する関数を実装する
+        個別に必要なものもすべてinfoコントラに格納し、
+        可能な限りarray化してUXから読み込みやすくする
+
+ ok トレジャリーコントラクトの整備と実装
+        バイバック金庫
+            amount / summoner number = mint fee とする
+                あるいは、amount / active summoner number = mint fee
+                petrified summonerの数は除く
+            mint時は自動的にバイバックトレジャリーに50%, 運営金庫に50%入る
+            以降は、あらかじめ予定したインフレ率に従い、一週間か一ヶ月ごとに手動で追加する
+        運営金庫
+            mint feeの50%が即座に入る
+            donationの100%が即座に入る
+            trading fee, dapps stakingのうち、バイバック金庫に入り切らなかったものが入る
+            運営報酬として個人walletへ支払う
+            残ったものはdapps stakingへ還元する
+        バッファー金庫
+            dapps staking, trading fee, その他feeはすべてここに一時的に格納される
+            週毎か月毎に、決められたインフレ率になるようにバイバック金庫へ移す
+            残りは運営金庫へ移して、その都度0にする。
+        弱点
+            mint過剰
+                mintだけしてtradingもdapps stakingもしないライトユーザーが大量につくと、
+                バイバック費用が全く釣り上がらずに物価が上がらない
+                どこかで非アクティブユーザーをふるい落とす機構が必要か
+                もうプレイしないユーザー（石化ユーザー）の分のバイバック料金は、
+                インフレ率計算時にアクティブユーザーで分けるようにするか。
+            インフレ資金不足
+                みなが盛んにゲームプレイしてもインフレには寄与しない
+                また、ユーザー数が短期間に増大するとむしろインフレしにくくなる。
+                mint feeの50%をdapps stakingしたリワードがインフレ率の基本なので、
+                何も追加がなければ年3.9%しかインフレしない。
+                dapps stakingに入れてるほどのファンユーザーの「比率」を
+                どれだけ増やせるかがインフレ率に寄与する。
+                1年インフレ率42%で、月率3%
+                これを実現するためには、dapps stakingに1120/summoner必要
+                10,000 stakingしてくれる人が10%いれば実現可能なライン
+            後半の経済破綻
+                アイテムはだいたい1週間に1個程度作製できる
+                序盤のアイテムはいくら売ってもバイバック金庫が枯渇しないが、
+                後半のアイテムは売り続けられると金庫が枯渇する。
+                育ちきったsummonerが一斉に集金に走ると、おそらく経済が終わるだろう
+                この辺、計算しておくか、デフレルールを設けるか、対策が必要
+                Lv10アイテムnormalを売り続けると103日で枯渇する（3.4ヶ月）
+                つまり、1年後に作っては売りの集金に走ったとしても、
+                バイバック金庫をシュリンクさせるには3-4ヶ月かかる
+                2年後にLv16のアイテムを売るとすると、およそ1.5ヶ月
+
+ ok lootライクなランダムテキストの実装
+        summoner mint時にランダムでオリジナルのパラメータを設定する
+        パラメータによって何かしらの差をつけたいが・・・
+            ゲーム性には直接関係ない、愛着とストーリー性を持つものにする
+            早さや大きさなど、行動に影響したり変化したりしそうなものは避ける
+        項目案
+            出身地：火星、お花畑、滝壺、アンドロメダ星雲、とか意味不明な場所にする
+            好きな色：最初に設定する
+            正確：おっとり、
+            寿命：
+            
+        出身地(Birthplace)：
+            fluffy
+            woolly
+            feathery
+                x
+            sweater
+            blanket
+            carpet
+            cushion
+            scarf
+            towel
+            
+        softness:
+        fluffiness:
+        elasticity:
+            inredible
+            marvelous
+            excellent
+            amazing
+            great
+            fabulous
+            wonderful
+            gorgeous
+            awesome
+            fantastic
+            lovely
+            brilliant
+            impressive
+            superb
+            
+        main component:
+            kindness
+            braveness
+            love
+            pleasure
+            cuteness
+            cleverness
+            
+        personality:
+            friendly
+            reliable
+            optimistic
+            frisky
+            thoughtful
+            honest
+            easygoing
+            tolerant
+            mild
+            affectionate
+            intelligent
+            patient
+            faithful
+            innocent
+            gentle
+        
+
+ ok 収集NFTの再考
+        コンセプト
+            むらさきさんが集めている宝物
+                流れ星、金平糖、宝石の原石
+            他のsummonerとの関わりでのみ手に入る
+            マメなゲームプレイに応じて手に入る
+            luckを増やす主な手段
+                luckが増えるとすべての行動効率が増加する
+            トレードするとより有利になる機構
+            同型を集めてupgradeすることで効果を高められる
+            集めるとお部屋がにぎやかになる
+        今ハートを得るタイミングで代わりに手に入る多種類NFT
+            所持することでluckが上昇する
+            同じ種類を集めてupgradeすると上位NFT化できる
+            上位NFTは3個→5個分の効果、など
+            luckを効果的に上げる主な手段とする
+        upgradeのUIの実装
+            marketのupgradeでは味気ないか
+            うまくsummonerの行動として組み込みたいところだが。
+            ネックは、burnするアイテムの選択をどうするか。
+        取得方法の再考
+            craft時に受動的に
+            mail時に能動的に
+            もう1つぐらいなにか
+                他のsummonerとのインタラクションが必須にしたい
+                例えば、ダイスで20出たらとかではなくて。
+            しかし、あまりにも機会を増やすと部屋がNFTだらけになる。
+        宝石箱の実装
+            集めたNFTを入れておく入れ物
+        作品内での立ち位置と、獲得時の演出を深慮する
+            星なら空から降ってくる
+            宝石ならないないさんが持ってきてくれる、など。
+        一方通行で溜め込むだけで、消費はさせない
+            クラフトの消費アイテムとしては要求されない
+            1キャラに集中させてluckをブーストできるので、レベルキャップをもうける？
+        実装
+            見かけ：未定
+                流れ星、金平糖、宝石、きれいな石、あるいはそのいずれかに見える謎の個体
+                → 毛玉：fluffyとする
+                fluffy (normal), fluffier (uncommon), fluffiest (rare)
+                red fluffy, blue fluffierなど、種類＋レア度で表現する
+            種類：ひとまず１２
+                トレードしないとランダム取得で効率悪いように
+                4だと少ない、12だと多すぎ？10か8か。あるいは12でも良いか。
+                    red
+                    yellow
+                    white
+                    black
+                    green
+                    orange
+                    brown
+                    pink
+                    blue
+                    aqua
+                    gray
+                    violet
+                    
+            レアリティ：3段階
+                itemと同じくnormal, uncommon, rare
+                下位3個をburnして上位1個をmintする
+                n*3 -> u = n*4, u*3 -> r = u*4 = n*16 (n*9 -> n*16)
+            取得理論値：
+                luckデザイン
+                    初期値3 + ダイス平均1 + staking3 + Lv分4 = 11 (1年後)
+                    1年後にNFTによって+4 = 15ぐらいを目安に設計する
+                0.01ならばn:400個, u:100個, r:25
+                0.05ならばn:80個, u:20個, r:5, この辺だろうか
+                    n*80/y = 6/mo = 3/2w
+                0.04ならばn:100個, u:25個, r:6.25
+                    n*100/y = 8/mo = 2/w
+                    クラフトは1/w, メールも1/wとすると, 合わせて2/w程度
+                    もう一つ取得メカニズムを入れたい場合は、初期値3を下げるか、単価を下げるか。
+                0.03ならば, n:133
+            レベルキャップ：
+                市場買い占め→luckブーストを防ぐメカニズム
+                でないと、luck +100なども可能になってしまう
+                キャップはLvとするか、Ageとするか
+                    → やはりゲームプレイに応じて上がるLvが適切か
+                単純に、Lv20でmax+4として、0.2/Lvとするか
+                    これなら、相当課金しないとLvキャップを意識しなくて良いだろう
 
     効果音
         https://soundeffect-lab.info/sound/button/
@@ -80,6 +280,38 @@
             曲？音だけ？
         バッチ処理による軽量化
             チェーン情報の一括取得、頻度向上
+
+    バイバックシテムの深慮
+        意味論
+            市場最低価格を運営側で設定することにより、暴落という概念をなくす。
+            最低価格はdapps stakingに応じて少しずつ上昇してゆく。
+            アイテムは売って手放せるが、売って利確するとその後の育成効率が下がる
+                かつ、売値が高いアイテムはより後半で作れる
+            時間が立つほど売値が上昇するので、後で売ったほうがお得となり、売りづらい
+            常に最低価格で買い取ってもらえる安心感を設定する
+            最低価格より高い値段で売りに出して、誰かが買ってくれると嬉しい
+            最低価格での売りはburnとなり、残ったアイテムの希少性を上げる
+        戦略
+            最低価格はどれだけ売られても下がらない
+                mintされた全アイテムを買いきれる価格に設定する
+            係数をかけてLv1よりLv16のほうが高くなるようにする
+                必要なコストに比例するようにする
+            dapps stakingによりtrejuaryが増加して価格が上昇する
+                しかし、これだと新規参入者が増えると価格が下落することになる
+                trejury/summonerの値が小さくなるため
+                trejuryはmint費用＋staking rewordが入る
+                    summonerが増えるとそれだけ、summonerあたりのtrejuryが減るため、
+                    アイテム買取価格も減らさなければいけなくなる
+                summonerのmint費用をtrejuryに応じて上げればよいか
+                    現在のtrejury/summonerがmint費用に等しい
+                    アイテム買取価格が2倍に上がれば新規mint費用も2倍に上がる計算
+        実装
+            summonerのmint費用はtrejury/(summoner+1)で算出する
+                trejury/summonerの比率はどれだけmintされても変化しない
+                早めの参入が少しだけ有利な設計
+            dapps stakingの50%がtrejuryに移動する
+            全アイテムを売り切るとtrejury/summonerの値を使い切るコスト設計にする
+                最低価格だけでは恩株化しにくい設計≒ポンジスキーム化しにくい設計
 
     bot対策:他キャラ抑制
         Item transfer costの設定
@@ -2636,68 +2868,6 @@ function radarchart(scene, x0, y0, r, str, dex, int, luk, str_item, dex_item, in
     group_chart.add(scene.add.sprite(x0+r-5+10, y0-30, "icon_dex").setOrigin(0.5).setScale(0.12));
     group_chart.add(scene.add.sprite(x0-15-12, y0+r-5+14, "icon_luk").setOrigin(0.5).setScale(0.10));
     group_chart.add(scene.add.sprite(x0-r-20+16, y0-10-16, "icon_int").setOrigin(0.5).setScale(0.10));
-}
-function radarchart2(
-        scene, 
-        x0, 
-        y0, 
-        r, 
-        str, 
-        dex, 
-        int, 
-        luk, 
-        str_item, 
-        dex_item, 
-        int_item, 
-        luk_item
-    ) {
-        //base
-        let base = 30;
-        //calc (x,y) from status
-        //main
-        let x1 = 0;
-        let y1 = -r * str/base;
-        let x2 = r * dex/base;
-        let y2 = 0;
-        let x3 = 0;
-        //let y3 = r * luk/(base*0.7);
-        //luk: boost draw x2 beyond initial value=3
-        let y3 = r * ((luk-3)/(base/2) + 3/base);
-        let x4 = -r * int/base;
-        let y4 = 0;
-        //item
-        let y1i = -r * (str+str_item)/base;
-        let x2i = r * (dex+dex_item)/base;
-        let y3i = r * ((luk+luk_item-3)/(base/2) + 3/base);
-        let x4i = -r * (int+int_item)/base;
-        //dice
-        let y1d = -r * (str+str_item)/base;
-        let x2d = r * (dex+dex_item)/base;
-        let y3d = r * ((luk+luk_item+local_rolled_dice/100-3)/(base/2) + 3/base);
-        let x4d = -r * (int+int_item)/base;
-        //remove old chart
-        try {
-            group_chart.destroy(true);
-        } catch(error) {
-            ;
-        }
-        //draw
-        group_chart = scene.add.group();
-        group_chart.add(scene.add.polygon(x0+r, y0+r, [0,-r,r,0,0,r,-r,0], 0xDADADA, 0.4));
-        group_chart.add(scene.add.polygon(x0+r*0.75, y0+r*0.75, [0,-r*0.75,r*0.75,0,0,r*0.75,-r*0.75,0], 0xDADADA, 0.4));
-        group_chart.add(scene.add.polygon(x0+r/2, y0+r/2, [0,-r/2,r/2,0,0,r/2,-r/2,0], 0xDADADA, 0.4));
-        group_chart.add(scene.add.polygon(x0+(-x4d+x2d)/2, y0+(-y1d+y3d)/2, [x1,y1d,x2d,y2,x3,y3d,x4d,y4], 0xF29B76, 1));
-        group_chart.add(scene.add.polygon(x0+(-x4i+x2i)/2, y0+(-y1i+y3i)/2, [x1,y1i,x2i,y2,x3,y3i,x4i,y4], 0xF9C270, 1));
-        group_chart.add(scene.add.polygon(x0+(-x4+x2)/2, y0+(-y1+y3)/2, [x1,y1,x2,y2,x3,y3,x4,y4], 0xFFF67F, 1));
-        let font_arg = {font: "17px Arial", fill: "#000000"};
-        group_chart.add(scene.add.text(x0-15, y0-r-25, "STR"+"\n"+(Math.round( (str+str_item)*100 )/100).toFixed(2), font_arg));
-        group_chart.add(scene.add.text(x0+r-5, y0-10, "DEX"+"\n"+(Math.round( (dex+dex_item)*100 )/100).toFixed(2), font_arg));
-        group_chart.add(scene.add.text(x0-15, y0+r-7, "LUK"+"\n"+(Math.round( (luk+luk_item+local_rolled_dice/100)*100 )/100).toFixed(2), font_arg));
-        group_chart.add(scene.add.text(x0-r-20, y0-12, "INT"+"\n"+(Math.round( (int+int_item)*100 )/100).toFixed(2), font_arg));
-        group_chart.add(scene.add.sprite(x0-15-10, y0-r-25+20, "icon_str").setOrigin(0.5).setScale(0.12));
-        group_chart.add(scene.add.sprite(x0+r-5+10, y0-30, "icon_dex").setOrigin(0.5).setScale(0.12));
-        group_chart.add(scene.add.sprite(x0-15-12, y0+r-5+14, "icon_luk").setOrigin(0.5).setScale(0.10));
-        group_chart.add(scene.add.sprite(x0-r-20+16, y0-10-16, "icon_int").setOrigin(0.5).setScale(0.10));
 }
 async function draw_radarchart(scene) {
         let _x = 1160;
@@ -6186,238 +6356,6 @@ function update() {
 
 //===end=================================================================
 /*
-
-    バイバックシテムの深慮
-        意味論
-            市場最低価格を運営側で設定することにより、暴落という概念をなくす。
-            最低価格はdapps stakingに応じて少しずつ上昇してゆく。
-            アイテムは売って手放せるが、売って利確するとその後の育成効率が下がる
-                かつ、売値が高いアイテムはより後半で作れる
-            時間が立つほど売値が上昇するので、後で売ったほうがお得となり、売りづらい
-            常に最低価格で買い取ってもらえる安心感を設定する
-            最低価格より高い値段で売りに出して、誰かが買ってくれると嬉しい
-            最低価格での売りはburnとなり、残ったアイテムの希少性を上げる
-        戦略
-            最低価格はどれだけ売られても下がらない
-                mintされた全アイテムを買いきれる価格に設定する
-            係数をかけてLv1よりLv16のほうが高くなるようにする
-                必要なコストに比例するようにする
-            dapps stakingによりtrejuaryが増加して価格が上昇する
-                しかし、これだと新規参入者が増えると価格が下落することになる
-                trejury/summonerの値が小さくなるため
-                trejuryはmint費用＋staking rewordが入る
-                    summonerが増えるとそれだけ、summonerあたりのtrejuryが減るため、
-                    アイテム買取価格も減らさなければいけなくなる
-                summonerのmint費用をtrejuryに応じて上げればよいか
-                    現在のtrejury/summonerがmint費用に等しい
-                    アイテム買取価格が2倍に上がれば新規mint費用も2倍に上がる計算
-        実装
-            summonerのmint費用はtrejury/(summoner+1)で算出する
-                trejury/summonerの比率はどれだけmintされても変化しない
-                早めの参入が少しだけ有利な設計
-            dapps stakingの50%がtrejuryに移動する
-            全アイテムを売り切るとtrejury/summonerの値を使い切るコスト設計にする
-                最低価格だけでは恩株化しにくい設計≒ポンジスキーム化しにくい設計
-
- ok infoコントラの実装と整理
-        UXとのinteractionは基本的にinfoコントラを介す
-        定期的に取得する情報はarrayとして一度に取得する関数を実装する
-        個別に必要なものもすべてinfoコントラに格納し、
-        可能な限りarray化してUXから読み込みやすくする
-
- ok トレジャリーコントラクトの整備と実装
-        バイバック金庫
-            amount / summoner number = mint fee とする
-                あるいは、amount / active summoner number = mint fee
-                petrified summonerの数は除く
-            mint時は自動的にバイバックトレジャリーに50%, 運営金庫に50%入る
-            以降は、あらかじめ予定したインフレ率に従い、一週間か一ヶ月ごとに手動で追加する
-        運営金庫
-            mint feeの50%が即座に入る
-            donationの100%が即座に入る
-            trading fee, dapps stakingのうち、バイバック金庫に入り切らなかったものが入る
-            運営報酬として個人walletへ支払う
-            残ったものはdapps stakingへ還元する
-        バッファー金庫
-            dapps staking, trading fee, その他feeはすべてここに一時的に格納される
-            週毎か月毎に、決められたインフレ率になるようにバイバック金庫へ移す
-            残りは運営金庫へ移して、その都度0にする。
-        弱点
-            mint過剰
-                mintだけしてtradingもdapps stakingもしないライトユーザーが大量につくと、
-                バイバック費用が全く釣り上がらずに物価が上がらない
-                どこかで非アクティブユーザーをふるい落とす機構が必要か
-                もうプレイしないユーザー（石化ユーザー）の分のバイバック料金は、
-                インフレ率計算時にアクティブユーザーで分けるようにするか。
-            インフレ資金不足
-                みなが盛んにゲームプレイしてもインフレには寄与しない
-                また、ユーザー数が短期間に増大するとむしろインフレしにくくなる。
-                mint feeの50%をdapps stakingしたリワードがインフレ率の基本なので、
-                何も追加がなければ年3.9%しかインフレしない。
-                dapps stakingに入れてるほどのファンユーザーの「比率」を
-                どれだけ増やせるかがインフレ率に寄与する。
-                1年インフレ率42%で、月率3%
-                これを実現するためには、dapps stakingに1120/summoner必要
-                10,000 stakingしてくれる人が10%いれば実現可能なライン
-            後半の経済破綻
-                アイテムはだいたい1週間に1個程度作製できる
-                序盤のアイテムはいくら売ってもバイバック金庫が枯渇しないが、
-                後半のアイテムは売り続けられると金庫が枯渇する。
-                育ちきったsummonerが一斉に集金に走ると、おそらく経済が終わるだろう
-                この辺、計算しておくか、デフレルールを設けるか、対策が必要
-                Lv10アイテムnormalを売り続けると103日で枯渇する（3.4ヶ月）
-                つまり、1年後に作っては売りの集金に走ったとしても、
-                バイバック金庫をシュリンクさせるには3-4ヶ月かかる
-                2年後にLv16のアイテムを売るとすると、およそ1.5ヶ月
-
- ok lootライクなランダムテキストの実装
-        summoner mint時にランダムでオリジナルのパラメータを設定する
-        パラメータによって何かしらの差をつけたいが・・・
-            ゲーム性には直接関係ない、愛着とストーリー性を持つものにする
-            早さや大きさなど、行動に影響したり変化したりしそうなものは避ける
-        項目案
-            出身地：火星、お花畑、滝壺、アンドロメダ星雲、とか意味不明な場所にする
-            好きな色：最初に設定する
-            正確：おっとり、
-            寿命：
-            
-        出身地(Birthplace)：
-            fluffy
-            woolly
-            feathery
-                x
-            sweater
-            blanket
-            carpet
-            cushion
-            scarf
-            towel
-            
-        softness:
-        fluffiness:
-        elasticity:
-            inredible
-            marvelous
-            excellent
-            amazing
-            great
-            fabulous
-            wonderful
-            gorgeous
-            awesome
-            fantastic
-            lovely
-            brilliant
-            impressive
-            superb
-            
-        main component:
-            kindness
-            braveness
-            love
-            pleasure
-            cuteness
-            cleverness
-            
-        personality:
-            friendly
-            reliable
-            optimistic
-            frisky
-            thoughtful
-            honest
-            easygoing
-            tolerant
-            mild
-            affectionate
-            intelligent
-            patient
-            faithful
-            innocent
-            gentle
-        
-
- ok 収集NFTの再考
-        コンセプト
-            むらさきさんが集めている宝物
-                流れ星、金平糖、宝石の原石
-            他のsummonerとの関わりでのみ手に入る
-            マメなゲームプレイに応じて手に入る
-            luckを増やす主な手段
-                luckが増えるとすべての行動効率が増加する
-            トレードするとより有利になる機構
-            同型を集めてupgradeすることで効果を高められる
-            集めるとお部屋がにぎやかになる
-        今ハートを得るタイミングで代わりに手に入る多種類NFT
-            所持することでluckが上昇する
-            同じ種類を集めてupgradeすると上位NFT化できる
-            上位NFTは3個→5個分の効果、など
-            luckを効果的に上げる主な手段とする
-        upgradeのUIの実装
-            marketのupgradeでは味気ないか
-            うまくsummonerの行動として組み込みたいところだが。
-            ネックは、burnするアイテムの選択をどうするか。
-        取得方法の再考
-            craft時に受動的に
-            mail時に能動的に
-            もう1つぐらいなにか
-                他のsummonerとのインタラクションが必須にしたい
-                例えば、ダイスで20出たらとかではなくて。
-            しかし、あまりにも機会を増やすと部屋がNFTだらけになる。
-        宝石箱の実装
-            集めたNFTを入れておく入れ物
-        作品内での立ち位置と、獲得時の演出を深慮する
-            星なら空から降ってくる
-            宝石ならないないさんが持ってきてくれる、など。
-        一方通行で溜め込むだけで、消費はさせない
-            クラフトの消費アイテムとしては要求されない
-            1キャラに集中させてluckをブーストできるので、レベルキャップをもうける？
-        実装
-            見かけ：未定
-                流れ星、金平糖、宝石、きれいな石、あるいはそのいずれかに見える謎の個体
-                → 毛玉：fluffyとする
-                fluffy (normal), fluffier (uncommon), fluffiest (rare)
-                red fluffy, blue fluffierなど、種類＋レア度で表現する
-            種類：ひとまず１２
-                トレードしないとランダム取得で効率悪いように
-                4だと少ない、12だと多すぎ？10か8か。あるいは12でも良いか。
-                    red
-                    yellow
-                    white
-                    black
-                    green
-                    orange
-                    brown
-                    pink
-                    blue
-                    aqua
-                    gray
-                    violet
-                    
-            レアリティ：3段階
-                itemと同じくnormal, uncommon, rare
-                下位3個をburnして上位1個をmintする
-                n*3 -> u = n*4, u*3 -> r = u*4 = n*16 (n*9 -> n*16)
-            取得理論値：
-                luckデザイン
-                    初期値3 + ダイス平均1 + staking3 + Lv分4 = 11 (1年後)
-                    1年後にNFTによって+4 = 15ぐらいを目安に設計する
-                0.01ならばn:400個, u:100個, r:25
-                0.05ならばn:80個, u:20個, r:5, この辺だろうか
-                    n*80/y = 6/mo = 3/2w
-                0.04ならばn:100個, u:25個, r:6.25
-                    n*100/y = 8/mo = 2/w
-                    クラフトは1/w, メールも1/wとすると, 合わせて2/w程度
-                    もう一つ取得メカニズムを入れたい場合は、初期値3を下げるか、単価を下げるか。
-                0.03ならば, n:133
-            レベルキャップ：
-                市場買い占め→luckブーストを防ぐメカニズム
-                でないと、luck +100なども可能になってしまう
-                キャップはLvとするか、Ageとするか
-                    → やはりゲームプレイに応じて上がるLvが適切か
-                単純に、Lv20でmax+4として、0.2/Lvとするか
-                    これなら、相当課金しないとLvキャップを意識しなくて良いだろう
-
 
     トレジャリーシステムの深慮
         これまで

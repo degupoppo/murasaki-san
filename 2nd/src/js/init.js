@@ -144,8 +144,8 @@ async function test() {
 
 }
 
-initialize_contract();
-//set_speed(100*10);
+//initialize_contract();
+set_speed(100*10);
 //set_speed(100*365);
 //set_speed(100*1000);
 //test();
