@@ -73,9 +73,9 @@ let _array_name_sp = [
     //193, heart
     "Tiny Heart",
     //194, Ohana Piggy Bank
-    "Ohana Bank",
+    "Coin Bank",
     //195, Kusa Pouch
-    "Kusa Pouch",
+    "Leaf Pouch",
     //196, Cat Mail
     "Cat Mail",
     //197, Nui
@@ -86,30 +86,45 @@ let _array_name_sp = [
     "---",
     //200
     "---",
-    //201
-    "Red Twinkle",
-    //202
-    "Orange Sparkle",
-    //203
-    "Yellow Twinkle",
-    //204
-    "Green Sparkle",
-    //205
-    "Blue Twinkle",
-    //206
-    "Purple Sparkle",
-    //207
-    "Black Twinkle",
-    //208
-    "Pink Sparkle",
-    //209
-    "White Twinkle",
-    //210
-    "Gold Sparkle",
-    //211
-    "Shilver Twinkle",
-    //212
-    "Skyblue Sparkle",
+    //201-212
+    "Red Fluffy",
+    "Orange Fluffy",
+    "Yellow Fluffy",
+    "Green Fluffy",
+    "Blue Fluffy",
+    "Purple Fluffy",
+    "Black Fluffy",
+    "Pink Fluffy",
+    "White Fluffy",
+    "Gold Fluffy",
+    "Shilver Fluffy",
+    "Skyblue Fluffy",
+    //213-224
+    "Red Fluffier",
+    "Orange Fluffier",
+    "Yellow Fluffier",
+    "Green Fluffier",
+    "Blue Fluffier",
+    "Purple Fluffier",
+    "Black Fluffier",
+    "Pink Fluffier",
+    "White Fluffier",
+    "Gold Fluffier",
+    "Shilver Fluffier",
+    "Skyblue Fluffier",
+    //225-236
+    "Red Fluffiest",
+    "Orange Fluffiest",
+    "Yellow Fluffiest",
+    "Green Fluffiest",
+    "Blue Fluffiest",
+    "Purple Fluffiest",
+    "Black Fluffiest",
+    "Pink Fluffiest",
+    "White Fluffiest",
+    "Gold Fluffiest",
+    "Shilver Fluffiest",
+    "Skyblue Fluffiest",
 ];
 
 let array_item_name = ["dummy"]; //dummy, 0

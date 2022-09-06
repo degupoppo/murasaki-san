@@ -6,7 +6,8 @@
 <script src="src/js/array_item_name.js"></script>
 <script src="src/js/array_item_png.js"></script>
 
-<script src="src/js/share.js"></script>
+<script src="src/js/share_local.js"></script>
+<script> init_web3(); </script>
 <script src="src/js/market.js"></script>
 
 <head>
@@ -64,7 +65,7 @@
 	<div id="recentActivity"></div>
     </p>
 
-    <h3>Your Sellings &#127926;</h3>
+    <h3>Your Sellings on the Market &#127926;</h3>
 	<table id="talbe_sellingItems" class="display">
 		<thead><tr>
 			<th style="width:50px;"><center>item_id</center></th>
@@ -77,7 +78,7 @@
 		<tbody id="tbody_listedItems"></tbody>
 	</table>
 
-    <h3>Your Items &#127752;</h3>
+    <h3>Your Items in the House &#127752;</h3>
     <p><code class="language-plaintext highlighter-rouge">
         Before selling, please approve the Market Contract:
         <button id="button_approve" onclick='approve();'>Approve</button><br>
@@ -88,7 +89,7 @@
             <th><center>item_type</center></th>
             <th><center>item_rarity</center></th>
             <th><center>crafted_by</center></th>
-            <th><center>sell Price ($ASTR)</center></th>
+            <th><center>selling Price ($ASTR)</center></th>
         </tr></thead>
         <tbody id="tbody_myItems"></tbody>
 	</table>

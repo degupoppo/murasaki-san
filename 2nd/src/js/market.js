@@ -43,7 +43,7 @@ async function update_onMarketItems() {
     let wallet = await get_wallet(web3);
     //contract
     let contract = await new web3.eth.Contract(abi_murasaki_item_market, contract_murasaki_item_market);
-    let contract_msn = await new web3.eth.Contract(abi_murasaki_strage_nui, contract_murasaki_strage_nui);
+    let contract_msn = await new web3.eth.Contract(abi_murasaki_storage_nui, contract_murasaki_storage_nui);
     let contract_mc = await new web3.eth.Contract(abi_murasaki_craft, contract_murasaki_craft);
     let ListLength = await contract.methods.listLength().call();
     let ListsAt = await contract.methods.listsAt(0, ListLength).call();
@@ -68,11 +68,15 @@ async function update_onMarketItems() {
             _item_rarity = "<font color=blue>uncommon</font>";
         } else if (_item_type <= 192) {
             _item_rarity = "<font color=orange>rare</font>";
-        } else if (_item_type == 197) { //nui
-            //let _nui = await contract_msn.methods.nuis(_item).call();
-            //_item_rarity = "<font color=#E85298>score: " + _nui[3] + "</font>";
+        } else if (_item_type == 197) {
             let _score = await contract_msn.methods.score(_item).call();
             _item_rarity = "<font color=#E85298>score: " + _score + "</font>";
+        } else if (_item_type >= 201 && _item_type <= 212) {
+            _item_rarity = "<font color=green>common</font>";
+        } else if (_item_type >= 213 && _item_type <= 224) {
+            _item_rarity = "<font color=blue>uncommon</font>";
+        } else if (_item_type >= 225 && _item_type <= 236) {
+            _item_rarity = "<font color=orange>rare</font>";
         } else {
             _item_rarity = "<font color=black>---</font>";
         }
@@ -117,7 +121,7 @@ async function update_sellingItems() {
     let wallet = await get_wallet(web3);
     //contract
     let contract = await new web3.eth.Contract(abi_murasaki_item_market, contract_murasaki_item_market);
-    let contract_msn = await new web3.eth.Contract(abi_murasaki_strage_nui, contract_murasaki_strage_nui);
+    let contract_msn = await new web3.eth.Contract(abi_murasaki_storage_nui, contract_murasaki_storage_nui);
     let contract_mc = await new web3.eth.Contract(abi_murasaki_craft, contract_murasaki_craft);
     let myListLength = await contract.methods.myListLength(wallet).call();
     let myListsAt = await contract.methods.myListsAt(wallet, 0, myListLength).call();
@@ -143,10 +147,14 @@ async function update_sellingItems() {
         } else if (_item_type <= 192) {
             _item_rarity = "<font color=orange>rare</font>";
         } else if (_item_type == 197) {
-            //let _nui = await contract_msn.methods.nuis(_item).call();
-            //_item_rarity = "<font color=#E85298>score: " + _nui[3] + "</font>";
             let _score = await contract_msn.methods.score(_item).call();
             _item_rarity = "<font color=#E85298>score: " + _score + "</font>";
+        } else if (_item_type >= 201 && _item_type <= 212) {
+            _item_rarity = "<font color=green>common</font>";
+        } else if (_item_type >= 213 && _item_type <= 224) {
+            _item_rarity = "<font color=blue>uncommon</font>";
+        } else if (_item_type >= 225 && _item_type <= 236) {
+            _item_rarity = "<font color=orange>rare</font>";
         } else {
             _item_rarity = "<font color=black>---</font>";
         }
@@ -190,7 +198,7 @@ async function update_userItems() {
     let wallet = await get_wallet(web3);
     //contract
     let contract = await new web3.eth.Contract(abi_murasaki_craft, contract_murasaki_craft);
-    let contract_msn = await new web3.eth.Contract(abi_murasaki_strage_nui, contract_murasaki_strage_nui);
+    let contract_msn = await new web3.eth.Contract(abi_murasaki_storage_nui, contract_murasaki_storage_nui);
     let myListLength = await contract.methods.myListLength(wallet).call();
     let myListsAt = await contract.methods.myListsAt(wallet, 0, myListLength).call();
     //console.log(myListsAt);
@@ -220,6 +228,12 @@ async function update_userItems() {
         } else if (_item_type == 197) {
             let _score = await contract_msn.methods.score(_item).call();
             _item_rarity = "<font color=#E85298>score: " + _score + "</font>";
+        } else if (_item_type >= 201 && _item_type <= 212) {
+            _item_rarity = "<font color=green>common</font>";
+        } else if (_item_type >= 213 && _item_type <= 224) {
+            _item_rarity = "<font color=blue>uncommon</font>";
+        } else if (_item_type >= 225 && _item_type <= 236) {
+            _item_rarity = "<font color=orange>rare</font>";
         } else {
             _item_rarity = "<font color=black>---</font>";
         }
@@ -245,7 +259,7 @@ async function update_userItems() {
         _html += "<input type='number' style='width:80px;' id='" + "input_price_" + _item + "'>";
         _html += "&nbsp;&nbsp;";
         _html += "<button onclick='list_item(" + _item + ");'>";
-        _html += "Sell";
+        _html += "List";
         _html += "</button>";
         _html += "</center></td></tr>";
         //tbody_myItems.innerHTML += _html;

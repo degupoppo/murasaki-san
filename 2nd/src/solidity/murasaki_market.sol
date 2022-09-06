@@ -624,8 +624,9 @@ interface IERC721 is IERC165 {
 interface Murasaki_Function_Share {
     function murasaki_craft_address() external view returns (address);
     function murasaki_main_address() external view returns (address);
-    function murasaki_strage_address() external view returns (address);
+    function murasaki_storage_address() external view returns (address);
     function not_petrified(uint32) external view returns (bool);
+    function bufferTreasury_address() external view returns (address);
 }
 interface Murasaki_Craft {
     function safeTransferFrom(
@@ -637,7 +638,7 @@ interface Murasaki_Craft {
 interface Murasaki_Main {
     function tokenOf(address) external view returns (uint32);
 }
-interface Murasaki_Strage {
+interface Murasaki_Storage {
     function isActive(uint32) external view returns (bool);
 }
 
@@ -764,14 +765,14 @@ contract Murasaki_Market_Item is Initializable, ERC721Holder {
     }
 
     //check wallet
-    function _check_wallet(address _wallet) internal view returns (bool) {
+    function _check_wallet(address _wallet) public view returns (bool) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         //check summoner possession
         Murasaki_Main mm = Murasaki_Main(mfs.murasaki_main_address());
         uint32 _summoner = mm.tokenOf(_wallet);
         require(_summoner > 0);
         //check summoner activation
-        Murasaki_Strage ms = Murasaki_Strage(mfs.murasaki_strage_address());
+        Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
         require(ms.isActive(_summoner));
         //check summoner petrification
         require(mfs.not_petrified(_summoner));

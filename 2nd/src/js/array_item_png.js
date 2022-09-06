@@ -37,7 +37,7 @@ let _array_base = [
     //33-48
     "item_pad_on.png",
     "icon_clock.png",
-    "item_hat_mortarboard",
+    "item_hat_mortarboard.png",
     "dr_bitco.png",
     "icon_clock.png",
     "item_violin.png",
