@@ -5,15 +5,6 @@
 
 /*
 
-    Mint表記の実装
-        Craftボタンをstopとmintに表示仕分ける
-
-    Newspaperの実装
-        主だったイベントのみを表示させる
-            craft
-            Level-up
-            mail open
-
     Fluffy NFTのUX実装
         カウンターの実装
             n,u,rを3つ表示する
@@ -35,13 +26,14 @@
                 mint日時, mint元, rarity（idで判別）, class（idで判別）
             これらの情報を与えて専用のclassでspriteを作製する
 
-    読み込み画面の修正
-        static一括取得
-        dynamic一括取得
+    Mint表記の実装
+        Craftボタンをstopとmintに表示仕分ける
 
-        wallet age取得、計算
-        nui取得、計算
-        wallet token取得
+    Newspaperの実装
+        主だったイベントのみを表示させる
+            craft
+            Level-up
+            mail open
 
     毛玉取りフェスティバル
         月に1回のイベント
@@ -60,6 +52,13 @@
         ゲーム画面はすべて読みこんでから表示させたい
         そのため、できるだけまとめて読み込み、読み込み完了をわかりやすくする
             ぬいちゃんと、walletスコアの取得がネック、さてどうするか。
+    読み込み画面の修正
+        static一括取得
+        dynamic一括取得
+
+        wallet age取得、計算
+        nui取得、計算
+        wallet token取得
 
     ガバナンスシステムの実装
         投票
