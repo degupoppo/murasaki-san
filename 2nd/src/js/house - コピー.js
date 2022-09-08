@@ -46,7 +46,7 @@
                 mint日時, mint元, rarity（idで判別）, class（idで判別）
             これらの情報を与えて専用のclassでspriteを作製する
 
- ok Mint表記の実装
+    Mint表記の実装
         Craftボタンをstopとmintに表示仕分ける
 
     Newspaperの実装
@@ -75,11 +75,10 @@
     読み込み画面の修正
         static一括取得
         dynamic一括取得
+
         wallet age取得、計算
         nui取得、計算
         wallet token取得
-    読み込み演出の深慮
-        ロード画面→部屋画面の間の演出をなにか
 
     ガバナンスシステムの実装
         投票
@@ -317,9 +316,9 @@ async function init_global_variants() {
     text_event_random = text_event_random.padStart(116, " ");
     turn_forFPS = 0;
     time_forFPS = Date.now();
-    //web3 = await connect();
+    web3 = await connect();
     //wss3 = await wss();
-    //wss = await connect();
+    wss = await connect();
 
     //---flag
     flag_music = 0;
@@ -336,8 +335,6 @@ async function init_global_variants() {
     
     //wss, use for call
     //web3_wss = await wss();
-    
-    //wallet = 0;
 }
 
 init_global_variants();
@@ -473,7 +470,7 @@ async function send_fp_get(_wallet, _summoner) {
 //---update status2
 
 
-//init_web3();
+init_web3();
 
 
 //call myListsAt_withItemType
@@ -515,8 +512,8 @@ async function contract_update_static_status(_summoner) {
         return 0;
     }
 
-    //let web3 = await connect();
-    //let wallet = await get_wallet(web3);
+    let web3 = await connect();
+    let wallet = await get_wallet(web3);
     //let contract_info = await new web3.eth.Contract(abi_murasaki_info, contract_murasaki_info);
     
     //call info from chain
@@ -773,9 +770,9 @@ async function contract_update_all() {
 //update event_heart
 async function contract_update_event_precious() {
     //let web3 = await connect();
-    //let wallet = await get_wallet(web3);
-    //let contract_mml = new web3.eth.Contract(abi_murasaki_mail, contract_murasaki_mail);
-    //let contract_mfc = new web3.eth.Contract(abi_murasaki_function_crafting, contract_murasaki_function_crafting);
+    let wallet = await get_wallet(web3);
+    let contract_mml = new web3.eth.Contract(abi_murasaki_mail, contract_murasaki_mail);
+    let contract_mfc = new web3.eth.Contract(abi_murasaki_function_crafting, contract_murasaki_function_crafting);
     let _block_latest = await web3.eth.getBlockNumber();
     let _block_from = _block_latest - 7200; //1 day
     //let _block_from = _block_latest - 50000;
@@ -1974,8 +1971,8 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             item_wearing_hat.x = this.x;
             item_wearing_hat.y = this.y - 65;
         }else if (this.mode == "sleeping") {
-            item_wearing_hat.x = this.x - 26;
-            item_wearing_hat.y = this.y - 22;
+            item_wearing_hat.x = this.x - 30;
+            item_wearing_hat.y = this.y - 25;
         }else if (this.mode == "mining" && this.submode == 1 && this.dist == "left") {
             item_wearing_hat.x = this.x - 5;
             item_wearing_hat.y = this.y - 50;
@@ -3488,17 +3485,19 @@ async function calc_wallet_score(wallet_address) {
 //===phaser3:preload========================================================--------
 
 
-function preload(scene) {
+function preload2(this2) {
+
+    let this = this2;
 
     //---loading screen
     //https://gamedevacademy.org/creating-a-preloading-screen-in-phaser-3/?a=13
-    let progressBar = scene.add.graphics();
-    let progressBox = scene.add.graphics();
+    let progressBar = this.add.graphics();
+    let progressBox = this.add.graphics();
     progressBox.fillStyle(0xFDEFF5, 0.4);
     progressBox.fillRect(480, 450, 320, 50);
-    let progressText = scene.add.text(490,520,"", {font: "20px monospace", fill: "#3D3D3D"}); 
-    let progressText_loading = scene.add.text(490,420, "Loading...", {font: "20px monospace", fill: "#3D3D3D"});
-    let percentText = scene.add.text(510, 465, "", {font: "20px monospace", fill: "#3D3D3D"});
+    let progressText = this.add.text(490,520,"", {font: "20px monospace", fill: "#3D3D3D"}); 
+    let progressText_loading = this.add.text(490,420, "Loading...", {font: "20px monospace", fill: "#3D3D3D"});
+    let percentText = this.add.text(510, 465, "", {font: "20px monospace", fill: "#3D3D3D"});
     /*
     this.load.on("progress", function(value) {
         if (flag_loaded == 0) {
@@ -3550,16 +3549,11 @@ function preload(scene) {
         "Painting your murasaki-san purple...",
         "Bathing the teddy bear...",
         "Polishing the floor...",
-        "Counting the number of hairs on Fluffy...",
-        "Charging the Murasaki-san battery...",
-        "Shopping for cat food...",
-        "Filling a fountain pen with ink for writing letters...",
-        "Baking pancakes...",
     ];
     let _index1 = Math.floor(Math.random() * _arr.length);
     let _index2 = Math.floor(Math.random() * _arr.length);
     let _index3 = Math.floor(Math.random() * _arr.length);
-    scene.load.on("progress", function(value) {
+    this.load.on("progress", function(value) {
         if (flag_loaded == 0) {
             progressBar.clear();
             progressBar.fillStyle(0xE62E8B, 1);
@@ -3577,7 +3571,7 @@ function preload(scene) {
             }
         }
     });
-    scene.load.on("complete", function() {
+    this.load.on("complete", function() {
         progressBar.destroy();
         progressBox.destroy();
         progressText.destroy();
@@ -3587,235 +3581,234 @@ function preload(scene) {
     });
 
     //---back
-    scene.load.image("back", "src/png/background.png");
-    scene.load.image("back_black", "src/png/background_black.png");
-    scene.load.image("window", "src/png/background_window.png");
-    scene.load.image("back_neon", "src/png/background_neon.png");
+    this.load.image("back", "src/png/background.png");
+    this.load.image("back_black", "src/png/background_black.png");
+    this.load.image("window", "src/png/background_window.png");
+    this.load.image("back_neon", "src/png/background_neon.png");
 
     //---murasaki-san
-    scene.load.spritesheet("murasaki_right", "src/png/murasaki_right.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.spritesheet("murasaki_left", "src/png/murasaki_left.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.spritesheet("murasaki_sleeping", "src/png/murasaki_sleeping2.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.spritesheet("murasaki_feeding", "src/png/murasaki_feeding.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.spritesheet("murasaki_feeding_happy_right", "src/png/murasaki_feeding_happy_right.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.spritesheet("murasaki_feeding_happy_left", "src/png/murasaki_feeding_happy_left.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.spritesheet("murasaki_crying", "src/png/murasaki_crying.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.spritesheet("murasaki_mining", "src/png/murasaki_mining.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.spritesheet("murasaki_hugging", "src/png/murasaki_hugging.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.spritesheet("murasaki_farming", "src/png/murasaki_farming.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.spritesheet("murasaki_grooming", "src/png/murasaki_grooming3.png", {frameWidth: 720, frameHeight: 622});
-    scene.load.spritesheet("murasaki_crafting", "src/png/murasaki_crafting.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.spritesheet("murasaki_working_left", "src/png/murasaki_working_left.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.spritesheet("murasaki_working_right", "src/png/murasaki_working_right.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.spritesheet("murasaki_click", "src/png/murasaki_click.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.spritesheet("murasaki_stone", "src/png/murasaki_stone.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.spritesheet("murasaki_hungry", "src/png/murasaki_hungry.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.spritesheet("murasaki_listning", "src/png/murasaki_listning.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("murasaki_right", "src/png/murasaki_right.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("murasaki_left", "src/png/murasaki_left.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("murasaki_sleeping", "src/png/murasaki_sleeping2.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("murasaki_feeding", "src/png/murasaki_feeding.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("murasaki_feeding_happy_right", "src/png/murasaki_feeding_happy_right.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("murasaki_feeding_happy_left", "src/png/murasaki_feeding_happy_left.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("murasaki_crying", "src/png/murasaki_crying.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("murasaki_mining", "src/png/murasaki_mining.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("murasaki_hugging", "src/png/murasaki_hugging.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("murasaki_farming", "src/png/murasaki_farming.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("murasaki_grooming", "src/png/murasaki_grooming3.png", {frameWidth: 720, frameHeight: 622});
+    this.load.spritesheet("murasaki_crafting", "src/png/murasaki_crafting.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("murasaki_working_left", "src/png/murasaki_working_left.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("murasaki_working_right", "src/png/murasaki_working_right.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("murasaki_click", "src/png/murasaki_click.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("murasaki_stone", "src/png/murasaki_stone.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("murasaki_hungry", "src/png/murasaki_hungry.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("murasaki_listning", "src/png/murasaki_listning.png", {frameWidth: 370, frameHeight: 320});
 
     //---button
-    scene.load.image("button_feeding", "src/png/button_feeding.png");
-    scene.load.image("button_feeding_pointerover", "src/png/button_feeding_pointerover.png");
-    scene.load.image("button_mining_enable", "src/png/button_mining_enable.png");
-    scene.load.image("button_mining_unable", "src/png/button_mining_unable.png");
-    scene.load.image("button_mining_pointerover", "src/png/button_mining_pointerover.png");
-    scene.load.image("button_mining_working", "src/png/button_mining_working.png");
-    scene.load.image("button_mining_pointerover_stop", "src/png/button_mining_pointerover_stop.png");
-    scene.load.image("button_farming_enable", "src/png/button_farming_enable.png");
-    scene.load.image("button_farming_unable", "src/png/button_farming_unable.png");
-    scene.load.image("button_farming_pointerover", "src/png/button_farming_pointerover.png", {frameWidth: 500, frameHeight: 500});
-    scene.load.image("button_farming_working", "src/png/button_farming_working.png", {frameWidth: 500, frameHeight: 500});
-    scene.load.image("button_farming_pointerover_stop", "src/png/button_farming_pointerover_stop.png", {frameWidth: 500, frameHeight: 500});
-    scene.load.image("button_crafting_enable", "src/png/button_crafting_enable.png", {frameWidth: 500, frameHeight: 500});
-    scene.load.image("button_crafting_unable", "src/png/button_crafting_unable.png", {frameWidth: 500, frameHeight: 500});
-    scene.load.image("button_crafting_pointerover", "src/png/button_crafting_pointerover.png", {frameWidth: 500, frameHeight: 500});
-    scene.load.image("button_crafting_working", "src/png/button_crafting_working.png", {frameWidth: 500, frameHeight: 500});
-    scene.load.image("button_crafting_pointerover_stop", "src/png/button_crafting_pointerover_stop.png", {frameWidth: 500, frameHeight: 500});
-    scene.load.image("button_crafting_pointerover_mint", "src/png/button_crafting_pointerover_mint.png", {frameWidth: 500, frameHeight: 500});
-    scene.load.image("button_grooming_enable", "src/png/button_grooming_enable.png", {frameWidth: 500, frameHeight: 500});
-    scene.load.image("button_grooming_unable", "src/png/button_grooming_unable.png", {frameWidth: 500, frameHeight: 500});
-    scene.load.image("button_grooming_pointerover", "src/png/button_grooming_pointerover.png", {frameWidth: 500, frameHeight: 500});
-    scene.load.image("button_levelup_enable", "src/png/button_levelup_enable.png", {frameWidth: 500, frameHeight: 500});
-    scene.load.image("button_levelup_unable", "src/png/button_levelup_unable.png", {frameWidth: 500, frameHeight: 500});
-    scene.load.image("button_levelup_pointerover", "src/png/button_levelup_pointerover.png", {frameWidth: 500, frameHeight: 500});
-    scene.load.image("back_level", "src/png/button_level.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_feeding", "src/png/button_feeding.png");
+    this.load.image("button_feeding_pointerover", "src/png/button_feeding_pointerover.png");
+    this.load.image("button_mining_enable", "src/png/button_mining_enable.png");
+    this.load.image("button_mining_unable", "src/png/button_mining_unable.png");
+    this.load.image("button_mining_pointerover", "src/png/button_mining_pointerover.png");
+    this.load.image("button_mining_working", "src/png/button_mining_working.png");
+    this.load.image("button_mining_pointerover_stop", "src/png/button_mining_pointerover_stop.png");
+    this.load.image("button_farming_enable", "src/png/button_farming_enable.png");
+    this.load.image("button_farming_unable", "src/png/button_farming_unable.png");
+    this.load.image("button_farming_pointerover", "src/png/button_farming_pointerover.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_farming_working", "src/png/button_farming_working.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_farming_pointerover_stop", "src/png/button_farming_pointerover_stop.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_crafting_enable", "src/png/button_crafting_enable.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_crafting_unable", "src/png/button_crafting_unable.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_crafting_pointerover", "src/png/button_crafting_pointerover.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_crafting_working", "src/png/button_crafting_working.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_crafting_pointerover_stop", "src/png/button_crafting_pointerover_stop.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_crafting_pointerover_mint", "src/png/button_crafting_pointerover_mint.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_grooming_enable", "src/png/button_grooming_enable.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_grooming_unable", "src/png/button_grooming_unable.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_grooming_pointerover", "src/png/button_grooming_pointerover.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_levelup_enable", "src/png/button_levelup_enable.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_levelup_unable", "src/png/button_levelup_unable.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("button_levelup_pointerover", "src/png/button_levelup_pointerover.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("back_level", "src/png/button_level.png", {frameWidth: 500, frameHeight: 500});
 
     //---pet
-    scene.load.spritesheet("mr_astar_right", "src/png/pet_mr_astar_right.png", {frameWidth: 600, frameHeight: 600});
-    scene.load.spritesheet("mr_astar_left", "src/png/pet_mr_astar_left.png", {frameWidth: 600, frameHeight: 600});
-    scene.load.spritesheet("ms_ether_right", "src/png/pet_ms_ether_right.png", {frameWidth: 600, frameHeight: 600});
-    scene.load.spritesheet("ms_ether_left", "src/png/pet_ms_ether_left.png", {frameWidth: 600, frameHeight: 600});
-    scene.load.spritesheet("dr_bitco_right", "src/png/pet_dr_bitco_right.png", {frameWidth: 600, frameHeight: 600});
-    scene.load.spritesheet("dr_bitco_left", "src/png/pet_dr_bitco_left.png", {frameWidth: 600, frameHeight: 600});
+    this.load.spritesheet("mr_astar_right", "src/png/pet_mr_astar_right.png", {frameWidth: 600, frameHeight: 600});
+    this.load.spritesheet("mr_astar_left", "src/png/pet_mr_astar_left.png", {frameWidth: 600, frameHeight: 600});
+    this.load.spritesheet("ms_ether_right", "src/png/pet_ms_ether_right.png", {frameWidth: 600, frameHeight: 600});
+    this.load.spritesheet("ms_ether_left", "src/png/pet_ms_ether_left.png", {frameWidth: 600, frameHeight: 600});
+    this.load.spritesheet("dr_bitco_right", "src/png/pet_dr_bitco_right.png", {frameWidth: 600, frameHeight: 600});
+    this.load.spritesheet("dr_bitco_left", "src/png/pet_dr_bitco_left.png", {frameWidth: 600, frameHeight: 600});
 
     //---music
-    scene.load.audio("bgm1", "src/music/Morning_2.mp3");
-    scene.load.audio("bgm2", "src/music/Roll_Roll_Roll.mp3");
-    scene.load.audio("bgm3", "src/music/amaoto.mp3");
+    this.load.audio("bgm1", "src/music/Morning_2.mp3");
+    this.load.audio("bgm2", "src/music/Roll_Roll_Roll.mp3");
+    this.load.audio("bgm3", "src/music/amaoto.mp3");
 
     //---sound
-    scene.load.audio("button_on", "src/sound/button_on.mp3");
-    scene.load.audio("button_select", "src/sound/button_select.mp3");
-    scene.load.audio("feeding", "src/sound/feeding.mp3");
-    scene.load.audio("grooming", "src/sound/grooming.mp3");
-    scene.load.audio("mining", "src/sound/mining.mp3");
-    scene.load.audio("mining_during", "src/sound/mining_during.mp3");
-    scene.load.audio("farming", "src/sound/farming.mp3");
-    scene.load.audio("farming_during", "src/sound/farming_during.mp3");
-    scene.load.audio("crafting", "src/sound/crafting.mp3");
-    scene.load.audio("crafting_during", "src/sound/crafting_during.mp3");
-    scene.load.audio("happy", "src/sound/happy.mp3");
-    scene.load.audio("earn", "src/sound/earn.wav");
-    scene.load.audio("dice", "src/sound/dice.mp3");
-    scene.load.audio("dice_impact", "src/sound/dice_impact.mp3");
-    scene.load.audio("hat", "src/sound/hat.mp3");
-    scene.load.audio("unhappy", "src/sound/unhappy.mp3");
-    scene.load.audio("switch", "src/sound/switch.mp3");
-    scene.load.audio("window_open", "src/sound/window_open.mp3");
-    scene.load.audio("window_pointerover", "src/sound/window_pointerover.mp3");
-    scene.load.audio("window_select", "src/sound/window_select.mp3");
-    scene.load.audio("window_cancel", "src/sound/window_cancel.mp3");
-    scene.load.audio("system", "src/sound/system.mp3");
-    scene.load.audio("nui", "src/sound/nui.mp3");
-    scene.load.audio("pad", "src/sound/pad2.mp3");
-    scene.load.audio("fireworks", "src/sound/fireworks.mp3");
-    scene.load.audio("fireworks2", "src/sound/fireworks2.mp3");
-    scene.load.audio("basket", "src/sound/basket.mp3");
-    scene.load.audio("cat1", "src/sound/cat1.mp3");
-    scene.load.audio("clock", "src/sound/clock.mp3");
-    scene.load.audio("window", "src/sound/window.mp3");
-    scene.load.audio("piano1", "src/sound/piano1.mp3");
-    scene.load.audio("piano2", "src/sound/piano2.mp3");
+    this.load.audio("button_on", "src/sound/button_on.mp3");
+    this.load.audio("button_select", "src/sound/button_select.mp3");
+    this.load.audio("feeding", "src/sound/feeding.mp3");
+    this.load.audio("grooming", "src/sound/grooming.mp3");
+    this.load.audio("mining", "src/sound/mining.mp3");
+    this.load.audio("mining_during", "src/sound/mining_during.mp3");
+    this.load.audio("farming", "src/sound/farming.mp3");
+    this.load.audio("farming_during", "src/sound/farming_during.mp3");
+    this.load.audio("crafting", "src/sound/crafting.mp3");
+    this.load.audio("crafting_during", "src/sound/crafting_during.mp3");
+    this.load.audio("happy", "src/sound/happy.mp3");
+    this.load.audio("earn", "src/sound/earn.wav");
+    this.load.audio("dice", "src/sound/dice.mp3");
+    this.load.audio("dice_impact", "src/sound/dice_impact.mp3");
+    this.load.audio("hat", "src/sound/hat.mp3");
+    this.load.audio("unhappy", "src/sound/unhappy.mp3");
+    this.load.audio("switch", "src/sound/switch.mp3");
+    this.load.audio("window_open", "src/sound/window_open.mp3");
+    this.load.audio("window_pointerover", "src/sound/window_pointerover.mp3");
+    this.load.audio("window_select", "src/sound/window_select.mp3");
+    this.load.audio("window_cancel", "src/sound/window_cancel.mp3");
+    this.load.audio("system", "src/sound/system.mp3");
+    this.load.audio("nui", "src/sound/nui.mp3");
+    this.load.audio("pad", "src/sound/pad2.mp3");
+    this.load.audio("fireworks", "src/sound/fireworks.mp3");
+    this.load.audio("fireworks2", "src/sound/fireworks2.mp3");
+    this.load.audio("basket", "src/sound/basket.mp3");
+    this.load.audio("cat1", "src/sound/cat1.mp3");
+    this.load.audio("clock", "src/sound/clock.mp3");
+    this.load.audio("window", "src/sound/window.mp3");
+    this.load.audio("piano1", "src/sound/piano1.mp3");
+    this.load.audio("piano2", "src/sound/piano2.mp3");
 
     //---item_basic
-    scene.load.image("item_table", "src/png/item_basic_table.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("item_misin", "src/png/item_basic_misin.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("item_tree0", "src/png/item_basic_tree0.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("item_tree1", "src/png/item_basic_tree1.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("item_tree2", "src/png/item_basic_tree2.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("item_tree3", "src/png/item_basic_tree3.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("item_bear", "src/png/item_basic_bear.png", {frameWidth: 720, frameHeight: 622});
-    scene.load.image("item_sweet_potato", "src/png/item_basic_sweet_potato.png", {frameWidth: 500, frameHeight: 500});
-    scene.load.image("item_gold1", "src/png/item_basic_gold1.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("item_gold2", "src/png/item_basic_gold2.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("item_gold3", "src/png/item_basic_gold3.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_table", "src/png/item_basic_table.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_misin", "src/png/item_basic_misin.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_tree0", "src/png/item_basic_tree0.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_tree1", "src/png/item_basic_tree1.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_tree2", "src/png/item_basic_tree2.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_tree3", "src/png/item_basic_tree3.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_bear", "src/png/item_basic_bear.png", {frameWidth: 720, frameHeight: 622});
+    this.load.image("item_sweet_potato", "src/png/item_basic_sweet_potato.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("item_gold1", "src/png/item_basic_gold1.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_gold2", "src/png/item_basic_gold2.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_gold3", "src/png/item_basic_gold3.png", {frameWidth: 370, frameHeight: 320});
 
     //---item_craft
-    scene.load.spritesheet("item_musicbox", "src/png/item_musicbox.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("item_violin", "src/png/item_violin.png", {frameWidth: 600, frameHeight: 600});
-    scene.load.image("item_vase", "src/png/item_vase.png", {frameWidth: 300, frameHeight: 300});
-    scene.load.image("item_kanban", "src/png/item_kanban4.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.spritesheet("item_crown", "src/png/item_crown.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("item_pudding", "src/png/item_pudding2.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("item_chocolate_bread", "src/png/item_chocolate_bread.png", {frameWidth: 643, frameHeight: 477});
-    scene.load.image("item_fortune_statue", "src/png/item_fortune_statue.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("item_ribbon", "src/png/item_ribbon3.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("item_hat_tiny_crown", "src/png/item_hat_tiny_crown.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("item_kusa_pouch", "src/png/item_kusa_pouch.png", {frameWidth: 636, frameHeight: 895});
-    scene.load.image("item_dice", "src/png/item_dice.png", {frameWidth: 200, frameHeight: 200});
-    scene.load.image("item_dice_pointerover", "src/png/item_dice_pointerover.png", {frameWidth: 200, frameHeight: 200});
-    scene.load.image("item_hat_knit", "src/png/item_hat_knit.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("item_hat_mugiwara", "src/png/item_hat_mugiwara.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("item_bank", "src/png/item_bank.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("item_bank_broken", "src/png/item_bank_broken.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("item_hat_helmet", "src/png/item_hat_helmet.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("item_asnya", "src/png/item_asnya.png", {frameWidth: 500, frameHeight: 500});
-    //scene.load.image("item_nui", "src/png/item_nui.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.spritesheet("item_nui", "src/png/item_nui2.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.spritesheet("item_nui_ribbon", "src/png/item_nui_ribbon.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.spritesheet("item_switch", "src/png/item_switch.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("item_pouch", "src/png/item_pouch.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("item_pouch_broken", "src/png/item_pouch_broken.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("item_hat_mortarboard", "src/png/item_hat_mortarboard.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("item_pad_on", "src/png/item_pad_on.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("item_pad_off", "src/png/item_pad_off.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("item_gauge", "src/png/item_gauge.png", {frameWidth: 370, frameHeight: 306});
-    scene.load.image("item_frame", "src/png/item_frame.png", {frameWidth: 370, frameHeight: 428});
-    scene.load.image("item_wall_sticker", "src/png/item_wall_sticker.png");
-    scene.load.image("item_floor_sticker1", "src/png/item_floor_sticker1.png");
-    scene.load.image("item_floor_sticker2", "src/png/item_floor_sticker2.png");
-    scene.load.image("item_window", "src/png/item_window.png");
-    scene.load.image("item_lantern", "src/png/item_lantern.png");
-    scene.load.image("item_pancake", "src/png/item_pancake.png");
-    scene.load.image("item_sushi", "src/png/item_sushi.png");
-    //scene.load.image("item_newsbunner", "src/png/item_newsbunner.png");
-    scene.load.image("item_rugg", "src/png/item_rugg.png");
-    scene.load.image("item_piano", "src/png/item_piano.png");
-    scene.load.image("item_piano_opened", "src/png/item_piano_opened.png");
-    scene.load.image("item_clock", "src/png/item_clock.png");
-    scene.load.image("item_clock_opened", "src/png/item_clock_opened.png");
-    scene.load.spritesheet("item_clock_anim", "src/png/item_clock_anim.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("item_window_day", "src/png/item_window_day.png");
-    scene.load.image("item_window_day_closed", "src/png/item_window_day_closed.png");
-    scene.load.image("item_window_night", "src/png/item_window_night.png");
-    scene.load.image("item_window_night_closed", "src/png/item_window_night_closed.png");
-    scene.load.image("item_newspaper", "src/png/item_newspaper.png");
+    this.load.spritesheet("item_musicbox", "src/png/item_musicbox.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_violin", "src/png/item_violin.png", {frameWidth: 600, frameHeight: 600});
+    this.load.image("item_vase", "src/png/item_vase.png", {frameWidth: 300, frameHeight: 300});
+    this.load.image("item_kanban", "src/png/item_kanban4.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("item_crown", "src/png/item_crown.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_pudding", "src/png/item_pudding2.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_chocolate_bread", "src/png/item_chocolate_bread.png", {frameWidth: 643, frameHeight: 477});
+    this.load.image("item_fortune_statue", "src/png/item_fortune_statue.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_ribbon", "src/png/item_ribbon3.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_hat_tiny_crown", "src/png/item_hat_tiny_crown.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_kusa_pouch", "src/png/item_kusa_pouch.png", {frameWidth: 636, frameHeight: 895});
+    this.load.image("item_dice", "src/png/item_dice.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("item_dice_pointerover", "src/png/item_dice_pointerover.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("item_hat_knit", "src/png/item_hat_knit.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_hat_mugiwara", "src/png/item_hat_mugiwara.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_bank", "src/png/item_bank.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_bank_broken", "src/png/item_bank_broken.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_hat_helmet", "src/png/item_hat_helmet.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_asnya", "src/png/item_asnya.png", {frameWidth: 500, frameHeight: 500});
+    //this.load.image("item_nui", "src/png/item_nui.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("item_nui", "src/png/item_nui2.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("item_nui_ribbon", "src/png/item_nui_ribbon.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("item_switch", "src/png/item_switch.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_pouch", "src/png/item_pouch.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_pouch_broken", "src/png/item_pouch_broken.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_hat_mortarboard", "src/png/item_hat_mortarboard.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_pad_on", "src/png/item_pad_on.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_pad_off", "src/png/item_pad_off.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_gauge", "src/png/item_gauge.png", {frameWidth: 370, frameHeight: 306});
+    this.load.image("item_frame", "src/png/item_frame.png", {frameWidth: 370, frameHeight: 428});
+    this.load.image("item_wall_sticker", "src/png/item_wall_sticker.png");
+    this.load.image("item_floor_sticker1", "src/png/item_floor_sticker1.png");
+    this.load.image("item_floor_sticker2", "src/png/item_floor_sticker2.png");
+    this.load.image("item_window", "src/png/item_window.png");
+    this.load.image("item_lantern", "src/png/item_lantern.png");
+    this.load.image("item_pancake", "src/png/item_pancake.png");
+    this.load.image("item_sushi", "src/png/item_sushi.png");
+    //this.load.image("item_newsbunner", "src/png/item_newsbunner.png");
+    this.load.image("item_rugg", "src/png/item_rugg.png");
+    this.load.image("item_piano", "src/png/item_piano.png");
+    this.load.image("item_piano_opened", "src/png/item_piano_opened.png");
+    this.load.image("item_clock", "src/png/item_clock.png");
+    this.load.image("item_clock_opened", "src/png/item_clock_opened.png");
+    this.load.spritesheet("item_clock_anim", "src/png/item_clock_anim.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_window_day", "src/png/item_window_day.png");
+    this.load.image("item_window_day_closed", "src/png/item_window_day_closed.png");
+    this.load.image("item_window_night", "src/png/item_window_night.png");
+    this.load.image("item_window_night_closed", "src/png/item_window_night_closed.png");
     
     //---star
-    scene.load.image("star_blue", "src/png/star_blue.png", {frameWidth: 200, frameHeight: 191});
-    scene.load.image("star_green", "src/png/star_green.png", {frameWidth: 200, frameHeight: 191});
-    scene.load.image("star_orange", "src/png/star_orange.png", {frameWidth: 200, frameHeight: 191});
-    scene.load.image("star_pink", "src/png/star_pink.png", {frameWidth: 200, frameHeight: 191});
-    scene.load.image("star_purple", "src/png/star_purple.png", {frameWidth: 200, frameHeight: 191});
-    scene.load.image("star_red", "src/png/star_red.png", {frameWidth: 200, frameHeight: 191});
-    scene.load.image("star_skyblue", "src/png/star_skyblue.png", {frameWidth: 200, frameHeight: 191});
-    scene.load.image("star_yellow", "src/png/star_yellow.png", {frameWidth: 200, frameHeight: 191});
+    this.load.image("star_blue", "src/png/star_blue.png", {frameWidth: 200, frameHeight: 191});
+    this.load.image("star_green", "src/png/star_green.png", {frameWidth: 200, frameHeight: 191});
+    this.load.image("star_orange", "src/png/star_orange.png", {frameWidth: 200, frameHeight: 191});
+    this.load.image("star_pink", "src/png/star_pink.png", {frameWidth: 200, frameHeight: 191});
+    this.load.image("star_purple", "src/png/star_purple.png", {frameWidth: 200, frameHeight: 191});
+    this.load.image("star_red", "src/png/star_red.png", {frameWidth: 200, frameHeight: 191});
+    this.load.image("star_skyblue", "src/png/star_skyblue.png", {frameWidth: 200, frameHeight: 191});
+    this.load.image("star_yellow", "src/png/star_yellow.png", {frameWidth: 200, frameHeight: 191});
         
     //---cat
-    scene.load.image("item_mail", "src/png/item_mail.png");
-    scene.load.image("cat_sitting", "src/png/cat_sitting.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.spritesheet("cat_sleeping", "src/png/cat_sleeping.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("item_mail", "src/png/item_mail.png");
+    this.load.image("cat_sitting", "src/png/cat_sitting.png", {frameWidth: 370, frameHeight: 320});
+    this.load.spritesheet("cat_sleeping", "src/png/cat_sleeping.png", {frameWidth: 370, frameHeight: 320});
     
     //---item_craft_todo
-    scene.load.image("item_cushion", "src/png/item_cushion.png", {frameWidth: 663, frameHeight: 447});
+    this.load.image("item_cushion", "src/png/item_cushion.png", {frameWidth: 663, frameHeight: 447});
 
     //---icon_system
-    scene.load.image("icon_kusa", "src/png/icon_system_kusa.png", {frameWidth: 350, frameHeight: 350});
-    scene.load.image("icon_ohana", "src/png/icon_system_ohana.png", {frameWidth: 350, frameHeight: 350});
-    scene.load.image("icon_clock", "src/png/icon_system_clock.png", {frameWidth: 225, frameHeight: 225});
-    scene.load.image("icon_heart", "src/png/icon_system_heart.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("icon_rotate", "src/png/icon_system_rotate.png", {frameWidth: 980, frameHeight: 818});
-    scene.load.image("icon_home", "src/png/icon_system_home.png", {frameWidth: 512, frameHeight: 512});
-    scene.load.image("icon_satiety", "src/png/icon_system_satiety.png", {frameWidth: 500, frameHeight: 500});
-    scene.load.image("icon_happy", "src/png/icon_system_happy.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("icon_kusa", "src/png/icon_system_kusa.png", {frameWidth: 350, frameHeight: 350});
+    this.load.image("icon_ohana", "src/png/icon_system_ohana.png", {frameWidth: 350, frameHeight: 350});
+    this.load.image("icon_clock", "src/png/icon_system_clock.png", {frameWidth: 225, frameHeight: 225});
+    this.load.image("icon_heart", "src/png/icon_system_heart.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("icon_rotate", "src/png/icon_system_rotate.png", {frameWidth: 980, frameHeight: 818});
+    this.load.image("icon_home", "src/png/icon_system_home.png", {frameWidth: 512, frameHeight: 512});
+    this.load.image("icon_satiety", "src/png/icon_system_satiety.png", {frameWidth: 500, frameHeight: 500});
+    this.load.image("icon_happy", "src/png/icon_system_happy.png", {frameWidth: 500, frameHeight: 500});
 
     //---icon_counter
-    scene.load.image("icon_counter", "src/png/icon_clover.png", {frameWidth: 507, frameHeight: 507});
+    this.load.image("icon_counter", "src/png/icon_clover.png", {frameWidth: 507, frameHeight: 507});
 
     //---icon_status
-    scene.load.image("icon_str", "src/png/icon_status_str.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("icon_dex", "src/png/icon_status_dex.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("icon_int", "src/png/icon_status_int.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("icon_luk", "src/png/icon_status_luk.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("icon_str", "src/png/icon_status_str.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("icon_dex", "src/png/icon_status_dex.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("icon_int", "src/png/icon_status_int.png", {frameWidth: 370, frameHeight: 320});
+    this.load.image("icon_luk", "src/png/icon_status_luk.png", {frameWidth: 370, frameHeight: 320});
 
     //---plugin: rexuiplugin
     //need for nameplate
-    scene.load.scenePlugin({
+    this.load.scenePlugin({
         key: 'rexuiplugin',
         url: "lib/rexuiplugin.min.js",
         sceneKey: 'rexUI'
     });
-    scene.load.plugin('rextexteditplugin', 'lib/rextexteditplugin.min.js', true);
+    this.load.plugin('rextexteditplugin', 'lib/rextexteditplugin.min.js', true);
     
     //---fireworks
     //https://codepen.io/samme/pen/eYEearb
-    scene.load.atlas('flares', 'src/fireworks/flares.png', 'src/fireworks/flares.json');
+    this.load.atlas('flares', 'src/fireworks/flares.png', 'src/fireworks/flares.json');
     
     //---tokenBall
-    scene.load.image("coin_color_ACA", "src/png/coin_color_ACA.png", {frameWidth: 200, frameHeight: 200});
-    scene.load.image("coin_color_ASTR", "src/png/coin_color_ASTR.png", {frameWidth: 200, frameHeight: 200});
-    scene.load.image("coin_color_BNB", "src/png/coin_color_BNB.png", {frameWidth: 200, frameHeight: 200});
-    scene.load.image("coin_color_BTC", "src/png/coin_color_BTC.png", {frameWidth: 200, frameHeight: 200});
-    scene.load.image("coin_color_BUSD", "src/png/coin_color_BUSD.png", {frameWidth: 200, frameHeight: 200});
-    scene.load.image("coin_color_DAI", "src/png/coin_color_DAI.png", {frameWidth: 200, frameHeight: 200});
-    scene.load.image("coin_color_DOT", "src/png/coin_color_DOT.png", {frameWidth: 200, frameHeight: 200});
-    scene.load.image("coin_color_ETH", "src/png/coin_color_ETH.png", {frameWidth: 200, frameHeight: 200});
-    scene.load.image("coin_color_GLMR", "src/png/coin_color_GLMR.png", {frameWidth: 200, frameHeight: 200});
-    scene.load.image("coin_color_KSM", "src/png/coin_color_KSM.png", {frameWidth: 200, frameHeight: 200});
-    scene.load.image("coin_color_LAY", "src/png/coin_color_LAY.png", {frameWidth: 200, frameHeight: 200});
-    scene.load.image("coin_color_MATIC", "src/png/coin_color_MATIC.png", {frameWidth: 200, frameHeight: 200});
-    scene.load.image("coin_color_SDN", "src/png/coin_color_SDN.png", {frameWidth: 200, frameHeight: 200});
-    scene.load.image("coin_color_USDC", "src/png/coin_color_USDC.png", {frameWidth: 200, frameHeight: 200});
-    scene.load.image("coin_color_USDT", "src/png/coin_color_USDT.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_color_ACA", "src/png/coin_color_ACA.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_color_ASTR", "src/png/coin_color_ASTR.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_color_BNB", "src/png/coin_color_BNB.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_color_BTC", "src/png/coin_color_BTC.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_color_BUSD", "src/png/coin_color_BUSD.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_color_DAI", "src/png/coin_color_DAI.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_color_DOT", "src/png/coin_color_DOT.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_color_ETH", "src/png/coin_color_ETH.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_color_GLMR", "src/png/coin_color_GLMR.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_color_KSM", "src/png/coin_color_KSM.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_color_LAY", "src/png/coin_color_LAY.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_color_MATIC", "src/png/coin_color_MATIC.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_color_SDN", "src/png/coin_color_SDN.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_color_USDC", "src/png/coin_color_USDC.png", {frameWidth: 200, frameHeight: 200});
+    this.load.image("coin_color_USDT", "src/png/coin_color_USDT.png", {frameWidth: 200, frameHeight: 200});
     array_image_tokenBall = [
         "coin_color_ACA",
         "coin_color_ASTR",
@@ -3895,260 +3888,260 @@ function preload(scene) {
 //===phaser3:create========================================================--------
 
 
-function create(scene) {
+function create() {
 
     //---back image
-    scene.add.image(640, 480, "back");
-    back_neon = scene.add.image(900, 180, "back_neon").setOrigin(0.5).setScale(0.3);
+    this.add.image(640, 480, "back");
+    back_neon = this.add.image(900, 180, "back_neon").setOrigin(0.5).setScale(0.3);
     back_neon.angle += 10;
     back_neon.visible = false;
     back_neon.depth = 9999+11;
 
     //---animation murasaki
-    scene.anims.create({
+    this.anims.create({
         key: "murasaki_right",
-        frames: scene.anims.generateFrameNumbers("murasaki_right", {start:0, end:3}),
+        frames: this.anims.generateFrameNumbers("murasaki_right", {start:0, end:3}),
         frameRate: 2,
         repeat: -1
     });
-    scene.anims.create({
+    this.anims.create({
         key: "murasaki_left",
-        frames: scene.anims.generateFrameNumbers("murasaki_left", {start:0, end:3}),
+        frames: this.anims.generateFrameNumbers("murasaki_left", {start:0, end:3}),
         frameRate: 2,
         repeat: -1
     });
-    scene.anims.create({
+    this.anims.create({
         key: "murasaki_sleeping",
-        frames: scene.anims.generateFrameNumbers("murasaki_sleeping", {start:0, end:1}),
+        frames: this.anims.generateFrameNumbers("murasaki_sleeping", {start:0, end:1}),
         frameRate: 1,
         repeat: -1
     });
-    scene.anims.create({
+    this.anims.create({
         key: "murasaki_feeding",
-        frames: scene.anims.generateFrameNumbers("murasaki_feeding", {start:0, end:1}),
+        frames: this.anims.generateFrameNumbers("murasaki_feeding", {start:0, end:1}),
         frameRate: 1,
         repeat: -1
     });
-    scene.anims.create({
+    this.anims.create({
         key: "murasaki_feeding_happy_right",
-        frames: scene.anims.generateFrameNumbers("murasaki_feeding_happy_right", {start:0, end:1}),
+        frames: this.anims.generateFrameNumbers("murasaki_feeding_happy_right", {start:0, end:1}),
         frameRate: 1,
         repeat: -1
     });
-    scene.anims.create({
+    this.anims.create({
         key: "murasaki_feeding_happy_left",
-        frames: scene.anims.generateFrameNumbers("murasaki_feeding_happy_left", {start:0, end:1}),
+        frames: this.anims.generateFrameNumbers("murasaki_feeding_happy_left", {start:0, end:1}),
         frameRate: 1,
         repeat: -1
     });
-    scene.anims.create({
+    this.anims.create({
         key: "murasaki_crying",
-        frames: scene.anims.generateFrameNumbers("murasaki_crying", {start:0, end:1}),
+        frames: this.anims.generateFrameNumbers("murasaki_crying", {start:0, end:1}),
         frameRate: 1,
         repeat: -1
     });
-    scene.anims.create({
+    this.anims.create({
         key: "murasaki_mining",
-        frames: scene.anims.generateFrameNumbers("murasaki_mining", {start:0, end:1}),
+        frames: this.anims.generateFrameNumbers("murasaki_mining", {start:0, end:1}),
         frameRate: 1,
         repeat: -1
     });
-    scene.anims.create({
+    this.anims.create({
         key: "murasaki_hugging",
-        frames: scene.anims.generateFrameNumbers("murasaki_hugging", {start:0, end:1}),
+        frames: this.anims.generateFrameNumbers("murasaki_hugging", {start:0, end:1}),
         frameRate: 1,
         repeat: -1
     });
-    scene.anims.create({
+    this.anims.create({
         key: "murasaki_farming",
-        frames: scene.anims.generateFrameNumbers("murasaki_farming", {start:0, end:1}),
+        frames: this.anims.generateFrameNumbers("murasaki_farming", {start:0, end:1}),
         frameRate: 1,
         repeat: -1
     });
-    scene.anims.create({
+    this.anims.create({
         key: "murasaki_grooming",
-        frames: scene.anims.generateFrameNumbers("murasaki_grooming", {start:0, end:1}),
+        frames: this.anims.generateFrameNumbers("murasaki_grooming", {start:0, end:1}),
         frameRate: 1,
         repeat: -1
     });
-    scene.anims.create({
+    this.anims.create({
         key: "murasaki_crafting",
-        frames: scene.anims.generateFrameNumbers("murasaki_crafting", {start:0, end:1}),
+        frames: this.anims.generateFrameNumbers("murasaki_crafting", {start:0, end:1}),
         frameRate: 1,
         repeat: -1
     });
-    scene.anims.create({
+    this.anims.create({
         key: "murasaki_working_left",
-        frames: scene.anims.generateFrameNumbers("murasaki_working_left", {start:0, end:1}),
+        frames: this.anims.generateFrameNumbers("murasaki_working_left", {start:0, end:1}),
         frameRate: 1,
         repeat: -1
     });
-    scene.anims.create({
+    this.anims.create({
         key: "murasaki_working_right",
-        frames: scene.anims.generateFrameNumbers("murasaki_working_right", {start:0, end:1}),
+        frames: this.anims.generateFrameNumbers("murasaki_working_right", {start:0, end:1}),
         frameRate: 1,
         repeat: -1
     });
-    scene.anims.create({
+    this.anims.create({
         key: "murasaki_click",
-        frames: scene.anims.generateFrameNumbers("murasaki_click", {start:0, end:1}),
+        frames: this.anims.generateFrameNumbers("murasaki_click", {start:0, end:1}),
         frameRate: 1,
         repeat: -1
     });
-    scene.anims.create({
+    this.anims.create({
         key: "murasaki_stone",
-        frames: scene.anims.generateFrameNumbers("murasaki_stone", {start:0, end:0}),
+        frames: this.anims.generateFrameNumbers("murasaki_stone", {start:0, end:0}),
         frameRate: 1,
         repeat: -1
     });
-    scene.anims.create({
+    this.anims.create({
         key: "murasaki_listning",
-        frames: scene.anims.generateFrameNumbers("murasaki_listning", {start:0, end:1}),
+        frames: this.anims.generateFrameNumbers("murasaki_listning", {start:0, end:1}),
         frameRate: 1,
         repeat: -1
     });
 
     //---animation pet
-    scene.anims.create({
+    this.anims.create({
         key: "mr_astar_right",
-        frames: scene.anims.generateFrameNumbers("mr_astar_right", {start:0, end:1}),
+        frames: this.anims.generateFrameNumbers("mr_astar_right", {start:0, end:1}),
         frameRate: 1,
         repeat: -1
     });
-    scene.anims.create({
+    this.anims.create({
         key: "mr_astar_left",
-        frames: scene.anims.generateFrameNumbers("mr_astar_left", {start:0, end:1}),
+        frames: this.anims.generateFrameNumbers("mr_astar_left", {start:0, end:1}),
         frameRate: 1,
         repeat: -1
     });
-    scene.anims.create({
+    this.anims.create({
         key: "ms_ether_right",
-        frames: scene.anims.generateFrameNumbers("ms_ether_right", {start:0, end:1}),
+        frames: this.anims.generateFrameNumbers("ms_ether_right", {start:0, end:1}),
         frameRate: 1,
         repeat: -1
     });
-    scene.anims.create({
+    this.anims.create({
         key: "ms_ether_left",
-        frames: scene.anims.generateFrameNumbers("ms_ether_left", {start:0, end:1}),
+        frames: this.anims.generateFrameNumbers("ms_ether_left", {start:0, end:1}),
         frameRate: 1,
         repeat: -1
     });
-    scene.anims.create({
+    this.anims.create({
         key: "dr_bitco_right",
-        frames: scene.anims.generateFrameNumbers("dr_bitco_right", {start:0, end:1}),
+        frames: this.anims.generateFrameNumbers("dr_bitco_right", {start:0, end:1}),
         frameRate: 1,
         repeat: -1
     });
-    scene.anims.create({
+    this.anims.create({
         key: "dr_bitco_left",
-        frames: scene.anims.generateFrameNumbers("dr_bitco_left", {start:0, end:1}),
+        frames: this.anims.generateFrameNumbers("dr_bitco_left", {start:0, end:1}),
         frameRate: 1,
         repeat: -1
     });
     
     //---animation item
-    scene.anims.create({
+    this.anims.create({
         key: "item_musicbox_on",
-        frames: scene.anims.generateFrameNumbers("item_musicbox", {start:1, end:2}),
+        frames: this.anims.generateFrameNumbers("item_musicbox", {start:1, end:2}),
         frameRate: 1,
         repeat: -1
     });
-    scene.anims.create({
+    this.anims.create({
         key: "item_musicbox_off",
-        frames: scene.anims.generateFrameNumbers("item_musicbox", {start:0, end:0}),
+        frames: this.anims.generateFrameNumbers("item_musicbox", {start:0, end:0}),
         frameRate: 1,
         repeat: -1
     });
-    scene.anims.create({
+    this.anims.create({
         key: "item_crown",
-        frames: scene.anims.generateFrameNumbers("item_crown", {start:0, end:1}),
+        frames: this.anims.generateFrameNumbers("item_crown", {start:0, end:1}),
         frameRate: 1,
         repeat: -1
     });
-    scene.anims.create({
+    this.anims.create({
         key: "murasaki_hungry",
-        frames: scene.anims.generateFrameNumbers("murasaki_hungry", {start:0, end:1}),
+        frames: this.anims.generateFrameNumbers("murasaki_hungry", {start:0, end:1}),
         frameRate: 1,
         repeat: -1
     });
-    scene.anims.create({
+    this.anims.create({
         key: "item_switch_on",
-        frames: scene.anims.generateFrameNumbers("item_switch", {start:0, end:0}),
+        frames: this.anims.generateFrameNumbers("item_switch", {start:0, end:0}),
         frameRate: 1,
         repeat: -1
     });
-    scene.anims.create({
+    this.anims.create({
         key: "item_switch_off",
-        frames: scene.anims.generateFrameNumbers("item_switch", {start:1, end:1}),
+        frames: this.anims.generateFrameNumbers("item_switch", {start:1, end:1}),
         frameRate: 1,
         repeat: -1
     });
-    scene.anims.create({
+    this.anims.create({
         key: "item_nui",
-        frames: scene.anims.generateFrameNumbers("item_nui", {start:0, end:0}),
+        frames: this.anims.generateFrameNumbers("item_nui", {start:0, end:0}),
         frameRate: 1,
         repeat: -1
     });
-    scene.anims.create({
+    this.anims.create({
         key: "item_nui_alive",
-        frames: scene.anims.generateFrameNumbers("item_nui", {start:1, end:3}),
+        frames: this.anims.generateFrameNumbers("item_nui", {start:1, end:3}),
         frameRate: 1,
         repeat: -1
     });
-    scene.anims.create({
+    this.anims.create({
         key: "item_clock_anim",
-        frames: scene.anims.generateFrameNumbers("item_clock_anim", {start:1, end:0}),
+        frames: this.anims.generateFrameNumbers("item_clock_anim", {start:1, end:0}),
         frameRate: 1,
         repeat: 1
     });
-    scene.anims.create({
+    this.anims.create({
         key: "cat_sleeping",
-        frames: scene.anims.generateFrameNumbers("cat_sleeping", {start:0, end:1}),
+        frames: this.anims.generateFrameNumbers("cat_sleeping", {start:0, end:1}),
         frameRate: 1,
         repeat: -1
     });
     
     //---item_basic
-    item_bear = scene.add.sprite(1000,400, "item_bear")
+    item_bear = this.add.sprite(1000,400, "item_bear")
         .setScale(0.45);
-    item_table = scene.add.sprite(600,870, "item_table")
+    item_table = this.add.sprite(600,870, "item_table")
         .setOrigin(0.5)
         .setScale(0.6)
         //.setDepth(870-50);
         .setDepth(2);
-    item_misin = scene.add.sprite(950,830, "item_misin")
+    item_misin = this.add.sprite(950,830, "item_misin")
         .setOrigin(0.5)
         .setScale(0.8)
         //.setDepth(830-100);
         .setDepth(2);
-    item_tree0 = scene.add.sprite(100,400, "item_tree0")
+    item_tree0 = this.add.sprite(100,400, "item_tree0")
         .setOrigin(0.5)
         .setScale(0.7)
         .setDepth(420);
-    item_tree1 = scene.add.sprite(100,400, "item_tree1")
+    item_tree1 = this.add.sprite(100,400, "item_tree1")
         .setOrigin(0.5)
         .setScale(0.7)
         .setDepth(420+2);
-    item_tree2 = scene.add.sprite(100,400, "item_tree2")
+    item_tree2 = this.add.sprite(100,400, "item_tree2")
         .setOrigin(0.5)
         .setScale(0.7)
         .setDepth(420+1);
-    item_tree3 = scene.add.sprite(100,400, "item_tree3")
+    item_tree3 = this.add.sprite(100,400, "item_tree3")
         .setOrigin(0.5)
         .setScale(0.7)
         .setDepth(420);
     item_tree1.visible = false;
     item_tree2.visible = false;
     item_tree3.visible = false;
-    item_gold1 = scene.add.sprite(130,750, "item_gold1")
+    item_gold1 = this.add.sprite(130,750, "item_gold1")
         .setOrigin(0.5)
         .setScale(0.7)
         .setDepth(750);
-    item_gold2 = scene.add.sprite(130,750, "item_gold2")
+    item_gold2 = this.add.sprite(130,750, "item_gold2")
         .setOrigin(0.5)
         .setScale(0.7)
         .setDepth(750+1);
-    item_gold3 = scene.add.sprite(130,750, "item_gold3")
+    item_gold3 = this.add.sprite(130,750, "item_gold3")
         .setOrigin(0.5)
         .setScale(0.7)
         .setDepth(750+2);
@@ -4163,7 +4156,7 @@ function create(scene) {
     //feeding
     _x = 460;
     _y = 870;
-    button_feeding = scene.add.sprite(_x, _y, "button_feeding")
+    button_feeding = this.add.sprite(_x, _y, "button_feeding")
         .setScale(0.16)
         .setInteractive({useHandCursor: true})
         .on('pointerdown', () => sound_button_on.play() )
@@ -4175,7 +4168,7 @@ function create(scene) {
     //grooming
     _x = 1150;
     _y = 400;
-    button_grooming = scene.add.sprite(_x, _y, "button_grooming_unable")
+    button_grooming = this.add.sprite(_x, _y, "button_grooming_unable")
         .setScale(0.16)
         .setInteractive({useHandCursor: true})
         .on('pointerdown', () => sound_button_on.play() )
@@ -4188,7 +4181,7 @@ function create(scene) {
     //crafting
     _x = 820;
     _y = 870;
-    button_crafting = scene.add.sprite(_x, _y, "button_crafting_unable")
+    button_crafting = this.add.sprite(_x, _y, "button_crafting_unable")
         .setScale(0.16)
         .setInteractive({useHandCursor: true})
         .on('pointerdown', () => sound_button_on.play() )
@@ -4201,45 +4194,45 @@ function create(scene) {
 
     //--crafting_selected_info
     //icon_ohana
-    icon_crafting_ohana = scene.add.sprite(_x+58, _y+13, "icon_ohana")
+    icon_crafting_ohana = this.add.sprite(_x+58, _y+13, "icon_ohana")
         .setDepth(9999)
         .setScale(0.07)
         .setVisible(false);
     //icon_kusa
-    icon_crafting_kusa = scene.add.sprite(_x+130, _y+15, "icon_kusa")
+    icon_crafting_kusa = this.add.sprite(_x+130, _y+15, "icon_kusa")
         .setDepth(9999)
         .setScale(0.09)
         .setVisible(false);
     //icon_clock
-    icon_crafting_time = scene.add.sprite(_x+58, _y+42, "icon_clock")
+    icon_crafting_time = this.add.sprite(_x+58, _y+42, "icon_clock")
         .setDepth(9999)
         .setScale(0.09)
         .setVisible(false);
     //icon_heart
-    icon_crafting_heart = scene.add.sprite(_x+200, _y+13, "icon_heart")
+    icon_crafting_heart = this.add.sprite(_x+200, _y+13, "icon_heart")
         .setDepth(9999)
         .setScale(0.08)
         .setVisible(false);
     //text
-    text_crafting_selected_item_ohana = scene.add.text(
+    text_crafting_selected_item_ohana = this.add.text(
         _x+72, 
         _y+5, 
         "", 
         {font: "18px Arial", fill: "#000", backgroundColor: "#ecd9ff"}
     ).setDepth(9999);
-    text_crafting_selected_item_kusa = scene.add.text(
+    text_crafting_selected_item_kusa = this.add.text(
         _x+142, 
         _y+5, 
         "", 
         {font: "18px Arial", fill: "#000", backgroundColor: "#ecd9ff"}
     ).setDepth(9999);
-    text_crafting_selected_item_heart = scene.add.text(
+    text_crafting_selected_item_heart = this.add.text(
         _x+214, 
         _y+5, 
         "", 
         {font: "18px Arial", fill: "#000", backgroundColor: "#ecd9ff"}
     ).setDepth(9999);
-    text_crafting_selected_item_time = scene.add.text(
+    text_crafting_selected_item_time = this.add.text(
         _x+72, 
         _y+32, 
         "", 
@@ -4248,34 +4241,34 @@ function create(scene) {
 
     //--craftimg_now_info
     //icon_clock
-    icon_crafting_time_remining = scene.add.sprite(_x+60, _y+15, "icon_clock")
+    icon_crafting_time_remining = this.add.sprite(_x+60, _y+15, "icon_clock")
         .setDepth(9999)
         .setScale(0.09)
         .setVisible(false);
     //text
-    text_crafting_calc = scene.add.text(
+    text_crafting_calc = this.add.text(
         _x+75, 
         _y+5, 
         "", 
         {font: "18px Arial", fill: "#000", backgroundColor: "#ecd9ff"}
     ).setDepth(9999);
     //select crafting_item_type
-    text_select_item = scene.add.text(_x+50, _y-30, ">> Select Item <<", {font: "30px Arial", fill: "#000", backgroundColor: "#ecd9ff"})
+    text_select_item = this.add.text(_x+50, _y-30, ">> Select Item <<", {font: "30px Arial", fill: "#000", backgroundColor: "#ecd9ff"})
                 .setDepth(9999)
                 .setFontSize(24).setFontFamily("Arial").setFill('#000000')
                 .setInteractive({useHandCursor: true})
-                .on("pointerdown", () => open_window_craft(scene) )
+                .on("pointerdown", () => open_window_craft(this) )
                 .on("pointerover", () => text_select_item.setStyle({ fontSize: 24, fontFamily: "Arial", fill: '#d19dff' }))
                 .on("pointerout", () => text_select_item.setStyle({ fontSize: 24, fontFamily: "Arial", fill: '#000000' }));
-    text_craft_item = scene.add.text(_x+50, _y, "", {font: "18px Arial", fill: "#000"})
+    text_craft_item = this.add.text(_x+50, _y, "", {font: "18px Arial", fill: "#000"})
                 .setDepth(9999)
                 .setInteractive({useHandCursor: true})
-                .on("pointerdown", () => open_window_craft(scene) )
+                .on("pointerdown", () => open_window_craft(this) )
 
     //mining
     _x = 60;
     _y = 760;
-    button_mining = scene.add.sprite(_x, _y, "button_mining_unable")
+    button_mining = this.add.sprite(_x, _y, "button_mining_unable")
         .setScale(0.16)
         .setInteractive({useHandCursor: true})
         .on('pointerdown', () => sound_button_on.play() )
@@ -4285,16 +4278,16 @@ function create(scene) {
         .on('pointerout', () => button_mining.setTexture("button_mining_enable"))
         .disableInteractive();
     //icon
-    icon_mining = scene.add.sprite(_x+55, _y-22, "icon_ohana")
+    icon_mining = this.add.sprite(_x+55, _y-22, "icon_ohana")
         .setScale(0.07)
         .setVisible(false);
     //text
-    text_mining_calc = scene.add.text(_x+67, _y-30, "", {font: "18px Arial", fill: "#000"});
+    text_mining_calc = this.add.text(_x+67, _y-30, "", {font: "18px Arial", fill: "#000"});
 
     //farming
     _x = 240;
     _y = 340;
-    button_farming = scene.add.sprite(_x, _y, "button_farming_unable")
+    button_farming = this.add.sprite(_x, _y, "button_farming_unable")
         .setScale(0.16)
         .setInteractive({useHandCursor: true})
         .on('pointerdown', () => sound_button_on.play() )
@@ -4304,16 +4297,16 @@ function create(scene) {
         .on('pointerout', () => button_farming.setTexture("button_farming_enable"))
         .disableInteractive();
     //icon
-    icon_farming = scene.add.sprite(_x+55, _y-20, "icon_kusa")
+    icon_farming = this.add.sprite(_x+55, _y-20, "icon_kusa")
         .setScale(0.09)
         .setVisible(false);
     //text
-    text_farming_calc = scene.add.text(_x+65, _y-30, "", {font: "18px Arial", fill: "#000"});
+    text_farming_calc = this.add.text(_x+65, _y-30, "", {font: "18px Arial", fill: "#000"});
 
     //level
     _x = 1240;
     _y = 35;
-    button_levelup = scene.add.sprite(_x, _y, "back_level")
+    button_levelup = this.add.sprite(_x, _y, "back_level")
         .setScale(0.11)
         .setInteractive({useHandCursor: true})
         .on('pointerdown', () => sound_button_on.play() )
@@ -4324,29 +4317,29 @@ function create(scene) {
         .on('pointerout', () => button_levelup.setTexture("button_levelup_enable"))
         .on('pointerout', () => text_level.setText(local_level))
         .disableInteractive();
-    text_level = scene.add.text(_x, _y+7, "0", {font: "bold 26px Verdana", fill: "#E5004F"}).setOrigin(0.5);
+    text_level = this.add.text(_x, _y+7, "0", {font: "bold 26px Verdana", fill: "#E5004F"}).setOrigin(0.5);
 
     //---system click button
     //icon_rotate
-    icon_rotate = scene.add.sprite(1235,915-15, "icon_rotate")
+    icon_rotate = this.add.sprite(1235,915-15, "icon_rotate")
         .setOrigin(0.5)
         .setScale(0.075)
         .setInteractive({useHandCursor: true})
         .on('pointerdown', () => sound_system.play())
         .on("pointerdown", () => {
-            if (scene.sys.game.scale.gameSize._width == 1280) {
-                scene.scale.setGameSize(960,1280);
-                scene.cameras.main.rotation = 90 * Math.PI / 180;
-                scene.cameras.main.centerOn(640,480);
+            if (this.sys.game.scale.gameSize._width == 1280) {
+                this.scale.setGameSize(960,1280);
+                this.cameras.main.rotation = 90 * Math.PI / 180;
+                this.cameras.main.centerOn(640,480);
             } else {
-                scene.scale.setGameSize(1280,960);
-                scene.cameras.main.rotation = 0;
-                scene.cameras.main.centerOn(640,480);
+                this.scale.setGameSize(1280,960);
+                this.cameras.main.rotation = 0;
+                this.cameras.main.centerOn(640,480);
             }
         });
 
     //icon_home
-    icon_home = scene.add.sprite(1155,915-15, "icon_home")
+    icon_home = this.add.sprite(1155,915-15, "icon_home")
         .setOrigin(0.5)
         .setScale(0.15)
         .setInteractive({useHandCursor: true})
@@ -4357,48 +4350,48 @@ function create(scene) {
 
     //---music
     //sound out of focus
-    scene.sound.pauseOnBlur = false
-    bgm1 = scene.sound.add("bgm1", {volume:0.1, loop:true});
-    bgm2 = scene.sound.add("bgm2", {volume:0.1, loop:true});
-    bgm3 = scene.sound.add("bgm3", {volume:0.1, loop:true});
+    this.sound.pauseOnBlur = false
+    bgm1 = this.sound.add("bgm1", {volume:0.1, loop:true});
+    bgm2 = this.sound.add("bgm2", {volume:0.1, loop:true});
+    bgm3 = this.sound.add("bgm3", {volume:0.1, loop:true});
 
     //---sound
-    sound_button_select = scene.sound.add("button_select", {volume:0.2});
-    sound_button_on = scene.sound.add("button_on", {volume:0.2});
-    sound_feeding = scene.sound.add("feeding", {volume:0.1});
-    sound_grooming = scene.sound.add("grooming", {volume:0.1});
-    sound_mining = scene.sound.add("mining", {volume:0.1});
-    sound_mining_during = scene.sound.add("mining_during", {volume:0.1});
-    sound_farming = scene.sound.add("farming", {volume:0.1});
-    sound_farming_during = scene.sound.add("farming_during", {volume:0.2});
-    sound_crafting = scene.sound.add("crafting", {volume:0.2});
-    sound_crafting_during = scene.sound.add("crafting_during", {volume:0.1});
-    sound_happy = scene.sound.add("happy", {volume:0.2});
-    sound_earn = scene.sound.add("earn", {volume:0.2});
-    sound_dice = scene.sound.add("dice", {volume:0.15});
-    sound_dice_impact = scene.sound.add("dice_impact", {volume:0.1});
-    sound_hat = scene.sound.add("hat", {volume:0.1});
-    sound_unhappy = scene.sound.add("unhappy", {volume:0.2});
-    sound_switch = scene.sound.add("switch", {volume:0.2});
-    sound_window_open = scene.sound.add("window_open", {volume:0.2});
-    sound_window_pointerover = scene.sound.add("window_pointerover", {volume:0.2});
-    sound_window_select = scene.sound.add("window_select", {volume:0.2});
-    sound_window_cancel = scene.sound.add("window_cancel", {volume:0.2});
-    sound_system = scene.sound.add("system", {volume:0.2});
-    sound_nui = scene.sound.add("nui", {volume:0.2});
-    sound_pad = scene.sound.add("pad", {volume:0.2});
-    sound_fireworks = scene.sound.add("fireworks", {volume:0.2});
-    sound_fireworks2 = scene.sound.add("fireworks2", {volume:0.2});
-    sound_basket = scene.sound.add("basket", {volume:0.2});
-    sound_cat1 = scene.sound.add("cat1", {volume:0.2});
-    sound_clock = scene.sound.add("clock", {volume:0.2});
-    sound_window = scene.sound.add("window", {volume:0.2});
-    sound_piano1 = scene.sound.add("piano1", {volume:0.3});
-    sound_piano2 = scene.sound.add("piano2", {volume:0.25});
+    sound_button_select = this.sound.add("button_select", {volume:0.2});
+    sound_button_on = this.sound.add("button_on", {volume:0.2});
+    sound_feeding = this.sound.add("feeding", {volume:0.1});
+    sound_grooming = this.sound.add("grooming", {volume:0.1});
+    sound_mining = this.sound.add("mining", {volume:0.1});
+    sound_mining_during = this.sound.add("mining_during", {volume:0.1});
+    sound_farming = this.sound.add("farming", {volume:0.1});
+    sound_farming_during = this.sound.add("farming_during", {volume:0.2});
+    sound_crafting = this.sound.add("crafting", {volume:0.2});
+    sound_crafting_during = this.sound.add("crafting_during", {volume:0.1});
+    sound_happy = this.sound.add("happy", {volume:0.2});
+    sound_earn = this.sound.add("earn", {volume:0.2});
+    sound_dice = this.sound.add("dice", {volume:0.15});
+    sound_dice_impact = this.sound.add("dice_impact", {volume:0.1});
+    sound_hat = this.sound.add("hat", {volume:0.1});
+    sound_unhappy = this.sound.add("unhappy", {volume:0.2});
+    sound_switch = this.sound.add("switch", {volume:0.2});
+    sound_window_open = this.sound.add("window_open", {volume:0.2});
+    sound_window_pointerover = this.sound.add("window_pointerover", {volume:0.2});
+    sound_window_select = this.sound.add("window_select", {volume:0.2});
+    sound_window_cancel = this.sound.add("window_cancel", {volume:0.2});
+    sound_system = this.sound.add("system", {volume:0.2});
+    sound_nui = this.sound.add("nui", {volume:0.2});
+    sound_pad = this.sound.add("pad", {volume:0.2});
+    sound_fireworks = this.sound.add("fireworks", {volume:0.2});
+    sound_fireworks2 = this.sound.add("fireworks2", {volume:0.2});
+    sound_basket = this.sound.add("basket", {volume:0.2});
+    sound_cat1 = this.sound.add("cat1", {volume:0.2});
+    sound_clock = this.sound.add("clock", {volume:0.2});
+    sound_window = this.sound.add("window", {volume:0.2});
+    sound_piano1 = this.sound.add("piano1", {volume:0.3});
+    sound_piano2 = this.sound.add("piano2", {volume:0.25});
 
     //---system message
     //system message
-    text_system_message = scene.add.text(640, 420, "", {
+    text_system_message = this.add.text(640, 420, "", {
         font: "32px Arial", 
         fill: "#000000", 
         backgroundColor: "#ffffff",
@@ -4406,21 +4399,21 @@ function create(scene) {
     }).setOrigin(0.5);
 
     //summon
-    text_summon = scene.add.text(640, 480, ">> Summon your Murasaki-san <<", {font: "30px Arial", fill: "#E62E8B", backgroundColor: "#FDEFF5"})
+    text_summon = this.add.text(640, 480, ">> Summon your Murasaki-san <<", {font: "30px Arial", fill: "#E62E8B", backgroundColor: "#FDEFF5"})
         .setOrigin(0.5)
         .setInteractive({useHandCursor: true})
-        .on("pointerdown", () => open_window_summon(scene) )
+        .on("pointerdown", () => open_window_summon(this) )
         .on("pointerover", () => text_summon.setStyle({ fontSize: 30, fontFamily: "Arial", fill: '#0000ff' }))
         .on("pointerout", () => text_summon.setStyle({ fontSize: 30, fontFamily: "Arial", fill: '#E62E8B' }));
     text_summon.visible = false;
 
     //kill
-    //new Button(10, 880, 'kill_summoner', scene, () => contract_burn(summoner));
+    //new Button(10, 880, 'kill_summoner', this, () => contract_burn(summoner));
     //burn name
-    //new Button(10, 780, 'burn_name', scene, () => contract_burn_name(summoner));
+    //new Button(10, 780, 'burn_name', this, () => contract_burn_name(summoner));
 
     //curePetrification
-    text_curePetrification = scene.add.text(640, 480, " >> Cure Petrification (Cost: Lv x 10 $ASTR) << ", {font: "28px Arial", fill: "#E62E8B", backgroundColor: "#FDEFF5"})
+    text_curePetrification = this.add.text(640, 480, " >> Cure Petrification (Cost: Lv x 10 $ASTR) << ", {font: "28px Arial", fill: "#E62E8B", backgroundColor: "#FDEFF5"})
         .setOrigin(0.5)
         .setInteractive({useHandCursor: true})
         .on("pointerdown", () => contract_curePetrification(summoner) )
@@ -4432,89 +4425,89 @@ function create(scene) {
     let font_arg = {font: "18px Arial", fill: "#000"};
 
     //debug info
-    //text_turn = scene.add.text(250, 920, "***", {font: "14px Arial", fill: "#727171"});
-    text_turn = scene.add.text(5, 955, "***", {font: "14px Arial", fill: "#303030"})
+    //text_turn = this.add.text(250, 920, "***", {font: "14px Arial", fill: "#727171"});
+    text_turn = this.add.text(5, 955, "***", {font: "14px Arial", fill: "#303030"})
         .setOrigin(0,1)
         .setDepth(2);
-    //text_sync_time = scene.add.text(330, 940, "***", {font: "14px Arial", fill: "#727171"});
-    text_sync_time = scene.add.text(1275, 955, "***", {font: "14px Arial", fill: "#727171"})
+    //text_sync_time = this.add.text(330, 940, "***", {font: "14px Arial", fill: "#727171"});
+    text_sync_time = this.add.text(1275, 955, "***", {font: "14px Arial", fill: "#727171"})
         .setOrigin(1)
         .setDepth(9999);
-    //text_wallet = scene.add.text(430, 940, "***", {font: "14px Arial", fill: "#727171"});
-    text_wallet = scene.add.text(1250, 955, "***", {font: "14px Arial", fill: "#727171"})
+    //text_wallet = this.add.text(430, 940, "***", {font: "14px Arial", fill: "#727171"});
+    text_wallet = this.add.text(1250, 955, "***", {font: "14px Arial", fill: "#727171"})
         .setOrigin(1)
         .setDepth(9999);
 
     //satiety
-    icon_satiety = scene.add.sprite(30,25, "icon_satiety")
+    icon_satiety = this.add.sprite(30,25, "icon_satiety")
         .setScale(0.08)
         .setDepth(9999);
-    bar_satiety_back = makeBar(scene, 55, 15, 0xF8C5AC)
+    bar_satiety_back = makeBar(this, 55, 15, 0xF8C5AC)
         .setDepth(9999);
     bar_satiety_back.scaleX = 1;
-    bar_satiety = makeBar(scene, 55, 15, 0xE60012)
+    bar_satiety = makeBar(this, 55, 15, 0xE60012)
         .setDepth(9999);
     bar_satiety.scaleX = 0;
-    text_satiety = scene.add.text(60, 16, "0%", {font: "17px Arial", fill: "#ffffff"})
+    text_satiety = this.add.text(60, 16, "0%", {font: "17px Arial", fill: "#ffffff"})
         .setDepth(9999);
 
     //happy
-    icon_happy = scene.add.sprite(245,25, "icon_happy")
+    icon_happy = this.add.sprite(245,25, "icon_happy")
         .setScale(0.08)
         .setDepth(9999);
-    bar_happy_back = makeBar(scene, 270, 15, 0xFCE2BA)
+    bar_happy_back = makeBar(this, 270, 15, 0xFCE2BA)
         .setDepth(9999);
     bar_happy_back.scaleX = 1;
-    bar_happy = makeBar(scene, 270, 15, 0xF39800)
+    bar_happy = makeBar(this, 270, 15, 0xF39800)
         .setDepth(9999);
     bar_happy.scaleX = 0;
-    text_happy = scene.add.text(275, 16, "0%", {font: "17px Arial", fill: "#ffffff"})
+    text_happy = this.add.text(275, 16, "0%", {font: "17px Arial", fill: "#ffffff"})
         .setDepth(9999);
 
     //exp
-    scene.add.text(440, 15, "Exp:", font_arg)
+    this.add.text(440, 15, "Exp:", font_arg)
         .setDepth(9999);
-    bar_exp_back = makeBar(scene, 480, 15, 0xBBCCE9)
+    bar_exp_back = makeBar(this, 480, 15, 0xBBCCE9)
         .setDepth(9999);
     bar_exp_back.scaleX = 1;
-    bar_exp = makeBar(scene, 480, 15, 0x0068B7)
+    bar_exp = makeBar(this, 480, 15, 0x0068B7)
         .setDepth(9999);
     bar_exp.scaleX = 0;
-    text_exp = scene.add.text(485, 16, "0 / 0", {font: "17px Arial", fill: "#ffffff"})
+    text_exp = this.add.text(485, 16, "0 / 0", {font: "17px Arial", fill: "#ffffff"})
         .setDepth(9999);
-    text_exp_earned = scene.add.text(480, 38, "", {font: "17px Arial", fill: "#000000"})
+    text_exp_earned = this.add.text(480, 38, "", {font: "17px Arial", fill: "#000000"})
         .setDepth(9999);
     text_exp_earned_count = 0;
 
     //coin
-    icon_ohana = scene.add.sprite(668,23, "icon_ohana")
+    icon_ohana = this.add.sprite(668,23, "icon_ohana")
         .setScale(0.07)
         .setDepth(9999);
-    text_coin = scene.add.text(685, 15, "Coin: 0", {font: "17px Arial", fill: "#000", backgroundColor: "#FFF200"})
+    text_coin = this.add.text(685, 15, "Coin: 0", {font: "17px Arial", fill: "#000", backgroundColor: "#FFF200"})
         .setDepth(9999);
-    text_coin_earned = scene.add.text(685, 38, "", {font: "17px Arial", fill: "#000000"})
+    text_coin_earned = this.add.text(685, 38, "", {font: "17px Arial", fill: "#000000"})
         .setDepth(9999);
     text_coin_earned_count = 0;
 
     //material
-    icon_kusa = scene.add.sprite(815, 25, "icon_kusa")
+    icon_kusa = this.add.sprite(815, 25, "icon_kusa")
         .setScale(0.09)
         .setDepth(9999);
-    text_material = scene.add.text(830, 15, "Leaf: 0", {font: "17px Arial", fill: "#000", backgroundColor: "#D7E7AF"})
+    text_material = this.add.text(830, 15, "Leaf: 0", {font: "17px Arial", fill: "#000", backgroundColor: "#D7E7AF"})
         .setDepth(9999);
-    text_material_earned = scene.add.text(830, 38, "", {font: "17px Arial", fill: "#000000"})
+    text_material_earned = this.add.text(830, 38, "", {font: "17px Arial", fill: "#000000"})
         .setDepth(9999);
     text_material_earned_count = 0;
 
     //heart
-    icon_heart = scene.add.sprite(960, 21, "icon_heart")
+    icon_heart = this.add.sprite(960, 21, "icon_heart")
         .setScale(0.08)
         .setDepth(9999);
-    text_event_heart = scene.add.text(1045, 40, "", {font: "17px Arial", fill: "#000", backgroundColor: "#FDEEED"})
+    text_event_heart = this.add.text(1045, 40, "", {font: "17px Arial", fill: "#000", backgroundColor: "#FDEEED"})
         .setOrigin(1,0)
         .setVisible(false)
         .setDepth(9999);
-    text_heart = scene.add.text(975, 15, "***", {font: "17px Arial", fill: "#000", backgroundColor: "#FDEEED"})
+    text_heart = this.add.text(975, 15, "***", {font: "17px Arial", fill: "#000", backgroundColor: "#FDEEED"})
         .setDepth(9999)
         .setInteractive()
         .on("pointerover", () => text_event_heart.setVisible(true))
@@ -4523,13 +4516,13 @@ function create(scene) {
     //name
     _x = 85;
     _y = 100;
-    item_kanban = scene.add.sprite(85, 100, "item_kanban")
+    item_kanban = this.add.sprite(85, 100, "item_kanban")
         .setScale(0.4);
-    text_kanban = scene.add.text(_x+2, _y+17, "", {font: "17px Arial", fill: "#000000"})
+    text_kanban = this.add.text(_x+2, _y+17, "", {font: "17px Arial", fill: "#000000"})
         .setOrigin(0.5)
-	    .setInteractive().on('pointerdown', () => {scene.rexUI.edit(text_kanban)})
+	    .setInteractive().on('pointerdown', () => {this.rexUI.edit(text_kanban)})
         .setDepth(9999+2);
-    text_mint_name = scene.add.text(_x+80, _y-5, "[MINT NAME]", {font: "17px Arial", fill: "#000000"})
+    text_mint_name = this.add.text(_x+80, _y-5, "[MINT NAME]", {font: "17px Arial", fill: "#000000"})
         .setInteractive({useHandCursor: true})
         .on("pointerover", () => text_mint_name.setStyle({ fontSize: 17, fontFamily: "Arial", fill: '#ffff00' }))
         .on("pointerout", () => text_mint_name.setStyle({ fontSize: 17, fontFamily: "Arial", fill: '#000000' }));
@@ -4538,24 +4531,24 @@ function create(scene) {
             contract_mint_name(summoner, text_kanban.text);
             flag_name_minting = 1;
         });
-    icon_name_ohana = scene.add.sprite(_x+88, _y+25, "icon_ohana")
+    icon_name_ohana = this.add.sprite(_x+88, _y+25, "icon_ohana")
         .setScale(0.05);
-    text_name_ohana = scene.add.text(_x+100, _y+17, "100", {font: "17px Arial", fill: "#000000"});
-    icon_name_kusa = scene.add.sprite(_x+140, _y+25, "icon_kusa")
+    text_name_ohana = this.add.text(_x+100, _y+17, "100", {font: "17px Arial", fill: "#000000"});
+    icon_name_kusa = this.add.sprite(_x+140, _y+25, "icon_kusa")
         .setScale(0.07);
-    text_name_kusa = scene.add.text(_x+150, _y+17, "100", {font: "17px Arial", fill: "#000000"});
+    text_name_kusa = this.add.text(_x+150, _y+17, "100", {font: "17px Arial", fill: "#000000"});
     //id
-    text_id = scene.add.text(_x-45, _y+32, "#100", {font: "14px Arial", fill: "#000000"});
+    text_id = this.add.text(_x-45, _y+32, "#100", {font: "14px Arial", fill: "#000000"});
     //age
-    text_age_time = scene.add.text(_x+20, _y+32, "***", {font: "14px Arial", fill: "#000000"});
+    text_age_time = this.add.text(_x+20, _y+32, "***", {font: "14px Arial", fill: "#000000"});
     //group
-    group_kanban = scene.add.group();
+    group_kanban = this.add.group();
     group_kanban.add(item_kanban);
     group_kanban.add(text_kanban);
     group_kanban.add(text_id);
     group_kanban.add(text_age_time);
     group_kanban.setVisible(false);
-    group_mint_name = scene.add.group();
+    group_mint_name = this.add.group();
     group_mint_name.add(text_mint_name);
     group_mint_name.add(icon_name_ohana);
     group_mint_name.add(text_name_ohana);
@@ -4564,12 +4557,12 @@ function create(scene) {
     group_mint_name.setVisible(false);
         
     //---group
-    group_star = scene.add.group();
-    group_update = scene.add.group();
+    group_star = this.add.group();
+    group_update = this.add.group();
     group_update.runChildUpdate = true;
 
     //---summoner
-    murasakisan = new Murasakisan(scene, 500 + Math.random()*200, 640 + Math.random()*100)
+    murasakisan = new Murasakisan(this, 500 + Math.random()*200, 640 + Math.random()*100)
         .setOrigin(0.5)
         .setScale(0.45);
     group_update.add(murasakisan);
@@ -5046,7 +5039,7 @@ function update_checkModeChange(this_scene) {
         //fireworks
         if (previous_local_level > 0) {
             draw_firework(this_scene);
-            //summon_star(this_scene);
+            summon_star(this_scene);
         }
         //update radarchart
         if (flag_radarchart == 1) {
@@ -5265,7 +5258,7 @@ function update_checkButtonActivation(this_scene) {
 function update_checkItem(this_scene) {
 
     //debug
-    local_items = [1] * 256;
+    //local_items = [1] * 256;
 
     let _item_id;
 
@@ -5403,7 +5396,7 @@ function update_checkItem(this_scene) {
     ) {
         local_items_flag[_item_id] = true;
         let _x = 110;
-        let _y = 225;
+        let _y = 230;
         item_window = this_scene.add.image(_x, _y, "item_window_day")
             .setScale(0.58)
             .setOrigin(0.5)
@@ -6165,44 +6158,11 @@ function update_checkItem(this_scene) {
     }
 
     //###43:*Newspaper
-    //_item_id = 43;
     _item_id = 43;
     if (
         (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
         && local_items_flag[_item_id] != true
     ) {
-        local_items_flag[_item_id] = true;
-        let _x = 110;
-        let _y = 370;
-        item_newspaper = this_scene.add.image(_x, _y, "item_newspaper")
-            .setOrigin(0.5)
-            .setScale(0.19)
-            .setDepth(1);
-        item_newspaper_text1 = this_scene.add.text(
-            _x,
-            _y-10,
-            "block:999999",
-            {font: "14px Arial", fill: "#000000"}
-        ).setOrigin(0.5).setDepth(2);
-        item_newspaper_text2 = this_scene.add.text(
-            _x,
-            _y+10,
-            "Kapico",
-            {font: "14px Arial", fill: "#000000"}
-        ).setOrigin(0.5).setDepth(2);
-        item_newspaper_text3 = this_scene.add.text(
-            _x,
-            _y+30,
-            "Crafted",
-            {font: "14px Arial", fill: "#000000"}
-        ).setOrigin(0.5).setDepth(2);
-        item_newspaper_text4 = this_scene.add.text(
-            _x,
-            _y+50,
-            "Fortune Statue!",
-            {font: "14px Arial", fill: "#000000"}
-        ).setOrigin(0.5).setDepth(2);
-        /*
         local_items_flag[_item_id] = true;
         let _x = 250;
         let _y = 940;
@@ -6215,14 +6175,11 @@ function update_checkItem(this_scene) {
         ).setOrigin(0).setDepth(9999);
         //item_newsbunner = this_scene.add.image(640, 485, "item_newsbunner")
         //    .setDepth(900).setAlpha(0.8);
-        */
     }
     //after possession
     if (local_items_flag[_item_id] == true) {
-        /*
         contract_update_event_random();
         item_bbs_text.setText(text_event_random);
-        */
     }
 
     //###44:Cuckoo Clock
@@ -6495,12 +6452,12 @@ function calc_fps() {
 
 
 //---update()
-function update(scene) {
+function update() {
 
     //increment turn
     turn += 1;
     //text_turn.setText("turn: " + ("0000000" + turn).slice(-7) );
-        
+    
     //calc FPS
     calc_fps();
 
@@ -6526,42 +6483,42 @@ function update(scene) {
 
     //radarchart
     if (turn % 1000 == 0 && summoner > 0 && flag_radarchart == 1) {
-        draw_radarchart(scene);
+        draw_radarchart(this);
     }
     
     //sync time
     if (turn % 20 == 0) {
-        update_syncTime(scene);
+        update_syncTime(this);
     }
 
     //numeric animation
     if (turn % 2 == 0) {
-        update_numericAnimation(scene);
+        update_numericAnimation(this);
     }
 
     //parameters with animation
     if (turn % 150 == 0) {
-        update_parametersWithAnimation(scene);
+        update_parametersWithAnimation(this);
     }
 
     //parameters without animation
     if (turn % 150 == 10) {
-        update_parametersWithoutAnimation(scene);
+        update_parametersWithoutAnimation(this);
     }
 
     //check mode change
     if (turn % 150 == 20) {
-        update_checkModeChange(scene);
+        update_checkModeChange(this);
     }
 
     //check button activation
     if (turn % 150 == 30) {
-        update_checkButtonActivation(scene);
+        update_checkButtonActivation(this);
     }
 
     //check item
     if (turn % 150 == 40 && local_items != previous_local_items) {
-        update_checkItem(scene);
+        update_checkItem(this);
     }
 
     //system message
@@ -6589,93 +6546,16 @@ function update(scene) {
 //===phaser3:scene========================================================--------
 
 
-//---Loading
-
-class Loading extends Phaser.Scene {
-
-    constructor() {
-        super({ key:"Loading", active:true });
-    }
-    
-    preload() {
-        this.load.image("murasaki_error", "src/png/murasaki_error.png");
-    }
-    
-    create(){
-
-        //system messages
-        let _msg1 = this.add.text(640, 480, '')
-            .setFontSize(80)
-            .setFontFamily("Arial")
-            .setOrigin(0.5)
-            .setFill("#ff1694");
-        let _msg2 = this.add.text(640, 560, '')
-            .setFontSize(40)
-            .setFontFamily("Arial")
-            .setOrigin(0.5)
-            .setFill("#ffebf7");
-        let _errImg = this.add.image(640, 360, "murasaki_error")
-            .setOrigin(0.5)
-            .setScale(0.45)
-            .setVisible(false);
-            
-        //function for loop
-        async function runAll(scene) {
-            let _chainId = 0;
-            let _wallet = 0;
-            //get metamask info
-            try {
-                let _wallets = await window.ethereum.request({method:"eth_requestAccounts"});
-                _wallet = _wallets[0];
-                let _hexCahinId = await window.ethereum.request({method:"eth_chainId"});
-                _chainId = parseInt(_hexCahinId);
-                console.log(_wallet, _chainId);
-            //when error = no metamask or not yet connect
-            } catch (err) {
-                console.log("error");
-                console.error(err);
-                if (_wallet == 0) {
-                    _msg1.setText("Connect Wallet");
-                    _msg2.setText("Please install Metamask and allow wallet connect.");
-                }
-            }
-            //check metamask info
-            //when wallet and chainId are good, start Main scene
-            if (_wallet != 0 && _chainId == 4369) {
-                _msg1.setText("");
-                _msg2.setText("");
-                _errImg.setVisible(false);
-                init_web3();
-                scene.scene.start("Main");
-                clearInterval(timerId);
-            //when not yet connect
-            } else if (_wallet == 0) {
-                _msg1.setText("Connect Wallet");
-                _msg2.setText("Please install Metamask and allow wallet connect.");
-                _errImg.setVisible(true);
-            //when wrong network
-            } else if (_chainId != 4369) {
-                _msg1.setText("Wrong Network");
-                _msg2.setText("Please connect to the Astar Network RPC.");
-                _errImg.setVisible(true);
-            }
-        }
-        
-        //loop checking wallet and chain id
-        runAll(this);
-        const timerId = setInterval(runAll, 1000, this);
-    }
-}
-
-
 //---Main
+
 
 class Main extends Phaser.Scene {
     constructor() {
-        super({ key:"Main", active:false });
+        super({ key:"Main", active:true });
     }
     preload(){
-        preload(this);
+        console.log(0);
+        preload2(this);
     }
     create(){
         create(this);
@@ -6692,7 +6572,6 @@ class Main extends Phaser.Scene {
 let config = {
     type: Phaser.CANVAS,
     parent: "canvas",
-    //parent: "content",
     backgroundColor: "F4B4D0",
     scale: {
         mode: Phaser.Scale.FIT,
@@ -6708,7 +6587,7 @@ let config = {
         update: update,
     },
     */
-    scene: [Loading, Main],
+    scene: [Main],
     /*
     render: {
         //pixelArt: true,

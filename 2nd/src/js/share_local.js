@@ -34,6 +34,14 @@ async function connect() {
         method: 'wallet_addEthereumChain',
         params: [{
             chainId: '0x51',  //4369
+        }]
+    });
+    */
+    /*
+    window.ethereum.request({
+        method: 'wallet_addEthereumChain',
+        params: [{
+            chainId: '0x51',  //4369
             chainName: 'Shibuya Testnet',
             nativeCurrency: {
                 name: 'sby',
@@ -47,6 +55,29 @@ async function connect() {
     */
     return web3;
 }
+
+
+async function connect2() {
+
+    if (typeof window.ethereum !== 'undefined') {
+      console.log('MetaMask is installed!');
+    }
+
+    try {
+        const acccounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        if (acccounts.length > 0) {
+            console.log(acccounts[0]);
+        }
+    } catch (err) {
+        if (err.code === 4001) {
+            // EIP-1193 userRejectedRequest error
+            console.log('Please connect to MetaMask.');
+        } else {
+            console.error(err);
+        }
+    }
+}
+
 
 //get wallet
 async function get_wallet() {
