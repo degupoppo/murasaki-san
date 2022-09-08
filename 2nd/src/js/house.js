@@ -46,9 +46,6 @@
                 mint日時, mint元, rarity（idで判別）, class（idで判別）
             これらの情報を与えて専用のclassでspriteを作製する
 
- ok Mint表記の実装
-        Craftボタンをstopとmintに表示仕分ける
-
     Newspaperの実装
         主だったイベントのみを表示させる
             craft
@@ -63,11 +60,6 @@
         → 同時に、選択した色に投票される
         一番投票数が多かった毛玉が選出され、その月luckにブーストがかかる
 
-    web3周りのコード整理
-        infoコントラから一括でバッチ処理で取得する
-        個別の情報は仕方ないのでその都度取得する
-        一度だけ読む情報もinfoからバッチで取得する
-
     ゲーム読み込み・開始UIの深慮
         ゲーム画面はすべて読みこんでから表示させたい
         そのため、できるだけまとめて読み込み、読み込み完了をわかりやすくする
@@ -80,6 +72,12 @@
         wallet token取得
     読み込み演出の深慮
         ロード画面→部屋画面の間の演出をなにか
+    読み込みUIの改善
+        すべて読み込みきってから描写する
+        いない間も時間が進んでいたことを表すために、行動を引き継ぐ
+        画面切り替えと読み込みの演出を考える
+            ロード中は面白いメッセージを表示させる
+            画面切り替えは扉を開けるなどストレスのないオープニングを考える
 
     ガバナンスシステムの実装
         投票
@@ -112,18 +110,6 @@
         https://otologic.jp/free/se/motion-pop01.html
         https://dova-s.jp/
 
-    etc
-        猫のアニメーション
-            sleepingとsitting
-        鳩時計のアニメーション
-            クリックで一定時間
-            サウンド
-        ピアノのサウンド
-            クリック時
-            曲？音だけ？
-        バッチ処理による軽量化
-            チェーン情報の一括取得、頻度向上
-
     bot対策:他キャラ抑制
         Item transfer costの設定
             やはり最も有効なのはitem transferにコストをかけることか
@@ -134,13 +120,6 @@
         実装
             market contractへのtransferはノーコストとする
             permitted addressで分岐させるか、別transfer関数を作るか
-
-    読み込みUIの改善
-        すべて読み込みきってから描写する
-        いない間も時間が進んでいたことを表すために、行動を引き継ぐ
-        画面切り替えと読み込みの演出を考える
-            ロード中は面白いメッセージを表示させる
-            画面切り替えは扉を開けるなどストレスのないオープニングを考える
 
     ステーキング反映アイテムの実装
         花瓶＋ちょうちょ
@@ -183,16 +162,6 @@
             txばっかり飛ばしていても、wallet ageが1年経ってないものは上限にぶつかる
             逆に、wallet ageが古くても、tx飛ばして使い込んでいなければscoreは小さい。
 
-    電光掲示板の実装
-        craftやfeedingなど、他キャラの行動の情報を流す電光掲示板
-            craft
-            level-up
-            mining
-            farming
-        上記イベントを監視してランダムで表示させる
-        前回表示時～今回までの間にlogをすべて取得し、ランダムで1つ表示させる
-        何もlogがなければ表示させないか、なにか適当なテキストを表示させる。
-
     レベルアップの演出の実装
      ok 花火の音の実装, emitter
         summonerの専用アニメーションの用意
@@ -200,9 +169,6 @@
 
     帽子の普遍的な位置合わせ
             
- ok メール送信成功のメッセージを実装
-        相手がメールを開けたことがわかるように
-    
     NFTのURL取得方法の実装
     
     Tokenのコントラクトの書き換え
@@ -333,6 +299,7 @@ async function init_global_variants() {
     flag_item_update = 0;
     flag_summon_fluffy = 0;
     flag_onLight = true;
+    flag_window_craft = 0;
     
     //wss, use for call
     //web3_wss = await wss();
@@ -555,21 +522,21 @@ async function contract_update_dynamic_status(_summoner) {
     //let wallet = await get_wallet(web3);
     //let contract_info = await new web3.eth.Contract(abi_murasaki_info, contract_murasaki_info);
     
+    //call item
+    let _myListsAt_withItemType = await get_myListsAt_withItemType();
+
+    //generate and update local item info
+    local_myListsAt_withItemType = _myListsAt_withItemType;
+    let _allItemBalance = get_allItemBalance_from_allItemId_withItemType(_myListsAt_withItemType);
+    local_items = _allItemBalance;
+
     //call dynamic status from chain
     let _all_dynamic_status = await contract_info.methods.allDynamicStatus(_summoner).call();
-    //***TODO*** item, use allItemId_withItemType and calc allItemBalance from that.
     //let _all_items = await contract_info.methods.allItemBalance(_summoner).call();
     //console.log(_all_dynamic_status);
     
-    //call item
-    let _myListsAt_withItemType = await get_myListsAt_withItemType();
-    local_myListsAt_withItemType = _myListsAt_withItemType;
-
-    //generate item lists
-    let _allItemBalance = get_allItemBalance_from_allItemId_withItemType(_myListsAt_withItemType);
-    local_items = _allItemBalance;
     
-    //update local variants
+    //update local status
 
     //wallet
     local_wallet = wallet;
@@ -1074,7 +1041,7 @@ async function contract_get_item_nui(_item) {
     let _summoner_of_nui = await contract_msn.methods.summoner(_item).call();
     let _class = await contract_msn.methods.class(_item).call();
     let _score = await contract_msn.methods.score(_item).call();
-    let contract_mfs = await new web3.eth.Contract(abi_murasaki_function_share, contract_murasaki_function_share);
+    //let contract_mfs = await new web3.eth.Contract(abi_murasaki_function_share, contract_murasaki_function_share);
     let _exp_rate = await contract_mfs.methods.calc_exp_addition_rate(summoner, _item).call();
     return [_summoner_of_nui, _class, _score, _exp_rate];
 }
@@ -1093,8 +1060,8 @@ async function contract_get_heart_required(_item_type) {
 //call name from summoner id
 async function call_name_from_summoner(_summoner) {
     //let web3 = await connect();
-    let contract = await new web3.eth.Contract(abi_murasaki_function_name, contract_murasaki_function_name);
-    let _name = await contract.methods.call_name_from_summoner(_summoner).call();
+    //let contract = await new web3.eth.Contract(abi_murasaki_function_name, contract_murasaki_function_name);
+    let _name = await contract_mfn.methods.call_name_from_summoner(_summoner).call();
     return _name;
 }
 
@@ -1138,6 +1105,7 @@ async function check_tx(_tx) {
 }
 
 
+/*
 //get and calc wallet age
 //0-1m = age1, 1-2m = age2, >12m = age12
 async function get_ageScore(_wallet){
@@ -1165,14 +1133,15 @@ async function get_ageScore(_wallet){
     }
     return _ageScore;
 }
+*/
 
 
 //update summoner of wallet
 async function contract_update_summoner_of_wallet() {
     if (summoner <= 0) {
         //let web3 = await connect();
-        let wallet = await get_wallet(web3);
-        let contract_mm = new web3.eth.Contract(abi_murasaki_main, contract_murasaki_main);
+        //let wallet = await get_wallet(web3);
+        //let contract_mm = new web3.eth.Contract(abi_murasaki_main, contract_murasaki_main);
         summoner = await contract_mm.methods.tokenOf(wallet).call();  //have not summoned yet: 0
     }
 }
@@ -1268,15 +1237,15 @@ async function contract_get_nonce(_wallet_address) {
     return _nonce;
 }
 
-//get age
+//get wallet month age
 async function contract_get_age(_wallet_address) {
-    let _lastBlock = await wss3.eth.getBlockNumber();
+    let _lastBlock = await web3.eth.getBlockNumber();
     //console.log(1, _lastBlock);
     let _age = 1;
     //2592000 block/mo, 1block/12sec
     for (let i = _lastBlock; i >= 216000; i -= 216000) {
         //console.log(2, i);
-        let _transactionCount = await wss3.eth.getTransactionCount(_wallet_address, i);
+        let _transactionCount = await web3.eth.getTransactionCount(_wallet_address, i);
         //console.log(3, i, _transactionCount);
         if (_transactionCount > 0) {
             _age += 1;
@@ -1313,19 +1282,19 @@ async function contract_summon(_class) {
     //let contract_ms = await new web3.eth.Contract(abi_murasaki_storage, contract_murasaki_storage);
     let _price = await contract_mp.methods.PRICE().call();
     _price = Number(_price) * 10**18;
-    let wallet = await get_wallet(web3);
+    //let wallet = await get_wallet(web3);
     contract_mfsl.methods.summon(_class).send({from:wallet, value:_price});
 }
 
 //cure petrification
 async function contract_curePetrification(_summoner) {
     //let web3 = await connect();
-    let wallet = await get_wallet(web3);
-    let contract_ms = await new web3.eth.Contract(abi_murasaki_storage, contract_murasaki_storage);
+    //let wallet = await get_wallet(web3);
+    //let contract_ms = await new web3.eth.Contract(abi_murasaki_storage, contract_murasaki_storage);
     let _price = await contract_ms.methods.PRICE().call();
-    let contract = await new web3.eth.Contract(abi_murasaki_function_feeding_and_grooming, contract_murasaki_function_feeding_and_grooming);
+    //let contract = await new web3.eth.Contract(abi_murasaki_function_feeding_and_grooming, contract_murasaki_function_feeding_and_grooming);
     _price = Number(_price) * 10**18 * local_level;
-    contract.methods.cure_petrification(_summoner).send({from:wallet, value:_price});
+    contract_mffg.methods.cure_petrification(_summoner).send({from:wallet, value:_price});
 }
 
 //burn
@@ -1426,7 +1395,8 @@ async function _contract_crafting_with_heart(_summoner, _item_type_to_craft, _he
 */
 
 //send mail
-async function contract_send_mail(_summoner) {
+async function contract_send_mail(_summoner, _item_mail) {
+    /*
     //let web3 = await connect();
     //let wallet = await get_wallet(web3);
     //select mail
@@ -1448,6 +1418,8 @@ async function contract_send_mail(_summoner) {
         //let contract_mm = await new web3.eth.Contract(abi_murasaki_mail, contract_murasaki_mail);
         contract_mml.methods.send_mail(_summoner, _item_mail).send({from:wallet});
     }
+    */
+    contract_mml.methods.send_mail(_summoner, _item_mail).send({from:wallet});
 }
 
 //open mail
@@ -3095,6 +3067,7 @@ function open_window_craft (scene) {
             icon_crafting_heart.visible = false;
             text_select_item.setText(">> Select Item <<");
         }
+        flag_window_craft = 0;
     }
 
     //function, get cost of item
@@ -3296,7 +3269,7 @@ function open_window_craft (scene) {
     group_window_crafting.add(button_crafting_item197);
     group_window_crafting.add(item197_icon);
 
-    //calcel
+    //cancel
     _rarity = "common";
     button_crafting_close = create_button(1070, 840, "Cancel", 0, scene, _rarity);
     group_window_crafting.add(button_crafting_close);
@@ -3577,6 +3550,7 @@ function preload(scene) {
             }
         }
     });
+    //let this_scene = scene;
     scene.load.on("complete", function() {
         progressBar.destroy();
         progressBox.destroy();
@@ -3584,6 +3558,8 @@ function preload(scene) {
         progressText_loading.destroy();
         percentText.destroy();
         flag_loaded = 1;
+        //console.log(0);
+        //scene.scene.launch("Opeaning");
     });
 
     //---back
@@ -4264,7 +4240,12 @@ function create(scene) {
                 .setDepth(9999)
                 .setFontSize(24).setFontFamily("Arial").setFill('#000000')
                 .setInteractive({useHandCursor: true})
-                .on("pointerdown", () => open_window_craft(scene) )
+                .on("pointerdown", () => {
+                    if (flag_window_craft == 0) {
+                        flag_window_craft = 1;
+                        open_window_craft(scene);
+                    }
+                })
                 .on("pointerover", () => text_select_item.setStyle({ fontSize: 24, fontFamily: "Arial", fill: '#d19dff' }))
                 .on("pointerout", () => text_select_item.setStyle({ fontSize: 24, fontFamily: "Arial", fill: '#000000' }));
     text_craft_item = scene.add.text(_x+50, _y, "", {font: "18px Arial", fill: "#000"})
@@ -5603,7 +5584,12 @@ function update_checkItem(this_scene) {
             .setScale(0.4)
             .setOrigin(0.5)
             .setInteractive({useHandCursor: true})
-            .on("pointerdown", () => {contract_send_mail(summoner)})
+            .on("pointerdown", async () => {
+                let _array_item_196 = await get_userItems(summoner, 196);
+                if (_array_item_196.length > 0) {
+                    contract_send_mail(summoner, _array_item_196[0]);
+                }
+            })
             .setVisible(false);
         cat.anims.play("cat_sleeping", true);
         cat.depth = item_cushion.y + 1;
@@ -6493,6 +6479,21 @@ function calc_fps() {
     }
 }
 
+async function updateFirst(scene) {
+    await contract_update_all();
+    if (flag_radarchart == 1) {
+        draw_radarchart(scene);
+    }
+    update_syncTime(scene);
+    update_numericAnimation(scene);
+    update_parametersWithAnimation(scene);
+    update_parametersWithoutAnimation(scene);
+    update_checkModeChange(scene);
+    update_checkButtonActivation(scene);
+    update_checkItem(scene);
+    //update_systemMessage();
+}
+
 
 //---update()
 function update(scene) {
@@ -6589,12 +6590,12 @@ function update(scene) {
 //===phaser3:scene========================================================--------
 
 
-//---Loading
+//---FirstCheck
 
-class Loading extends Phaser.Scene {
+class FirstCheck extends Phaser.Scene {
 
     constructor() {
-        super({ key:"Loading", active:true });
+        super({ key:"FirstCheck", active:true });
     }
     
     preload() {
@@ -6609,7 +6610,7 @@ class Loading extends Phaser.Scene {
             .setFontFamily("Arial")
             .setOrigin(0.5)
             .setFill("#ff1694");
-        let _msg2 = this.add.text(640, 560, '')
+        let _msg2 = this.add.text(640, 560, 'Connecting...')
             .setFontSize(40)
             .setFontFamily("Arial")
             .setOrigin(0.5)
@@ -6643,12 +6644,12 @@ class Loading extends Phaser.Scene {
             //when wallet and chainId are good, start Main scene
             if (_wallet != 0 && _chainId == 4369) {
                 _msg1.setText("");
-                _msg2.setText("");
+                _msg2.setText("Connecting...OK!");
                 _errImg.setVisible(false);
                 init_web3();
-                scene.scene.start("Main");
+                scene.scene.start("Loading");
                 clearInterval(timerId);
-            //when not yet connect
+            //when not connect yet
             } else if (_wallet == 0) {
                 _msg1.setText("Connect Wallet");
                 _msg2.setText("Please install Metamask and allow wallet connect.");
@@ -6668,6 +6669,60 @@ class Loading extends Phaser.Scene {
 }
 
 
+//---Loading
+
+class Loading extends Phaser.Scene {
+
+    constructor() {
+        super({ key:"Loading", active:false });
+    }
+
+    preload() {
+        preload(this);
+    }
+    
+    create(){
+        this.scene.start("Opeaning");
+    }
+}
+
+
+//---Opeaning
+
+class Opeaning extends Phaser.Scene {
+
+    constructor() {
+        super({ key:"Opeaning", active:false });
+    }
+
+    preload() {
+    }
+    
+    create(){
+        contract_update_all();
+        /*
+        let back_opeaning = this.add.image(640, 480, "back")
+            .setInteractive()
+            .on('pointerdown', () => {
+
+                this.cameras.main.fadeOut(1200, 244, 108, 208);
+                this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+                    this.scene.start("Main");
+                });
+
+                //this.scene.start("Main");
+            });
+        */
+        //let back_opeaning = this.add.image(640, 480, "back")
+        //fade out
+        this.cameras.main.fadeOut(300, 255, 255, 255);
+        this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+            this.scene.start("Main");
+        });
+    }
+}
+
+
 //---Main
 
 class Main extends Phaser.Scene {
@@ -6675,10 +6730,13 @@ class Main extends Phaser.Scene {
         super({ key:"Main", active:false });
     }
     preload(){
-        preload(this);
+        //preload(this);
     }
-    create(){
-        create(this);
+    async create(){
+        //fade in
+        this.cameras.main.fadeIn(300, 255, 255, 255);
+        await create(this);
+        updateFirst(this);
     }
     update(){
         update(this);
@@ -6708,7 +6766,7 @@ let config = {
         update: update,
     },
     */
-    scene: [Loading, Main],
+    scene: [FirstCheck, Loading, Opeaning, Main],
     /*
     render: {
         //pixelArt: true,
@@ -6731,6 +6789,38 @@ game = new Phaser.Game(config);
 //===end=================================================================
 /*
 
+ ok メール送信成功のメッセージを実装
+        相手がメールを開けたことがわかるように
+    
+ ng 電光掲示板の実装
+        craftやfeedingなど、他キャラの行動の情報を流す電光掲示板
+            craft
+            level-up
+            mining
+            farming
+        上記イベントを監視してランダムで表示させる
+        前回表示時～今回までの間にlogをすべて取得し、ランダムで1つ表示させる
+        何もlogがなければ表示させないか、なにか適当なテキストを表示させる。
+
+ ok web3周りのコード整理
+        infoコントラから一括でバッチ処理で取得する
+        個別の情報は仕方ないのでその都度取得する
+        一度だけ読む情報もinfoからバッチで取得する
+
+ ok Mint表記の実装
+        Craftボタンをstopとmintに表示仕分ける
+
+ ok etc
+        猫のアニメーション
+            sleepingとsitting
+        鳩時計のアニメーション
+            クリックで一定時間
+            サウンド
+        ピアノのサウンド
+            クリック時
+            曲？音だけ？
+        バッチ処理による軽量化
+            チェーン情報の一括取得、頻度向上
 
  ok mfsのprecious_scoreのバグ修正
         allBalanceの積算になっているので、同じタイプが重なると加算されていない
