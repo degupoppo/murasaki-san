@@ -24,6 +24,13 @@
             吹き出し？
             鈴？
             首輪？
+        絵
+            寝ている絵, 2枚, OK
+            立っている絵, 2枚
+            メールを加えて右に歩いている絵, 2枚
+            何も加えずに左に歩いている絵, 2枚
+            メールを加えて立っている絵, 1枚
+            メールを加えて立っている絵, にゃーと鳴いている, 1枚
 
     Fluffy NFTのUX実装
         カウンターの実装
@@ -52,6 +59,31 @@
             Level-up
             mail open
 
+    ガバナンスシステムの実装
+        投票
+            インフレ率の修正や、運営個人walletへの報酬支払など、
+            方針決定時に投票できるメカニズムを作る。
+            投票には例えばLv3以上のsummonerが紐付いたwalletのみ許可し、
+            例えばスコアの大きさに応じて比率を変える（log関数、せいぜい2倍）。
+            Lvによる足切りと、スコアによる増幅
+        内容
+            選択肢は予め運営側で決定する（インフレ率100%などの逸脱はさせない）
+            過去の投票結果を見られるページを作る
+            役員報酬の支払い
+            インフレ率の設定？
+        その他
+            せっかくなので、定期的に行えるシステムがほしい
+            fluffyのどの色を優遇するかの投票などを月イチで行うか
+                効果+5%
+            月イチボーナスの決定
+                mining +3%
+                farming +3%
+                crafting time -3%
+                feeding +3%
+                grooming +3%
+            頻度は月1回か、2週間に1回程度
+            参加でfluffy 1匹もらえる？
+        実装
     毛玉取りフェスティバル
         月に1回のイベント
         むらさきさんが飼い主のところに毛玉取りに出かける
@@ -78,32 +110,6 @@
         画面切り替えと読み込みの演出を考える
             ロード中は面白いメッセージを表示させる
             画面切り替えは扉を開けるなどストレスのないオープニングを考える
-
-    ガバナンスシステムの実装
-        投票
-            インフレ率の修正や、運営個人walletへの報酬支払など、
-            方針決定時に投票できるメカニズムを作る。
-            投票には例えばLv3以上のsummonerが紐付いたwalletのみ許可し、
-            例えばスコアの大きさに応じて比率を変える（log関数、せいぜい2倍）。
-            Lvによる足切りと、スコアによる増幅
-        内容
-            選択肢は予め運営側で決定する（インフレ率100%などの逸脱はさせない）
-            過去の投票結果を見られるページを作る
-            役員報酬の支払い
-            インフレ率の設定？
-        その他
-            せっかくなので、定期的に行えるシステムがほしい
-            fluffyのどの色を優遇するかの投票などを月イチで行うか
-                効果+5%
-            月イチボーナスの決定
-                mining +3%
-                farming +3%
-                crafting time -3%
-                feeding +3%
-                grooming +3%
-            頻度は月1回か、2週間に1回程度
-            参加でfluffy 1匹もらえる？
-        実装
 
     効果音
         https://soundeffect-lab.info/sound/button/
@@ -207,7 +213,7 @@ async function init_global_variants() {
     local_crafting_status = 0;
     local_crafting_start_time = 0;
     local_crafting_item_type = 0;
-    local_items = [0] * 256;
+    local_items = new Array(256).fill(0);
     //local_heart = 0;
     local_precious = 0;
     local_wallet = "0x0000000000000000000000000000000000000001";
@@ -608,7 +614,8 @@ async function contract_update_dynamic_status(_summoner) {
 
     //mail
     local_mail_sending_interval =   Number(_all_dynamic_status[44]);
-    local_receiving_mail =          Number(_all_dynamic_status[44]);
+    local_receiving_mail =          Number(_all_dynamic_status[45]);
+    local_lastMailOpen   =          Number(_all_dynamic_status[50]);
 
     //items
     //local_items = _all_items;
@@ -1143,6 +1150,7 @@ async function contract_update_summoner_of_wallet() {
         //let wallet = await get_wallet(web3);
         //let contract_mm = new web3.eth.Contract(abi_murasaki_main, contract_murasaki_main);
         summoner = await contract_mm.methods.tokenOf(wallet).call();  //have not summoned yet: 0
+        summoner = Number(summoner);
     }
 }
 
@@ -1318,6 +1326,9 @@ async function contract_feeding(_summoner) {
     //let web3 = await connect();
     //let contract = await new web3.eth.Contract(abi_murasaki_function_feeding_and_grooming, contract_murasaki_function_feeding_and_grooming);
     //let wallet = await get_wallet(web3);
+    if (_summoner == 0) {
+        return 0;
+    }
     contract_mffg.methods.feeding(_summoner, active_nui_id).send({from:wallet});
 }
 
@@ -2212,6 +2223,247 @@ class Pet extends Phaser.GameObjects.Sprite{
         else if (this.mode == "working") {this.working();}
         //depth
         this.depth = this.y;
+    }
+}
+
+
+//===class:HomeCat========================================================--------
+
+
+class HomeCat extends Phaser.GameObjects.Sprite{
+
+    constructor(scene, x, y){
+        super(scene, x, y);
+        this.scene.add.existing(this);
+        this.submode = 0;
+        this.firstDecideMode();
+    }
+    
+    firstDecideMode(){
+        if (local_mail_sending_interval == 0) {
+            this.mode = "standing";
+        } else if (local_mail_sending_interval > 0 && local_lastMailOpen == 1){
+            this.mode = "sleeping";
+        } else {
+            this.mode = "leaving";
+        }
+        this.submode = 0;
+    }
+    
+    //standing: mailInterval = 0
+    //check click, check interval, change to mode:mailSending
+    standing(){
+        if (this.submode == 0) {
+            this.anims.play("cat_standing");
+            this.setInteractive({ useHandCursor: true });
+            this.on("pointerdown", async () => {
+                let _array_item_196 = await get_userItems(summoner, 196);
+                if (_array_item_196.length > 0) {
+                    contract_send_mail(summoner, _array_item_196[0]);
+                }
+            });
+            this.submode += 1;
+        } else {
+            if (turn % 100 == 0) {
+                if (local_mail_sending_interval > 0) {
+                    this.mode = "mailSending";
+                    this.submode = 0;
+                }
+            }
+        }
+    }
+    
+    //mailSending, mailInterval > 0
+    //just after mailSending tx, change to mode:leaving
+    mailSending(){
+        if (this.submode == 0) {
+            this.speed_x = 10;
+            this.speed_y = Math.random() * 10;
+            this.disableInteractive();
+            this.anims.play("cat_mailSending");
+            this.submode += 1;
+        } else {
+            this.x += this.speed_x;
+            this.y += this.speed_y;
+            if (this.x >= 1300 || this.y >= 1000) {
+                this.mode = leaving();
+                this.submode = 0;
+            }
+        }
+    }
+    
+    //leaving, mailIntervail > 0 and lastMailOpen = false
+    //check lastMailOpen, change to mode:goingHome
+    leaving(){
+        if (this.submode == 0) {
+            this.anims.isPlaying = false;
+            this.submode += 1;
+        } else {
+            if (turn % 100 == 0) {
+                if (local_lastMailOpen == 1) {
+                    this.mode = "goingHome";
+                    this.submode = 0;
+                }
+            }
+        }
+    }
+    
+    //goingHome, lastMailOpen = true
+    //just after mailOpen, change to mode:sleeping
+    goingHome(){
+        if (this.submode == 0) {
+            this.anims.play("cat_goingHome");
+            this.x = 1300;
+            this.y = 600 + Math.random() * 200; 
+            this.target_x = 90;
+            this.target_y = 610;
+            this.submode += 1;
+        } else {
+            let delta_x = this.target_x - this.x;
+            let delta_y = this.target_y - this.y;
+            let delta_x2 = delta_x / (Math.abs(delta_x) + Math.abs(delta_y)) * 1.5;
+            let delta_y2 = delta_y / (Math.abs(delta_x) + Math.abs(delta_y)) * 1.5;
+            this.x += delta_x2;
+            this.y += delta_y2;
+            if (this.x > this.target_x-10 
+              && this.x < this.target_x+10 
+              && this.y > this.target_y-10 
+              && this.y < this.target_y+10) {
+                this.mode = "sleeping";
+                this.submode = 0;
+            }
+        }
+    }
+
+    //sleeping, mailInterval > 0 and lastMailOpen = true
+    //check mailInterval, change to mode:standing
+    sleeping(){
+        if (this.sumode == 0){
+            this.x = 90;
+            this.y = 610;
+            this.anims.play("cat_sleepig");
+            this.sumode += 1;
+        } else {
+            if (turn % 100 == 0) {
+                if (local_mail_sending_interval == 0) {
+                    this.mode = "standing";
+                    this.submode = 0;
+                }
+            }
+        }
+    }
+    
+    //---update()
+    update(){
+        if (this.mode == "sleeping") {this.sleeping();}
+        else if (this.mode == "standing") {this.standing();}
+        else if (this.mode == "mailSending") {this.mailSending();}
+        else if (this.mode == "leaving") {this.leaving();}
+        else if (this.mode == "goingHome") {this.goingHome();}
+        this.depth = this.y;
+    }
+}
+
+
+//===class:VisiterCat========================================================--------
+
+
+class VisiterCat extends Phaser.GameObjects.Sprite{
+
+    constructor(scene, x, y){
+        super(scene, x, y);
+        this.scene.add.existing(this);
+        this.submode = 0;
+        this.firstDecideMode();
+    }
+    
+    firstDecideMode(){
+        this.mode = "visiting";
+        this.submode = 0;
+    }
+    
+    visiting(){
+        if (this.submode == 0){
+            this.anims.play("cat_visiter_moving_left");
+            this.x = 1300;
+            this.y = 600 + Math.random() * 200; 
+            this.target_x = 200 + Math.random()*600;
+            this.target_y = 400 + Math.random()*200;
+            this.submode += 1;
+        } else {
+            let delta_x = this.target_x - this.x;
+            let delta_y = this.target_y - this.y;
+            let delta_x2 = delta_x / (Math.abs(delta_x) + Math.abs(delta_y)) * 1.5;
+            let delta_y2 = delta_y / (Math.abs(delta_x) + Math.abs(delta_y)) * 1.5;
+            this.x += delta_x2;
+            this.y += delta_y2;
+            if (this.x > this.target_x-10 
+              && this.x < this.target_x+10 
+              && this.y > this.target_y-10 
+              && this.y < this.target_y+10) {
+                this.mode = "standing";
+                this.submode = 0;
+            }
+        }
+    }
+    
+    standing(){
+        if (this.submode == 0){
+            this.standing_count = 100 + Math.random()*100;
+            this.anims.play("cat_visiter_standing");
+            this.setInteractive({ useHandCursor: true });
+            this.on("pointerdown", async () => {
+                contract_open_mail(summoner);
+                });
+            this.submode += 1;
+        } else if (this.submode < this.standing_count)  {
+            this.submode += 1;
+        } else {
+            let _rand = Math.random()*100;
+            if (_rand >= 80) {
+                this.mode = "moving";
+            } else {
+                this.mode = "sleeping";
+            }
+            this.submode = 0;
+        }
+    }
+    
+    moving(){
+        if (this.submode == 0){
+            this.submode += 1;
+        } else {
+        }
+    }
+    
+    sleeping(){
+        if (this.submode == 0){
+            this.submode += 1;
+        } else {
+        }
+    }
+    
+    gointHome(){
+        if (this.submode == 0){
+            this.submode += 1;
+        } else {
+        }
+    }
+        
+    //---update()
+    update(){
+        if (this.mode == "visiting") {this.sleeping();}
+        else if (this.mode == "standing") {this.standing();}
+        else if (this.mode == "moving") {this.mailSending();}
+        else if (this.mode == "sleeping") {this.leaving();}
+        else if (this.mode == "goingHome") {this.goingHome();}
+        this.depth = this.y;
+        if (turn % 100 == 0) {
+            if (local_receiving_mail == 0) {
+                this.mode = "goingHome";
+                this.submode = 0;
+            }
+        }
     }
 }
 
@@ -3453,7 +3705,7 @@ async function calc_wallet_score(wallet_address) {
     if (_score > _scoreMax) {
         _score = _scoreMax;
     }
-    console.log(_nonce, _age, _scoreMax, _score);
+    //console.log(_nonce, _age, _scoreMax, _score);
     return _score;    
 }
 
@@ -4076,6 +4328,25 @@ function create(scene) {
         frames: scene.anims.generateFrameNumbers("item_clock_anim", {start:1, end:0}),
         frameRate: 1,
         repeat: 1
+    });
+    //***TODO***cat
+    scene.anims.create({
+        key: "cat_standing",
+        frames: scene.anims.generateFrameNumbers("cat_sleeping", {start:0, end:1}),
+        frameRate: 1,
+        repeat: -1
+    });
+    scene.anims.create({
+        key: "cat_mailSending",
+        frames: scene.anims.generateFrameNumbers("cat_sleeping", {start:0, end:1}),
+        frameRate: 1,
+        repeat: -1
+    });
+    scene.anims.create({
+        key: "cat_goingHome",
+        frames: scene.anims.generateFrameNumbers("cat_sleeping", {start:0, end:1}),
+        frameRate: 1,
+        repeat: -1
     });
     scene.anims.create({
         key: "cat_sleeping",
@@ -5154,7 +5425,7 @@ function update_checkModeChange(this_scene) {
 //---button
 function update_checkButtonActivation(this_scene) {
     //grooming
-    if (local_farming_status == 1 || local_crafting_status == 1 || local_mining_status == 1) {
+    if (local_farming_status == 1 || local_crafting_status == 1 || local_mining_status == 1 || summoner == 0) {
         button_grooming.setTexture("button_grooming_unable");
         button_grooming.disableInteractive();
     }else {
@@ -5571,13 +5842,18 @@ function update_checkItem(this_scene) {
 
         //cushion
         item_cushion = this_scene.add.sprite(90, 620, "item_cushion").setScale(0.25).setOrigin(0.5);
-        item_cushion.depth = item_cushion.y - 200;
+        item_cushion.depth = item_cushion.y - 50;
         
         //text_sending_interval
         text_sending_interval = this_scene.add.text(70, 640, "00h:00m", {font: "15px Arial", fill: "#ffffff"})
             .setDepth(item_cushion.depth + 1);
 
         //cat
+        cat = new HomeCat(this_scene, 90, 610)
+            .setOrigin(0.5)
+            .setScale(0.4);
+        group_update.add(cat);
+        /*
         let _x3 =90;
         let _y3 =610;
         cat = this_scene.add.sprite(_x3, _y3-10, "cat_sleeping")
@@ -5592,13 +5868,14 @@ function update_checkItem(this_scene) {
             })
             .setVisible(false);
         cat.anims.play("cat_sleeping", true);
-        cat.depth = item_cushion.y + 1;
+        cat.depth = item_cushion.y -50 + 1;
+        */
         
         //mail
         mail = this_scene.add.sprite(75, 675, "item_mail")
             .setScale(0.9)
             .setOrigin(0.5)
-            .setDepth(item_cushion.y + 2)
+            .setDepth(item_cushion.y -50 +2)
             .setVisible(false);
     }
 
@@ -6699,7 +6976,6 @@ class Opeaning extends Phaser.Scene {
     }
     
     create(){
-        contract_update_all();
         /*
         let back_opeaning = this.add.image(640, 480, "back")
             .setInteractive()
@@ -6715,6 +6991,7 @@ class Opeaning extends Phaser.Scene {
         */
         //let back_opeaning = this.add.image(640, 480, "back")
         //fade out
+        contract_update_all();
         this.cameras.main.fadeOut(300, 255, 255, 255);
         this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
             this.scene.start("Main");

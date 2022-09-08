@@ -2184,9 +2184,11 @@ contract Murasaki_Function_Share is Ownable {
         for (uint i = 201; i <= 212; i++) {
             if (_balance_of_type[i+24] > 0) {
                 _precious_score += _balance_of_type[i+24] * 3*16;
-            }else if (_balance_of_type[i+12] > 0) {
+            }
+            if (_balance_of_type[i+12] > 0) {
                 _precious_score += _balance_of_type[i+12] * 3*4;
-            }else if (_balance_of_type[i] > 0) {
+            }
+            if (_balance_of_type[i] > 0) {
                 _precious_score += _balance_of_type[i] * 3;
             }
         }
@@ -3363,10 +3365,6 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
             } else {
                 _mod_dc = _dc - _delta;
             }
-            //***test item***
-            if (_item_type == 48) {
-                return 10;
-            }
             return _mod_dc;
         }
     }
@@ -3430,12 +3428,6 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
             _dc = 3000;
             _coin = 1000;
             _material = 1000;
-        //48: ***test item***
-        } else if (_item_type == 48) {
-            _level = 99;
-            _dc = 10;
-            _coin = 10;
-            _material = 10;
         //1-64: normal items
         } else if (_item_type <= 64) {
             _level = level_table[_item_type];
@@ -4384,7 +4376,7 @@ contract Murasaki_Mail is Ownable {
     //interval, both of sending interval & receving limit
     uint32 public interval_sec = 60 * 60 * 24 * 3;    // 3 days
     uint32 public item_type_of_mail = 196;
-    uint32 public item_type_of_cushion = 20; //***TODO*** _item_type
+    uint32 public item_type_of_cushion = 20;
 
     //admin, set variants
     function set_interval_sec(uint32 _value) external onlyOwner {
@@ -4435,6 +4427,20 @@ contract Murasaki_Mail is Ownable {
             return 0;
         } else {
             return interval_sec - _delta;
+        }
+    }
+    
+    //check last mail open
+    function check_lastMailOpen(uint32 _summoner_from) public view returns (bool) {
+        uint32 _mail_id = sending[_summoner_from];
+        if (_mail_id == 0) {
+            return false;
+        }
+        Mail memory _mail = mails[_mail_id];
+        if (_mail.open_time > 0) {
+            return true;
+        } else {
+            return false;
         }
     }
     
@@ -5040,6 +5046,16 @@ contract Murasaki_Info is Ownable {
         Murasaki_Mail mml = Murasaki_Mail(mfs.murasaki_mail_address());
         return mml.calc_sending_interval(_summoner);
     }
+    function check_lastMailOpen(uint32 _summoner) public view returns (uint32) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Mail mml = Murasaki_Mail(mfs.murasaki_mail_address());
+        bool _res = mml.check_lastMailOpen(_summoner);
+        if (_res == true) {
+            return uint32(1);
+        } else {
+            return uint32(0);
+        }
+    }
     
     //Lootlike
     function allStatus(uint32 _summoner) public view returns (string[5] memory) {
@@ -5125,6 +5141,7 @@ contract Murasaki_Info is Ownable {
         _res[47] = calc_farming(_summoner);
         _res[48] = calc_crafting(_summoner);
         _res[49] = inHouse(_summoner);
+        _res[50] = check_lastMailOpen(_summoner);
         return _res;
     }
     
