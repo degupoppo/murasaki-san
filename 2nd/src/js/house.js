@@ -5265,7 +5265,7 @@ function update_checkButtonActivation(this_scene) {
 function update_checkItem(this_scene) {
 
     //debug
-    local_items = [1] * 256;
+    //local_items = [1] * 256;
 
     let _item_id;
 
