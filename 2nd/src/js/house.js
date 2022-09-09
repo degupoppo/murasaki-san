@@ -5,6 +5,9 @@
 
 /*
 
+ ok クリティカル検出の改善
+        現状、うまく検出できてない
+
     猫のUIの改善
         専用クラスを用意する
         メール送信中は部屋にいない
@@ -25,12 +28,17 @@
             鈴？
             首輪？
         絵
-            寝ている絵, 2枚, OK
-            立っている絵, 2枚
-            メールを加えて右に歩いている絵, 2枚
-            何も加えずに左に歩いている絵, 2枚
-            メールを加えて立っている絵, 1枚
-            メールを加えて立っている絵, にゃーと鳴いている, 1枚
+            家猫, 寝ている絵, 2枚, OK
+            家猫, 立っている絵, 2枚
+            家猫, メールをくわえて立っている絵, 1枚
+            家猫, メールをくわえて右に歩いている絵, 2枚
+            家猫, 何もくわえずに左に歩いている絵, 2枚
+            家猫, メールをくわえて立っている絵, にゃーと鳴いている, 1枚
+            訪問猫, 寝ている絵, 2枚
+            訪問猫, メールをくわえて立っている絵, 2枚
+            訪問猫, メールをくわえて立っている絵, にゃーと鳴いている, 1枚
+            訪問猫, メールをくわえて右に歩いている絵, 2枚
+            訪問猫, 何もくわえずに左に歩いている絵, 2枚
 
     Fluffy NFTのUX実装
         カウンターの実装
@@ -232,6 +240,7 @@ async function init_global_variants() {
     local_happy = 0;
     local_age = 0;
     local_myListsAt_withItemType = [];
+    local_luck_challenge = 0;
 
     //---local previous
     previous_local_last_feeding_time = 0;
@@ -306,6 +315,7 @@ async function init_global_variants() {
     flag_summon_fluffy = 0;
     flag_onLight = true;
     flag_window_craft = 0;
+    flag_update = 1;
     
     //wss, use for call
     //web3_wss = await wss();
@@ -614,7 +624,7 @@ async function contract_update_dynamic_status(_summoner) {
 
     //mail
     local_mail_sending_interval =   Number(_all_dynamic_status[44]);
-    local_receiving_mail =          Number(_all_dynamic_status[45]);
+    local_receiving_mail =          Number(_all_dynamic_status[43]);
     local_lastMailOpen   =          Number(_all_dynamic_status[50]);
 
     //items
@@ -625,6 +635,9 @@ async function contract_update_dynamic_status(_summoner) {
     local_coin_calc =       Number(_all_dynamic_status[46]);
     local_material_calc =   Number(_all_dynamic_status[47]);
     local_crafting_calc =   Number(_all_dynamic_status[48]);
+    
+    //update luck challenge
+    local_luck_challenge =  Number(_all_dynamic_status[51]);
     
     //update last_sync_time
     last_sync_time = Date.now();
@@ -1007,6 +1020,15 @@ async function contract_update_event_random() {
 }
 
 //---call
+
+//call mail detail
+async function contract_callMailDetail(_summoner){
+    let _mail_id = await contract_mml.methods.receiving(_summoner).call();
+    let _mail = await contract_mml.methods.mails(_mail_id).call();
+    let _summoner_from_id = _mail[2];
+    let _summoner_from_name = await contract_mn.methods.call_name_from_summoner(_summoner_from_id).call();
+    return (_summoner_from_id, _summoner_from_name);
+}
 
 /*
 //check mail
@@ -1943,6 +1965,50 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         }
     }
     
+    //---attenting
+    try_attenting(target_x, target_y) {
+        if (this.mode == "resting"
+            || this.mode == "moving"
+        ) {
+            this.mode = "attenting";
+            this.submode = 0;
+            this.target_x = target_x;
+            this.target_y = target_y;
+        }
+    }
+    attenting(){
+        if (this.submode == 0) {
+            //this.target_x = target_x;
+            //this.target_y = target_y;
+            let delta_x = this.target_x - this.x;
+            if (delta_x >0) {
+                this.dist = "right";
+                this.anims.play("murasaki_right", true);
+            }else {
+                this.dist = "left";
+                this.anims.play("murasaki_left", true);
+            }
+            this.submode += 1;
+        } else if (this.submode == 1) {
+            let delta_x = this.target_x - this.x;
+            let delta_y = this.target_y - this.y;
+            let delta_x2 = delta_x / (Math.abs(delta_x) + Math.abs(delta_y)) * 1.5;
+            let delta_y2 = delta_y / (Math.abs(delta_x) + Math.abs(delta_y)) * 1.5;
+            this.x += delta_x2;
+            this.y += delta_y2;
+            if (this.x > this.target_x-75 
+              && this.x < this.target_x+75 
+              && this.y > this.target_y-75 
+              && this.y < this.target_y+75) {
+                this.submode = 2;
+            }
+        } else if (this.submode == 2) {
+            this.mode = "hugging";
+            this.submode = 0;
+            this.count = 0;
+        }
+    }
+    
     //---update wearing_hat
     update_item_wearing_hat() {
 
@@ -1953,6 +2019,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             || this.mode == "hungry"
             || this.mode == "crying"
             || this.mode == "listning"
+            || this.mode == "attenting"
         ) {
             item_wearing_hat.x = this.x;
             item_wearing_hat.y = this.y - 65;
@@ -1991,7 +2058,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             item_wearing_hat.y = this.y - 55;
         }else if (this.mode == "feeding" && this.submode == 1 && this.dist == "left") {
             item_wearing_hat.x = this.x - 8;
-            item_wearing_hat.y = this.y - 50;
+            item_wearing_hat.y = this.y - 55;
         }else if (this.mode == "feeding" && this.submode == 3) {
             item_wearing_hat.x = this.x - 2;
             item_wearing_hat.y = this.y - 65;
@@ -2034,6 +2101,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             else if (this.mode == "hungry") {this.hungry();}
             else if (this.mode == "petrified") {this.petrified();}
             else if (this.mode == "listning") {this.listning();}
+            else if (this.mode == "attenting") {this.attenting();}
             //draw item_wearing_hat
             if (item_wearing_hat != 0) {
                 this.update_item_wearing_hat();
@@ -2234,6 +2302,8 @@ class HomeCat extends Phaser.GameObjects.Sprite{
 
     constructor(scene, x, y){
         super(scene, x, y);
+        this.x = x;
+        this.y = y;
         this.scene.add.existing(this);
         this.submode = 0;
         this.firstDecideMode();
@@ -2254,7 +2324,7 @@ class HomeCat extends Phaser.GameObjects.Sprite{
     //check click, check interval, change to mode:mailSending
     standing(){
         if (this.submode == 0) {
-            this.anims.play("cat_standing");
+            this.anims.play("cat_standing", true);
             this.setInteractive({ useHandCursor: true });
             this.on("pointerdown", async () => {
                 let _array_item_196 = await get_userItems(summoner, 196);
@@ -2277,16 +2347,16 @@ class HomeCat extends Phaser.GameObjects.Sprite{
     //just after mailSending tx, change to mode:leaving
     mailSending(){
         if (this.submode == 0) {
-            this.speed_x = 10;
-            this.speed_y = Math.random() * 10;
+            this.speed_x = 1;
+            this.speed_y = Math.random() * 1;
             this.disableInteractive();
-            this.anims.play("cat_mailSending");
+            this.anims.play("cat_mailSending", true);
             this.submode += 1;
         } else {
             this.x += this.speed_x;
             this.y += this.speed_y;
-            if (this.x >= 1300 || this.y >= 1000) {
-                this.mode = leaving();
+            if (this.x >= 1400 || this.y >= 1100) {
+                this.mode = "leaving";
                 this.submode = 0;
             }
         }
@@ -2300,7 +2370,7 @@ class HomeCat extends Phaser.GameObjects.Sprite{
             this.submode += 1;
         } else {
             if (turn % 100 == 0) {
-                if (local_lastMailOpen == 1) {
+                if (local_lastMailOpen == 1 || local_mail_sending_interval == 0) {
                     this.mode = "goingHome";
                     this.submode = 0;
                 }
@@ -2312,7 +2382,7 @@ class HomeCat extends Phaser.GameObjects.Sprite{
     //just after mailOpen, change to mode:sleeping
     goingHome(){
         if (this.submode == 0) {
-            this.anims.play("cat_goingHome");
+            this.anims.play("cat_goingHome", true);
             this.x = 1300;
             this.y = 600 + Math.random() * 200; 
             this.target_x = 90;
@@ -2341,7 +2411,7 @@ class HomeCat extends Phaser.GameObjects.Sprite{
         if (this.sumode == 0){
             this.x = 90;
             this.y = 610;
-            this.anims.play("cat_sleepig");
+            this.anims.play("cat_sleepig", true);
             this.sumode += 1;
         } else {
             if (turn % 100 == 0) {
@@ -2365,13 +2435,17 @@ class HomeCat extends Phaser.GameObjects.Sprite{
 }
 
 
-//===class:VisiterCat========================================================--------
+//===class:VisitorCat========================================================--------
 
 
-class VisiterCat extends Phaser.GameObjects.Sprite{
+class VisitorCat extends Phaser.GameObjects.Sprite{
 
-    constructor(scene, x, y){
+    constructor(scene, x, y, summoner_from_id, summoner_from_name){
         super(scene, x, y);
+        this.x = x;
+        this.y = y;
+        this.summoner_from_id = summoner_from_id;
+        this.summoner_from_name = summoner_from_name;
         this.scene.add.existing(this);
         this.submode = 0;
         this.firstDecideMode();
@@ -2384,7 +2458,7 @@ class VisiterCat extends Phaser.GameObjects.Sprite{
     
     visiting(){
         if (this.submode == 0){
-            this.anims.play("cat_visiter_moving_left");
+            this.anims.play("cat_visitor_moving_left", true);
             this.x = 1300;
             this.y = 600 + Math.random() * 200; 
             this.target_x = 200 + Math.random()*600;
@@ -2410,17 +2484,18 @@ class VisiterCat extends Phaser.GameObjects.Sprite{
     standing(){
         if (this.submode == 0){
             this.standing_count = 100 + Math.random()*100;
-            this.anims.play("cat_visiter_standing");
+            this.anims.play("cat_visitor_standing", true);
             this.setInteractive({ useHandCursor: true });
-            this.on("pointerdown", async () => {
+            this.on("pointerdown", () => {
                 contract_open_mail(summoner);
-                });
+                this.disableInteractive();
+            });
             this.submode += 1;
         } else if (this.submode < this.standing_count)  {
             this.submode += 1;
         } else {
             let _rand = Math.random()*100;
-            if (_rand >= 80) {
+            if (_rand <= 80) {
                 this.mode = "moving";
             } else {
                 this.mode = "sleeping";
@@ -2431,31 +2506,88 @@ class VisiterCat extends Phaser.GameObjects.Sprite{
     
     moving(){
         if (this.submode == 0){
+            this.disableInteractive();
+            //determine degree, 0-30, 150-210, 330-360
+            var li = [0,10,20,30,150,160,170,180,190,200,210,330,340,350]
+            this.moving_degree = li[Math.floor(Math.random() * li.length)];
+            //out of area check
+            if (this.x < 100 && this.moving_degree > 90 && this.moving_degree <270) {
+                this.moving_degree -= 180;
+            }else if (this.x > 1100 && (this.moving_degree < 90 || this.moving_degree > 270)) {
+                this.moving_degree -= 180;
+            }
+            //360 over check
+            this.moving_degree = this.moving_degree % 360;
+            //out of area check, y
+            if (this.y > 860 && this.moving_degree > 180) {
+                this.moving_degree = 360 - this.moving_degree;
+            }else if (this.y < 500 && this.moving_degree < 180) {
+                this.moving_degree = 360 - this.moving_degree;
+            }
+            //minus check
+            if (this.moving_degree < 0) {
+                this.moving_degree += 360;
+            }
+            //determine speed, count
+            //this.moving_speed = 0.2 + Math.random() * 0.1;  //0.3-0.5
+            this.moving_speed = 0.3 + Math.random() * 0.2;  //0.3-0.5
+            this.moving_count = 70 + Math.random() * 30;    //70-100
+            //determine left or right
+            if (this.moving_degree > 90 && this.moving_degree <= 270) {
+                this.dist = "left";
+                this.anims.play("cat_visitor_moving_left", true);
+            }else {
+                this.dist = "right";
+                this.anims.play("cat_visitor_moving_right", true);
+            }
             this.submode += 1;
         } else {
+            this.x += Math.cos(this.moving_degree * (Math.PI/180)) * this.moving_speed;
+            this.y -= Math.sin(this.moving_degree * (Math.PI/180)) * this.moving_speed;
+            this.submode += 1;
+            if (this.submode >= 100){
+                this.mode = "standing";
+                this.submode = 0;
+            }
         }
     }
     
     sleeping(){
         if (this.submode == 0){
+            this.anims.play("cat_visitor_sleeping", true);
+            this.disableInteractive();
             this.submode += 1;
         } else {
+            this.submode += 1;
+            if (this.submode >= 500) {
+                this.mode = "standing";
+                this.submode = 0;
+            }
         }
     }
     
-    gointHome(){
+    goingHome(){
         if (this.submode == 0){
+            this.speed_x = -1;
+            this.speed_y = Math.random() * 1;
+            this.disableInteractive();
+            this.anims.play("cat_visitor_moving_left", true);
             this.submode += 1;
         } else {
+            this.x += this.speed_x;
+            this.y += this.speed_y;
+            if (this.x < -100) {
+                cat_visitor.destroy();
+            }
         }
     }
         
     //---update()
     update(){
-        if (this.mode == "visiting") {this.sleeping();}
+        if (this.mode == "visiting") {this.visiting();}
         else if (this.mode == "standing") {this.standing();}
-        else if (this.mode == "moving") {this.mailSending();}
-        else if (this.mode == "sleeping") {this.leaving();}
+        else if (this.mode == "moving") {this.moving();}
+        else if (this.mode == "sleeping") {this.sleeping();}
         else if (this.mode == "goingHome") {this.goingHome();}
         this.depth = this.y;
         if (turn % 100 == 0) {
@@ -4329,6 +4461,8 @@ function create(scene) {
         frameRate: 1,
         repeat: 1
     });
+    
+    //---animation cat
     //***TODO***cat
     scene.anims.create({
         key: "cat_standing",
@@ -4350,6 +4484,30 @@ function create(scene) {
     });
     scene.anims.create({
         key: "cat_sleeping",
+        frames: scene.anims.generateFrameNumbers("cat_sleeping", {start:0, end:1}),
+        frameRate: 1,
+        repeat: -1
+    });
+    scene.anims.create({
+        key: "cat_visitor_moving_right",
+        frames: scene.anims.generateFrameNumbers("cat_sleeping", {start:0, end:1}),
+        frameRate: 1,
+        repeat: -1
+    });
+    scene.anims.create({
+        key: "cat_visitor_moving_left",
+        frames: scene.anims.generateFrameNumbers("cat_sleeping", {start:0, end:1}),
+        frameRate: 1,
+        repeat: -1
+    });
+    scene.anims.create({
+        key: "cat_visitor_standing",
+        frames: scene.anims.generateFrameNumbers("cat_sleeping", {start:0, end:1}),
+        frameRate: 1,
+        repeat: -1
+    });
+    scene.anims.create({
+        key: "cat_visitor_sleeping",
         frames: scene.anims.generateFrameNumbers("cat_sleeping", {start:0, end:1}),
         frameRate: 1,
         repeat: -1
@@ -4850,7 +5008,8 @@ function protection_code(this_scene) {
 function update_systemMessage(this_scene) {
     //if (summoner == -1) {
     if (count_sync == 0) {
-        text_system_message.setText(" --- Connecting to Astar Network --- ");
+        //text_system_message.setText(" --- Connecting to Astar Network --- ");
+        text_system_message.setText("");
     } else if (summoner == 0) {
         text_system_message.setText(" --- You have not summoned Murasaki-san yet --- ");
         text_summon.visible = true;
@@ -5010,7 +5169,8 @@ function update_parametersWithAnimation(this_scene) {
             if (_delta > 0) {
                 _sign = "+";
             }
-            if (_delta >= local_coin_calc * 1.5) {
+            //if (_delta >= local_coin_calc * 1.5) {
+            if (local_luck_challenge && _sign == "+") {
                 text_coin_earned.setText(_sign + _delta + " lucky♪");
             } else {
                 text_coin_earned.setText(_sign + _delta);
@@ -5039,7 +5199,8 @@ function update_parametersWithAnimation(this_scene) {
             if (_delta > 0) {
                 _sign = "+";
             }
-            if (_delta >= local_material_calc * 1.5) {
+            //if (_delta >= local_material_calc * 1.5) {
+            if (local_luck_challenge && _sign == "+") {
                 text_material_earned.setText(_sign + _delta + " lucky♪");
             } else {
                 text_material_earned.setText(_sign + _delta);
@@ -5075,7 +5236,11 @@ function update_parametersWithAnimation(this_scene) {
             if (_delta > 0) {
                 _sign = "+";
             }
-            text_exp_earned.setText(_sign + _delta);
+            if (local_luck_challenge && _sign == "+") {
+                text_exp_earned.setText(_sign + _delta + " lucky♪");
+            } else {
+                text_exp_earned.setText(_sign + _delta);
+            }
             text_exp_earned_count = 5;
         }
     }
@@ -5853,6 +6018,7 @@ function update_checkItem(this_scene) {
             .setOrigin(0.5)
             .setScale(0.4);
         group_update.add(cat);
+
         /*
         let _x3 =90;
         let _y3 =610;
@@ -5910,6 +6076,7 @@ function update_checkItem(this_scene) {
     }
     
 
+    /*
     //check mail receiving, independent from cushion possession
     if (flag_mail) {
         let _x = 800;
@@ -5945,6 +6112,7 @@ function update_checkItem(this_scene) {
             ;
         }
     }
+    */
 
     //###21:Uni
     
@@ -5983,6 +6151,14 @@ function update_checkItem(this_scene) {
             .on("dragend", () => {
                 let _pos = [item_fortune_statue.x, item_fortune_statue.y];
                 localStorage.setItem(_pos_local, JSON.stringify(_pos));
+                if (
+                    item_fortune_statue.x >= 100
+                    && item_fortune_statue.x <= 1000
+                    && item_fortune_statue.y >= 500
+                    && item_fortune_statue.y <= 800
+                ){
+                    murasakisan.try_attenting(item_fortune_statue.x, item_fortune_statue.y);
+                }
             });
     }
     
@@ -6021,6 +6197,14 @@ function update_checkItem(this_scene) {
             .on("dragend", () => {
                 let _pos = [item_asnya.x, item_asnya.y];
                 localStorage.setItem(_pos_local, JSON.stringify(_pos));
+                if (
+                    item_asnya.x >= 100
+                    && item_asnya.x <= 1000
+                    && item_asnya.y >= 500
+                    && item_asnya.y <= 800
+                ){
+                    murasakisan.try_attenting(item_asnya.x, item_asnya.y);
+                }
             });
     }
 
@@ -6251,6 +6435,14 @@ function update_checkItem(this_scene) {
             .on("dragend", () => {
                 let _pos = [item_violin.x, item_violin.y];
                 localStorage.setItem(_pos_local, JSON.stringify(_pos));
+                if (
+                    item_violin.x >= 100
+                    && item_violin.x <= 1000
+                    && item_violin.y >= 500
+                    && item_violin.y <= 800
+                ){
+                    murasakisan.try_attenting(item_violin.x, item_violin.y);
+                }
             });
     }
 
@@ -6735,6 +6927,20 @@ function update_checkItem(this_scene) {
         flag_summon_fluffy = 1;
     }
     
+    //###000:visitorCat
+    if (local_receiving_mail == 1 && typeof cat_visitor != "undefined"){
+        async function run(scene) {
+            let _res = await contract_callMailDetail();
+            let _summoner_from_id = _res[0];
+            let _summoner_from_name = res[1];
+            cat_visitor = new VisitorCat(scene, 0, 0, summoner_from_id, summoner_from_name)
+                .setOrigin(0.5)
+                .setScale(0.4);
+            group_update.add(cat_visitor);
+        }
+        run(this_scene);
+    }
+    
     previous_local_items = local_items;
     previous_local_item194 = local_items[194];
     previous_local_item195 = local_items[195];
@@ -6853,7 +7059,7 @@ function update(scene) {
     }
 
     //update onchain data
-    if (turn % 250 == 70 || turn == 50) {
+    if ( (turn % 250 == 70 || turn == 50) && flag_update == 1) {
         if (count_sync == 0 || local_notPetrified == false || summoner == 0) {
             contract_update_all();
         } else if (summoner > 0) {

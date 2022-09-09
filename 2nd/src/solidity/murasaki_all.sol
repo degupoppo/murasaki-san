@@ -4963,6 +4963,15 @@ contract Murasaki_Info is Ownable {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         return mfs.calc_score(_summoner);
     }
+    function luck_challenge(uint32 _summoner) public view returns (uint32) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        bool _res = mfs.luck_challenge(_summoner);
+        if (_res == true) {
+            return uint32(1);
+        } else {
+            return uint32(0);
+        }
+    }
     
     //Function_Working
     function calc_mining(uint32 _summoner) public view returns (uint32) {
@@ -5142,6 +5151,7 @@ contract Murasaki_Info is Ownable {
         _res[48] = calc_crafting(_summoner);
         _res[49] = inHouse(_summoner);
         _res[50] = check_lastMailOpen(_summoner);
+        _res[51] = luck_challenge(_summoner);
         return _res;
     }
     

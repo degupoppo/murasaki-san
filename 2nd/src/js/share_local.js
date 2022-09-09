@@ -135,7 +135,7 @@ async function init_web3(){
 
     //function
     contract_murasaki_function_share = 
-        "0xB362d6aA21e72C7Cd8428Db6b0a5b66678CA694d";
+        "0x69a062b192b1Fd51649447f2c1558AE47bFDaa6c";
     contract_murasaki_function_summon_and_levelup = 
         "0x850b4C91E67Fc7AD3B868BA1AF9AE2aDC085404F";
     contract_murasaki_function_feeding_and_grooming = 
@@ -181,7 +181,7 @@ async function init_web3(){
 
     //info
     contract_murasaki_info = 
-        "0x59a0a8cF6a92729704313750a99D679a05D785E1";
+        "0x788d817FF36Bae28E08DfBbF3B0b2E06C67cf488";
     //contract_murasaki_info_fromWallet = 
     //    "0x3F7b2695012c73fAc1A8667a4f8A8d64653d5712";
 
