@@ -2758,6 +2758,12 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable {
         }
         return _happy;
     }
+
+    //luck challenge of mffg
+    function luck_challenge(uint32 _summoner) public view returns (bool) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        return mfs.luck_challenge(_summoner);
+    }    
 }
 
 
@@ -2993,6 +2999,12 @@ contract Murasaki_Function_Mining_and_Farming is Ownable {
         }
         return _farming_items;
     }
+
+    //luck challenge of mfmf
+    function luck_challenge(uint32 _summoner) public view returns (bool) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        return mfs.luck_challenge(_summoner);
+    }    
 }
 
 
@@ -3293,6 +3305,12 @@ contract Murasaki_Function_Crafting is Ownable {
         mc.craft(_item_type, _summoner, msg.sender, _seed);
     }
     */
+
+    //luck challenge of mfc
+    function luck_challenge(uint32 _summoner) public view returns (bool) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        return mfs.luck_challenge(_summoner);
+    }    
 }
 
 
@@ -3325,12 +3343,12 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
         uint32 BASE_SEC = mp.BASE_SEC();
         uint32 _dc_sec = _dc * BASE_SEC / 1000;   //1000dc = 1day = 86400sec
         //calc remining sec
-        uint32 _delta_time = ( _now - ms.crafting_start_time(_summoner) ) * SPEED/100;
+        uint32 _delta_time = uint32( ( _now - ms.crafting_start_time(_summoner) ) * SPEED/100);
         uint32 _remining_time;
         if (_delta_time >= _dc_sec) {
             _remining_time = 0;
         }else {
-            _remining_time = _dc_sec - _delta_time;
+            _remining_time = uint32(_dc_sec - _delta_time);
         }
         return _remining_time;
     }
@@ -4422,7 +4440,7 @@ contract Murasaki_Mail is Ownable {
         //mail sending
         Mail memory _mail = mails[_mail_id];
         uint32 _now = uint32(block.timestamp);
-        uint32 _delta = (_now - _mail.send_time) * SPEED/100;
+        uint32 _delta = uint32( (_now - _mail.send_time) * SPEED/100 );
         if (_delta >= interval_sec) {
             return 0;
         } else {
@@ -4733,6 +4751,7 @@ contract Murasaki_Info is Ownable {
     address public murasaki_function_share_address;
     address public murasaki_function_mining_and_farming_address;
     address public murasaki_function_crafting_address;
+    address public murasaki_function_feeding_and_grooming_address;
     
     //admin, set address
     function _set1_murasaki_function_share_address(address _address) external onlyOwner {
@@ -4743,6 +4762,9 @@ contract Murasaki_Info is Ownable {
     }
     function _set3_murasaki_function_crafting_address(address _address) external onlyOwner {
         murasaki_function_crafting_address = _address;
+    }
+    function _set4_murasaki_function_feeding_and_grooming_address(address _address) external onlyOwner {
+        murasaki_function_feeding_and_grooming_address = _address;
     }
     
     //Murasaki_Main
@@ -4963,6 +4985,7 @@ contract Murasaki_Info is Ownable {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         return mfs.calc_score(_summoner);
     }
+    /*
     function luck_challenge(uint32 _summoner) public view returns (uint32) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         bool _res = mfs.luck_challenge(_summoner);
@@ -4972,6 +4995,7 @@ contract Murasaki_Info is Ownable {
             return uint32(0);
         }
     }
+    */
     
     //Function_Working
     function calc_mining(uint32 _summoner) public view returns (uint32) {
@@ -5097,6 +5121,35 @@ contract Murasaki_Info is Ownable {
         }
     }
     
+    //luck challenge
+    function luck_challenge_of_mffg(uint32 _summoner) public view returns (uint32) {
+        Murasaki_Function_Feeding_and_Grooming mffg = Murasaki_Function_Feeding_and_Grooming(murasaki_function_feeding_and_grooming_address);
+        bool _res = mffg.luck_challenge(_summoner);
+        if (_res == true) {
+            return uint32(1);
+        } else {
+            return uint32(0);
+        }
+    }
+    function luck_challenge_of_mfmf(uint32 _summoner) public view returns (uint32) {
+        Murasaki_Function_Mining_and_Farming mfmf = Murasaki_Function_Mining_and_Farming(murasaki_function_mining_and_farming_address);
+        bool _res = mfmf.luck_challenge(_summoner);
+        if (_res == true) {
+            return uint32(1);
+        } else {
+            return uint32(0);
+        }
+    }
+    function luck_challenge_of_mfc(uint32 _summoner) public view returns (uint32) {
+        Murasaki_Function_Crafting mfc = Murasaki_Function_Crafting(murasaki_function_crafting_address);
+        bool _res = mfc.luck_challenge(_summoner);
+        if (_res == true) {
+            return uint32(1);
+        } else {
+            return uint32(0);
+        }
+    }
+    
     //get all
     function allDynamicStatus(uint32 _summoner) external view returns (uint32[64] memory) {
         uint32[64] memory _res;
@@ -5120,14 +5173,14 @@ contract Murasaki_Info is Ownable {
         _res[17] = crafting_status(_summoner);
         _res[18] = crafting_start_time(_summoner);
         _res[19] = crafting_item_type(_summoner);
-        _res[20] = total_mining_sec(_summoner);
-        _res[21] = total_farming_sec(_summoner);
-        _res[22] = total_crafting_sec(_summoner);
-        _res[23] = total_exp_gained(_summoner);
-        _res[24] = total_coin_mined(_summoner);
-        _res[25] = total_material_farmed(_summoner);
-        _res[26] = total_item_crafted(_summoner);
-        _res[27] = total_precious_received(_summoner);
+        //_res[20] = total_mining_sec(_summoner);
+        //_res[21] = total_farming_sec(_summoner);
+        //_res[22] = total_crafting_sec(_summoner);
+        //_res[23] = total_exp_gained(_summoner);
+        //_res[24] = total_coin_mined(_summoner);
+        //_res[25] = total_material_farmed(_summoner);
+        //_res[26] = total_item_crafted(_summoner);
+        //_res[27] = total_precious_received(_summoner);
         _res[28] = satiety(_summoner);
         _res[29] = happy(_summoner);
         _res[30] = precious(_summoner);
@@ -5151,10 +5204,12 @@ contract Murasaki_Info is Ownable {
         _res[48] = calc_crafting(_summoner);
         _res[49] = inHouse(_summoner);
         _res[50] = check_lastMailOpen(_summoner);
-        _res[51] = luck_challenge(_summoner);
+        _res[51] = luck_challenge_of_mffg(_summoner);
+        _res[52] = luck_challenge_of_mfmf(_summoner);
+        _res[53] = luck_challenge_of_mfc(_summoner);
         return _res;
     }
-    
+            
     function allStaticStatus(uint32 _summoner) external view returns (
         uint32,
         address,

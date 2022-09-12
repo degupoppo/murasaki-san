@@ -5,8 +5,25 @@
 
 /*
 
- ok クリティカル検出の改善
+    クラフトウィンドウの軽量化
+        毎回create, destroyではなく、
+        最初にcreateしvisible/unvisibleで制御する
+
+    一人遊び用アクセサリー
+        積み木
+            つっつくむらさきさん絵
+            積み木が３段階ぐらいで積み上がっている絵
+        
+
+    クリティカル検出の改善
         現状、うまく検出できてない
+        luck_challengeはmsg.senderを参照するので画一的に結果を取得できない
+        案1
+            msg.senderを考慮した乱数取得関数を用意する
+        案2
+            通常のernを計算しそれより多いか参照する
+        案3
+            Eventを参照する
 
     猫のUIの改善
         専用クラスを用意する
@@ -240,7 +257,9 @@ async function init_global_variants() {
     local_happy = 0;
     local_age = 0;
     local_myListsAt_withItemType = [];
-    local_luck_challenge = 0;
+    local_luck_challenge_of_mffg = 0;
+    local_luck_challenge_of_mfmf = 0;
+    local_luck_challenge_of_mfc = 0;
 
     //---local previous
     previous_local_last_feeding_time = 0;
@@ -637,7 +656,9 @@ async function contract_update_dynamic_status(_summoner) {
     local_crafting_calc =   Number(_all_dynamic_status[48]);
     
     //update luck challenge
-    local_luck_challenge =  Number(_all_dynamic_status[51]);
+    local_luck_challenge_of_mffg =  Number(_all_dynamic_status[51]);
+    local_luck_challenge_of_mfmf =  Number(_all_dynamic_status[52]);
+    local_luck_challenge_of_mfc  =  Number(_all_dynamic_status[53]);
     
     //update last_sync_time
     last_sync_time = Date.now();
@@ -3406,6 +3427,7 @@ function open_window_craft (scene) {
 
     //function, closing: destroy group and update selecte_item
     async function close_crafting_window(_item) {
+        flag_window_craft = 0;
         //destroy group
         group_window_crafting.destroy(true);
         //during crafting, return 0
@@ -3451,7 +3473,6 @@ function open_window_craft (scene) {
             icon_crafting_heart.visible = false;
             text_select_item.setText(">> Select Item <<");
         }
-        flag_window_craft = 0;
     }
 
     //function, get cost of item
@@ -5170,7 +5191,7 @@ function update_parametersWithAnimation(this_scene) {
                 _sign = "+";
             }
             //if (_delta >= local_coin_calc * 1.5) {
-            if (local_luck_challenge && _sign == "+") {
+            if (local_luck_challenge_of_mfmf && _sign == "+") {
                 text_coin_earned.setText(_sign + _delta + " lucky♪");
             } else {
                 text_coin_earned.setText(_sign + _delta);
@@ -5200,7 +5221,7 @@ function update_parametersWithAnimation(this_scene) {
                 _sign = "+";
             }
             //if (_delta >= local_material_calc * 1.5) {
-            if (local_luck_challenge && _sign == "+") {
+            if (local_luck_challenge_of_mfmf && _sign == "+") {
                 text_material_earned.setText(_sign + _delta + " lucky♪");
             } else {
                 text_material_earned.setText(_sign + _delta);
@@ -5236,7 +5257,7 @@ function update_parametersWithAnimation(this_scene) {
             if (_delta > 0) {
                 _sign = "+";
             }
-            if (local_luck_challenge && _sign == "+") {
+            if (local_luck_challenge_of_mffg && _sign == "+") {
                 text_exp_earned.setText(_sign + _delta + " lucky♪");
             } else {
                 text_exp_earned.setText(_sign + _delta);
@@ -5517,7 +5538,6 @@ function update_checkModeChange(this_scene) {
                 .setDepth(9999);
             group_food.add(item_sushi);
         }
-
         sound_feeding.play();
 
     //grooming check, continue
@@ -6153,10 +6173,11 @@ function update_checkItem(this_scene) {
                 localStorage.setItem(_pos_local, JSON.stringify(_pos));
                 if (
                     item_fortune_statue.x >= 100
-                    && item_fortune_statue.x <= 1000
+                    && item_fortune_statue.x <= 1100
                     && item_fortune_statue.y >= 500
                     && item_fortune_statue.y <= 800
                 ){
+                    sound_hat.play();
                     murasakisan.try_attenting(item_fortune_statue.x, item_fortune_statue.y);
                 }
             });
@@ -6199,10 +6220,11 @@ function update_checkItem(this_scene) {
                 localStorage.setItem(_pos_local, JSON.stringify(_pos));
                 if (
                     item_asnya.x >= 100
-                    && item_asnya.x <= 1000
+                    && item_asnya.x <= 1100
                     && item_asnya.y >= 500
                     && item_asnya.y <= 800
                 ){
+                    sound_hat.play();
                     murasakisan.try_attenting(item_asnya.x, item_asnya.y);
                 }
             });
@@ -6437,10 +6459,11 @@ function update_checkItem(this_scene) {
                 localStorage.setItem(_pos_local, JSON.stringify(_pos));
                 if (
                     item_violin.x >= 100
-                    && item_violin.x <= 1000
+                    && item_violin.x <= 1100
                     && item_violin.y >= 500
                     && item_violin.y <= 800
                 ){
+                    sound_hat.play();
                     murasakisan.try_attenting(item_violin.x, item_violin.y);
                 }
             });

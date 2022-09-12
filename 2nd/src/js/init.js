@@ -132,6 +132,7 @@ async function initialize_contract() {
     contract_info.methods._set1_murasaki_function_share_address(contract_murasaki_function_share).send({from:wallet});
     contract_info.methods._set2_murasaki_function_mining_and_farming_address(contract_murasaki_function_mining_and_farming).send({from:wallet});
     contract_info.methods._set3_murasaki_function_crafting_address(contract_murasaki_function_crafting).send({from:wallet});
+    contract_info.methods._set4_murasaki_function_feeding_and_grooming_address(contract_murasaki_function_feeding_and_grooming).send({from:wallet});
     //contract_info_fromWallet.methods._set1_murasaki_function_share_address(contract_murasaki_function_share).send({from:wallet});
     //contract_info_fromWallet.methods._set2_murasaki_function_mining_and_farming_address(contract_murasaki_function_mining_and_farming).send({from:wallet});
     //contract_info_fromWallet.methods._set3_murasaki_function_crafting_address(contract_murasaki_function_crafting).send({from:wallet});
