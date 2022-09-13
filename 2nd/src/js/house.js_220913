@@ -11,7 +11,6 @@
         fluffyをコストに要求するか
             rare fluffyを1体要求、など
             fluffiestの選択はどうするか
-        fluffyコスト導入の場合はコードの修正が必要
     
     item upgradeのUIの改善
         HP上で自分でid選んでupgradeは面倒だし味気ない
@@ -280,9 +279,7 @@ async function init_global_variants() {
     local_luck_challenge_of_mffg = 0;
     local_luck_challenge_of_mfmf = 0;
     local_luck_challenge_of_mfc = 0;
-    local_newsText = ["Peaceful","Today !","","ฅ•ω•ฅ"];
-    local_itemIds = [];
-    
+
     //---local previous
     previous_local_last_feeding_time = 0;
     previous_local_last_grooming_time = 0;
@@ -303,8 +300,8 @@ async function init_global_variants() {
     previous_local_score = 0;
     previous_satiety = 0;
     previous_happy = 0;
+    //previous_local_heart = 0;
     previous_local_precious = 0;
-    previous_local_precious2 = 0;
     
     //---local etc
     turn = 0;
@@ -334,11 +331,14 @@ async function init_global_variants() {
     item_wearing_hat = 0;
     active_nui_id = 0;
     text_event_heart = "";
+    //text_event_random = "[Murasaki news]                                                                                                    ";
     text_event_random = "[Murasaki news]";
     text_event_random = text_event_random.padStart(116, " ");
     turn_forFPS = 0;
     time_forFPS = Date.now();
-    summoned_fluffies = [];
+    //web3 = await connect();
+    //wss3 = await wss();
+    //wss = await connect();
 
     //---flag
     flag_music = 0;
@@ -354,6 +354,11 @@ async function init_global_variants() {
     flag_onLight = true;
     flag_window_craft = 0;
     flag_update = 1;
+    
+    //wss, use for call
+    //web3_wss = await wss();
+    
+    //wallet = 0;
 }
 
 init_global_variants();
@@ -486,7 +491,11 @@ async function send_fp_get(_wallet, _summoner) {
 //===web3========================================================--------
 
 
-//---update
+//---update status2
+
+
+//init_web3();
+
 
 //call myListsAt_withItemType
 async function get_myListsAt_withItemType() {
@@ -513,23 +522,13 @@ function get_itemIds_from_itemType(_allItemId_withItemType, _target_itemType) {
         let _itemId = _allItemId_withItemType[i];
         let _itemType = _allItemId_withItemType[i+1];
         if (_itemType == _target_itemType) {
-            itemIds.push(Number(_itemId));
+            itemIds.push(_itemId);
         }
     }
     return itemIds;    
 }
 
-//generate all item ids list
-function get_itemIds(_myListsAt_withItemType) {
-    let _itemIds = [];
-    for (i = 0; i < _myListsAt_withItemType.length; i += 2) {
-        let _itemId = _myListsAt_withItemType[i];
-        _itemIds.push(Number(_itemId));
-    }
-    return _itemIds;
-}
 
-//###static status
 async function contract_update_static_status(_summoner) {
 
     //check summoner
@@ -563,23 +562,20 @@ async function contract_update_static_status(_summoner) {
 }
 
 
-async function preUpdate(){
-    await contract_update_summoner_of_wallet();
-    await contract_update_dynamic_status(summoner);
-}
-
-
-//###dynamic status
 async function contract_update_dynamic_status(_summoner) {
 
     //check summoner
-    if (_summoner == 0) {
+    if (summoner == 0) {
         count_sync += 1;
         return 0;
     }
 
     let _res;
 
+    //let web3 = await connect();
+    //let wallet = await get_wallet(web3);
+    //let contract_info = await new web3.eth.Contract(abi_murasaki_info, contract_murasaki_info);
+    
     //call item
     let _myListsAt_withItemType = await get_myListsAt_withItemType();
 
@@ -587,10 +583,12 @@ async function contract_update_dynamic_status(_summoner) {
     local_myListsAt_withItemType = _myListsAt_withItemType;
     let _allItemBalance = get_allItemBalance_from_allItemId_withItemType(_myListsAt_withItemType);
     local_items = _allItemBalance;
-    local_itemIds = get_itemIds(_myListsAt_withItemType);
 
     //call dynamic status from chain
     let _all_dynamic_status = await contract_info.methods.allDynamicStatus(_summoner).call();
+    //let _all_items = await contract_info.methods.allItemBalance(_summoner).call();
+    //console.log(_all_dynamic_status);
+    
     
     //update local status
 
@@ -689,21 +687,128 @@ async function contract_update_dynamic_status(_summoner) {
     count_sync += 1;
 }
 
+/*
+//---update status
+async function contract_update_status(_summoner) {
+
+    let web3 = await connect();
+    //let web3 = wss3;
+    let wallet = await get_wallet(web3);
+
+    //contract
+    let contract_mfs = await new web3.eth.Contract(abi_murasaki_function_share, contract_murasaki_function_share);
+
+    //check isActive
+    if (local_isActive == false) {
+        count_sync += 1;
+        return 0;
+    }
+    
+    //wallet
+    local_wallet = wallet;
+
+    //call dynamic status from ms
+    let _dynamic_status = await contract_mfs.methods.get_dynamic_status_array(_summoner).call();
+
+    //update local variants
+    local_level = Number(_dynamic_status[0]);
+    local_exp = Number(_dynamic_status[1]);
+    local_strength = Number(_dynamic_status[2])/100;
+    local_dexterity = Number(_dynamic_status[3])/100;
+    local_intelligence = Number(_dynamic_status[4])/100;
+    local_luck = Number(_dynamic_status[5])/100;
+    local_next_exp_required = Number(_dynamic_status[6]);
+    //7: last_level_up_time
+    local_coin = Number(_dynamic_status[8]);
+    local_material = Number(_dynamic_status[9]);
+    local_last_feeding_time = Number(_dynamic_status[10]);
+    local_last_grooming_time = Number(_dynamic_status[11]);
+    local_mining_status = Number(_dynamic_status[12]);
+    local_mining_start_time = Number(_dynamic_status[13]);
+    local_farming_status = Number(_dynamic_status[14]);
+    local_farming_start_time = Number(_dynamic_status[15]);
+    local_crafting_status = Number(_dynamic_status[16]);
+    local_crafting_start_time = Number(_dynamic_status[17]);
+    local_crafting_item_type = Number(_dynamic_status[18]);
+    local_heart = Number(_dynamic_status[27]);
+
+    //dice, when rolling, high frequency update
+    if (flag_dice_rolling == 1 && local_items[3] > 0) {
+        await contract_update_dice(_summoner);
+    }
+    
+    //name minting
+    if (flag_name_minting == 1) {
+        contract_update_name(_summoner);
+        if (local_name_str != "") {
+            flag_name_minting = 0;
+        }
+    }
+    
+    if　(flag_item_update == 1) {
+        local_items = await contract_mfs.methods.get_balance_of_type_array(local_owner).call();
+        flag_item_update = 0;
+    }
+
+    //low frequency updates
+    if (count_sync % 3 == 1) {
+
+        //call item
+        local_items = await contract_mfs.methods.get_balance_of_type_array(local_owner).call();
+        //local_heart = Number(local_items[193]);
+
+        //update mining, farming, crafting calculation
+        contract_update_working(_summoner);
+
+        //update dice
+        if (flag_dice_rolling == 0 && local_items[3] > 0) {
+            await contract_update_dice(_summoner);
+        }
+        
+        //check mail
+        contract_check_mail(summoner);
+        //if (local_items[20] > 0) {
+        if (local_items[1] > 0) {
+            contract_calc_sending_interval(summoner);
+        }
+        
+        //update score
+        local_score = await contract_mfs.methods.calc_score(_summoner).call();
+    }
+    
+    //debug
+    //console.log("status:", _dynamic_status, "items:", local_items);
+
+    //update last_sync_time
+    last_sync_time = Date.now();
+    count_sync += 1;
+}
+*/
+
 
 //update_all, at the first
 async function contract_update_all() {
     await contract_update_summoner_of_wallet();
     await contract_update_static_status(summoner);
     await contract_update_dynamic_status(summoner);
+    //await contract_update_statics(summoner);
+    //await contract_update_name(summoner);
+    //await contract_update_status(summoner);
+    //await contract_update_event_heart();
 }
 
 
-//###event
+//---update event
 
 //update event_heart
 async function contract_update_event_precious() {
+    //let web3 = await connect();
+    //let wallet = await get_wallet(web3);
+    //let contract_mml = new web3.eth.Contract(abi_murasaki_mail, contract_murasaki_mail);
+    //let contract_mfc = new web3.eth.Contract(abi_murasaki_function_crafting, contract_murasaki_function_crafting);
     let _block_latest = await web3.eth.getBlockNumber();
     let _block_from = _block_latest - 7200; //1 day
+    //let _block_from = _block_latest - 50000;
     let _text = "";
 
     //event craft
@@ -711,6 +816,7 @@ async function contract_update_event_precious() {
             fromBlock: _block_from,
             toBlock: _block_latest
     })
+    //console.log(_events_mc);
     if (_events_mc) {
         for (let event of _events_mc) {
             let _summoner_to = event.returnValues[1];
@@ -777,22 +883,29 @@ async function contract_update_event_precious() {
 
 //update event random
 async function contract_update_event_random() {
-    //let wallet = await get_wallet(web3);
-    //let contract_mfsl = await new web3.eth.Contract(abi_murasaki_function_summon_and_levelup, contract_murasaki_function_summon_and_levelup);
-    //let contract_mffg = await new web3.eth.Contract(abi_murasaki_function_feeding_and_grooming, contract_murasaki_function_feeding_and_grooming);
-    //let contract_mfmf = await new web3.eth.Contract(abi_murasaki_function_mining_and_farming, contract_murasaki_function_mining_and_farming);
-    //let contract_mfc = await new web3.eth.Contract(abi_murasaki_function_crafting, contract_murasaki_function_crafting);
-    //let contract_d = await new web3.eth.Contract(abi_world_dice, contract_world_dice);
-    //let contract_mml = new web3.eth.Contract(abi_murasaki_mail, contract_murasaki_mail);
+    //let web3 = await connect();
+    //let web3 = await wss();
+    //let web3 = web3_wss;
+    let wallet = await get_wallet(web3);
+    let contract_mfsl = await new web3.eth.Contract(abi_murasaki_function_summon_and_levelup, contract_murasaki_function_summon_and_levelup);
+    let contract_mffg = await new web3.eth.Contract(abi_murasaki_function_feeding_and_grooming, contract_murasaki_function_feeding_and_grooming);
+    let contract_mfmf = await new web3.eth.Contract(abi_murasaki_function_mining_and_farming, contract_murasaki_function_mining_and_farming);
+    let contract_mfc = await new web3.eth.Contract(abi_murasaki_function_crafting, contract_murasaki_function_crafting);
+    let contract_d = await new web3.eth.Contract(abi_world_dice, contract_world_dice);
+    let contract_mml = new web3.eth.Contract(abi_murasaki_mail, contract_murasaki_mail);
     let _block_latest = await web3.eth.getBlockNumber();
     //let _block_from = _block_latest - 300;  //60 min
     let _block_from = _block_latest - 7200;  //24 h
     //let _block_from = _block_latest - 50000;
-    //let _block_from = _block_latest - 10000;
-    
     /*
     //summon
     let _events_summon = await contract_mfsl.getPastEvents("Summon", {
+            fromBlock: _block_from,
+            toBlock: _block_latest
+    })
+    */
+    //Level-up
+    let _events_levelup = await contract_mfsl.getPastEvents("Level_up", {
             fromBlock: _block_from,
             toBlock: _block_latest
     })
@@ -816,70 +929,56 @@ async function contract_update_event_random() {
             fromBlock: _block_from,
             toBlock: _block_latest
     })
+    //Crafting
+    let _events_crafting = await contract_mfc.getPastEvents("Crafting", {
+            fromBlock: _block_from,
+            toBlock: _block_latest
+    })
     //Dice_roll
     let _events_dice = await contract_d.getPastEvents("Dice_Roll", {
             fromBlock: _block_from,
             toBlock: _block_latest
     })
+    //Mail
+    let _events_mail = await contract_mml.getPastEvents("allEvents", {
+            fromBlock: _block_from,
+            toBlock: _block_latest
+    })
+    /*
     //Upgrade
     let _events_upgrade = await contract_mfc.getPastEvents("Upgrade", {
             fromBlock: _block_from,
             toBlock: _block_latest
     })
     */
-    
-    //Level-up
-    let _events_levelup = await contract_mfsl.getPastEvents("Level_up", {
-            fromBlock: _block_from,
-            toBlock: _block_latest
-    })
-    //Crafting
-    let _events_crafting = await contract_mfc.getPastEvents("Crafting", {
-            fromBlock: _block_from,
-            toBlock: _block_latest
-    })
-    //Mail
-    let _events_mail = await contract_mml.getPastEvents("Open_Mail", {
-            fromBlock: _block_from,
-            toBlock: _block_latest
-    })
     let _array = [];
     _array = _array.concat(
         //_events_summon,
         _events_levelup,
-        //_events_feeding,
-        //_events_grooming,
-        //_events_mining,
-        //_events_farming,
+        _events_feeding,
+        _events_grooming,
+        _events_mining,
+        _events_farming,
         _events_crafting,
-        //_events_dice,
+        _events_dice,
         _events_mail,
         //_events_upgrade,
     )
-    //console.log(_array);
-    //let _text = "";
-    let _resText = ["", "", "", ""];
+    console.log(_array);
+    let _text = "";
     if (_array.length > 0) {
-        //select event randomly
         let _event = _array[Math.floor(Math.random() * _array.length)];
-        //get block and timestamp
         let _blockNumber = _event.blockNumber;
         let _block = await web3.eth.getBlock(_blockNumber);
         let _timestamp = _block.timestamp;
         let _now = Date.now() /1000;
         let _delta_min = Math.round( (_now - _timestamp) / 60 );
-        //prepare text
-
-        //first line: block number
         let _text_time = "";
         if (_delta_min == 0) {
             _text_time = "just now: ";
         } else {
             _text_time = _delta_min + " min ago: ";
         }
-        _resText[0] = _text_time;
-
-        //second line: summoner
         let _name = _event.event;
         //let _summoner = _event.returnValues["_summoner"];
         let _summoner = _event.returnValues[0];
@@ -887,20 +986,14 @@ async function contract_update_event_random() {
         if (_summoner_name == "") {
             _summoner_name = "#" + _summoner;
         }
-        _resText[1] = _summoner_name;
-
-        //third/4th line: type of event
         let _value = _event.returnValues[1];
-        //_text += "[Murasaki news] ";
-        let _text3;
-        let _text4;
+        _text += "[Murasaki news] ";
         if (_name == "Level_up") {
-            //_text += _text_time;
-            //_text += _summoner_name;
-            _text3 = "Leveled up to ";
-            _text4 = _value;
-            _text4 += " !!";
-        /*
+            _text += _text_time;
+            _text += _summoner_name;
+            _text += " leveled up to ";
+            _text += _value;
+            _text += "!";
         } else if (_name == "Feeding") {
             _text += _text_time;
             _text += _summoner_name;
@@ -925,20 +1018,13 @@ async function contract_update_event_random() {
             _text += " completed farming and earned ";
             _text += _value;
             _text += " kusa!";
-        */
         } else if (_name == "Crafting") {
             let _item_name = array_item_name[_value];
-            _text3 = "Crafted";
-            _text4 = _item_name;
-            _text4 += " !!";
-            /*
             _text += _text_time;
             _text += _summoner_name;
             _text += " crafted ";
             _text += _item_name;
             _text += "!";
-            */
-        /*
         } else if (_name == "Dice_Roll") {
             _text += _text_time;
             _text += _summoner_name;
@@ -955,35 +1041,25 @@ async function contract_update_event_random() {
             _text += " send mail to ";
             _text += _summoner_to_name;
             _text += "!";
-        */
         } else if (_name == "Open_Mail") {
             _summoner_from_name = await call_name_from_summoner(_value);
             if (_summoner_from_name == "") {
                 _summoner_from_name = "#" + _value;
             }
-            _text3 = "Opened Mail from";
-            _text4 = _summoner_from_name;
-            _text4 += " !!";
-            /*
             _text += _text_time;
             _text += _summoner_name;
             _text += " opened mail from ";
             _text += _summoner_from_name;
             _text += "!";
-            */
         /*
         } else if (_name == "Upgrade") {
             ;
         */
         }
-        _resText[2] = _text3;
-        _resText[3] = _text4;
         //_text = _text.padStart(110, " ");
-        //_text += "          ";
-    //text_event_random = _text;
+        _text += "          ";
+    text_event_random = _text;
     }
-    local_newsText = _resText;
-    //return _resText;
 }
 
 //---call
@@ -997,17 +1073,66 @@ async function contract_callMailDetail(_summoner){
     return (_summoner_from_id, _summoner_from_name);
 }
 
+/*
+//check mail
+async function contract_check_mail(_summoner) {
+    //let web3 = await connect();
+    let wallet = await get_wallet(web3);
+    let contract_mml = await new web3.eth.Contract(abi_murasaki_mail, contract_murasaki_mail);
+    flag_mail = await contract_mml.methods.check_receiving_mail(_summoner).call();
+    if (flag_mail) {
+        _mail = await contract_mml.methods.receiving(_summoner).call();
+        local_receiving_mail = await contract_mml.methods.mails(_mail).call();
+        let _summoner_from = local_receiving_mail[2];
+        let contract_mn = await new web3.eth.Contract(abi_murasaki_function_name, contract_murasaki_function_name);
+        local_receiving_mail_from = await contract_mn.methods.call_name_from_summoner(_summoner_from).call();
+    }
+    //console.log(flag_mail);
+}
+*/
+
+/*
+//calc mail sending interval
+async function contract_calc_sending_interval(_summoner) {
+    //let web3 = await connect();
+    let wallet = await get_wallet(web3);
+    let contract_mml = await new web3.eth.Contract(abi_murasaki_mail, contract_murasaki_mail);
+    local_mail_sending_interval = await contract_mml.methods.calc_sending_interval(_summoner).call();
+}
+*/
+
 //get item_nui, summoner and score
 async function contract_get_item_nui(_item) {
+    //let web3 = await connect();
+    //let wallet = await get_wallet(web3);
+    //let contract_msn = await new web3.eth.Contract(abi_murasaki_storage_nui, contract_murasaki_storage_nui);
+    /*
+    let _nui = await contract_msn.methods.nuis(_item).call();
+    return _nui;
+    */
     let _summoner_of_nui = await contract_msn.methods.summoner(_item).call();
     let _class = await contract_msn.methods.class(_item).call();
     let _score = await contract_msn.methods.score(_item).call();
+    //let contract_mfs = await new web3.eth.Contract(abi_murasaki_function_share, contract_murasaki_function_share);
     let _exp_rate = await contract_mfs.methods.calc_exp_addition_rate(summoner, _item).call();
     return [_summoner_of_nui, _class, _score, _exp_rate];
 }
 
+/*
+//get heart required
+async function contract_get_heart_required(_item_type) {
+    //let web3 = await connect();
+    let wallet = await get_wallet(web3);
+    let contract = await new web3.eth.Contract(abi_murasaki_function_crafting, contract_murasaki_function_crafting);
+    let _heart_required = await contract.methods.get_heart_required(_item_type).call();
+    return _heart_required;
+}
+*/
+
 //call name from summoner id
 async function call_name_from_summoner(_summoner) {
+    //let web3 = await connect();
+    //let contract = await new web3.eth.Contract(abi_murasaki_function_name, contract_murasaki_function_name);
     let _name = await contract_mfn.methods.call_name_from_summoner(_summoner).call();
     return _name;
 }
@@ -1015,6 +1140,8 @@ async function call_name_from_summoner(_summoner) {
 //call amount of token
 //https://qiita.com/ramo798/items/0cc2c556410c95b0b332
 async function call_amount_of_token(_contract_address) {
+    //let web3 = await connect();
+    //let wallet = await get_wallet(web3);
     let wallet = local_owner;
     let minABI = [
         {
@@ -1038,13 +1165,144 @@ async function call_amount_of_token(_contract_address) {
     return balance / (10 ** decimal);
 }
 
+//check tx
+async function check_tx(_tx) {
+    //let web3 = await connect();
+    let _res = await web3.eth.getTransactionReceipt(_tx);
+    if (_res != null) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+
+/*
+//get and calc wallet age
+//0-1m = age1, 1-2m = age2, >12m = age12
+async function get_ageScore(_wallet){
+    //let web3 = await connect();
+    //get nonce
+    let _nonceNow = await web3.eth.getTransactionCount(_wallet);
+    //get month age, min=1, max=12
+    let _lastBlock = await web3.eth.getBlockNumber();
+    let _age = 1;
+    let _count = 1;
+    while (_count < 12) {
+        let _block = _lastBlock - _count * 216000;  // =1m, 1block/12sec
+        let _nonce = await web3.eth.getTransactionCount(_wallet, _block);
+        if(_nonce == 0) {
+            break;
+        }
+        _count += 1;
+    }
+    _age = _count;  //min=1, max=12
+    //calc ageScore, min=0, max=1800
+    let _ageScore = _nonceNow;
+    let _ageScore_limit = _age * 150;   // 5tx/day, 150tx/m
+    if (_ageScore >= _ageScore_limit) {
+        _ageScore = _ageScore_limit;
+    }
+    return _ageScore;
+}
+*/
+
+
 //update summoner of wallet
 async function contract_update_summoner_of_wallet() {
     if (summoner <= 0) {
+        //let web3 = await connect();
+        //let wallet = await get_wallet(web3);
+        //let contract_mm = new web3.eth.Contract(abi_murasaki_main, contract_murasaki_main);
         summoner = await contract_mm.methods.tokenOf(wallet).call();  //have not summoned yet: 0
         summoner = Number(summoner);
     }
 }
+
+/*
+//update name
+async function contract_update_name(_summoner) {
+    if (local_isActive == false) {
+        return 0;
+    }
+    //let web3 = await connect();
+    let wallet = await get_wallet(web3);
+    let contract_mfn = new web3.eth.Contract(abi_murasaki_function_name, contract_murasaki_function_name);
+    local_name_str = await contract_mfn.methods.call_name_from_summoner(_summoner).call();
+}
+*/
+
+/*
+//update dice
+async function contract_update_dice(_summoner) {
+    //let web3 = await connect();
+    let wallet = await get_wallet(web3);
+    let contract_wd = await new web3.eth.Contract(abi_world_dice, contract_world_dice);
+    local_rolled_dice = await contract_wd.methods.get_rolled_dice(_summoner).call();
+    local_last_rolled_dice = await contract_wd.methods.get_last_rolled_dice(_summoner).call();
+    local_last_dice_roll_time = await contract_wd.methods.last_dice_roll_time(_summoner).call();
+}
+*/
+
+/*
+//update static_parameters
+async function contract_update_statics(_summoner) {
+    //let web3 = await connect();
+    let wallet = await get_wallet(web3);
+    let contract_ms = await new web3.eth.Contract(abi_murasaki_storage, contract_murasaki_storage);
+    local_isActive = await contract_ms.methods.isActive(_summoner).call();
+    if (local_isActive == false) {
+        return 0;
+    }
+    SPEED = await contract_ms.methods.SPEED().call();   //220311: speed was modified as 100%=x1
+    SPEED = Number(SPEED) / 100;
+    let contract_mfs = await new web3.eth.Contract(abi_murasaki_function_share, contract_murasaki_function_share);
+    let _static_status = await contract_mfs.methods.get_static_status_array(_summoner).call();
+    local_class = Number(_static_status[0]);
+    local_birth_time = Number(_static_status[1]);
+    let contract_mm = await new web3.eth.Contract(abi_murasaki_main, contract_murasaki_main);
+    let _owner = await contract_mm.methods.ownerOf(_summoner).call();
+    local_owner = _owner;
+    let contract_mffg = await new web3.eth.Contract(abi_murasaki_function_feeding_and_grooming, contract_murasaki_function_feeding_and_grooming);
+    local_notPetrified = await contract_mfs.methods.not_petrified(_summoner).call();
+}
+*/
+
+/*
+//update mining/farming/crafting
+async function contract_update_working(_summoner) {
+    //let web3 = await connect();
+    //let wallet = await get_wallet(web3);
+    let contract_mfc = await new web3.eth.Contract(abi_murasaki_function_crafting, contract_murasaki_function_crafting);
+    let contract_mfmf = await new web3.eth.Contract(abi_murasaki_function_mining_and_farming, contract_murasaki_function_mining_and_farming);
+    if (local_mining_status == 1){
+        local_coin_calc = await contract_mfmf.methods.calc_mining(_summoner).call();
+        local_coin_calc = Number(local_coin_calc);
+    }else if (local_farming_status == 1) {
+        local_material_calc = await contract_mfmf.methods.calc_farming(_summoner).call();
+        local_material_calc = Number(local_material_calc);
+    }else if (local_crafting_status == 1) {
+        local_crafting_calc = await contract_mfc.methods.calc_crafting(_summoner).call();
+        local_crafting_calc = Number(local_crafting_calc);
+    }
+}
+*/
+
+/*
+//calc item
+async function contract_get_item_count(_summoner) {
+    //let web3 = await connect();
+    let contract_mm = await new web3.eth.Contract(abi_murasaki_main, contract_murasaki_main);
+    let contract_mfmf = await new web3.eth.Contract(abi_murasaki_function_mining_and_farming, contract_murasaki_function_mining_and_farming);
+    let contract_mfc = await new web3.eth.Contract(abi_murasaki_function_crafting, contract_murasaki_function_crafting);
+    let _owner = await contract_mm.methods.ownerOf(_summoner).call();
+    let _mining_item_count = await contract_mfmf.methods.count_mining_items(_owner).call();
+    let _farming_item_count = await contract_mfmf.methods.count_farming_items(_owner).call();
+    let _crafting_item_count = await contract_mfc.methods.count_crafting_items(_owner).call();
+    let _luck_item_count = 0;
+    return [Number(_mining_item_count)/100, Number(_farming_item_count)/100, Number(_crafting_item_count)/100, _luck_item_count];
+}
+*/
 
 //get nonce
 async function contract_get_nonce(_wallet_address) {
@@ -1055,10 +1313,13 @@ async function contract_get_nonce(_wallet_address) {
 //get wallet month age
 async function contract_get_age(_wallet_address) {
     let _lastBlock = await web3.eth.getBlockNumber();
+    //console.log(1, _lastBlock);
     let _age = 1;
     //2592000 block/mo, 1block/12sec
     for (let i = _lastBlock; i >= 216000; i -= 216000) {
+        //console.log(2, i);
         let _transactionCount = await web3.eth.getTransactionCount(_wallet_address, i);
+        //console.log(3, i, _transactionCount);
         if (_transactionCount > 0) {
             _age += 1;
         } else {
@@ -1068,19 +1329,20 @@ async function contract_get_age(_wallet_address) {
     return _age;        
 }
 
+
 //get item dc
 async function contract_get_item_dc(item_type) {
+    //let web3 = await connect();
+    //let contract = await new web3.eth.Contract(abi_murasaki_function_crafting, contract_murasaki_function_crafting);
+    //let wallet = await get_wallet(web3);
     let item_dc = await contract_mfc.methods.get_item_dc(item_type).call();
     return item_dc;
 }
 async function contract_get_modified_dc(_summoner, _item_type) {
+    //let web3 = await connect();
+    //let contract = await new web3.eth.Contract(abi_murasaki_function_crafting, contract_murasaki_function_crafting);
     let _modified_dc = await contract_mfc.methods.get_modified_dc(_summoner, _item_type).call();
     return _modified_dc;
-}
-
-//get_userItems_bag
-async function get_userItems(_summoner, _target_item_type) {
-    return get_itemIds_from_itemType(local_myListsAt_withItemType, _target_item_type);
 }
 
 
@@ -1088,8 +1350,12 @@ async function get_userItems(_summoner, _target_item_type) {
 
 //summon
 async function contract_summon(_class) {
+    //let web3 = await connect();
+    //let contract = await new web3.eth.Contract(abi_murasaki_function_summon_and_levelup, contract_murasaki_function_summon_and_levelup);
+    //let contract_ms = await new web3.eth.Contract(abi_murasaki_storage, contract_murasaki_storage);
     let _price = await contract_mp.methods.PRICE().call();
     _price = Number(_price) * 10**18;
+    //let wallet = await get_wallet(web3);
     contract_mfsl.methods.summon(_class).send({from:wallet, value:_price})
         .on("transactionHash", (transactionHash) => update_tx_text("sending", transactionHash))
         .on("receipt", (receipt) => update_tx_text("done", receipt.transactionHash));
@@ -1097,7 +1363,11 @@ async function contract_summon(_class) {
 
 //cure petrification
 async function contract_curePetrification(_summoner) {
+    //let web3 = await connect();
+    //let wallet = await get_wallet(web3);
+    //let contract_ms = await new web3.eth.Contract(abi_murasaki_storage, contract_murasaki_storage);
     let _price = await contract_mp.methods.PRICE().call();
+    //let contract = await new web3.eth.Contract(abi_murasaki_function_feeding_and_grooming, contract_murasaki_function_feeding_and_grooming);
     _price = Number(_price) * 10**18 * local_level;
     contract_mffg.methods.cure_petrification(_summoner).send({from:wallet, value:_price})
         .on("transactionHash", (transactionHash) => update_tx_text("sending", transactionHash))
@@ -1106,6 +1376,9 @@ async function contract_curePetrification(_summoner) {
 
 //burn
 async function contract_burn(_summoner) {
+    //let web3 = await connect();
+    //let contract = await new web3.eth.Contract(abi_murasaki_function_summon_and_levelup, contract_murasaki_function_summon_and_levelup);
+    //let wallet = await get_wallet(web3);
     contract_mfsl.methods.burn(_summoner).send({from:wallet})
         .on("transactionHash", (transactionHash) => update_tx_text("sending", transactionHash))
         .on("receipt", (receipt) => update_tx_text("done", receipt.transactionHash));
@@ -1113,6 +1386,9 @@ async function contract_burn(_summoner) {
 
 //levelup
 async function contract_level_up(_summoner) {
+    //let web3 = await connect();
+    //let contract = await new web3.eth.Contract(abi_murasaki_function_summon_and_levelup, contract_murasaki_function_summon_and_levelup);
+    //let wallet = await get_wallet(web3);
     contract_mfsl.methods.level_up(_summoner).send({from:wallet})
         .on("transactionHash", (transactionHash) => update_tx_text("sending", transactionHash))
         .on("receipt", (receipt) => update_tx_text("done", receipt.transactionHash));
@@ -1120,9 +1396,15 @@ async function contract_level_up(_summoner) {
 
 //feeding
 async function contract_feeding(_summoner) {
+    //let web3 = await connect();
+    //let contract = await new web3.eth.Contract(abi_murasaki_function_feeding_and_grooming, contract_murasaki_function_feeding_and_grooming);
+    //let wallet = await get_wallet(web3);
     if (_summoner == 0) {
         return 0;
     }
+    //contract_mffg.methods.feeding(_summoner, active_nui_id).send({from:wallet});
+    //contract_mffg.methods.feeding(_summoner, active_nui_id).send({from:wallet})
+    //    .on("receipt", (receipt) => console.log(receipt.transactionHash ));
     contract_mffg.methods.feeding(_summoner, active_nui_id).send({from:wallet})
         .on("transactionHash", (transactionHash) => update_tx_text("sending", transactionHash))
         .on("receipt", (receipt) => update_tx_text("done", receipt.transactionHash));
@@ -1130,6 +1412,9 @@ async function contract_feeding(_summoner) {
 
 //grooming
 async function contract_grooming(_summoner) {
+    //let web3 = await connect();
+    //let contract = await new web3.eth.Contract(abi_murasaki_function_feeding_and_grooming, contract_murasaki_function_feeding_and_grooming);
+    //let wallet = await get_wallet(web3);
     contract_mffg.methods.grooming(_summoner, active_nui_id).send({from:wallet})
         .on("transactionHash", (transactionHash) => update_tx_text("sending", transactionHash))
         .on("receipt", (receipt) => update_tx_text("done", receipt.transactionHash));
@@ -1137,6 +1422,9 @@ async function contract_grooming(_summoner) {
 
 //mining
 async function contract_mining(_summoner) {
+    //let web3 = await connect();
+    //let contract = await new web3.eth.Contract(abi_murasaki_function_mining_and_farming, contract_murasaki_function_mining_and_farming);
+    //let wallet = await get_wallet(web3);
     if (local_mining_status == 0) {
         contract_mfmf.methods.start_mining(_summoner).send({from:wallet})
             .on("transactionHash", (transactionHash) => update_tx_text("sending", transactionHash))
@@ -1150,6 +1438,9 @@ async function contract_mining(_summoner) {
 
 //farming
 async function contract_farming(_summoner) {
+    //let web3 = await connect();
+    //let contract = await new web3.eth.Contract(abi_murasaki_function_mining_and_farming, contract_murasaki_function_mining_and_farming);
+    //let wallet = await get_wallet(web3);
     if (local_farming_status == 0) {
         contract_mfmf.methods.start_farming(_summoner).send({from:wallet})
             .on("transactionHash", (transactionHash) => update_tx_text("sending", transactionHash))
@@ -1166,6 +1457,9 @@ async function contract_crafting(_summoner) {
     if (local_crafting_status == 0 && global_selected_crafting_item == 0) {
         return 0;
     }
+    //let web3 = await connect();
+    //let contract = await new web3.eth.Contract(abi_murasaki_function_crafting, contract_murasaki_function_crafting);
+    //let wallet = await get_wallet(web3);
     let _item_type = global_selected_crafting_item;
     if (local_crafting_status == 0) {
         contract_mfc.methods.start_crafting(_summoner, _item_type).send({from:wallet})
@@ -1205,6 +1499,29 @@ async function _contract_crafting_with_heart(_summoner, _item_type_to_craft, _he
 
 //send mail
 async function contract_send_mail(_summoner, _item_mail) {
+    /*
+    //let web3 = await connect();
+    //let wallet = await get_wallet(web3);
+    //select mail
+    //let contract_mc = await new web3.eth.Contract(abi_murasaki_craft, contract_murasaki_craft);
+    let myListLength = await contract_mc.methods.myListLength(wallet).call();
+    let myListsAt = await contract_mc.methods.myListsAt(wallet, 0, myListLength).call();
+    let _item_mail = 0;
+    //for (let i = 0; i < myListLength; i++) {
+    for (let i = myListLength-1; i > 0; i--) {
+        let _item = myListsAt[i];
+        _items = await contract_mc.methods.items(_item).call();
+        let _item_type = _items[0];
+        if (_item_type == 196) {
+            _item_mail = _item;
+            break;
+        }
+    }
+    if (_item_mail != 0) {
+        //let contract_mm = await new web3.eth.Contract(abi_murasaki_mail, contract_murasaki_mail);
+        contract_mml.methods.send_mail(_summoner, _item_mail).send({from:wallet});
+    }
+    */
     contract_mml.methods.send_mail(_summoner, _item_mail).send({from:wallet})
         .on("transactionHash", (transactionHash) => update_tx_text("sending", transactionHash))
         .on("receipt", (receipt) => update_tx_text("done", receipt.transactionHash));
@@ -1212,6 +1529,9 @@ async function contract_send_mail(_summoner, _item_mail) {
 
 //open mail
 async function contract_open_mail(_summoner) {
+    //let web3 = await connect();
+    //let wallet = await get_wallet(web3);
+    //let contract_mml = await new web3.eth.Contract(abi_murasaki_mail, contract_murasaki_mail);
     contract_mml.methods.open_mail(_summoner).send({from:wallet})
         .on("transactionHash", (transactionHash) => update_tx_text("sending", transactionHash))
         .on("receipt", (receipt) => update_tx_text("done", receipt.transactionHash));
@@ -1219,6 +1539,9 @@ async function contract_open_mail(_summoner) {
 
 //mint name
 async function contract_mint_name(_summoner, _name_str) {
+    //let web3 = await connect();
+    //let contract = await new web3.eth.Contract(abi_murasaki_function_name, contract_murasaki_function_name);
+    //let wallet = await get_wallet(web3);
     contract_mfn.methods.mint(_summoner, _name_str).send({from:wallet})
         .on("transactionHash", (transactionHash) => update_tx_text("sending", transactionHash))
         .on("receipt", (receipt) => update_tx_text("done", receipt.transactionHash));
@@ -1226,14 +1549,55 @@ async function contract_mint_name(_summoner, _name_str) {
 
 //burn name
 async function contract_burn_name(_summoner) {
+    //let web3 = await connect();
+    //let contract = await new web3.eth.Contract(abi_murasaki_function_name, contract_murasaki_function_name);
+    //let wallet = await get_wallet(web3);
     contract_mfn.methods.burn(_summoner).send({from:wallet})
         .on("transactionHash", (transactionHash) => update_tx_text("sending", transactionHash))
         .on("receipt", (receipt) => update_tx_text("done", receipt.transactionHash));
 }
 
+///use myListsAt_withItemType
+//get_userItems_bag
+async function get_userItems(_summoner, _target_item_type) {
+    /*
+    //let web3 = await connect();
+    //let wallet = await get_wallet(web3);
+    //let contract_mm = await new web3.eth.Contract(abi_murasaki_main, contract_murasaki_main);
+    let _owner = await contract_mm.methods.ownerOf(_summoner).call();
+    //contract
+    //let contract = await new web3.eth.Contract(abi_murasaki_craft, contract_murasaki_craft);
+    let myListLength = await contract_mc.methods.myListLength(_owner).call();
+    let myListsAt = await contract.methods.myListsAt(_owner, 0, myListLength).call();
+    let _array_items = [];
+    for (let i = 0; i < myListLength; i++) {
+        let _item = myListsAt[i];
+        _items = await contract_mc.methods.items(_item).call();
+        let _item_type = _items[0];
+        if (_item_type == _target_item_type) {
+            _array_items.push(_item);
+        }
+    }
+    return _array_items;
+    */
+    return get_itemIds_from_itemType(local_myListsAt_withItemType, _target_item_type);
+}
+
 
 //unpack_bag
 async function unpack_bag(_summoner, _item) {
+    //let web3 = await connect();
+    //let wallet = await get_wallet(web3);
+    //let contract_mc = await new web3.eth.Contract(abi_murasaki_craft, contract_murasaki_craft);
+    //let contract_mfc = await new web3.eth.Contract(abi_murasaki_function_crafting, contract_murasaki_function_crafting);
+    /*
+    let _res = await contract_mc.methods.isApprovedForAll(wallet, contract_murasaki_function_crafting).call();
+    if (_res == false) {
+        contract_mc.methods.setApprovalForAll(contract_murasaki_function_crafting, true).send({from:wallet});
+    } else {
+        contract_mfc.methods.unpack_bag(_summoner, _item).send({from:wallet});
+    }
+    */
     contract_mfc.methods.unpack_bag(_summoner, _item).send({from:wallet})
         .on("transactionHash", (transactionHash) => update_tx_text("sending", transactionHash))
         .on("receipt", (receipt) => update_tx_text("done", receipt.transactionHash));
@@ -1241,6 +1605,9 @@ async function unpack_bag(_summoner, _item) {
 
 //dice_roll
 async function dice_roll(_summoner) {
+    //let web3 = await connect();
+    //let wallet = await get_wallet(web3);
+    //let contract = await new web3.eth.Contract(abi_world_dice, contract_world_dice);
     contract_wd.methods.dice_roll(_summoner).send({from:wallet})
         .on("transactionHash", (transactionHash) => update_tx_text("sending", transactionHash))
         .on("receipt", (receipt) => update_tx_text("done", receipt.transactionHash));
@@ -1253,11 +1620,9 @@ async function dice_roll(_summoner) {
 class Murasakisan extends Phaser.GameObjects.Sprite{
     
     constructor(scene, x, y){
-        super(scene, x, y, "murasaki_right");
-        this.x = x;
-        this.y = y;
+        super(scene, x, y, "murasaki_sleeping");
         this.scene.add.existing(this);
-        this.anims.play("murasaki_right", true);
+        this.anims.play("murasaki_sleeping", true);
     	this.mode = "resting";
         this.submode = 0;
         this.count = 0;
@@ -1359,7 +1724,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             this.x += Math.cos(this.moving_degree * (Math.PI/180)) * this.moving_speed;
             this.y -= Math.sin(this.moving_degree * (Math.PI/180)) * this.moving_speed;
 
-            //tokenBall
+            //***TODO*** tokenBall
             if (
                 flag_tokenBall == 1
                 && this.count == 2 
@@ -1382,7 +1747,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
                 }
             }
 
-            //star -> fluffy
+            //***TODO*** star
             if (
                 this.count == 3
                 && Math.random()*100 >= 50
@@ -1541,8 +1906,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             }
         }else if (this.submode == 2) {
             this.x = this.target_x;
-            //this.y = this.target_y;
-            this.y = this.target_y - 50;
+            this.y = this.target_y;
             this.anims.play("murasaki_grooming", true);
             this.count_limit = this.count + 1500;
             this.submode = 3;
@@ -1558,7 +1922,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
                     this.anims.play("murasaki_left", true);
                 }
                 this.x = 1000 - 50
-                this.y = 400 + 80
+                this.y = 400 + 50
                 this.mode = "resting";
                 this.count = 0;
                 item_bear.visible = true;
@@ -1799,6 +2163,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             item_wearing_hat.y += 8;
         }
         //depth
+        //item_wearing_hat.depth = item_wearing_hat.y + 100;
         item_wearing_hat.depth = this.y + 1;
     }
     
@@ -2026,7 +2391,6 @@ class HomeCat extends Phaser.GameObjects.Sprite{
         this.firstDecideMode();
     }
     
-    //---first
     firstDecideMode(){
         if (local_mail_sending_interval == 0) {
             this.mode = "standing";
@@ -2038,8 +2402,7 @@ class HomeCat extends Phaser.GameObjects.Sprite{
         this.submode = 0;
     }
     
-    //---standing
-    //: mailInterval = 0
+    //standing: mailInterval = 0
     //check click, check interval, change to mode:mailSending
     standing(){
         if (this.submode == 0) {
@@ -2062,8 +2425,7 @@ class HomeCat extends Phaser.GameObjects.Sprite{
         }
     }
     
-    //---mailSending
-    //, mailInterval > 0
+    //mailSending, mailInterval > 0
     //just after mailSending tx, change to mode:leaving
     mailSending(){
         if (this.submode == 0) {
@@ -2082,8 +2444,7 @@ class HomeCat extends Phaser.GameObjects.Sprite{
         }
     }
     
-    //---leaving
-    //, mailIntervail > 0 and lastMailOpen = false
+    //leaving, mailIntervail > 0 and lastMailOpen = false
     //check lastMailOpen, change to mode:goingHome
     leaving(){
         if (this.submode == 0) {
@@ -2099,8 +2460,7 @@ class HomeCat extends Phaser.GameObjects.Sprite{
         }
     }
     
-    //---goingHome
-    //, lastMailOpen = true
+    //goingHome, lastMailOpen = true
     //just after mailOpen, change to mode:sleeping
     goingHome(){
         if (this.submode == 0) {
@@ -2127,8 +2487,7 @@ class HomeCat extends Phaser.GameObjects.Sprite{
         }
     }
 
-    //---sleeping
-    //, mailInterval > 0 and lastMailOpen = true
+    //sleeping, mailInterval > 0 and lastMailOpen = true
     //check mailInterval, change to mode:standing
     sleeping(){
         if (this.sumode == 0){
@@ -2174,13 +2533,11 @@ class VisitorCat extends Phaser.GameObjects.Sprite{
         this.firstDecideMode();
     }
     
-    //---first
     firstDecideMode(){
         this.mode = "visiting";
         this.submode = 0;
     }
     
-    //---visiting
     visiting(){
         if (this.submode == 0){
             this.anims.play("cat_visitor_moving_left", true);
@@ -2206,7 +2563,6 @@ class VisitorCat extends Phaser.GameObjects.Sprite{
         }
     }
     
-    //---standing
     standing(){
         if (this.submode == 0){
             this.standing_count = 100 + Math.random()*100;
@@ -2230,7 +2586,6 @@ class VisitorCat extends Phaser.GameObjects.Sprite{
         }
     }
     
-    //---moving
     moving(){
         if (this.submode == 0){
             this.disableInteractive();
@@ -2279,7 +2634,6 @@ class VisitorCat extends Phaser.GameObjects.Sprite{
         }
     }
     
-    //---sleeping
     sleeping(){
         if (this.submode == 0){
             this.anims.play("cat_visitor_sleeping", true);
@@ -2294,7 +2648,6 @@ class VisitorCat extends Phaser.GameObjects.Sprite{
         }
     }
     
-    //---goingHome
     goingHome(){
         if (this.submode == 0){
             this.speed_x = -1;
@@ -2779,7 +3132,7 @@ class Star extends Phaser.GameObjects.Sprite{
 //***TODO***
 
 class Fluffy extends Phaser.GameObjects.Sprite{
-    constructor(scene, x, y, img, rarity, itemId){
+    constructor(scene, x, y, img, rarity){
         super(scene, x, y, img);
         this.scene.add.existing(this);
         this.setInteractive({ useHandCursor: true });
@@ -2797,7 +3150,6 @@ class Fluffy extends Phaser.GameObjects.Sprite{
         this.submode = 0;
         this.resting_count = 200;
         this.rarity = rarity;
-        this.itemId = itemId;
     }
     
     //---on_click
@@ -2944,6 +3296,7 @@ class Fluffy extends Phaser.GameObjects.Sprite{
                 this.moving_degree += 360;
             }
             //determine speed, count
+            //this.moving_speed = 0.2 + Math.random() * 0.1;  //0.3-0.5
             this.moving_speed = 0.3 + Math.random() * 0.2;  //0.3-0.5
             this.moving_count = 70 + Math.random() * 30;    //70-100
             //determine left or right
@@ -2971,13 +3324,23 @@ class Fluffy extends Phaser.GameObjects.Sprite{
         if (this.mode == "rolling"){this.rolling();}
         else if (this.mode == "resting"){this.resting();}
         else if (this.mode == "moving"){this.moving();}
-        if (turn % 100 == 0) {
-            if (!local_itemIds.includes(this.itemId)){
-                summoned_fluffies = summoned_fluffies.filter(n => n !== this.itemId);
-                this.destroy();
-            }
+    }
+    /*
+    update(){
+        //check speed
+        if (
+            Math.abs(this.speed_x) <= 0.5
+            && Math.abs(this.speed_y) <= 0.5
+            && this.line_y - this.y <= 1
+        ) {
+            //when standing
+            ;
+        } else {
+            rolling();
         }
     }
+    */
+    
 }
 
 
@@ -3039,22 +3402,8 @@ function music() {
 }
 
 //---radar chart
-function radarchart2(
-    scene, 
-    x0, 
-    y0, 
-    r, 
-    str, 
-    dex, 
-    int, 
-    luk, 
-    str_withItems, 
-    dex_withItems, 
-    int_withItems, 
-    luk_withItems,
-    luk_withItems_withStaking,
-    luk_withItems_withStaking_withDice
-) {
+/*
+function radarchart(scene, x0, y0, r, str, dex, int, luk, str_item, dex_item, int_item, luk_item) {
     //base
     let base = 30;
     //calc (x,y) from status
@@ -3070,15 +3419,15 @@ function radarchart2(
     let x4 = -r * int/base;
     let y4 = 0;
     //item
-    let y1i = -r * (str_withItems)/base;
-    let x2i = r * (dex_withItems)/base;
-    let y3i = r * ((luk_withItems-3)/(base/2) + 3/base);
-    let x4i = -r * (int_withItems)/base;
+    let y1i = -r * (str+str_item)/base;
+    let x2i = r * (dex+dex_item)/base;
+    let y3i = r * ((luk+luk_item-3)/(base/2) + 3/base);
+    let x4i = -r * (int+int_item)/base;
     //dice
-    let y1d = -r * (str_withItems)/base;
-    let x2d = r * (dex_withItems)/base;
-    let y3d = r * ((luk_withItems_withStaking_withDice-3)/(base/2) + 3/base);
-    let x4d = -r * (int_withItems)/base;
+    let y1d = -r * (str+str_item)/base;
+    let x2d = r * (dex+dex_item)/base;
+    let y3d = r * ((luk+luk_item+local_rolled_dice/100-3)/(base/2) + 3/base);
+    let x4d = -r * (int+int_item)/base;
     //remove old chart
     try {
         group_chart.destroy(true);
@@ -3087,44 +3436,126 @@ function radarchart2(
     }
     //draw
     group_chart = scene.add.group();
-    //back
     group_chart.add(scene.add.polygon(x0+r, y0+r, [0,-r,r,0,0,r,-r,0], 0xDADADA, 0.4));
     group_chart.add(scene.add.polygon(x0+r*0.75, y0+r*0.75, [0,-r*0.75,r*0.75,0,0,r*0.75,-r*0.75,0], 0xDADADA, 0.4));
     group_chart.add(scene.add.polygon(x0+r/2, y0+r/2, [0,-r/2,r/2,0,0,r/2,-r/2,0], 0xDADADA, 0.4));
-    //dice
     group_chart.add(scene.add.polygon(x0+(-x4d+x2d)/2, y0+(-y1d+y3d)/2, [x1,y1d,x2d,y2,x3,y3d,x4d,y4], 0xF29B76, 1));
     group_chart.add(scene.add.polygon(x0+(-x4i+x2i)/2, y0+(-y1i+y3i)/2, [x1,y1i,x2i,y2,x3,y3i,x4i,y4], 0xF9C270, 1));
     group_chart.add(scene.add.polygon(x0+(-x4+x2)/2, y0+(-y1+y3)/2, [x1,y1,x2,y2,x3,y3,x4,y4], 0xFFF67F, 1));
     let font_arg = {font: "17px Arial", fill: "#000000"};
-    group_chart.add(scene.add.text(x0-15, y0-r-25, "STR"+"\n"+(Math.round( (str_withItems)*100 )/100).toFixed(2), font_arg));
-    group_chart.add(scene.add.text(x0+r-5, y0-10, "DEX"+"\n"+(Math.round( (dex_withItems)*100 )/100).toFixed(2), font_arg));
-    group_chart.add(scene.add.text(x0-15, y0+r-7, "LUK"+"\n"+(Math.round( (luk_withItems_withStaking_withDice)*100 )/100).toFixed(2), font_arg));
-    group_chart.add(scene.add.text(x0-r-20, y0-12, "INT"+"\n"+(Math.round( (int_withItems)*100 )/100).toFixed(2), font_arg));
+    group_chart.add(scene.add.text(x0-15, y0-r-25, "STR"+"\n"+(Math.round( (str+str_item)*100 )/100).toFixed(2), font_arg));
+    group_chart.add(scene.add.text(x0+r-5, y0-10, "DEX"+"\n"+(Math.round( (dex+dex_item)*100 )/100).toFixed(2), font_arg));
+    group_chart.add(scene.add.text(x0-15, y0+r-7, "LUK"+"\n"+(Math.round( (luk+luk_item+local_rolled_dice/100)*100 )/100).toFixed(2), font_arg));
+    group_chart.add(scene.add.text(x0-r-20, y0-12, "INT"+"\n"+(Math.round( (int+int_item)*100 )/100).toFixed(2), font_arg));
     group_chart.add(scene.add.sprite(x0-15-10, y0-r-25+20, "icon_str").setOrigin(0.5).setScale(0.12));
     group_chart.add(scene.add.sprite(x0+r-5+10, y0-30, "icon_dex").setOrigin(0.5).setScale(0.12));
     group_chart.add(scene.add.sprite(x0-15-12, y0+r-5+14, "icon_luk").setOrigin(0.5).setScale(0.10));
     group_chart.add(scene.add.sprite(x0-r-20+16, y0-10-16, "icon_int").setOrigin(0.5).setScale(0.10));
 }
-async function draw_radarchart(scene) {
-    let _x = 1160;
-    let _y = 115;
-    let _r = 75;
-    radarchart2(
+*/
+function radarchart2(
         scene, 
-        _x, 
-        _y, 
-        _r, 
-        local_strength, 
-        local_dexterity, 
-        local_intelligence, 
-        local_luck, 
-        local_strength_withItems, 
-        local_dexterity_withItems, 
-        local_intelligence_withItems, 
-        local_luck_withItems,
-        local_luck_withItems_withStaking,
-        local_luck_withItems_withStaking_withDice
-    );
+        x0, 
+        y0, 
+        r, 
+        str, 
+        dex, 
+        int, 
+        luk, 
+        str_withItems, 
+        dex_withItems, 
+        int_withItems, 
+        luk_withItems,
+        luk_withItems_withStaking,
+        luk_withItems_withStaking_withDice
+    ) {
+        //base
+        let base = 30;
+        //calc (x,y) from status
+        //main
+        let x1 = 0;
+        let y1 = -r * str/base;
+        let x2 = r * dex/base;
+        let y2 = 0;
+        let x3 = 0;
+        //let y3 = r * luk/(base*0.7);
+        //luk: boost draw x2 beyond initial value=3
+        let y3 = r * ((luk-3)/(base/2) + 3/base);
+        let x4 = -r * int/base;
+        let y4 = 0;
+        //item
+        let y1i = -r * (str_withItems)/base;
+        let x2i = r * (dex_withItems)/base;
+        let y3i = r * ((luk_withItems-3)/(base/2) + 3/base);
+        let x4i = -r * (int_withItems)/base;
+        //dice
+        let y1d = -r * (str_withItems)/base;
+        let x2d = r * (dex_withItems)/base;
+        let y3d = r * ((luk_withItems_withStaking_withDice-3)/(base/2) + 3/base);
+        let x4d = -r * (int_withItems)/base;
+        //remove old chart
+        try {
+            group_chart.destroy(true);
+        } catch(error) {
+            ;
+        }
+        //draw
+        group_chart = scene.add.group();
+        //back
+        group_chart.add(scene.add.polygon(x0+r, y0+r, [0,-r,r,0,0,r,-r,0], 0xDADADA, 0.4));
+        group_chart.add(scene.add.polygon(x0+r*0.75, y0+r*0.75, [0,-r*0.75,r*0.75,0,0,r*0.75,-r*0.75,0], 0xDADADA, 0.4));
+        group_chart.add(scene.add.polygon(x0+r/2, y0+r/2, [0,-r/2,r/2,0,0,r/2,-r/2,0], 0xDADADA, 0.4));
+        //dice
+        group_chart.add(scene.add.polygon(x0+(-x4d+x2d)/2, y0+(-y1d+y3d)/2, [x1,y1d,x2d,y2,x3,y3d,x4d,y4], 0xF29B76, 1));
+        group_chart.add(scene.add.polygon(x0+(-x4i+x2i)/2, y0+(-y1i+y3i)/2, [x1,y1i,x2i,y2,x3,y3i,x4i,y4], 0xF9C270, 1));
+        group_chart.add(scene.add.polygon(x0+(-x4+x2)/2, y0+(-y1+y3)/2, [x1,y1,x2,y2,x3,y3,x4,y4], 0xFFF67F, 1));
+        let font_arg = {font: "17px Arial", fill: "#000000"};
+        group_chart.add(scene.add.text(x0-15, y0-r-25, "STR"+"\n"+(Math.round( (str_withItems)*100 )/100).toFixed(2), font_arg));
+        group_chart.add(scene.add.text(x0+r-5, y0-10, "DEX"+"\n"+(Math.round( (dex_withItems)*100 )/100).toFixed(2), font_arg));
+        group_chart.add(scene.add.text(x0-15, y0+r-7, "LUK"+"\n"+(Math.round( (luk_withItems_withStaking_withDice)*100 )/100).toFixed(2), font_arg));
+        group_chart.add(scene.add.text(x0-r-20, y0-12, "INT"+"\n"+(Math.round( (int_withItems)*100 )/100).toFixed(2), font_arg));
+        group_chart.add(scene.add.sprite(x0-15-10, y0-r-25+20, "icon_str").setOrigin(0.5).setScale(0.12));
+        group_chart.add(scene.add.sprite(x0+r-5+10, y0-30, "icon_dex").setOrigin(0.5).setScale(0.12));
+        group_chart.add(scene.add.sprite(x0-15-12, y0+r-5+14, "icon_luk").setOrigin(0.5).setScale(0.10));
+        group_chart.add(scene.add.sprite(x0-r-20+16, y0-10-16, "icon_int").setOrigin(0.5).setScale(0.10));
+}
+async function draw_radarchart(scene) {
+        let _x = 1160;
+        let _y = 115;
+        let _r = 75;
+        /*
+        let _res = await contract_get_item_count(summoner);
+        radarchart(
+            scene, 
+            _x, 
+            _y, 
+            _r, 
+            local_strength, 
+            local_dexterity, 
+            local_intelligence, 
+            local_luck, 
+            _res[0], 
+            _res[1], 
+            _res[2], 
+            local_heart*5/100
+        );
+        */
+        radarchart2(
+            scene, 
+            _x, 
+            _y, 
+            _r, 
+            local_strength, 
+            local_dexterity, 
+            local_intelligence, 
+            local_luck, 
+            local_strength_withItems, 
+            local_dexterity_withItems, 
+            local_intelligence_withItems, 
+            local_luck_withItems,
+            local_luck_withItems_withStaking,
+            local_luck_withItems_withStaking_withDice
+        );
 }
 
 
@@ -3144,7 +3575,6 @@ function open_window_craft (scene) {
     //when already created, just setVisible and return
     if (typeof group_window_crafting != "undefined"){
         group_window_crafting.setVisible(true);
-        //console.log(0);
         return 0;
     }
 
@@ -3546,7 +3976,7 @@ function summon_star(scene, _type) {
 
 
 //---summon_fluffy
-function summon_fluffy(scene, _type, rarity, itemId) {
+function summon_fluffy(scene, _type, rarity) {
     let _dic = {
         //common
         201:"star_blue",
@@ -3591,19 +4021,19 @@ function summon_fluffy(scene, _type, rarity, itemId) {
     let _img = _dic[_type];
     let _fluffy;
     if (rarity == "common"){
-        _fluffy = new Fluffy(scene, 300, -100, _img, rarity, itemId)
+        _fluffy = new Fluffy(scene, 300, -100, _img, rarity)
             .setOrigin(0.5)
             .setScale(0.15)
             .setAlpha(1)
             .setDepth(3);
     } else if (rarity == "uncommon") {
-        _fluffy = new Fluffy(scene, 300, -100, _img, rarity, itemId)
+        _fluffy = new Fluffy(scene, 300, -100, _img, rarity)
             .setOrigin(0.5)
             .setScale(0.20)
             .setAlpha(1)
             .setDepth(3);
     } else if (rarity == "rare") {
-        _fluffy = new Fluffy(scene, 300, -100, _img, rarity, itemId)
+        _fluffy = new Fluffy(scene, 300, -100, _img, rarity)
             .setOrigin(0.5)
             .setScale(0.25)
             .setAlpha(1)
@@ -3663,6 +4093,41 @@ function preload(scene) {
     let progressText = scene.add.text(490,520,"", {font: "20px monospace", fill: "#3D3D3D"}); 
     let progressText_loading = scene.add.text(490,420, "Loading...", {font: "20px monospace", fill: "#3D3D3D"});
     let percentText = scene.add.text(510, 465, "", {font: "20px monospace", fill: "#3D3D3D"});
+    /*
+    this.load.on("progress", function(value) {
+        if (flag_loaded == 0) {
+            progressBar.clear();
+            progressBar.fillStyle(0xE62E8B, 1);
+            progressBar.fillRect(490, 460, 300 * value, 30);
+            percentText.setText( Math.round(value * 100) + "%");
+            if (value == 1) {
+                progressText_loading.setText("Completed!");
+                let _arr = [
+                    "Making roasted sweet potatoes...",
+                    "Brushing a teddy bear...",
+                    "Looking for my shovel...",
+                    "Polishing the watering can...",
+                    "Assembling the sewing machine...",
+                    "Counting flowers and grass...",
+                    "Cleaning up the house...",
+                    "Replacing the sand in the sandbox...",
+                    "Adding fertilizer to the flowerpot...",
+                    "treating a needle puncture wound...",
+                    "Washing the dishes...",
+                    "Putting a flower on the teddy bear...",
+                ];
+                let _index = Math.floor(Math.random() * _arr.length);
+                let _text = _arr[_index];            
+                progressText.setText(_text);
+            }
+        }
+    });
+    this.load.on("fileprogress", function(file) {
+        if (flag_loaded == 0) {
+            progressText.setText("Loading asset: " + file.src);
+        }
+    });
+    */
     let _arr = [
         "Making roasted sweet potatoes...",
         "Brushing a teddy bear...",
@@ -3706,6 +4171,7 @@ function preload(scene) {
             }
         }
     });
+    //let this_scene = scene;
     scene.load.on("complete", function() {
         progressBar.destroy();
         progressBox.destroy();
@@ -3713,6 +4179,8 @@ function preload(scene) {
         progressText_loading.destroy();
         percentText.destroy();
         flag_loaded = 1;
+        //console.log(0);
+        //scene.scene.launch("Opeaning");
     });
 
     //---back
@@ -4763,46 +5231,10 @@ function create(scene) {
     group_tx.setVisible(false);
 
     //---summoner
-    //set each mode
-    if (local_mining_status == 1) {
-        murasakisan = new Murasakisan(scene, 100, 880)
-            .setOrigin(0.5)
-            .setScale(0.45);
-        murasakisan.set_mode = "mining";
-        murasakisan.submode = 2;
-        murasakisan.count = 0;
-        murasakisan.target_x = 100;
-        murasakisan.target_y = 880;
-    } else if (local_farming_status == 1) {
-        murasakisan = new Murasakisan(scene, 180, 450)
-            .setOrigin(0.5)
-            .setScale(0.45);
-        murasakisan.set_mode = "farming";
-        murasakisan.submode = 2;
-        murasakisan.count = 0;
-        murasakisan.target_x = 180;
-        murasakisan.target_y = 450;
-    } else if (local_crafting_status == 1) {
-        murasakisan = new Murasakisan(scene, 950, 740)
-            .setOrigin(0.5)
-            .setScale(0.45);
-        murasakisan.set_mode = "crafting";
-        murasakisan.submode = 2;
-        murasakisan.count = 0;
-        murasakisan.target_x = 950;
-        murasakisan.target_y = 740;
-    } else {
-        murasakisan = new Murasakisan(scene, 500 + Math.random()*200, 640 + Math.random()*100)
-            .setOrigin(0.5)
-            .setScale(0.45);
-    }
-    group_update.add(murasakisan);
-    /*
     murasakisan = new Murasakisan(scene, 500 + Math.random()*200, 640 + Math.random()*100)
         .setOrigin(0.5)
         .setScale(0.45);
     group_update.add(murasakisan);
-    */
 }
 
 
@@ -5249,6 +5681,18 @@ function update_parametersWithoutAnimation(this_scene) {
         text_wallet.setText(_text);
         text_wallet.setColor("blue");
     }
+    /*
+    if (local_owner == local_wallet || local_owner == "0x0000000000000000000000000000000000000000") {
+        _text += "living in: " + _owner1 + "..." + _owner2 + ", ";
+        text_wallet.setText(_text);
+        text_wallet.setColor("#727171");
+    } else {
+        _text += "living in: " + _owner1 + "..." + _owner2 + ", ";
+        _text += "not your wallet.";
+        text_wallet.setText(_text);
+        text_wallet.setColor("blue");
+    }
+    */
     
     //radarchart
     if (previous_local_rolled_dice != local_rolled_dice && flag_radarchart == 1) {
@@ -5271,7 +5715,6 @@ function update_checkModeChange(this_scene) {
         //fireworks
         if (previous_local_level > 0) {
             draw_firework(this_scene);
-            murasakisan.on_click();
             //summon_star(this_scene);
         }
         //update radarchart
@@ -5334,8 +5777,7 @@ function update_checkModeChange(this_scene) {
         murasakisan.submode = 0;
         murasakisan.count = 0;
         murasakisan.target_x = 1000;
-        //murasakisan.target_y = 400;
-        murasakisan.target_y = 450;
+        murasakisan.target_y = 400;
         sound_grooming.play();
 
     //mining check
@@ -5348,6 +5790,7 @@ function update_checkModeChange(this_scene) {
         sound_mining.play();
     }else if (local_mining_status == 0 & murasakisan.mode == "mining") {
         murasakisan.set_mode = "hugging";
+        //murasakisan.set_mode = "resting";
         //icon invisible
         icon_mining.visible = false;
         sound_earn.play();
@@ -5363,6 +5806,7 @@ function update_checkModeChange(this_scene) {
         sound_farming.play();
     }else if (local_farming_status == 0 & murasakisan.mode == "farming") {
         murasakisan.set_mode = "hugging";
+        //murasakisan.set_mode = "resting";
         //icon invisible
         icon_farming.visible = false;
         sound_earn.play();
@@ -5380,6 +5824,7 @@ function update_checkModeChange(this_scene) {
         local_crafting_calc = -1;
     }else if (local_crafting_status == 0 & murasakisan.mode == "crafting") {
         murasakisan.set_mode = "hugging";
+        //murasakisan.set_mode = "resting";
         text_select_item.setText(">> Select Item <<")
         //icon invisible
         icon_crafting_time_remining.visible = false;
@@ -5491,15 +5936,16 @@ function update_checkItem(this_scene) {
     let res1 = local_items.reduce((sum, element) => sum + element, 0);
     let res2 = previous_local_items.reduce((sum, element) => sum + element, 0);
     if (res1 == res2) {
-        //return 0;
-        ;
-    } else {
-        //destroy crafting window group to update item info
-        if (typeof group_window_crafting != "undefined") {
-            group_window_crafting.destroy(true);
-            delete group_window_crafting;
-        }
+        return 0;
     }
+    
+    //destroy crafting window group to update item info
+    if (typeof group_window_crafting != "undefined") {
+        group_window_crafting.destroy(true);
+    }
+    
+    //debug
+    //local_items = [1] * 256;
 
     let _item_id;
 
@@ -5511,13 +5957,6 @@ function update_checkItem(this_scene) {
     ) {
         local_items_flag[_item_id] = true;
         group_kanban.setVisible(true);
-    } else if (
-        local_items[_item_id] == 0 
-        && local_items[_item_id+64] == 0 
-        && local_items[_item_id+128] == 0
-    ) {
-        local_items_flag[_item_id] = false;
-        group_kanban.setVisible(false);
     }
     //nameplate, after craft
     if (local_items_flag[_item_id] == true) {
@@ -5599,31 +6038,19 @@ function update_checkItem(this_scene) {
             .setScale(0.22)
             .setAngle(90);
         item_hat_helmet.setInteractive({useHandCursor: true});
-        let _flag_local = "item_hat_helmet";  //for localStorage
         item_hat_helmet.on('pointerdown', () => {
             if (item_wearing_hat == 0) {
                 item_wearing_hat = item_hat_helmet;
                 murasakisan.on_click();
                 sound_hat.play();
                 item_hat_helmet.setAngle(0);
-                localStorage.setItem(_flag_local, JSON.stringify(1));
             } else if (item_wearing_hat == item_hat_helmet) {
                 item_wearing_hat = 0;
                 item_hat_helmet.x = _x;
                 item_hat_helmet.y = _y;
                 item_hat_helmet.setAngle(90);
-                localStorage.setItem(_flag_local, JSON.stringify(0));
             }
         });
-        //for localStorage
-        if (localStorage.getItem(_flag_local) != null && local_owner == local_wallet) {
-            let _json = localStorage.getItem(_flag_local);
-            let _flag = JSON.parse(_json);
-            if (_flag) {
-                item_wearing_hat = item_hat_helmet;
-                item_hat_helmet.setAngle(0);
-            }
-        }
     } else if (
         local_items[_item_id] == 0 
         && local_items[_item_id+64] == 0 
@@ -5675,6 +6102,7 @@ function update_checkItem(this_scene) {
         && local_items_flag[_item_id] != true
     ) {
         local_items_flag[_item_id] = true;
+        //item_ribbon = this.add.sprite(1057, 443, "item_ribbon").setScale(0.5).setOrigin(0.5);
         item_ribbon = this_scene.add.sprite(1037, 401, "item_ribbon").setScale(0.15).setOrigin(0.5);
         item_ribbon.depth = 9999;
     } else if (
@@ -5730,6 +6158,8 @@ function update_checkItem(this_scene) {
         && local_items_flag[_item_id] != true
     ) {
         local_items_flag[_item_id] = true;
+        //let _x = 800;
+        //let _y = 810;
         let _x = 690;
         let _y = 255;
         item_hat_knit = this_scene.add.sprite(_x, _y, "item_hat_knit").setOrigin(0.5).setScale(0.20);
@@ -5869,6 +6299,8 @@ function update_checkItem(this_scene) {
         && local_items_flag[_item_id] != true
     ) {
         local_items_flag[_item_id] = true;
+        //let _x = 240;
+        //let _y = 275;
         let _x = 450;
         let _y = 255;
         item_hat_mugiwara = this_scene.add.sprite(_x, _y, "item_hat_mugiwara")
@@ -5876,31 +6308,19 @@ function update_checkItem(this_scene) {
             .setScale(0.25)
             .setAngle(90);
         item_hat_mugiwara.setInteractive({useHandCursor: true});
-        let _flag_local = "item_hat_mugiwara";  //for localStorage
         item_hat_mugiwara.on('pointerdown', () => {
             if (item_wearing_hat == 0) {
                 item_wearing_hat = item_hat_mugiwara;
                 murasakisan.on_click();
                 sound_hat.play();
                 item_hat_mugiwara.setAngle(0);
-                localStorage.setItem(_flag_local, JSON.stringify(1));
             } else if (item_wearing_hat == item_hat_mugiwara) {
                 item_wearing_hat = 0;
                 item_hat_mugiwara.x = _x;
                 item_hat_mugiwara.y = _y;
                 item_hat_mugiwara.setAngle(90);
-                localStorage.setItem(_flag_local, JSON.stringify(0));
             }
         });
-        //for localStorage
-        if (localStorage.getItem(_flag_local) != null && local_owner == local_wallet) {
-            let _json = localStorage.getItem(_flag_local);
-            let _flag = JSON.parse(_json);
-            if (_flag) {
-                item_wearing_hat = item_hat_mugiwara;
-                item_hat_mugiwara.setAngle(0);
-            }
-        }
     } else if (
         local_items[_item_id] == 0 
         && local_items[_item_id+64] == 0 
@@ -5958,6 +6378,24 @@ function update_checkItem(this_scene) {
             .setOrigin(0.5)
             .setScale(0.4);
         group_update.add(cat);
+
+        /*
+        let _x3 =90;
+        let _y3 =610;
+        cat = this_scene.add.sprite(_x3, _y3-10, "cat_sleeping")
+            .setScale(0.4)
+            .setOrigin(0.5)
+            .setInteractive({useHandCursor: true})
+            .on("pointerdown", async () => {
+                let _array_item_196 = await get_userItems(summoner, 196);
+                if (_array_item_196.length > 0) {
+                    contract_send_mail(summoner, _array_item_196[0]);
+                }
+            })
+            .setVisible(false);
+        cat.anims.play("cat_sleeping", true);
+        cat.depth = item_cushion.y -50 + 1;
+        */
         
         //mail
         mail = this_scene.add.sprite(75, 675, "item_mail")
@@ -6007,6 +6445,45 @@ function update_checkItem(this_scene) {
             mail.visible = false;
         }
     }
+    
+
+    /*
+    //check mail receiving, independent from cushion possession
+    if (flag_mail) {
+        let _x = 800;
+        let _y = 700;
+        let _text;
+        if (local_receiving_mail_from == "") {
+            _text = "You got mail\nfrom, #" + local_receiving_mail[2];
+        } else {
+            _text = "You got mail\nfrom, " + local_receiving_mail_from;
+        }
+        text_cat_others = this_scene.add.text(_x, _y+60, _text, {font: "15px Arial", fill: "#000000", backgroundColor: "#ffffff"})
+            .setOrigin(0.5)
+            .setVisible(false);
+        cat_others = this_scene.add.sprite(_x, _y, "cat_sitting")
+            .setScale(0.4)
+            .setOrigin(0.5)
+            .setDepth(_y)
+            .setInteractive({useHandCursor: true})
+            .on("pointerdown", () => {contract_open_mail(summoner)})
+            .on("pointerover", () => {
+                text_cat_others.x = cat_others.x;
+                text_cat_others.y = cat_others.y+60;
+                text_cat_others.visible = true;
+                sound_cat1.play();
+                })
+            .on("pointerout", () => {
+                text_cat_others.visible = false;
+                });
+    } else {
+        try {
+            cat_others.destroy(true);
+        } catch (error) {
+            ;
+        }
+    }
+    */
 
     //###21:Uni
     
@@ -6318,31 +6795,19 @@ function update_checkItem(this_scene) {
             .setScale(0.20)
             .setAngle(90);
         item_hat_mortarboard.setInteractive({useHandCursor: true});
-        let _flag_local = "item_hat_mortarboard";  //for localStorage
         item_hat_mortarboard.on('pointerdown', () => {
             if (item_wearing_hat == 0) {
                 item_wearing_hat = item_hat_mortarboard;
                 murasakisan.on_click();
                 sound_hat.play();
                 item_hat_mortarboard.setAngle(0);
-                localStorage.setItem(_flag_local, JSON.stringify(1));
             } else if (item_wearing_hat == item_hat_mortarboard) {
                 item_wearing_hat = 0;
                 item_hat_mortarboard.x = _x;
                 item_hat_mortarboard.y = _y;
                 item_hat_mortarboard.setAngle(90);
-                localStorage.setItem(_flag_local, JSON.stringify(0));
             }
         });
-        //for localStorage
-        if (localStorage.getItem(_flag_local) != null && local_owner == local_wallet) {
-            let _json = localStorage.getItem(_flag_local);
-            let _flag = JSON.parse(_json);
-            if (_flag) {
-                item_wearing_hat = item_hat_mortarboard;
-                item_hat_mortarboard.setAngle(0);
-            }
-        }
     } else if (
         local_items[_item_id] == 0 
         && local_items[_item_id+64] == 0 
@@ -6642,9 +7107,10 @@ function update_checkItem(this_scene) {
     }
 
     //###43:*Newspaper
+    //_item_id = 43;
     _item_id = 43;
-    if (    //***TODO***
-        (true || local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+    if (
+        (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
         && local_items_flag[_item_id] != true
     ) {
         local_items_flag[_item_id] = true;
@@ -6656,29 +7122,28 @@ function update_checkItem(this_scene) {
             .setDepth(1);
         item_newspaper_text1 = this_scene.add.text(
             _x,
-            _y-20,
-            local_newsText[0],
+            _y-10,
+            "block:999999",
             {font: "14px Arial", fill: "#000000"}
         ).setOrigin(0.5).setDepth(2);
         item_newspaper_text2 = this_scene.add.text(
             _x,
-            _y+0,
-            local_newsText[1],
+            _y+10,
+            "Kapico",
             {font: "14px Arial", fill: "#000000"}
         ).setOrigin(0.5).setDepth(2);
         item_newspaper_text3 = this_scene.add.text(
             _x,
-            _y+20,
-            local_newsText[2],
+            _y+30,
+            "Crafted",
             {font: "14px Arial", fill: "#000000"}
         ).setOrigin(0.5).setDepth(2);
         item_newspaper_text4 = this_scene.add.text(
             _x,
-            _y+40,
-            local_newsText[3],
+            _y+50,
+            "Fortune Statue!",
             {font: "14px Arial", fill: "#000000"}
         ).setOrigin(0.5).setDepth(2);
-        count_to_newsUpdate = 0;
         /*
         local_items_flag[_item_id] = true;
         let _x = 250;
@@ -6693,12 +7158,18 @@ function update_checkItem(this_scene) {
         //item_newsbunner = this_scene.add.image(640, 485, "item_newsbunner")
         //    .setDepth(900).setAlpha(0.8);
         */
+    }
+    //after possession
+    if (local_items_flag[_item_id] == true) {
+        /*
+        contract_update_event_random();
+        item_bbs_text.setText(text_event_random);
+        */
     } else if (
         local_items[_item_id] == 0 
         && local_items[_item_id+64] == 0 
         && local_items[_item_id+128] == 0
         && typeof item_newspaper != "undefined"
-        && typeof item_newspaper == "undefined" //***TODO***
     ) {
         item_newspaper.destroy(true);
         item_newspaper_text1.destroy(true);
@@ -6706,17 +7177,6 @@ function update_checkItem(this_scene) {
         item_newspaper_text3.destroy(true);
         item_newspaper_text4.destroy(true);
         local_items_flag[_item_id] = false;
-    }
-    //after possession
-    if (local_items_flag[_item_id] == true) {
-        count_to_newsUpdate += 1;
-        if (count_to_newsUpdate % 30 == 0) {
-            contract_update_event_random();
-            item_newspaper_text1.setText(local_newsText[0]);
-            item_newspaper_text2.setText(local_newsText[1]);
-            item_newspaper_text3.setText(local_newsText[2]);
-            item_newspaper_text4.setText(local_newsText[3]);
-        }
     }
 
     //###44:Cuckoo Clock
@@ -6969,113 +7429,42 @@ function update_checkItem(this_scene) {
     }
 
     //###201-236:Fluffy
-    if (local_precious > previous_local_precious2) {
-        let _timeout = 0;
-        //common
-        for (let i = 201; i <= 212; i++) {
-            let _count = local_items[i];
-            if (_count > 0) {
-                let _itemIds = get_itemIds_from_itemType(local_myListsAt_withItemType, i)
-                _itemIds.forEach(_itemId => {
-                    if (!summoned_fluffies.includes(_itemId)){
-                        setTimeout( () => {
-                            summon_fluffy(this_scene, i, "common", _itemId);
-                        }, _timeout, _itemId);
-                        _timeout += 500;
-                        summoned_fluffies.push(_itemId);
-                    }
-                });
-            }
-        }
-        //uncommon
-        for (let i = 213; i <= 224; i++) {
-            let _count = local_items[i];
-            if (_count > 0) {
-                let _itemIds = get_itemIds_from_itemType(local_myListsAt_withItemType, i)
-                _itemIds.forEach(_itemId => {
-                    if (!summoned_fluffies.includes(_itemId)){
-                        setTimeout( () => {
-                            summon_fluffy(this_scene, i, "uncommon", _itemId);
-                        }, _timeout, _itemId);
-                        _timeout += 500;
-                        summoned_fluffies.push(_itemId);
-                    }
-                });
-            }
-        }
-        //rare
-        for (let i = 225; i <= 236; i++) {
-            let _count = local_items[i];
-            if (_count > 0) {
-                let _itemIds = get_itemIds_from_itemType(local_myListsAt_withItemType, i)
-                _itemIds.forEach(_itemId => {
-                    if (!summoned_fluffies.includes(_itemId)){
-                        setTimeout( () => {
-                            summon_fluffy(this_scene, i, "rare", _itemId);
-                        }, _timeout, _itemId);
-                        _timeout += 500;
-                        summoned_fluffies.push(_itemId);
-                    }
-                });
-            }
-        }
-    }
-    
     //***TODO***
-    //first summon
-    /*
+    //get each fluffy itemtype and decide img
     if (flag_summon_fluffy == 0) {
         let _timeout = 0;
         //common
         for (let i = 201; i <= 212; i++) {
             let _count = local_items[i];
-            if (_count > 0) {
-                let _itemIds = get_itemIds_from_itemType(local_myListsAt_withItemType, i)
-                _itemIds.forEach(_itemId => {
-                    setTimeout( () => {
-                        summon_fluffy(this_scene, i, "common", _itemId);
-                    }, _timeout, _itemId);
-                    _timeout += 500;
-                    summoned_fluffies.push(_itemId);
-                });
+            for (let j = 1; j <= _count; j++) {
+                setTimeout(function(){
+                    summon_fluffy(this_scene, i, "common");
+                }, _timeout);
+                _timeout += 500;
             }
         }
         //uncommon
         for (let i = 213; i <= 224; i++) {
             let _count = local_items[i];
-            if (_count > 0) {
-                let _itemIds = get_itemIds_from_itemType(local_myListsAt_withItemType, i)
-                _itemIds.forEach(_itemId => {
-                    setTimeout( () => {
-                        summon_fluffy(this_scene, i, "uncommon", _itemId);
-                    }, _timeout, _itemId);
-                    _timeout += 500;
-                    summoned_fluffies.push(_itemId);
-                });
+            for (let j = 1; j <= _count; j++) {
+                setTimeout(function(){
+                    summon_fluffy(this_scene, i, "uncommon");
+                }, _timeout);
+                _timeout += 500;
             }
         }
         //rare
         for (let i = 225; i <= 236; i++) {
             let _count = local_items[i];
-            if (_count > 0) {
-                let _itemIds = get_itemIds_from_itemType(local_myListsAt_withItemType, i)
-                _itemIds.forEach(_itemId => {
-                    setTimeout( () => {
-                        summon_fluffy(this_scene, i, "rare", _itemId);
-                    }, _timeout, _itemId);
-                    _timeout += 500;
-                    summoned_fluffies.push(_itemId);
-                });
+            for (let j = 1; j <= _count; j++) {
+                setTimeout(function(){
+                    summon_fluffy(this_scene, i, "rare");
+                }, _timeout);
+                _timeout += 500;
             }
         }
         flag_summon_fluffy = 1;
-    //after first summon, only when difference
-    } else {
-        if (local_precious > previous_local_precious2) {
-            ;
-        }
     }
-    */
     
     //###000:visitorCat
     if (local_receiving_mail == 1 && typeof cat_visitor != "undefined"){
@@ -7099,11 +7488,7 @@ function update_checkItem(this_scene) {
     previous_local_rolled_dice = local_rolled_dice;
     previous_local_name_str = local_name_str;
     previous_local_score = local_score;
-    previous_local_precious2 = local_precious;
 }
-
-
-//---update()
 
 function calc_fps() {
     let _now = Date.now();
@@ -7139,6 +7524,7 @@ async function checkChainId(scene, correctChainId) {
     }
 }
 
+//---update()
 function update(scene) {
 
     //increment turn
@@ -7224,7 +7610,7 @@ function update(scene) {
     }
 
     //update onchain data
-    if (turn % 250 == 70 && flag_update == 1) {
+    if ( (turn % 250 == 70 || turn == 50) && flag_update == 1) {
         if (count_sync == 0 || local_notPetrified == 0 || summoner == 0) {
             contract_update_all();
         } else if (summoner > 0) {
@@ -7277,6 +7663,7 @@ class FirstCheck extends Phaser.Scene {
                 _wallet = _wallets[0];
                 let _hexCahinId = await window.ethereum.request({method:"eth_chainId"});
                 _chainId = parseInt(_hexCahinId);
+                console.log(_wallet, _chainId);
             //when error = no metamask or not yet connect
             } catch (err) {
                 console.log("error");
@@ -7325,7 +7712,6 @@ class Loading extends Phaser.Scene {
     }
 
     preload() {
-        preUpdate();
         preload(this);
     }
     
@@ -7429,14 +7815,33 @@ class Main extends Phaser.Scene {
 let config = {
     type: Phaser.CANVAS,
     parent: "canvas",
+    //parent: "content",
     backgroundColor: "F4B4D0",
     scale: {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH,
         width: 1280,
         height: 960,
+        //fps: 10,
     },
+    /*
+    scene: {
+        preload: preload,
+        create: create,
+        update: update,
+    },
+    */
     scene: [FirstCheck, Loading, Opeaning, SomethingWrong, Main],
+    /*
+    render: {
+        //pixelArt: true,
+        //antialias: false
+    },
+    parent: 'phaser-container',
+    dom: {
+        createContainer: true
+    },
+    */
     fps: {
         target: 50,
         forceSetTimeOut: true
@@ -8138,4 +8543,7 @@ async function test() {
             houseのcomfortableをスコアとして数字化する
                 異なる種類のアイテムがたくさんあるほどスコアが高くなる
                 comfortableが一定値以上でstakingリワードを得られる
+
+
+
 */
