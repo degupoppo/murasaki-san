@@ -2075,7 +2075,8 @@ contract Murasaki_Function_Share is Ownable {
     }
 
     //status
-
+    
+    /*
     //return status
     function get_dynamic_status_array(uint32 _summoner) external view returns (uint32[30] memory) {
         Murasaki_Storage ms = Murasaki_Storage(murasaki_storage_address);
@@ -2117,6 +2118,7 @@ contract Murasaki_Function_Share is Ownable {
         _res[1] = mm.summoned_time(_summoner);
         return _res;
     }
+    */
 
     //craft
 
@@ -3008,7 +3010,7 @@ contract Murasaki_Function_Mining_and_Farming is Ownable {
 }
 
 
-//---Crafting
+//---*Crafting
 
 
 contract Murasaki_Function_Crafting is Ownable {
@@ -3095,9 +3097,10 @@ contract Murasaki_Function_Crafting is Ownable {
             //uint32 _crafting_item = mc.next_item();
             uint32 _seed = mfs.seed(_summoner);
             mc.craft(_item_type, _summoner, msg.sender, _seed);
-            //when normal items, generate tiny heart and update score
+            //when normal items, mint precious and update score
             if (_item_type <= 128) {
-                _mint_precious(_summoner);
+                //_mint_precious(_summoner);
+                _send_randomPresentbox(_summoner);
                 //update score
                 Murasaki_Storage_Score mss = Murasaki_Storage_Score(mfs.murasaki_storage_score_address());
                 uint32 _total_item_crafted = mss.total_item_crafted(_summoner);
@@ -3169,6 +3172,7 @@ contract Murasaki_Function_Crafting is Ownable {
     }
     */
 
+    /*
     //mint_precious
     event Precious(uint32 indexed _summoner_to, uint32 _summoner_from, uint32 _item_type);
     function _mint_precious(uint32 _summoner_from) internal {
@@ -3209,6 +3213,7 @@ contract Murasaki_Function_Crafting is Ownable {
         //event
         emit Precious(_summoner_to, _summoner_from, _item_type);        
     }
+    */
 
     //upgrade item
     event Upgrade(uint32 indexed _summoner, uint32 _item_type, uint32 _item);
@@ -3310,7 +3315,81 @@ contract Murasaki_Function_Crafting is Ownable {
     function luck_challenge(uint32 _summoner) public view returns (bool) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         return mfs.luck_challenge(_summoner);
-    }    
+    }
+
+    //send random presentbox
+    event SendPresentbox(uint32 indexed _summoner_from, uint32 _summoner_to);
+    function _send_randomPresentbox(uint32 _summoner_from) internal {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Main mm = Murasaki_Main(mfs.murasaki_main_address());
+        Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
+        //get random _to_summoner
+        uint32 _count_summoners = mm.next_summoner() - 1;
+        uint32 _summoner_to = mfs.dn(_summoner_from, _count_summoners) + 1;
+        //check _to_summoner
+        bool _isActive = ms.isActive(_summoner_to);
+        address _wallet_to;
+        //when _summoner_to is active
+        if (
+            _isActive == true
+            && ms.level(_summoner_to) >= 3
+            && mfs.calc_satiety(_summoner_to) >= 10
+            && mfs.calc_happy(_summoner_to) >= 10
+        ) {
+            _wallet_to = mm.ownerOf(_summoner_to);
+        //when _summoner_to is not active, wallet = msg.sender
+        } else {
+            _wallet_to = msg.sender;
+            _summoner_to = _summoner_from;
+        }
+        //mint presentbox
+        _mint_presentbox(_summoner_from, _wallet_to);
+        //event
+        emit SendPresentbox(_summoner_from, _summoner_to);
+    
+    }
+    //mint presentbox
+    function _mint_presentbox(uint32 _summoner_from, address _wallet_to) internal {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
+        uint32 _seed = mfs.seed(_summoner_from);
+        uint32 _item_type = 200;
+        mc.craft(_item_type, _summoner_from, _wallet_to, _seed);
+    }
+    
+    //open present box and mint precious
+    //presentbox = 200
+    function open_presentbox(uint32 _summoner, uint32 _item) external {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
+        //check owner
+        require(mfs.check_owner(_summoner, msg.sender));
+        require(mc.ownerOf(_item) == msg.sender);
+        //check item_type
+        (uint32 _item_type, , uint32 crafted_summoner,) = mc.items(_item);
+        require(_item_type == 200);
+        //burn _item
+        _burn(_item);
+        //mint precious
+        //need: summoner_to, summoner_from, to_wallet
+        _mint_precious(_summoner, crafted_summoner, msg.sender);
+    }
+    //mint precious
+    event Precious(uint32 indexed _summoner_to, uint32 _summoner_from, uint32 _item_type);
+    function _mint_precious(uint32 _summoner_to, uint32 _summoner_from, address _wallet_to) internal {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
+        //mint precious
+        uint32 _seed = mfs.seed(_summoner_from);
+        uint32 _item_type = 200 + mfs.d12(_summoner_from) + 1;   //201-212
+        mc.craft(_item_type, _summoner_from, _wallet_to, _seed);
+        //update score
+        Murasaki_Storage_Score mss = Murasaki_Storage_Score(mfs.murasaki_storage_score_address());
+        uint32 _total_precious_received = mss.total_precious_received(_summoner_to);
+        mss.set_total_precious_received(_summoner_to, _total_precious_received + 1);
+        //event
+        emit Precious(_summoner_to, _summoner_from, _item_type);
+    }
 }
 
 
@@ -4360,7 +4439,7 @@ contract World_Dice is Ownable {
 }
 
 
-//---Murasaki_Mail
+//---*Murasaki_Mail
 
 
 contract Murasaki_Mail is Ownable {
@@ -4546,10 +4625,25 @@ contract Murasaki_Mail is Ownable {
         uint32 _now = uint32(block.timestamp);
         _mail.open_time = _now;
         //mint precious
-        _mint_precious(_summoner_to, _mail.summoner_from);
+        //_mint_precious(_summoner_to, _mail.summoner_from);
+        _mint_presentboxBoth(_summoner_to, _mail.summoner_from);
         //event
         emit Open_Mail(_summoner_to, _mail.summoner_from);
     }
+    function _mint_presentboxBoth(uint32 _summoner_to, uint32 _summoner_from) internal {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Main mm = Murasaki_Main(mfs.murasaki_main_address());
+        _mint_presentbox(_summoner_from, mm.ownerOf(_summoner_to));
+        _mint_presentbox(_summoner_to, mm.ownerOf(_summoner_from));
+    }
+    function _mint_presentbox(uint32 _summoner_from, address _wallet_to) internal {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
+        uint32 _seed = mfs.seed(_summoner_from);
+        uint32 _item_type = 200;
+        mc.craft(_item_type, _summoner_from, _wallet_to, _seed);
+    }    
+    /*
     event Precious(uint32 indexed _summoner_to, uint32 _summoner_from, uint32 _item_type);
     function _mint_precious(uint32 _summoner_to, uint32 _summoner_from) internal {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
@@ -4569,6 +4663,7 @@ contract Murasaki_Mail is Ownable {
         //ms.set_heart(_summoner_to, ms.heart(_summoner_to) + 1);
         //ms.set_heart(_summoner_from, ms.heart(_summoner_from) + 1);
     }
+    */
     /*
     function _create_tiny_heart(uint32 _summoner_to, uint32 _summoner_from) internal {
         Murasaki_Function_Crafting mfc = Murasaki_Function_Crafting(murasaki_function_crafting_address);

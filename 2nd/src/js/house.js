@@ -5,6 +5,30 @@
 
 /*
 
+    プレゼントシステムの実装
+        fluffyを得るタイミングではまずプレゼントboxを得る
+        クリックしてopenするとランダムでfluffyが手に入る
+        コントラクトで管理する
+        itemType = 200
+        burnしてfluffyをmintする
+        タイミング
+            craft時に誰かに送られる
+            mail open時にお互いに送られる
+            fluffy festival時にもらえる
+        dapps stakingとの連携を考える
+            直接luckがブーストされるのではなく、
+            プレゼントを貰えるタイミングや頻度が増える
+            stakingあり：30日～7日でプレゼント1つもらえる
+            $500 ASTRでもstakingすれば30日に1個はもらえる
+            claimのタイミングはどうするか。
+                feedingやgroomingの時にチェックかけてmintさせるか。
+        演出はどうするか
+            空から降ってくるか
+            ないないさんが持ってくるか
+
+    コンセプトの整理
+        電子生命
+
     ぬいちゃんのコストの深慮
         ハート経済を不採用としたためコストが不明
         ノーマルリソースのみでは希少性が低すぎる
@@ -237,6 +261,7 @@ async function init_global_variants() {
     local_birth_time = Date.now();
     SPEED = 1;
     BASE_SEC = 86400;
+    CORRECT_CHAINID = 4369;
 
     //---on_chain dynamic
     local_class = 0;
@@ -282,6 +307,7 @@ async function init_global_variants() {
     local_luck_challenge_of_mfc = 0;
     local_newsText = ["Peaceful","Today !","","ฅ•ω•ฅ"];
     local_itemIds = [];
+    local_wallet_score = 0;
     
     //---local previous
     previous_local_last_feeding_time = 0;
@@ -354,6 +380,7 @@ async function init_global_variants() {
     flag_onLight = true;
     flag_window_craft = 0;
     flag_update = 1;
+    flag_fadein = 0;
 }
 
 init_global_variants();
@@ -529,6 +556,31 @@ function get_itemIds(_myListsAt_withItemType) {
     return _itemIds;
 }
 
+//generate upgradable item ids list
+//return: [ [fromItemType, toItemType, [itemId1, 2, 3]], []...]
+function get_upgradable_itemIds(_myListsAt_withItemType) {
+    //totalling itemType
+    //{_itemType:[_itemId1, 2, 3], ...}
+    let _dict = {};
+    for (i = 0; i < _myListsAt_withItemType.length; i += 2) {
+        let _itemId = Number(_myListsAt_withItemType[i]);
+        let _itemType = Number(_myListsAt_withItemType[i+1]);
+        try {
+            _dict[_itemType].push(_itemId);
+        } catch(error) {
+            _dict[_itemType] = [_itemId];
+        }
+    }
+    //extract itemType in ids >= 3
+    let _res = {};
+    Object.keys(_dict).forEach(__itemType => {
+        if (_dict[__itemType].length >= 3) {
+            _res[__itemType] = [_dict[__itemType]];
+        }
+    });
+    return _res;
+}
+
 //###static status
 async function contract_update_static_status(_summoner) {
 
@@ -537,10 +589,6 @@ async function contract_update_static_status(_summoner) {
         return 0;
     }
 
-    //let web3 = await connect();
-    //let wallet = await get_wallet(web3);
-    //let contract_info = await new web3.eth.Contract(abi_murasaki_info, contract_murasaki_info);
-    
     //call info from chain
     let _all_static_status = await contract_info.methods.allStaticStatus(_summoner).call();
 
@@ -560,9 +608,12 @@ async function contract_update_static_status(_summoner) {
     //call speed
     SPEED = await contract_mp.methods.SPEED().call();
     SPEED = Number(SPEED) / 100;
+    
+    //calc wallet score
+    local_wallet_score = await calc_wallet_score(wallet);
 }
 
-
+//using in Loading scene
 async function preUpdate(){
     await contract_update_summoner_of_wallet();
     await contract_update_dynamic_status(summoner);
@@ -588,6 +639,11 @@ async function contract_update_dynamic_status(_summoner) {
     let _allItemBalance = get_allItemBalance_from_allItemId_withItemType(_myListsAt_withItemType);
     local_items = _allItemBalance;
     local_itemIds = get_itemIds(_myListsAt_withItemType);
+
+    //***TODO*** debug
+    for (let i = 1; i <= 64; i++) {
+        local_items[i] += 1;
+    }
 
     //call dynamic status from chain
     let _all_dynamic_status = await contract_info.methods.allDynamicStatus(_summoner).call();
@@ -1046,6 +1102,8 @@ async function contract_update_summoner_of_wallet() {
     }
 }
 
+//###wallet age
+
 //get nonce
 async function contract_get_nonce(_wallet_address) {
     let _nonce = await web3.eth.getTransactionCount(_wallet_address);
@@ -1067,6 +1125,20 @@ async function contract_get_age(_wallet_address) {
     }
     return _age;        
 }
+
+//calc wallet_score
+async function calc_wallet_score(wallet_address) {
+    let _nonce = await contract_get_nonce(wallet_address);
+    let _age = await contract_get_age(wallet_address); //mo
+    let _scoreMax = _age * 150; // 5tx/day, 150tx/mo
+    let _score = _nonce;
+    if (_score > _scoreMax) {
+        _score = _scoreMax;
+    }
+    //console.log(_nonce, _age, _scoreMax, _score);
+    return _score;    
+}
+
 
 //get item dc
 async function contract_get_item_dc(item_type) {
@@ -1231,7 +1303,6 @@ async function contract_burn_name(_summoner) {
         .on("receipt", (receipt) => update_tx_text("done", receipt.transactionHash));
 }
 
-
 //unpack_bag
 async function unpack_bag(_summoner, _item) {
     contract_mfc.methods.unpack_bag(_summoner, _item).send({from:wallet})
@@ -1242,6 +1313,13 @@ async function unpack_bag(_summoner, _item) {
 //dice_roll
 async function dice_roll(_summoner) {
     contract_wd.methods.dice_roll(_summoner).send({from:wallet})
+        .on("transactionHash", (transactionHash) => update_tx_text("sending", transactionHash))
+        .on("receipt", (receipt) => update_tx_text("done", receipt.transactionHash));
+}
+
+//upgrade
+async function upgrade_item(_summoner, _itemId1, _itemId2, _itemId3) {
+    contract_mfc.methods.upgrade_item(_summoner, _itemId1, _itemId2, _itemId3).send({from:wallet})
         .on("transactionHash", (transactionHash) => update_tx_text("sending", transactionHash))
         .on("receipt", (receipt) => update_tx_text("done", receipt.transactionHash));
 }
@@ -3410,6 +3488,13 @@ function open_window_craft (scene) {
 }
 
 
+//---window:upgrade
+//***TODO***
+function open_window_upgrade(scene) {
+    
+}
+
+
 //---window:summon
 function open_window_summon(scene) {
     //close window and summon
@@ -3612,21 +3697,6 @@ function summon_fluffy(scene, _type, rarity, itemId) {
     _fluffy.on_summon();
     group_star.add(_fluffy);
     group_update.add(_fluffy);
-}
-
-
-//---calc wallet_score
-
-async function calc_wallet_score(wallet_address) {
-    let _nonce = await contract_get_nonce(wallet_address);
-    let _age = await contract_get_age(wallet_address); //mo
-    let _scoreMax = _age * 150; // 5tx/day, 150tx/mo
-    let _score = _nonce;
-    if (_score > _scoreMax) {
-        _score = _scoreMax;
-    }
-    //console.log(_nonce, _age, _scoreMax, _score);
-    return _score;    
 }
 
 
@@ -3981,7 +4051,6 @@ function preload(scene) {
     }
     //***TODO*** contract
     //local
-    /*
     dic_tokenBall_contract = {
         ACA:"0x2F2eB7682bE7AC2ADaa2E2389ddBC6C76D66671d",
         ASTR:"0x2F2eB7682bE7AC2ADaa2E2389ddBC6C76D66671d",
@@ -3999,8 +4068,8 @@ function preload(scene) {
         USDC:"0x2F2eB7682bE7AC2ADaa2E2389ddBC6C76D66671d",
         USDT:"0x2F2eB7682bE7AC2ADaa2E2389ddBC6C76D66671d"
     }
-    */
     //shibuya
+    /*
     dic_tokenBall_contract = {
         ACA:"0xC4195CE9383eA77aED21bd662ecad10a935Ed459",
         ASTR:0,
@@ -4018,6 +4087,7 @@ function preload(scene) {
         USDC:"0x37B76d58FAFc3Bc32E12E2e720F7a57Fc94bE871",
         USDT:"0xa4C17AD6bEC86e1233499A9B174D1E2D466c7198"
     }
+    */
 }
 
 
@@ -4983,7 +5053,7 @@ function update_parametersWithAnimation(this_scene) {
         screen_coin_delta = local_coin - previous_local_coin;
         screen_coin_easing = 100;
         //earning text
-        if (count_sync > 3) {
+        if (count_sync > 5) {
             let _delta = local_coin - previous_local_coin;
             let _sign = "";
             if (_delta > 0) {
@@ -5013,7 +5083,7 @@ function update_parametersWithAnimation(this_scene) {
         screen_material_delta = local_material - previous_local_material;
         screen_material_easing = 100;
         //earning text
-        if (count_sync > 3) {
+        if (count_sync > 5) {
             let _delta = local_material - previous_local_material;
             let _sign = ""; //no need when minus
             if (_delta > 0) {
@@ -5050,7 +5120,7 @@ function update_parametersWithAnimation(this_scene) {
         }
         screen_exp_easing = 100;
         //earning text
-        if (count_sync > 3) {
+        if (count_sync > 5) {
             let _delta = local_exp - previous_local_exp;
             let _sign = ""; //no need when minus
             if (_delta > 0) {
@@ -6643,8 +6713,8 @@ function update_checkItem(this_scene) {
 
     //###43:*Newspaper
     _item_id = 43;
-    if (    //***TODO***
-        (true || local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+    if (
+        (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
         && local_items_flag[_item_id] != true
     ) {
         local_items_flag[_item_id] = true;
@@ -6698,7 +6768,6 @@ function update_checkItem(this_scene) {
         && local_items[_item_id+64] == 0 
         && local_items[_item_id+128] == 0
         && typeof item_newspaper != "undefined"
-        && typeof item_newspaper == "undefined" //***TODO***
     ) {
         item_newspaper.destroy(true);
         item_newspaper_text1.destroy(true);
@@ -7021,63 +7090,7 @@ function update_checkItem(this_scene) {
         }
     }
     
-    //***TODO***
-    //first summon
-    /*
-    if (flag_summon_fluffy == 0) {
-        let _timeout = 0;
-        //common
-        for (let i = 201; i <= 212; i++) {
-            let _count = local_items[i];
-            if (_count > 0) {
-                let _itemIds = get_itemIds_from_itemType(local_myListsAt_withItemType, i)
-                _itemIds.forEach(_itemId => {
-                    setTimeout( () => {
-                        summon_fluffy(this_scene, i, "common", _itemId);
-                    }, _timeout, _itemId);
-                    _timeout += 500;
-                    summoned_fluffies.push(_itemId);
-                });
-            }
-        }
-        //uncommon
-        for (let i = 213; i <= 224; i++) {
-            let _count = local_items[i];
-            if (_count > 0) {
-                let _itemIds = get_itemIds_from_itemType(local_myListsAt_withItemType, i)
-                _itemIds.forEach(_itemId => {
-                    setTimeout( () => {
-                        summon_fluffy(this_scene, i, "uncommon", _itemId);
-                    }, _timeout, _itemId);
-                    _timeout += 500;
-                    summoned_fluffies.push(_itemId);
-                });
-            }
-        }
-        //rare
-        for (let i = 225; i <= 236; i++) {
-            let _count = local_items[i];
-            if (_count > 0) {
-                let _itemIds = get_itemIds_from_itemType(local_myListsAt_withItemType, i)
-                _itemIds.forEach(_itemId => {
-                    setTimeout( () => {
-                        summon_fluffy(this_scene, i, "rare", _itemId);
-                    }, _timeout, _itemId);
-                    _timeout += 500;
-                    summoned_fluffies.push(_itemId);
-                });
-            }
-        }
-        flag_summon_fluffy = 1;
-    //after first summon, only when difference
-    } else {
-        if (local_precious > previous_local_precious2) {
-            ;
-        }
-    }
-    */
-    
-    //###000:visitorCat
+    //###000:VisitorCat
     if (local_receiving_mail == 1 && typeof cat_visitor != "undefined"){
         async function run(scene) {
             let _res = await contract_callMailDetail();
@@ -7143,7 +7156,6 @@ function update(scene) {
 
     //increment turn
     turn += 1;
-    //text_turn.setText("turn: " + ("0000000" + turn).slice(-7) );
         
     //calc FPS
     calc_fps();
@@ -7179,32 +7191,32 @@ function update(scene) {
     }
 
     //numeric animation
-    if (turn % 2 == 0) {
+    if (turn == 1 || turn % 2 == 0) {
         update_numericAnimation(scene);
     }
 
     //parameters with animation
-    if (turn % 150 == 0) {
+    if (turn == 1 || turn % 150 == 0) {
         update_parametersWithAnimation(scene);
     }
 
     //parameters without animation
-    if (turn % 150 == 10) {
+    if (turn == 1 || turn % 150 == 10) {
         update_parametersWithoutAnimation(scene);
     }
 
     //check mode change
-    if (turn % 150 == 20) {
+    if (turn == 1 || turn % 150 == 20) {
         update_checkModeChange(scene);
     }
 
     //check button activation
-    if (turn % 150 == 30) {
+    if (turn == 1 || turn % 150 == 30) {
         update_checkButtonActivation(scene);
     }
 
     //check item
-    if (turn % 150 == 40) {
+    if (turn == 1 || turn % 150 == 40) {
         update_checkItem(scene);
     }
 
@@ -7220,7 +7232,7 @@ function update(scene) {
     
     //check chain id
     if (turn % 500 == 0) {
-        checkChainId(scene, 4369);
+        checkChainId(scene, CORRECT_CHAINID);
     }
 
     //update onchain data
@@ -7243,6 +7255,7 @@ class FirstCheck extends Phaser.Scene {
 
     constructor() {
         super({ key:"FirstCheck", active:true });
+        this.flag_start = 0;
     }
     
     preload() {
@@ -7288,13 +7301,16 @@ class FirstCheck extends Phaser.Scene {
             }
             //check metamask info
             //when wallet and chainId are good, start Main scene
-            if (_wallet != 0 && _chainId == 4369) {
+            if (_wallet != 0 && _chainId == CORRECT_CHAINID) {
                 _msg1.setText("Check Network");
                 _msg2.setText("Connecting...OK!");
                 _errImg.setVisible(false);
                 init_web3();
-                setTimeout( () => {scene.scene.start("Loading")}, 500, scene);
-                //scene.scene.start("Loading");
+                //prevent duplicated starting
+                if (scene.flag_start == 0) {
+                    setTimeout( () => {scene.scene.start("Loading")}, 500, scene);
+                    scene.flag_start = 1;
+                }
                 clearInterval(timerId);
             //when not connect yet
             } else if (_wallet == 0) {
@@ -7302,7 +7318,7 @@ class FirstCheck extends Phaser.Scene {
                 _msg2.setText("Please install Metamask and allow wallet connect.");
                 _errImg.setVisible(true);
             //when wrong network
-            } else if (_chainId != 4369) {
+            } else if (_chainId != CORRECT_CHAINID) {
                 _msg1.setText("Wrong Network");
                 _msg2.setText("Please connect to the Astar Network RPC.");
                 _errImg.setVisible(true);
@@ -7412,12 +7428,15 @@ class Main extends Phaser.Scene {
         //preload(this);
     }
     async create(){
-        //fade in
-        this.cameras.main.fadeIn(300, 255, 255, 255);
         await create(this);
         updateFirst(this);
     }
     update(){
+        //fade in
+        if (flag_fadein == 0) {
+            this.cameras.main.fadeIn(600, 255, 255, 255, update(this));
+            flag_fadein = 1;
+        }
         update(this);
     }
 }
