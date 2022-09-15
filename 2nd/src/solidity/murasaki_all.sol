@@ -31,7 +31,7 @@ pragma solidity ^0.8.7;
         upgradeに対応させる, preciousは+12
         calc_heartの計算式を修正する
 
-    要求_item_idの整備
+ ok 要求_item_idの整備
         _item_idテーブルが確定してから
         nameplateにrequire
         murasaki_mailにクッションをrequire
@@ -1447,6 +1447,7 @@ contract Murasaki_Craft is ERC721, Ownable{
         uint32 crafted_time;
         uint32 crafted_summoner;
         address crafted_wallet;
+        string memo;
     }
     mapping(uint256 => item) public items;
     mapping(address => uint32[256]) public balance_of_type;
@@ -1484,12 +1485,18 @@ contract Murasaki_Craft is ERC721, Ownable{
     }
 
     //craft
-    function craft(uint32 _item_type, uint32 _summoner, address _wallet, uint32 _seed) external {
+    function craft(
+        uint32 _item_type, 
+        uint32 _summoner, 
+        address _wallet, 
+        uint32 _seed, 
+        string memory _memo
+    ) external {
         //require(msg.sender == murasaki_function_address);
         require(permitted_address[msg.sender] == true);
         uint32 _now = uint32(block.timestamp);
         uint32 _crafting_item = next_item;
-        items[_crafting_item] = item(_item_type, _now, _summoner, _wallet);
+        items[_crafting_item] = item(_item_type, _now, _summoner, _wallet, _memo);
         balance_of_type[_wallet][_item_type] += 1;  //balanceOf each item type
         count_of_mint[_item_type]++;
         seed[_crafting_item] = _seed;
@@ -3096,7 +3103,8 @@ contract Murasaki_Function_Crafting is Ownable {
             Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
             //uint32 _crafting_item = mc.next_item();
             uint32 _seed = mfs.seed(_summoner);
-            mc.craft(_item_type, _summoner, msg.sender, _seed);
+            string memory _memo = "";
+            mc.craft(_item_type, _summoner, msg.sender, _seed, _memo);
             //when normal items, mint precious and update score
             if (_item_type <= 128) {
                 //_mint_precious(_summoner);
@@ -3229,9 +3237,9 @@ contract Murasaki_Function_Crafting is Ownable {
             && mc.ownerOf(_item3) == msg.sender
         );
         //check item_type
-        (uint32 _item_type1, , ,) = mc.items(_item1);
-        (uint32 _item_type2, , ,) = mc.items(_item2);
-        (uint32 _item_type3, , ,) = mc.items(_item3);
+        (uint32 _item_type1, , , ,) = mc.items(_item1);
+        (uint32 _item_type2, , , ,) = mc.items(_item2);
+        (uint32 _item_type3, , , ,) = mc.items(_item3);
         require(_item_type1 <= 128 || (_item_type1 >= 201 && _item_type1 <= 224) );
     	require(
     	    _item_type2 == _item_type1
@@ -3243,10 +3251,11 @@ contract Murasaki_Function_Crafting is Ownable {
         _burn(_item3);
         //mint upper rank item
         uint32 _seed = mfs.seed(_summoner);
+        string memory _memo = "";
         if (_item_type1 <= 128) {   // normal item, +64
-            mc.craft(_item_type1 + 64, _summoner, msg.sender, _seed);
+            mc.craft(_item_type1 + 64, _summoner, msg.sender, _seed, _memo);
         } else if (_item_type1 >= 201) {    // precious, +12
-            mc.craft(_item_type1 + 12, _summoner, msg.sender, _seed);
+            mc.craft(_item_type1 + 12, _summoner, msg.sender, _seed, _memo);
         }
         //event
         emit Upgrade(_summoner, _item_type1, mc.next_item());
@@ -3262,7 +3271,7 @@ contract Murasaki_Function_Crafting is Ownable {
         require(mfs.check_owner(_summoner, msg.sender));
         require(mc.ownerOf(_item) == msg.sender);
         //check item_type
-        (uint32 _item_type, , ,) = mc.items(_item);
+        (uint32 _item_type, , , ,) = mc.items(_item);
         require(_item_type == 194 || _item_type == 195);
         //burn _item
         //mc.transferFrom(msg.sender, address(this), _item);
@@ -3354,7 +3363,8 @@ contract Murasaki_Function_Crafting is Ownable {
         Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
         uint32 _seed = mfs.seed(_summoner_from);
         uint32 _item_type = 200;
-        mc.craft(_item_type, _summoner_from, _wallet_to, _seed);
+        string memory _memo = "item crafting";
+        mc.craft(_item_type, _summoner_from, _wallet_to, _seed, _memo);
     }
     
     //open present box and mint precious
@@ -3366,7 +3376,7 @@ contract Murasaki_Function_Crafting is Ownable {
         require(mfs.check_owner(_summoner, msg.sender));
         require(mc.ownerOf(_item) == msg.sender);
         //check item_type
-        (uint32 _item_type, , uint32 crafted_summoner,) = mc.items(_item);
+        (uint32 _item_type, , uint32 crafted_summoner, ,) = mc.items(_item);
         require(_item_type == 200);
         //burn _item
         _burn(_item);
@@ -3382,7 +3392,8 @@ contract Murasaki_Function_Crafting is Ownable {
         //mint precious
         uint32 _seed = mfs.seed(_summoner_from);
         uint32 _item_type = 200 + mfs.d12(_summoner_from) + 1;   //201-212
-        mc.craft(_item_type, _summoner_from, _wallet_to, _seed);
+        string memory _memo = "";
+        mc.craft(_item_type, _summoner_from, _wallet_to, _seed, _memo);
         //update score
         Murasaki_Storage_Score mss = Murasaki_Storage_Score(mfs.murasaki_storage_score_address());
         uint32 _total_precious_received = mss.total_precious_received(_summoner_to);
@@ -4163,7 +4174,7 @@ contract buybackTreasury is Ownable {
     function calc_buybackPrice(uint32 _item) public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
-        (uint32 _item_type, , ,) = mc.items(_item);
+        (uint32 _item_type, , , ,) = mc.items(_item);
         uint32 _item_level = _item_type % 16;
         if (_item_level == 0) {
             _item_level = 16;
@@ -4560,7 +4571,7 @@ contract Murasaki_Mail is Ownable {
         require(calc_sending_interval(_summoner_from) == 0);
         //check _item_mail nft
         Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
-        (uint32 _item_type, , ,) = mc.items(_item_mail);
+        (uint32 _item_type, , , ,) = mc.items(_item_mail);
         require(_item_type == item_type_of_mail);
         require(mc.ownerOf(_item_mail) == msg.sender);
         //burn mail nft
@@ -4641,7 +4652,8 @@ contract Murasaki_Mail is Ownable {
         Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
         uint32 _seed = mfs.seed(_summoner_from);
         uint32 _item_type = 200;
-        mc.craft(_item_type, _summoner_from, _wallet_to, _seed);
+        string memory _memo = "mail opening";
+        mc.craft(_item_type, _summoner_from, _wallet_to, _seed, _memo);
     }    
     /*
     event Precious(uint32 indexed _summoner_to, uint32 _summoner_from, uint32 _item_type);
@@ -5335,9 +5347,9 @@ contract Murasaki_Info is Ownable {
 }
 
 
-//---Murasaki_Info_fromWallet
+//---(Murasaki_Info_fromWallet)
 
-
+/*
 contract Murasaki_Info_fromWallet is Ownable {
 
     //address
@@ -5476,14 +5488,6 @@ contract Murasaki_Info_fromWallet is Ownable {
         Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
         return ms.material(_summoner);
     }
-    /*
-    function heart(address _wallet) external view returns (uint32) {
-        uint32 _summoner = summoner(_wallet);
-        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
-        Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
-        return ms.heart(_summoner);
-    }
-    */
     function total_exp_gained(address _wallet) external view returns (uint32) {
         uint32 _summoner = summoner(_wallet);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
@@ -5524,9 +5528,10 @@ contract Murasaki_Info_fromWallet is Ownable {
         return mfs.get_balance_of_type_specific(_wallet, _item_type);
     }
 }
+*/
 
 
-//---Governance
+//---(Governance)
 
 /*
 contract Governance is Ownable {

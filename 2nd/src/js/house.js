@@ -5,6 +5,67 @@
 
 /*
 
+1st
+    コンセプトの整理
+        電子生命
+
+    ぬいちゃんのコストの深慮
+        ハート経済を不採用としたためコストが不明
+        ノーマルリソースのみでは希少性が低すぎる
+        fluffyをコストに要求するか
+            rare fluffyを1体要求、など
+            fluffiestの選択はどうするか
+        fluffyコスト導入の場合はコードの修正が必要
+
+    クリティカル検出の改善
+        現状、うまく検出できてない
+        luck_challengeはmsg.senderを参照するので画一的に結果を取得できない
+        案1
+            msg.senderを考慮した乱数取得関数を用意する
+        案2
+            通常のernを計算しそれより多いか参照する
+        案3
+            Eventを参照する
+
+    ガバナンスシステムの実装
+        投票
+            インフレ率の修正や、運営個人walletへの報酬支払など、
+            方針決定時に投票できるメカニズムを作る。
+            投票には例えばLv3以上のsummonerが紐付いたwalletのみ許可し、
+            例えばスコアの大きさに応じて比率を変える（log関数、せいぜい2倍）。
+            Lvによる足切りと、スコアによる増幅
+        内容
+            選択肢は予め運営側で決定する（インフレ率100%などの逸脱はさせない）
+            過去の投票結果を見られるページを作る
+            役員報酬の支払い
+            インフレ率の設定？
+        その他
+            せっかくなので、定期的に行えるシステムがほしい
+            fluffyのどの色を優遇するかの投票などを月イチで行うか
+                効果+5%
+            月イチボーナスの決定
+                mining +3%
+                farming +3%
+                crafting time -3%
+                feeding +3%
+                grooming +3%
+            頻度は月1回か、2週間に1回程度
+            参加でfluffy 1匹もらえる？
+        毛玉取りフェスティバル
+            月に1回のイベント
+            むらさきさんが飼い主のところに毛玉取りに出かける
+            「あなたの服には今何色の毛玉がついてる？」
+            → 選択した色のfluffyが手に入る
+            → 同時に、選択した色に投票される
+            一番投票数が多かった毛玉が選出され、その月luckにブーストがかかる
+    
+    Pet用帽子の実装
+        ニット帽はペット用の小さいものにする
+        Petクラスにwearing hat関数を実装する
+        ニット帽子のサイズと位置合わせ
+
+
+2nd
     プレゼントシステムの実装
         fluffyを得るタイミングではまずプレゼントboxを得る
         クリックしてopenするとランダムでfluffyが手に入る
@@ -25,18 +86,9 @@
         演出はどうするか
             空から降ってくるか
             ないないさんが持ってくるか
+        実装
+            専用クラスを用意する
 
-    コンセプトの整理
-        電子生命
-
-    ぬいちゃんのコストの深慮
-        ハート経済を不採用としたためコストが不明
-        ノーマルリソースのみでは希少性が低すぎる
-        fluffyをコストに要求するか
-            rare fluffyを1体要求、など
-            fluffiestの選択はどうするか
-        fluffyコスト導入の場合はコードの修正が必要
-    
     item upgradeのUIの改善
         HP上で自分でid選んでupgradeは面倒だし味気ない
         craft windowなどでupgrade可能なもの一覧などを表示できればよいが。
@@ -55,16 +107,6 @@
         お昼寝用クッション
             条件が揃うとペットたちとくっついて寝る
             スイッチで夜もしくは20時以降20時前、満腹度80%以上、happy80%以上
-
-    クリティカル検出の改善
-        現状、うまく検出できてない
-        luck_challengeはmsg.senderを参照するので画一的に結果を取得できない
-        案1
-            msg.senderを考慮した乱数取得関数を用意する
-        案2
-            通常のernを計算しそれより多いか参照する
-        案3
-            Eventを参照する
 
     猫のUIの改善
         専用クラスを用意する
@@ -127,39 +169,6 @@
             craft
             Level-up
             mail open
-
-    ガバナンスシステムの実装
-        投票
-            インフレ率の修正や、運営個人walletへの報酬支払など、
-            方針決定時に投票できるメカニズムを作る。
-            投票には例えばLv3以上のsummonerが紐付いたwalletのみ許可し、
-            例えばスコアの大きさに応じて比率を変える（log関数、せいぜい2倍）。
-            Lvによる足切りと、スコアによる増幅
-        内容
-            選択肢は予め運営側で決定する（インフレ率100%などの逸脱はさせない）
-            過去の投票結果を見られるページを作る
-            役員報酬の支払い
-            インフレ率の設定？
-        その他
-            せっかくなので、定期的に行えるシステムがほしい
-            fluffyのどの色を優遇するかの投票などを月イチで行うか
-                効果+5%
-            月イチボーナスの決定
-                mining +3%
-                farming +3%
-                crafting time -3%
-                feeding +3%
-                grooming +3%
-            頻度は月1回か、2週間に1回程度
-            参加でfluffy 1匹もらえる？
-        実装
-    毛玉取りフェスティバル
-        月に1回のイベント
-        むらさきさんが飼い主のところに毛玉取りに出かける
-        「あなたの服には今何色の毛玉がついてる？」
-        → 選択した色のfluffyが手に入る
-        → 同時に、選択した色に投票される
-        一番投票数が多かった毛玉が選出され、その月luckにブーストがかかる
 
     ゲーム読み込み・開始UIの深慮
         ゲーム画面はすべて読みこんでから表示させたい
@@ -331,6 +340,7 @@ async function init_global_variants() {
     previous_happy = 0;
     previous_local_precious = 0;
     previous_local_precious2 = 0;
+    previous_local_item200 = 0;
     
     //---local etc
     turn = 0;
@@ -365,6 +375,7 @@ async function init_global_variants() {
     turn_forFPS = 0;
     time_forFPS = Date.now();
     summoned_fluffies = [];
+    summoned_presentbox = [];
 
     //---flag
     flag_music = 0;
@@ -574,8 +585,12 @@ function get_upgradable_itemIds(_myListsAt_withItemType) {
     //extract itemType in ids >= 3
     let _res = {};
     Object.keys(_dict).forEach(__itemType => {
-        if (_dict[__itemType].length >= 3) {
-            _res[__itemType] = [_dict[__itemType]];
+        if (
+            _dict[__itemType].length >= 3 && (
+                __itemType <= 128  || (__itemType >= 201 && __itemType <= 224)
+            )
+        ){
+            _res[__itemType] = _dict[__itemType];
         }
     });
     return _res;
@@ -914,7 +929,7 @@ async function contract_update_event_random() {
     )
     //console.log(_array);
     //let _text = "";
-    let _resText = ["", "", "", ""];
+    let _resText = ["Peaceful","Today !","","ฅ•ω•ฅ"];
     if (_array.length > 0) {
         //select event randomly
         let _event = _array[Math.floor(Math.random() * _array.length)];
@@ -1155,6 +1170,19 @@ async function get_userItems(_summoner, _target_item_type) {
     return get_itemIds_from_itemType(local_myListsAt_withItemType, _target_item_type);
 }
 
+//call presentbox info
+/*
+async function call_presentbox_info
+*/
+
+//call item info
+async function call_item_info(_itemId) {
+    let _item = await contract_mc.methods.items(_itemId).call();
+    return _item;   //object
+}
+
+
+
 
 //---send
 
@@ -1320,6 +1348,13 @@ async function dice_roll(_summoner) {
 //upgrade
 async function upgrade_item(_summoner, _itemId1, _itemId2, _itemId3) {
     contract_mfc.methods.upgrade_item(_summoner, _itemId1, _itemId2, _itemId3).send({from:wallet})
+        .on("transactionHash", (transactionHash) => update_tx_text("sending", transactionHash))
+        .on("receipt", (receipt) => update_tx_text("done", receipt.transactionHash));
+}
+
+//open presentbox
+async function open_presentbox(_summoner, _itemId) {
+    contract_mfc.methods.open_presentbox(_summoner, _itemId).send({from:wallet})
         .on("transactionHash", (transactionHash) => update_tx_text("sending", transactionHash))
         .on("receipt", (receipt) => update_tx_text("done", receipt.transactionHash));
 }
@@ -1794,8 +1829,8 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             this.y += delta_y2;
             if (this.x > this.target_x-75 
               && this.x < this.target_x+75 
-              && this.y > this.target_y-75 
-              && this.y < this.target_y+75) {
+              && this.y > this.target_y-25 
+              && this.y < this.target_y+25) {
                 this.submode = 2;
             }
         } else if (this.submode == 2) {
@@ -2475,11 +2510,6 @@ class Dice extends Phaser.GameObjects.Sprite{
     //---update()
     update(){
         this.count += 1;
-        /*
-        if (this.count % 2 == 0) {
-            return 0;
-        }
-        */
         //dept
         this.depth = this.line_y;
         this.text_rolled_number.depth = this.line_y + 1;
@@ -2497,7 +2527,7 @@ class Dice extends Phaser.GameObjects.Sprite{
             if (_next_sec <= 0) {
                 this.text_next_time.setText("Dice Roll").setFill("#ff0000");
                 this.flag_tx = 1;
-            } else if (_next_sec <= this.buffer_sec ) {
+            } else if (_next_sec <= this.buffer_sec * 0.95 ) {
                 let _hr = Math.floor(_next_sec % 86400 / 3600);
                 let _min = Math.floor(_next_sec % 3600 / 60);
                 let _text = _hr + "h:" + _min + "m";
@@ -3059,6 +3089,46 @@ class Fluffy extends Phaser.GameObjects.Sprite{
 }
 
 
+//===class:PresentBox========================================================--------
+//***TODO***
+
+class PresentBox extends Phaser.GameObjects.Sprite{
+    constructor(scene, x, y, img, itemId, summoner_from, memo){
+        super(scene, x, y, img);
+        this.scene.add.existing(this);
+        this.setInteractive({ useHandCursor: true });
+        this.on("pointerdown", function (pointer) {
+            this.on_click();
+        }, this);
+        this.itemId = itemId;
+        this.summoner_from = summoner_from;
+        this.memo = memo;
+        this.on_summon();
+    }
+    
+    //---on_click
+    on_click() {
+        //send transaction
+        open_presentbox(summoner, this.itemId);
+    }
+    
+    //---on_summon
+    on_summon() {
+        //animation?
+    }
+        
+    //---update()
+    update() {
+        if (turn % 100 == 0) {
+            if (!local_itemIds.includes(this.itemId)){
+                summoned_presentbox = summoned_presentbox.filter(n => n !== this.itemId);
+                this.destroy();
+            }
+        }
+    }
+}
+
+
 //===functions========================================================--------
 
 
@@ -3483,6 +3553,20 @@ function open_window_craft (scene) {
     button_crafting_close = create_button(1070, 840, "Cancel", 0, scene, _rarity);
     group_window_crafting.add(button_crafting_close);
     
+    //upgrade button
+    let obj_upgrade = scene.add.text(220, 810, ">> Upgrade Item <<")
+        .setFontSize(30).setFontFamily("Arial")
+        .setInteractive({useHandCursor: true})
+        .setFill("black")
+        .setBackgroundColor("#ecd9ff")
+        .on("pointerdown", () => close_crafting_window(0) )
+        .on("pointerdown", () => sound_window_select.play() )
+        .on("pointerover", () => obj_upgrade.setStyle({ fontSize: 30, fontFamily: "Arial", fill: '#d19dff' }))
+        .on("pointerover", () => sound_window_pointerover.play())
+        .on("pointerout", () => obj_upgrade.setStyle({ fontSize: 30, fontFamily: "Arial", fill: "black" }))
+        .on("pointerdown", () => open_window_upgrade(scene) );
+    group_window_crafting.add(obj_upgrade);
+
     //depth
     group_window_crafting.setDepth(9999 + 100);
 }
@@ -3491,7 +3575,84 @@ function open_window_craft (scene) {
 //---window:upgrade
 //***TODO***
 function open_window_upgrade(scene) {
+
+    function close_window_upgrade() {
+        group_window_upgrade.destroy(true);
+    }
+
+    //create group
+    group_window_upgrade = scene.add.group();
     
+    //create window
+    let window_upgrade = scene.add.sprite(640, 480, "window").setInteractive();
+    let _text = "Upgrade your items.\n Mint a higher rarity item by burning 3 items with the same item_type and rarity";
+    let msg_upgrade = scene.add.text(150, 150, _text)
+        .setFontSize(24).setFontFamily("Arial").setFill("#000000");
+    group_window_upgrade.add(window_upgrade);
+    group_window_upgrade.add(msg_upgrade);
+    
+    //get upgradable items
+    let upgradable_itemIds = get_upgradable_itemIds(local_myListsAt_withItemType);
+    
+    //display upgradable items
+    let _num = 1;
+    Object.keys(upgradable_itemIds).forEach(_itemId => {
+        // mint uncommon Violin (burn 3 common items, ID: 1, 4, 5)
+        let _item_name = array_item_name[_itemId];
+        let _item_name_to;
+        if (_itemId <= 128) {
+            _item_name_to = array_item_name[Number(_itemId)+64];
+        } else {
+            _item_name_to = array_item_name[Number(_itemId)+12];
+        }
+        let _rarity = "";
+        let _rarity_to = "";
+        if (_itemId <= 64 || (_itemId >= 201 && _itemId <= 212)){
+            _rarity = "Common";
+            _rarity_to = "Uncommon";
+        } else {
+            _rarity = "Uncommon";
+            _rarity_to = "Rare";
+        }
+        let _txt = "";
+        _txt += _rarity_to + " " + _item_name_to;
+        _txt += " (burn item ID: ";
+        _txt += upgradable_itemIds[_itemId][0] + ", ";
+        _txt += upgradable_itemIds[_itemId][1] + ", ";
+        _txt += upgradable_itemIds[_itemId][1] + ")";
+        let _msg = scene.add.text(150, 200 + 50*_num, _txt)
+            .setFontSize(30).setFontFamily("Arial").setFill("#000000")
+            .setInteractive({useHandCursor: true})
+            .on("pointerdown", () => {
+                upgrade_item(
+                    summoner, 
+                    upgradable_itemIds[_itemId][0], 
+                    upgradable_itemIds[_itemId][1], 
+                    upgradable_itemIds[_itemId][1]
+                );
+                close_window_upgrade(); 
+            })
+            .on("pointerdown", () => sound_window_select.play() )
+            .on("pointerover", () => _msg.setStyle({ fontSize: 30, fontFamily: "Arial", fill: '#ffff00' }))
+            .on("pointerover", () => sound_window_pointerover.play())
+            .on("pointerout", () => _msg.setStyle({ fontSize: 30, fontFamily: "Arial", fill: "black" }));
+        group_window_upgrade.add(_msg);
+        _num += 1;
+    });
+    
+    //cancel button
+    let _msg = scene.add.text(1070, 840, "Cancel")
+        .setFontSize(30).setFontFamily("Arial").setFill("#000000")
+        .setInteractive({useHandCursor: true})
+        .on("pointerdown", () => close_window_upgrade() )
+        .on("pointerdown", () => sound_window_select.play() )
+        .on("pointerover", () => _msg.setStyle({ fontSize: 30, fontFamily: "Arial", fill: '#ffff00' }))
+        .on("pointerover", () => sound_window_pointerover.play())
+        .on("pointerout", () => _msg.setStyle({ fontSize: 30, fontFamily: "Arial", fill: "black" }));
+    group_window_upgrade.add(_msg);
+    
+    //depth
+    group_window_upgrade.setDepth(9999 + 100);
 }
 
 
@@ -3948,6 +4109,7 @@ function preload(scene) {
     scene.load.image("item_window_night", "src/png/item_window_night.png");
     scene.load.image("item_window_night_closed", "src/png/item_window_night_closed.png");
     scene.load.image("item_newspaper", "src/png/item_newspaper.png");
+    scene.load.image("item_presentbox", "src/png/item_presentbox.png");
     
     //---star
     scene.load.image("star_blue", "src/png/star_blue.png", {frameWidth: 200, frameHeight: 191});
@@ -7037,6 +7199,38 @@ function update_checkItem(this_scene) {
         _do(this_scene);
     }
 
+    //###200:Presentbox
+    //***TODO***
+    if (local_items[200] > previous_local_item200) {
+        let _itemIds = get_itemIds_from_itemType(local_myListsAt_withItemType, 200);
+        _itemIds.forEach( async (_itemId) => {
+            if (!summoned_presentbox.includes(_itemId)) {
+                let _x = 300 + Math.random() * 500;
+                let _y = 600 + Math.random() * 100;
+                let _item = await call_item_info(_itemId);
+                let _summoner_from = call_name_from_summoner(_item.crafted_summoner);
+                if (_summoner_from == "") {
+                    _summoner_from = "#" + _item.crafted_summoner;
+                }
+                let _memo = _item.memo;
+                new PresentBox(
+                    scene,
+                     _x, 
+                     _y, 
+                     "item_presentbox", 
+                     _summoner_from, 
+                     _memo, 
+                     _itemId
+                 )
+                    .setOrigin(0.5)
+                    .setScale(0.15)
+                    .setAlpha(1)
+                    .setDepth(3);
+                summoned_presentbox.push(_itemId);
+            }
+        });
+    }
+
     //###201-236:Fluffy
     if (local_precious > previous_local_precious2) {
         let _timeout = 0;
@@ -7109,6 +7303,7 @@ function update_checkItem(this_scene) {
     previous_local_item195 = local_items[195];
     previous_local_item196 = local_items[196];
     previous_local_item197 = local_items[197];
+    previous_local_item200 = local_items[200];
     previous_local_rolled_dice = local_rolled_dice;
     previous_local_name_str = local_name_str;
     previous_local_score = local_score;
@@ -7259,7 +7454,8 @@ class FirstCheck extends Phaser.Scene {
     }
     
     preload() {
-        this.load.image("murasaki_error", "src/png/murasaki_error.png");
+        this.load.image("icon_error", "src/png/icon_error.png");
+        this.load.image("icon_wrong", "src/png/icon_wrong.png");
     }
     
     create(){
@@ -7275,9 +7471,9 @@ class FirstCheck extends Phaser.Scene {
             .setFontFamily("Arial")
             .setOrigin(0.5)
             .setFill("#ffebf7");
-        let _errImg = this.add.image(640, 360, "murasaki_error")
+        let _errImg = this.add.image(640, 360, "icon_error")
             .setOrigin(0.5)
-            .setScale(0.45)
+            .setScale(0.5)
             .setVisible(false);
             
         //function for loop
@@ -7407,9 +7603,9 @@ class SomethingWrong extends Phaser.Scene {
             .setFontFamily("Arial")
             .setOrigin(0.5)
             .setFill("#ffebf7");
-        let _errImg = this.add.image(640, 360, "murasaki_error")
+        let _errImg = this.add.image(640, 360, "icon_wrong")
             .setOrigin(0.5)
-            .setScale(0.45)
+            .setScale(0.5)
             .setVisible(false);
         _msg1.setText("Something Wrong");
         _msg2.setText("Please reload the page.");
