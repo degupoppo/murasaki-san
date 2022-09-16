@@ -6,18 +6,32 @@
 /*
 
 1st
-    コンセプトの整理
+
+   *メインコンセプトの整理*
         電子生命
 
-    ぬいちゃんのコストの深慮
-        ハート経済を不採用としたためコストが不明
-        ノーマルリソースのみでは希少性が低すぎる
-        fluffyをコストに要求するか
+   *ぬいちゃんシステムの深慮*
+        コスト設定
+            ハート経済を不採用としたためコストが不明
+            ノーマルリソースのみでは希少性が低すぎる
+            fluffyをコストに要求するか
             rare fluffyを1体要求、など
             fluffiestの選択はどうするか
-        fluffyコスト導入の場合はコードの修正が必要
+            fluffyコスト導入の場合はコードの修正が必要
+        自分でもぬいちゃんを所有するインセンティブを考える
+            最低補正値を+3%にするか
+                feedingとgroomingではluck+3に相当
+                fluffiestがおよそ+0.5なので破格か
+                fluffiest x 3 = 1.5なので、fluffiest x3を要求とかでも良いか？
+            1体でも所有していれば経験値獲得にプラスとなる。
+            fluffiest分のluck補正は持ち越し。
+        意味論
+            fluffyはぬいちゃんになることに憧れている設定
+            fluffiestが3体集まるとぬいちゃんになれる
+            ぬいちゃんのバリエーションが少しはほしいところだが
+                リボンなどのアクセサリーでバリエーションを作るか
 
-    クリティカル検出の改善
+ ig クリティカル検出の改善
         現状、うまく検出できてない
         luck_challengeはmsg.senderを参照するので画一的に結果を取得できない
         案1
@@ -26,6 +40,10 @@
             通常のernを計算しそれより多いか参照する
         案3
             Eventを参照する
+        採用案
+            feeding, grooming, mining, farmingのluck前の値を取得し、
+            この値より1.8倍大きいdeltaが生じた時にcliticalと判定する。
+            feedingとgroomingのぬいちゃん補正はlocalで行う。
 
     ガバナンスシステムの実装
         投票
@@ -59,14 +77,50 @@
             → 同時に、選択した色に投票される
             一番投票数が多かった毛玉が選出され、その月luckにブーストがかかる
     
-    Pet用帽子の実装
+    猫の絵の実装
+        家猫, 寝ている絵, 2枚, OK
+        家猫, 立っている絵, 2枚
+        家猫, メールをくわえて立っている絵, 1枚
+        家猫, メールをくわえて右に歩いている絵, 2枚
+        家猫, 何もくわえずに左に歩いている絵, 2枚
+        家猫, メールをくわえて立っている絵, にゃーと鳴いている, 1枚
+        訪問猫, 寝ている絵, 2枚
+        訪問猫, メールをくわえて立っている絵, 2枚
+        訪問猫, メールをくわえて立っている絵, にゃーと鳴いている, 1枚
+        訪問猫, メールをくわえて右に歩いている絵, 2枚
+        訪問猫, 何もくわえずに左に歩いている絵, 2枚
+    
+    Fluffyの絵の実装
+        3種類, 12色
+    
+    Newspaperの絵の改善
+        もう少し見やすく、新聞の絵をもうちょっとリッチに
+    
+    読み込み画面の改善
+        オープニングのイメージをどうするか
+    
+    Upgradeウィンドウの改善
+        もっと直感的にわかりやすく
+
+    一人遊び用アクセサリー
+        積み木
+            つっつくむらさきさん絵
+            積み木が３段階ぐらいで積み上がっている絵
+        ティーセット
+            条件が揃うとペットたちとお茶会をする
+            午後2時～4時、happy80%以上、満腹度80%以下
+        お昼寝用クッション
+            条件が揃うとペットたちとくっついて寝る
+            スイッチで夜もしくは20時以降20時前、満腹度80%以上、happy80%以上
+
+2nd
+
+ ok Pet用帽子の実装
         ニット帽はペット用の小さいものにする
         Petクラスにwearing hat関数を実装する
         ニット帽子のサイズと位置合わせ
 
-
-2nd
-    プレゼントシステムの実装
+ ok プレゼントシステムの実装
         fluffyを得るタイミングではまずプレゼントboxを得る
         クリックしてopenするとランダムでfluffyが手に入る
         コントラクトで管理する
@@ -89,7 +143,7 @@
         実装
             専用クラスを用意する
 
-    item upgradeのUIの改善
+ ok item upgradeのUIの改善
         HP上で自分でid選んでupgradeは面倒だし味気ない
         craft windowなどでupgrade可能なもの一覧などを表示できればよいが。
 
@@ -97,18 +151,7 @@
         毎回create, destroyではなく、
         最初にcreateしvisible/unvisibleで制御する
 
-    一人遊び用アクセサリー
-        積み木
-            つっつくむらさきさん絵
-            積み木が３段階ぐらいで積み上がっている絵
-        ティーセット
-            条件が揃うとペットたちとお茶会をする
-            午後2時～4時、happy80%以上、満腹度80%以下
-        お昼寝用クッション
-            条件が揃うとペットたちとくっついて寝る
-            スイッチで夜もしくは20時以降20時前、満腹度80%以上、happy80%以上
-
-    猫のUIの改善
+ ok 猫のUIの改善
         専用クラスを用意する
         メール送信中は部屋にいない
         メール開封後、インターバル中はクッションで寝ている
@@ -140,7 +183,7 @@
             訪問猫, メールをくわえて右に歩いている絵, 2枚
             訪問猫, 何もくわえずに左に歩いている絵, 2枚
 
-    Fluffy NFTのUX実装
+ ok Fluffy NFTのUX実装
         カウンターの実装
             n,u,rを3つ表示する
         レーダーチャートへの反映
@@ -164,13 +207,13 @@
             新たに取得時の出現を実装
             消費やupgrade時の消滅を実装
 
-    Newspaperの実装
+ ok Newspaperの実装
         主だったイベントのみを表示させる
             craft
             Level-up
             mail open
 
-    ゲーム読み込み・開始UIの深慮
+ ok ゲーム読み込み・開始UIの深慮
         ゲーム画面はすべて読みこんでから表示させたい
         そのため、できるだけまとめて読み込み、読み込み完了をわかりやすくする
             ぬいちゃんと、walletスコアの取得がネック、さてどうするか。
@@ -251,7 +294,7 @@
         summonerの専用アニメーションの用意
         レベルアップの文字の表示
 
-    帽子の普遍的な位置合わせ
+ ok 帽子の普遍的な位置合わせ
             
     NFTのURL取得方法の実装
     
@@ -341,6 +384,9 @@ async function init_global_variants() {
     previous_local_precious = 0;
     previous_local_precious2 = 0;
     previous_local_item200 = 0;
+    last_local_coin_calc = 0;
+    last_local_material_calc = 0;
+
     
     //---local etc
     turn = 0;
@@ -376,6 +422,7 @@ async function init_global_variants() {
     time_forFPS = Date.now();
     summoned_fluffies = [];
     summoned_presentbox = [];
+    item_wearing_hat_pet = 0;
 
     //---flag
     flag_music = 0;
@@ -603,7 +650,7 @@ async function contract_update_static_status(_summoner) {
     if (summoner == 0) {
         return 0;
     }
-
+    
     //call info from chain
     let _all_static_status = await contract_info.methods.allStaticStatus(_summoner).call();
 
@@ -747,10 +794,12 @@ async function contract_update_dynamic_status(_summoner) {
     local_material_calc =   Number(_all_dynamic_status[47]);
     local_crafting_calc =   Number(_all_dynamic_status[48]);
     
+    /*
     //update luck challenge
     local_luck_challenge_of_mffg =  Number(_all_dynamic_status[51]);
     local_luck_challenge_of_mfmf =  Number(_all_dynamic_status[52]);
     local_luck_challenge_of_mfc  =  Number(_all_dynamic_status[53]);
+    */
     
     //petrified
     local_notPetrified = Number(_all_dynamic_status[31]);
@@ -2113,6 +2162,65 @@ class Pet extends Phaser.GameObjects.Sprite{
     }
     */
 
+    //---update wearing_hat
+    update_item_wearing_hat() {
+        if (this.type == "mining") {
+            //right or left
+            if (this.dist == "right") {
+                item_wearing_hat_pet[1].x = this.x-9;
+            } else {
+                item_wearing_hat_pet[1].x = this.x+10;
+            }
+            //frame adjustment
+            if (
+                (this.frame.name == 0 && this.dist == "right")
+                || (this.frame.name == 1 && this.dist == "left")
+            ) {
+                item_wearing_hat_pet[1].y = this.y-22;
+            } else {
+                item_wearing_hat_pet[1].y = this.y-24;
+            }
+            //depth
+            item_wearing_hat_pet[1].depth = this.y + 1;
+        } else if (this.type == "farming") {
+            //right or left
+            if (this.dist == "right") {
+                item_wearing_hat_pet[1].x = this.x;
+            } else {
+                item_wearing_hat_pet[1].x = this.x+1;
+            }
+            //frame adjustment
+            if (
+                (this.frame.name == 1 && this.dist == "right")
+                || (this.frame.name == 0 && this.dist == "left")
+            ) {
+                item_wearing_hat_pet[1].y = this.y-24;
+            } else {
+                item_wearing_hat_pet[1].y = this.y-27;
+            }
+            //depth
+            item_wearing_hat_pet[1].depth = this.y + 1;
+        } else if (this.type == "crafting") {
+            //right or left
+            if (this.dist == "right") {
+                item_wearing_hat_pet[1].x = this.x;
+            } else {
+                item_wearing_hat_pet[1].x = this.x+2;
+            }
+            //frame adjustment
+            if (
+                (this.frame.name == 1 && this.dist == "right")
+                || (this.frame.name == 0 && this.dist == "left")
+            ) {
+                item_wearing_hat_pet[1].y = this.y-29;
+            } else {
+                item_wearing_hat_pet[1].y = this.y-31;
+            }
+            //depth
+            item_wearing_hat_pet[1].depth = this.y + 1;
+        }
+    }
+
     //---update()
     update(){
         if (this.mode == "resting") {this.resting();}
@@ -2121,6 +2229,10 @@ class Pet extends Phaser.GameObjects.Sprite{
         else if (this.mode == "working") {this.working();}
         //depth
         this.depth = this.y;
+        //draw item_wearing_hat
+        if (item_wearing_hat_pet != 0 && item_wearing_hat_pet[0] == this.type) {
+            this.update_item_wearing_hat();
+        }
     }
 }
 
@@ -3560,7 +3672,7 @@ function open_window_craft (scene) {
         .setFill("black")
         .setBackgroundColor("#ecd9ff")
         .on("pointerdown", () => close_crafting_window(0) )
-        .on("pointerdown", () => sound_window_select.play() )
+        .on("pointerdown", () => sound_window_open.play() )
         .on("pointerover", () => obj_upgrade.setStyle({ fontSize: 30, fontFamily: "Arial", fill: '#d19dff' }))
         .on("pointerover", () => sound_window_pointerover.play())
         .on("pointerout", () => obj_upgrade.setStyle({ fontSize: 30, fontFamily: "Arial", fill: "black" }))
@@ -3619,7 +3731,7 @@ function open_window_upgrade(scene) {
         _txt += " (burn item ID: ";
         _txt += upgradable_itemIds[_itemId][0] + ", ";
         _txt += upgradable_itemIds[_itemId][1] + ", ";
-        _txt += upgradable_itemIds[_itemId][1] + ")";
+        _txt += upgradable_itemIds[_itemId][2] + ")";
         let _msg = scene.add.text(150, 200 + 50*_num, _txt)
             .setFontSize(30).setFontFamily("Arial").setFill("#000000")
             .setInteractive({useHandCursor: true})
@@ -3628,7 +3740,7 @@ function open_window_upgrade(scene) {
                     summoner, 
                     upgradable_itemIds[_itemId][0], 
                     upgradable_itemIds[_itemId][1], 
-                    upgradable_itemIds[_itemId][1]
+                    upgradable_itemIds[_itemId][2]
                 );
                 close_window_upgrade(); 
             })
@@ -5222,7 +5334,8 @@ function update_parametersWithAnimation(this_scene) {
                 _sign = "+";
             }
             //if (_delta >= local_coin_calc * 1.5) {
-            if (local_luck_challenge_of_mfmf && _sign == "+") {
+            //if (local_luck_challenge_of_mfmf && _sign == "+") {
+            if (_delta >= last_local_coin_calc * 1.8) {
                 text_coin_earned.setText(_sign + _delta + " lucky♪");
             } else {
                 text_coin_earned.setText(_sign + _delta);
@@ -5252,7 +5365,8 @@ function update_parametersWithAnimation(this_scene) {
                 _sign = "+";
             }
             //if (_delta >= local_material_calc * 1.5) {
-            if (local_luck_challenge_of_mfmf && _sign == "+") {
+            //if (local_luck_challenge_of_mfmf && _sign == "+") {
+            if (_delta >= last_local_material_calc * 1.8) {
                 text_material_earned.setText(_sign + _delta + " lucky♪");
             } else {
                 text_material_earned.setText(_sign + _delta);
@@ -5336,6 +5450,8 @@ function update_parametersWithAnimation(this_scene) {
     previous_local_coin = local_coin;
     previous_local_material = local_material;
     previous_local_exp = local_exp;
+    last_local_coin_calc = local_coin_calc;
+    last_local_material_calc = local_material_calc;
 }
 
 
@@ -5964,15 +6080,31 @@ function update_checkItem(this_scene) {
         local_items_flag[_item_id] = true;
         let _x = 690;
         let _y = 255;
-        item_hat_knit = this_scene.add.sprite(_x, _y, "item_hat_knit").setOrigin(0.5).setScale(0.20);
+        item_hat_knit = this_scene.add.sprite(_x, _y, "item_hat_knit")
+            .setOrigin(0.5)
+            .setScale(0.20);
         item_hat_knit.setInteractive({useHandCursor: true});
         item_hat_knit.on('pointerdown', () => {
-            if (item_wearing_hat == 0) {
-                item_wearing_hat = item_hat_knit;
-                murasakisan.on_click();
+            if (item_wearing_hat_pet == 0) {
+                let _array = [];
+                if (typeof mr_astar != "undefined"){
+                    _array.push("mining");
+                }
+                if (typeof ms_ether != "undefined"){
+                    _array.push("farming");
+                }
+                if (typeof dr_bitco != "undefined"){
+                    _array.push("crafting");
+                }
+                if (_array != []) {
+                    let _target_pet = _array[Math.floor(Math.random() * _array.length)];
+                    item_wearing_hat_pet = [_target_pet, item_hat_knit];
+                    item_hat_knit.setScale(0.1);
+                }
                 sound_hat.play();
-            } else if (item_wearing_hat == item_hat_knit) {
-                item_wearing_hat = 0;
+            } else {
+                item_wearing_hat_pet = 0;
+                item_hat_knit.setScale(0.20);
                 item_hat_knit.x = _x;
                 item_hat_knit.y = _y;
             }
