@@ -3066,7 +3066,7 @@ contract Murasaki_Function_Crafting is Ownable {
             || _item_type == 194    //coin bag
             || _item_type == 195    //material bag
             || _item_type == 196    //mail
-            || _item_type == 197    //nui
+            //|| _item_type == 197    //nui
         );
         //get dc, cost, heart
         uint32[4] memory _dc_table = get_item_dc(_item_type);
@@ -3125,10 +3125,12 @@ contract Murasaki_Function_Crafting is Ownable {
                 uint32 _total_item_crafted = mss.total_item_crafted(_summoner);
                 mss.set_total_item_crafted(_summoner, _total_item_crafted + 1);
             }
+            /*
             //when nui-chan, update Storage_Nui
             if (_item_type == 197) {
                 _update_storage_nui(_summoner, mc.next_item()-1);
             }
+            */
             //event
             emit Crafting(_summoner, _item_type, mc.next_item()-1, _critical);
         //not completed, return coin/material
@@ -3251,7 +3253,8 @@ contract Murasaki_Function_Crafting is Ownable {
         (uint32 _item_type1, , , ,) = mc.items(_item1);
         (uint32 _item_type2, , , ,) = mc.items(_item2);
         (uint32 _item_type3, , , ,) = mc.items(_item3);
-        require(_item_type1 <= 128 || (_item_type1 >= 201 && _item_type1 <= 224) );
+        //require(_item_type1 <= 128 || (_item_type1 >= 201 && _item_type1 <= 224) );
+        require(_item_type1 <= 128 || (_item_type1 >= 201 && _item_type1 <= 236) );
     	require(
     	    _item_type2 == _item_type1
     	    && _item_type3 == _item_type1
@@ -3263,10 +3266,15 @@ contract Murasaki_Function_Crafting is Ownable {
         //mint upper rank item
         uint32 _seed = mfs.seed(_summoner);
         string memory _memo = "";
-        if (_item_type1 <= 128) {   // normal item, +64
+        // normal item, +64
+        if (_item_type1 <= 128) {
             mc.craft(_item_type1 + 64, _summoner, msg.sender, _seed, _memo);
-        } else if (_item_type1 >= 201) {    // precious, +12
+        // precious, +12
+        } else if (_item_type1 >= 201 && _item_type1 <= 224) {
             mc.craft(_item_type1 + 12, _summoner, msg.sender, _seed, _memo);
+        // fluffiest, -> nui-chan
+        } else if (_item_type1 >=225 && _item_type1 <= 236) {
+            _update_storage_nui(_summoner, mc.next_item());
         }
         //event
         emit Upgrade(_summoner, _item_type1, mc.next_item());

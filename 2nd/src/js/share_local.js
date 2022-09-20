@@ -331,5 +331,6 @@ async function init_web3(){
     contract_bbt = await new web3.eth.Contract(abi_buybackTreasury, contract_buybackTreasury);
     contract_tt = await new web3.eth.Contract(abi_teamTreasury, contract_teamTreasury);
     
+    return 0;
 }
 

@@ -30,6 +30,12 @@
             fluffiestが3体集まるとぬいちゃんになれる
             ぬいちゃんのバリエーションが少しはほしいところだが
                 リボンなどのアクセサリーでバリエーションを作るか
+        コスト設定
+            Upgradeがノーコスト・ノータイムで行えてしまうと、
+            summonerがぬいちゃん製造機になってしまう。
+            ぬいちゃんをcraftするとゲームプレイが不利になるメカニズムを考える
+            → コストの要求, coin/leafコスト
+            → 時間の要求, システム構築が結構面倒
 
  ig クリティカル検出の改善
         現状、うまく検出できてない
@@ -114,6 +120,17 @@
             スイッチで夜もしくは20時以降20時前、満腹度80%以上、happy80%以上
 
 2nd
+
+ ok 読み込み順の整理
+        最優先
+            wallet
+            summoner
+            owner
+        画面描写前
+            全パラメータを1度
+        描写後
+            ぬいちゃん
+            fluffy
 
  ok Pet用帽子の実装
         ニット帽はペット用の小さいものにする
@@ -574,9 +591,9 @@ async function send_fp_get(_wallet, _summoner) {
 //---update
 
 //call myListsAt_withItemType
-async function get_myListsAt_withItemType() {
-    let myListLength = await contract_mc.methods.myListLength(wallet).call();
-    let myListsAt_withItemType = await contract_mc.methods.myListsAt_withItemType(wallet, 0, myListLength).call();
+async function get_myListsAt_withItemType(_wallet) {
+    let myListLength = await contract_mc.methods.myListLength(_wallet).call();
+    let myListsAt_withItemType = await contract_mc.methods.myListsAt_withItemType(_wallet, 0, myListLength).call();
     return myListsAt_withItemType;
 }
 
@@ -672,13 +689,27 @@ async function contract_update_static_status(_summoner) {
     SPEED = Number(SPEED) / 100;
     
     //calc wallet score
-    local_wallet_score = await calc_wallet_score(wallet);
+    //local_wallet_score = await calc_wallet_score(wallet);
+    update_local_wallet_score();
 }
 
 //using in Loading scene
 async function preUpdate(){
+    console.log("load: web3");
+    await init_web3();
+    console.log("OK");
+    console.log("load: summoner");
     await contract_update_summoner_of_wallet();
+    console.log("OK");
+    //console.log("load: static");
+    //await contract_update_static_status(summoner);
+    //console.log("OK");
+    console.log("load: dynamic");
     await contract_update_dynamic_status(summoner);
+    console.log("OK");
+    console.log("local item");
+    local_myListsAt_withItemType = await get_myListsAt_withItemType(local_owner);
+    console.log("OK");
 }
 
 
@@ -694,7 +725,7 @@ async function contract_update_dynamic_status(_summoner) {
     let _res;
 
     //call item
-    let _myListsAt_withItemType = await get_myListsAt_withItemType();
+    let _myListsAt_withItemType = await get_myListsAt_withItemType(local_owner);
 
     //generate and update local item info
     local_myListsAt_withItemType = _myListsAt_withItemType;
@@ -703,9 +734,9 @@ async function contract_update_dynamic_status(_summoner) {
     local_itemIds = get_itemIds(_myListsAt_withItemType);
 
     //***TODO*** debug
-    for (let i = 1; i <= 64; i++) {
-        local_items[i] += 1;
-    }
+    //for (let i = 1; i <= 64; i++) {
+    //    local_items[i] += 1;
+    //}
 
     //call dynamic status from chain
     let _all_dynamic_status = await contract_info.methods.allDynamicStatus(_summoner).call();
@@ -1201,6 +1232,12 @@ async function calc_wallet_score(wallet_address) {
     }
     //console.log(_nonce, _age, _scoreMax, _score);
     return _score;    
+}
+
+//update local_wallet_score
+//because calc is high cost, wrapping the updating
+async function update_local_wallet_score() {
+    local_wallet_score = await calc_wallet_score(local_owner);
 }
 
 
@@ -4094,22 +4131,22 @@ function preload(scene) {
     scene.load.image("button_mining_pointerover_stop", "src/png/button_mining_pointerover_stop.png");
     scene.load.image("button_farming_enable", "src/png/button_farming_enable.png");
     scene.load.image("button_farming_unable", "src/png/button_farming_unable.png");
-    scene.load.image("button_farming_pointerover", "src/png/button_farming_pointerover.png", {frameWidth: 500, frameHeight: 500});
-    scene.load.image("button_farming_working", "src/png/button_farming_working.png", {frameWidth: 500, frameHeight: 500});
-    scene.load.image("button_farming_pointerover_stop", "src/png/button_farming_pointerover_stop.png", {frameWidth: 500, frameHeight: 500});
-    scene.load.image("button_crafting_enable", "src/png/button_crafting_enable.png", {frameWidth: 500, frameHeight: 500});
-    scene.load.image("button_crafting_unable", "src/png/button_crafting_unable.png", {frameWidth: 500, frameHeight: 500});
-    scene.load.image("button_crafting_pointerover", "src/png/button_crafting_pointerover.png", {frameWidth: 500, frameHeight: 500});
-    scene.load.image("button_crafting_working", "src/png/button_crafting_working.png", {frameWidth: 500, frameHeight: 500});
-    scene.load.image("button_crafting_pointerover_stop", "src/png/button_crafting_pointerover_stop.png", {frameWidth: 500, frameHeight: 500});
-    scene.load.image("button_crafting_pointerover_mint", "src/png/button_crafting_pointerover_mint.png", {frameWidth: 500, frameHeight: 500});
-    scene.load.image("button_grooming_enable", "src/png/button_grooming_enable.png", {frameWidth: 500, frameHeight: 500});
-    scene.load.image("button_grooming_unable", "src/png/button_grooming_unable.png", {frameWidth: 500, frameHeight: 500});
-    scene.load.image("button_grooming_pointerover", "src/png/button_grooming_pointerover.png", {frameWidth: 500, frameHeight: 500});
-    scene.load.image("button_levelup_enable", "src/png/button_levelup_enable.png", {frameWidth: 500, frameHeight: 500});
-    scene.load.image("button_levelup_unable", "src/png/button_levelup_unable.png", {frameWidth: 500, frameHeight: 500});
-    scene.load.image("button_levelup_pointerover", "src/png/button_levelup_pointerover.png", {frameWidth: 500, frameHeight: 500});
-    scene.load.image("back_level", "src/png/button_level.png", {frameWidth: 500, frameHeight: 500});
+    scene.load.image("button_farming_pointerover", "src/png/button_farming_pointerover.png");
+    scene.load.image("button_farming_working", "src/png/button_farming_working.png");
+    scene.load.image("button_farming_pointerover_stop", "src/png/button_farming_pointerover_stop.png");
+    scene.load.image("button_crafting_enable", "src/png/button_crafting_enable.png");
+    scene.load.image("button_crafting_unable", "src/png/button_crafting_unable.png");
+    scene.load.image("button_crafting_pointerover", "src/png/button_crafting_pointerover.png");
+    scene.load.image("button_crafting_working", "src/png/button_crafting_working.png");
+    scene.load.image("button_crafting_pointerover_stop", "src/png/button_crafting_pointerover_stop.png");
+    scene.load.image("button_crafting_pointerover_mint", "src/png/button_crafting_pointerover_mint.png");
+    scene.load.image("button_grooming_enable", "src/png/button_grooming_enable.png");
+    scene.load.image("button_grooming_unable", "src/png/button_grooming_unable.png");
+    scene.load.image("button_grooming_pointerover", "src/png/button_grooming_pointerover.png");
+    scene.load.image("button_levelup_enable", "src/png/button_levelup_enable.png");
+    scene.load.image("button_levelup_unable", "src/png/button_levelup_unable.png");
+    scene.load.image("button_levelup_pointerover", "src/png/button_levelup_pointerover.png");
+    scene.load.image("back_level", "src/png/button_level.png");
 
     //---pet
     scene.load.spritesheet("mr_astar_right", "src/png/pet_mr_astar_right.png", {frameWidth: 600, frameHeight: 600});
@@ -4159,49 +4196,49 @@ function preload(scene) {
     scene.load.audio("piano2", "src/sound/piano2.mp3");
 
     //---item_basic
-    scene.load.image("item_table", "src/png/item_basic_table.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("item_misin", "src/png/item_basic_misin.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("item_tree0", "src/png/item_basic_tree0.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("item_tree1", "src/png/item_basic_tree1.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("item_tree2", "src/png/item_basic_tree2.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("item_tree3", "src/png/item_basic_tree3.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("item_bear", "src/png/item_basic_bear.png", {frameWidth: 720, frameHeight: 622});
-    scene.load.image("item_sweet_potato", "src/png/item_basic_sweet_potato.png", {frameWidth: 500, frameHeight: 500});
-    scene.load.image("item_gold1", "src/png/item_basic_gold1.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("item_gold2", "src/png/item_basic_gold2.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("item_gold3", "src/png/item_basic_gold3.png", {frameWidth: 370, frameHeight: 320});
+    scene.load.image("item_table", "src/png/item_basic_table.png");
+    scene.load.image("item_misin", "src/png/item_basic_misin.png");
+    scene.load.image("item_tree0", "src/png/item_basic_tree0.png");
+    scene.load.image("item_tree1", "src/png/item_basic_tree1.png");
+    scene.load.image("item_tree2", "src/png/item_basic_tree2.png");
+    scene.load.image("item_tree3", "src/png/item_basic_tree3.png");
+    scene.load.image("item_bear", "src/png/item_basic_bear.png");
+    scene.load.image("item_sweet_potato", "src/png/item_basic_sweet_potato.png");
+    scene.load.image("item_gold1", "src/png/item_basic_gold1.png");
+    scene.load.image("item_gold2", "src/png/item_basic_gold2.png");
+    scene.load.image("item_gold3", "src/png/item_basic_gold3.png");
 
     //---item_craft
     scene.load.spritesheet("item_musicbox", "src/png/item_musicbox.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("item_violin", "src/png/item_violin.png", {frameWidth: 600, frameHeight: 600});
-    scene.load.image("item_vase", "src/png/item_vase.png", {frameWidth: 300, frameHeight: 300});
-    scene.load.image("item_kanban", "src/png/item_kanban4.png", {frameWidth: 370, frameHeight: 320});
+    scene.load.image("item_violin", "src/png/item_violin.png");
+    scene.load.image("item_vase", "src/png/item_vase.png");
+    scene.load.image("item_kanban", "src/png/item_kanban4.png");
     scene.load.spritesheet("item_crown", "src/png/item_crown.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("item_pudding", "src/png/item_pudding2.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("item_chocolate_bread", "src/png/item_chocolate_bread.png", {frameWidth: 643, frameHeight: 477});
-    scene.load.image("item_fortune_statue", "src/png/item_fortune_statue.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("item_ribbon", "src/png/item_ribbon3.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("item_hat_tiny_crown", "src/png/item_hat_tiny_crown.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("item_kusa_pouch", "src/png/item_kusa_pouch.png", {frameWidth: 636, frameHeight: 895});
-    scene.load.image("item_dice", "src/png/item_dice.png", {frameWidth: 200, frameHeight: 200});
-    scene.load.image("item_dice_pointerover", "src/png/item_dice_pointerover.png", {frameWidth: 200, frameHeight: 200});
-    scene.load.image("item_hat_knit", "src/png/item_hat_knit.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("item_hat_mugiwara", "src/png/item_hat_mugiwara.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("item_bank", "src/png/item_bank.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("item_bank_broken", "src/png/item_bank_broken.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("item_hat_helmet", "src/png/item_hat_helmet.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("item_asnya", "src/png/item_asnya.png", {frameWidth: 500, frameHeight: 500});
+    scene.load.image("item_pudding", "src/png/item_pudding2.png");
+    scene.load.image("item_chocolate_bread", "src/png/item_chocolate_bread.png");
+    scene.load.image("item_fortune_statue", "src/png/item_fortune_statue.png");
+    scene.load.image("item_ribbon", "src/png/item_ribbon3.png");
+    scene.load.image("item_hat_tiny_crown", "src/png/item_hat_tiny_crown.png");
+    scene.load.image("item_kusa_pouch", "src/png/item_kusa_pouch.png");
+    scene.load.image("item_dice", "src/png/item_dice.png");
+    scene.load.image("item_dice_pointerover", "src/png/item_dice_pointerover.png");
+    scene.load.image("item_hat_knit", "src/png/item_hat_knit.png");
+    scene.load.image("item_hat_mugiwara", "src/png/item_hat_mugiwara.png");
+    scene.load.image("item_bank", "src/png/item_bank.png");
+    scene.load.image("item_bank_broken", "src/png/item_bank_broken.png");
+    scene.load.image("item_hat_helmet", "src/png/item_hat_helmet.png");
+    scene.load.image("item_asnya", "src/png/item_asnya.png");
     //scene.load.image("item_nui", "src/png/item_nui.png", {frameWidth: 370, frameHeight: 320});
     scene.load.spritesheet("item_nui", "src/png/item_nui2.png", {frameWidth: 370, frameHeight: 320});
     scene.load.spritesheet("item_nui_ribbon", "src/png/item_nui_ribbon.png", {frameWidth: 370, frameHeight: 320});
     scene.load.spritesheet("item_switch", "src/png/item_switch.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("item_pouch", "src/png/item_pouch.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("item_pouch_broken", "src/png/item_pouch_broken.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("item_hat_mortarboard", "src/png/item_hat_mortarboard.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("item_pad_on", "src/png/item_pad_on.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("item_pad_off", "src/png/item_pad_off.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("item_gauge", "src/png/item_gauge.png", {frameWidth: 370, frameHeight: 306});
-    scene.load.image("item_frame", "src/png/item_frame.png", {frameWidth: 370, frameHeight: 428});
+    scene.load.image("item_pouch", "src/png/item_pouch.png");
+    scene.load.image("item_pouch_broken", "src/png/item_pouch_broken.png");
+    scene.load.image("item_hat_mortarboard", "src/png/item_hat_mortarboard.png");
+    scene.load.image("item_pad_on", "src/png/item_pad_on.png");
+    scene.load.image("item_pad_off", "src/png/item_pad_off.png");
+    scene.load.image("item_gauge", "src/png/item_gauge.png");
+    scene.load.image("item_frame", "src/png/item_frame.png");
     scene.load.image("item_wall_sticker", "src/png/item_wall_sticker.png");
     scene.load.image("item_floor_sticker1", "src/png/item_floor_sticker1.png");
     scene.load.image("item_floor_sticker2", "src/png/item_floor_sticker2.png");
@@ -4224,41 +4261,41 @@ function preload(scene) {
     scene.load.image("item_presentbox", "src/png/item_presentbox.png");
     
     //---star
-    scene.load.image("star_blue", "src/png/star_blue.png", {frameWidth: 200, frameHeight: 191});
-    scene.load.image("star_green", "src/png/star_green.png", {frameWidth: 200, frameHeight: 191});
-    scene.load.image("star_orange", "src/png/star_orange.png", {frameWidth: 200, frameHeight: 191});
-    scene.load.image("star_pink", "src/png/star_pink.png", {frameWidth: 200, frameHeight: 191});
-    scene.load.image("star_purple", "src/png/star_purple.png", {frameWidth: 200, frameHeight: 191});
-    scene.load.image("star_red", "src/png/star_red.png", {frameWidth: 200, frameHeight: 191});
-    scene.load.image("star_skyblue", "src/png/star_skyblue.png", {frameWidth: 200, frameHeight: 191});
-    scene.load.image("star_yellow", "src/png/star_yellow.png", {frameWidth: 200, frameHeight: 191});
+    scene.load.image("star_blue", "src/png/star_blue.png");
+    scene.load.image("star_green", "src/png/star_green.png");
+    scene.load.image("star_orange", "src/png/star_orange.png");
+    scene.load.image("star_pink", "src/png/star_pink.png");
+    scene.load.image("star_purple", "src/png/star_purple.png");
+    scene.load.image("star_red", "src/png/star_red.png");
+    scene.load.image("star_skyblue", "src/png/star_skyblue.png");
+    scene.load.image("star_yellow", "src/png/star_yellow.png");
         
     //---cat
     scene.load.image("item_mail", "src/png/item_mail.png");
-    scene.load.image("cat_sitting", "src/png/cat_sitting.png", {frameWidth: 370, frameHeight: 320});
+    scene.load.image("cat_sitting", "src/png/cat_sitting.png");
     scene.load.spritesheet("cat_sleeping", "src/png/cat_sleeping.png", {frameWidth: 370, frameHeight: 320});
     
     //---item_craft_todo
-    scene.load.image("item_cushion", "src/png/item_cushion.png", {frameWidth: 663, frameHeight: 447});
+    scene.load.image("item_cushion", "src/png/item_cushion.png");
 
     //---icon_system
-    scene.load.image("icon_kusa", "src/png/icon_system_kusa.png", {frameWidth: 350, frameHeight: 350});
-    scene.load.image("icon_ohana", "src/png/icon_system_ohana.png", {frameWidth: 350, frameHeight: 350});
-    scene.load.image("icon_clock", "src/png/icon_system_clock.png", {frameWidth: 225, frameHeight: 225});
-    scene.load.image("icon_heart", "src/png/icon_system_heart.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("icon_rotate", "src/png/icon_system_rotate.png", {frameWidth: 980, frameHeight: 818});
-    scene.load.image("icon_home", "src/png/icon_system_home.png", {frameWidth: 512, frameHeight: 512});
-    scene.load.image("icon_satiety", "src/png/icon_system_satiety.png", {frameWidth: 500, frameHeight: 500});
-    scene.load.image("icon_happy", "src/png/icon_system_happy.png", {frameWidth: 500, frameHeight: 500});
+    scene.load.image("icon_kusa", "src/png/icon_system_kusa.png");
+    scene.load.image("icon_ohana", "src/png/icon_system_ohana.png");
+    scene.load.image("icon_clock", "src/png/icon_system_clock.png");
+    scene.load.image("icon_heart", "src/png/icon_system_heart.png");
+    scene.load.image("icon_rotate", "src/png/icon_system_rotate.png");
+    scene.load.image("icon_home", "src/png/icon_system_home.png");
+    scene.load.image("icon_satiety", "src/png/icon_system_satiety.png");
+    scene.load.image("icon_happy", "src/png/icon_system_happy.png");
 
     //---icon_counter
-    scene.load.image("icon_counter", "src/png/icon_clover.png", {frameWidth: 507, frameHeight: 507});
+    scene.load.image("icon_counter", "src/png/icon_clover.png");
 
     //---icon_status
-    scene.load.image("icon_str", "src/png/icon_status_str.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("icon_dex", "src/png/icon_status_dex.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("icon_int", "src/png/icon_status_int.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("icon_luk", "src/png/icon_status_luk.png", {frameWidth: 370, frameHeight: 320});
+    scene.load.image("icon_str", "src/png/icon_status_str.png");
+    scene.load.image("icon_dex", "src/png/icon_status_dex.png");
+    scene.load.image("icon_int", "src/png/icon_status_int.png");
+    scene.load.image("icon_luk", "src/png/icon_status_luk.png");
 
     //---plugin: rexuiplugin
     //need for nameplate
@@ -4274,21 +4311,21 @@ function preload(scene) {
     scene.load.atlas('flares', 'src/fireworks/flares.png', 'src/fireworks/flares.json');
     
     //---tokenBall
-    scene.load.image("coin_color_ACA", "src/png/coin_color_ACA.png", {frameWidth: 200, frameHeight: 200});
-    scene.load.image("coin_color_ASTR", "src/png/coin_color_ASTR.png", {frameWidth: 200, frameHeight: 200});
-    scene.load.image("coin_color_BNB", "src/png/coin_color_BNB.png", {frameWidth: 200, frameHeight: 200});
-    scene.load.image("coin_color_BTC", "src/png/coin_color_BTC.png", {frameWidth: 200, frameHeight: 200});
-    scene.load.image("coin_color_BUSD", "src/png/coin_color_BUSD.png", {frameWidth: 200, frameHeight: 200});
-    scene.load.image("coin_color_DAI", "src/png/coin_color_DAI.png", {frameWidth: 200, frameHeight: 200});
-    scene.load.image("coin_color_DOT", "src/png/coin_color_DOT.png", {frameWidth: 200, frameHeight: 200});
-    scene.load.image("coin_color_ETH", "src/png/coin_color_ETH.png", {frameWidth: 200, frameHeight: 200});
-    scene.load.image("coin_color_GLMR", "src/png/coin_color_GLMR.png", {frameWidth: 200, frameHeight: 200});
-    scene.load.image("coin_color_KSM", "src/png/coin_color_KSM.png", {frameWidth: 200, frameHeight: 200});
-    scene.load.image("coin_color_LAY", "src/png/coin_color_LAY.png", {frameWidth: 200, frameHeight: 200});
-    scene.load.image("coin_color_MATIC", "src/png/coin_color_MATIC.png", {frameWidth: 200, frameHeight: 200});
-    scene.load.image("coin_color_SDN", "src/png/coin_color_SDN.png", {frameWidth: 200, frameHeight: 200});
-    scene.load.image("coin_color_USDC", "src/png/coin_color_USDC.png", {frameWidth: 200, frameHeight: 200});
-    scene.load.image("coin_color_USDT", "src/png/coin_color_USDT.png", {frameWidth: 200, frameHeight: 200});
+    scene.load.image("coin_color_ACA", "src/png/coin_color_ACA.png");
+    scene.load.image("coin_color_ASTR", "src/png/coin_color_ASTR.png");
+    scene.load.image("coin_color_BNB", "src/png/coin_color_BNB.png");
+    scene.load.image("coin_color_BTC", "src/png/coin_color_BTC.png");
+    scene.load.image("coin_color_BUSD", "src/png/coin_color_BUSD.png");
+    scene.load.image("coin_color_DAI", "src/png/coin_color_DAI.png");
+    scene.load.image("coin_color_DOT", "src/png/coin_color_DOT.png");
+    scene.load.image("coin_color_ETH", "src/png/coin_color_ETH.png");
+    scene.load.image("coin_color_GLMR", "src/png/coin_color_GLMR.png");
+    scene.load.image("coin_color_KSM", "src/png/coin_color_KSM.png");
+    scene.load.image("coin_color_LAY", "src/png/coin_color_LAY.png");
+    scene.load.image("coin_color_MATIC", "src/png/coin_color_MATIC.png");
+    scene.load.image("coin_color_SDN", "src/png/coin_color_SDN.png");
+    scene.load.image("coin_color_USDC", "src/png/coin_color_USDC.png");
+    scene.load.image("coin_color_USDT", "src/png/coin_color_USDT.png");
     array_image_tokenBall = [
         "coin_color_ACA",
         "coin_color_ASTR",
@@ -7583,6 +7620,7 @@ class FirstCheck extends Phaser.Scene {
     constructor() {
         super({ key:"FirstCheck", active:true });
         this.flag_start = 0;
+        console.log("scene: FirstCheck");
     }
     
     preload() {
@@ -7633,7 +7671,6 @@ class FirstCheck extends Phaser.Scene {
                 _msg1.setText("Check Network");
                 _msg2.setText("Connecting...OK!");
                 _errImg.setVisible(false);
-                init_web3();
                 //prevent duplicated starting
                 if (scene.flag_start == 0) {
                     setTimeout( () => {scene.scene.start("Loading")}, 500, scene);
@@ -7666,16 +7703,108 @@ class Loading extends Phaser.Scene {
 
     constructor() {
         super({ key:"Loading", active:false });
+        this.flag_start = 0;
+    }
+    
+    //load wallet, contract, status here
+    async update_web3() {
+        console.log("load: web3");
+        await init_web3();
+        console.log("OK");
+        console.log("load: summoner");
+        await contract_update_summoner_of_wallet();
+        console.log("OK");
+        console.log("load: static");
+        await contract_update_static_status(summoner);
+        console.log("OK");
+        console.log("load: dynamic");
+        await contract_update_dynamic_status(summoner);
+        console.log("OK");
+        console.log("local item");
+        local_myListsAt_withItemType = await get_myListsAt_withItemType(local_owner);
+        console.log("OK");
+        this.flag_start = 1;
+    }
+    
+    preload() {
+        console.log("scene: Loading");
+        this.update_web3(); // start loading web3 without async
+        preload(this);
+    }
+    
+    create() {
+        this._msg1 = this.add.text(640, 480, '')
+            .setFontSize(30)
+            .setFontFamily("Arial")
+            .setOrigin(0.5)
+            .setFill("#ffebf7");
+    }
+    
+    update() {
+        //check web3 loading, wait for complete
+        if (this.flag_start == 1) {
+            this._msg1.setText("");
+            this.scene.start("Opeaning");
+        } else {
+            this._msg1.setText("Loading On-Chain Data...");
+        }
+    }
+
+    /*
+    async preload(){
+        console.log("load: web3");
+        await init_web3();
+        console.log("OK");
+        console.log("load:preUpdate");
+        await preUpdate();
+        console.log("OK");
+        console.log("start loading");
+        preload(this);
+        console.log("OK");
+        this.flag_start = 1;
+    }
+
+    create(){
+        function runAll(scene) {
+            if (scene.flag_start == 1){
+                scene.scene.start("Opeaning");
+            }
+        }
+        runAll(this);
+        const timerId = setInterval(runAll, 1000, this);
+    }
+    */
+
+    /*
+    async update_web3(){
+        console.log("load: web3");
+        await init_web3();
+        console.log("OK");
+        console.log("load: summoner");
+        await contract_update_summoner_of_wallet();
+        console.log("OK");
+        console.log("load: static");
+        await contract_update_static_status(summoner);
+        console.log("OK");
+        console.log("load: dynamic");
+        await contract_update_dynamic_status(summoner);
+        console.log("OK");
+        console.log("local item");
+        local_myListsAt_withItemType = await get_myListsAt_withItemType(local_owner);
+        console.log("OK");
     }
 
     preload() {
-        preUpdate();
+        //init_web3();
+        //preUpdate();
+        await this.update_web3();
         preload(this);
     }
     
     create(){
         this.scene.start("Opeaning");
     }
+    */
 }
 
 
@@ -7688,6 +7817,7 @@ class Opeaning extends Phaser.Scene {
     }
 
     preload() {
+        console.log("scene: Opeaning");
     }
     
     create(){
@@ -7755,8 +7885,8 @@ class Main extends Phaser.Scene {
     preload(){
         //preload(this);
     }
-    async create(){
-        await create(this);
+    create(){
+        create(this);
         updateFirst(this);
     }
     update(){
