@@ -3238,7 +3238,12 @@ contract Murasaki_Function_Crafting is Ownable {
 
     //upgrade item
     event Upgrade(uint32 indexed _summoner, uint32 _item_type, uint32 _item);
-    function upgrade_item(uint32 _summoner, uint32 _item1, uint32 _item2, uint32 _item3) external {
+    function upgrade_item(
+        uint32 _summoner, 
+        uint32 _item1, 
+        uint32 _item2, 
+        uint32 _item3
+    ) external {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
         //check summoner owner
@@ -3266,15 +3271,16 @@ contract Murasaki_Function_Crafting is Ownable {
         //mint upper rank item
         uint32 _seed = mfs.seed(_summoner);
         string memory _memo = "";
-        // normal item, +64
+        // when normal item, +64
         if (_item_type1 <= 128) {
             mc.craft(_item_type1 + 64, _summoner, msg.sender, _seed, _memo);
-        // precious, +12
+        // when precious, +12
         } else if (_item_type1 >= 201 && _item_type1 <= 224) {
             mc.craft(_item_type1 + 12, _summoner, msg.sender, _seed, _memo);
-        // fluffiest, -> nui-chan
+        // when fluffiest, -> nui-chan
         } else if (_item_type1 >=225 && _item_type1 <= 236) {
-            _update_storage_nui(_summoner, mc.next_item());
+            mc.craft(197, _summoner, msg.sender, _seed, _memo);
+            _update_storage_nui(_summoner, mc.next_item()-1);
         }
         //event
         emit Upgrade(_summoner, _item_type1, mc.next_item());

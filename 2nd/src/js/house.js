@@ -10,6 +10,15 @@
    *メインコンセプトの整理*
         電子生命
 
+    Upgradeシステムの深慮
+        コスト設定
+            ノータイムで完了にしてしまうと、
+            特にぬいちゃんなどsummonerのステータスを参照するものの製造機になってしまう
+        ストーリー
+            努力で高レベルのアイテムを入手するシステム
+            fluffyのランクを上げるシステム
+            
+
    *ぬいちゃんシステムの深慮*
         コスト設定
             ハート経済を不採用としたためコストが不明
@@ -2175,6 +2184,7 @@ class Pet extends Phaser.GameObjects.Sprite{
               && this.x < this.target_x+1 
               && this.y > this.target_y-1 
               && this.y < this.target_y+1) {
+                this.dist = "left";
                 this.anims.play(this.sprite_left, true);
                 this.submode = 2;
             }
