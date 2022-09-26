@@ -46,7 +46,7 @@ let _array_name_base = [
     "Token Basket",
     "Electric Board",
     "Cuckoo Clock",
-    "---",
+    "History Book",
     "---",
     "---",
     "Travel Bag",

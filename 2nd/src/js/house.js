@@ -5,62 +5,35 @@
 
 /*
 
-1st
+//### 1st
 
    *メインコンセプトの整理*
         電子生命
 
-    Upgradeシステムの深慮
-        コスト設定
-            ノータイムで完了にしてしまうと、
-            特にぬいちゃんなどsummonerのステータスを参照するものの製造機になってしまう
-        ストーリー
-            努力で高レベルのアイテムを入手するシステム
-            fluffyのランクを上げるシステム
-            
+    ステータスページの実装
+        walletもしくはsummoner idから、ステータス一覧を取得するページ
+        もしくはステータスを取得するコントラクトのマニュアルの整備
+        ステータスは数値ですべて公開してしまうより、画面内から読み取るほうが良いか？
+            total_mined_coinに対応したアイテムを用意する、など
+        もしくは、内部計算をできるだけ公開し、ランキングなどもつくるか？
+        Interfaceの整備
+    
+    ステータスを表示する本の実装
+        クリックやマウスオーバラップで細かなパラメータを表示する
+        表示ステータス
+            total_exp_gained
+            total_coin_mined
+            total_leaf_farmed
+            total_fluffy_received
+            total_item_crafting
+            total_mail_sent
+            total_mail_opened
+        バッチ処理で受け取ってもよいが、
+            アイテムクラフト時にかき集めてもそこまで負担にならないか
+        随時更新させたいので、やはり専用のバッチ処理で定期的に情報を取得する
+            もしくはmurasaki_info内に組み込めたら良いのだが。            
 
-   *ぬいちゃんシステムの深慮*
-        コスト設定
-            ハート経済を不採用としたためコストが不明
-            ノーマルリソースのみでは希少性が低すぎる
-            fluffyをコストに要求するか
-            rare fluffyを1体要求、など
-            fluffiestの選択はどうするか
-            fluffyコスト導入の場合はコードの修正が必要
-        自分でもぬいちゃんを所有するインセンティブを考える
-            最低補正値を+3%にするか
-                feedingとgroomingではluck+3に相当
-                fluffiestがおよそ+0.5なので破格か
-                fluffiest x 3 = 1.5なので、fluffiest x3を要求とかでも良いか？
-            1体でも所有していれば経験値獲得にプラスとなる。
-            fluffiest分のluck補正は持ち越し。
-        意味論
-            fluffyはぬいちゃんになることに憧れている設定
-            fluffiestが3体集まるとぬいちゃんになれる
-            ぬいちゃんのバリエーションが少しはほしいところだが
-                リボンなどのアクセサリーでバリエーションを作るか
-        コスト設定
-            Upgradeがノーコスト・ノータイムで行えてしまうと、
-            summonerがぬいちゃん製造機になってしまう。
-            ぬいちゃんをcraftするとゲームプレイが不利になるメカニズムを考える
-            → コストの要求, coin/leafコスト
-            → 時間の要求, システム構築が結構面倒
-
- ig クリティカル検出の改善
-        現状、うまく検出できてない
-        luck_challengeはmsg.senderを参照するので画一的に結果を取得できない
-        案1
-            msg.senderを考慮した乱数取得関数を用意する
-        案2
-            通常のernを計算しそれより多いか参照する
-        案3
-            Eventを参照する
-        採用案
-            feeding, grooming, mining, farmingのluck前の値を取得し、
-            この値より1.8倍大きいdeltaが生じた時にcliticalと判定する。
-            feedingとgroomingのぬいちゃん補正はlocalで行う。
-
-    ガバナンスシステムの実装
+ ig ガバナンスシステムの実装
         投票
             インフレ率の修正や、運営個人walletへの報酬支払など、
             方針決定時に投票できるメカニズムを作る。
@@ -91,7 +64,58 @@
             → 選択した色のfluffyが手に入る
             → 同時に、選択した色に投票される
             一番投票数が多かった毛玉が選出され、その月luckにブーストがかかる
-    
+            選出された色の子はお花や音符など、何かしらの+αで表示させる
+        オークション方法
+            キャンドルオークション方式で行ってみる
+            リアルタイムで投票結果を表示する
+            投票した色のfluffyがもらえる
+            投票に勝った場合は投票した色のfluffierがもらえる
+            誰かがvoteするたびに、mapping noでその時点の1位を書き込む
+            投票時間が過ぎたあと、end functionにseed値を渡して動かす
+                seed値よりvote noを選出し、そのvote no時点の1位を勝利者とする。
+            投票済みをrequireし、投票結果を参照して、fluffyをmintさせる。
+            
+        フロアステッカーの実装
+            お花にするか
+
+ ig クリティカル検出の改善
+        現状、うまく検出できてない
+        luck_challengeはmsg.senderを参照するので画一的に結果を取得できない
+        案1
+            msg.senderを考慮した乱数取得関数を用意する
+        案2
+            通常のernを計算しそれより多いか参照する
+        案3
+            Eventを参照する
+        採用案
+            feeding, grooming, mining, farmingのluck前の値を取得し、
+            この値より1.8倍大きいdeltaが生じた時にcliticalと判定する。
+            feedingとgroomingのぬいちゃん補正はlocalで行う。
+            feedingとgroomingはまずsolidityの更新が必要。
+                → calc値を取得してpreviousに代入
+                → これに対してnuiちゃん補正をかけ、1.8倍判定を行う
+
+    Crafting難易度の再考
+        現在の難易度ではItemづまりを起こすだろうか。
+        もう少しDCを下げるなど難易度調整する。
+
+
+//### 絵など
+
+    トークンボックス絵の実装
+        宝箱
+        開いた絵と閉じている絵の２種類
+
+    ネオンちゃんの絵の実装
+        裏の世界である程度動き回る
+
+    プレゼント絵の実装
+        マウスオーバーで半開きの絵
+        出現アニメーション
+            ケムリでぼわぼわ
+            誰かが持ってきて置く
+            空からパラシュート
+
     猫の絵の実装
         家猫, 寝ている絵, 2枚, OK
         家猫, 立っている絵, 2枚
@@ -128,7 +152,84 @@
             条件が揃うとペットたちとくっついて寝る
             スイッチで夜もしくは20時以降20時前、満腹度80%以上、happy80%以上
 
-2nd
+
+//### 2nd
+
+ ok プレゼントシステムの実装
+        fluffyを得るタイミングではまずプレゼントboxを得る
+        クリックしてopenするとランダムでfluffyが手に入る
+        コントラクトで管理する
+        itemType = 200
+        burnしてfluffyをmintする
+        タイミング
+            craft時に誰かに送られる
+            mail open時にお互いに送られる
+            fluffy festival時にもらえる
+       *dapps stakingとの連携を考える
+            直接luckがブーストされるのではなく、
+            プレゼントを貰えるタイミングや頻度が増える
+            stakingあり：30日～7日でプレゼント1つもらえる
+            $500 ASTRでもstakingすれば30日に1個はもらえる
+            claimのタイミングはどうするか。
+                feedingやgroomingの時にチェックかけてmintさせるか。
+        演出はどうするか
+            空から降ってくるか
+            ないないさんが持ってくるか
+        実装
+            専用クラスを用意する
+        Dapps Staking連携の深慮
+            500 ASTR以上で追加のpresentboxが得られる
+            30日に1度, 500 ASTRあたり1日短くなる
+            7日が最短7日までに11500 ASTR必要
+                あるいはmax 100,000 ASTRで指数関数的にするか。
+            feeding時にタイマーをすすめる
+                0になったらpresentboxをmintさせる
+            実装
+                feeding時に現staking量 x 前回feeding時からの時間 = スコアを算出する
+                スコアをnext_scoreから減じ、next_scoreが0になったらmintする
+                feeding直前に毎回資金をスライドさせれば原理上ハック可能だが、
+                面倒なのでやる人は少ないと期待する。
+                30d x 24h x 60m x 60sec = 2,592,000 sec
+                500 ASTRで経過時間x1 -> 30d
+                100,000 ASTRで経過時間x4.2857倍 -> 7d (30 / 4.2857 = 7.00) 
+
+ ok LootLike情報のUI実装
+        看板にマウスオーバーラップで情報表示させるか
+
+ ok Upgradeシステムの深慮
+        コスト設定
+            ノータイムで完了にしてしまうと、
+            特にぬいちゃんなどsummonerのステータスを参照するものの製造機になってしまう
+        ストーリー
+            努力で高レベルのアイテムを入手するシステム
+            fluffyのランクを上げるシステム
+            
+ ok ぬいちゃんシステムの深慮*
+        コスト設定
+            ハート経済を不採用としたためコストが不明
+            ノーマルリソースのみでは希少性が低すぎる
+            fluffyをコストに要求するか
+            rare fluffyを1体要求、など
+            fluffiestの選択はどうするか
+            fluffyコスト導入の場合はコードの修正が必要
+        自分でもぬいちゃんを所有するインセンティブを考える
+            最低補正値を+3%にするか
+                feedingとgroomingではluck+3に相当
+                fluffiestがおよそ+0.5なので破格か
+                fluffiest x 3 = 1.5なので、fluffiest x3を要求とかでも良いか？
+            1体でも所有していれば経験値獲得にプラスとなる。
+            fluffiest分のluck補正は持ち越し。
+        意味論
+            fluffyはぬいちゃんになることに憧れている設定
+            fluffiestが3体集まるとぬいちゃんになれる
+            ぬいちゃんのバリエーションが少しはほしいところだが
+                リボンなどのアクセサリーでバリエーションを作るか
+        コスト設定
+            Upgradeがノーコスト・ノータイムで行えてしまうと、
+            summonerがぬいちゃん製造機になってしまう。
+            ぬいちゃんをcraftするとゲームプレイが不利になるメカニズムを考える
+            → コストの要求, coin/leafコスト
+            → 時間の要求, システム構築が結構面倒
 
  ok 読み込み順の整理
         最優先
@@ -145,29 +246,6 @@
         ニット帽はペット用の小さいものにする
         Petクラスにwearing hat関数を実装する
         ニット帽子のサイズと位置合わせ
-
- ok プレゼントシステムの実装
-        fluffyを得るタイミングではまずプレゼントboxを得る
-        クリックしてopenするとランダムでfluffyが手に入る
-        コントラクトで管理する
-        itemType = 200
-        burnしてfluffyをmintする
-        タイミング
-            craft時に誰かに送られる
-            mail open時にお互いに送られる
-            fluffy festival時にもらえる
-        dapps stakingとの連携を考える
-            直接luckがブーストされるのではなく、
-            プレゼントを貰えるタイミングや頻度が増える
-            stakingあり：30日～7日でプレゼント1つもらえる
-            $500 ASTRでもstakingすれば30日に1個はもらえる
-            claimのタイミングはどうするか。
-                feedingやgroomingの時にチェックかけてmintさせるか。
-        演出はどうするか
-            空から降ってくるか
-            ないないさんが持ってくるか
-        実装
-            専用クラスを用意する
 
  ok item upgradeのUIの改善
         HP上で自分でid選んでupgradeは面倒だし味気ない
@@ -386,7 +464,12 @@ async function init_global_variants() {
     local_newsText = ["Peaceful","Today !","","ฅ•ω•ฅ"];
     local_itemIds = [];
     local_wallet_score = 0;
-    
+    local_birthplace =  "";
+    local_softness =    "";
+    local_fluffiness =  "";
+    local_elasticity =  "";
+    local_personality = "";
+
     //---local previous
     previous_local_last_feeding_time = 0;
     previous_local_last_grooming_time = 0;
@@ -688,7 +771,7 @@ async function contract_update_static_status(_summoner) {
     //lootlike
     let _res = _all_static_status[3];
     local_birthplace =  _res[0];
-    local_spftmess =    _res[1];
+    local_softness =    _res[1];
     local_fluffiness =  _res[2];
     local_elasticity =  _res[3];
     local_personality = _res[4];
@@ -784,8 +867,11 @@ async function contract_update_dynamic_status(_summoner) {
     local_dexterity_withItems =       Number(_all_dynamic_status[36])/100;
     local_intelligence_withItems =    Number(_all_dynamic_status[37])/100;
     local_luck_withItems =            Number(_all_dynamic_status[38])/100;
+    /*
     local_luck_withItems_withStaking =          Number(_all_dynamic_status[39])/100;
     local_luck_withItems_withStaking_withDice = Number(_all_dynamic_status[42])/100;
+    */
+    local_luck_withItems_withDice = Number(_all_dynamic_status[42])/100;
     
     //coin, material, precious
     local_coin =        Number(_all_dynamic_status[9]);
@@ -818,7 +904,7 @@ async function contract_update_dynamic_status(_summoner) {
 
     //dapps staking
     local_dapps_staking_amount =    Number(_all_dynamic_status[32]);
-    local_luck_by_staking =         Number(_all_dynamic_status[33]);
+    //local_luck_by_staking =         Number(_all_dynamic_status[33]);
 
     //mail
     local_mail_sending_interval =   Number(_all_dynamic_status[44]);
@@ -2638,18 +2724,18 @@ class Dice extends Phaser.GameObjects.Sprite{
     on_click() {
         this.speed_x = 8 + Math.random() * 5;
         
+        /*
         if (Math.random() > 0.5) {
             this.speed_x *= -1;
         }
+        */
         
-        /*
         //DOES NOT WORK in phone
-        //if (game.input.mousePointer.x > this.x) {
-        if (game.input.activePointer.position.x > this.x) {
+        if (game.input.mousePointer.x > this.x) {
+        //if (game.input.activePointer.position.x > this.x) {
         //if (game.input.pointer1.x > this.x) {
             this.speed_x *= -1;
         }
-        */
 
         this.speed_y = 8 + Math.random() * 5;
         this.count = 0;
@@ -2756,6 +2842,11 @@ class Dice extends Phaser.GameObjects.Sprite{
                 }
             }
             //refrection x
+            if (this.y > 500) {
+                this.line_x_r = (this.y + 115746/205)/(208/205);
+            } else {
+                this.line_x_r = 1060;
+            }
             if (this.x >= this.line_x_r) {
                 this.x = this.line_x_r;
                 this.speed_x *= -0.9;   //bounce coefficient
@@ -3148,6 +3239,12 @@ class Fluffy extends Phaser.GameObjects.Sprite{
         }
 
         //refrection x
+        //limit_y_right: y = (208/205)x - (115746/205)
+        if (this.y > 500) {
+            this.line_x_r = (this.y + 115746/205)/(208/205);
+        } else {
+            this.line_x_r = 1060;
+        }
         if (this.x >= this.line_x_r) {
             this.x = this.line_x_r;
             this.speed_x *= -0.9;   //bounce coefficient
@@ -3359,8 +3456,11 @@ function radarchart2(
     dex_withItems, 
     int_withItems, 
     luk_withItems,
+    /*
     luk_withItems_withStaking,
     luk_withItems_withStaking_withDice
+    */
+    luk_withItems_withDice
 ) {
     //base
     let base = 30;
@@ -3384,7 +3484,8 @@ function radarchart2(
     //dice
     let y1d = -r * (str_withItems)/base;
     let x2d = r * (dex_withItems)/base;
-    let y3d = r * ((luk_withItems_withStaking_withDice-3)/(base/2) + 3/base);
+    //let y3d = r * ((luk_withItems_withStaking_withDice-3)/(base/2) + 3/base);
+    let y3d = r * ((luk_withItems_withDice-3)/(base/2) + 3/base);
     let x4d = -r * (int_withItems)/base;
     //remove old chart
     try {
@@ -3405,7 +3506,8 @@ function radarchart2(
     let font_arg = {font: "17px Arial", fill: "#000000"};
     group_chart.add(scene.add.text(x0-15, y0-r-25, "STR"+"\n"+(Math.round( (str_withItems)*100 )/100).toFixed(2), font_arg));
     group_chart.add(scene.add.text(x0+r-5, y0-10, "DEX"+"\n"+(Math.round( (dex_withItems)*100 )/100).toFixed(2), font_arg));
-    group_chart.add(scene.add.text(x0-15, y0+r-7, "LUK"+"\n"+(Math.round( (luk_withItems_withStaking_withDice)*100 )/100).toFixed(2), font_arg));
+    //group_chart.add(scene.add.text(x0-15, y0+r-7, "LUK"+"\n"+(Math.round( (luk_withItems_withStaking_withDice)*100 )/100).toFixed(2), font_arg));
+    group_chart.add(scene.add.text(x0-15, y0+r-7, "LUK"+"\n"+(Math.round( (luk_withItems_withDice)*100 )/100).toFixed(2), font_arg));
     group_chart.add(scene.add.text(x0-r-20, y0-12, "INT"+"\n"+(Math.round( (int_withItems)*100 )/100).toFixed(2), font_arg));
     group_chart.add(scene.add.sprite(x0-15-10, y0-r-25+20, "icon_str").setOrigin(0.5).setScale(0.12));
     group_chart.add(scene.add.sprite(x0+r-5+10, y0-30, "icon_dex").setOrigin(0.5).setScale(0.12));
@@ -3429,8 +3531,9 @@ async function draw_radarchart(scene) {
         local_dexterity_withItems, 
         local_intelligence_withItems, 
         local_luck_withItems,
-        local_luck_withItems_withStaking,
-        local_luck_withItems_withStaking_withDice
+        //local_luck_withItems_withStaking,
+        //local_luck_withItems_withStaking_withDice
+        local_luck_withItems_withDice
     );
 }
 
@@ -3744,8 +3847,10 @@ function open_window_upgrade(scene) {
     
     //create window
     let window_upgrade = scene.add.sprite(640, 480, "window").setInteractive();
-    let _text = "Upgrade your items.\n Mint a higher rarity item by burning 3 items with the same item_type and rarity";
-    let msg_upgrade = scene.add.text(150, 150, _text)
+    let _text = "Upgrade your items."
+    _text += "\n";
+    _text += "Mint a higher rarity item by burning 3 items with the same item type and rarity";
+    let msg_upgrade = scene.add.text(150, 130, _text)
         .setFontSize(24).setFontFamily("Arial").setFill("#000000");
     group_window_upgrade.add(window_upgrade);
     group_window_upgrade.add(msg_upgrade);
@@ -3753,34 +3858,61 @@ function open_window_upgrade(scene) {
     //get upgradable items
     let upgradable_itemIds = get_upgradable_itemIds(local_myListsAt_withItemType);
     
-    //display upgradable items
-    let _num = 1;
+    //showing upgradable items
+    let _num = 0;
     Object.keys(upgradable_itemIds).forEach(_itemId => {
         // mint uncommon Violin (burn 3 common items, ID: 1, 4, 5)
         let _item_name = array_item_name[_itemId];
         let _item_name_to;
         if (_itemId <= 128) {
             _item_name_to = array_item_name[Number(_itemId)+64];
-        } else {
+        } else if (_itemId <= 224) {
             _item_name_to = array_item_name[Number(_itemId)+12];
+        } else if (_itemId <= 236) {
+            _item_name_to = "Fluffy Murasaki-san";
         }
         let _rarity = "";
         let _rarity_to = "";
-        if (_itemId <= 64 || (_itemId >= 201 && _itemId <= 212)){
-            _rarity = "Common";
-            _rarity_to = "Uncommon";
-        } else {
-            _rarity = "Uncommon";
-            _rarity_to = "Rare";
+        let _cost_coin = "";
+        let _cost_leaf = "";
+        let _fontColor = "#000000";
+        if (_itemId <= 64){
+            _rarity = "Common ";
+            _rarity_to = "Uncommon ";
+            _cost_coin = "1000";
+            _cost_leaf = "1000";
+            _fontColor = "#0000FF";
+        } else if (_itemId <= 128) {
+            _rarity = "Uncommon ";
+            _rarity_to = "Rare ";
+            _cost_coin = "2000";
+            _cost_leaf = "2000";
+            _fontColor = "#FFA500";
+        } else if (_itemId <= 212) {
+            _cost_coin = "1000";
+            _cost_leaf = "1000";
+            _fontColor = "#0000FF";
+        } else if (_itemId <= 224) {
+            _cost_coin = "2000";
+            _cost_leaf = "2000";
+            _fontColor = "#E05A00";
+        } else if (_itemId <= 236) {
+            _cost_coin = "3000";
+            _cost_leaf = "3000";
+            _fontColor = "#E85298";
         }
-        let _txt = "";
-        _txt += _rarity_to + " " + _item_name_to;
-        _txt += " (burn item ID: ";
+        //prepare text
+        let _txt = "■ ";
+        _txt += _rarity_to + _item_name_to;
+        _txt += " (burning item_id: ";
         _txt += upgradable_itemIds[_itemId][0] + ", ";
         _txt += upgradable_itemIds[_itemId][1] + ", ";
         _txt += upgradable_itemIds[_itemId][2] + ")";
-        let _msg = scene.add.text(150, 200 + 50*_num, _txt)
-            .setFontSize(30).setFontFamily("Arial").setFill("#000000")
+        _txt += "\n";
+        let _msg = scene.add.text(160, 220 + 70*_num, _txt)
+            .setFontSize(30)
+            .setFontFamily("Arial")
+            .setFill(_fontColor)
             .setInteractive({useHandCursor: true})
             .on("pointerdown", () => {
                 upgrade_item(
@@ -3794,8 +3926,21 @@ function open_window_upgrade(scene) {
             .on("pointerdown", () => sound_window_select.play() )
             .on("pointerover", () => _msg.setStyle({ fontSize: 30, fontFamily: "Arial", fill: '#ffff00' }))
             .on("pointerover", () => sound_window_pointerover.play())
-            .on("pointerout", () => _msg.setStyle({ fontSize: 30, fontFamily: "Arial", fill: "black" }));
+            .on("pointerout", () => _msg.setStyle({ fontSize: 30, fontFamily: "Arial", fill: _fontColor }));
+        //prepare cost text
+        let _cost_coin_text = scene.add.text(210, 223 + 70*_num + 30, _cost_coin)
+            .setFontSize(24).setFontFamily("Arial").setFill("#000000");
+        let _cost_leaf_text = scene.add.text(300, 223 + 70*_num + 30, _cost_leaf)
+            .setFontSize(24).setFontFamily("Arial").setFill("#000000");
+        let icon_upgrading_coin = scene.add.sprite(190, 235 + 70*_num + 30, "icon_ohana")
+            .setScale(0.07);
+        let icon_upgrading_leaf = scene.add.sprite(290, 235 + 70*_num + 30, "icon_kusa")
+            .setScale(0.07);
         group_window_upgrade.add(_msg);
+        group_window_upgrade.add(_cost_coin_text);
+        group_window_upgrade.add(_cost_leaf_text);
+        group_window_upgrade.add(icon_upgrading_coin);
+        group_window_upgrade.add(icon_upgrading_leaf);
         _num += 1;
     });
     
@@ -4056,14 +4201,14 @@ function preload(scene) {
     let _arr = [
         "Making roasted sweet potatoes...",
         "Brushing a teddy bear...",
-        "Looking for my shovel...",
+        "Looking for your shovel...",
         "Polishing the watering can...",
         "Assembling the sewing machine...",
         "Counting flowers and grass...",
         "Cleaning up the house...",
         "Replacing the sand in the sandbox...",
         "Adding fertilizer to the flowerpot...",
-        "treating a needle puncture wound...",
+        "Treating a needle puncture wound...",
         "Washing the dishes...",
         "Putting a flower on the teddy bear...",
         "Painting your murasaki-san purple...",
@@ -4074,25 +4219,26 @@ function preload(scene) {
         "Shopping for cat food...",
         "Filling a fountain pen with ink for writing letters...",
         "Baking pancakes...",
+        "Writing Solidity code...",
+        "Refactoring JavaScript code...",
+        "Thinking about the peace of the world...",
+        "Calling Mr. Sota Watanabe...",
+        "Studying nuclear fusion...",
+        "Chaingng a violin strings...",
+        "Tuning the toy piano...",
+        "Debugging Rust code...",
     ];
-    let _index1 = Math.floor(Math.random() * _arr.length);
-    let _index2 = Math.floor(Math.random() * _arr.length);
-    let _index3 = Math.floor(Math.random() * _arr.length);
+    progressText.setText(_arr[Math.floor(Math.random() * _arr.length)]);
+    let _threthold = 0.25;
     scene.load.on("progress", function(value) {
         if (flag_loaded == 0) {
             progressBar.clear();
             progressBar.fillStyle(0xE62E8B, 1);
             progressBar.fillRect(490, 460, 300 * value, 30);
             percentText.setText( Math.round(value * 100) + "%");
-            if (value > 0.66) {
-                let _text = _arr[_index3];            
-                progressText.setText(_text);
-            }else if (value > 0.33) {
-                let _text = _arr[_index2];            
-                progressText.setText(_text);
-            } else {
-                let _text = _arr[_index1];
-                progressText.setText(_text);
+            if (value > _threthold) {
+                progressText.setText(_arr[Math.floor(Math.random() * _arr.length)]);
+                _threthold += 0.25;
             }
         }
     });
@@ -5119,6 +5265,125 @@ function create(scene) {
     text_id = scene.add.text(_x-45, _y+32, "#100", {font: "14px Arial", fill: "#000000"});
     //age
     text_age_time = scene.add.text(_x+20, _y+32, "***", {font: "14px Arial", fill: "#000000"});
+
+    //lootlike
+    let _dic_color_birthplace = {
+        "fluffy sweater":"#EB6100",
+        "fluffy blanket":"#F39800",
+        "fluffy carpet":"#FCC800",
+        "fluffy cushion":"#FFF100",
+        "fluffy scarf":"#CFDB00",
+        "fluffy towel":"#8FC31F",
+        "woolly sweater":"#22AC38",
+        "woolly blanket":"#009944",
+        "woolly carpet":"#009B6B",
+        "woolly cushion":"#009E96",
+        "woolly scarf":"#00A0C1",
+        "woolly towel":"#00A0E9",
+        "feathery sweater":"#0086D1",
+        "feathery blanket":"#0068B7",
+        "feathery carpet":"#00479D",
+        "feathery cushion":"#1D2088",
+        "feathery scarf":"#601986",
+        "feathery towel":"#920783",
+    };
+    let _dic_color_personality = {
+        "friendly":"#EB6100",
+        "reliable":"#F39800",
+        "optimistic":"#FCC800",
+        "frisky":"#FFF100",
+        "thoughtful":"#CFDB00",
+        "honest":"#8FC31F",
+        "easygoing":"#22AC38",
+        "tolerant":"#009944",
+        "mild":"#009B6B",
+        "affectionate":"#009E96",
+        "intelligent":"#00A0C1",
+        "patient":"#00A0E9",
+        "faithful":"#0086D1",
+        "innocent":"#0068B7",
+        "gentle":"#00479D",
+    };
+    let _dic_color_other = {
+        "inredible":"#EB6100",
+        "marvelous":"#F39800",
+        "excellent":"#FCC800",
+        "amazing":"#FFF100",
+        "great":"#CFDB00",
+        "fabulous":"#8FC31F",
+        "wonderful":"#22AC38",
+        "gorgeous":"#009944",
+        "awesome":"#009B6B",
+        "fantastic":"#009E96",
+        "lovely":"#00A0C1",
+        "brilliant":"#00A0E9",
+        "impressive":"#0086D1",
+        "superb":"#0068B7",
+    };
+    let _text_lootlike_base = "";
+    _text_lootlike_base += " Birthplace:                        \n";
+    _text_lootlike_base += " Softness:                          \n";
+    _text_lootlike_base += " Fluffiness:                        \n";
+    _text_lootlike_base += " Elasticity:                        \n";
+    _text_lootlike_base += " Personality:                       ";
+    let _text_lootlike_birthplace = "                       " + local_birthplace;
+    let _text_lootlike_softness = "\n                       " + local_softness;
+    let _text_lootlike_fluffiness = "\n\n                       " + local_fluffiness;
+    let _text_lootlike_elasticity = "\n\n\n                       " + local_elasticity;
+    let _text_lootlike_personality = "\n\n\n\n                       " + local_personality;
+    let text_lootlike_base = scene.add.text(
+        _x-70, 
+        _y+60, 
+        _text_lootlike_base, 
+        {font: "18px Arial", fill: "#000000", backgroundColor: "#ffffff"}
+    );
+    let text_lootlike_birthplace = scene.add.text(
+        _x-70, 
+        _y+60, 
+        _text_lootlike_birthplace, 
+        {font: "18px Arial", fill: _dic_color_birthplace[local_birthplace]}
+    );
+    let text_lootlike_softness = scene.add.text(
+        _x-70, 
+        _y+60, 
+        _text_lootlike_softness, 
+        {font: "18px Arial", fill: _dic_color_other[local_softness]}
+    );
+    let text_lootlike_fluffiness = scene.add.text(
+        _x-70, 
+        _y+60, 
+        _text_lootlike_fluffiness, 
+        {font: "18px Arial", fill: _dic_color_other[local_fluffiness]}
+    );
+    let text_lootlike_elasticity = scene.add.text(
+        _x-70, 
+        _y+60, 
+        _text_lootlike_elasticity, 
+        {font: "18px Arial", fill: _dic_color_other[local_elasticity]}
+    );
+    let text_lootlike_personality = scene.add.text(
+        _x-70, 
+        _y+60, 
+        _text_lootlike_personality, 
+        {font: "18px Arial", fill: _dic_color_personality[local_personality]}
+    );
+    group_lootlike = scene.add.group();
+    group_lootlike.add(text_lootlike_base);
+    group_lootlike.add(text_lootlike_birthplace);
+    group_lootlike.add(text_lootlike_softness);
+    group_lootlike.add(text_lootlike_fluffiness);
+    group_lootlike.add(text_lootlike_elasticity);
+    group_lootlike.add(text_lootlike_personality);
+    group_lootlike.setVisible(false);
+    group_lootlike.setDepth(9999);
+    item_kanban.setInteractive()
+        .on("pointerover", () => {
+            group_lootlike.setVisible(true);
+        })
+        .on("pointerout", () => {
+            group_lootlike.setVisible(false);
+        });
+
     //group
     group_kanban = scene.add.group();
     group_kanban.add(item_kanban);
@@ -7535,6 +7800,7 @@ function update(scene) {
     calc_fps();
 
     //debug
+    //this.input.on("pointerdown", () => {console.log(Math.round(game.input.mousePointer.x), Math.round(game.input.mousePointer.y)});
     /*
     if (turn % 20 == 0) {
         console.log(Math.round(game.input.mousePointer.x), Math.round(game.input.mousePointer.y));
@@ -7552,6 +7818,12 @@ function update(scene) {
     if (turn % 100 == 0 && summoner > 0 && flag_doneFp == 0 && local_wallet == local_owner) {
         send_fp_get(local_wallet, summoner);
         flag_doneFp = 1;
+        scene.input.on("pointerdown", () => {
+            console.log(
+                Math.round(game.input.mousePointer.x), 
+                Math.round(game.input.mousePointer.y)
+            )
+        });
     }
 
     //radarchart

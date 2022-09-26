@@ -69,6 +69,7 @@ async function initialize_contract() {
     contract_mn.methods._add_permitted_address(contract_murasaki_function_name).send({from:wallet});
     contract_mc.methods._add_permitted_address(contract_murasaki_function_crafting).send({from:wallet});
     contract_mc.methods._add_permitted_address(contract_murasaki_mail).send({from:wallet});
+    contract_mc.methods._add_permitted_address(contract_murasaki_function_feeding_and_grooming).send({from:wallet});
     //contract_mc.methods._add_permitted_address(contract_murasaki_admin).send({from:wallet});
     //contract_mc.methods._add_permitted_address(contract_murasaki_function_summon_and_levelup).send({from:wallet});
     //contract_mn.methods._add_permitted_address(contract_murasaki_admin).send({from:wallet});
