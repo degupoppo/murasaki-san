@@ -1586,7 +1586,7 @@ contract Murasaki_Craft is ERC721, Ownable{
 //===Storage==================================================================================================================
 
 
-//---Murasaki_Parameter
+//---*Murasaki_Parameter
 
 
 contract Murasaki_Parameter is Ownable {
@@ -1610,6 +1610,7 @@ contract Murasaki_Parameter is Ownable {
     uint32 public DAY_PETRIFIED = 30;
     uint32 public STAKING_REWARD_SEC = 2592000; //30 days
     uint32 public ELECTED_FLUFFY_TYPE = 0;
+    string public DEVELOPER_SUMMONER_NAME = "*Fluffy Kingdom*";
 
     //admin, set global variants
     function _set_isPaused(bool _bool) external {
@@ -1636,10 +1637,14 @@ contract Murasaki_Parameter is Ownable {
         require(permitted_address[msg.sender] == true);
         ELECTED_FLUFFY_TYPE = _value;
     }
+    function _set_developer_summoner_name(string memory _string) external {
+        require(permitted_address[msg.sender] == true);
+        DEVELOPER_SUMMONER_NAME = _string;
+    }
 }
 
 
-//---*Murasaki_Storage
+//---Murasaki_Storage
 
 
 contract Murasaki_Storage is Ownable {
@@ -2150,6 +2155,10 @@ contract Murasaki_Function_Share is Ownable {
 
     //call_name_from_summoner
     function call_name_from_summoner(uint32 _summoner) external view returns (string memory) {
+        if (_summoner == 0) {
+            Murasaki_Parameter mp = Murasaki_Parameter(murasaki_parameter_address);
+            return mp.DEVELOPER_SUMMONER_NAME();
+        }
         Murasaki_Name mn = Murasaki_Name(murasaki_name_address);
         Murasaki_Main mm = Murasaki_Main(murasaki_main_address);
         address _owner = mm.ownerOf(_summoner);
@@ -2279,13 +2288,13 @@ contract Murasaki_Function_Share is Ownable {
             _speed = 200;
         } else if (_staker < 16000) {
             _speed = 250;
-        } else if (_staker < 3200) {
+        } else if (_staker < 32000) {
             _speed = 300;
-        } else if (_staker < 6400) {
+        } else if (_staker < 64000) {
             _speed = 350;
-        } else if (_staker < 12800) {
+        } else if (_staker < 128000) {
             _speed = 400;
-        } else if (_staker >= 12800) {
+        } else if (_staker >= 128000) {
             _speed = 428;
         }
         return _speed;
@@ -2383,7 +2392,7 @@ contract Murasaki_Function_Share is Ownable {
 }
 
 
-//---*Summon_and_LevelUp
+//---Summon_and_LevelUp
 
 
 contract Murasaki_Function_Summon_and_LevelUp is Ownable {
@@ -2573,7 +2582,7 @@ contract Murasaki_Function_Summon_and_LevelUp is Ownable {
 }
 
 
-//---*Feeding_and_Grooming
+//---Feeding_and_Grooming
 
 
 contract Murasaki_Function_Feeding_and_Grooming is Ownable {
@@ -2669,7 +2678,7 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable {
         uint32 _seed = mfs.seed(_summoner_from);
         uint32 _item_type = 200;
         string memory _memo = "dapps staking";
-        mc.craft(_item_type, _summoner_from, _wallet_to, _seed, _memo);
+        mc.craft(_item_type, uint32(0), _wallet_to, _seed, _memo);
     }
 
     //petrification, debends on only feeding
@@ -3012,7 +3021,7 @@ contract Murasaki_Function_Mining_and_Farming is Ownable {
 }
 
 
-//---*Crafting
+//---Crafting
 
 
 contract Murasaki_Function_Crafting is Ownable {
@@ -3422,7 +3431,7 @@ contract Murasaki_Function_Crafting is Ownable {
 }
 
 
-//---*Crafting_Codex
+//---Crafting_Codex
 
 
 contract Murasaki_Function_Crafting_Codex is Ownable {
@@ -4466,7 +4475,7 @@ contract World_Dice is Ownable {
 }
 
 
-//---*Murasaki_Mail
+//---Murasaki_Mail
 
 
 contract Murasaki_Mail is Ownable {
@@ -4879,6 +4888,7 @@ contract Murasaki_Info is Ownable {
     address public murasaki_function_mining_and_farming_address;
     address public murasaki_function_crafting_address;
     address public murasaki_function_feeding_and_grooming_address;
+    address public fluffy_festival_address;
     
     //admin, set address
     function _set1_murasaki_function_share_address(address _address) external onlyOwner {
@@ -4892,6 +4902,9 @@ contract Murasaki_Info is Ownable {
     }
     function _set4_murasaki_function_feeding_and_grooming_address(address _address) external onlyOwner {
         murasaki_function_feeding_and_grooming_address = _address;
+    }
+    function _set5_fluffy_festival_address(address _address) external onlyOwner {
+        fluffy_festival_address = _address;
     }
     
     //Murasaki_Main
@@ -5248,6 +5261,17 @@ contract Murasaki_Info is Ownable {
         }
     }
     
+    //fluffy festival
+    function check_votable(uint32 _summoner) public view returns (uint32) {
+        Fluffy_Festival ff = Fluffy_Festival(fluffy_festival_address);
+        bool _isVotable = ff.check_votable(_summoner);
+        if (_isVotable == true) {
+            return uint32(1);
+        } else {
+            return uint32(0);
+        }
+    }
+    
     //get all
     function allDynamicStatus(uint32 _summoner) external view returns (uint32[64] memory) {
         uint32[64] memory _res;
@@ -5271,14 +5295,14 @@ contract Murasaki_Info is Ownable {
         _res[17] = crafting_status(_summoner);
         _res[18] = crafting_start_time(_summoner);
         _res[19] = crafting_item_type(_summoner);
-        //_res[20] = total_mining_sec(_summoner);
-        //_res[21] = total_farming_sec(_summoner);
-        //_res[22] = total_crafting_sec(_summoner);
-        //_res[23] = total_exp_gained(_summoner);
-        //_res[24] = total_coin_mined(_summoner);
-        //_res[25] = total_material_farmed(_summoner);
-        //_res[26] = total_item_crafted(_summoner);
-        //_res[27] = total_precious_received(_summoner);
+        _res[20] = total_mining_sec(_summoner);
+        _res[21] = total_farming_sec(_summoner);
+        _res[22] = total_crafting_sec(_summoner);
+        _res[23] = total_exp_gained(_summoner);
+        _res[24] = total_coin_mined(_summoner);
+        _res[25] = total_material_farmed(_summoner);
+        _res[26] = total_item_crafted(_summoner);
+        _res[27] = total_precious_received(_summoner);
         _res[28] = satiety(_summoner);
         _res[29] = happy(_summoner);
         _res[30] = precious(_summoner);
@@ -5309,6 +5333,7 @@ contract Murasaki_Info is Ownable {
         _res[54] = calc_feeding(_summoner);
         _res[55] = calc_grooming(_summoner);
         _res[56] = staking_reward_counter(_summoner);
+        _res[57] = check_votable(_summoner);
         return _res;
     }
             
@@ -5391,7 +5416,7 @@ contract Murasaki_Info_fromWallet is Ownable {
 }
 
 
-//---Fluffy_Festival
+//---*Fluffy_Festival
 
 
 contract Fluffy_Festival is Ownable {
@@ -5467,11 +5492,11 @@ contract Fluffy_Festival is Ownable {
     function voting(uint32 _summoner, uint32 _select) external {
         require(isActive);
         string memory _memo;
-        //chekc fist voting
+        //check fist voting
         if ( check_start_voting() ){
             _start_voting();
             _memo = "first voting bonus";
-            _mint_presentbox(_summoner, msg.sender, _memo);
+            _mint_presentbox(uint32(0), msg.sender, _memo);
         }
         //chekc votable of summoner
         require(check_votable(_summoner));
@@ -5486,13 +5511,13 @@ contract Fluffy_Festival is Ownable {
         next_step += 1;
         //mint presentbox
         _memo = "participation award";
-        _mint_presentbox(_summoner, msg.sender, _memo);
+        _mint_presentbox(uint32(0), msg.sender, _memo);
         //check final voting
         if ( check_end_voting() ) {
             _end_voting(_summoner);
             //bonus presentbox
             _memo = "final voting bonus";
-            _mint_presentbox(_summoner, msg.sender, _memo);
+            _mint_presentbox(uint32(0), msg.sender, _memo);
         }
     }
     function check_votable(uint32 _summoner) public view returns (bool) {
@@ -5502,46 +5527,29 @@ contract Fluffy_Festival is Ownable {
         //get subject_now
         Subject memory _subject = subjects[subject_now];
         if (
-            //check pause
-            mp.isPaused() == false
-            //check owner
-            && mfs.check_owner(_summoner, msg.sender)
-            //check summoner status
-            && ms.inHouse(_summoner)
-            && mfs.calc_satiety(_summoner) >= SATIETY_REQUIRED
-            && mfs.calc_happy(_summoner) >= HAPPY_REQUIRED
-            && ms.level(_summoner) >= LEVEL_REQUIRED
-            //check not have already voted
-            && _subject.start_block > last_voting_block[_summoner]
-            //check voting period
-            //&& _subject.start_block + ELECTION_PERIOD_BLOCK >= block.number
-            //check not ended
-            && inSession
+            //can star voting
+            check_start_voting()
+            //or after start, meet the all condition
+            || (
+                //check pause
+                mp.isPaused() == false
+                //check owner
+                && mfs.check_owner(_summoner, msg.sender)
+                //check summoner status
+                && ms.inHouse(_summoner)
+                && mfs.calc_satiety(_summoner) >= SATIETY_REQUIRED
+                && mfs.calc_happy(_summoner) >= HAPPY_REQUIRED
+                && ms.level(_summoner) >= LEVEL_REQUIRED
+                //check not have already voted
+                && _subject.start_block > last_voting_block[_summoner]
+                //check not ended
+                && inSession
+            )
         ){
             return true;
         } else {
             return false;
         }
-        /*
-        //check pause
-        require(mp.isPaused() == false);
-        //check owner
-        require(mfs.check_owner(_summoner, msg.sender));
-        //chekc summoner status
-        require(ms.inHouse(_summoner));
-        require(
-            mfs.calc_satiety(_summoner) >= SATIETY_REQUIRED
-            && mfs.calc_happy(_summoner) >= HAPPY_REQUIRED
-        );
-        require(ms.level(_summoner) >= LEVEL_REQUIRED);
-        //check have already or not
-        Subject memory _subject = subjects[subject_now];
-        require(_subject.start_block > last_voting_block[_summoner]);
-        //require(_start_block > last_voting_block[_summoner]);
-        //check voting period
-        require(_subject.start_block + ELECTION_PERIOD_BLOCK >= block.number);
-        return true;
-        */
     }
     function _get_winner_inStep_now() internal view returns (uint32) {
         //return fluffy type with the biggest voting count
@@ -5562,6 +5570,10 @@ contract Fluffy_Festival is Ownable {
         uint32 _seed = mfs.seed(_summoner);
         uint32 _item_type = 200;
         mc.craft(_item_type, _summoner, _wallet_to, _seed, _memo);
+    }
+    //***TODO*** forDebug
+    function mint_presentbox(uint32 _summoner, address _wallet_to, string memory _memo) external {
+        _mint_presentbox(_summoner, _wallet_to, _memo);
     }
     
     //start voting

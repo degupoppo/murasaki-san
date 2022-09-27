@@ -343,7 +343,8 @@ async function transfer_item() {
 //call name from summoner id
 async function call_name_from_summoner(_summoner) {
     let web3 = await connect();
-    let contract = await new web3.eth.Contract(abi_murasaki_function_name, contract_murasaki_function_name);
+    //let contract = await new web3.eth.Contract(abi_murasaki_function_name, contract_murasaki_function_name);
+    let contract = await new web3.eth.Contract(abi_murasaki_function_share, contract_murasaki_function_share);
     let _name = await contract.methods.call_name_from_summoner(_summoner).call();
     return _name;
 }

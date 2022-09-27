@@ -5,32 +5,34 @@
 
 /*
 
-
 //### 1st
 
    *メインコンセプトの整理*
         電子生命
     
-    ステータスを表示する本の実装
-        クリックやマウスオーバラップで細かなパラメータを表示する
-        表示ステータス
-            total_exp_gained
-            total_coin_mined
-            total_leaf_farmed
-            total_fluffy_received
-            total_item_crafting
-            total_mail_sent
-            total_mail_opened
-        バッチ処理で受け取ってもよいが、
-            アイテムクラフト時にかき集めてもそこまで負担にならないか
-        随時更新させたいので、やはり専用のバッチ処理で定期的に情報を取得する
-            もしくはmurasaki_info内に組み込めたら良いのだが。
-    
-    Fluffy FestivalのUIの実装
+    Fluffy FestivalのUI実装
         次回投票日までのblock数の表示方法
         投票可能時の演出
         投票出発時の専用絵
         selection画面の実装
+        専用キャラ？
+            Festival前から出現
+            festival startまでのblock数をカウントダウン
+            start_block後はクリックでvoting windowを開く
+            専用クラスを用意する
+            votable(false)で退出する
+                退出の演出を用意する
+            start_blockまでのカウントダウン関数の実装が必要か
+            0/1のvotableと、start_blockまでのdelta_blockの2つを取得する
+
+    Staking RewardカウンターのUI実装
+        次回のプレゼントを受け取るまでの進捗をバーなどで表示する
+            さてどこに表示させるか
+            feedingでのみカウンター減弱するので、feedingの近くか？
+        表示内容
+            feeding時にカウンターが進む
+            かつ、係数はstaking量に比例するので単純な秒でもない
+            単位なしの「%」とするか
 
     フロアステッカーの実装
         お花にするか
@@ -53,12 +55,44 @@
                 → calc値を取得してpreviousに代入
                 → これに対してnuiちゃん補正をかけ、1.8倍判定を行う
 
-    Crafting難易度の再考
+    Crafting難易度の調整
         現在の難易度ではItemづまりを起こすだろうか。
         もう少しDCを下げるなど難易度調整する。
+        初期の必須アイテム系はもっと値段と難易度を下げる
+            大体1-2週間程度ですべて揃うぐらいに。
+            特にnameplateは1日でmint可能なぐらいに。
+    
+    バイバックシステムのUI実装
+        専用ページの用意
+            現在のバイバック価格の表示
+            バイバックボタンの実装
+            マーケットlistページと統合する？
+        意味論
+            アクティブユーザーが増えればインフレしにくくなる
+            ユーザー数に対してステーキング量が大きければインフレしやすくなる
+            脱落ユーザーはアクティブユーザーにカウントせず、
+                その分アクティブユーザー用のインフレに資金を回す
+                ただし、いきなりアクティブユーザー数で割らずに、
+                あくまで月ごとのインフレ率は小さく保つ
+            月ごとは3%-6%程度。
+                様子を見ながら調整する。
+                理想はdapps stakingで利益をとった上での定常状態化
+                アクティブユーザー数が多すぎるとインフレしにくいだろうか。
 
+//### Picture
 
-//### 絵など
+    ステーキング反映案
+        いくつかのアイテムはステーキング量に応じて豪華になる
+            金魚鉢：金魚が増える
+            ステッカー：にぎやかになる
+            花瓶：花の種類が変わる、など
+        ステッカーはwallet ageではなくstaking量に対応させてしまうか
+
+    本のアニメーションの実装
+        マウスオーバーラップ時の絵
+        クリックで開いて表示させる？
+        吹き出しの検討
+            位置合わせがとても面倒だが
 
     トークンボックス絵の実装
         宝箱
@@ -112,6 +146,28 @@
 
 
 //### 2nd
+
+ ok ステータスを表示する本の実装
+        クリックやマウスオーバラップで細かなパラメータを表示する
+        表示ステータス
+            total_exp_gained
+            total_coin_mined
+            total_leaf_farmed
+            total_fluffy_received
+            total_item_crafting
+            total_mail_sent
+            total_mail_opened
+        バッチ処理で受け取ってもよいが、
+            アイテムクラフト時にかき集めてもそこまで負担にならないか
+        随時更新させたいので、やはり専用のバッチ処理で定期的に情報を取得する
+            もしくはmurasaki_info内に組み込めたら良いのだが。
+    
+ ok Fluffly ScoreのUI改善
+        履歴ではなく、現在の個数を表示させる
+            fluffy, flyffier, flyffiest, fluffy dollの個数と補正値
+    
+ ok presentboxのUI実装
+        マウスオーバーラップで情報表示
 
  ok ガバナンスシステムの実装
         投票
@@ -477,7 +533,17 @@ async function init_global_variants() {
     local_fluffiness =  "";
     local_elasticity =  "";
     local_personality = "";
-
+    local_staking_reward_counter = 2592000;
+    local_check_votable = 0;
+    local_total_mining_sec = 0;
+    local_total_farming_sec = 0;
+    local_total_crafting_sec = 0;
+    local_total_exp_gained = 0;
+    local_total_coin_mined = 0;
+    local_total_material_farmed = 0;
+    local_total_item_crafted = 0;
+    local_total_precious_received = 0;
+    
     //---local previous
     previous_local_last_feeding_time = 0;
     previous_local_last_grooming_time = 0;
@@ -532,7 +598,7 @@ async function init_global_variants() {
     screen_satiety_delta = 0;
     item_wearing_hat = 0;
     active_nui_id = 0;
-    text_event_heart = "";
+    //text_event_heart = "";
     text_event_random = "[Murasaki news]";
     text_event_random = text_event_random.padStart(116, " ");
     turn_forFPS = 0;
@@ -834,9 +900,9 @@ async function contract_update_dynamic_status(_summoner) {
     local_itemIds = get_itemIds(_myListsAt_withItemType);
 
     //***TODO*** debug
-    //for (let i = 1; i <= 64; i++) {
-    //    local_items[i] += 1;
-    //}
+    for (let i = 1; i <= 64; i++) {
+        local_items[i] += 1;
+    }
 
     //call dynamic status from chain
     let _all_dynamic_status = await contract_info.methods.allDynamicStatus(_summoner).call();
@@ -938,6 +1004,22 @@ async function contract_update_dynamic_status(_summoner) {
     //petrified
     local_notPetrified = Number(_all_dynamic_status[31]);
     
+    //stakign reward counter
+    local_staking_reward_counter = Number(_all_dynamic_status[56]);
+    
+    //votable
+    local_check_votable = Number(_all_dynamic_status[57]);
+    
+    //total status
+    local_total_mining_sec = Number(_all_dynamic_status[20]);
+    local_total_farming_sec = Number(_all_dynamic_status[21]);
+    local_total_crafting_sec = Number(_all_dynamic_status[22]);
+    local_total_exp_gained = Number(_all_dynamic_status[23]);
+    local_total_coin_mined = Number(_all_dynamic_status[24]);
+    local_total_material_farmed = Number(_all_dynamic_status[25]);
+    local_total_item_crafted = Number(_all_dynamic_status[26]);
+    local_total_precious_received = Number(_all_dynamic_status[27]);
+    
     //update last_sync_time
     last_sync_time = Date.now();
     count_sync += 1;
@@ -954,6 +1036,7 @@ async function contract_update_all() {
 
 //###event
 
+/*
 //update event_heart
 async function contract_update_event_precious() {
     let _block_latest = await web3.eth.getBlockNumber();
@@ -1015,19 +1098,9 @@ async function contract_update_event_precious() {
     
     _text = _text.slice(0, -2);
 
-    /*
-    _contract = new web3.eth.Contract(abi_murasaki_function_feeding_and_grooming, contract_murasaki_function_feeding_and_grooming);
-    let _res = await _contract.getPastEvents("Feeding", {
-            fromBlock: _block_from,
-            toBlock: _block_latest
-    });
-    console.log(_res);
-    _text += _res[0].returnValues[0];
-    console.log(_text);
-    */
-
     text_event_heart.setText(_text);
 }
+*/
 
 //update event random
 async function contract_update_event_random() {
@@ -1247,7 +1320,8 @@ async function contract_callMailDetail(_summoner){
     let _mail_id = await contract_mml.methods.receiving(_summoner).call();
     let _mail = await contract_mml.methods.mails(_mail_id).call();
     let _summoner_from_id = _mail[2];
-    let _summoner_from_name = await contract_mn.methods.call_name_from_summoner(_summoner_from_id).call();
+    //let _summoner_from_name = await contract_mn.methods.call_name_from_summoner(_summoner_from_id).call();
+    let _summoner_from_name = await contract_mfs.methods.call_name_from_summoner(_summoner_from_id).call();
     return (_summoner_from_id, _summoner_from_name);
 }
 
@@ -1262,7 +1336,8 @@ async function contract_get_item_nui(_item) {
 
 //call name from summoner id
 async function call_name_from_summoner(_summoner) {
-    let _name = await contract_mfn.methods.call_name_from_summoner(_summoner).call();
+    //let _name = await contract_mfn.methods.call_name_from_summoner(_summoner).call();
+    let _name = await contract_mfs.methods.call_name_from_summoner(_summoner).call();
     return _name;
 }
 
@@ -1548,6 +1623,13 @@ async function open_presentbox(_summoner, _itemId) {
         .on("receipt", (receipt) => update_tx_text("done", receipt.transactionHash));
 }
 
+//voting
+async function voting(_summoner, _select) {
+    contract_ff.methods.voting(_summoner, _select).send({from:wallet})
+        .on("transactionHash", (transactionHash) => update_tx_text("sending", transactionHash))
+        .on("receipt", (receipt) => update_tx_text("done", receipt.transactionHash));
+}
+
 
 //===class:Murasakisan========================================================--------
 
@@ -1555,11 +1637,11 @@ async function open_presentbox(_summoner, _itemId) {
 class Murasakisan extends Phaser.GameObjects.Sprite{
     
     constructor(scene, x, y){
-        super(scene, x, y, "murasaki_right");
+        super(scene, x, y, "murasaki_sleeping");
         this.x = x;
         this.y = y;
         this.scene.add.existing(this);
-        this.anims.play("murasaki_right", true);
+        this.anims.play("murasaki_sleeping", true);
     	this.mode = "resting";
         this.submode = 0;
         this.count = 0;
@@ -3364,10 +3446,25 @@ class PresentBox extends Phaser.GameObjects.Sprite{
         this.on("pointerdown", function (pointer) {
             this.on_click();
         }, this);
-        this.itemId = itemId;
+        this.itemId = Number(itemId);
         this.summoner_from = summoner_from;
         this.memo = memo;
         this.on_summon();
+        let _text = "";
+        _text += "Gift of " + this.memo + "\n"; 
+        _text += "from " + this.summoner_from;
+        this.text = scene.add.text(
+            this.x, 
+            this.y-40,
+            _text, 
+            {font: "20px Arial", fill: "#000000", backgroundColor: "#ffffff"}
+        ).setOrigin(0.5).setDepth(9999).setVisible(false);
+        this.on("pointerover", () => {
+            this.text.visible = true;
+        })
+        this.on("pointerout", () => {
+            this.text.visible = false;
+        });
     }
     
     //---on_click
@@ -3811,12 +3908,14 @@ function open_window_craft (scene) {
     group_window_crafting.add(button_crafting_item196);
     group_window_crafting.add(item196_icon);
 
+    /*
     //nui
     if (local_items[197] > 0) { _rarity = "common" } else { _rarity = null }
     button_crafting_item197  = create_button(870, 80 + 40*18, "[" +local_items[197]+ "] Coddly Toy", 197,  scene, _rarity);
     item197_icon = scene.add.sprite(870-25, 80+20 + 40*18, "item_nui").setScale(0.15);
     group_window_crafting.add(button_crafting_item197);
     group_window_crafting.add(item197_icon);
+    */
 
     //cancel
     _rarity = "common";
@@ -4028,7 +4127,7 @@ function open_window_summon(scene) {
     group_window_summon.add(button11);
     group_window_summon.add(button_cancel);
     //depth
-    group_window_summon.setDepth(9999 + 1);
+    group_window_summon.setDepth(999999);
 }
 
 
@@ -4423,6 +4522,7 @@ function preload(scene) {
     scene.load.image("item_window_night_closed", "src/png/item_window_night_closed.png");
     scene.load.image("item_newspaper", "src/png/item_newspaper.png");
     scene.load.image("item_presentbox", "src/png/item_presentbox.png");
+    scene.load.image("item_book", "src/png/item_book.png");
     
     //---star
     scene.load.image("star_blue", "src/png/star_blue.png");
@@ -5235,15 +5335,15 @@ function create(scene) {
     icon_heart = scene.add.sprite(960, 21, "icon_heart")
         .setScale(0.08)
         .setDepth(9999);
-    text_event_heart = scene.add.text(1045, 40, "", {font: "17px Arial", fill: "#000", backgroundColor: "#FDEEED"})
+    text_fluffy = scene.add.text(1045, 40, "", {font: "17px Arial", fill: "#000", backgroundColor: "#FDEEED"})
         .setOrigin(1,0)
         .setVisible(false)
         .setDepth(9999);
     text_heart = scene.add.text(975, 15, "***", {font: "17px Arial", fill: "#000", backgroundColor: "#FDEEED"})
         .setDepth(9999)
         .setInteractive()
-        .on("pointerover", () => text_event_heart.setVisible(true))
-        .on("pointerout", () => text_event_heart.setVisible(false));
+        .on("pointerover", () => text_fluffy.setVisible(true))
+        .on("pointerout", () => text_fluffy.setVisible(false));
 
     //name
     _x = 85;
@@ -5796,9 +5896,11 @@ function update_parametersWithoutAnimation(this_scene) {
     //text_speed.setText("speed: x" + SPEED);
 
     text_heart.setText("Fluffy: " + local_precious);
+    /*
     if (local_precious != previous_local_precious) {
         contract_update_event_precious();
     }
+    */
 
     //update progression status
     let _mode = murasakisan.get_mode;
@@ -6179,6 +6281,40 @@ function update_checkItem(this_scene) {
     ) {
         local_items_flag[_item_id] = true;
         group_kanban.setVisible(true);
+
+        //***TODO***//
+        
+        //book
+        let _x = 230;
+        let _y = 700;
+        let _text = "";
+        _text += " total mining sec: " + local_total_mining_sec + "\n";
+        _text += " total farming sec: " + local_total_farming_sec + "\n";
+        _text += " total crafting sec: " + local_total_crafting_sec + "\n";
+        _text += " total exp gained: " + local_total_exp_gained + "\n";
+        _text += " total coin mined: " + local_total_coin_mined + "\n";
+        _text += " total leaf farmed: " + local_total_material_farmed + "\n";
+        _text += " total item crafted: " + local_total_item_crafted + "\n";
+        _text += " total fluffy gifted: " + local_total_precious_received;
+        item_book_text = this_scene.add.text(
+            _x,
+            _y-120,
+            _text,
+            {font: "20px Arial", fill: "#000000", backgroundColor: "#ffffff"}
+        ).setOrigin(0.5).setVisible(false).setDepth(9999);
+        item_book = this_scene.add.sprite(
+            _x, 
+            _y, 
+            "item_book"
+        ).setScale(0.1).setOrigin(0.5)
+            .setInteractive()
+            .on("pointerover", () => {
+                item_book_text.visible = true;
+            })
+            .on("pointerout", () => {
+                item_book_text.visible = false;
+            });
+
     } else if (
         local_items[_item_id] == 0 
         && local_items[_item_id+64] == 0 
@@ -6874,6 +7010,7 @@ function update_checkItem(this_scene) {
     }
 
     //###27:Floor Sticker
+    /*
     _item_id = 27;
     if (
         (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
@@ -6898,6 +7035,7 @@ function update_checkItem(this_scene) {
         item_floor_sticker2.destroy(true);
         local_items_flag[_item_id] = false;
     }
+    */
 
     //###33:Table
     _item_id = 33;
@@ -7657,28 +7795,29 @@ function update_checkItem(this_scene) {
         let _itemIds = get_itemIds_from_itemType(local_myListsAt_withItemType, 200);
         _itemIds.forEach( async (_itemId) => {
             if (!summoned_presentbox.includes(_itemId)) {
-                let _x = 300 + Math.random() * 500;
-                let _y = 600 + Math.random() * 100;
+                let _x = 170 + Math.random() * 830;
+                let _y = 510 + Math.random() * 170;
                 let _item = await call_item_info(_itemId);
-                let _summoner_from = call_name_from_summoner(_item.crafted_summoner);
+                let _summoner_from = await call_name_from_summoner(_item.crafted_summoner);
                 if (_summoner_from == "") {
                     _summoner_from = "#" + _item.crafted_summoner;
                 }
                 let _memo = _item.memo;
-                new PresentBox(
-                    scene,
+                let _present = new PresentBox(
+                    this_scene,
                      _x, 
                      _y, 
                      "item_presentbox", 
+                     _itemId,
                      _summoner_from, 
-                     _memo, 
-                     _itemId
+                     _memo
                  )
                     .setOrigin(0.5)
-                    .setScale(0.15)
+                    .setScale(0.1)
                     .setAlpha(1)
                     .setDepth(3);
                 summoned_presentbox.push(_itemId);
+                group_update.add(_present);
             }
         });
     }
@@ -7686,7 +7825,10 @@ function update_checkItem(this_scene) {
     //###201-236:Fluffy
     if (local_precious > previous_local_precious2) {
         let _timeout = 0;
-        //common
+        let _count_fluffy = 0;
+        let _count_fluffier = 0;
+        let _count_fluffiest = 0;
+        //fluffy
         for (let i = 201; i <= 212; i++) {
             let _count = local_items[i];
             if (_count > 0) {
@@ -7700,9 +7842,10 @@ function update_checkItem(this_scene) {
                         summoned_fluffies.push(_itemId);
                     }
                 });
+                _count_fluffy += 1;
             }
         }
-        //uncommon
+        //fluffier
         for (let i = 213; i <= 224; i++) {
             let _count = local_items[i];
             if (_count > 0) {
@@ -7716,9 +7859,10 @@ function update_checkItem(this_scene) {
                         summoned_fluffies.push(_itemId);
                     }
                 });
+                _count_fluffier += 1;
             }
         }
-        //rare
+        //fluffiest
         for (let i = 225; i <= 236; i++) {
             let _count = local_items[i];
             if (_count > 0) {
@@ -7732,8 +7876,18 @@ function update_checkItem(this_scene) {
                         summoned_fluffies.push(_itemId);
                     }
                 });
+                _count_fluffiest += 1;
             }
         }
+
+        //update fluffy text
+        let _count_nui = local_items[197];        
+        let _text = "";
+        _text += " fluffy x " + _count_fluffy + "\n";
+        _text += " fluffier x " + _count_fluffier + "\n";
+        _text += " fluffiest x " + _count_fluffiest + "\n";
+        _text += " fluffy doll x " + _count_nui + " ";
+        text_fluffy.setText(_text);
     }
     
     //###000:VisitorCat
@@ -7807,14 +7961,6 @@ function update(scene) {
     //calc FPS
     calc_fps();
 
-    //debug
-    //this.input.on("pointerdown", () => {console.log(Math.round(game.input.mousePointer.x), Math.round(game.input.mousePointer.y)});
-    /*
-    if (turn % 20 == 0) {
-        console.log(Math.round(game.input.mousePointer.x), Math.round(game.input.mousePointer.y));
-    }
-    */
-    
     //protection code
     /*
     if (turn % 100 == 10) {
