@@ -16,44 +16,44 @@
         投票出発時の専用絵
         selection画面の実装
         専用キャラ？
+            専用クラスを用意する
             Festival前から出現
             festival startまでのblock数をカウントダウン
             start_block後はクリックでvoting windowを開く
-            専用クラスを用意する
             votable(false)で退出する
                 退出の演出を用意する
+            退出後は張り紙やレポート用紙などで途中経過を報告する
+            festival終了時は結果を表示する
             start_blockまでのカウントダウン関数の実装が必要か
             0/1のvotableと、start_blockまでのdelta_blockの2つを取得する
-
-    Staking RewardカウンターのUI実装
-        次回のプレゼントを受け取るまでの進捗をバーなどで表示する
-            さてどこに表示させるか
-            feedingでのみカウンター減弱するので、feedingの近くか？
-        表示内容
-            feeding時にカウンターが進む
-            かつ、係数はstaking量に比例するので単純な秒でもない
-            単位なしの「%」とするか
-
-    フロアステッカーの実装
-        お花にするか
-        床の上に薄く色々な種類のお花が増えてゆく
-
- ig クリティカル検出の改善
-        現状、うまく検出できてない
-        luck_challengeはmsg.senderを参照するので画一的に結果を取得できない
-        案1
-            msg.senderを考慮した乱数取得関数を用意する
-        案2
-            通常のernを計算しそれより多いか参照する
-        案3
-            Eventを参照する
-        採用案
-            feeding, grooming, mining, farmingのluck前の値を取得し、
-            この値より1.8倍大きいdeltaが生じた時にcliticalと判定する。
-            feedingとgroomingのぬいちゃん補正はlocalで行う。
-            feedingとgroomingはまずsolidityの更新が必要。
-                → calc値を取得してpreviousに代入
-                → これに対してnuiちゃん補正をかけ、1.8倍判定を行う
+        必要な情報
+            in session = true/false
+            your status = voted/not yet
+            next festival start block
+            end block
+        バグ対策：end_voting
+            みなが早めにvoteし終えてしまうと、誰もend_votingしてくれなくなる
+            end_votingだけを別途行えるようにしておく
+            必要なら運営が手動で行うか
+            もしくは、end_votingのみは、条件を満たせば誰でも行えるようにしておく
+                まだvotingしていないsummonerはvoting & end_voting
+                すでにvoting済みのsummonerもend_votingのみを行い、
+                    ボーナスboxを得ることができる
+                また、このような状況を逐次ユーザーに表示するUIを実装する
+                    自分の投票内容
+                    途中経過の報告
+                    終了までの残block数と概算時間
+        状況
+            未開催：
+                直近の結果を表示
+                前回のend_voterを表示
+                次回開催予定日時を表示
+            開催中, 未投票：
+                投票ボタンを表示
+            開催中, 投票済：
+                自分の投票結果を表示
+                現在の投票状況を表示
+                終了までのblock数と概算時間を表示
 
     Crafting難易度の調整
         現在の難易度ではItemづまりを起こすだろうか。
@@ -80,6 +80,10 @@
                 アクティブユーザー数が多すぎるとインフレしにくいだろうか。
 
 //### Picture
+
+    フロアステッカーの実装
+        お花にするか
+        床の上に薄く色々な種類のお花が増えてゆく
 
     ステーキング反映案
         いくつかのアイテムはステーキング量に応じて豪華になる
@@ -146,6 +150,43 @@
 
 
 //### 2nd
+
+ ok クリティカル検出の改善
+        現状、うまく検出できてない
+        luck_challengeはmsg.senderを参照するので画一的に結果を取得できない
+        案1
+            msg.senderを考慮した乱数取得関数を用意する
+        案2
+            通常のernを計算しそれより多いか参照する
+        案3
+            Eventを参照する
+        採用案
+            feeding, grooming, mining, farmingのluck前の値を取得し、
+            この値より1.8倍大きいdeltaが生じた時にcliticalと判定する。
+            feedingとgroomingのぬいちゃん補正はlocalで行う。
+            feedingとgroomingはまずsolidityの更新が必要。
+                → calc値を取得してpreviousに代入
+                → これに対してnuiちゃん補正をかけ、1.8倍判定を行う
+
+ ok Staking RewardカウンターのUI実装
+        次回のプレゼントを受け取るまでの進捗をバーなどで表示する
+            さてどこに表示させるか
+            feedingでのみカウンター減弱するので、feedingの近くか？
+        表示内容
+            feeding時にカウンターが進む
+            かつ、係数はstaking量に比例するので単純な秒でもない
+            単位なしの「%」とするか
+        専用キャラクター？
+            カウンターが0になった時にキャラクターを表示させるか
+            もしくは、常に表示されるカウンターのようなものを作るか
+        必要な情報
+            dapps staking amount
+            staking reward counter
+            staking reward speed
+            staking reward percent
+
+ ok contract_mpからのパラメータ取得のバッチ処理化
+        もしくはmurasaki_infoのstaticでmpステータスをバッチで取得する
 
  ok ステータスを表示する本の実装
         クリックやマウスオーバラップで細かなパラメータを表示する
@@ -482,6 +523,8 @@ async function init_global_variants() {
     SPEED = 1;
     BASE_SEC = 86400;
     CORRECT_CHAINID = 4369;
+    STAKING_REWARD_SEC = 2592000;
+    ELECTED_FLUFFY_TYPE = 0;
 
     //---on_chain dynamic
     local_class = 0;
@@ -535,14 +578,16 @@ async function init_global_variants() {
     local_personality = "";
     local_staking_reward_counter = 2592000;
     local_check_votable = 0;
-    local_total_mining_sec = 0;
-    local_total_farming_sec = 0;
-    local_total_crafting_sec = 0;
+    //local_total_mining_sec = 0;
+    //local_total_farming_sec = 0;
+    //local_total_crafting_sec = 0;
     local_total_exp_gained = 0;
     local_total_coin_mined = 0;
     local_total_material_farmed = 0;
     local_total_item_crafted = 0;
     local_total_precious_received = 0;
+    local_dapps_staking_amount = 0;
+    local_staking_reward_speed = 0;
     
     //---local previous
     previous_local_last_feeding_time = 0;
@@ -569,7 +614,8 @@ async function init_global_variants() {
     previous_local_item200 = 0;
     last_local_coin_calc = 0;
     last_local_material_calc = 0;
-
+    last_local_calc_feeding = 0;
+    last_local_calc_grooming = 0;
     
     //---local etc
     turn = 0;
@@ -606,6 +652,7 @@ async function init_global_variants() {
     summoned_fluffies = [];
     summoned_presentbox = [];
     item_wearing_hat_pet = 0;
+    staking_reward_percent = 0;
 
     //---flag
     flag_music = 0;
@@ -622,6 +669,7 @@ async function init_global_variants() {
     flag_window_craft = 0;
     flag_update = 1;
     flag_fadein = 0;
+    flag_debug = 0;
 }
 
 init_global_variants();
@@ -851,12 +899,23 @@ async function contract_update_static_status(_summoner) {
     local_personality = _res[4];
 
     //call speed
+    /*
     SPEED = await contract_mp.methods.SPEED().call();
     SPEED = Number(SPEED) / 100;
+    */
+    SPEED = Number(_all_static_status[4])/100;
+    
+    //STAKING_REWARD_SEC
+    //STAKING_REWARD_SEC = await contract_mp.methods.STAKING_REWARD_SEC().call();
+    STAKING_REWARD_SEC = Number(_all_static_status[6]);
+    
+    //ELECTED_FLUFFY_TYPE
+    //ELECTED_FLUFFY_TYPE = await contract_mp.methods.ELECTED_FLUFFY_TYPE().call();
+    ELECTED_FLUFFY_TYPE = Number(_all_static_status[7]);
     
     //calc wallet score
     //local_wallet_score = await calc_wallet_score(wallet);
-    update_local_wallet_score();
+    //update_local_wallet_score();
 }
 
 //using in Loading scene
@@ -900,8 +959,10 @@ async function contract_update_dynamic_status(_summoner) {
     local_itemIds = get_itemIds(_myListsAt_withItemType);
 
     //***TODO*** debug
-    for (let i = 1; i <= 64; i++) {
-        local_items[i] += 1;
+    if (flag_debug == 1) {
+        for (let i = 1; i <= 64; i++) {
+            local_items[i] += 1;
+        }
     }
 
     //call dynamic status from chain
@@ -976,10 +1037,6 @@ async function contract_update_dynamic_status(_summoner) {
     local_satiety = Number(_all_dynamic_status[28]);
     local_happy =   Number(_all_dynamic_status[29]);
 
-    //dapps staking
-    local_dapps_staking_amount =    Number(_all_dynamic_status[32]);
-    //local_luck_by_staking =         Number(_all_dynamic_status[33]);
-
     //mail
     local_mail_sending_interval =   Number(_all_dynamic_status[44]);
     local_receiving_mail =          Number(_all_dynamic_status[43]);
@@ -1004,21 +1061,27 @@ async function contract_update_dynamic_status(_summoner) {
     //petrified
     local_notPetrified = Number(_all_dynamic_status[31]);
     
-    //stakign reward counter
+    //dapps staking
+    local_dapps_staking_amount =    Number(_all_dynamic_status[32]);
     local_staking_reward_counter = Number(_all_dynamic_status[56]);
+    local_staking_reward_speed = Number(_all_dynamic_status[58]);
     
     //votable
     local_check_votable = Number(_all_dynamic_status[57]);
     
     //total status
-    local_total_mining_sec = Number(_all_dynamic_status[20]);
-    local_total_farming_sec = Number(_all_dynamic_status[21]);
-    local_total_crafting_sec = Number(_all_dynamic_status[22]);
+    //local_total_mining_sec = Number(_all_dynamic_status[20]);
+    //local_total_farming_sec = Number(_all_dynamic_status[21]);
+    //local_total_crafting_sec = Number(_all_dynamic_status[22]);
     local_total_exp_gained = Number(_all_dynamic_status[23]);
     local_total_coin_mined = Number(_all_dynamic_status[24]);
     local_total_material_farmed = Number(_all_dynamic_status[25]);
     local_total_item_crafted = Number(_all_dynamic_status[26]);
     local_total_precious_received = Number(_all_dynamic_status[27]);
+    
+    //feeding/grooming calc
+    local_calc_feeding = Number(_all_dynamic_status[54]);
+    local_calc_grooming = Number(_all_dynamic_status[55]);
     
     //update last_sync_time
     last_sync_time = Date.now();
@@ -4523,6 +4586,7 @@ function preload(scene) {
     scene.load.image("item_newspaper", "src/png/item_newspaper.png");
     scene.load.image("item_presentbox", "src/png/item_presentbox.png");
     scene.load.image("item_book", "src/png/item_book.png");
+    scene.load.image("item_hourglass", "src/png/item_hourglass.png");
     
     //---star
     scene.load.image("star_blue", "src/png/star_blue.png");
@@ -4563,12 +4627,14 @@ function preload(scene) {
 
     //---plugin: rexuiplugin
     //need for nameplate
+    /*
     scene.load.scenePlugin({
         key: 'rexuiplugin',
         url: "lib/rexuiplugin.min.js",
         sceneKey: 'rexUI'
     });
     scene.load.plugin('rextexteditplugin', 'lib/rextexteditplugin.min.js', true);
+    */
     
     //---fireworks
     //https://codepen.io/samme/pen/eYEearb
@@ -5352,16 +5418,15 @@ function create(scene) {
         .setScale(0.4);
     text_kanban = scene.add.text(_x+2, _y+17, "", {font: "17px Arial", fill: "#000000"})
         .setOrigin(0.5)
-	    .setInteractive().on('pointerdown', () => {scene.rexUI.edit(text_kanban)})
+	    .setInteractive({useHandCursor: true}).on('pointerdown', () => {scene.rexUI.edit(text_kanban)})
         .setDepth(9999+2);
     text_mint_name = scene.add.text(_x+80, _y-5, "[MINT NAME]", {font: "17px Arial", fill: "#000000"})
         .setInteractive({useHandCursor: true})
         .on("pointerover", () => text_mint_name.setStyle({ fontSize: 17, fontFamily: "Arial", fill: '#ffff00' }))
-        .on("pointerout", () => text_mint_name.setStyle({ fontSize: 17, fontFamily: "Arial", fill: '#000000' }));
-    text_mint_name.setInteractive()
+        .on("pointerout", () => text_mint_name.setStyle({ fontSize: 17, fontFamily: "Arial", fill: '#000000' }))
         .on("pointerdown", () => {
             contract_mint_name(summoner, text_kanban.text);
-            flag_name_minting = 1;
+            //flag_name_minting = 1;
         });
     icon_name_ohana = scene.add.sprite(_x+88, _y+25, "icon_ohana")
         .setScale(0.05);
@@ -5372,7 +5437,7 @@ function create(scene) {
     //id
     text_id = scene.add.text(_x-45, _y+32, "#100", {font: "14px Arial", fill: "#000000"});
     //age
-    text_age_time = scene.add.text(_x+20, _y+32, "***", {font: "14px Arial", fill: "#000000"});
+    text_age_time = scene.add.text(_x+10, _y+32, "***", {font: "14px Arial", fill: "#000000"});
 
     //lootlike
     let _dic_color_birthplace = {
@@ -5822,11 +5887,27 @@ function update_parametersWithAnimation(this_scene) {
             if (_delta > 0) {
                 _sign = "+";
             }
+            //***TODO*** detect critical
+            //***ignore nui boost***
+            let _logical_addition = 0;
+            if (local_satiety > previous_satiety) {
+                _logical_addition += last_local_calc_feeding;
+            }
+            if (local_happy > previous_happy) {
+                _logical_addition += last_local_calc_grooming;
+            }
+            if (_logical_addition + 1 < _delta) {
+                text_exp_earned.setText(_sign + _delta + " lucky♪");
+            } else {
+                text_exp_earned.setText(_sign + _delta);
+            }
+            /*
             if (local_luck_challenge_of_mffg && _sign == "+") {
                 text_exp_earned.setText(_sign + _delta + " lucky♪");
             } else {
                 text_exp_earned.setText(_sign + _delta);
             }
+            */
             text_exp_earned_count = 5;
         }
     }
@@ -5872,6 +5953,8 @@ function update_parametersWithAnimation(this_scene) {
     previous_local_exp = local_exp;
     last_local_coin_calc = local_coin_calc;
     last_local_material_calc = local_material_calc;
+    last_local_calc_feeding = local_calc_feeding;
+    last_local_calc_grooming = local_calc_grooming;
 }
 
 
@@ -5885,7 +5968,7 @@ function update_parametersWithoutAnimation(this_scene) {
     //let age = Math.round( age_time * SPEED / 86400 );
     //let age = local_age;
     let age = Math.round( local_age * SPEED / 86400 );
-    text_age_time.setText(("000" + age).slice(-3) + "d");
+    text_age_time.setText(("0000" + age).slice(-4) + "d");
 
     //level
     if (button_levelup.texture.key != "button_levelup_pointerover") {
@@ -6024,6 +6107,10 @@ function update_parametersWithoutAnimation(this_scene) {
     if (previous_local_rolled_dice != local_rolled_dice && flag_radarchart == 1) {
         draw_radarchart(this_scene);
     }
+    
+    //stakign reward counter, XX.X%
+    staking_reward_percent = 
+        Math.round( (100 - (local_staking_reward_counter / STAKING_REWARD_SEC * 100)) * 100) /100;
 
     previous_local_rolled_dice = local_rolled_dice;
     previous_local_precious = local_precious;
@@ -6285,35 +6372,118 @@ function update_checkItem(this_scene) {
         //***TODO***//
         
         //book
-        let _x = 230;
-        let _y = 700;
-        let _text = "";
-        _text += " total mining sec: " + local_total_mining_sec + "\n";
-        _text += " total farming sec: " + local_total_farming_sec + "\n";
-        _text += " total crafting sec: " + local_total_crafting_sec + "\n";
-        _text += " total exp gained: " + local_total_exp_gained + "\n";
-        _text += " total coin mined: " + local_total_coin_mined + "\n";
-        _text += " total leaf farmed: " + local_total_material_farmed + "\n";
-        _text += " total item crafted: " + local_total_item_crafted + "\n";
-        _text += " total fluffy gifted: " + local_total_precious_received;
-        item_book_text = this_scene.add.text(
-            _x,
-            _y-120,
-            _text,
-            {font: "20px Arial", fill: "#000000", backgroundColor: "#ffffff"}
-        ).setOrigin(0.5).setVisible(false).setDepth(9999);
-        item_book = this_scene.add.sprite(
-            _x, 
-            _y, 
-            "item_book"
-        ).setScale(0.1).setOrigin(0.5)
-            .setInteractive()
-            .on("pointerover", () => {
-                item_book_text.visible = true;
-            })
-            .on("pointerout", () => {
-                item_book_text.visible = false;
-            });
+        {
+            let _x;
+            let _y;
+            let _pos_local = "pos_item_book";
+            //recover position from localStorage
+            if (localStorage.getItem(_pos_local) != null && local_owner == local_wallet) {
+                let _json = localStorage.getItem(_pos_local);
+                _pos = JSON.parse(_json);
+                _x = _pos[0];
+                _y = _pos[1];
+            } else {
+                _x = 230;
+                _y = 720;
+            }
+            let _text = "";
+            _text += " total exp gained: " + local_total_exp_gained + "\n";
+            _text += " total coin mined: " + local_total_coin_mined + "\n";
+            _text += " total leaf farmed: " + local_total_material_farmed + "\n";
+            _text += " total item crafted: " + local_total_item_crafted + "\n";
+            _text += " total fluffy gifted: " + local_total_precious_received;
+            item_book_text = this_scene.add.text(
+                _x,
+                _y-90,
+                _text,
+                {font: "20px Arial", fill: "#000000", backgroundColor: "#ffffff"}
+            ).setOrigin(0.5).setVisible(false).setDepth(9999);
+            item_book = this_scene.add.sprite(
+                _x, 
+                _y, 
+                "item_book"
+            ).setScale(0.1).setOrigin(0.5)
+                .setInteractive({ draggable: true, useHandCursor: true })
+                .on("pointerover", () => {
+                    item_book_text.visible = true;
+                })
+                .on("pointerout", () => {
+                    item_book_text.visible = false;
+                })
+                .on("drag", () => {
+                    if (this_scene.sys.game.scale.gameSize._width == 1280) {
+                        item_book.x = game.input.activePointer.x;
+                        item_book.y = game.input.activePointer.y;
+                    } else {
+                        item_book.x = game.input.activePointer.y;
+                        item_book.y = 960 - game.input.activePointer.x;
+                    }
+                    item_book.depth = item_book.y;
+                    item_book_text.visible = false;
+                })
+                .on("dragend", () => {
+                    item_book_text.x = item_book.x;
+                    item_book_text.y = item_book.y-90;
+                    let _pos = [item_book.x, item_book.y];
+                    localStorage.setItem(_pos_local, JSON.stringify(_pos));
+                });
+        }
+            
+        //hourglass
+        {
+            let _x;
+            let _y;
+            let _pos_local = "pos_item_hourglass";
+            //recover position from localStorage
+            if (localStorage.getItem(_pos_local) != null && local_owner == local_wallet) {
+                let _json = localStorage.getItem(_pos_local);
+                _pos = JSON.parse(_json);
+                _x = _pos[0];
+                _y = _pos[1];
+            } else {
+                _x = 350;
+                _y = 850;
+            }
+            let _text = "";
+            _text += " dapps staking: " + local_dapps_staking_amount + " $ASTR \n";
+            _text += " rewarding speed: x" + local_staking_reward_speed/100 + " \n";
+            _text += " next reward: " + staking_reward_percent + "%";
+            item_hourglass_text = this_scene.add.text(
+                _x,
+                _y-80,
+                _text,
+                {font: "20px Arial", fill: "#000000", backgroundColor: "#ffffff"}
+            ).setOrigin(0.5).setVisible(false).setDepth(9999);
+            item_hourglass = this_scene.add.sprite(
+                _x,
+                _y,
+                "item_hourglass",
+            ).setOrigin(0.5).setScale(0.08).setDepth(850)
+                .setInteractive({ draggable: true, useHandCursor: true })
+                .on("pointerover", () => {
+                    item_hourglass_text.visible = true;
+                })
+                .on("pointerout", () => {
+                    item_hourglass_text.visible = false;
+                })
+                .on("drag", () => {
+                    if (this_scene.sys.game.scale.gameSize._width == 1280) {
+                        item_hourglass.x = game.input.activePointer.x;
+                        item_hourglass.y = game.input.activePointer.y;
+                    } else {
+                        item_hourglass.x = game.input.activePointer.y;
+                        item_hourglass.y = 960 - game.input.activePointer.x;
+                    }
+                    item_hourglass.depth = item_book.y;
+                    item_hourglass_text.visible = false;
+                })
+                .on("dragend", () => {
+                    item_hourglass_text.x = item_hourglass.x;
+                    item_hourglass_text.y = item_hourglass.y-80;
+                    let _pos = [item_hourglass.x, item_hourglass.y];
+                    localStorage.setItem(_pos_local, JSON.stringify(_pos));
+                })
+        }
 
     } else if (
         local_items[_item_id] == 0 
@@ -6340,6 +6510,29 @@ function update_checkItem(this_scene) {
             group_mint_name.setVisible(false);
         }
         text_id.setText("#"+summoner);
+        
+        //***TODO***//
+
+        //book
+        {
+            let _text = "";
+            _text += " total exp gained: " + local_total_exp_gained + "\n";
+            _text += " total coin mined: " + local_total_coin_mined + "\n";
+            _text += " total leaf farmed: " + local_total_material_farmed + "\n";
+            _text += " total item crafted: " + local_total_item_crafted + "\n";
+            _text += " total fluffy gifted: " + local_total_precious_received;
+            item_book_text.setText(_text);
+        }
+            
+        //hourglass
+        {
+            let _text = "";
+            _text += " dapps staking: " + local_dapps_staking_amount + " $ASTR \n";
+            _text += " rewarding speed: x" + local_staking_reward_speed/100 + " \n";
+            _text += " next reward: " + staking_reward_percent + "%";
+            item_hourglass_text.setText(_text);
+        }
+        
     }
     
     //###2:Mr.Astar
@@ -8320,6 +8513,14 @@ class Main extends Phaser.Scene {
     }
     preload(){
         //preload(this);
+        //---plugin: rexuiplugin
+        //need for nameplate
+        this.load.scenePlugin({
+            key: 'rexuiplugin',
+            url: "lib/rexuiplugin.min.js",
+            sceneKey: 'rexUI'
+        });
+        this.load.plugin('rextexteditplugin', 'lib/rextexteditplugin.min.js', true);
     }
     create(){
         create(this);
