@@ -3508,7 +3508,7 @@ class Festligheter extends Phaser.GameObjects.Sprite{
     //### on_summon
     on_summon() {
     }
-        
+    
     //### resting
     resting() {
         //low rarity, do nothing
