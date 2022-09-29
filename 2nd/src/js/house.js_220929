@@ -7,12 +7,6 @@
 
 //### 1st
 
-    upgrade料金の調整
-        現状、fluffierに3000, fluffiestに11000必要でちょっと高すぎる
-        ぬいちゃんは36000, アイテム6-8個分ぐらいか
-        コストは半分ぐらいでもよいだろうか
-        もしくは一桁さげるか、1/5ぐらいにするか。
-
    *メインコンセプトの整理*
         電子生命
     
@@ -961,7 +955,7 @@ async function contract_update_static_status(_summoner) {
     
     //calc wallet score
     //local_wallet_score = await calc_wallet_score(wallet);
-    update_local_wallet_score();
+    //update_local_wallet_score();
 }
 
 
@@ -1186,10 +1180,56 @@ async function contract_update_event_precious() {
 
 //update event random
 async function contract_update_event_random() {
-
-    //search range
+    //let wallet = await get_wallet(web3);
+    //let contract_mfsl = await new web3.eth.Contract(abi_murasaki_function_summon_and_levelup, contract_murasaki_function_summon_and_levelup);
+    //let contract_mffg = await new web3.eth.Contract(abi_murasaki_function_feeding_and_grooming, contract_murasaki_function_feeding_and_grooming);
+    //let contract_mfmf = await new web3.eth.Contract(abi_murasaki_function_mining_and_farming, contract_murasaki_function_mining_and_farming);
+    //let contract_mfc = await new web3.eth.Contract(abi_murasaki_function_crafting, contract_murasaki_function_crafting);
+    //let contract_d = await new web3.eth.Contract(abi_world_dice, contract_world_dice);
+    //let contract_mml = new web3.eth.Contract(abi_murasaki_mail, contract_murasaki_mail);
     let _block_latest = await web3.eth.getBlockNumber();
+    //let _block_from = _block_latest - 300;  //60 min
     let _block_from = _block_latest - 7200;  //24 h
+    //let _block_from = _block_latest - 50000;
+    //let _block_from = _block_latest - 10000;
+    
+    /*
+    //summon
+    let _events_summon = await contract_mfsl.getPastEvents("Summon", {
+            fromBlock: _block_from,
+            toBlock: _block_latest
+    })
+    //Feeding
+    let _events_feeding = await contract_mffg.getPastEvents("Feeding", {
+            fromBlock: _block_from,
+            toBlock: _block_latest
+    })
+    //Grooming
+    let _events_grooming = await contract_mffg.getPastEvents("Grooming", {
+            fromBlock: _block_from,
+            toBlock: _block_latest
+    })
+    //Mining
+    let _events_mining = await contract_mfmf.getPastEvents("Mining", {
+            fromBlock: _block_from,
+            toBlock: _block_latest
+    })
+    //Farming
+    let _events_farming = await contract_mfmf.getPastEvents("Farming", {
+            fromBlock: _block_from,
+            toBlock: _block_latest
+    })
+    //Dice_roll
+    let _events_dice = await contract_d.getPastEvents("Dice_Roll", {
+            fromBlock: _block_from,
+            toBlock: _block_latest
+    })
+    //Upgrade
+    let _events_upgrade = await contract_mfc.getPastEvents("Upgrade", {
+            fromBlock: _block_from,
+            toBlock: _block_latest
+    })
+    */
     
     //Level-up
     let _events_levelup = await contract_mfsl.getPastEvents("Level_up", {
@@ -1206,29 +1246,31 @@ async function contract_update_event_random() {
             fromBlock: _block_from,
             toBlock: _block_latest
     })
-    
-    //combine events
     let _array = [];
     _array = _array.concat(
+        //_events_summon,
         _events_levelup,
+        //_events_feeding,
+        //_events_grooming,
+        //_events_mining,
+        //_events_farming,
         _events_crafting,
+        //_events_dice,
         _events_mail,
+        //_events_upgrade,
     )
-    
-    //prepare event text
+    //console.log(_array);
+    //let _text = "";
     let _resText = ["Peaceful","Today !","","ฅ•ω•ฅ"];
     if (_array.length > 0) {
-
         //select event randomly
         let _event = _array[Math.floor(Math.random() * _array.length)];
-
         //get block and timestamp
         let _blockNumber = _event.blockNumber;
         let _block = await web3.eth.getBlock(_blockNumber);
         let _timestamp = _block.timestamp;
         let _now = Date.now() /1000;
         let _delta_min = Math.round( (_now - _timestamp) / 60 );
-
         //prepare text
 
         //first line: block number
@@ -1250,32 +1292,101 @@ async function contract_update_event_random() {
         }
         _resText[1] = _summoner_name;
 
-        //3th-4th lines: type of event
+        //third/4th line: type of event
         let _value = _event.returnValues[1];
-        let _content1;
-        let _content2;
+        //_text += "[Murasaki news] ";
+        let _text3;
+        let _text4;
         if (_name == "Level_up") {
-            _content1 = "Leveled up to ";
-            _content2 = _value;
-            _content2 += " !!";
+            //_text += _text_time;
+            //_text += _summoner_name;
+            _text3 = "Leveled up to ";
+            _text4 = _value;
+            _text4 += " !!";
+        /*
+        } else if (_name == "Feeding") {
+            _text += _text_time;
+            _text += _summoner_name;
+            _text += " was feeded and gained ";
+            _text += _value;
+            _text += " exp!";
+        } else if (_name == "Grooming") {
+            _text += _text_time;
+            _text += _summoner_name;
+            _text += " was groomed and gained ";
+            _text += _value;
+            _text += " exp!";
+        } else if (_name == "Mining") {
+            _text += _text_time;
+            _text += _summoner_name;
+            _text += " completed mining and earned ";
+            _text += _value;
+            _text += " ohana!";
+        } else if (_name == "Farming") {
+            _text += _text_time;
+            _text += _summoner_name;
+            _text += " completed farming and earned ";
+            _text += _value;
+            _text += " kusa!";
+        */
         } else if (_name == "Crafting") {
             let _item_name = array_item_name[_value];
-            _content1 = "Crafted";
-            _content2 = _item_name;
-            _content2 += " !!";
+            _text3 = "Crafted";
+            _text4 = _item_name;
+            _text4 += " !!";
+            /*
+            _text += _text_time;
+            _text += _summoner_name;
+            _text += " crafted ";
+            _text += _item_name;
+            _text += "!";
+            */
+        /*
+        } else if (_name == "Dice_Roll") {
+            _text += _text_time;
+            _text += _summoner_name;
+            _text += " rolled dice and got ";
+            _text += _value;
+            _text += "!";
+        } else if (_name == "Send_Mail") {
+            _summoner_to_name = await call_name_from_summoner(_value);
+            if (_summoner_to_name == "") {
+                _summoner_to_name = "#" + _value;
+            }
+            _text += _text_time;
+            _text += _summoner_name;
+            _text += " send mail to ";
+            _text += _summoner_to_name;
+            _text += "!";
+        */
         } else if (_name == "Open_Mail") {
             _summoner_from_name = await call_name_from_summoner(_value);
             if (_summoner_from_name == "") {
                 _summoner_from_name = "#" + _value;
             }
-            _content1 = "Opened Mail from";
-            _content2 = _summoner_from_name;
-            _content2 += " !!";
+            _text3 = "Opened Mail from";
+            _text4 = _summoner_from_name;
+            _text4 += " !!";
+            /*
+            _text += _text_time;
+            _text += _summoner_name;
+            _text += " opened mail from ";
+            _text += _summoner_from_name;
+            _text += "!";
+            */
+        /*
+        } else if (_name == "Upgrade") {
+            ;
+        */
         }
-        _resText[2] = _content1;
-        _resText[3] = _content2;
+        _resText[2] = _text3;
+        _resText[3] = _text4;
+        //_text = _text.padStart(110, " ");
+        //_text += "          ";
+    //text_event_random = _text;
     }
     local_newsText = _resText;
+    //return _resText;
 }
 
 //### festival
@@ -1401,6 +1512,7 @@ async function calc_wallet_score(wallet_address) {
     if (_score > _scoreMax) {
         _score = _scoreMax;
     }
+    //console.log(_nonce, _age, _scoreMax, _score);
     return _score;    
 }
 
@@ -8062,7 +8174,7 @@ function update_checkItem(this_scene) {
                         summoned_fluffies.push(_itemId);
                     }
                 });
-                _count_fluffy += _count;
+                _count_fluffy += 1;
             }
         }
         //fluffier
@@ -8079,7 +8191,7 @@ function update_checkItem(this_scene) {
                         summoned_fluffies.push(_itemId);
                     }
                 });
-                _count_fluffier += _count;
+                _count_fluffier += 1;
             }
         }
         //fluffiest
@@ -8096,7 +8208,7 @@ function update_checkItem(this_scene) {
                         summoned_fluffies.push(_itemId);
                     }
                 });
-                _count_fluffiest += _count;
+                _count_fluffiest += 1;
             }
         }
 

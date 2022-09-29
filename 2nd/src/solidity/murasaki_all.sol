@@ -2611,7 +2611,8 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable {
         uint32 _now = uint32(block.timestamp);
         uint32 _satiety = mfs.calc_satiety(_summoner);
         uint32 _exp_add = 500 * (100 - _satiety) / 100;
-        uint32 _delta_sec = _exp_add;   //for staking counter, sec before boost
+        //for staking counter, sec before boost
+        uint32 _delta_sec = ( _now - ms.last_feeding_time(_summoner) ) * mp.SPEED()/100;
         //nui boost
         if (_item_nui > 0) {
             address _owner = mfs.get_owner(_summoner);
@@ -5268,6 +5269,7 @@ contract Murasaki_Info is Ownable {
     }
     
     //fluffy festival
+    /*
     function check_votable(uint32 _summoner) public view returns (uint32) {
         Fluffy_Festival ff = Fluffy_Festival(fluffy_festival_address);
         bool _isVotable = ff.check_votable(_summoner);
@@ -5276,6 +5278,20 @@ contract Murasaki_Info is Ownable {
         } else {
             return uint32(0);
         }
+    }
+    function inSession() public view returns (uint32) {
+        Fluffy_Festival ff = Fluffy_Festival(fluffy_festival_address);
+        bool _inSession = ff.inSession();
+        if (_inSession == true) {
+            return uint32(1);
+        } else {
+            return uint32(0);
+        }
+    }
+    */
+    function next_festival_block() public view returns (uint32) {
+        Fluffy_Festival ff = Fluffy_Festival(fluffy_festival_address);
+        return ff.next_festival_block();
     }
     
     //parameter
@@ -5361,8 +5377,10 @@ contract Murasaki_Info is Ownable {
         _res[54] = calc_feeding(_summoner);
         _res[55] = calc_grooming(_summoner);
         _res[56] = staking_reward_counter(_summoner);
-        _res[57] = check_votable(_summoner);
+        //_res[57] = check_votable(_summoner);
         _res[58] = get_speed_of_dappsStaking(_summoner);
+        //_res[59] = inSession();
+        _res[60] = next_festival_block();
         return _res;
     }
     
@@ -5460,7 +5478,7 @@ contract Murasaki_Info_fromWallet is Ownable {
 }
 
 
-//---*Fluffy_Festival
+//---Fluffy_Festival
 
 
 contract Fluffy_Festival is Ownable {
@@ -5476,13 +5494,13 @@ contract Fluffy_Festival is Ownable {
     }
     
     //global variants
-    uint32 ELECTION_PERIOD_BLOCK = 21600; //3 days, 12sec/block
-    uint32 LEVEL_REQUIRED = 3;
-    uint32 SATIETY_REQUIRED = 10;
-    uint32 HAPPY_REQUIRED = 10;
-    uint32 ELECTION_INTERVAL_BLOCK = 216000; //30 days, 12sec/block
-    bool inSession;
-    bool isActive = true;
+    uint32 public ELECTION_PERIOD_BLOCK = 7200; //1 days, 12sec/block
+    uint32 public LEVEL_REQUIRED = 3;
+    uint32 public SATIETY_REQUIRED = 10;
+    uint32 public HAPPY_REQUIRED = 10;
+    uint32 public ELECTION_INTERVAL_BLOCK = 216000; //30 days, 12sec/block
+    bool public inSession;
+    bool public isActive = true;
     
     //set global variants
     function _setA_election_period_block(uint32  _value) external onlyOwner {
@@ -5527,6 +5545,7 @@ contract Fluffy_Festival is Ownable {
     mapping(uint32 => vote) public votes;
     uint32[13] each_voting_count;
     mapping(uint32 => uint32) public last_voting_block; //summoner => blocknumber
+    mapping(uint32 => uint32) public last_voting_type;  //summoner => fluffy_type
     
     //step
     uint32 next_step = 1;
@@ -5548,6 +5567,7 @@ contract Fluffy_Festival is Ownable {
         uint32 _block = uint32(block.number);
         votes[next_vote] = vote(_block, _summoner, _select);
         last_voting_block[_summoner] = _block;
+        last_voting_type[_summoner] = _select;
         each_voting_count[_select] += 1;
         next_vote += 1;
         //update winner in step
@@ -5558,16 +5578,13 @@ contract Fluffy_Festival is Ownable {
         _mint_presentbox(uint32(0), msg.sender, _memo);
         //check final voting
         if ( check_end_voting() ) {
-            _end_voting(_summoner);
+            end_voting(_summoner);
             //bonus presentbox
             _memo = "final voting bonus";
             _mint_presentbox(uint32(0), msg.sender, _memo);
         }
     }
     function check_votable(uint32 _summoner) public view returns (bool) {
-        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
-        Murasaki_Parameter mp = Murasaki_Parameter(mfs.murasaki_parameter_address());
-        Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
         //get subject_now
         Subject memory _subject = subjects[subject_now];
         if (
@@ -5575,20 +5592,33 @@ contract Fluffy_Festival is Ownable {
             check_start_voting()
             //or after start, meet the all condition
             || (
-                //check pause
-                mp.isPaused() == false
-                //check owner
-                && mfs.check_owner(_summoner, msg.sender)
-                //check summoner status
-                && ms.inHouse(_summoner)
-                && mfs.calc_satiety(_summoner) >= SATIETY_REQUIRED
-                && mfs.calc_happy(_summoner) >= HAPPY_REQUIRED
-                && ms.level(_summoner) >= LEVEL_REQUIRED
+                //check summoner
+                _check_summoner(_summoner)
                 //check not have already voted
                 && _subject.start_block > last_voting_block[_summoner]
                 //check not ended
                 && inSession
             )
+        ){
+            return true;
+        } else {
+            return false;
+        }
+    }
+    function _check_summoner (uint32 _summoner) public view returns (bool) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Parameter mp = Murasaki_Parameter(mfs.murasaki_parameter_address());
+        Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
+        if (
+            //check pause
+            mp.isPaused() == false
+            //check owner
+            && mfs.check_owner(_summoner, msg.sender)
+            //check summoner status
+            && ms.inHouse(_summoner)
+            && mfs.calc_satiety(_summoner) >= SATIETY_REQUIRED
+            && mfs.calc_happy(_summoner) >= HAPPY_REQUIRED
+            && ms.level(_summoner) >= LEVEL_REQUIRED
         ){
             return true;
         } else {
@@ -5614,10 +5644,6 @@ contract Fluffy_Festival is Ownable {
         uint32 _seed = mfs.seed(_summoner);
         uint32 _item_type = 200;
         mc.craft(_item_type, _summoner, _wallet_to, _seed, _memo);
-    }
-    //***TODO*** forDebug
-    function mint_presentbox(uint32 _summoner, address _wallet_to, string memory _memo) external onlyOwner {
-        _mint_presentbox(_summoner, _wallet_to, _memo);
     }
     
     //start voting
@@ -5651,13 +5677,18 @@ contract Fluffy_Festival is Ownable {
     //end voting
     function check_end_voting() public view returns (bool) {
         //check blocknumber
-        if (block.number >= subjects[subject_now].end_block) {
+        if (block.number >= subjects[subject_now].end_block && inSession) {
             return true;
         } else {
             return false;
         }
     }
-    function _end_voting(uint32 _summoner) internal {
+    //public, can run without voting
+    function end_voting(uint32 _summoner) public {
+        require(
+            _check_summoner(_summoner)
+            && check_end_voting()
+        );
         //select winner
         uint32 _winner = _select_winner(_summoner);
         //update mp parameter
@@ -5679,6 +5710,67 @@ contract Fluffy_Festival is Ownable {
         uint32 _elected_step = _subject.start_step + _rand;
         //return winner as winner_inStep of the elected_step
         return winner_inStep[_elected_step];
+    }
+    
+    //info
+    function get_info(uint32 _summoner) external view returns (uint32[24] memory) {
+        uint32[24] memory _res;
+        _res[0] = each_voting_count[0];
+        _res[1] = each_voting_count[1];
+        _res[2] = each_voting_count[2];
+        _res[3] = each_voting_count[3];
+        _res[4] = each_voting_count[4];
+        _res[5] = each_voting_count[5];
+        _res[6] = each_voting_count[6];
+        _res[7] = each_voting_count[7];
+        _res[8] = each_voting_count[8];
+        _res[9] = each_voting_count[9];
+        _res[10] = each_voting_count[10];
+        _res[11] = each_voting_count[11];
+        _res[12] = each_voting_count[12];
+        _res[13] = next_festival_block();
+        _res[14] = _inSession();
+        _res[15] = _isVotable(_summoner);
+        _res[16] = last_voting_block[_summoner];
+        _res[17] = last_voting_type[_summoner];
+        _res[18] = subject_now;
+        _res[19] = subjects[subject_now].start_block;
+        _res[20] = subjects[subject_now].end_block;
+        _res[21] = _isEndable();
+        return _res;
+    }
+    function _inSession() internal view returns (uint32) {
+        bool _bool = inSession;
+        if (_bool == true) {
+            return uint32(1);
+        } else {
+            return uint32(0);
+        }    
+    }
+    function _isVotable(uint32 _summoner) internal view returns (uint32) {
+        bool _bool = check_votable(_summoner);
+        if (_bool == true) {
+            return uint32(1);
+        } else {
+            return uint32(0);
+        }
+    }
+    function _isEndable() internal view returns (uint32) {
+        bool _bool = check_end_voting();
+        if (_bool == true) {
+            return uint32(1);
+        } else {
+            return uint32(0);
+        }
+    }
+    function next_festival_block() public view returns (uint32) {
+        //in first festival, return past block number (0+INTERVAL)
+        return subjects[subject_now].start_block + ELECTION_INTERVAL_BLOCK;
+    }
+
+    //***TODO*** forDebug
+    function mint_presentbox(uint32 _summoner, address _wallet_to, string memory _memo) external onlyOwner {
+        _mint_presentbox(_summoner, _wallet_to, _memo);
     }
 }
 
