@@ -7,87 +7,56 @@
 
 //### 1st
 
-    upgrade料金の調整
-        現状、fluffierに3000, fluffiestに11000必要でちょっと高すぎる
-        ぬいちゃんは36000, アイテム6-8個分ぐらいか
-        コストは半分ぐらいでもよいだろうか
-        もしくは一桁さげるか、1/5ぐらいにするか。
-
    *メインコンセプトの整理*
         電子生命
     
+    presentboxの演出を考える
+        出現タイミング
+            誰かのcrafting
+            mail開封時（受け取り側）
+            mail開封時（贈り側）
+            festival voting
+            dapps staking reward
+        演出案
+            空からパラシュート
+            煙の中から出現
+            ないないさんが画面外から持ってきて置いていく
+            fluffyたちが画面外から持ってきて置いていく
+            あるいは上記のランダム
+    
     Fluffy FestivalのUI実装
-        次回投票日までのblock数の表示方法
-        投票可能時の演出
-        投票出発時の専用絵
-        selection画面の実装
-        専用キャラ？
-            専用クラスを用意する
-            Festival前から出現
-            festival startまでのblock数をカウントダウン
-            start_block後はクリックでvoting windowを開く
-            votable(false)で退出する
-                退出の演出を用意する
-            退出後は張り紙やレポート用紙などで途中経過を報告する
-            festival終了時は結果を表示する
-            start_blockまでのカウントダウン関数の実装が必要か
-            0/1のvotableと、start_blockまでのdelta_blockの2つを取得する
-        必要な情報
-            in session = true/false
-            your status = voted/not yet
-            next festival start block
-            end block
-        バグ対策：end_voting
-            みなが早めにvoteし終えてしまうと、誰もend_votingしてくれなくなる
-            end_votingだけを別途行えるようにしておく
-            必要なら運営が手動で行うか
-            もしくは、end_votingのみは、条件を満たせば誰でも行えるようにしておく
-                まだvotingしていないsummonerはvoting & end_voting
-                すでにvoting済みのsummonerもend_votingのみを行い、
-                    ボーナスboxを得ることができる
-                また、このような状況を逐次ユーザーに表示するUIを実装する
-                    自分の投票内容
-                    途中経過の報告
-                    終了までの残block数と概算時間
-        状況
-            未開催：
-                直近の結果を表示
-                次回開催予定日時を表示
-            開催中, 未投票：
-                投票ボタンを表示
-            開催中, 投票済：
-                自分の投票結果を表示
-                現在の投票状況を表示
-                終了までのblock数と概算時間を表示
-        UI
-            開催直前
-                画面の端に少しだけ見えて待機している
-                開催までの残り時間を知らせてくれる
-            開催中：投票前
-                お部屋の中をにぎやかに動き回る
-                タップでvotingする
-            開催中：投票後
-                投票済みを表す絵を考える
-                    看板の表示を変える？
-                開催中はお部屋に居続ける
-                自分の投票先を表示する
-                残り時間を表示する
-                現在の投票結果を表示する
-                終了可能かを表示する
-                    終了可能時はタップでend_votingする
-            開催終了
-                画面外へ出てゆく
-            絵の案
-                とんがり帽子をかぶったfluffy達？
-
+        開催直前
+            画面の端に少しだけ見えて待機している
+            開催までの残り時間を知らせてくれる
+        開催中：投票前
+            お部屋の中をにぎやかに動き回る
+            立て看板で「開催中！」とでも表示させるか
+            タップでvote用windowを表示する
+        開催中：投票後
+            投票済みを表す絵を考える
+                看板の表示を変える？
+            開催中はお部屋に居続ける
+            自分の投票先を表示する
+            残り時間を表示する
+            現在の投票結果を表示する
+            終了可能かを表示する
+                終了可能時はタップでend_votingする
+        開催終了
+            画面外へ出てゆく
+        絵の案
+            とんがり帽子をかぶったfluffy達？
+            ないないさん？
+        
     Crafting難易度の調整
         現在の難易度ではItemづまりを起こすだろうか。
         もう少しDCを下げるなど難易度調整する。
+            あるいはコストを上げる？
+            その場合はstr/dexのインフレ率も調整必要
+            現状、str/dexを上げて効率が上がるという拡大再生産の実感が弱め
         初期の必須アイテム系はもっと値段と難易度を下げる
             大体1-2週間程度ですべて揃うぐらいに。
             特にnameplateは1日でmint可能なぐらいに。
-        ただし、初期アイテムを大量に売って倍バックで稼ぐハックが
-            可能とならないよう調整する。
+        ただし、初期アイテムを大量に売って倍バックで稼ぐハックが可能とならないよう調整する。
     
     バイバックシステムのUI実装
         専用ページの用意
@@ -184,6 +153,59 @@
 
 
 //### 2nd
+
+ ok upgrade料金の調整
+        現状、fluffierに3000, fluffiestに11000必要でちょっと高すぎる
+        ぬいちゃんは36000, アイテム6-8個分ぐらいか
+        コストは半分ぐらいでもよいだろうか
+        もしくは一桁さげるか、1/5ぐらいにするか。
+
+ ok Fluffy Festivalの構想
+        次回投票日までのblock数の表示方法
+        投票可能時の演出
+        投票出発時の専用絵
+        selection画面の実装
+        専用キャラ？
+            専用クラスを用意する
+            Festival前から出現
+            festival startまでのblock数をカウントダウン
+            start_block後はクリックでvoting windowを開く
+            votable(false)で退出する
+                退出の演出を用意する
+            退出後は張り紙やレポート用紙などで途中経過を報告する
+            festival終了時は結果を表示する
+            start_blockまでのカウントダウン関数の実装が必要か
+            0/1のvotableと、start_blockまでのdelta_blockの2つを取得する
+        必要な情報
+            in session = true/false
+            your status = voted/not yet
+            next festival start block
+            end block
+        バグ対策：end_voting
+            みなが早めにvoteし終えてしまうと、誰もend_votingしてくれなくなる
+            end_votingだけを別途行えるようにしておく
+            必要なら運営が手動で行うか
+            もしくは、end_votingのみは、条件を満たせば誰でも行えるようにしておく
+                まだvotingしていないsummonerはvoting & end_voting
+                すでにvoting済みのsummonerもend_votingのみを行い、
+                    ボーナスboxを得ることができる
+                また、このような状況を逐次ユーザーに表示するUIを実装する
+                    自分の投票内容
+                    途中経過の報告
+                    終了までの残block数と概算時間
+        状況
+            未開催：
+                直近の結果を表示
+                次回開催予定日時を表示
+            開催中, 未投票：
+                投票ボタンを表示
+            開催中, 投票済：
+                自分の投票結果を表示
+                現在の投票状況を表示
+                終了までのblock数と概算時間を表示
+        固定化対策：重複禁止
+            前回のtopは次回の投票対象から外すルールを実装する
+            現在のmp.elected_typeはrequireでnotすればよいか
 
  ok mane mintのバグ修正
     
@@ -628,19 +650,25 @@ async function init_global_variants() {
     local_total_precious_received = 0;
     local_dapps_staking_amount = 0;
     local_staking_reward_speed = 0;
+    local_coin_calc = 0;
+    local_material_calc = 0;
+    local_calc_feeding = 0;
+    local_calc_grooming = 0;
     
     //---local festival
-   local_ff_each_voting_count = new Array(13).fill(0);
-   local_ff_next_festival_block =   0;
-   local_ff_inSession =             0;
-   local_ff_isVotable =             0;
-   local_ff_last_voting_block =     0;
-   local_ff_last_voting_type =      0;
-   local_ff_subject_now =           0;
-   local_ff_subject_start_block =   0;
-   local_ff_subject_end_block =     0;
-   local_ff_isEndable =             0;
-        
+    local_ff_each_voting_count = new Array(13).fill(0);
+    local_ff_next_festival_block =   0;
+    local_ff_inSession =             0;
+    local_ff_isVotable =             0;
+    local_ff_last_voting_block =     0;
+    local_ff_last_voting_type =      0;
+    local_ff_subject_now =           0;
+    local_ff_subject_start_block =   0;
+    local_ff_subject_end_block =     0;
+    local_ff_isEndable =             0;
+    local_ff_elected_type =          0;
+    local_ff_previous_elected_type = 0;
+
     //---local previous
     previous_local_last_feeding_time = 0;
     previous_local_last_grooming_time = 0;
@@ -1304,6 +1332,8 @@ async function contract_update_festival_info(_summoner) {
    local_ff_subject_start_block =   Number(_festival_info[19]);
    local_ff_subject_end_block =     Number(_festival_info[20]);
    local_ff_isEndable =             Number(_festival_info[21]);
+   local_ff_elected_type =          Number(_festival_info[22]);
+   local_ff_previous_elected_type = Number(_festival_info[23]);
 }
 
 //---call
@@ -1974,6 +2004,9 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             if (this.count % 400 == 10) {
                 sound_mining_during.play();
             }
+            if (happy <= 0) {
+                this.anims.play("murasaki_sleeping", true);
+            }
         }
     }
     
@@ -2021,6 +2054,9 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             this.anims.play("murasaki_farming", true);
             if (this.count % 400 == 10) {
                 sound_farming_during.play();
+            }
+            if (happy <= 0) {
+                this.anims.play("murasaki_sleeping", true);
             }
         }
     }
@@ -4075,26 +4111,26 @@ function open_window_upgrade(scene) {
         if (_itemId <= 64){
             _rarity = "Common ";
             _rarity_to = "Uncommon ";
-            _cost_coin = "1000";
-            _cost_leaf = "1000";
+            _cost_coin = "200";
+            _cost_leaf = "200";
             _fontColor = "#0000FF";
         } else if (_itemId <= 128) {
             _rarity = "Uncommon ";
             _rarity_to = "Rare ";
-            _cost_coin = "2000";
-            _cost_leaf = "2000";
+            _cost_coin = "400";
+            _cost_leaf = "400";
             _fontColor = "#FFA500";
         } else if (_itemId <= 212) {
-            _cost_coin = "1000";
-            _cost_leaf = "1000";
+            _cost_coin = "200";
+            _cost_leaf = "200";
             _fontColor = "#0000FF";
         } else if (_itemId <= 224) {
-            _cost_coin = "2000";
-            _cost_leaf = "2000";
+            _cost_coin = "400";
+            _cost_leaf = "400";
             _fontColor = "#E05A00";
         } else if (_itemId <= 236) {
-            _cost_coin = "3000";
-            _cost_leaf = "3000";
+            _cost_coin = "600";
+            _cost_leaf = "600";
             _fontColor = "#E85298";
         }
         //prepare text

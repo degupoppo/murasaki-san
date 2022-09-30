@@ -39,7 +39,8 @@ async function initialize_contract() {
     //astarbase, local
     //contract_mfs.methods._set9_astarbase_address("0x64582688EF82Bcce7F6260eE1384656e1D33b4bB").send({from:wallet});
     //astarbase, local, forDebug, 100000 staking, enable change amount
-    contract_mfs.methods._set9_astarbase_address("0xcFB4EF572b46B0972b0c316Fa27b58F03149DFa0").send({from:wallet});
+    //contract_mfs.methods._set9_astarbase_address("0xcFB4EF572b46B0972b0c316Fa27b58F03149DFa0").send({from:wallet});
+    contract_mfs.methods._set9_astarbase_address("0x43b71d69f6021433f5a860ce1FDBa793429b60A3").send({from:wallet});
     
     //astarbase, shibuya
     //contract_mfs.methods._set9_astarbase_address("0xF183f51D3E8dfb2513c15B046F848D4a68bd3F5D").send({from:wallet});
@@ -62,6 +63,7 @@ async function initialize_contract() {
 
     //set storage
     contract_mp.methods._add_permitted_address(wallet).send({from:wallet});
+    contract_mp.methods._add_permitted_address(contract_fluffy_festival).send({from:wallet});
     contract_ms.methods._add_permitted_address(contract_murasaki_function_summon_and_levelup).send({from:wallet});
     contract_ms.methods._add_permitted_address(contract_murasaki_function_feeding_and_grooming).send({from:wallet});
     contract_ms.methods._add_permitted_address(contract_murasaki_function_mining_and_farming).send({from:wallet});

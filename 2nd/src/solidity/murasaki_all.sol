@@ -1976,7 +1976,7 @@ contract Murasaki_Storage_Nui is Ownable {
 //===Function==================================================================================================================
 
 
-//---*Share
+//---Share
 
 
 contract Murasaki_Function_Share is Ownable {
@@ -2127,7 +2127,7 @@ contract Murasaki_Function_Share is Ownable {
         for (uint i = 201; i <= 212; i++) {
             if (_balance_of_type[i+24] > 0) {
                 _precious_score += _balance_of_type[i+24] * 3*16;
-                //fluffly festival modification
+                //fluffly festival modification, x2 score
                 if (i == _elected_precious_type) {
                     _precious_score += _balance_of_type[i+24] * 3*16;
                 }
@@ -2416,7 +2416,7 @@ contract Murasaki_Function_Summon_and_LevelUp is Ownable {
         Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
         Murasaki_Parameter mp = Murasaki_Parameter(mfs.murasaki_parameter_address());
         require(mp.isPaused() == false);
-        uint32 PRICE = mp.PRICE();
+        uint PRICE = mp.PRICE();
         uint32 BASE_SEC = mp.BASE_SEC();
         uint32 SPEED = mp.SPEED();
         require(msg.value >= PRICE * 10**18);
@@ -2692,7 +2692,7 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
         Murasaki_Parameter mp = Murasaki_Parameter(mfs.murasaki_parameter_address());
-        uint32 PRICE = mp.PRICE();
+        uint PRICE = mp.PRICE();
         require(mfs.check_owner(_summoner, msg.sender));
         require(!not_petrified(_summoner));
         uint _price = ms.level(_summoner) * PRICE * 10**18;
@@ -3569,24 +3569,24 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
         // for upgrading
         //65-127: common -> uncommon
         } else if (_item_type >= 65 && _item_type <= 128) {
-            _coin = 1000;
-            _material = 1000;
+            _coin = 200;
+            _material = 200;
         //129-192: uncommon -> rare
         } else if (_item_type >= 129 && _item_type <= 192) {
-            _coin = 2000;
-            _material = 2000;
+            _coin = 400;
+            _material = 400;
         //213-224: fluffy -> fluffier
         } else if (_item_type >= 213 && _item_type <= 224) {
-            _coin = 1000;
-            _material = 1000;
+            _coin = 200;
+            _material = 200;
         //225-236: fluffier -> fluffiest
         } else if (_item_type >= 225 && _item_type <= 236) {
-            _coin = 2000;
-            _material = 2000;
+            _coin = 400;
+            _material = 400;
         //197: fluffiest -> nui
         } else if (_item_type == 197) {
-            _coin = 3000;
-            _material = 3000;
+            _coin = 600;
+            _material = 600;
         }
         return [_level, _dc, _coin, _material];
     }
@@ -5501,8 +5501,10 @@ contract Fluffy_Festival is Ownable {
     uint32 public ELECTION_INTERVAL_BLOCK = 216000; //30 days, 12sec/block
     bool public inSession;
     bool public isActive = true;
+    uint32 public elected_type = 0;
+    uint32 public previous_elected_type = 0;
     
-    //set global variants
+    //admin, change global variants
     function _setA_election_period_block(uint32  _value) external onlyOwner {
         ELECTION_PERIOD_BLOCK = _value;
     }
@@ -5532,6 +5534,7 @@ contract Fluffy_Festival is Ownable {
         uint32 end_block;
         uint32 start_step;
         uint32 end_step;
+        uint32 elected_type;
     }
     mapping(uint32 => Subject) public subjects;
     
@@ -5554,11 +5557,15 @@ contract Fluffy_Festival is Ownable {
     //voting
     function voting(uint32 _summoner, uint32 _select) external {
         require(isActive);
+        //reject present and previous elected type
+        require(_select != elected_type);
+        require(_select != previous_elected_type);
+        //prepare _memo
         string memory _memo;
         //check fist voting
         if ( check_start_voting() ){
             _start_voting();
-            _memo = "first voting bonus";
+            _memo = "first vote bonus";
             _mint_presentbox(uint32(0), msg.sender, _memo);
         }
         //chekc votable of summoner
@@ -5580,7 +5587,7 @@ contract Fluffy_Festival is Ownable {
         if ( check_end_voting() ) {
             end_voting(_summoner);
             //bonus presentbox
-            _memo = "final voting bonus";
+            _memo = "final vote bonus";
             _mint_presentbox(uint32(0), msg.sender, _memo);
         }
     }
@@ -5664,6 +5671,7 @@ contract Fluffy_Festival is Ownable {
             _block, 
             _block + ELECTION_PERIOD_BLOCK, 
             next_step, 
+            0,
             0
         );
         //reset voting count
@@ -5683,12 +5691,14 @@ contract Fluffy_Festival is Ownable {
             return false;
         }
     }
-    //public, can run without voting
+    //public, executable without voting
     function end_voting(uint32 _summoner) public {
         require(
             _check_summoner(_summoner)
             && check_end_voting()
         );
+        //update session status
+        inSession = false;
         //select winner
         uint32 _winner = _select_winner(_summoner);
         //update mp parameter
@@ -5697,15 +5707,17 @@ contract Fluffy_Festival is Ownable {
         mp._set_elected_fluffy_type(_winner);
         //insert end step into last subject
         subjects[subject_now].end_step = next_step - 1;
-        //voting not in session
-        inSession = false;
+        //update elected type
+        subjects[subject_now].elected_type = _winner;
+        previous_elected_type = elected_type;
+        elected_type = _winner;
     }
     function _select_winner(uint32 _summoner) internal view returns (uint32) {
         //candle auction
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         //select random step in the range between from start_step to latest step
         Subject memory _subject = subjects[subject_now];
-        uint32 _delta_step = (next_step -1) - _subject.start_step;
+        uint32 _delta_step = (next_step) - _subject.start_step;
         uint32 _rand = mfs.dn(_summoner, _delta_step);
         uint32 _elected_step = _subject.start_step + _rand;
         //return winner as winner_inStep of the elected_step
@@ -5737,6 +5749,8 @@ contract Fluffy_Festival is Ownable {
         _res[19] = subjects[subject_now].start_block;
         _res[20] = subjects[subject_now].end_block;
         _res[21] = _isEndable();
+        _res[22] = elected_type;
+        _res[23] = previous_elected_type;
         return _res;
     }
     function _inSession() internal view returns (uint32) {
