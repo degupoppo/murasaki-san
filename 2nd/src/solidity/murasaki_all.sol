@@ -5319,7 +5319,7 @@ contract Murasaki_Info is Ownable {
     //###dynamic
     function allDynamicStatus(uint32 _summoner) external view returns (uint32[64] memory) {
         uint32[64] memory _res;
-        //_res[0] = class(_summoner);
+        _res[0] = uint32(block.number);
         _res[1] = age(_summoner);
         _res[2] = level(_summoner);
         _res[3] = exp(_summoner);
@@ -5478,7 +5478,7 @@ contract Murasaki_Info_fromWallet is Ownable {
 }
 
 
-//---Fluffy_Festival
+//---*Fluffy_Festival
 
 
 contract Fluffy_Festival is Ownable {
@@ -5526,6 +5526,24 @@ contract Fluffy_Festival is Ownable {
     function _setG_isActive(bool _bool) external onlyOwner {
         isActive = _bool;
     }
+    
+    //admin, modify subject parameters
+    function _modify_subject(
+        uint32 _subject_no,
+        uint32 _start_block,
+        uint32 _end_block,
+        uint32 _start_step,
+        uint32 _end_step,
+        uint32 _elected_type
+    ) external onlyOwner {
+        subjects[_subject_no] = Subject(
+            _start_block, 
+            _end_block, 
+            _start_step, 
+            _end_step,
+            _elected_type
+        );
+    }
 
     //subject
     uint32 subject_now = 0;
@@ -5546,7 +5564,7 @@ contract Fluffy_Festival is Ownable {
         uint32 value;
     }
     mapping(uint32 => vote) public votes;
-    uint32[13] each_voting_count;
+    uint32[256] each_voting_count;
     mapping(uint32 => uint32) public last_voting_block; //summoner => blocknumber
     mapping(uint32 => uint32) public last_voting_type;  //summoner => fluffy_type
     
@@ -5560,13 +5578,10 @@ contract Fluffy_Festival is Ownable {
         //reject present and previous elected type
         require(_select != elected_type);
         require(_select != previous_elected_type);
-        //prepare _memo
-        string memory _memo;
+        require(_select >= 201 && _select <= 212);
         //check fist voting
         if ( check_start_voting() ){
             _start_voting();
-            _memo = "first vote bonus";
-            _mint_presentbox(uint32(0), msg.sender, _memo);
         }
         //chekc votable of summoner
         require(check_votable(_summoner));
@@ -5581,14 +5596,11 @@ contract Fluffy_Festival is Ownable {
         winner_inStep[next_step] = _get_winner_inStep_now();
         next_step += 1;
         //mint presentbox
-        _memo = "participation award";
+        string memory _memo = "participation award";
         _mint_presentbox(uint32(0), msg.sender, _memo);
         //check final voting
         if ( check_end_voting() ) {
             end_voting(_summoner);
-            //bonus presentbox
-            _memo = "final vote bonus";
-            _mint_presentbox(uint32(0), msg.sender, _memo);
         }
     }
     function check_votable(uint32 _summoner) public view returns (bool) {
@@ -5637,7 +5649,7 @@ contract Fluffy_Festival is Ownable {
         //when equal, smaller type number win
         uint32 _winner = 0;
         uint32 _voted = 0;
-        for (uint32 i=1; i<=12; i++) {
+        for (uint32 i=201; i<=212; i++) {
             if (each_voting_count[i] > _voted) {
                 _winner = i;
                 _voted = each_voting_count[i];
@@ -5675,11 +5687,14 @@ contract Fluffy_Festival is Ownable {
             0
         );
         //reset voting count
-        for (uint32 i=1; i<=12; i++) {
+        for (uint32 i=201; i<=212; i++) {
             each_voting_count[i] = 0;
         }
         //voting in session
         inSession = true;
+        //vonus mint
+        string memory _memo = "first vote bonus";
+        _mint_presentbox(uint32(0), msg.sender, _memo);
     }
     
     //end voting
@@ -5711,6 +5726,9 @@ contract Fluffy_Festival is Ownable {
         subjects[subject_now].elected_type = _winner;
         previous_elected_type = elected_type;
         elected_type = _winner;
+        //vonus mint
+        string memory _memo = "final vote bonus";
+        _mint_presentbox(uint32(0), msg.sender, _memo);
     }
     function _select_winner(uint32 _summoner) internal view returns (uint32) {
         //candle auction
@@ -5727,19 +5745,19 @@ contract Fluffy_Festival is Ownable {
     //info
     function get_info(uint32 _summoner) external view returns (uint32[24] memory) {
         uint32[24] memory _res;
-        _res[0] = each_voting_count[0];
-        _res[1] = each_voting_count[1];
-        _res[2] = each_voting_count[2];
-        _res[3] = each_voting_count[3];
-        _res[4] = each_voting_count[4];
-        _res[5] = each_voting_count[5];
-        _res[6] = each_voting_count[6];
-        _res[7] = each_voting_count[7];
-        _res[8] = each_voting_count[8];
-        _res[9] = each_voting_count[9];
-        _res[10] = each_voting_count[10];
-        _res[11] = each_voting_count[11];
-        _res[12] = each_voting_count[12];
+        //_res[0] = each_voting_count[0];
+        _res[1] = each_voting_count[201];
+        _res[2] = each_voting_count[202];
+        _res[3] = each_voting_count[203];
+        _res[4] = each_voting_count[204];
+        _res[5] = each_voting_count[205];
+        _res[6] = each_voting_count[206];
+        _res[7] = each_voting_count[207];
+        _res[8] = each_voting_count[208];
+        _res[9] = each_voting_count[209];
+        _res[10] = each_voting_count[210];
+        _res[11] = each_voting_count[211];
+        _res[12] = each_voting_count[212];
         _res[13] = next_festival_block();
         _res[14] = _inSession();
         _res[15] = _isVotable(_summoner);

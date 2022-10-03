@@ -126,9 +126,9 @@ async function init_web3(){
     contract_murasaki_lootlike = 
         "0x24D0fD88131dE6D17400Dda0a4792072EcAC48b0";
     contract_murasaki_info = 
-        "0x261188B383d85bCfacc67d9b255390537719059E";
+        "0x2e5D8A8B5133B67c4421310c8ad30743777bF5Fd";
     contract_fluffy_festival =
-        "0x42ab3fc5d3e27A4a80FF61d11A437dFc77442ea8";
+        "0xB719D345cB5111b4A959a17AffA53094e678E4e7";
 
     //market
     contract_murasaki_item_market = 

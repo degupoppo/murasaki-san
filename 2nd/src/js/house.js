@@ -7,6 +7,10 @@
 
 //### 1st
 
+    情報表示の洗練
+        文字情報は極力控える
+        アイコンや絵などでわかりやすく表示する
+
    *メインコンセプトの整理*
         電子生命
     
@@ -658,6 +662,7 @@ async function init_global_variants() {
     local_material_calc = 0;
     local_calc_feeding = 0;
     local_calc_grooming = 0;
+    local_blockNumber = 0;
     
     //---local festival
     local_ff_each_voting_count = new Array(13).fill(0);
@@ -1033,6 +1038,9 @@ async function contract_update_dynamic_status(_summoner) {
 
     //wallet
     local_wallet = wallet;
+    
+    //blocknumber
+    local_blockNumber = Number(_all_dynamic_status[0]);
     
     //isActive
     _res = Number(_all_dynamic_status[45]);
@@ -1427,6 +1435,9 @@ async function contract_get_age(_wallet_address) {
 }
 
 //calc wallet_score
+//score = nonce, max_score = 150 nonce/mo
+//1mo = 150, 6mo = 900, 12mo = 1800, 24mo = 3600
+//12step = <300, <600, <900, <1200, <1500, <1800, <2100, <2400, <2700, <3000, <3300, 3300<=
 async function calc_wallet_score(wallet_address) {
     let _nonce = await contract_get_nonce(wallet_address);
     let _age = await contract_get_age(wallet_address); //mo
@@ -1650,8 +1661,15 @@ async function open_presentbox(_summoner, _itemId) {
 }
 
 //voting
-async function voting(_summoner, _select) {
+async function contract_voting(_summoner, _select) {
     contract_ff.methods.voting(_summoner, _select).send({from:wallet})
+        .on("transactionHash", (transactionHash) => update_tx_text("sending", transactionHash))
+        .on("receipt", (receipt) => update_tx_text("done", receipt.transactionHash));
+}
+
+//end_voting
+async function contract_end_voting(_summoner) {
+    contract_ff.methods.end_voting(_summoner).send({from:wallet})
         .on("transactionHash", (transactionHash) => update_tx_text("sending", transactionHash))
         .on("receipt", (receipt) => update_tx_text("done", receipt.transactionHash));
 }
@@ -3529,44 +3547,203 @@ class PresentBox extends Phaser.GameObjects.Sprite{
 class Festligheter extends Phaser.GameObjects.Sprite{
     constructor(scene, x, y, img){
         super(scene, x, y, img);
+        this.scene = scene;
         this.x = x;
         this.y = y;
+        this.img = "ff_preFestival";
         this.scene.add.existing(this);
-        this.setInteractive({ useHandCursor: true });
-        this.on("pointerdown", function (pointer) {
-            this.on_click();
-        }, this);
         this.mode = "";
         this.submode = 0;
         this.resting_count = 200;
+        this.movingMode = "";
+        this.movingSubmode = "";
+        this.on("pointerdown", function (pointer) {
+            this.on_click();
+        }, this);
+        this.text = scene.add.text(
+            this.x, 
+            this.y-40,
+            "test", 
+            {font: "20px Arial", fill: "#000000", backgroundColor: "#ffffff"}
+        ).setOrigin(0.5).setDepth(9999).setVisible(false);
+        this.on("pointerover", () => {
+            this.text.visible = true;
+        })
+        this.on("pointerout", () => {
+            this.text.visible = false;
+        });
+        this.checkFestival();
     }
     
     //### on_click
     on_click() {
+        if (this.mode == "duringFestival") {
+            open_window_voting(this.scene);
+        } else if (this.mode == "duringFestival_isEndable") {
+            contract_end_voting(summoner);
+        }
     }
     
-    //### on_summon
-    on_summon() {
-    }
-    
-    //### resting
-    resting() {
-        //low rarity, do nothing
-        if (this.submode == 0){
-            this.resting_count = 200 + Math.random() * 50;
-            //this.anims.play("cat_visitor_standing", true);
-            this.submode += 1;
-        } else if (this.submode < this.resting_count)  {
-            this.submode += 1;
-        } else {
-            this.mode = "moving";
+    //### checkFestival
+    checkFestival() {
+        let _preFestival_limitBlock = 7200;
+        
+        // before preFestival, destroy
+        if (
+            local_ff_inSession == 0
+            && local_ff_next_festival_block - local_blockNumber > _preFestival_limitBlock
+        ) {
+            this.destroy();
+        
+        // preFestival
+        } else if (
+            local_ff_inSession == 0
+            && local_ff_next_festival_block - local_blockNumber <= _preFestival_limitBlock 
+            && local_ff_next_festival_block >= local_blockNumber
+            && this.mode != "preFestival"
+        ) {
+            this.mode = "preFestival";
+            this.submode = 0;
+        
+        // during festival, before voting
+        } else if (
+            (local_ff_inSession == 0 || local_ff_inSession == 1)
+            && local_ff_isVotable == 1
+            && this.mode != "duringFestival"
+        ) {
+            this.mode = "duringFestival";
+            this.submode = 0;
+        
+        // during festival, after voting
+        } else if (
+            local_ff_inSession == 1
+            && local_ff_isVotable == 0
+            && local_ff_isEndable == 0
+            && this.mode != "duringFestival_afterVoting"
+        ) {
+            this.mode = "duringFestival_afterVoting";
+            this.submode = 0;
+        
+        // during festival, endable
+        } else if (
+            local_ff_inSession == 1
+            && local_ff_isVotable == 0
+            && local_ff_isEndable == 1
+            && this.mode != "duringFestival_isEndable"
+        ) {
+            this.mode = "duringFestival_isEndable";
             this.submode = 0;
         }
     }
     
+    //### preFestival
+    preFestival() {
+        if (this.submode == 0) {
+            this.img = "ff_preFestival";
+            this.x = 1000;
+            this.y = 750;
+            this.removeInteractive();
+            this.setInteractive({useHandCursor: false});
+            this.text.setText("");
+            this.text.x = this.x;
+            this.text.y = this.y-40;
+            this.movingMode = "";
+        } else if (this.submode % 100 == 1) {
+            let _text = "";
+            _text += "Festival is comming..." + " \n";
+            _text += local_ff_next_festival_block - local_blockNumber;
+            this.text.setText(_text);
+        }
+        this.submode += 1;
+    }
+    
+    //### duringFestival
+    duringFestival() {
+        if (this.submode == 0) {
+            this.img = "during_festival";
+            this.removeInteractive();
+            this.setInteractive({useHandCursor: true});
+            this.text.setText("");
+            this.text.x = this.x;
+            this.text.y = this.y-40;
+            this.movingMode = "resting";
+        } else if (this.submode % 100 == 1) {
+            let _text = "";
+            _text += "Fluffy Festival!" + " \n";
+            _text += "Vote your favorit fluffy";
+            this.text.setText(_text);
+        }
+        this.submode += 1;
+    }
+
+    //### duringFestival_afterVoting
+    duringFestival_afterVoting() {
+        if (this.submode == 0) {
+            this.img = "during_festival_afterVoting";
+            this.removeInteractive();
+            this.setInteractive({useHandCursor: false});
+            this.text.setText("");
+            this.text.x = this.x;
+            this.text.y = this.y-40;
+            this.movingMode = "resting";
+        } else if (this.submode % 100 == 1) {
+            let [_winner_type, _winner_count] = this._get_winner_now();
+            let _text = "";
+            _text += "Fluffy Festival!" + " \n";
+            _text += "Your vote: " + local_ff_last_voting_type + "\n";
+            _text += "Winner: " + _winner_type + " (" + _winner_count + ") ";
+            this.text.setText(_text);
+        }
+        this.submode += 1;
+    }
+    _get_winner_now() {
+        let _count = 0;
+        let _type = 0;
+        for (i=1; i<=12; i++) {
+            if (local_ff_each_voting_count[i] > _count) {
+                _count = local_ff_each_voting_count[i];
+                _type = i;
+            }
+        }
+        return [_type, _count];
+    }
+
+    //### duringFestival_endable
+    duringFestival_isEndable() {
+        if (this.submode == 0) {
+            this.img = "during_festival_isEndable";
+            this.removeInteractive();
+            this.setInteractive({useHandCursor: true});
+            this.text.setText("");
+            this.text.x = this.x;
+            this.text.y = this.y-40;
+            this.movingMode = "resting";
+        } else if (this.submode % 100 == 1) {
+            let [_winner_type, _winner_count] = this._get_winner_now();
+            let _text = "";
+            _text += "Fluffy Festival!" + " \n";
+            _text += "Endable";
+            this.text.setText(_text);
+        }
+        this.submode += 1;
+    }
+    
+    //### resting
+    resting() {
+        if (this.movingSubmode == 0){
+            this.resting_count = 200 + Math.random() * 50;
+            this.movingSubmode += 1;
+        } else if (this.movingSubmode < this.resting_count)  {
+            this.movingSubmode += 1;
+        } else {
+            this.movingMode = "moving";
+            this.movingSubmode = 0;
+        }
+    }
+
     //### moving
     moving() {
-        if (this.submode == 0){
+        if (this.movingSubmode == 0){
             //determine degree, 0-30, 150-210, 330-360
             var li = [0,10,20,30,150,160,170,180,190,200,210,330,340,350]
             this.moving_degree = li[Math.floor(Math.random() * li.length)];
@@ -3599,22 +3776,47 @@ class Festligheter extends Phaser.GameObjects.Sprite{
                 this.dist = "right";
                 //this.anims.play("cat_visitor_moving_right", true);
             }
-            this.submode += 1;
+            this.movingSubmode += 1;
         } else {
             this.x += Math.cos(this.moving_degree * (Math.PI/180)) * this.moving_speed;
             this.y -= Math.sin(this.moving_degree * (Math.PI/180)) * this.moving_speed;
-            this.submode += 1;
-            if (this.submode >= 100){
-                this.mode = "resting";
-                this.submode = 0;
+            this.depth = this.y;
+            this.text.x = this.x;
+            this.text.y = this.y-40;
+            this.movingSubmode += 1;
+            if (this.movingSubmode >= 100){
+                this.movingMode = "resting";
+                this.movingSubmode = 0;
             }
         }
     }
     
     //### update()
     update() {
-        if (this.mode == "resting"){this.resting();}
-        else if (this.mode == "moving"){this.moving();}
+        //main mode
+        if (this.mode == "preFestival"){
+            this.preFestival();
+        } else if (this.mode == "duringFestival"){
+            this.duringFestival();
+        } else if (this.mode == "duringFestival_afterVoting"){
+            this.duringFestival_afterVoting();
+        } else if (this.mode == "duringFestival_isEndable"){
+            this.duringFestival_isEndable();
+        }
+        //moving mode
+        if (this.movingMode == "moving"){
+            this.moving();
+        } else if (this.movingMode == "resting"){
+            this.resting();
+        }
+        //check festival
+        if (turn % 100 == 0) {
+            this.checkFestival();
+        }
+        //update festival status
+        if (turn % 300 == 0) {
+            contract_update_festival_info(summoner);
+        }
     }
 }
 
@@ -4196,6 +4398,72 @@ function open_window_upgrade(scene) {
 }
 
 
+//---window:voting
+function open_window_voting(scene) {
+    //close window and summon
+    function close_window(_summoner, _type) {
+        group_window_voting.destroy(true);
+        if (_type >= 0) {
+            contract_voting(_summoner, _type);
+        }
+    }
+    //create button with color and class
+    function create_button(_x, _y, _text, _color, _type, scene) {
+        let obj = scene.add.text(_x, _y, _text)
+            .setFontSize(40)
+            .setFontFamily("Arial")
+            .setFill(_color)
+            .setInteractive({useHandCursor: true})
+            .on("pointerdown", () => close_window(summoner, _type) )
+            .on("pointerover", () => obj.setStyle({ fontSize: 40, fontFamily: "Arial", fill: '#ffff00' }))
+            .on("pointerout", () => obj.setStyle({ fontSize: 40, fontFamily: "Arial", fill: _color }))
+        return obj;
+    }
+    //create window
+    let window_voting = scene.add.sprite(640, 480, "window").setInteractive();
+    //create message
+    let _text = "Fluffy Festival!\nPlease choose a color to vote";
+    let msg1 = scene.add.text(150, 150, _text)
+            .setFontSize(24).setFontFamily("Arial").setFill("#000000")
+    //create button
+    let _x = 200;
+    let _y = 280;
+    let _y_add = 70;
+    button0 = create_button(_x, _y+_y_add*0, "Red", "#E60012", 201, scene);
+    button1 = create_button(_x, _y+_y_add*1, "Orange", "#F39800", 202, scene);
+    button2 = create_button(_x, _y+_y_add*2, "Yello", "#FFF100", 203, scene);
+    button3 = create_button(_x, _y+_y_add*3, "Light Green", "#8FC31F", 204, scene);
+    button4 = create_button(_x, _y+_y_add*4, "Green", "#009944", 205, scene);
+    button5 = create_button(_x, _y+_y_add*5, "Deep Green", "#009E96", 206, scene);
+    button6 = create_button(_x+500, _y+_y_add*0, "Light Blue", "#00A0E9", 207, scene);
+    button7 = create_button(_x+500, _y+_y_add*1, "Blue", "#0068B7", 208, scene);
+    button8 = create_button(_x+500, _y+_y_add*2, "Deep Blue", "#1D2088", 209, scene);
+    button9 = create_button(_x+500, _y+_y_add*3, "Purple", "#920783", 210, scene);
+    button10 = create_button(_x+500, _y+_y_add*4, "Pink", "#E4007F", 211, scene);
+    button11 = create_button(_x+500, _y+_y_add*5, "Vivid Pink", "#E5004F", 212, scene);
+    button_cancel = create_button(1000, 750, "Cancel", "#000000", -1, scene);
+    //create group
+    group_window_voting = scene.add.group();
+    group_window_voting.add(window_voting);
+    group_window_voting.add(msg1);
+    group_window_voting.add(button0);
+    group_window_voting.add(button1);
+    group_window_voting.add(button2);
+    group_window_voting.add(button3);
+    group_window_voting.add(button4);
+    group_window_voting.add(button5);
+    group_window_voting.add(button6);
+    group_window_voting.add(button7);
+    group_window_voting.add(button8);
+    group_window_voting.add(button9);
+    group_window_voting.add(button10);
+    group_window_voting.add(button11);
+    group_window_voting.add(button_cancel);
+    //depth
+    group_window_voting.setDepth(999999);
+}
+
+
 //---window:summon
 function open_window_summon(scene) {
     //close window and summon
@@ -4631,7 +4899,19 @@ function preload(scene) {
     scene.load.image("item_pad_off", "src/png/item_pad_off.png");
     scene.load.image("item_gauge", "src/png/item_gauge.png");
     scene.load.image("item_frame", "src/png/item_frame.png");
-    scene.load.image("item_wall_sticker", "src/png/item_wall_sticker.png");
+    //scene.load.image("item_wall_sticker", "src/png/item_wall_sticker.png");
+    scene.load.image("item_wall_sticker_01", "src/png/item_wall_sticker_01.png");
+    scene.load.image("item_wall_sticker_02", "src/png/item_wall_sticker_02.png");
+    scene.load.image("item_wall_sticker_03", "src/png/item_wall_sticker_03.png");
+    scene.load.image("item_wall_sticker_04", "src/png/item_wall_sticker_04.png");
+    scene.load.image("item_wall_sticker_05", "src/png/item_wall_sticker_05.png");
+    scene.load.image("item_wall_sticker_06", "src/png/item_wall_sticker_06.png");
+    scene.load.image("item_wall_sticker_07", "src/png/item_wall_sticker_07.png");
+    scene.load.image("item_wall_sticker_08", "src/png/item_wall_sticker_08.png");
+    scene.load.image("item_wall_sticker_09", "src/png/item_wall_sticker_09.png");
+    scene.load.image("item_wall_sticker_10", "src/png/item_wall_sticker_10.png");
+    scene.load.image("item_wall_sticker_11", "src/png/item_wall_sticker_11.png");
+    scene.load.image("item_wall_sticker_12", "src/png/item_wall_sticker_12.png");
     scene.load.image("item_floor_sticker1", "src/png/item_floor_sticker1.png");
     scene.load.image("item_floor_sticker2", "src/png/item_floor_sticker2.png");
     scene.load.image("item_window", "src/png/item_window.png");
@@ -4653,6 +4933,13 @@ function preload(scene) {
     scene.load.image("item_presentbox", "src/png/item_presentbox.png");
     scene.load.image("item_book", "src/png/item_book.png");
     scene.load.image("item_hourglass", "src/png/item_hourglass.png");
+    
+    //---ff
+    scene.load.image("ff_preFestival", "src/png/ff_preFestival.png");
+    scene.load.image("ff_duringFestival", "src/png/ff_duringFestival.png");
+    scene.load.image("ff_duringFestival_pointerOver", "src/png/ff_duringFestival_pointerOver.png");
+    scene.load.image("ff_duringFestival_afterVoting", "src/png/ff_duringFestival_afterVoting.png");
+    scene.load.image("ff_duringFestival_isEndable", "src/png/ff_duringFestival_isEndable.png");
     
     //---star
     scene.load.image("star_blue", "src/png/star_blue.png");
@@ -4759,21 +5046,21 @@ function preload(scene) {
     //***TODO*** contract
     //local
     dic_tokenBall_contract = {
-        ACA:"0x2F2eB7682bE7AC2ADaa2E2389ddBC6C76D66671d",
-        ASTR:"0x2F2eB7682bE7AC2ADaa2E2389ddBC6C76D66671d",
-        BNB:"0x2F2eB7682bE7AC2ADaa2E2389ddBC6C76D66671d",
-        BTC:"0x2F2eB7682bE7AC2ADaa2E2389ddBC6C76D66671d",
-        BUSD:"0x2F2eB7682bE7AC2ADaa2E2389ddBC6C76D66671d",
-        DAI:"0x2F2eB7682bE7AC2ADaa2E2389ddBC6C76D66671d",
-        DOT:"0x2F2eB7682bE7AC2ADaa2E2389ddBC6C76D66671d",
-        ETH:"0x2F2eB7682bE7AC2ADaa2E2389ddBC6C76D66671d",
-        GLMR:"0x2F2eB7682bE7AC2ADaa2E2389ddBC6C76D66671d",
-        KSM:"0x2F2eB7682bE7AC2ADaa2E2389ddBC6C76D66671d",
-        LAY:"0x2F2eB7682bE7AC2ADaa2E2389ddBC6C76D66671d",
-        MATIC:"0x2F2eB7682bE7AC2ADaa2E2389ddBC6C76D66671d",
-        SDN:"0x2F2eB7682bE7AC2ADaa2E2389ddBC6C76D66671d",
-        USDC:"0x2F2eB7682bE7AC2ADaa2E2389ddBC6C76D66671d",
-        USDT:"0x2F2eB7682bE7AC2ADaa2E2389ddBC6C76D66671d"
+        ACA:"0xF458Fd09b0ceFd288B98A43D987B8F1A1C3a7BBF",
+        ASTR:"0xF458Fd09b0ceFd288B98A43D987B8F1A1C3a7BBF",
+        BNB:"0xF458Fd09b0ceFd288B98A43D987B8F1A1C3a7BBF",
+        BTC:"0xF458Fd09b0ceFd288B98A43D987B8F1A1C3a7BBF",
+        BUSD:"0xF458Fd09b0ceFd288B98A43D987B8F1A1C3a7BBF",
+        DAI:"0xF458Fd09b0ceFd288B98A43D987B8F1A1C3a7BBF",
+        DOT:"0xF458Fd09b0ceFd288B98A43D987B8F1A1C3a7BBF",
+        ETH:"0xF458Fd09b0ceFd288B98A43D987B8F1A1C3a7BBF",
+        GLMR:"0xF458Fd09b0ceFd288B98A43D987B8F1A1C3a7BBF",
+        KSM:"0xF458Fd09b0ceFd288B98A43D987B8F1A1C3a7BBF",
+        LAY:"0xF458Fd09b0ceFd288B98A43D987B8F1A1C3a7BBF",
+        MATIC:"0xF458Fd09b0ceFd288B98A43D987B8F1A1C3a7BBF",
+        SDN:"0xF458Fd09b0ceFd288B98A43D987B8F1A1C3a7BBF",
+        USDC:"0xF458Fd09b0ceFd288B98A43D987B8F1A1C3a7BBF",
+        USDT:"0xF458Fd09b0ceFd288B98A43D987B8F1A1C3a7BBF"
     }
     //shibuya
     /*
@@ -6904,9 +7191,41 @@ function update_checkItem(this_scene) {
         local_items_flag[_item_id] = true;
         let _x = 640;
         let _y = 480;
+        
+        if (local_wallet_score == 0) {
+            //wait for calculation
+            local_items_flag[_item_id] = false;
+        } else if (local_wallet_score < 300) {
+            item_wall_sticker = this_scene.add.image(_x, _y, "item_wall_sticker_01");
+        } else if (local_wallet_score < 600) {
+            item_wall_sticker = this_scene.add.image(_x, _y, "item_wall_sticker_02");
+        } else if (local_wallet_score < 900) {
+            item_wall_sticker = this_scene.add.image(_x, _y, "item_wall_sticker_03");
+        } else if (local_wallet_score < 1200) {
+            item_wall_sticker = this_scene.add.image(_x, _y, "item_wall_sticker_04");
+        } else if (local_wallet_score < 1500) {
+            item_wall_sticker = this_scene.add.image(_x, _y, "item_wall_sticker_05");
+        } else if (local_wallet_score < 1800) {
+            item_wall_sticker = this_scene.add.image(_x, _y, "item_wall_sticker_06");
+        } else if (local_wallet_score < 2100) {
+            item_wall_sticker = this_scene.add.image(_x, _y, "item_wall_sticker_07");
+        } else if (local_wallet_score < 2400) {
+            item_wall_sticker = this_scene.add.image(_x, _y, "item_wall_sticker_08");
+        } else if (local_wallet_score < 2700) {
+            item_wall_sticker = this_scene.add.image(_x, _y, "item_wall_sticker_09");
+        } else if (local_wallet_score < 3000) {
+            item_wall_sticker = this_scene.add.image(_x, _y, "item_wall_sticker_10");
+        } else if (local_wallet_score < 3300) {
+            item_wall_sticker = this_scene.add.image(_x, _y, "item_wall_sticker_11");
+        } else if (local_wallet_score >= 3300) {
+            item_wall_sticker = this_scene.add.image(_x, _y, "item_wall_sticker_12");
+        }
+        item_wall_sticker.setDepth(1).setAlpha(0.2);
+        /*
         item_wall_sticker = this_scene.add.image(_x, _y, "item_wall_sticker")
             .setDepth(1)
             .setAlpha(0.2);
+        */
     } else if (
         local_items[_item_id] == 0 
         && local_items[_item_id+64] == 0 
@@ -8163,6 +8482,25 @@ function update_checkItem(this_scene) {
         }
         run(this_scene);
     }
+
+    //###000:Festivaler
+    if (
+        typeof festligheter == "undefined" 
+        && (
+            local_ff_next_festival_block - local_blockNumber <= 7200
+            || local_ff_inSession == 1
+            )
+    ){
+        console.log("summon, festligheter");
+        let _x = 200 + Math.random()*700;
+        let _y = 550 + Math.random()*200;
+        festligheter = new Festligheter(this_scene, _x, _y, "ff_preFestival")
+            .setOrigin(0.5)
+            .setScale(0.3)
+            .setAlpha(1)
+            .setDepth(3);
+        group_update.add(festligheter);
+    }
     
     previous_local_items = local_items;
     previous_local_item194 = local_items[194];
@@ -8420,6 +8758,9 @@ class Loading extends Phaser.Scene {
         console.log("local item");
         local_myListsAt_withItemType = await get_myListsAt_withItemType(local_owner);
         console.log("  OK", Date.now() - _start);
+        console.log("local festival");
+        await contract_update_festival_info(summoner);
+        console.log("  OK", Date.now() - _start);
         this.flag_start = 1;
     }
     
@@ -8525,14 +8866,6 @@ class Main extends Phaser.Scene {
     }
     preload(){
         //preload(this);
-        //plugin: rexuiplugin
-        //need for nameplate
-        this.load.scenePlugin({
-            key: 'rexuiplugin',
-            url: "lib/rexuiplugin.min.js",
-            sceneKey: 'rexUI'
-        });
-        this.load.plugin('rextexteditplugin', 'lib/rextexteditplugin.min.js', true);
     }
     create(){
         create(this);
@@ -8543,6 +8876,17 @@ class Main extends Phaser.Scene {
         if (flag_fadein == 0) {
             this.cameras.main.fadeIn(600, 255, 255, 255, update(this));
             flag_fadein = 1;
+            
+            //plugin: rexuiplugin
+            //need for nameplate
+            //need to load in Main secene,
+            //need to load after fadein because of camera flashing
+            this.load.scenePlugin({
+                key: 'rexuiplugin',
+                url: "lib/rexuiplugin.min.js",
+                sceneKey: 'rexUI'
+            });
+            this.load.plugin('rextexteditplugin', 'lib/rextexteditplugin.min.js', true);
         }
         update(this);
     }
