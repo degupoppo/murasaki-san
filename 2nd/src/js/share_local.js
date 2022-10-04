@@ -1,27 +1,4 @@
 
-
-/*
-console.log(
-    "%c"+
-    "\n"+
-    "'##::::'##:'##::::'##:'########:::::'###:::::'######:::::'###::::'##:::'##:'####:::::::::::'######:::::'###::::'##::: ##:\n"+
-    " ###::'###: ##:::: ##: ##.... ##:::'## ##:::'##... ##:::'## ##::: ##::'##::. ##:::::::::::'##... ##:::'## ##::: ###:: ##:\n"+
-    " ####'####: ##:::: ##: ##:::: ##::'##:. ##:: ##:::..:::'##:. ##:: ##:'##:::: ##::::::::::: ##:::..:::'##:. ##:: ####: ##:\n"+
-    " ## ### ##: ##:::: ##: ########::'##:::. ##:. ######::'##:::. ##: #####::::: ##::'#######:. ######::'##:::. ##: ## ## ##:\n"+
-    " ##. #: ##: ##:::: ##: ##.. ##::: #########::..... ##: #########: ##. ##:::: ##::........::..... ##: #########: ##. ####:\n"+
-    " ##:.:: ##: ##:::: ##: ##::. ##:: ##.... ##:'##::: ##: ##.... ##: ##:. ##::: ##:::::::::::'##::: ##: ##.... ##: ##:. ###:\n"+
-    " ##:::: ##:. #######:: ##:::. ##: ##:::: ##:. ######:: ##:::: ##: ##::. ##:'####::::::::::. ######:: ##:::: ##: ##::. ##:\n"+
-    "..:::::..:::.......:::..:::::..::..:::::..:::......:::..:::::..::..::::..::....::::::::::::......:::..:::::..::..::::..::\n"+
-    "\n"+
-    "%cWelcome to House of Murasaki-san!苧\n"+
-    "..._@・噂" < Cheers to ASTR!瑳\n"+
-    "\n",
-    "color: pink;",
-    "color: pink; font-size: 16px;",
-)
-*/
-
-
 //connect to metamask
 async function connect() {
     const web3 = await new Web3(window.ethereum);
@@ -29,6 +6,12 @@ async function connect() {
         method: 'eth_requestAccounts'
     });
     return web3;
+}
+
+//connect to wss
+async function connect_wss() {
+    const web3wss = await new Web3("wss://testnetwss.murasaki-san.com");
+    return web3wss
 }
 
 //get wallet
@@ -39,8 +22,6 @@ async function get_wallet(web3) {
 
 //donate
 async function donate(_value) {
-    let web3 = await connect();
-    let wallet = await get_wallet(web3);
     let _to_wallet = "0x2F7448B62134e52C2f46454d0089Ae21B5248805";
     let _value_wei = web3.utils.toWei(String(_value));
     web3.eth.sendTransaction({from: wallet, to: _to_wallet, value: _value_wei});
@@ -233,7 +214,10 @@ async function init_web3(){
     //create contract
 
     web3 = await connect();
+    web3wss = await connect_wss();
     wallet = await get_wallet(web3);
+
+    //contract, web3, for sending
 
     //nft, ntt
     contract_mm = await new web3.eth.Contract(abi_murasaki_main, contract_murasaki_main);
@@ -269,5 +253,62 @@ async function init_web3(){
 
     //market
     contract_mmt = await new web3.eth.Contract(abi_murasaki_item_market, contract_murasaki_item_market);
+    
+
+    //contract, web3wss, for calling
+
+    //nft, ntt
+    contract_mm_wss = await new web3wss.eth.Contract(abi_murasaki_main, contract_murasaki_main);
+    contract_mc_wss = await new web3wss.eth.Contract(abi_murasaki_craft, contract_murasaki_craft);
+    contract_mn_wss = await new web3wss.eth.Contract(abi_murasaki_name, contract_murasaki_name);
+
+    //storage
+    contract_mp_wss = await new web3wss.eth.Contract(abi_murasaki_parameter, contract_murasaki_parameter);
+    contract_ms_wss = await new web3wss.eth.Contract(abi_murasaki_storage, contract_murasaki_storage);
+    contract_mss_wss = await new web3wss.eth.Contract(abi_murasaki_storage_score, contract_murasaki_storage_score);
+    contract_msn_wss = await new web3wss.eth.Contract(abi_murasaki_storage_nui, contract_murasaki_storage_nui);
+
+    //function
+    contract_mfs_wss = await new web3wss.eth.Contract(abi_murasaki_function_share, contract_murasaki_function_share);
+    contract_mfsl_wss = await new web3wss.eth.Contract(abi_murasaki_function_summon_and_levelup, contract_murasaki_function_summon_and_levelup);
+    contract_mffg_wss = await new web3wss.eth.Contract(abi_murasaki_function_feeding_and_grooming, contract_murasaki_function_feeding_and_grooming);
+    contract_mfmf_wss = await new web3wss.eth.Contract(abi_murasaki_function_mining_and_farming, contract_murasaki_function_mining_and_farming);
+    contract_mfc_wss = await new web3wss.eth.Contract(abi_murasaki_function_crafting, contract_murasaki_function_crafting);
+    contract_mfcc_wss = await new web3wss.eth.Contract(abi_murasaki_function_crafting_codex, contract_murasaki_function_crafting_codex);
+    contract_mfn_wss = await new web3wss.eth.Contract(abi_murasaki_function_name, contract_murasaki_function_name);
+
+    //treajury
+    contract_bft_wss = await new web3wss.eth.Contract(abi_bufferTreasury, contract_bufferTreasury);
+    contract_bbt_wss = await new web3wss.eth.Contract(abi_buybackTreasury, contract_buybackTreasury);
+    contract_tt_wss = await new web3wss.eth.Contract(abi_teamTreasury, contract_teamTreasury);
+
+    //etc
+    contract_wd_wss = await new web3wss.eth.Contract(abi_world_dice, contract_world_dice);
+    contract_mml_wss = await new web3wss.eth.Contract(abi_murasaki_mail, contract_murasaki_mail);
+    contract_mll_wss = await new web3wss.eth.Contract(abi_murasaki_lootlike, contract_murasaki_lootlike);
+    contract_info_wss = await new web3wss.eth.Contract(abi_murasaki_info, contract_murasaki_info);
+    contract_ff_wss = await new web3wss.eth.Contract(abi_fluffy_festival, contract_fluffy_festival);
+
+    //market
+    contract_mmt_wss = await new web3wss.eth.Contract(abi_murasaki_item_market, contract_murasaki_item_market);
 }
 
+
+console.warn(
+    "%c"+
+    "\n"+
+    "'##::::'##:'##::::'##:'########:::::'###:::::'######:::::'###::::'##:::'##:'####:::::::::::'######:::::'###::::'##::: ##:\n"+
+    " ###::'###: ##:::: ##: ##.... ##:::'## ##:::'##... ##:::'## ##::: ##::'##::. ##:::::::::::'##... ##:::'## ##::: ###:: ##:\n"+
+    " ####'####: ##:::: ##: ##:::: ##::'##:. ##:: ##:::..:::'##:. ##:: ##:'##:::: ##::::::::::: ##:::..:::'##:. ##:: ####: ##:\n"+
+    " ## ### ##: ##:::: ##: ########::'##:::. ##:. ######::'##:::. ##: #####::::: ##::'#######:. ######::'##:::. ##: ## ## ##:\n"+
+    " ##. #: ##: ##:::: ##: ##.. ##::: #########::..... ##: #########: ##. ##:::: ##::........::..... ##: #########: ##. ####:\n"+
+    " ##:.:: ##: ##:::: ##: ##::. ##:: ##.... ##:'##::: ##: ##.... ##: ##:. ##::: ##:::::::::::'##::: ##: ##.... ##: ##:. ###:\n"+
+    " ##:::: ##:. #######:: ##:::. ##: ##:::: ##:. ######:: ##:::: ##: ##::. ##:'####::::::::::. ######:: ##:::: ##: ##::. ##:\n"+
+    "..:::::..:::.......:::..:::::..::..:::::..:::......:::..:::::..::..::::..::....::::::::::::......:::..:::::..::..::::..::\n"+
+    "\n"+
+    "%cWelcome to House of Murasaki-san!\n"+
+    "..._@ﾉ\" < Cheers to ASTR!\n"+
+    "\n",
+    "color: pink;",
+    "color: pink; font-size: 16px;",
+)

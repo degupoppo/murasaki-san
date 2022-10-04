@@ -17,22 +17,8 @@
     コントラクトのuint32修正
         エラーのもとで煩わしいので、全てuintへ置換する
         コードとabiの全置換が必要
-    
-    presentboxの演出を考える
-        出現タイミング
-            誰かのcrafting
-            mail開封時（受け取り側）
-            mail開封時（贈り側）
-            festival voting
-            dapps staking reward
-        演出案
-            空からパラシュート
-            煙の中から出現
-            ないないさんが画面外から持ってきて置いていく
-            fluffyたちが画面外から持ってきて置いていく
-            あるいは上記のランダム
-    
-    Fluffy FestivalのUI実装
+
+ ig Fluffy FestivalのUI実装
         開催直前
             画面の端に少しだけ見えて待機している
             開催までの残り時間を知らせてくれる
@@ -82,6 +68,12 @@
                 様子を見ながら調整する。
                 理想はdapps stakingで利益をとった上での定常状態化
                 アクティブユーザー数が多すぎるとインフレしにくいだろうか。
+
+    マーケットの改善
+        情報取得のバッチ処理化
+        バイバックシステムの組み込み
+            市場で売りに出すかバイバックするかを選択できるように
+            バイバックは気軽にはできないようにする
 
 //### Picture
 
@@ -162,6 +154,20 @@
 
 //### 2nd
 
+ ng presentboxの演出を考える
+        出現タイミング
+            誰かのcrafting
+            mail開封時（受け取り側）
+            mail開封時（贈り側）
+            festival voting
+            dapps staking reward
+        演出案
+            空からパラシュート
+            煙の中から出現
+            ないないさんが画面外から持ってきて置いていく
+            fluffyたちが画面外から持ってきて置いていく
+            あるいは上記のランダム
+    
  ok upgrade料金の調整
         現状、fluffierに3000, fluffiestに11000必要でちょっと高すぎる
         ぬいちゃんは36000, アイテム6-8個分ぐらいか
@@ -756,7 +762,7 @@ async function init_global_variants() {
     flag_summon_fluffy = 0;
     flag_onLight = true;
     flag_window_craft = 0;
-    flag_update = 1;
+    flag_sync = 1;
     flag_fadein = 0;
     flag_debug = 0;
 }
@@ -895,8 +901,10 @@ async function send_fp_get(_wallet, _summoner) {
 
 //call myListsAt_withItemType
 async function get_myListsAt_withItemType(_wallet) {
-    let myListLength = await contract_mc.methods.myListLength(_wallet).call();
-    let myListsAt_withItemType = await contract_mc.methods.myListsAt_withItemType(_wallet, 0, myListLength).call();
+    //let myListLength = await contract_mc.methods.myListLength(_wallet).call();
+    //let myListsAt_withItemType = await contract_mc.methods.myListsAt_withItemType(_wallet, 0, myListLength).call();
+    let myListLength = await contract_mc_wss.methods.myListLength(_wallet).call();
+    let myListsAt_withItemType = await contract_mc_wss.methods.myListsAt_withItemType(_wallet, 0, myListLength).call();
     return myListsAt_withItemType;
 }
 
@@ -972,7 +980,8 @@ async function contract_update_static_status(_summoner) {
     }
     
     //call info from chain
-    let _all_static_status = await contract_info.methods.allStaticStatus(_summoner).call();
+    //let _all_static_status = await contract_info.methods.allStaticStatus(_summoner).call();
+    let _all_static_status = await contract_info_wss.methods.allStaticStatus(_summoner).call();
 
     //class, owner, name
     local_class =       Number(_all_static_status[0]);
@@ -1032,7 +1041,8 @@ async function contract_update_dynamic_status(_summoner) {
     }
 
     //call dynamic status from chain
-    let _all_dynamic_status = await contract_info.methods.allDynamicStatus(_summoner).call();
+    //let _all_dynamic_status = await contract_info.methods.allDynamicStatus(_summoner).call();
+    let _all_dynamic_status = await contract_info_wss.methods.allDynamicStatus(_summoner).call();
     
     //update local status
 
@@ -1321,7 +1331,8 @@ async function contract_update_event_random() {
 //### festival
 async function contract_update_festival_info(_summoner) {
     //call
-    let _festival_info = await contract_ff.methods.get_info(_summoner).call();    
+    //let _festival_info = await contract_ff.methods.get_info(_summoner).call();    
+    let _festival_info = await contract_ff_wss.methods.get_info(_summoner).call();    
    //update local
    local_ff_each_voting_count[1] =  Number(_festival_info[1]);
    local_ff_each_voting_count[2] =  Number(_festival_info[2]);
@@ -1405,7 +1416,8 @@ async function call_amount_of_token(_contract_address) {
 //update summoner of wallet
 async function contract_update_summoner_of_wallet() {
     if (summoner <= 0) {
-        summoner = await contract_mm.methods.tokenOf(wallet).call();  //have not summoned yet: 0
+        //summoner = await contract_mm.methods.tokenOf(wallet).call();  //have not summoned yet: 0
+        summoner = await contract_mm_wss.methods.tokenOf(wallet).call();  //have not summoned yet: 0
         summoner = Number(summoner);
     }
 }
@@ -1414,17 +1426,20 @@ async function contract_update_summoner_of_wallet() {
 
 //get nonce
 async function contract_get_nonce(_wallet_address) {
-    let _nonce = await web3.eth.getTransactionCount(_wallet_address);
+    //let _nonce = await web3.eth.getTransactionCount(_wallet_address);
+    let _nonce = await web3wss.eth.getTransactionCount(_wallet_address);
     return _nonce;
 }
 
 //get wallet month age
 async function contract_get_age(_wallet_address) {
-    let _lastBlock = await web3.eth.getBlockNumber();
+    //let _lastBlock = await web3.eth.getBlockNumber();
+    let _lastBlock = await web3wss.eth.getBlockNumber();
     let _age = 1;
     //2592000 block/mo, 1block/12sec
     for (let i = _lastBlock; i >= 216000; i -= 216000) {
-        let _transactionCount = await web3.eth.getTransactionCount(_wallet_address, i);
+        //let _transactionCount = await web3.eth.getTransactionCount(_wallet_address, i);
+        let _transactionCount = await web3wss.eth.getTransactionCount(_wallet_address, i);
         if (_transactionCount > 0) {
             _age += 1;
         } else {
@@ -3570,7 +3585,9 @@ class Festligheter extends Phaser.GameObjects.Sprite{
             this.text.visible = true;
         })
         this.on("pointerout", () => {
-            this.text.visible = false;
+            setTimeout( () => {
+                this.text.visible = false;
+            }, 1000)
         });
         this.checkFestival();
     }
@@ -3593,6 +3610,8 @@ class Festligheter extends Phaser.GameObjects.Sprite{
             local_ff_inSession == 0
             && local_ff_next_festival_block - local_blockNumber > _preFestival_limitBlock
         ) {
+            console.log("destroy festligheter");
+            this.mode = "destroy";
             this.destroy();
         
         // preFestival
@@ -3640,8 +3659,8 @@ class Festligheter extends Phaser.GameObjects.Sprite{
     preFestival() {
         if (this.submode == 0) {
             this.img = "ff_preFestival";
-            this.x = 1000;
-            this.y = 750;
+            this.x = 340;
+            this.y = 960;
             this.removeInteractive();
             this.setInteractive({useHandCursor: false});
             this.text.setText("");
@@ -3660,6 +3679,8 @@ class Festligheter extends Phaser.GameObjects.Sprite{
     //### duringFestival
     duringFestival() {
         if (this.submode == 0) {
+            this.x = 200 + Math.random()*700;
+            this.y = 550 + Math.random()*200;
             this.img = "during_festival";
             this.removeInteractive();
             this.setInteractive({useHandCursor: true});
@@ -3691,7 +3712,8 @@ class Festligheter extends Phaser.GameObjects.Sprite{
             let _text = "";
             _text += "Fluffy Festival!" + " \n";
             _text += "Your vote: " + local_ff_last_voting_type + "\n";
-            _text += "Winner: " + _winner_type + " (" + _winner_count + ") ";
+            _text += "Winner: " + _winner_type + " (" + _winner_count + ") " + "\n";
+            _text += local_ff_subject_end_block - local_blockNumber;
             this.text.setText(_text);
         }
         this.submode += 1;
@@ -3814,7 +3836,7 @@ class Festligheter extends Phaser.GameObjects.Sprite{
             this.checkFestival();
         }
         //update festival status
-        if (turn % 300 == 0) {
+        if (turn % 300 == 0 && flag_sync == 1) {
             contract_update_festival_info(summoner);
         }
     }
@@ -4666,6 +4688,10 @@ function summon_fluffy(scene, _type, rarity, itemId) {
     _fluffy.on_summon();
     group_star.add(_fluffy);
     group_update.add(_fluffy);
+    //murasaki hugging
+    if (count_sync > 5) {
+        murasakisan.on_click();
+    }
 }
 
 
@@ -4721,7 +4747,7 @@ function preload(scene) {
         "Counting the number of hairs on Fluffy...",
         "Charging the Murasaki-san battery...",
         "Shopping for cat food...",
-        "Filling a fountain pen with ink for writing letters...",
+        "Filling a fountain pen with ink...",
         "Baking pancakes...",
         "Writing Solidity code...",
         "Refactoring JavaScript code...",
@@ -4731,6 +4757,9 @@ function preload(scene) {
         "Chaingng a violin strings...",
         "Tuning the toy piano...",
         "Debugging Rust code...",
+        "Drawing with ink! on the palette on the pallet...",
+        "Smartly contracting to the smart contract...",
+        "Assembling WebAssembly...",
     ];
     progressText.setText(_arr[Math.floor(Math.random() * _arr.length)]);
     let _threthold = 0.25;
@@ -4930,9 +4959,16 @@ function preload(scene) {
     scene.load.image("item_window_night", "src/png/item_window_night.png");
     scene.load.image("item_window_night_closed", "src/png/item_window_night_closed.png");
     scene.load.image("item_newspaper", "src/png/item_newspaper.png");
-    scene.load.image("item_presentbox", "src/png/item_presentbox.png");
     scene.load.image("item_book", "src/png/item_book.png");
     scene.load.image("item_hourglass", "src/png/item_hourglass.png");
+    scene.load.image("item_presentbox_01", "src/png/item_presentbox_01.png");
+    scene.load.image("item_presentbox_02", "src/png/item_presentbox_02.png");
+    scene.load.image("item_presentbox_03", "src/png/item_presentbox_03.png");
+    scene.load.image("item_presentbox_04", "src/png/item_presentbox_04.png");
+    scene.load.image("item_presentbox_05", "src/png/item_presentbox_05.png");
+    scene.load.image("item_presentbox_06", "src/png/item_presentbox_06.png");
+    scene.load.image("item_presentbox_07", "src/png/item_presentbox_07.png");
+    scene.load.image("item_presentbox_08", "src/png/item_presentbox_08.png");
     
     //---ff
     scene.load.image("ff_preFestival", "src/png/ff_preFestival.png");
@@ -5762,7 +5798,11 @@ function create(scene) {
         .setDepth(9999)
         .setInteractive()
         .on("pointerover", () => text_fluffy.setVisible(true))
-        .on("pointerout", () => text_fluffy.setVisible(false));
+        .on("pointerout", () => {
+            setTimeout( () => {
+                text_fluffy.setVisible(false);
+            }, 1000);
+        });
 
     //name
     _x = 85;
@@ -5903,12 +5943,12 @@ function create(scene) {
     group_lootlike.add(text_lootlike_personality);
     group_lootlike.setVisible(false);
     group_lootlike.setDepth(9999);
-    item_kanban.setInteractive()
-        .on("pointerover", () => {
+    item_kanban.setInteractive({useHandCursor: true})
+        .on("pointerdown", () => {
             group_lootlike.setVisible(true);
-        })
-        .on("pointerout", () => {
-            group_lootlike.setVisible(false);
+            setTimeout( () => {
+                group_lootlike.setVisible(false);
+            }, 3000)
         });
 
     //group
@@ -6758,11 +6798,11 @@ function update_checkItem(this_scene) {
                 "item_book"
             ).setScale(0.1).setOrigin(0.5)
                 .setInteractive({ draggable: true, useHandCursor: true })
-                .on("pointerover", () => {
+                .on("pointerdown", () => {
                     item_book_text.visible = true;
-                })
-                .on("pointerout", () => {
-                    item_book_text.visible = false;
+                    setTimeout( () => {
+                        item_book_text.visible = false;
+                    }, 3000)
                 })
                 .on("drag", () => {
                     if (this_scene.sys.game.scale.gameSize._width == 1280) {
@@ -6814,11 +6854,11 @@ function update_checkItem(this_scene) {
                 "item_hourglass",
             ).setOrigin(0.5).setScale(0.08).setDepth(850)
                 .setInteractive({ draggable: true, useHandCursor: true })
-                .on("pointerover", () => {
+                .on("pointerdown", () => {
                     item_hourglass_text.visible = true;
-                })
-                .on("pointerout", () => {
-                    item_hourglass_text.visible = false;
+                    setTimeout( () => {
+                        item_hourglass_text.visible = false;
+                    }, 3000)
                 })
                 .on("drag", () => {
                     if (this_scene.sys.game.scale.gameSize._width == 1280) {
@@ -8374,6 +8414,17 @@ function update_checkItem(this_scene) {
         let _itemIds = get_itemIds_from_itemType(local_myListsAt_withItemType, 200);
         _itemIds.forEach( async (_itemId) => {
             if (!summoned_presentbox.includes(_itemId)) {
+                let _array = [
+                    "item_presentbox_01",
+                    "item_presentbox_02",
+                    "item_presentbox_03",
+                    "item_presentbox_04",
+                    "item_presentbox_05",
+                    "item_presentbox_06",
+                    "item_presentbox_07",
+                    "item_presentbox_08",
+                ];
+                let _img = _array[Math.floor(Math.random() * _array.length)];
                 let _x = 170 + Math.random() * 830;
                 let _y = 510 + Math.random() * 170;
                 let _item = await call_item_info(_itemId);
@@ -8386,7 +8437,7 @@ function update_checkItem(this_scene) {
                     this_scene,
                      _x, 
                      _y, 
-                     "item_presentbox", 
+                     _img, 
                      _itemId,
                      _summoner_from, 
                      _memo
@@ -8485,11 +8536,13 @@ function update_checkItem(this_scene) {
 
     //###000:Festivaler
     if (
-        typeof festligheter == "undefined" 
-        && (
+        (
+            typeof festligheter == "undefined" 
+            || festligheter.mode == "destroy"
+        ) && (
             local_ff_next_festival_block - local_blockNumber <= 7200
             || local_ff_inSession == 1
-            )
+        )
     ){
         console.log("summon, festligheter");
         let _x = 200 + Math.random()*700;
@@ -8634,7 +8687,7 @@ function update(scene) {
     }
 
     //update onchain data
-    if (turn % 250 == 70 && flag_update == 1) {
+    if (turn % 250 == 70 && flag_sync == 1) {
         if (count_sync == 0 || local_notPetrified == 0 || summoner == 0) {
             contract_update_all();
         } else if (summoner > 0) {
