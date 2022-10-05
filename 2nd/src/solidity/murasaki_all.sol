@@ -4125,7 +4125,7 @@ contract bufferTreasury is Ownable {
 }
 
 
-//---buybackTreasury
+//---*buybackTreasury
 
 
 //for buyback items
@@ -4148,13 +4148,18 @@ contract buybackTreasury is Ownable {
     fallback() external payable {
     }
 
-    uint public amount_paied = 0;
+    uint public amountPaied_total = 0;
+    mapping(uint32 => uint) public amountPaied;
     
+    //***TODO*** active user
+    // not total user but active user count is needed to be caluculated 
+    // and to be used for calculation of amount per summoner value
+    // need: counting petrified summoners
     function calc_amount_per_summoner() public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Main mm = Murasaki_Main(mfs.murasaki_main_address());
         uint32 _total_summoner = mm.next_summoner() - 1;
-        uint _amount_per_summoner = (amount_paied + address(this).balance) / _total_summoner;
+        uint _amount_per_summoner = (amountPaied_total + address(this).balance) / _total_summoner;
         return _amount_per_summoner;
     }
     
@@ -4247,8 +4252,15 @@ contract buybackTreasury is Ownable {
         require(mc.ownerOf(_item) == msg.sender);
         mc.safeTransferFrom(msg.sender, address(this), _item);
         uint _price = calc_buybackPrice(_item);
-        amount_paied += _price;
+        //update amount paied
+        amountPaied[_summoner] += _price;
+        amountPaied_total += _price;
+        //pay
         payable(msg.sender).transfer(_price);
+        //do not exceed amount per summoner after paying
+        uint _amount_per_summoner = calc_amount_per_summoner();
+        require(amountPaied[_summoner] <= _amount_per_summoner);
+        //event
         emit Buyback(_summoner, _item, _price);
     }
 }
@@ -5478,7 +5490,7 @@ contract Murasaki_Info_fromWallet is Ownable {
 }
 
 
-//---*Fluffy_Festival
+//---Fluffy_Festival
 
 
 contract Fluffy_Festival is Ownable {

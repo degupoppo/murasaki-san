@@ -7,6 +7,46 @@
 
 //### 1st
 
+    バイバックコントラの洗練
+        アクティブユーザーのカウント方法の深慮
+            mm.next_summoner() - 1ではなく、not petrified summonersを
+            amount per summonerの分母に使用する
+            しかし、petrifiedは受動的な状態変化なので、
+            例えばpetrified時にカウントアップさせることはできない。
+            別でlast feeding timeを集計するバッチコントラを用意して、
+            adminコントラとして用意し、定期手に実行させるか。
+            last feedingよりpetrified summonerを割り出し、
+            msかmpのactive_summonersに有効summoner数を代入する関数。
+            これをbufferTreajuryのtransfer関数に組み込めればベストだが。
+            for関数のリミットはいくつだろうか。
+        あるいは, feeding時にpetrified summonerをカウント可能な機構を組み入れる
+            ある時間においてnow_time - last_feeding_time > 30dのsummonerをカウントしたい
+
+    エコノミクス
+        独自トークンは使用しない
+            経済のメイントークンとしてASTRを使用する
+        価格上昇メカニズム
+            殆どのアイテムについて最低買取価格が設定されている
+                coin/leafについては自由市場とする
+                fluffyの価格設定が難しいところ
+                    fluffyの2年間の理論数はいくつにバランス調整するか
+                    800/20lv = 265 fluffy, 67 fluffier, 17 fluffiest
+            最低買取価格は下落せず緩やかにインフレさせる
+            mint費用の半分が即座に買取用のバイバック金庫に入れられる
+            参加人数の増加は最低価格に影響を与えない
+                その時のインフレ率を加味した値段がmint価格となるため
+            参加人数の増加はインフレ率を抑制する
+            アクティブユーザーの減少はインフレ率を上昇させる
+            インフレ率の上昇要因：
+                マーケットの取引量の増加
+                アクティブユーザー数の減少
+                dapps staking量の増加
+            インフレ率の抑制要因：
+                アクティブユーザー数の増加
+                    1ユーザーあたりの割当金額が上昇しにくくなるため
+                マーケットの取引量の減少
+                dapps staking量の減少
+
     情報表示の洗練
         文字情報は極力控える
         アイコンや絵などでわかりやすく表示する
@@ -1242,17 +1282,17 @@ async function contract_update_event_random() {
     let _block_from = _block_latest - 7200;  //24 h
     
     //Level-up
-    let _events_levelup = await contract_mfsl.getPastEvents("Level_up", {
+    let _events_levelup = await contract_mfsl_wss.getPastEvents("Level_up", {
             fromBlock: _block_from,
             toBlock: _block_latest
     })
     //Crafting
-    let _events_crafting = await contract_mfc.getPastEvents("Crafting", {
+    let _events_crafting = await contract_mfc_wss.getPastEvents("Crafting", {
             fromBlock: _block_from,
             toBlock: _block_latest
     })
     //Mail
-    let _events_mail = await contract_mml.getPastEvents("Open_Mail", {
+    let _events_mail = await contract_mml_wss.getPastEvents("Open_Mail", {
             fromBlock: _block_from,
             toBlock: _block_latest
     })
@@ -1363,27 +1403,27 @@ async function contract_update_festival_info(_summoner) {
 
 //call mail detail
 async function contract_callMailDetail(_summoner){
-    let _mail_id = await contract_mml.methods.receiving(_summoner).call();
-    let _mail = await contract_mml.methods.mails(_mail_id).call();
+    let _mail_id = await contract_mml_wss.methods.receiving(_summoner).call();
+    let _mail = await contract_mml_wss.methods.mails(_mail_id).call();
     let _summoner_from_id = _mail[2];
     //let _summoner_from_name = await contract_mn.methods.call_name_from_summoner(_summoner_from_id).call();
-    let _summoner_from_name = await contract_mfs.methods.call_name_from_summoner(_summoner_from_id).call();
+    let _summoner_from_name = await contract_mfs_wss.methods.call_name_from_summoner(_summoner_from_id).call();
     return (_summoner_from_id, _summoner_from_name);
 }
 
 //get item_nui, summoner and score
 async function contract_get_item_nui(_item) {
-    let _summoner_of_nui = await contract_msn.methods.summoner(_item).call();
-    let _class = await contract_msn.methods.class(_item).call();
-    let _score = await contract_msn.methods.score(_item).call();
-    let _exp_rate = await contract_mfs.methods.calc_exp_addition_rate(summoner, _item).call();
+    let _summoner_of_nui = await contract_msn_wss.methods.summoner(_item).call();
+    let _class = await contract_msn_wss.methods.class(_item).call();
+    let _score = await contract_msn_wss.methods.score(_item).call();
+    let _exp_rate = await contract_mfs_wss.methods.calc_exp_addition_rate(summoner, _item).call();
     return [_summoner_of_nui, _class, _score, _exp_rate];
 }
 
 //call name from summoner id
 async function call_name_from_summoner(_summoner) {
     //let _name = await contract_mfn.methods.call_name_from_summoner(_summoner).call();
-    let _name = await contract_mfs.methods.call_name_from_summoner(_summoner).call();
+    let _name = await contract_mfs_wss.methods.call_name_from_summoner(_summoner).call();
     return _name;
 }
 
@@ -1407,7 +1447,7 @@ async function call_amount_of_token(_contract_address) {
           type: "function",
         },
     ];
-    let contract = await new web3.eth.Contract(minABI, _contract_address);
+    let contract = await new web3wss.eth.Contract(minABI, _contract_address);
     let balance = await contract.methods.balanceOf(wallet).call();
     let decimal = await contract.methods.decimals().call();
     return balance / (10 ** decimal);
@@ -1473,11 +1513,11 @@ async function update_local_wallet_score() {
 
 //get item dc
 async function contract_get_item_dc(item_type) {
-    let item_dc = await contract_mfc.methods.get_item_dc(item_type).call();
+    let item_dc = await contract_mfc_wss.methods.get_item_dc(item_type).call();
     return item_dc;
 }
 async function contract_get_modified_dc(_summoner, _item_type) {
-    let _modified_dc = await contract_mfc.methods.get_modified_dc(_summoner, _item_type).call();
+    let _modified_dc = await contract_mfc_wss.methods.get_modified_dc(_summoner, _item_type).call();
     return _modified_dc;
 }
 
@@ -1493,7 +1533,8 @@ async function call_presentbox_info
 
 //call item info
 async function call_item_info(_itemId) {
-    let _item = await contract_mc.methods.items(_itemId).call();
+    //let _item = await contract_mc.methods.items(_itemId).call();
+    let _item = await contract_mc_wss.methods.items(_itemId).call();
     return _item;   //object
 }
 
@@ -2276,6 +2317,98 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             //depth
             this.depth = this.y;
         }
+    }
+}
+
+
+//---Neon
+
+
+class Neon extends Phaser.GameObjects.Sprite{
+    constructor(scene, x, y, sprite_right, sprite_left){
+        super(scene, x, y, sprite_right);
+        this.scene.add.existing(this);
+        this.sprite_right = sprite_right;
+        this.sprite_left = sprite_left;
+        this.anims.play(sprite_right, true);
+    	this.mode = "resting";
+        this.submode = 0;
+        this.count = 0;
+        this.dist = "right";
+        this.target_x = 0;
+        this.target_y = 0;
+        this.depth = 9999+2;
+    }
+
+    //### resting
+    resting(){
+	    this.count += 1;
+        if (this.count == 1) {
+            if (this.dist == "right"){
+                this.anims.play(this.sprite_right, true);
+            }else if (this.dist == "left") {
+                this.anims.play(this.sprite_left, true);
+            }
+            this.resting_count = 200 + Math.random() * 50;
+	    }else if (this.count >= this.resting_count){
+            this.mode = "moving";
+            this.count = 0;
+        }
+    }
+
+    //### moving
+    moving() {
+        this.count += 1;
+        //determine direction
+        if (this.count == 1){
+            //determine degree, 0-30, 150-210, 330-360
+            var li = [0,10,20,30,150,160,170,180,190,200,210,330,340,350]
+            this.moving_degree = li[Math.floor(Math.random() * li.length)];
+            //out of area check
+            if (this.x < 100 && this.moving_degree > 90 && this.moving_degree <270) {
+                this.moving_degree -= 180;
+            }else if (this.x > 1000 && (this.moving_degree < 90 || this.moving_degree > 270)) {
+                this.moving_degree -= 180;
+            }
+            //360 over check
+            this.moving_degree = this.moving_degree % 360;
+            //out of area check, y
+            if (this.y > 450 && this.moving_degree > 180) {
+                this.moving_degree = 360 - this.moving_degree;
+            }else if (this.y < 50 && this.moving_degree < 180) {
+                this.moving_degree = 360 - this.moving_degree;
+            }
+            //minus check
+            if (this.moving_degree < 0) {
+                this.moving_degree += 360;
+            }
+            //determine speed, count
+            //this.moving_speed = 0.2 + Math.random() * 0.1;  //0.3-0.5
+            this.moving_speed = 0.3 + Math.random() * 0.2;  //0.3-0.5
+            this.moving_count = 70 + Math.random() * 30;    //70-100
+            //determine left or right
+            if (this.moving_degree > 90 && this.moving_degree <= 270) {
+                this.dist = "left";
+                this.anims.play(this.sprite_left, true);
+            }else {
+                this.dist = "right";
+                this.anims.play(this.sprite_right, true);
+            }
+        //moving
+        }else if (this.count < this.moving_count) {
+            this.x += Math.cos(this.moving_degree * (Math.PI/180)) * this.moving_speed;
+            this.y -= Math.sin(this.moving_degree * (Math.PI/180)) * this.moving_speed;
+        //return to resting
+        }else if (this.count >= this.moving_count) {
+            this.mode = "resting";
+            this.count = 0;
+        }
+    }
+
+    //### update()
+    update(){
+        if (this.mode == "resting") {this.resting();}
+        else if (this.mode == "moving") {this.moving();}
     }
 }
 
@@ -3158,7 +3291,7 @@ class tokenBall extends Phaser.GameObjects.Sprite{
 }
 
 
-//---class:Star
+//---Star
 
 
 class Star extends Phaser.GameObjects.Sprite{
@@ -4809,6 +4942,8 @@ function preload(scene) {
     scene.load.spritesheet("murasaki_stone", "src/png/murasaki_stone.png", {frameWidth: 370, frameHeight: 320});
     scene.load.spritesheet("murasaki_hungry", "src/png/murasaki_hungry.png", {frameWidth: 370, frameHeight: 320});
     scene.load.spritesheet("murasaki_listning", "src/png/murasaki_listning.png", {frameWidth: 370, frameHeight: 320});
+    scene.load.spritesheet("murasaki_neon_right", "src/png/murasaki_neon_right.png", {frameWidth: 370, frameHeight: 320});
+    scene.load.spritesheet("murasaki_neon_left", "src/png/murasaki_neon_left.png", {frameWidth: 370, frameHeight: 320});
 
     //---button
     scene.load.image("button_feeding", "src/png/button_feeding.png");
@@ -5128,10 +5263,10 @@ function create(scene) {
 
     //---back image
     scene.add.image(640, 480, "back");
-    back_neon = scene.add.image(900, 180, "back_neon").setOrigin(0.5).setScale(0.3);
-    back_neon.angle += 10;
-    back_neon.visible = false;
-    back_neon.depth = 9999+11;
+    //back_neon = scene.add.image(900, 180, "back_neon").setOrigin(0.5).setScale(0.3);
+    //back_neon.angle += 10;
+    //back_neon.visible = false;
+    //back_neon.depth = 9999+11;
 
     //---animation murasaki
     scene.anims.create({
@@ -5233,6 +5368,18 @@ function create(scene) {
     scene.anims.create({
         key: "murasaki_listning",
         frames: scene.anims.generateFrameNumbers("murasaki_listning", {start:0, end:1}),
+        frameRate: 1,
+        repeat: -1
+    });
+    scene.anims.create({
+        key: "murasaki_neon_right",
+        frames: scene.anims.generateFrameNumbers("murasaki_neon_right", {start:0, end:1}),
+        frameRate: 1,
+        repeat: -1
+    });
+    scene.anims.create({
+        key: "murasaki_neon_left",
+        frames: scene.anims.generateFrameNumbers("murasaki_neon_left", {start:0, end:1}),
         frameRate: 1,
         repeat: -1
     });
@@ -7923,6 +8070,17 @@ function update_checkItem(this_scene) {
         back_black = this_scene.add.image(640, 480, "back_black")
             .setDepth(9999+1)
             .setVisible(false);
+        murasaki_neon = new Neon(
+            this_scene, 
+            50 + Math.random()*900, 
+            50 + Math.random()*350, 
+            "murasaki_neon_right", 
+            "murasaki_neon_left"
+        ).setVisible(false)
+            .setDepth(9999+2)
+            .setOrigin(0.5)
+            .setScale(0.35);
+        group_update.add(murasaki_neon);
         item_switch = this_scene.add.sprite(1230,300, "item_switch")
             .setOrigin(0.5)
             .setScale(0.25)
@@ -7933,7 +8091,7 @@ function update_checkItem(this_scene) {
                 item_switch.anims.play("item_switch_on", true);
                 back_black.visible = true;
                 sound_switch.play();
-                back_neon.visible = true;
+                murasaki_neon.visible = true;
                 text_kanban.setColor("white");
                 /*
                 if (typeof item_nui != "undefined") {
@@ -7958,7 +8116,7 @@ function update_checkItem(this_scene) {
                 item_switch.anims.play("item_switch_off", true);
                 back_black.visible = false;
                 sound_switch.play();
-                back_neon.visible = false;
+                murasaki_neon.visible = false;
                 text_kanban.setColor("black");
                 /*
                 if (typeof item_nui != "undefined") {
