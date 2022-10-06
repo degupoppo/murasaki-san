@@ -8,15 +8,15 @@
 //### 1st
 
     バイバックコントラの洗練
-        アクティブユーザーのカウント方法の深慮
+       *アクティブユーザーのカウント方法の深慮
             mm.next_summoner() - 1ではなく、not petrified summonersを
-            amount per summonerの分母に使用する
+                amount per summonerの分母に使用する
             しかし、petrifiedは受動的な状態変化なので、
-            例えばpetrified時にカウントアップさせることはできない。
+                例えばpetrified時にカウントアップさせることはできない。
             別でlast feeding timeを集計するバッチコントラを用意して、
-            adminコントラとして用意し、定期手に実行させるか。
+                adminコントラとして用意し、定期的に実行させるか。
             last feedingよりpetrified summonerを割り出し、
-            msかmpのactive_summonersに有効summoner数を代入する関数。
+                msかmpのactive_summonersに有効summoner数を代入する関数。
             これをbufferTreajuryのtransfer関数に組み込めればベストだが。
             for関数のリミットはいくつだろうか。
         あるいは, feeding時にpetrified summonerをカウント可能な機構を組み入れる
@@ -46,6 +46,62 @@
                     1ユーザーあたりの割当金額が上昇しにくくなるため
                 マーケットの取引量の減少
                 dapps staking量の減少
+        バイバック上限の設定
+            amount per summonerの2倍をバイバック上限とする
+                一部のbotterが売りまくるのを防ぐ
+                あるいは、レベルキャップを設けるか
+                    低レベルのbotterが売りまくるのを防ぐ
+            バイバックが枯渇したらバイバック終了
+                ある程度の早いものがち
+                しかし理論上は可能だが実現するためには全summonerの半分が
+                    すべてのアイテムを手放さないと枯渇しない程度のamountを用意しておく
+                また、2年近く立たないと枯渇させられないバイバック価格に設定する
+                    初期アイテムのみを作って売り続けても５～６年かかる値段設定に
+                    現在の価格設定だとLv9のアイテムを売り続ければ、1年でもとが取れる
+                        amount per summonerの2倍量までは2年で達する
+                    また、Lv13だと半年でもとが取れ、1年で枯渇する
+                恩株化するには、これらのアイテムが作れるようになるまで育てて、
+                    その後アイテムを作り続けて売り続けると可能となる。
+                アイテムを手放したく無いように、金庫が枯渇するまでに
+                    アイテムに魅力的なユースケースを付加したい。
+            amount per summonerの値はインフレとともに増加してゆく
+        bank/pouchの価格考察
+            バイバック価格から理論的な最低額が算出できそう
+            最低価格から計算するならば1000coin/leaf = 0.03 $ASTR程度
+            クラフトの手間を考えると更に下がる
+        fluffyの価格設定の深慮
+            coin/leafと並んで実質の通貨価値を持ちそうなので、
+            バイバック価格は慎重に設定する
+            800luck/20lv = 250fluffy/20lv
+                100の25%=25をあてがった場合0.1$ASTR/fluffyぐらいか
+
+    バイバックシステムのUI実装
+        専用ページの用意
+            現在のバイバック価格の表示
+            バイバックボタンの実装
+            マーケットlistページと統合する？
+        意味論
+            アクティブユーザーが増えればインフレしにくくなる
+            ユーザー数に対してステーキング量が大きければインフレしやすくなる
+            脱落ユーザーはアクティブユーザーにカウントせず、
+                その分アクティブユーザー用のインフレに資金を回す
+                ただし、いきなりアクティブユーザー数で割らずに、
+                あくまで月ごとのインフレ率は小さく保つ
+            月ごとは3%-6%程度。
+                様子を見ながら調整する。
+                理想はdapps stakingで利益をとった上での定常状態化
+                アクティブユーザー数が多すぎるとインフレしにくいだろうか。
+
+    マーケットの改善
+        情報取得のバッチ処理化
+        バイバックシステムの組み込み
+            市場で売りに出すかバイバックするかを選択できるように
+            バイバックは気軽にはできないようにする
+
+    ウォレットの用意と整理
+        いくつ必要か
+        EVMとSubstrateと2種類必要か
+        summoner ownerとdeveloperは別か
 
     情報表示の洗練
         文字情報は極力控える
@@ -92,29 +148,6 @@
             特にnameplateは1日でmint可能なぐらいに。
         ただし、初期アイテムを大量に売って倍バックで稼ぐハックが可能とならないよう調整する。
     
-    バイバックシステムのUI実装
-        専用ページの用意
-            現在のバイバック価格の表示
-            バイバックボタンの実装
-            マーケットlistページと統合する？
-        意味論
-            アクティブユーザーが増えればインフレしにくくなる
-            ユーザー数に対してステーキング量が大きければインフレしやすくなる
-            脱落ユーザーはアクティブユーザーにカウントせず、
-                その分アクティブユーザー用のインフレに資金を回す
-                ただし、いきなりアクティブユーザー数で割らずに、
-                あくまで月ごとのインフレ率は小さく保つ
-            月ごとは3%-6%程度。
-                様子を見ながら調整する。
-                理想はdapps stakingで利益をとった上での定常状態化
-                アクティブユーザー数が多すぎるとインフレしにくいだろうか。
-
-    マーケットの改善
-        情報取得のバッチ処理化
-        バイバックシステムの組み込み
-            市場で売りに出すかバイバックするかを選択できるように
-            バイバックは気軽にはできないようにする
-
 //### Picture
 
     額縁絵の改善
@@ -788,6 +821,8 @@ async function init_global_variants() {
     summoned_presentbox = [];
     item_wearing_hat_pet = 0;
     staking_reward_percent = 0;
+    //item_hat_helmet = 0;
+    //item_hat_mortarboard = 0;
 
     //---flag
     flag_music = 0;
@@ -2282,10 +2317,10 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             item_wearing_hat.y = this.y + 45;
         }
         //ajustment
-        if (item_wearing_hat == item_hat_helmet) {
+        if (typeof item_hat_helmet != "undefined" && item_wearing_hat == item_hat_helmet) {
             item_wearing_hat.x += 0;
             item_wearing_hat.y += 5;
-        } else if (item_wearing_hat == item_hat_mortarboard) {
+        } else if (typeof item_hat_mortarboard != "undefined" && item_wearing_hat == item_hat_mortarboard) {
             item_wearing_hat.x += 4;
             item_wearing_hat.y += 8;
         }
