@@ -55,6 +55,8 @@ function write_icon(_value) {
 
 async function init_web3(){
 
+    //console.log("init_web3...start");
+
     //contract_address
 
     //NTT/NFT
@@ -291,6 +293,8 @@ async function init_web3(){
 
     //market
     contract_mmt_wss = await new web3wss.eth.Contract(abi_murasaki_item_market, contract_murasaki_item_market);
+
+    //console.log("init_web3...end");    
 }
 
 

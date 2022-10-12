@@ -1081,7 +1081,6 @@ async function contract_update_static_status(_summoner) {
     ELECTED_FLUFFY_TYPE = Number(_all_static_status[7]);
     
     //calc wallet score
-    //local_wallet_score = await calc_wallet_score(wallet);
     update_local_wallet_score();
 }
 
@@ -1513,8 +1512,8 @@ async function contract_get_age(_wallet_address) {
     let _age = 1;
     //2592000 block/mo, 1block/12sec
     for (let i = _lastBlock; i >= 216000; i -= 216000) {
-        //let _transactionCount = await web3.eth.getTransactionCount(_wallet_address, i);
-        let _transactionCount = await web3wss.eth.getTransactionCount(_wallet_address, i);
+        let _transactionCount = await web3.eth.getTransactionCount(_wallet_address, i);
+        //let _transactionCount = await web3wss.eth.getTransactionCount(_wallet_address, i);
         if (_transactionCount > 0) {
             _age += 1;
         } else {
@@ -4386,7 +4385,7 @@ function open_window_craft (scene) {
     item34_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  2, "item_score_board").setScale(0.12);
     item35_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  3, "item_hat_mortarboard").setScale(0.14);
     item36_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  4, "dr_bitco_right").setScale(0.08);
-    item37_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  5, "item_pancake").setScale(0.14);
+    item37_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  5, "item_pancake").setScale(0.18);
     item38_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  6, "item_violin").setScale(0.08);
     item39_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  7, "item_piano").setScale(0.18);
     item40_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  8, "item_switch").setScale(0.1);
@@ -5139,6 +5138,7 @@ function preload(scene) {
     scene.load.image("item_presentbox_06", "src/png/item_presentbox_06.png");
     scene.load.image("item_presentbox_07", "src/png/item_presentbox_07.png");
     scene.load.image("item_presentbox_08", "src/png/item_presentbox_08.png");
+    scene.load.image("item_fishbowl", "src/png/item_fishbowl.png");
     
     //---ff
     scene.load.image("ff_preFestival", "src/png/ff_preFestival.png");
@@ -6994,8 +6994,10 @@ function update_checkItem(this_scene) {
                         item_book.x = game.input.activePointer.y;
                         item_book.y = 960 - game.input.activePointer.x;
                     }
+                    item_book_text.x = item_book.x;
+                    item_book_text.y = item_book.y-90;
                     item_book.depth = item_book.y;
-                    item_book_text.visible = false;
+                    //item_book_text.visible = false;
                 })
                 .on("dragend", () => {
                     item_book_text.x = item_book.x;
@@ -7051,12 +7053,50 @@ function update_checkItem(this_scene) {
                         item_hourglass.y = 960 - game.input.activePointer.x;
                     }
                     item_hourglass.depth = item_book.y;
-                    item_hourglass_text.visible = false;
+                    item_hourglass_text.x = item_hourglass.x;
+                    item_hourglass_text.y = item_hourglass.y-80;
+                    //item_hourglass_text.visible = false;
                 })
                 .on("dragend", () => {
                     item_hourglass_text.x = item_hourglass.x;
                     item_hourglass_text.y = item_hourglass.y-80;
                     let _pos = [item_hourglass.x, item_hourglass.y];
+                    localStorage.setItem(_pos_local, JSON.stringify(_pos));
+                })
+        }
+        
+        //fishbowl
+        {
+            let _x;
+            let _y;
+            let _pos_local = "pos_item_fishbowl";
+            //recover position from localStorage
+            if (localStorage.getItem(_pos_local) != null && local_owner == local_wallet) {
+                let _json = localStorage.getItem(_pos_local);
+                _pos = JSON.parse(_json);
+                _x = _pos[0];
+                _y = _pos[1];
+            } else {
+                _x = 350;
+                _y = 500;
+            }
+            item_fishbowl = this_scene.add.sprite(
+                _x,
+                _y,
+                "item_fishbowl",
+            ).setOrigin(0.5).setScale(0.3).setDepth(_y)
+                .setInteractive({ draggable: true, useHandCursor: true })
+                .on("drag", () => {
+                    if (this_scene.sys.game.scale.gameSize._width == 1280) {
+                        item_fishbowl.x = game.input.activePointer.x;
+                        item_fishbowl.y = game.input.activePointer.y;
+                    } else {
+                        item_fishbowl.x = game.input.activePointer.y;
+                        item_fishbowl.y = 960 - game.input.activePointer.x;
+                    }
+                })
+                .on("dragend", () => {
+                    let _pos = [item_fishbowl.x, item_fishbowl.y];
                     localStorage.setItem(_pos_local, JSON.stringify(_pos));
                 })
         }
@@ -7467,12 +7507,43 @@ function update_checkItem(this_scene) {
         local_items_flag[_item_id] = true;
         let _x = 505;
         let _y = 370;
+        let _pos_local = "pos_item_musicbox";
+        //recover position from localStorage
+        if (localStorage.getItem(_pos_local) != null && local_owner == local_wallet) {
+            let _json = localStorage.getItem(_pos_local);
+            _pos = JSON.parse(_json);
+            _x = _pos[0];
+            _y = _pos[1];
+        }
         item_musicbox = this_scene.add.sprite(_x, _y, "item_musicbox")
             .setOrigin(0.5)
             .setScale(0.30)
-            .setInteractive({useHandCursor: true})
-            .setDepth(_y);
-        item_musicbox.on('pointerdown', () => music() );
+            .setInteractive({useHandCursor: true, draggable: true})
+            .setDepth(_y)
+            .on("drag", () => {
+                if (this_scene.sys.game.scale.gameSize._width == 1280) {
+                    item_musicbox.x = game.input.activePointer.x;
+                    item_musicbox.y = game.input.activePointer.y;
+                } else {
+                    item_musicbox.x = game.input.activePointer.y;
+                    item_musicbox.y = 960 - game.input.activePointer.x;
+                }
+                item_musicbox.depth = item_musicbox.y;
+            })
+            .on("dragend", () => {
+                let _pos = [item_musicbox.x, item_musicbox.y];
+                localStorage.setItem(_pos_local, JSON.stringify(_pos));
+                if (
+                    item_musicbox.x >= 100
+                    && item_musicbox.x <= 1100
+                    && item_musicbox.y >= 500
+                    && item_musicbox.y <= 800
+                ){
+                    sound_hat.play();
+                    murasakisan.try_attenting(item_musicbox.x, item_musicbox.y);
+                }
+            })
+            .on('pointerdown', () => music() );
     } else if (
         local_items[_item_id] == 0 
         && local_items[_item_id+64] == 0 
@@ -7848,11 +7919,42 @@ function update_checkItem(this_scene) {
         //status pad
         let _x = 700;
         let _y = 390;
+        let _pos_local = "pos_item_tablet";
+        //recover position from localStorage
+        if (localStorage.getItem(_pos_local) != null && local_owner == local_wallet) {
+            let _json = localStorage.getItem(_pos_local);
+            _pos = JSON.parse(_json);
+            _x = _pos[0];
+            _y = _pos[1];
+        }
         item_pad = this_scene.add.sprite(_x, _y, "item_pad_on")
             .setScale(0.25)
             .setOrigin(0.5)
             .setDepth(_y)
-            .setInteractive({useHandCursor: true})
+            .setInteractive({useHandCursor: true, draggable: true})
+            .on("drag", () => {
+                if (this_scene.sys.game.scale.gameSize._width == 1280) {
+                    item_pad.x = game.input.activePointer.x;
+                    item_pad.y = game.input.activePointer.y;
+                } else {
+                    item_pad.x = game.input.activePointer.y;
+                    item_pad.y = 960 - game.input.activePointer.x;
+                }
+                item_pad.depth = item_pad.y;
+            })
+            .on("dragend", () => {
+                let _pos = [item_pad.x, item_pad.y];
+                localStorage.setItem(_pos_local, JSON.stringify(_pos));
+                if (
+                    item_pad.x >= 100
+                    && item_pad.x <= 1100
+                    && item_pad.y >= 500
+                    && item_pad.y <= 800
+                ){
+                    sound_hat.play();
+                    murasakisan.try_attenting(item_pad.x, item_pad.y);
+                }
+            })
             .on('pointerdown', () => {
                 if (flag_radarchart == 0) {
                     flag_radarchart = 1;
@@ -8068,11 +8170,42 @@ function update_checkItem(this_scene) {
         local_items_flag[_item_id] = true;
         let _x = 595;
         let _y = 375;
+        let _pos_local = "pos_item_piano";
+        //recover position from localStorage
+        if (localStorage.getItem(_pos_local) != null && local_owner == local_wallet) {
+            let _json = localStorage.getItem(_pos_local);
+            _pos = JSON.parse(_json);
+            _x = _pos[0];
+            _y = _pos[1];
+        }
         item_piano = this_scene.add.image(_x, _y, "item_piano")
             .setScale(0.4)
             .setOrigin(0.5)
             .setDepth(2)
             .setInteractive({useHandCursor: true})
+            .on("drag", () => {
+                if (this_scene.sys.game.scale.gameSize._width == 1280) {
+                    item_piano.x = game.input.activePointer.x;
+                    item_piano.y = game.input.activePointer.y;
+                } else {
+                    item_piano.x = game.input.activePointer.y;
+                    item_piano.y = 960 - game.input.activePointer.x;
+                }
+                item_piano.depth = item_piano.y;
+            })
+            .on("dragend", () => {
+                let _pos = [item_piano.x, item_piano.y];
+                localStorage.setItem(_pos_local, JSON.stringify(_pos));
+                if (
+                    item_piano.x >= 100
+                    && item_piano.x <= 1100
+                    && item_piano.y >= 500
+                    && item_piano.y <= 800
+                ){
+                    sound_hat.play();
+                    murasakisan.try_attenting(item_piano.x, item_piano.y);
+                }
+            })
             .on('pointerdown', () => {
                 if(item_piano.texture == game.textures.get("item_piano")){
                     if(flag_onLight) {
