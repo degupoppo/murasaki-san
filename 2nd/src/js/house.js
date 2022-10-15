@@ -7,6 +7,10 @@
 
 //### 1st
 
+    fluffyのUI実装
+    
+    catのUI実装
+
     バイバックコントラの洗練
        *アクティブユーザーのカウント方法の深慮
             mm.next_summoner() - 1ではなく、not petrified summonersを
@@ -1081,7 +1085,7 @@ async function contract_update_static_status(_summoner) {
     ELECTED_FLUFFY_TYPE = Number(_all_static_status[7]);
     
     //calc wallet score
-    update_local_wallet_score();
+    //update_local_wallet_score();
 }
 
 
@@ -1112,6 +1116,7 @@ async function contract_update_dynamic_status(_summoner) {
         for (let i = 1; i <= 64; i++) {
             local_items[i] += 1;
         }
+        local_wallet_score = 9999;
     }
 
     //call dynamic status from chain
@@ -2118,6 +2123,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             }
             if (happy <= 0) {
                 this.anims.play("murasaki_sleeping", true);
+                this.submode = 3;
             }
         }
     }
@@ -2169,6 +2175,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             }
             if (happy <= 0) {
                 this.anims.play("murasaki_sleeping", true);
+                this.submode = 3;
             }
         }
     }
@@ -3460,7 +3467,7 @@ class Star extends Phaser.GameObjects.Sprite{
 //***TODO***
 
 class Fluffy extends Phaser.GameObjects.Sprite{
-    constructor(scene, x, y, img, rarity, itemId){
+    constructor(scene, x, y, img, rarity, itemId, type){
         super(scene, x, y, img);
         this.scene.add.existing(this);
         this.setInteractive({ useHandCursor: true });
@@ -3479,6 +3486,19 @@ class Fluffy extends Phaser.GameObjects.Sprite{
         this.resting_count = 200;
         this.rarity = rarity;
         this.itemId = itemId;
+        this.type = type;
+        if (this.rarity == "common") {
+            ;
+        } else if (this.rarity == "uncommon") {
+            this.anims.play("fluffy_fluffier_01", true);
+            /*
+            if (this.type == 1) {
+                this.anims.play("murasaki_sleeping", true);
+            }
+            */
+        } else if (this.rarity == "rare") {
+            
+        }
     }
     
     //### on_click
@@ -3511,7 +3531,7 @@ class Fluffy extends Phaser.GameObjects.Sprite{
         this.a = Math.random() * 0.8 - 0.4;
         this.b = this.y + this.a * this.x;
         //sound
-        sound_dice.play();
+        //sound_fluffy.play();
         this.mode = "rolling";
     }
     
@@ -3641,6 +3661,356 @@ class Fluffy extends Phaser.GameObjects.Sprite{
                 this.dist = "right";
                 //this.anims.play("cat_visitor_moving_right", true);
             }
+            this.angle = 0;
+            this.submode += 1;
+        } else {
+            this.x += Math.cos(this.moving_degree * (Math.PI/180)) * this.moving_speed;
+            this.y -= Math.sin(this.moving_degree * (Math.PI/180)) * this.moving_speed;
+            this.submode += 1;
+            if (this.submode >= 100){
+                this.mode = "resting";
+                this.submode = 0;
+            }
+        }
+    }
+    
+    //### update()
+    update() {
+        if (this.mode == "rolling"){this.rolling();}
+        else if (this.mode == "resting"){this.resting();}
+        else if (this.mode == "moving"){this.moving();}
+        if (turn % 100 == 0) {
+            if (!local_itemIds.includes(this.itemId)){
+                summoned_fluffies = summoned_fluffies.filter(n => n !== this.itemId);
+                this.destroy();
+            }
+        }
+    }
+}
+
+
+//---Fluffy2
+//***TODO***
+
+class Fluffy2 extends Phaser.GameObjects.Sprite{
+    constructor(scene, x, y, img, type, itemId){
+        super(scene, x, y, img);
+        this.x = 0;
+        this.y = 0;
+        //this.img = "fluffy_fluffys";
+        this.type = type;
+        this.itemId = itemId;
+        this.scene.add.existing(this);
+        this.setInteractive({ useHandCursor: true });
+        this.on("pointerdown", function (pointer) {
+            this.on_click();
+        }, this);
+        this.speed_x = 0;
+        this.speed_y = 0;
+        this.line_y = y;        //initial value of line_y, the same as first position of y
+        this.line_y_max = 500;  //max floor position
+        this.line_y_min = 800;
+        this.line_x_r = 1200;   //right side
+        this.line_x_l = 50;     //left side
+        this.mode = "";
+        this.submode = 0;
+        this.resting_count = 200;
+        //rarity
+        if (this.type <= 212) {
+            this.rarity = "common";
+            this.setScale(0.07);
+        } else if (this.type <= 224) {
+            this.rarity = "uncommon";
+            this.setScale(0.10);
+        } else if (this.type <= 236) {
+            this.rarity = "rare";
+            this.setScale(0.15);
+        }
+        console.log(this.rarity, this.type, this.itemId);
+        //image
+        if (this.rarity == "common") {
+            if (this.type == 201) {
+                this.setFrame(0 + 8*0);
+            } else if (this.type == 202) {
+                this.setFrame(0 + 8*1);
+            } else if (this.type == 203) {
+                this.setFrame(0 + 8*2);
+            } else if (this.type == 204) {
+                this.setFrame(0 + 8*3);
+            } else if (this.type == 205) {
+                this.setFrame(0 + 8*4);
+            } else if (this.type == 206) {
+                this.setFrame(0 + 8*5);
+            } else if (this.type == 207) {
+                this.setFrame(0 + 8*6);
+            } else if (this.type == 208) {
+                this.setFrame(0 + 8*7);
+            } else if (this.type == 209) {
+                this.setFrame(0 + 8*8);
+            } else if (this.type == 210) {
+                this.setFrame(0 + 8*9);
+            } else if (this.type == 211) {
+                this.setFrame(0 + 8*10);
+            } else if (this.type == 212) {
+                this.setFrame(0 + 8*11);
+            }
+        } else if (this.rarity == "uncommon") {
+            if (this.type == 213) {
+                this.anims.play("fluffy_fluffier_01", true);
+            } else if (this.type == 214) {
+                this.anims.play("fluffy_fluffier_02", true);
+            } else if (this.type == 215) {
+                this.anims.play("fluffy_fluffier_03", true);
+            } else if (this.type == 216) {
+                this.anims.play("fluffy_fluffier_04", true);
+            } else if (this.type == 217) {
+                this.anims.play("fluffy_fluffier_05", true);
+            } else if (this.type == 218) {
+                this.anims.play("fluffy_fluffier_06", true);
+            } else if (this.type == 219) {
+                this.anims.play("fluffy_fluffier_07", true);
+            } else if (this.type == 220) {
+                this.anims.play("fluffy_fluffier_08", true);
+            } else if (this.type == 221) {
+                this.anims.play("fluffy_fluffier_09", true);
+            } else if (this.type == 222) {
+                this.anims.play("fluffy_fluffier_10", true);
+            } else if (this.type == 223) {
+                this.anims.play("fluffy_fluffier_11", true);
+            } else if (this.type == 224) {
+                this.anims.play("fluffy_fluffier_12", true);
+            }
+        } else if (this.rarity == "rare") {
+            if (this.type == 225) {
+                this.frontFrame = 3 +8*0;
+                this.setFrame(this.frontFrame);
+                this.anim_right = "fluffy_fluffiest_01_right";
+                this.anim_left = "fluffy_fluffiest_01_left";
+            } else if (this.type == 226) {
+                this.frontFrame = 3 +8*1;
+                this.setFrame(this.frontFrame);
+                this.anim_right = "fluffy_fluffiest_02_right";
+                this.anim_left = "fluffy_fluffiest_02_left";
+            } else if (this.type == 227) {
+                this.frontFrame = 3 +8*2;
+                this.setFrame(this.frontFrame);
+                this.anim_right = "fluffy_fluffiest_03_right";
+                this.anim_left = "fluffy_fluffiest_03_left";
+            } else if (this.type == 228) {
+                this.frontFrame = 3 +8*3;
+                this.setFrame(this.frontFrame);
+                this.anim_right = "fluffy_fluffiest_04_right";
+                this.anim_left = "fluffy_fluffiest_04_left";
+            } else if (this.type == 229) {
+                this.frontFrame = 3 +8*4;
+                this.setFrame(this.frontFrame);
+                this.anim_right = "fluffy_fluffiest_05_right";
+                this.anim_left = "fluffy_fluffiest_05_left";
+            } else if (this.type == 230) {
+                this.frontFrame = 3 +8*5;
+                this.setFrame(this.frontFrame);
+                this.anim_right = "fluffy_fluffiest_06_right";
+                this.anim_left = "fluffy_fluffiest_06_left";
+            } else if (this.type == 231) {
+                this.frontFrame = 3 +8*6;
+                this.setFrame(this.frontFrame);
+                this.anim_right = "fluffy_fluffiest_07_right";
+                this.anim_left = "fluffy_fluffiest_07_left";
+            } else if (this.type == 232) {
+                this.frontFrame = 3 +8*7;
+                this.setFrame(this.frontFrame);
+                this.anim_right = "fluffy_fluffiest_08_right";
+                this.anim_left = "fluffy_fluffiest_08_left";
+            } else if (this.type == 233) {
+                this.frontFrame = 3 +8*8;
+                this.setFrame(this.frontFrame);
+                this.anim_right = "fluffy_fluffiest_09_right";
+                this.anim_left = "fluffy_fluffiest_09_left";
+            } else if (this.type == 234) {
+                this.frontFrame = 3 +8*9;
+                this.setFrame(this.frontFrame);
+                this.anim_right = "fluffy_fluffiest_10_right";
+                this.anim_left = "fluffy_fluffiest_10_left";
+            } else if (this.type == 235) {
+                this.frontFrame = 3 +8*10;
+                this.setFrame(this.frontFrame);
+                this.anim_right = "fluffy_fluffiest_11_right";
+                this.anim_left = "fluffy_fluffiest_11_left";
+            } else if (this.type == 236) {
+                this.frontFrame = 3 +8*11;
+                this.setFrame(this.frontFrame);
+                this.anim_right = "fluffy_fluffiest_12_right";
+                this.anim_left = "fluffy_fluffiest_12_left";
+            }
+        }
+        this.on_summon();
+    }
+    
+    //### on_click
+    on_click() {
+        this.speed_x = 6 + Math.random() * 4;
+        if (Math.random() > 0.5) {
+            this.speed_x *= -1;
+        }
+        this.speed_y = 6 + Math.random() * 4;
+        //define constant of y = b - a * x
+        this.a = Math.random() * 0.8 - 0.4;
+        this.b = this.y + this.a * this.x;
+        //sound
+        sound_dice.play();
+        this.mode = "rolling";
+    }
+    
+    //### on_summon
+    on_summon() {
+        //pos
+        this.x = 300 + Math.random() * 500;
+        this.y = 600 + Math.random() * 100;
+        //on click with modified speed
+        this.speed_x = 6 + Math.random() * 4;
+        if (Math.random() > 0.5) {
+            this.speed_x *= -1;
+        }
+        this.speed_y = 10 + Math.random() * 4;
+        //define constant of y = b - a * x
+        this.a = Math.random() * 0.8 - 0.4;
+        this.b = this.y + this.a * this.x;
+        //sound
+        //sound_fluffy.play();
+        this.mode = "rolling";
+    }
+    
+    //### rolling
+    rolling(){
+        //define line_y
+        this.line_y = this.b - this.a * this.x;
+        if (this.line_y < this.line_y_max) {
+            this.line_y = this.line_y_max;
+        }
+        if (this.line_y > this.line_y_min) {
+            this.line_y = this.line_y_min;
+        }
+
+        //reducing x speed, -/+
+        if (this.speed_x > 0) {
+            //friction, when speed_y = 0
+            if (Math.abs(this.speed_y) <= 0.5) {
+                this.speed_x -= 0.1 * 2.5;
+            } else {
+                this.speed_x -= 0.1;
+            }
+        } else {
+            if (Math.abs(this.speed_y) <= 0.5) {
+                this.speed_x += 0.1 * 2.5;
+            } else {
+                this.speed_x += 0.1;
+            }
+        }
+
+        //reduction of y speed
+        this.speed_y -= 0.75;
+
+        //position moving
+        this.x += this.speed_x;
+        this.y -= this.speed_y;
+
+        //increase angle
+        this.angle += this.speed_x * 5;
+
+        //refrection y
+        if (this.y >= this.line_y) {
+            this.y = this.line_y;
+            this.speed_y *= -0.3;   //bounce coefficient
+            if (Math.abs(this.speed_y) > 0.5) {
+                sound_dice_impact.play();
+            }
+        }
+
+        //refrection x
+        //limit_y_right: y = (208/205)x - (115746/205)
+        if (this.y > 500) {
+            this.line_x_r = (this.y + 115746/205)/(208/205);
+        } else {
+            this.line_x_r = 1060;
+        }
+        if (this.x >= this.line_x_r) {
+            this.x = this.line_x_r;
+            this.speed_x *= -0.9;   //bounce coefficient
+            sound_dice_impact.play();
+        } else if (this.x <= this.line_x_l) {
+            this.x = this.line_x_l;
+            this.speed_x *= -0.9;
+            sound_dice_impact.play();
+        }
+        
+        //check speed
+        if (
+            Math.abs(this.speed_x) <= 0.5
+            && Math.abs(this.speed_y) <= 0.5
+            && this.line_y - this.y <= 1
+        ) {
+            this.mode = "resting";
+            this.submode = 0
+        }
+    }
+    
+    //### resting
+    resting() {
+        //low rarity, do nothing
+        if (this.rarity == "common" || this.rarity == "uncommon") {
+            ;
+        } else if (this.submode == 0){
+            this.anims.stop();
+            this.setFrame(this.frontFrame);
+            this.resting_count = 200 + Math.random() * 50;
+            //this.anims.play("cat_visitor_standing", true);
+            this.submode += 1;
+        } else if (this.submode < this.resting_count)  {
+            this.submode += 1;
+        } else {
+            this.mode = "moving";
+            this.submode = 0;
+        }
+    }
+    
+    //### moving
+    moving() {
+        if (this.submode == 0){
+            //determine degree, 0-30, 150-210, 330-360
+            var li = [0,10,20,30,150,160,170,180,190,200,210,330,340,350]
+            this.moving_degree = li[Math.floor(Math.random() * li.length)];
+            //out of area check
+            if (this.x < 100 && this.moving_degree > 90 && this.moving_degree <270) {
+                this.moving_degree -= 180;
+            }else if (this.x > 1100 && (this.moving_degree < 90 || this.moving_degree > 270)) {
+                this.moving_degree -= 180;
+            }
+            //360 over check
+            this.moving_degree = this.moving_degree % 360;
+            //out of area check, y
+            if (this.y > 860 && this.moving_degree > 180) {
+                this.moving_degree = 360 - this.moving_degree;
+            }else if (this.y < 500 && this.moving_degree < 180) {
+                this.moving_degree = 360 - this.moving_degree;
+            }
+            //minus check
+            if (this.moving_degree < 0) {
+                this.moving_degree += 360;
+            }
+            //determine speed, count
+            this.moving_speed = 0.3 + Math.random() * 0.2;  //0.3-0.5
+            this.moving_count = 70 + Math.random() * 30;    //70-100
+            //determine left or right
+            if (this.moving_degree > 90 && this.moving_degree <= 270) {
+                this.dist = "left";
+                this.anims.play(this.anim_left);
+                //this.anims.play("cat_visitor_moving_left", true);
+            }else {
+                this.dist = "right";
+                this.anims.play(this.anim_right);
+                //this.anims.play("cat_visitor_moving_right", true);
+            }
+            this.angle = 0;
             this.submode += 1;
         } else {
             this.x += Math.cos(this.moving_degree * (Math.PI/180)) * this.moving_speed;
@@ -3732,13 +4102,16 @@ class Festligheter extends Phaser.GameObjects.Sprite{
         this.scene = scene;
         this.x = x;
         this.y = y;
-        this.img = "ff_preFestival";
+        this.img_right = "ff_preFestival_right";
+        this.img_left = "ff_preFestival_left";
+        this.setTexture(this.img_right);
         this.scene.add.existing(this);
         this.mode = "";
         this.submode = 0;
         this.resting_count = 200;
         this.movingMode = "";
         this.movingSubmode = "";
+        this.setInteractive({useHandCursor: true});
         this.on("pointerdown", function (pointer) {
             this.on_click();
         }, this);
@@ -3748,6 +4121,7 @@ class Festligheter extends Phaser.GameObjects.Sprite{
             "test", 
             {font: "20px Arial", fill: "#000000", backgroundColor: "#ffffff"}
         ).setOrigin(0.5).setDepth(9999).setVisible(false);
+        /*
         this.on("pointerover", () => {
             this.text.visible = true;
         })
@@ -3756,6 +4130,7 @@ class Festligheter extends Phaser.GameObjects.Sprite{
                 this.text.visible = false;
             }, 1000)
         });
+        */
         this.checkFestival();
     }
     
@@ -3765,6 +4140,11 @@ class Festligheter extends Phaser.GameObjects.Sprite{
             open_window_voting(this.scene);
         } else if (this.mode == "duringFestival_isEndable") {
             contract_end_voting(summoner);
+        } else {
+            this.text.visible = true;
+            setTimeout( () => {
+                this.text.visible = false;
+            }, 3000)
         }
     }
     
@@ -3780,7 +4160,11 @@ class Festligheter extends Phaser.GameObjects.Sprite{
             console.log("destroy festligheter");
             this.mode = "destroy";
             this.destroy();
-        
+            sound_nainai2.play();
+            draw_flower(this.scene, this.x+30, this.y);
+            draw_flower(this.scene, this.x-30, this.y);
+            draw_flower(this.scene, this.x, this.y);
+            
         // preFestival
         } else if (
             local_ff_inSession == 0
@@ -3825,19 +4209,21 @@ class Festligheter extends Phaser.GameObjects.Sprite{
     //### preFestival
     preFestival() {
         if (this.submode == 0) {
-            this.img = "ff_preFestival";
+            this.img_right = "ff_preFestival_right";
+            this.img_left = "ff_preFestival_left";
+            this.setTexture(this.img_right);
             this.x = 340;
             this.y = 960;
-            this.removeInteractive();
-            this.setInteractive({useHandCursor: false});
+            //this.removeInteractive();
+            //this.setInteractive({useHandCursor: false});
             this.text.setText("");
             this.text.x = this.x;
             this.text.y = this.y-40;
             this.movingMode = "";
         } else if (this.submode % 100 == 1) {
             let _text = "";
-            _text += "Festival is comming..." + " \n";
-            _text += local_ff_next_festival_block - local_blockNumber;
+            _text += " Festival is comming... " + " \n";
+            _text += " (" + (local_ff_next_festival_block - local_blockNumber) + " blocks later) ";
             this.text.setText(_text);
         }
         this.submode += 1;
@@ -3846,20 +4232,24 @@ class Festligheter extends Phaser.GameObjects.Sprite{
     //### duringFestival
     duringFestival() {
         if (this.submode == 0) {
+            this.img_right = "ff_duringFestival_right";
+            this.img_left = "ff_duringFestival_left";
+            this.setTexture(this.img_right);
             this.x = 200 + Math.random()*700;
             this.y = 550 + Math.random()*200;
-            this.img = "during_festival";
-            this.removeInteractive();
-            this.setInteractive({useHandCursor: true});
+            //this.removeInteractive();
+            //this.setInteractive({useHandCursor: true});
             this.text.setText("");
             this.text.x = this.x;
             this.text.y = this.y-40;
             this.movingMode = "resting";
         } else if (this.submode % 100 == 1) {
+            /*
             let _text = "";
             _text += "Fluffy Festival!" + " \n";
             _text += "Vote your favorit fluffy";
             this.text.setText(_text);
+            */
         }
         this.submode += 1;
     }
@@ -3867,20 +4257,28 @@ class Festligheter extends Phaser.GameObjects.Sprite{
     //### duringFestival_afterVoting
     duringFestival_afterVoting() {
         if (this.submode == 0) {
-            this.img = "during_festival_afterVoting";
-            this.removeInteractive();
-            this.setInteractive({useHandCursor: false});
+            this.img_right = "ff_duringFestival_afterVoting_right";
+            this.img_left = "ff_duringFestival_afterVoting_left";
+            this.setTexture(this.img_right);
+            //this.removeInteractive();
+            //this.setInteractive({useHandCursor: false});
             this.text.setText("");
             this.text.x = this.x;
             this.text.y = this.y-40;
             this.movingMode = "resting";
         } else if (this.submode % 100 == 1) {
-            let [_winner_type, _winner_count] = this._get_winner_now();
+            //let [_winner_type, _winner_count] = this._get_winner_now();
+            let _array_sorted = this._get_ranking_sorted();
             let _text = "";
+            _text += " Your vote: " + local_ff_last_voting_type + " \n";
+            _text += " top1:" + _array_sorted[0] + " top2:" + _array_sorted[1] + " top3:" + _array_sorted[2] + " \n";
+            _text += " (" + (local_ff_subject_end_block - local_blockNumber) + " blocks remaining) ";
+            /*
             _text += "Fluffy Festival!" + " \n";
             _text += "Your vote: " + local_ff_last_voting_type + "\n";
             _text += "Winner: " + _winner_type + " (" + _winner_count + ") " + "\n";
             _text += local_ff_subject_end_block - local_blockNumber;
+            */
             this.text.setText(_text);
         }
         this.submode += 1;
@@ -3896,13 +4294,27 @@ class Festligheter extends Phaser.GameObjects.Sprite{
         }
         return [_type, _count];
     }
+    _get_ranking_sorted() {
+        //prepare 2dim array
+        let _array = [];
+        for (i=1; i<=12; i++) {
+            _array.push([i, local_ff_each_voting_count[i]]);
+        }
+        //sort, desent
+        let _array_sorted = _array.sort(function(a,b) {
+            return b[1] - a[1];
+        });
+        return _array_sorted;
+    }
 
     //### duringFestival_endable
     duringFestival_isEndable() {
         if (this.submode == 0) {
-            this.img = "during_festival_isEndable";
-            this.removeInteractive();
-            this.setInteractive({useHandCursor: true});
+            this.img_right = "ff_duringFestival_isEndable_right";
+            this.img_left = "ff_duringFestival_isEndable_left";
+            this.setTexture(this.img_right);
+            //this.removeInteractive();
+            //this.setInteractive({useHandCursor: true});
             this.text.setText("");
             this.text.x = this.x;
             this.text.y = this.y-40;
@@ -3960,9 +4372,11 @@ class Festligheter extends Phaser.GameObjects.Sprite{
             //determine left or right
             if (this.moving_degree > 90 && this.moving_degree <= 270) {
                 this.dist = "left";
+                this.setTexture(this.img_left);
                 //this.anims.play("cat_visitor_moving_left", true);
             }else {
                 this.dist = "right";
+                this.setTexture(this.img_right);
                 //this.anims.play("cat_visitor_moving_right", true);
             }
             this.movingSubmode += 1;
@@ -4005,6 +4419,15 @@ class Festligheter extends Phaser.GameObjects.Sprite{
         //update festival status
         if (turn % 300 == 0 && flag_sync == 1) {
             contract_update_festival_info(summoner);
+        }
+        //flower
+        if (turn % 250 == 0 && this.mode == "duringFestival"){
+            sound_nainai1.play();
+            if (this.dist == "right") {
+                draw_flower(this.scene, this.x+30, this.y);
+            } else {
+                draw_flower(this.scene, this.x-30, this.y);
+            }
         }
     }
 }
@@ -4315,7 +4738,7 @@ function open_window_craft (scene) {
     item2_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  2, "mr_astar_right").setScale(0.08);
     item3_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  3, "item_dice").setScale(0.18);
     item4_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  4, "item_hat_helmet").setScale(0.1);
-    item5_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  5, "item_sushi").setScale(0.1);
+    item5_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  5, "item_onigiri").setScale(0.1);
     item6_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  6, "item_crown").setScale(0.15);
     item7_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  7, "item_ribbon").setScale(0.12);
     item8_icon = scene.add.sprite(_x-25, _y+12 + _y_add *  8, "item_window_day").setScale(0.15);
@@ -4736,7 +5159,7 @@ function draw_firework(scene) {
         speed: { min: 300, max: 600 },
         x: 512, y: 384,
     };
-    const particles = scene.add.particles('flares');
+    const particles = scene.add.particles('par_flares');
     const emitter = particles.createEmitter(emitterConfig);
     emitter.onParticleEmit( () => {
         sound_fireworks.play();
@@ -4757,6 +5180,76 @@ function draw_firework(scene) {
         }
     });
 }
+
+
+//---draw_flower
+function draw_flower(scene, _x, _y) {
+    let _lifespan = 900;
+    const emitterConfig = {
+        alpha: 0.8,
+        angle: { min: 250, max: 290 },
+        //blendMode: 'ADD',
+        gravityY: 900,
+        lifespan: { min:_lifespan*0.8, max:_lifespan},
+        frequency: _lifespan+200,
+        quantity: 20,
+        timeScale: 0.9,
+        reserve: 20,
+        rotate: { min:0, max:360 },
+        scale: { min: 0.05, max: 0.15 },
+        speed: { min: 300, max: 600 },
+        frame: [0,1,2,3,4,5],
+        //x: 50+Math.random()*1100, 
+        //y: 500+Math.random()*350,
+        x: _x, 
+        y: _y,
+    };
+    const particles = scene.add.particles('par_flowers')
+        .setDepth(9999);
+    const emitter = particles.createEmitter(emitterConfig);
+    scene.time.addEvent({
+        delay: _lifespan+100,
+        callback: () => {
+            emitter.stop();
+        }
+    });
+}
+
+
+//---draw_star
+function draw_star(scene, _x, _y) {
+    let _lifespan = 500;
+    const emitterConfig = {
+        alpha: 0.5,
+        //angle: { min: 250, max: 290 },
+        angle: { min: 0, max: 360 },
+        //blendMode: 'ADD',
+        gravityY: 400,
+        lifespan: { min:_lifespan*0.7, max:_lifespan},
+        frequency: _lifespan+200,
+        quantity: 20,
+        timeScale: 0.9,
+        reserve: 20,
+        rotate: { min:0, max:360 },
+        scale: { min: 0.05, max: 0.10 },
+        speed: { min: 50, max: 300 },
+        frame: [0,1,2,3,4,5,6,7],
+        //x: 50+Math.random()*1100, 
+        //y: 500+Math.random()*350,
+        x: _x, 
+        y: _y,
+    };
+    const particles = scene.add.particles('par_stars')
+        .setDepth(9999);
+    const emitter = particles.createEmitter(emitterConfig);
+    scene.time.addEvent({
+        delay: _lifespan+100,
+        callback: () => {
+            emitter.stop();
+        }
+    });
+}
+
 
 
 //---summon_star
@@ -4789,7 +5282,67 @@ function summon_star(scene, _type) {
 
 
 //---summon_fluffy
+
+function summon_fluffy2(scene, _type, _itemId) {
+    let _fluffy = new Fluffy2(scene, 0, 0, "fluffy_fluffys", _type, _itemId)
+        .setOrigin(0.5)
+        //.setScale(0.07)
+        .setAlpha(1)
+        .setDepth(3);
+    //_fluffy.on_summon();
+    group_star.add(_fluffy);
+    group_update.add(_fluffy);
+    if (count_sync > 10) {
+        murasakisan.on_click();
+        sound_fluffy.play();
+    }
+}
+
 function summon_fluffy(scene, _type, rarity, itemId) {
+
+    let _dic = {
+        //common
+        201:"fluffy_fluffy_01",
+        202:"fluffy_fluffy_01",
+        203:"fluffy_fluffy_01",
+        204:"fluffy_fluffy_01",
+        205:"fluffy_fluffy_01",
+        206:"fluffy_fluffy_01",
+        207:"fluffy_fluffy_01",
+        208:"fluffy_fluffy_01",
+        209:"fluffy_fluffy_01",
+        210:"fluffy_fluffy_01",
+        211:"fluffy_fluffy_01",
+        212:"fluffy_fluffy_01",
+        //uncommon
+        213:"fluffy_fluffier_01",
+        214:"fluffy_fluffier_01",
+        215:"fluffy_fluffier_01",
+        216:"fluffy_fluffier_01",
+        217:"fluffy_fluffier_01",
+        218:"fluffy_fluffier_01",
+        219:"fluffy_fluffier_01",
+        220:"fluffy_fluffier_01",
+        221:"fluffy_fluffier_01",
+        222:"fluffy_fluffier_01",
+        223:"fluffy_fluffier_01",
+        224:"fluffy_fluffier_01",
+        //rare
+        225:"fluffy_fluffiest_01_front",
+        226:"fluffy_fluffiest_01_front",
+        227:"fluffy_fluffiest_01_front",
+        228:"fluffy_fluffiest_01_front",
+        229:"fluffy_fluffiest_01_front",
+        230:"fluffy_fluffiest_01_front",
+        231:"fluffy_fluffiest_01_front",
+        232:"fluffy_fluffiest_01_front",
+        233:"fluffy_fluffiest_01_front",
+        234:"fluffy_fluffiest_01_front",
+        235:"fluffy_fluffiest_01_front",
+        236:"fluffy_fluffiest_01_front",
+    }
+
+    /*
     let _dic = {
         //common
         201:"star_blue",
@@ -4831,24 +5384,25 @@ function summon_fluffy(scene, _type, rarity, itemId) {
         235:"star_yellow",
         236:"star_yellow",
     }
+    */
     let _img = _dic[_type];
     let _fluffy;
     if (rarity == "common"){
-        _fluffy = new Fluffy(scene, 300, -100, _img, rarity, itemId)
+        _fluffy = new Fluffy(scene, 300, -100, _img, rarity, itemId, _type)
             .setOrigin(0.5)
-            .setScale(0.15)
+            .setScale(0.07)
             .setAlpha(1)
             .setDepth(3);
     } else if (rarity == "uncommon") {
-        _fluffy = new Fluffy(scene, 300, -100, _img, rarity, itemId)
+        _fluffy = new Fluffy(scene, 300, -100, _img, rarity, itemId, _type)
             .setOrigin(0.5)
-            .setScale(0.20)
+            .setScale(0.10)
             .setAlpha(1)
             .setDepth(3);
     } else if (rarity == "rare") {
-        _fluffy = new Fluffy(scene, 300, -100, _img, rarity, itemId)
+        _fluffy = new Fluffy(scene, 300, -100, _img, rarity, itemId, _type)
             .setOrigin(0.5)
-            .setScale(0.25)
+            .setScale(0.15)
             .setAlpha(1)
             .setDepth(3);
     }
@@ -4856,8 +5410,9 @@ function summon_fluffy(scene, _type, rarity, itemId) {
     group_star.add(_fluffy);
     group_update.add(_fluffy);
     //murasaki hugging
-    if (count_sync > 5) {
+    if (count_sync > 10) {
         murasakisan.on_click();
+        sound_fluffy.play();
     }
 }
 
@@ -4955,7 +5510,7 @@ function preload(scene) {
     scene.load.image("back", "src/png/background.png");
     scene.load.image("back_black", "src/png/background_black.png");
     scene.load.image("window", "src/png/background_window.png");
-    scene.load.image("back_neon", "src/png/background_neon.png");
+    //scene.load.image("back_neon", "src/png/background_neon.png");
 
     //---murasaki-san
     scene.load.spritesheet("murasaki_right", "src/png/murasaki_right.png", {frameWidth: 370, frameHeight: 320});
@@ -5052,6 +5607,9 @@ function preload(scene) {
     scene.load.audio("window", "src/sound/window.mp3");
     scene.load.audio("piano1", "src/sound/piano1.mp3");
     scene.load.audio("piano2", "src/sound/piano2.mp3");
+    scene.load.audio("nainai1", "src/sound/nainai1.mp3");
+    scene.load.audio("nainai2", "src/sound/nainai2.mp3");
+    scene.load.audio("fluffy", "src/sound/fluffy.mp3");
 
     //---item_basic
     scene.load.image("item_table", "src/png/item_basic_table.png");
@@ -5095,7 +5653,7 @@ function preload(scene) {
     scene.load.image("item_hat_mortarboard", "src/png/item_hat_mortarboard.png");
     scene.load.image("item_pad_on", "src/png/item_pad_on.png");
     scene.load.image("item_pad_off", "src/png/item_pad_off.png");
-    scene.load.image("item_gauge", "src/png/item_gauge.png");
+    scene.load.image("item_tokenChest", "src/png/item_tokenChest.png");
     scene.load.image("item_frame", "src/png/item_frame.png");
     //scene.load.image("item_wall_sticker", "src/png/item_wall_sticker.png");
     scene.load.image("item_wall_sticker_01", "src/png/item_wall_sticker_01.png");
@@ -5110,12 +5668,22 @@ function preload(scene) {
     scene.load.image("item_wall_sticker_10", "src/png/item_wall_sticker_10.png");
     scene.load.image("item_wall_sticker_11", "src/png/item_wall_sticker_11.png");
     scene.load.image("item_wall_sticker_12", "src/png/item_wall_sticker_12.png");
-    scene.load.image("item_floor_sticker1", "src/png/item_floor_sticker1.png");
-    scene.load.image("item_floor_sticker2", "src/png/item_floor_sticker2.png");
-    scene.load.image("item_window", "src/png/item_window.png");
+    scene.load.image("item_floor_sticker_01", "src/png/item_floor_sticker_01.png");
+    scene.load.image("item_floor_sticker_02", "src/png/item_floor_sticker_02.png");
+    scene.load.image("item_floor_sticker_03", "src/png/item_floor_sticker_03.png");
+    scene.load.image("item_floor_sticker_04", "src/png/item_floor_sticker_04.png");
+    scene.load.image("item_floor_sticker_05", "src/png/item_floor_sticker_05.png");
+    scene.load.image("item_floor_sticker_06", "src/png/item_floor_sticker_06.png");
+    scene.load.image("item_floor_sticker_07", "src/png/item_floor_sticker_07.png");
+    scene.load.image("item_floor_sticker_08", "src/png/item_floor_sticker_08.png");
+    scene.load.image("item_floor_sticker_09", "src/png/item_floor_sticker_09.png");
+    scene.load.image("item_floor_sticker_10", "src/png/item_floor_sticker_10.png");
+    scene.load.image("item_floor_sticker_11", "src/png/item_floor_sticker_11.png");
+    scene.load.image("item_floor_sticker_12", "src/png/item_floor_sticker_12.png");
+    //scene.load.image("item_window", "src/png/item_window.png");
     scene.load.image("item_lantern", "src/png/item_lantern.png");
     scene.load.image("item_pancake", "src/png/item_pancake.png");
-    scene.load.image("item_sushi", "src/png/item_sushi.png");
+    //scene.load.image("item_sushi", "src/png/item_sushi.png");
     //scene.load.image("item_newsbunner", "src/png/item_newsbunner.png");
     scene.load.image("item_rugg", "src/png/item_rugg.png");
     scene.load.image("item_piano", "src/png/item_piano.png");
@@ -5139,13 +5707,27 @@ function preload(scene) {
     scene.load.image("item_presentbox_07", "src/png/item_presentbox_07.png");
     scene.load.image("item_presentbox_08", "src/png/item_presentbox_08.png");
     scene.load.image("item_fishbowl", "src/png/item_fishbowl.png");
+    scene.load.image("item_onigiri", "src/png/item_onigiri.png");
     
     //---ff
-    scene.load.image("ff_preFestival", "src/png/ff_preFestival.png");
-    scene.load.image("ff_duringFestival", "src/png/ff_duringFestival.png");
-    scene.load.image("ff_duringFestival_pointerOver", "src/png/ff_duringFestival_pointerOver.png");
-    scene.load.image("ff_duringFestival_afterVoting", "src/png/ff_duringFestival_afterVoting.png");
-    scene.load.image("ff_duringFestival_isEndable", "src/png/ff_duringFestival_isEndable.png");
+    scene.load.image("ff_preFestival_left", "src/png/ff_preFestival_left.png");
+    scene.load.image("ff_duringFestival_left", "src/png/ff_duringFestival_left.png");
+    scene.load.image("ff_duringFestival_pointerOver_left", "src/png/ff_duringFestival_pointerOver_left.png");
+    scene.load.image("ff_duringFestival_afterVoting_left", "src/png/ff_duringFestival_afterVoting_left.png");
+    scene.load.image("ff_duringFestival_isEndable_left", "src/png/ff_duringFestival_isEndable_left.png");
+    scene.load.image("ff_preFestival_right", "src/png/ff_preFestival_right.png");
+    scene.load.image("ff_duringFestival_right", "src/png/ff_duringFestival_right.png");
+    scene.load.image("ff_duringFestival_pointerOver_right", "src/png/ff_duringFestival_pointerOver_right.png");
+    scene.load.image("ff_duringFestival_afterVoting_right", "src/png/ff_duringFestival_afterVoting_right.png");
+    scene.load.image("ff_duringFestival_isEndable_right", "src/png/ff_duringFestival_isEndable_right.png");
+
+    //---fluffy
+    /*
+    scene.load.image("fluffy_fluffy_01", "src/png/fluffy_fluffy_01.png");
+    scene.load.image("fluffy_fluffier_01", "src/png/fluffy_fluffier_01.png");
+    scene.load.image("fluffy_fluffiest_01", "src/png/fluffy_fluffiest_01.png");
+    */
+    scene.load.spritesheet("fluffy_fluffys", "src/png/fluffy_fluffys.png", {frameWidth: 370, frameHeight: 320});
     
     //---star
     scene.load.image("star_blue", "src/png/star_blue.png");
@@ -5197,7 +5779,9 @@ function preload(scene) {
     
     //---fireworks
     //https://codepen.io/samme/pen/eYEearb
-    scene.load.atlas('flares', 'src/fireworks/flares.png', 'src/fireworks/flares.json');
+    scene.load.atlas('par_flares', 'src/particle/flares.png', 'src/particle/flares.json');
+    scene.load.spritesheet("par_flowers", "src/particle/flowers.png", {frameWidth: 370, frameHeight: 320});
+    scene.load.spritesheet("par_stars", "src/particle/stars.png", {frameWidth: 200, frameHeight: 191});
     
     //---tokenBall
     scene.load.image("coin_color_ACA", "src/png/coin_color_ACA.png");
@@ -5564,6 +6148,226 @@ function create(scene) {
         repeat: -1
     });
     
+    //---animation fluffy
+    scene.anims.create({
+        key: "fluffy_fluffier_01",
+        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:1 +8*0, end:2 +8*0}),
+        frameRate: 1,
+        repeat: -1
+    });
+    scene.anims.create({
+        key: "fluffy_fluffier_02",
+        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:1 +8*1, end:2 +8*1}),
+        frameRate: 1,
+        repeat: -1
+    });
+    scene.anims.create({
+        key: "fluffy_fluffier_03",
+        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:1 +8*2, end:2 +8*2}),
+        frameRate: 1,
+        repeat: -1
+    });
+    scene.anims.create({
+        key: "fluffy_fluffier_04",
+        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:1 +8*3, end:2 +8*3}),
+        frameRate: 1,
+        repeat: -1
+    });
+    scene.anims.create({
+        key: "fluffy_fluffier_05",
+        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:1 +8*4, end:2 +8*4}),
+        frameRate: 1,
+        repeat: -1
+    });
+    scene.anims.create({
+        key: "fluffy_fluffier_06",
+        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:1 +8*5, end:2 +8*5}),
+        frameRate: 1,
+        repeat: -1
+    });
+    scene.anims.create({
+        key: "fluffy_fluffier_07",
+        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:1 +8*6, end:2 +8*6}),
+        frameRate: 1,
+        repeat: -1
+    });
+    scene.anims.create({
+        key: "fluffy_fluffier_08",
+        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:1 +8*7, end:2 +8*7}),
+        frameRate: 1,
+        repeat: -1
+    });
+    scene.anims.create({
+        key: "fluffy_fluffier_09",
+        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:1 +8*8, end:2 +8*8}),
+        frameRate: 1,
+        repeat: -1
+    });
+    scene.anims.create({
+        key: "fluffy_fluffier_10",
+        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:1 +8*9, end:2 +8*9}),
+        frameRate: 1,
+        repeat: -1
+    });
+    scene.anims.create({
+        key: "fluffy_fluffier_11",
+        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:1 +8*10, end:2 +8*10}),
+        frameRate: 1,
+        repeat: -1
+    });
+    scene.anims.create({
+        key: "fluffy_fluffier_12",
+        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:1 +8*11, end:2 +8*11}),
+        frameRate: 1,
+        repeat: -1
+    });
+
+    scene.anims.create({
+        key: "fluffy_fluffiest_01_left",
+        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:4 +8*0, end:5 +8*0}),
+        frameRate: 1,
+        repeat: -1
+    });
+    scene.anims.create({
+        key: "fluffy_fluffiest_02_left",
+        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:4 +8*1, end:5 +8*1}),
+        frameRate: 1,
+        repeat: -1
+    });
+    scene.anims.create({
+        key: "fluffy_fluffiest_03_left",
+        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:4 +8*2, end:5 +8*2}),
+        frameRate: 1,
+        repeat: -1
+    });
+    scene.anims.create({
+        key: "fluffy_fluffiest_04_left",
+        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:4 +8*3, end:5 +8*3}),
+        frameRate: 1,
+        repeat: -1
+    });
+    scene.anims.create({
+        key: "fluffy_fluffiest_05_left",
+        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:4 +8*4, end:5 +8*4}),
+        frameRate: 1,
+        repeat: -1
+    });
+    scene.anims.create({
+        key: "fluffy_fluffiest_06_left",
+        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:4 +8*5, end:5 +8*5}),
+        frameRate: 1,
+        repeat: -1
+    });
+    scene.anims.create({
+        key: "fluffy_fluffiest_07_left",
+        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:4 +8*6, end:5 +8*6}),
+        frameRate: 1,
+        repeat: -1
+    });
+    scene.anims.create({
+        key: "fluffy_fluffiest_08_left",
+        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:4 +8*7, end:5 +8*7}),
+        frameRate: 1,
+        repeat: -1
+    });
+    scene.anims.create({
+        key: "fluffy_fluffiest_09_left",
+        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:4 +8*8, end:5 +8*8}),
+        frameRate: 1,
+        repeat: -1
+    });
+    scene.anims.create({
+        key: "fluffy_fluffiest_10_left",
+        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:4 +8*9, end:5 +8*9}),
+        frameRate: 1,
+        repeat: -1
+    });
+    scene.anims.create({
+        key: "fluffy_fluffiest_11_left",
+        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:4 +8*10, end:5 +8*10}),
+        frameRate: 1,
+        repeat: -1
+    });
+    scene.anims.create({
+        key: "fluffy_fluffiest_12_left",
+        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:4 +8*11, end:5 +8*11}),
+        frameRate: 1,
+        repeat: -1
+    });
+
+    scene.anims.create({
+        key: "fluffy_fluffiest_01_right",
+        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:6 +8*0, end:7 +8*0}),
+        frameRate: 1,
+        repeat: -1
+    });
+    scene.anims.create({
+        key: "fluffy_fluffiest_02_right",
+        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:6 +8*1, end:7 +8*1}),
+        frameRate: 1,
+        repeat: -1
+    });
+    scene.anims.create({
+        key: "fluffy_fluffiest_03_right",
+        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:6 +8*2, end:7 +8*2}),
+        frameRate: 1,
+        repeat: -1
+    });
+    scene.anims.create({
+        key: "fluffy_fluffiest_04_right",
+        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:6 +8*3, end:7 +8*3}),
+        frameRate: 1,
+        repeat: -1
+    });
+    scene.anims.create({
+        key: "fluffy_fluffiest_05_right",
+        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:6 +8*4, end:7 +8*4}),
+        frameRate: 1,
+        repeat: -1
+    });
+    scene.anims.create({
+        key: "fluffy_fluffiest_06_right",
+        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:6 +8*5, end:7 +8*5}),
+        frameRate: 1,
+        repeat: -1
+    });
+    scene.anims.create({
+        key: "fluffy_fluffiest_07_right",
+        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:6 +8*6, end:7 +8*6}),
+        frameRate: 1,
+        repeat: -1
+    });
+    scene.anims.create({
+        key: "fluffy_fluffiest_08_right",
+        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:6 +8*7, end:7 +8*7}),
+        frameRate: 1,
+        repeat: -1
+    });
+    scene.anims.create({
+        key: "fluffy_fluffiest_09_right",
+        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:6 +8*8, end:7 +8*8}),
+        frameRate: 1,
+        repeat: -1
+    });
+    scene.anims.create({
+        key: "fluffy_fluffiest_10_right",
+        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:6 +8*9, end:7 +8*9}),
+        frameRate: 1,
+        repeat: -1
+    });
+    scene.anims.create({
+        key: "fluffy_fluffiest_11_right",
+        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:6 +8*10, end:7 +8*10}),
+        frameRate: 1,
+        repeat: -1
+    });    
+    scene.anims.create({
+        key: "fluffy_fluffiest_12_right",
+        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:6 +8*11, end:7 +8*11}),
+        frameRate: 1,
+        repeat: -1
+    });    
+    
     //---item_basic
     item_bear = scene.add.sprite(1000,400, "item_bear")
         .setScale(0.45);
@@ -5856,6 +6660,9 @@ function create(scene) {
     sound_window = scene.sound.add("window", {volume:0.2});
     sound_piano1 = scene.sound.add("piano1", {volume:0.3});
     sound_piano2 = scene.sound.add("piano2", {volume:0.25});
+    sound_nainai1 = scene.sound.add("nainai1", {volume:0.2});
+    sound_nainai2 = scene.sound.add("nainai2", {volume:0.2});
+    sound_fluffy = scene.sound.add("fluffy", {volume:0.2});
 
     //---system message
     //system message
@@ -5879,6 +6686,13 @@ function create(scene) {
     //new Button(10, 880, 'kill_summoner', scene, () => contract_burn(summoner));
     //burn name
     //new Button(10, 780, 'burn_name', scene, () => contract_burn_name(summoner));
+    new Button(1170, 530, "[debug]", scene, () => {
+        if (flag_debug == 0) {
+            flag_debug = 1;
+        } else {
+            flag_debug = 0;
+        }
+    });
 
     //curePetrification
     text_curePetrification = scene.add.text(640, 480, " >> Cure Petrification (Cost: Lv x 10 $ASTR) << ", {font: "28px Arial", fill: "#E62E8B", backgroundColor: "#FDEFF5"})
@@ -6747,17 +7561,17 @@ function update_checkModeChange(this_scene) {
         group_food.add(item_potato);
         
         if (local_items[37] > 0 || local_items[37+64] > 0 || local_items[37+128] > 0) {
-            item_pancake = this_scene.add.sprite(600-35, 840+10, "item_pancake").setScale(0.12).setOrigin(0.5);
+            item_pancake = this_scene.add.sprite(600-45, 840+10, "item_pancake").setScale(0.2).setOrigin(0.5);
             item_pancake.depth = 9999;
             group_food.add(item_pancake);
         }
 
         if (local_items[5] > 0 || local_items[5+64] > 0 || local_items[5+128] > 0) {
-            item_sushi = this_scene.add.sprite(600+50, 840+10, "item_sushi")
-                .setScale(0.25)
+            item_onigiri = this_scene.add.sprite(600+40, 840+10, "item_onigiri")
+                .setScale(0.1)
                 .setOrigin(0.5)
                 .setDepth(9999);
-            group_food.add(item_sushi);
+            group_food.add(item_onigiri);
         }
         sound_feeding.play();
 
@@ -7482,7 +8296,9 @@ function update_checkItem(this_scene) {
         } else if (local_wallet_score >= 3300) {
             item_wall_sticker = this_scene.add.image(_x, _y, "item_wall_sticker_12");
         }
-        item_wall_sticker.setDepth(1).setAlpha(0.2);
+        if (typeof item_wall_sticker != "undefined") {
+            item_wall_sticker.setDepth(1).setAlpha(0.2);
+        }
         /*
         item_wall_sticker = this_scene.add.image(_x, _y, "item_wall_sticker")
             .setDepth(1)
@@ -7882,7 +8698,6 @@ function update_checkItem(this_scene) {
     }
 
     //###27:Floor Sticker
-    /*
     _item_id = 27;
     if (
         (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
@@ -7891,23 +8706,47 @@ function update_checkItem(this_scene) {
         local_items_flag[_item_id] = true;
         let _x = 640;
         let _y = 480;
-        item_floor_sticker1 = this_scene.add.image(_x, _y, "item_floor_sticker1")
-            .setDepth(2)
-            .setAlpha(0.2);
-        item_floor_sticker2 = this_scene.add.image(_x, _y, "item_floor_sticker2")
-            .setDepth(3)
-            .setAlpha(0.7);
+
+        if (local_wallet_score == 0) {
+            local_items_flag[_item_id] = false;
+        } else if (local_wallet_score < 300) {
+            item_floor_sticker = this_scene.add.image(_x, _y, "item_floor_sticker_01");
+        } else if (local_wallet_score < 600) {
+            item_floor_sticker = this_scene.add.image(_x, _y, "item_floor_sticker_02");
+        } else if (local_wallet_score < 900) {
+            item_floor_sticker = this_scene.add.image(_x, _y, "item_floor_sticker_03");
+        } else if (local_wallet_score < 1200) {
+            item_floor_sticker = this_scene.add.image(_x, _y, "item_floor_sticker_04");
+        } else if (local_wallet_score < 1500) {
+            item_floor_sticker = this_scene.add.image(_x, _y, "item_floor_sticker_05");
+        } else if (local_wallet_score < 1800) {
+            item_floor_sticker = this_scene.add.image(_x, _y, "item_floor_sticker_06");
+        } else if (local_wallet_score < 2100) {
+            item_floor_sticker = this_scene.add.image(_x, _y, "item_floor_sticker_07");
+        } else if (local_wallet_score < 2400) {
+            item_floor_sticker = this_scene.add.image(_x, _y, "item_floor_sticker_08");
+        } else if (local_wallet_score < 2700) {
+            item_floor_sticker = this_scene.add.image(_x, _y, "item_floor_sticker_09");
+        } else if (local_wallet_score < 3000) {
+            item_floor_sticker = this_scene.add.image(_x, _y, "item_floor_sticker_10");
+        } else if (local_wallet_score < 3300) {
+            item_floor_sticker = this_scene.add.image(_x, _y, "item_floor_sticker_11");
+        } else if (local_wallet_score >= 3300) {
+            item_floor_sticker = this_scene.add.image(_x, _y, "item_floor_sticker_12");
+        }
+        if (typeof item_floor_sticker != "undefined") {
+            item_floor_sticker.setDepth(1).setAlpha(0.6);
+        }
+
     } else if (
         local_items[_item_id] == 0 
         && local_items[_item_id+64] == 0 
         && local_items[_item_id+128] == 0
-        && typeof item_floor_sticker1 != "undefined"
+        && typeof item_floor_sticker != "undefined"
     ) {
-        item_floor_sticker1.destroy(true);
-        item_floor_sticker2.destroy(true);
+        item_floor_sticker.destroy(true);
         local_items_flag[_item_id] = false;
     }
-    */
 
     //###33:Table
     _item_id = 33;
@@ -8350,8 +9189,8 @@ function update_checkItem(this_scene) {
         local_items_flag[_item_id] = true;
         let _x = 1037;
         let _y = 600;
-        item_gauge = this_scene.add.sprite(_x, _y, "item_gauge")
-            .setScale(0.2)
+        item_tokenChest = this_scene.add.sprite(_x, _y, "item_tokenChest")
+            .setScale(0.28)
             .setOrigin(0.5)
             .setInteractive({useHandCursor: true})
             .on('pointerdown', async function() {
@@ -8402,9 +9241,9 @@ function update_checkItem(this_scene) {
         local_items[_item_id] == 0 
         && local_items[_item_id+64] == 0 
         && local_items[_item_id+128] == 0
-        && typeof item_gauge != "undefined"
+        && typeof item_tokenChest != "undefined"
     ) {
-        item_gauge.destroy(true);
+        item_tokenChest.destroy(true);
         local_items_flag[_item_id] = false;
     }
 
@@ -8792,9 +9631,10 @@ function update_checkItem(this_scene) {
                 _itemIds.forEach(_itemId => {
                     if (!summoned_fluffies.includes(_itemId)){
                         setTimeout( () => {
-                            summon_fluffy(this_scene, i, "common", _itemId);
+                            //summon_fluffy(this_scene, i, "common", _itemId);
+                            summon_fluffy2(this_scene, i, _itemId);
                         }, _timeout, _itemId);
-                        _timeout += 500;
+                        _timeout += 200;
                         summoned_fluffies.push(_itemId);
                     }
                 });
@@ -8809,9 +9649,10 @@ function update_checkItem(this_scene) {
                 _itemIds.forEach(_itemId => {
                     if (!summoned_fluffies.includes(_itemId)){
                         setTimeout( () => {
-                            summon_fluffy(this_scene, i, "uncommon", _itemId);
+                            //summon_fluffy(this_scene, i, "uncommon", _itemId);
+                            summon_fluffy2(this_scene, i, _itemId);
                         }, _timeout, _itemId);
-                        _timeout += 500;
+                        _timeout += 200;
                         summoned_fluffies.push(_itemId);
                     }
                 });
@@ -8826,9 +9667,10 @@ function update_checkItem(this_scene) {
                 _itemIds.forEach(_itemId => {
                     if (!summoned_fluffies.includes(_itemId)){
                         setTimeout( () => {
-                            summon_fluffy(this_scene, i, "rare", _itemId);
+                            //summon_fluffy(this_scene, i, "rare", _itemId);
+                            summon_fluffy2(this_scene, i, _itemId);
                         }, _timeout, _itemId);
-                        _timeout += 500;
+                        _timeout += 200;
                         summoned_fluffies.push(_itemId);
                     }
                 });
@@ -8875,7 +9717,7 @@ function update_checkItem(this_scene) {
         let _y = 550 + Math.random()*200;
         festligheter = new Festligheter(this_scene, _x, _y, "ff_preFestival")
             .setOrigin(0.5)
-            .setScale(0.3)
+            .setScale(0.25)
             .setAlpha(1)
             .setDepth(3);
         group_update.add(festligheter);
@@ -8953,7 +9795,9 @@ function update(scene) {
             console.log(
                 Math.round(game.input.mousePointer.x), 
                 Math.round(game.input.mousePointer.y)
-            )
+            );
+            //draw_flower(scene, game.input.mousePointer.x, game.input.mousePointer.y);
+            draw_star(scene, game.input.mousePointer.x, game.input.mousePointer.y);
         });
     }
 

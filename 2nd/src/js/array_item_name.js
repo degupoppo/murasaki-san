@@ -4,7 +4,7 @@ let _array_name_base = [
     "Mr. Astar",
     "Dice",
     "Helmet",
-    "Sushi",
+    "Onigiri",
     "Crown",
     "Ribbon",
     "Window",
