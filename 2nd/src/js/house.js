@@ -5653,7 +5653,7 @@ function preload(scene) {
     scene.load.image("item_hat_mortarboard", "src/png/item_hat_mortarboard.png");
     scene.load.image("item_pad_on", "src/png/item_pad_on.png");
     scene.load.image("item_pad_off", "src/png/item_pad_off.png");
-    scene.load.image("item_tokenChest", "src/png/item_tokenChest.png");
+    scene.load.spritesheet("item_tokenChest", "src/png/item_tokenChest.png", {frameWidth: 370, frameHeight: 320});
     scene.load.image("item_frame", "src/png/item_frame.png");
     //scene.load.image("item_wall_sticker", "src/png/item_wall_sticker.png");
     scene.load.image("item_wall_sticker_01", "src/png/item_wall_sticker_01.png");
@@ -9190,11 +9190,13 @@ function update_checkItem(this_scene) {
         let _x = 1037;
         let _y = 600;
         item_tokenChest = this_scene.add.sprite(_x, _y, "item_tokenChest")
+            .setFrame(0)
             .setScale(0.28)
             .setOrigin(0.5)
             .setInteractive({useHandCursor: true})
             .on('pointerdown', async function() {
                 if (flag_tokenBall == 0) {
+                    item_tokenChest.setFrame(1);
                     flag_tokenBall = 1;
                     sound_basket.play();
                     murasakisan.on_click();
@@ -9233,6 +9235,7 @@ function update_checkItem(this_scene) {
                     }
                     */
                 } else {
+                    item_tokenChest.setFrame(0);
                     flag_tokenBall = 0;
                     group_tokenBall.destroy(true);
                 }
