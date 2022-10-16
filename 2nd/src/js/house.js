@@ -7,9 +7,25 @@
 
 //### 1st
 
+
+    食べ物一つずつ
+
     fluffyのUI実装
     
     catのUI実装
+    猫ちゃん実装
+    
+    お花ウォールステッカーへ
+    
+    ナイナイさん動かす
+    
+    宝箱の音
+    
+    情報の表示/非表示
+    
+    ニュースの修正
+    
+    
 
     バイバックコントラの洗練
        *アクティブユーザーのカウント方法の深慮
@@ -3726,7 +3742,7 @@ class Fluffy2 extends Phaser.GameObjects.Sprite{
             this.rarity = "rare";
             this.setScale(0.15);
         }
-        console.log(this.rarity, this.type, this.itemId);
+        //console.log(this.rarity, this.type, this.itemId);
         //image
         if (this.rarity == "common") {
             if (this.type == 201) {
@@ -4428,6 +4444,118 @@ class Festligheter extends Phaser.GameObjects.Sprite{
             } else {
                 draw_flower(this.scene, this.x-30, this.y);
             }
+        }
+    }
+}
+
+
+//---Nyuinyui
+
+
+class Nyuinyui extends Phaser.GameObjects.Sprite{
+    constructor(scene, x, y, img){
+        super(scene, x, y, img);
+        this.img = "nyui_moving";
+        this.scene = scene;
+        this.x = x;
+        this.y = y;
+        this.img_right = "nyui_moving_right";
+        this.img_left = "nyui_moving_left";
+        this.scene.add.existing(this);
+        this.mode = "";
+        this.submode = 0;
+        this.resting_count = 200;
+        this.movingMode = "resting";
+        this.movingSubmode = "";
+        this.setInteractive({useHandCursor: true});
+        this.on("pointerdown", function (pointer) {
+            this.on_click();
+        }, this);
+        this.text = scene.add.text(
+            this.x, 
+            this.y-40,
+            "test", 
+            {font: "20px Arial", fill: "#000000", backgroundColor: "#ffffff"}
+        ).setOrigin(0.5).setDepth(9999).setVisible(false);
+    }
+    
+    //### on_click
+    on_click() {
+        ;
+    }
+    
+    //### resting
+    resting() {
+        if (this.movingSubmode == 0){
+            this.resting_count = 200 + Math.random() * 50;
+            this.movingSubmode += 1;
+        } else if (this.movingSubmode < this.resting_count)  {
+            this.movingSubmode += 1;
+        } else {
+            this.movingMode = "moving";
+            this.movingSubmode = 0;
+        }
+    }
+
+    //### moving
+    moving() {
+        if (this.movingSubmode == 0){
+            //determine degree, 0-30, 150-210, 330-360
+            var li = [0,10,20,30,150,160,170,180,190,200,210,330,340,350]
+            this.moving_degree = li[Math.floor(Math.random() * li.length)];
+            //out of area check
+            if (this.x < 100 && this.moving_degree > 90 && this.moving_degree <270) {
+                this.moving_degree -= 180;
+            }else if (this.x > 1100 && (this.moving_degree < 90 || this.moving_degree > 270)) {
+                this.moving_degree -= 180;
+            }
+            //360 over check
+            this.moving_degree = this.moving_degree % 360;
+            //out of area check, y
+            if (this.y > 860 && this.moving_degree > 180) {
+                this.moving_degree = 360 - this.moving_degree;
+            }else if (this.y < 500 && this.moving_degree < 180) {
+                this.moving_degree = 360 - this.moving_degree;
+            }
+            //minus check
+            if (this.moving_degree < 0) {
+                this.moving_degree += 360;
+            }
+            //determine speed, count
+            this.moving_speed = 0.3 + Math.random() * 0.2;  //0.3-0.5
+            this.moving_count = 70 + Math.random() * 30;    //70-100
+            //determine left or right
+            if (this.moving_degree > 90 && this.moving_degree <= 270) {
+                this.dist = "left";
+                this.anims.play(this.img_left);
+                //this.anims.play("cat_visitor_moving_left", true);
+            }else {
+                this.dist = "right";
+                this.anims.play(this.img_right);
+                //this.anims.play("cat_visitor_moving_right", true);
+            }
+            this.movingSubmode += 1;
+        } else {
+            this.x += Math.cos(this.moving_degree * (Math.PI/180)) * this.moving_speed;
+            this.y -= Math.sin(this.moving_degree * (Math.PI/180)) * this.moving_speed;
+            this.depth = this.y;
+            this.text.x = this.x;
+            this.text.y = this.y-40;
+            this.movingSubmode += 1;
+            if (this.movingSubmode >= 100){
+                this.movingMode = "resting";
+                this.movingSubmode = 0;
+            }
+        }
+    }
+    
+    //### update()
+    update() {
+        //moving mode
+        if (this.movingMode == "moving"){
+            this.moving();
+        } else if (this.movingMode == "resting"){
+            this.resting();
         }
     }
 }
@@ -5721,6 +5849,9 @@ function preload(scene) {
     scene.load.image("ff_duringFestival_afterVoting_right", "src/png/ff_duringFestival_afterVoting_right.png");
     scene.load.image("ff_duringFestival_isEndable_right", "src/png/ff_duringFestival_isEndable_right.png");
 
+    //---nyui
+    scene.load.spritesheet("nyui_moving", "src/png/nyui_moving.png", {frameWidth: 370, frameHeight: 320});
+
     //---fluffy
     /*
     scene.load.image("fluffy_fluffy_01", "src/png/fluffy_fluffy_01.png");
@@ -6367,6 +6498,20 @@ function create(scene) {
         frameRate: 1,
         repeat: -1
     });    
+    
+    //---animation nyui
+    scene.anims.create({
+        key: "nyui_moving_left",
+        frames: scene.anims.generateFrameNumbers("nyui_moving", {start:0, end:1}),
+        frameRate: 1,
+        repeat: -1
+    });
+    scene.anims.create({
+        key: "nyui_moving_right",
+        frames: scene.anims.generateFrameNumbers("nyui_moving", {start:2, end:3}),
+        frameRate: 1,
+        repeat: -1
+    });
     
     //---item_basic
     item_bear = scene.add.sprite(1000,400, "item_bear")
@@ -7914,6 +8059,15 @@ function update_checkItem(this_scene) {
                     localStorage.setItem(_pos_local, JSON.stringify(_pos));
                 })
         }
+
+        //nyui
+        nyuinyui = new Nyuinyui(this_scene, 500, 500, "nyui_moving")
+            .setOrigin(0.5)
+            .setScale(0.25)
+            .setAlpha(1)
+            .setDepth(3);
+        group_update.add(nyuinyui);
+        
 
     } else if (
         local_items[_item_id] == 0 
