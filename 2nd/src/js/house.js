@@ -7125,6 +7125,13 @@ function create(scene) {
         }
     });
     scene.input.on("pointerdown", () => {
+        if (scene.sys.game.scale.gameSize._width == 1280) {
+            pointer_x = game.input.activePointer.x;
+            pointer_y = game.input.activePointer.y;
+        } else {
+            pointer_x = game.input.activePointer.y;
+            pointer_y = 960 - game.input.activePointer.x;
+        }
         console.log(
             Math.round(pointer_x), 
             Math.round(pointer_y)
