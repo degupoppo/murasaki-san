@@ -4522,7 +4522,7 @@ contract Murasaki_Mail is Ownable {
     
     //variants
     //interval, both of sending interval & receving limit
-    uint32 public interval_sec = 60 * 60 * 24 * 3;    // 3 days
+    uint32 public interval_sec = 60 * 60 * 24 * 5;    // 5 days
     uint32 public item_type_of_mail = 196;
     uint32 public item_type_of_cushion = 20;
 

@@ -7,6 +7,33 @@
 
 //### 1st
 
+   *猫ちゃん実装
+        アニメーションの実装
+
+   *スイッチOFF時のUI改善
+        ステッカーの蛍光塗料を実装
+
+   *アイテム順の吟味
+        アイテムの種類分け
+        STR/DEX/INT系で同種類アイテムをバラけさせる
+
+    fluffy修正
+        色修正
+        正面のアニメーション追加
+        サイズ修正
+        fluffierの瞬き頻度修正
+    
+    ナイナイさん動かす
+        
+    ニュースの修正
+        ウェルカムボードへ変更する
+    
+    バグ・微修正
+        connect連続バグの修正
+        再読み込み後にクラフト中のアイテム表示されないバグ修正
+        宝箱の音の吟味
+        お花のフロアステッカーの修正、ウォールステッカーへ？
+
     バイバックコントラの洗練
        *アクティブユーザーのカウント方法の深慮
             mm.next_summoner() - 1ではなく、not petrified summonersを
@@ -174,11 +201,11 @@
         吹き出しの検討
             位置合わせがとても面倒だが
 
-    トークンボックス絵の実装
+ ok トークンボックス絵の実装
         宝箱
         開いた絵と閉じている絵の２種類
 
-    ネオンちゃんの絵の実装
+ ok ネオンちゃんの絵の実装
         裏の世界である程度動き回る
 
     プレゼント絵の実装
@@ -226,6 +253,15 @@
 
 
 //### 2nd
+
+ ok 情報の表示/非表示
+        tabletのON/OFFでinfo系すべてON/OFFとする
+        info系spriteをgroup_infoに突っ込んどく。
+    
+ ok foodのUI改善
+        食べ物は一つずつ順番に
+        satietyによって演出を変える？
+        むらさきさんの位置を少し手前に修正
 
  ng presentboxの演出を考える
         出現タイミング
@@ -840,6 +876,11 @@ async function init_global_variants() {
     flag_sync = 1;
     flag_fadein = 0;
     flag_debug = 0;
+    flag_info = 1;
+    
+    //---pointer
+    pointer_x = 0;
+    pointer_y = 0;
 }
 
 init_global_variants();
@@ -1081,7 +1122,7 @@ async function contract_update_static_status(_summoner) {
     ELECTED_FLUFFY_TYPE = Number(_all_static_status[7]);
     
     //calc wallet score
-    update_local_wallet_score();
+    //update_local_wallet_score();
 }
 
 
@@ -1112,6 +1153,7 @@ async function contract_update_dynamic_status(_summoner) {
         for (let i = 1; i <= 64; i++) {
             local_items[i] += 1;
         }
+        local_wallet_score = 9999;
     }
 
     //call dynamic status from chain
@@ -1960,12 +2002,26 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             }
         }else if (this.submode == 2) {
             this.anims.play("murasaki_feeding", true);
-            group_food.destroy(true);
+            //group_food.destroy(true);
+            //destroy group_food one by one
+            if (group_food.getChildren().length > 0) {
+                //group_food.getChildren()[group_food.getChildren().length - 1].destroy();
+                group_food.getChildren()[Math.floor(Math.random() * group_food.getChildren().length)].destroy();
+            } else {
+                group_food.destroy(true);
+            }
+            this.count = 0;
             this.count_limit = this.count + 1000;
             this.submode = 3;
         }else if (this.submode == 3) {
-            if (this.count % 200 == 10) {
+            if (this.count % 200 == 0) {
                 sound_happy.play();
+                //destroy group_food one by one
+                if (group_food.getChildren().length > 0) {
+                    group_food.getChildren()[Math.floor(Math.random() * group_food.getChildren().length)].destroy();
+                } else {
+                    group_food.destroy(true);
+                }
             }
             if (this.count >= this.count_limit) {
                 this.mode = "resting";
@@ -2118,6 +2174,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             }
             if (happy <= 0) {
                 this.anims.play("murasaki_sleeping", true);
+                this.submode = 3;
             }
         }
     }
@@ -2169,6 +2226,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             }
             if (happy <= 0) {
                 this.anims.play("murasaki_sleeping", true);
+                this.submode = 3;
             }
         }
     }
@@ -3024,6 +3082,7 @@ class Dice extends Phaser.GameObjects.Sprite{
         this.speed_y = 0;
         this.text_rolled_number = scene.add.text(x, y, "88", {font: "bold 20px Arial", fill: "#ffffff"}).setOrigin(0.5);
         this.text_next_time = scene.add.text(x, y+40, "---", {font: "14px Arial", fill: "#000000"}).setOrigin(0.5);
+        group_info.add(this.text_next_time);
         this.flag_tx = 0;
         this.count = 0;
         this.line_y = y;      //initial value of line_y, the same as first position of y
@@ -3054,7 +3113,8 @@ class Dice extends Phaser.GameObjects.Sprite{
         */
         
         //DOES NOT WORK in phone
-        if (game.input.mousePointer.x > this.x) {
+        if (pointer_x > this.x) {
+        //if (game.input.mousePointer.x > this.x) {
         //if (game.input.activePointer.position.x > this.x) {
         //if (game.input.pointer1.x > this.x) {
             this.speed_x *= -1;
@@ -3120,7 +3180,9 @@ class Dice extends Phaser.GameObjects.Sprite{
             this.text_rolled_number.visible = true;
             this.text_rolled_number.x = this.x;
             this.text_rolled_number.y = this.y;
-            this.text_next_time.visible = true;
+            if (flag_info == 1) {
+                this.text_next_time.visible = true;
+            }
             this.text_next_time.x = this.x;
             this.text_next_time.y = this.y + 40;
         } else {
@@ -3216,18 +3278,19 @@ class tokenBall extends Phaser.GameObjects.Sprite{
         this.speed_x = 6 + Math.random() * 4;
         //this.speed_x = 8 + Math.random() * 5;
         
+        /*
         if (Math.random() > 0.5) {
             this.speed_x *= -1;
         }
+        */
         
-        /*
         //DOES NOT WORK in phone
+        if (pointer_x > this.x) {
         //if (game.input.mousePointer.x > this.x) {
-        if (game.input.activePointer.position.x > this.x) {
+        //if (game.input.activePointer.position.x > this.x) {
         //if (game.input.pointer1.x > this.x) {
             this.speed_x *= -1;
         }
-        */
 
         this.speed_y = 6 + Math.random() * 4;
         //this.speed_y = 8 + Math.random() * 5;
@@ -3460,7 +3523,7 @@ class Star extends Phaser.GameObjects.Sprite{
 //***TODO***
 
 class Fluffy extends Phaser.GameObjects.Sprite{
-    constructor(scene, x, y, img, rarity, itemId){
+    constructor(scene, x, y, img, rarity, itemId, type){
         super(scene, x, y, img);
         this.scene.add.existing(this);
         this.setInteractive({ useHandCursor: true });
@@ -3479,6 +3542,19 @@ class Fluffy extends Phaser.GameObjects.Sprite{
         this.resting_count = 200;
         this.rarity = rarity;
         this.itemId = itemId;
+        this.type = type;
+        if (this.rarity == "common") {
+            ;
+        } else if (this.rarity == "uncommon") {
+            this.anims.play("fluffy_fluffier_01", true);
+            /*
+            if (this.type == 1) {
+                this.anims.play("murasaki_sleeping", true);
+            }
+            */
+        } else if (this.rarity == "rare") {
+            
+        }
     }
     
     //### on_click
@@ -3511,7 +3587,7 @@ class Fluffy extends Phaser.GameObjects.Sprite{
         this.a = Math.random() * 0.8 - 0.4;
         this.b = this.y + this.a * this.x;
         //sound
-        sound_dice.play();
+        //sound_fluffy.play();
         this.mode = "rolling";
     }
     
@@ -3641,6 +3717,361 @@ class Fluffy extends Phaser.GameObjects.Sprite{
                 this.dist = "right";
                 //this.anims.play("cat_visitor_moving_right", true);
             }
+            this.angle = 0;
+            this.submode += 1;
+        } else {
+            this.x += Math.cos(this.moving_degree * (Math.PI/180)) * this.moving_speed;
+            this.y -= Math.sin(this.moving_degree * (Math.PI/180)) * this.moving_speed;
+            this.submode += 1;
+            if (this.submode >= 100){
+                this.mode = "resting";
+                this.submode = 0;
+            }
+        }
+    }
+    
+    //### update()
+    update() {
+        if (this.mode == "rolling"){this.rolling();}
+        else if (this.mode == "resting"){this.resting();}
+        else if (this.mode == "moving"){this.moving();}
+        if (turn % 100 == 0) {
+            if (!local_itemIds.includes(this.itemId)){
+                summoned_fluffies = summoned_fluffies.filter(n => n !== this.itemId);
+                this.destroy();
+            }
+        }
+    }
+}
+
+
+//---Fluffy2
+//***TODO***
+
+class Fluffy2 extends Phaser.GameObjects.Sprite{
+    constructor(scene, x, y, img, type, itemId){
+        super(scene, x, y, img);
+        this.x = 0;
+        this.y = 0;
+        //this.img = "fluffy_fluffys";
+        this.type = type;
+        this.itemId = itemId;
+        this.scene.add.existing(this);
+        this.setInteractive({ useHandCursor: true });
+        this.on("pointerdown", function (pointer) {
+            this.on_click();
+        }, this);
+        this.speed_x = 0;
+        this.speed_y = 0;
+        this.line_y = y;        //initial value of line_y, the same as first position of y
+        this.line_y_max = 500;  //max floor position
+        this.line_y_min = 800;
+        this.line_x_r = 1200;   //right side
+        this.line_x_l = 50;     //left side
+        this.mode = "";
+        this.submode = 0;
+        this.resting_count = 200;
+        //rarity
+        if (this.type <= 212) {
+            this.rarity = "common";
+            this.setScale(0.07);
+        } else if (this.type <= 224) {
+            this.rarity = "uncommon";
+            this.setScale(0.10);
+        } else if (this.type <= 236) {
+            this.rarity = "rare";
+            this.setScale(0.15);
+        }
+        //console.log(this.rarity, this.type, this.itemId);
+        //image
+        if (this.rarity == "common") {
+            if (this.type == 201) {
+                this.setFrame(0 + 8*0);
+            } else if (this.type == 202) {
+                this.setFrame(0 + 8*1);
+            } else if (this.type == 203) {
+                this.setFrame(0 + 8*2);
+            } else if (this.type == 204) {
+                this.setFrame(0 + 8*3);
+            } else if (this.type == 205) {
+                this.setFrame(0 + 8*4);
+            } else if (this.type == 206) {
+                this.setFrame(0 + 8*5);
+            } else if (this.type == 207) {
+                this.setFrame(0 + 8*6);
+            } else if (this.type == 208) {
+                this.setFrame(0 + 8*7);
+            } else if (this.type == 209) {
+                this.setFrame(0 + 8*8);
+            } else if (this.type == 210) {
+                this.setFrame(0 + 8*9);
+            } else if (this.type == 211) {
+                this.setFrame(0 + 8*10);
+            } else if (this.type == 212) {
+                this.setFrame(0 + 8*11);
+            }
+        } else if (this.rarity == "uncommon") {
+            if (this.type == 213) {
+                this.anims.play("fluffy_fluffier_01", true);
+            } else if (this.type == 214) {
+                this.anims.play("fluffy_fluffier_02", true);
+            } else if (this.type == 215) {
+                this.anims.play("fluffy_fluffier_03", true);
+            } else if (this.type == 216) {
+                this.anims.play("fluffy_fluffier_04", true);
+            } else if (this.type == 217) {
+                this.anims.play("fluffy_fluffier_05", true);
+            } else if (this.type == 218) {
+                this.anims.play("fluffy_fluffier_06", true);
+            } else if (this.type == 219) {
+                this.anims.play("fluffy_fluffier_07", true);
+            } else if (this.type == 220) {
+                this.anims.play("fluffy_fluffier_08", true);
+            } else if (this.type == 221) {
+                this.anims.play("fluffy_fluffier_09", true);
+            } else if (this.type == 222) {
+                this.anims.play("fluffy_fluffier_10", true);
+            } else if (this.type == 223) {
+                this.anims.play("fluffy_fluffier_11", true);
+            } else if (this.type == 224) {
+                this.anims.play("fluffy_fluffier_12", true);
+            }
+        } else if (this.rarity == "rare") {
+            if (this.type == 225) {
+                this.frontFrame = 3 +8*0;
+                this.setFrame(this.frontFrame);
+                this.anim_right = "fluffy_fluffiest_01_right";
+                this.anim_left = "fluffy_fluffiest_01_left";
+            } else if (this.type == 226) {
+                this.frontFrame = 3 +8*1;
+                this.setFrame(this.frontFrame);
+                this.anim_right = "fluffy_fluffiest_02_right";
+                this.anim_left = "fluffy_fluffiest_02_left";
+            } else if (this.type == 227) {
+                this.frontFrame = 3 +8*2;
+                this.setFrame(this.frontFrame);
+                this.anim_right = "fluffy_fluffiest_03_right";
+                this.anim_left = "fluffy_fluffiest_03_left";
+            } else if (this.type == 228) {
+                this.frontFrame = 3 +8*3;
+                this.setFrame(this.frontFrame);
+                this.anim_right = "fluffy_fluffiest_04_right";
+                this.anim_left = "fluffy_fluffiest_04_left";
+            } else if (this.type == 229) {
+                this.frontFrame = 3 +8*4;
+                this.setFrame(this.frontFrame);
+                this.anim_right = "fluffy_fluffiest_05_right";
+                this.anim_left = "fluffy_fluffiest_05_left";
+            } else if (this.type == 230) {
+                this.frontFrame = 3 +8*5;
+                this.setFrame(this.frontFrame);
+                this.anim_right = "fluffy_fluffiest_06_right";
+                this.anim_left = "fluffy_fluffiest_06_left";
+            } else if (this.type == 231) {
+                this.frontFrame = 3 +8*6;
+                this.setFrame(this.frontFrame);
+                this.anim_right = "fluffy_fluffiest_07_right";
+                this.anim_left = "fluffy_fluffiest_07_left";
+            } else if (this.type == 232) {
+                this.frontFrame = 3 +8*7;
+                this.setFrame(this.frontFrame);
+                this.anim_right = "fluffy_fluffiest_08_right";
+                this.anim_left = "fluffy_fluffiest_08_left";
+            } else if (this.type == 233) {
+                this.frontFrame = 3 +8*8;
+                this.setFrame(this.frontFrame);
+                this.anim_right = "fluffy_fluffiest_09_right";
+                this.anim_left = "fluffy_fluffiest_09_left";
+            } else if (this.type == 234) {
+                this.frontFrame = 3 +8*9;
+                this.setFrame(this.frontFrame);
+                this.anim_right = "fluffy_fluffiest_10_right";
+                this.anim_left = "fluffy_fluffiest_10_left";
+            } else if (this.type == 235) {
+                this.frontFrame = 3 +8*10;
+                this.setFrame(this.frontFrame);
+                this.anim_right = "fluffy_fluffiest_11_right";
+                this.anim_left = "fluffy_fluffiest_11_left";
+            } else if (this.type == 236) {
+                this.frontFrame = 3 +8*11;
+                this.setFrame(this.frontFrame);
+                this.anim_right = "fluffy_fluffiest_12_right";
+                this.anim_left = "fluffy_fluffiest_12_left";
+            }
+        }
+        this.on_summon();
+    }
+    
+    //### on_click
+    on_click() {
+        this.speed_x = 6 + Math.random() * 4;
+        if (pointer_x > this.x) {
+            this.speed_x *= -1;
+        }
+        /*
+        if (Math.random() > 0.5) {
+            this.speed_x *= -1;
+        }
+        */
+        this.speed_y = 6 + Math.random() * 4;
+        //define constant of y = b - a * x
+        this.a = Math.random() * 0.8 - 0.4;
+        this.b = this.y + this.a * this.x;
+        //sound
+        sound_dice.play();
+        this.mode = "rolling";
+    }
+    
+    //### on_summon
+    on_summon() {
+        //pos
+        this.x = 300 + Math.random() * 500;
+        this.y = 600 + Math.random() * 100;
+        //on click with modified speed
+        this.speed_x = 6 + Math.random() * 4;
+        if (Math.random() > 0.5) {
+            this.speed_x *= -1;
+        }
+        this.speed_y = 10 + Math.random() * 4;
+        //define constant of y = b - a * x
+        this.a = Math.random() * 0.8 - 0.4;
+        this.b = this.y + this.a * this.x;
+        //sound
+        //sound_fluffy.play();
+        this.mode = "rolling";
+    }
+    
+    //### rolling
+    rolling(){
+        //define line_y
+        this.line_y = this.b - this.a * this.x;
+        if (this.line_y < this.line_y_max) {
+            this.line_y = this.line_y_max;
+        }
+        if (this.line_y > this.line_y_min) {
+            this.line_y = this.line_y_min;
+        }
+
+        //reducing x speed, -/+
+        if (this.speed_x > 0) {
+            //friction, when speed_y = 0
+            if (Math.abs(this.speed_y) <= 0.5) {
+                this.speed_x -= 0.1 * 2.5;
+            } else {
+                this.speed_x -= 0.1;
+            }
+        } else {
+            if (Math.abs(this.speed_y) <= 0.5) {
+                this.speed_x += 0.1 * 2.5;
+            } else {
+                this.speed_x += 0.1;
+            }
+        }
+
+        //reduction of y speed
+        this.speed_y -= 0.75;
+
+        //position moving
+        this.x += this.speed_x;
+        this.y -= this.speed_y;
+
+        //increase angle
+        this.angle += this.speed_x * 5;
+
+        //refrection y
+        if (this.y >= this.line_y) {
+            this.y = this.line_y;
+            this.speed_y *= -0.3;   //bounce coefficient
+            if (Math.abs(this.speed_y) > 0.5) {
+                sound_dice_impact.play();
+            }
+        }
+
+        //refrection x
+        //limit_y_right: y = (208/205)x - (115746/205)
+        if (this.y > 500) {
+            this.line_x_r = (this.y + 115746/205)/(208/205);
+        } else {
+            this.line_x_r = 1060;
+        }
+        if (this.x >= this.line_x_r) {
+            this.x = this.line_x_r;
+            this.speed_x *= -0.9;   //bounce coefficient
+            sound_dice_impact.play();
+        } else if (this.x <= this.line_x_l) {
+            this.x = this.line_x_l;
+            this.speed_x *= -0.9;
+            sound_dice_impact.play();
+        }
+        
+        //check speed
+        if (
+            Math.abs(this.speed_x) <= 0.5
+            && Math.abs(this.speed_y) <= 0.5
+            && this.line_y - this.y <= 1
+        ) {
+            this.mode = "resting";
+            this.submode = 0
+        }
+    }
+    
+    //### resting
+    resting() {
+        //low rarity, do nothing
+        if (this.rarity == "common" || this.rarity == "uncommon") {
+            ;
+        } else if (this.submode == 0){
+            this.anims.stop();
+            this.setFrame(this.frontFrame);
+            this.resting_count = 200 + Math.random() * 50;
+            //this.anims.play("cat_visitor_standing", true);
+            this.submode += 1;
+        } else if (this.submode < this.resting_count)  {
+            this.submode += 1;
+        } else {
+            this.mode = "moving";
+            this.submode = 0;
+        }
+    }
+    
+    //### moving
+    moving() {
+        if (this.submode == 0){
+            //determine degree, 0-30, 150-210, 330-360
+            var li = [0,10,20,30,150,160,170,180,190,200,210,330,340,350]
+            this.moving_degree = li[Math.floor(Math.random() * li.length)];
+            //out of area check
+            if (this.x < 100 && this.moving_degree > 90 && this.moving_degree <270) {
+                this.moving_degree -= 180;
+            }else if (this.x > 1100 && (this.moving_degree < 90 || this.moving_degree > 270)) {
+                this.moving_degree -= 180;
+            }
+            //360 over check
+            this.moving_degree = this.moving_degree % 360;
+            //out of area check, y
+            if (this.y > 860 && this.moving_degree > 180) {
+                this.moving_degree = 360 - this.moving_degree;
+            }else if (this.y < 500 && this.moving_degree < 180) {
+                this.moving_degree = 360 - this.moving_degree;
+            }
+            //minus check
+            if (this.moving_degree < 0) {
+                this.moving_degree += 360;
+            }
+            //determine speed, count
+            this.moving_speed = 0.3 + Math.random() * 0.2;  //0.3-0.5
+            this.moving_count = 70 + Math.random() * 30;    //70-100
+            //determine left or right
+            if (this.moving_degree > 90 && this.moving_degree <= 270) {
+                this.dist = "left";
+                this.anims.play(this.anim_left);
+                //this.anims.play("cat_visitor_moving_left", true);
+            }else {
+                this.dist = "right";
+                this.anims.play(this.anim_right);
+                //this.anims.play("cat_visitor_moving_right", true);
+            }
+            this.angle = 0;
             this.submode += 1;
         } else {
             this.x += Math.cos(this.moving_degree * (Math.PI/180)) * this.moving_speed;
@@ -3716,6 +4147,7 @@ class PresentBox extends Phaser.GameObjects.Sprite{
         if (turn % 100 == 0) {
             if (!local_itemIds.includes(this.itemId)){
                 summoned_presentbox = summoned_presentbox.filter(n => n !== this.itemId);
+                draw_flower(this.scene, this.x, this.y);
                 this.destroy();
             }
         }
@@ -3732,13 +4164,16 @@ class Festligheter extends Phaser.GameObjects.Sprite{
         this.scene = scene;
         this.x = x;
         this.y = y;
-        this.img = "ff_preFestival";
+        this.img_right = "ff_preFestival_right";
+        this.img_left = "ff_preFestival_left";
+        this.setTexture(this.img_right);
         this.scene.add.existing(this);
         this.mode = "";
         this.submode = 0;
         this.resting_count = 200;
         this.movingMode = "";
         this.movingSubmode = "";
+        this.setInteractive({useHandCursor: true});
         this.on("pointerdown", function (pointer) {
             this.on_click();
         }, this);
@@ -3748,6 +4183,7 @@ class Festligheter extends Phaser.GameObjects.Sprite{
             "test", 
             {font: "20px Arial", fill: "#000000", backgroundColor: "#ffffff"}
         ).setOrigin(0.5).setDepth(9999).setVisible(false);
+        /*
         this.on("pointerover", () => {
             this.text.visible = true;
         })
@@ -3756,6 +4192,7 @@ class Festligheter extends Phaser.GameObjects.Sprite{
                 this.text.visible = false;
             }, 1000)
         });
+        */
         this.checkFestival();
     }
     
@@ -3765,6 +4202,11 @@ class Festligheter extends Phaser.GameObjects.Sprite{
             open_window_voting(this.scene);
         } else if (this.mode == "duringFestival_isEndable") {
             contract_end_voting(summoner);
+        } else {
+            this.text.visible = true;
+            setTimeout( () => {
+                this.text.visible = false;
+            }, 3000)
         }
     }
     
@@ -3780,7 +4222,11 @@ class Festligheter extends Phaser.GameObjects.Sprite{
             console.log("destroy festligheter");
             this.mode = "destroy";
             this.destroy();
-        
+            sound_nainai2.play();
+            draw_flower(this.scene, this.x+30, this.y);
+            draw_flower(this.scene, this.x-30, this.y);
+            draw_flower(this.scene, this.x, this.y);
+            
         // preFestival
         } else if (
             local_ff_inSession == 0
@@ -3825,19 +4271,21 @@ class Festligheter extends Phaser.GameObjects.Sprite{
     //### preFestival
     preFestival() {
         if (this.submode == 0) {
-            this.img = "ff_preFestival";
+            this.img_right = "ff_preFestival_right";
+            this.img_left = "ff_preFestival_left";
+            this.setTexture(this.img_right);
             this.x = 340;
             this.y = 960;
-            this.removeInteractive();
-            this.setInteractive({useHandCursor: false});
+            //this.removeInteractive();
+            //this.setInteractive({useHandCursor: false});
             this.text.setText("");
             this.text.x = this.x;
             this.text.y = this.y-40;
             this.movingMode = "";
         } else if (this.submode % 100 == 1) {
             let _text = "";
-            _text += "Festival is comming..." + " \n";
-            _text += local_ff_next_festival_block - local_blockNumber;
+            _text += " Festival is comming... " + " \n";
+            _text += " (" + (local_ff_next_festival_block - local_blockNumber) + " blocks later) ";
             this.text.setText(_text);
         }
         this.submode += 1;
@@ -3846,20 +4294,24 @@ class Festligheter extends Phaser.GameObjects.Sprite{
     //### duringFestival
     duringFestival() {
         if (this.submode == 0) {
+            this.img_right = "ff_duringFestival_right";
+            this.img_left = "ff_duringFestival_left";
+            this.setTexture(this.img_right);
             this.x = 200 + Math.random()*700;
             this.y = 550 + Math.random()*200;
-            this.img = "during_festival";
-            this.removeInteractive();
-            this.setInteractive({useHandCursor: true});
+            //this.removeInteractive();
+            //this.setInteractive({useHandCursor: true});
             this.text.setText("");
             this.text.x = this.x;
             this.text.y = this.y-40;
             this.movingMode = "resting";
         } else if (this.submode % 100 == 1) {
+            /*
             let _text = "";
             _text += "Fluffy Festival!" + " \n";
             _text += "Vote your favorit fluffy";
             this.text.setText(_text);
+            */
         }
         this.submode += 1;
     }
@@ -3867,20 +4319,28 @@ class Festligheter extends Phaser.GameObjects.Sprite{
     //### duringFestival_afterVoting
     duringFestival_afterVoting() {
         if (this.submode == 0) {
-            this.img = "during_festival_afterVoting";
-            this.removeInteractive();
-            this.setInteractive({useHandCursor: false});
+            this.img_right = "ff_duringFestival_afterVoting_right";
+            this.img_left = "ff_duringFestival_afterVoting_left";
+            this.setTexture(this.img_right);
+            //this.removeInteractive();
+            //this.setInteractive({useHandCursor: false});
             this.text.setText("");
             this.text.x = this.x;
             this.text.y = this.y-40;
             this.movingMode = "resting";
         } else if (this.submode % 100 == 1) {
-            let [_winner_type, _winner_count] = this._get_winner_now();
+            //let [_winner_type, _winner_count] = this._get_winner_now();
+            let _array_sorted = this._get_ranking_sorted();
             let _text = "";
+            _text += " Your vote: " + local_ff_last_voting_type + " \n";
+            _text += " top1:" + _array_sorted[0] + " top2:" + _array_sorted[1] + " top3:" + _array_sorted[2] + " \n";
+            _text += " (" + (local_ff_subject_end_block - local_blockNumber) + " blocks remaining) ";
+            /*
             _text += "Fluffy Festival!" + " \n";
             _text += "Your vote: " + local_ff_last_voting_type + "\n";
             _text += "Winner: " + _winner_type + " (" + _winner_count + ") " + "\n";
             _text += local_ff_subject_end_block - local_blockNumber;
+            */
             this.text.setText(_text);
         }
         this.submode += 1;
@@ -3896,13 +4356,27 @@ class Festligheter extends Phaser.GameObjects.Sprite{
         }
         return [_type, _count];
     }
+    _get_ranking_sorted() {
+        //prepare 2dim array
+        let _array = [];
+        for (i=1; i<=12; i++) {
+            _array.push([i, local_ff_each_voting_count[i]]);
+        }
+        //sort, desent
+        let _array_sorted = _array.sort(function(a,b) {
+            return b[1] - a[1];
+        });
+        return _array_sorted;
+    }
 
     //### duringFestival_endable
     duringFestival_isEndable() {
         if (this.submode == 0) {
-            this.img = "during_festival_isEndable";
-            this.removeInteractive();
-            this.setInteractive({useHandCursor: true});
+            this.img_right = "ff_duringFestival_isEndable_right";
+            this.img_left = "ff_duringFestival_isEndable_left";
+            this.setTexture(this.img_right);
+            //this.removeInteractive();
+            //this.setInteractive({useHandCursor: true});
             this.text.setText("");
             this.text.x = this.x;
             this.text.y = this.y-40;
@@ -3937,15 +4411,15 @@ class Festligheter extends Phaser.GameObjects.Sprite{
             var li = [0,10,20,30,150,160,170,180,190,200,210,330,340,350]
             this.moving_degree = li[Math.floor(Math.random() * li.length)];
             //out of area check
-            if (this.x < 100 && this.moving_degree > 90 && this.moving_degree <270) {
+            if (this.x < 150 && this.moving_degree > 90 && this.moving_degree <270) {
                 this.moving_degree -= 180;
-            }else if (this.x > 1100 && (this.moving_degree < 90 || this.moving_degree > 270)) {
+            }else if (this.x > 1050 && (this.moving_degree < 90 || this.moving_degree > 270)) {
                 this.moving_degree -= 180;
             }
             //360 over check
             this.moving_degree = this.moving_degree % 360;
             //out of area check, y
-            if (this.y > 860 && this.moving_degree > 180) {
+            if (this.y > 750 && this.moving_degree > 180) {
                 this.moving_degree = 360 - this.moving_degree;
             }else if (this.y < 500 && this.moving_degree < 180) {
                 this.moving_degree = 360 - this.moving_degree;
@@ -3960,9 +4434,11 @@ class Festligheter extends Phaser.GameObjects.Sprite{
             //determine left or right
             if (this.moving_degree > 90 && this.moving_degree <= 270) {
                 this.dist = "left";
+                this.setTexture(this.img_left);
                 //this.anims.play("cat_visitor_moving_left", true);
             }else {
                 this.dist = "right";
+                this.setTexture(this.img_right);
                 //this.anims.play("cat_visitor_moving_right", true);
             }
             this.movingSubmode += 1;
@@ -4005,6 +4481,119 @@ class Festligheter extends Phaser.GameObjects.Sprite{
         //update festival status
         if (turn % 300 == 0 && flag_sync == 1) {
             contract_update_festival_info(summoner);
+        }
+        //flower
+        if (turn % 250 == 0 && this.mode == "duringFestival"){
+            sound_nainai1.play();
+            if (this.dist == "right") {
+                draw_flower(this.scene, this.x+30, this.y);
+            } else {
+                draw_flower(this.scene, this.x-30, this.y);
+            }
+        }
+    }
+}
+
+
+//---Nyuinyui
+
+
+class Nyuinyui extends Phaser.GameObjects.Sprite{
+    constructor(scene, x, y, img){
+        super(scene, x, y, img);
+        this.img = "nyui_moving";
+        this.scene = scene;
+        this.x = x;
+        this.y = y;
+        this.img_right = "nyui_moving_right";
+        this.img_left = "nyui_moving_left";
+        this.scene.add.existing(this);
+        this.mode = "";
+        this.submode = 0;
+        this.resting_count = 200;
+        this.movingMode = "resting";
+        this.movingSubmode = "";
+        this.setInteractive({useHandCursor: true});
+        this.on("pointerdown", function (pointer) {
+            this.on_click();
+        }, this);
+    }
+    
+    //### on_click
+    on_click() {
+        ;
+    }
+    
+    //### resting
+    resting() {
+        if (this.movingSubmode == 0){
+            this.resting_count = 200 + Math.random() * 50;
+            this.movingSubmode += 1;
+        } else if (this.movingSubmode < this.resting_count)  {
+            this.movingSubmode += 1;
+        } else {
+            this.movingMode = "moving";
+            this.movingSubmode = 0;
+        }
+    }
+
+    //### moving
+    moving() {
+        if (this.movingSubmode == 0){
+            //determine degree, 0-30, 150-210, 330-360
+            var li = [0,10,20,30,150,160,170,180,190,200,210,330,340,350]
+            this.moving_degree = li[Math.floor(Math.random() * li.length)];
+            //out of area check
+            if (this.x < 650 && this.moving_degree > 90 && this.moving_degree <270) {
+                this.moving_degree -= 180;
+            }else if (this.x > 1000 && (this.moving_degree < 90 || this.moving_degree > 270)) {
+                this.moving_degree -= 180;
+            }
+            //360 over check
+            this.moving_degree = this.moving_degree % 360;
+            //out of area check, y
+            if (this.y > 850 && this.moving_degree > 180) {
+                this.moving_degree = 360 - this.moving_degree;
+            }else if (this.y < 820 && this.moving_degree < 180) {
+                this.moving_degree = 360 - this.moving_degree;
+            }
+            //minus check
+            if (this.moving_degree < 0) {
+                this.moving_degree += 360;
+            }
+            //determine speed, count
+            this.moving_speed = 0.2 + Math.random() * 0.1;  //0.3-0.5
+            this.moving_count = 70 + Math.random() * 30;    //70-100
+            //determine left or right
+            if (this.moving_degree > 90 && this.moving_degree <= 270) {
+                this.dist = "left";
+                this.anims.play(this.img_left);
+                //this.anims.play("cat_visitor_moving_left", true);
+            }else {
+                this.dist = "right";
+                this.anims.play(this.img_right);
+                //this.anims.play("cat_visitor_moving_right", true);
+            }
+            this.movingSubmode += 1;
+        } else {
+            this.x += Math.cos(this.moving_degree * (Math.PI/180)) * this.moving_speed;
+            this.y -= Math.sin(this.moving_degree * (Math.PI/180)) * this.moving_speed;
+            //this.depth = this.y;
+            this.movingSubmode += 1;
+            if (this.movingSubmode >= 100){
+                this.movingMode = "resting";
+                this.movingSubmode = 0;
+            }
+        }
+    }
+    
+    //### update()
+    update() {
+        //moving mode
+        if (this.movingMode == "moving"){
+            this.moving();
+        } else if (this.movingMode == "resting"){
+            this.resting();
         }
     }
 }
@@ -4166,6 +4755,9 @@ async function draw_radarchart(scene) {
 //---window:craft
 function open_window_craft (scene) {
 
+    //nyuinyui
+    nyuinyui.setVisible(true);
+
     //prevent loading error
     if (local_level == 0) {
         return 0;
@@ -4185,6 +4777,8 @@ function open_window_craft (scene) {
 
     //function, closing: destroy group and update selecte_item
     async function close_crafting_window(_item) {
+        //nyuinyui
+        nyuinyui.setVisible(false);
         flag_window_craft = 0;
         //destroy group
         //group_window_crafting.destroy(true);
@@ -4315,7 +4909,7 @@ function open_window_craft (scene) {
     item2_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  2, "mr_astar_right").setScale(0.08);
     item3_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  3, "item_dice").setScale(0.18);
     item4_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  4, "item_hat_helmet").setScale(0.1);
-    item5_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  5, "item_sushi").setScale(0.1);
+    item5_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  5, "item_onigiri").setScale(0.1);
     item6_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  6, "item_crown").setScale(0.15);
     item7_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  7, "item_ribbon").setScale(0.12);
     item8_icon = scene.add.sprite(_x-25, _y+12 + _y_add *  8, "item_window_day").setScale(0.15);
@@ -4465,8 +5059,13 @@ function open_window_craft (scene) {
 //***TODO***
 function open_window_upgrade(scene) {
 
+    //nyuinyui
+    nyuinyui.setVisible(true);
+
     function close_window_upgrade() {
         group_window_upgrade.destroy(true);
+        //nyuinyui
+        nyuinyui.setVisible(false);
     }
 
     //create group
@@ -4736,7 +5335,7 @@ function draw_firework(scene) {
         speed: { min: 300, max: 600 },
         x: 512, y: 384,
     };
-    const particles = scene.add.particles('flares');
+    const particles = scene.add.particles('par_flares');
     const emitter = particles.createEmitter(emitterConfig);
     emitter.onParticleEmit( () => {
         sound_fireworks.play();
@@ -4752,6 +5351,110 @@ function draw_firework(scene) {
     });
     scene.time.addEvent({
         delay: 2400,
+        callback: () => {
+            emitter.stop();
+        }
+    });
+}
+
+
+//---draw_flower
+function draw_flower(scene, _x, _y) {
+    let _lifespan = 900;
+    const emitterConfig = {
+        alpha: 0.8,
+        angle: { min: 250, max: 290 },
+        //blendMode: 'ADD',
+        gravityY: 900,
+        lifespan: { min:_lifespan*0.8, max:_lifespan},
+        frequency: _lifespan+200,
+        quantity: 20,
+        timeScale: 0.9,
+        reserve: 20,
+        rotate: { min:0, max:360 },
+        scale: { min: 0.05, max: 0.15 },
+        speed: { min: 300, max: 600 },
+        frame: [0,1,2,3,4,5],
+        //x: 50+Math.random()*1100, 
+        //y: 500+Math.random()*350,
+        x: _x, 
+        y: _y,
+    };
+    const particles = scene.add.particles('par_flowers')
+        .setDepth(9999);
+    const emitter = particles.createEmitter(emitterConfig);
+    scene.time.addEvent({
+        delay: _lifespan+100,
+        callback: () => {
+            emitter.stop();
+        }
+    });
+}
+
+
+//---draw_star
+function draw_star(scene, _x, _y) {
+    let _lifespan = 400;
+    const emitterConfig = {
+        alpha: 0.5,
+        //angle: { min: 250, max: 290 },
+        angle: { min: 0, max: 360 },
+        //blendMode: 'ADD',
+        gravityY: 400,
+        lifespan: { min:_lifespan*0.7, max:_lifespan},
+        frequency: _lifespan+200,
+        quantity: 20,
+        timeScale: 0.9,
+        reserve: 20,
+        rotate: { min:0, max:360 },
+        scale: { min: 0.05, max: 0.08 },
+        speed: { min: 50, max: 300 },
+        frame: [0,1,2,3,4,5,6,7],
+        //x: 50+Math.random()*1100, 
+        //y: 500+Math.random()*350,
+        x: _x, 
+        y: _y,
+    };
+    const particles = scene.add.particles('par_stars')
+        .setDepth(9999+200);
+    const emitter = particles.createEmitter(emitterConfig);
+    scene.time.addEvent({
+        delay: _lifespan+100,
+        callback: () => {
+            emitter.stop();
+        }
+    });
+}
+
+
+//---draw_fluffyBit
+function draw_fluffyBit(scene, _x, _y) {
+    let _lifespan = 500;
+    const emitterConfig = {
+        alpha: 0.5,
+        //angle: { min: 250, max: 290 },
+        angle: { min: 0, max: 360 },
+        //blendMode: 'ADD',
+        gravityY: 400,
+        lifespan: { min:_lifespan*0.7, max:_lifespan},
+        frequency: _lifespan+200,
+        quantity: 20,
+        timeScale: 0.9,
+        reserve: 20,
+        rotate: { min:0, max:360 },
+        scale: { min: 0.05, max: 0.10 },
+        speed: { min: 50, max: 300 },
+        frame: [0,1,2,3,4,5,6,7,8,9,10,11],
+        //x: 50+Math.random()*1100, 
+        //y: 500+Math.random()*350,
+        x: _x, 
+        y: _y,
+    };
+    const particles = scene.add.particles('par_fluffys')
+        .setDepth(9999);
+    const emitter = particles.createEmitter(emitterConfig);
+    scene.time.addEvent({
+        delay: _lifespan+100,
         callback: () => {
             emitter.stop();
         }
@@ -4789,7 +5492,67 @@ function summon_star(scene, _type) {
 
 
 //---summon_fluffy
+
+function summon_fluffy2(scene, _type, _itemId) {
+    let _fluffy = new Fluffy2(scene, 0, 0, "fluffy_fluffys", _type, _itemId)
+        .setOrigin(0.5)
+        //.setScale(0.07)
+        .setAlpha(1)
+        .setDepth(3);
+    //_fluffy.on_summon();
+    group_star.add(_fluffy);
+    group_update.add(_fluffy);
+    if (count_sync > 10) {
+        murasakisan.on_click();
+        sound_fluffy.play();
+    }
+}
+
 function summon_fluffy(scene, _type, rarity, itemId) {
+
+    let _dic = {
+        //common
+        201:"fluffy_fluffy_01",
+        202:"fluffy_fluffy_01",
+        203:"fluffy_fluffy_01",
+        204:"fluffy_fluffy_01",
+        205:"fluffy_fluffy_01",
+        206:"fluffy_fluffy_01",
+        207:"fluffy_fluffy_01",
+        208:"fluffy_fluffy_01",
+        209:"fluffy_fluffy_01",
+        210:"fluffy_fluffy_01",
+        211:"fluffy_fluffy_01",
+        212:"fluffy_fluffy_01",
+        //uncommon
+        213:"fluffy_fluffier_01",
+        214:"fluffy_fluffier_01",
+        215:"fluffy_fluffier_01",
+        216:"fluffy_fluffier_01",
+        217:"fluffy_fluffier_01",
+        218:"fluffy_fluffier_01",
+        219:"fluffy_fluffier_01",
+        220:"fluffy_fluffier_01",
+        221:"fluffy_fluffier_01",
+        222:"fluffy_fluffier_01",
+        223:"fluffy_fluffier_01",
+        224:"fluffy_fluffier_01",
+        //rare
+        225:"fluffy_fluffiest_01_front",
+        226:"fluffy_fluffiest_01_front",
+        227:"fluffy_fluffiest_01_front",
+        228:"fluffy_fluffiest_01_front",
+        229:"fluffy_fluffiest_01_front",
+        230:"fluffy_fluffiest_01_front",
+        231:"fluffy_fluffiest_01_front",
+        232:"fluffy_fluffiest_01_front",
+        233:"fluffy_fluffiest_01_front",
+        234:"fluffy_fluffiest_01_front",
+        235:"fluffy_fluffiest_01_front",
+        236:"fluffy_fluffiest_01_front",
+    }
+
+    /*
     let _dic = {
         //common
         201:"star_blue",
@@ -4831,24 +5594,25 @@ function summon_fluffy(scene, _type, rarity, itemId) {
         235:"star_yellow",
         236:"star_yellow",
     }
+    */
     let _img = _dic[_type];
     let _fluffy;
     if (rarity == "common"){
-        _fluffy = new Fluffy(scene, 300, -100, _img, rarity, itemId)
+        _fluffy = new Fluffy(scene, 300, -100, _img, rarity, itemId, _type)
             .setOrigin(0.5)
-            .setScale(0.15)
+            .setScale(0.07)
             .setAlpha(1)
             .setDepth(3);
     } else if (rarity == "uncommon") {
-        _fluffy = new Fluffy(scene, 300, -100, _img, rarity, itemId)
+        _fluffy = new Fluffy(scene, 300, -100, _img, rarity, itemId, _type)
             .setOrigin(0.5)
-            .setScale(0.20)
+            .setScale(0.10)
             .setAlpha(1)
             .setDepth(3);
     } else if (rarity == "rare") {
-        _fluffy = new Fluffy(scene, 300, -100, _img, rarity, itemId)
+        _fluffy = new Fluffy(scene, 300, -100, _img, rarity, itemId, _type)
             .setOrigin(0.5)
-            .setScale(0.25)
+            .setScale(0.15)
             .setAlpha(1)
             .setDepth(3);
     }
@@ -4856,8 +5620,9 @@ function summon_fluffy(scene, _type, rarity, itemId) {
     group_star.add(_fluffy);
     group_update.add(_fluffy);
     //murasaki hugging
-    if (count_sync > 5) {
+    if (count_sync > 10) {
         murasakisan.on_click();
+        sound_fluffy.play();
     }
 }
 
@@ -4955,7 +5720,7 @@ function preload(scene) {
     scene.load.image("back", "src/png/background.png");
     scene.load.image("back_black", "src/png/background_black.png");
     scene.load.image("window", "src/png/background_window.png");
-    scene.load.image("back_neon", "src/png/background_neon.png");
+    //scene.load.image("back_neon", "src/png/background_neon.png");
 
     //---murasaki-san
     scene.load.spritesheet("murasaki_right", "src/png/murasaki_right.png", {frameWidth: 370, frameHeight: 320});
@@ -5052,6 +5817,9 @@ function preload(scene) {
     scene.load.audio("window", "src/sound/window.mp3");
     scene.load.audio("piano1", "src/sound/piano1.mp3");
     scene.load.audio("piano2", "src/sound/piano2.mp3");
+    scene.load.audio("nainai1", "src/sound/nainai1.mp3");
+    scene.load.audio("nainai2", "src/sound/nainai2.mp3");
+    scene.load.audio("fluffy", "src/sound/fluffy.mp3");
 
     //---item_basic
     scene.load.image("item_table", "src/png/item_basic_table.png");
@@ -5061,10 +5829,18 @@ function preload(scene) {
     scene.load.image("item_tree2", "src/png/item_basic_tree2.png");
     scene.load.image("item_tree3", "src/png/item_basic_tree3.png");
     scene.load.image("item_bear", "src/png/item_basic_bear.png");
-    scene.load.image("item_sweet_potato", "src/png/item_basic_sweet_potato.png");
+    //scene.load.image("item_sweet_potato", "src/png/item_basic_sweet_potato.png");
     scene.load.image("item_gold1", "src/png/item_basic_gold1.png");
     scene.load.image("item_gold2", "src/png/item_basic_gold2.png");
     scene.load.image("item_gold3", "src/png/item_basic_gold3.png");
+
+    //---item_food
+    scene.load.image("item_food_potato", "src/png/item_food_potato.png");
+    scene.load.image("item_food_bread", "src/png/item_food_bread.png");
+    scene.load.image("item_food_cake", "src/png/item_food_cake.png");
+    scene.load.image("item_food_onigiri", "src/png/item_food_onigiri.png");
+    scene.load.image("item_food_pancake", "src/png/item_food_pancake.png");
+    
 
     //---item_craft
     scene.load.spritesheet("item_musicbox", "src/png/item_musicbox.png", {frameWidth: 370, frameHeight: 320});
@@ -5095,7 +5871,7 @@ function preload(scene) {
     scene.load.image("item_hat_mortarboard", "src/png/item_hat_mortarboard.png");
     scene.load.image("item_pad_on", "src/png/item_pad_on.png");
     scene.load.image("item_pad_off", "src/png/item_pad_off.png");
-    scene.load.image("item_gauge", "src/png/item_gauge.png");
+    scene.load.spritesheet("item_tokenChest", "src/png/item_tokenChest.png", {frameWidth: 370, frameHeight: 320});
     scene.load.image("item_frame", "src/png/item_frame.png");
     //scene.load.image("item_wall_sticker", "src/png/item_wall_sticker.png");
     scene.load.image("item_wall_sticker_01", "src/png/item_wall_sticker_01.png");
@@ -5110,12 +5886,23 @@ function preload(scene) {
     scene.load.image("item_wall_sticker_10", "src/png/item_wall_sticker_10.png");
     scene.load.image("item_wall_sticker_11", "src/png/item_wall_sticker_11.png");
     scene.load.image("item_wall_sticker_12", "src/png/item_wall_sticker_12.png");
-    scene.load.image("item_floor_sticker1", "src/png/item_floor_sticker1.png");
-    scene.load.image("item_floor_sticker2", "src/png/item_floor_sticker2.png");
-    scene.load.image("item_window", "src/png/item_window.png");
+    scene.load.image("item_wall_sticker_neon", "src/png/item_wall_sticker_neon.png");
+    scene.load.image("item_floor_sticker_01", "src/png/item_floor_sticker_01.png");
+    scene.load.image("item_floor_sticker_02", "src/png/item_floor_sticker_02.png");
+    scene.load.image("item_floor_sticker_03", "src/png/item_floor_sticker_03.png");
+    scene.load.image("item_floor_sticker_04", "src/png/item_floor_sticker_04.png");
+    scene.load.image("item_floor_sticker_05", "src/png/item_floor_sticker_05.png");
+    scene.load.image("item_floor_sticker_06", "src/png/item_floor_sticker_06.png");
+    scene.load.image("item_floor_sticker_07", "src/png/item_floor_sticker_07.png");
+    scene.load.image("item_floor_sticker_08", "src/png/item_floor_sticker_08.png");
+    scene.load.image("item_floor_sticker_09", "src/png/item_floor_sticker_09.png");
+    scene.load.image("item_floor_sticker_10", "src/png/item_floor_sticker_10.png");
+    scene.load.image("item_floor_sticker_11", "src/png/item_floor_sticker_11.png");
+    scene.load.image("item_floor_sticker_12", "src/png/item_floor_sticker_12.png");
+    //scene.load.image("item_window", "src/png/item_window.png");
     scene.load.image("item_lantern", "src/png/item_lantern.png");
     scene.load.image("item_pancake", "src/png/item_pancake.png");
-    scene.load.image("item_sushi", "src/png/item_sushi.png");
+    //scene.load.image("item_sushi", "src/png/item_sushi.png");
     //scene.load.image("item_newsbunner", "src/png/item_newsbunner.png");
     scene.load.image("item_rugg", "src/png/item_rugg.png");
     scene.load.image("item_piano", "src/png/item_piano.png");
@@ -5139,13 +5926,30 @@ function preload(scene) {
     scene.load.image("item_presentbox_07", "src/png/item_presentbox_07.png");
     scene.load.image("item_presentbox_08", "src/png/item_presentbox_08.png");
     scene.load.image("item_fishbowl", "src/png/item_fishbowl.png");
+    scene.load.image("item_onigiri", "src/png/item_onigiri.png");
     
     //---ff
-    scene.load.image("ff_preFestival", "src/png/ff_preFestival.png");
-    scene.load.image("ff_duringFestival", "src/png/ff_duringFestival.png");
-    scene.load.image("ff_duringFestival_pointerOver", "src/png/ff_duringFestival_pointerOver.png");
-    scene.load.image("ff_duringFestival_afterVoting", "src/png/ff_duringFestival_afterVoting.png");
-    scene.load.image("ff_duringFestival_isEndable", "src/png/ff_duringFestival_isEndable.png");
+    scene.load.image("ff_preFestival_left", "src/png/ff_preFestival_left.png");
+    scene.load.image("ff_duringFestival_left", "src/png/ff_duringFestival_left.png");
+    scene.load.image("ff_duringFestival_pointerOver_left", "src/png/ff_duringFestival_pointerOver_left.png");
+    scene.load.image("ff_duringFestival_afterVoting_left", "src/png/ff_duringFestival_afterVoting_left.png");
+    scene.load.image("ff_duringFestival_isEndable_left", "src/png/ff_duringFestival_isEndable_left.png");
+    scene.load.image("ff_preFestival_right", "src/png/ff_preFestival_right.png");
+    scene.load.image("ff_duringFestival_right", "src/png/ff_duringFestival_right.png");
+    scene.load.image("ff_duringFestival_pointerOver_right", "src/png/ff_duringFestival_pointerOver_right.png");
+    scene.load.image("ff_duringFestival_afterVoting_right", "src/png/ff_duringFestival_afterVoting_right.png");
+    scene.load.image("ff_duringFestival_isEndable_right", "src/png/ff_duringFestival_isEndable_right.png");
+
+    //---nyui
+    scene.load.spritesheet("nyui_moving", "src/png/nyui_moving.png", {frameWidth: 370, frameHeight: 320});
+
+    //---fluffy
+    /*
+    scene.load.image("fluffy_fluffy_01", "src/png/fluffy_fluffy_01.png");
+    scene.load.image("fluffy_fluffier_01", "src/png/fluffy_fluffier_01.png");
+    scene.load.image("fluffy_fluffiest_01", "src/png/fluffy_fluffiest_01.png");
+    */
+    scene.load.spritesheet("fluffy_fluffys", "src/png/fluffy_fluffys.png", {frameWidth: 370, frameHeight: 320});
     
     //---star
     scene.load.image("star_blue", "src/png/star_blue.png");
@@ -5195,9 +5999,12 @@ function preload(scene) {
     scene.load.plugin('rextexteditplugin', 'lib/rextexteditplugin.min.js', true);
     */
     
-    //---fireworks
+    //---particles
     //https://codepen.io/samme/pen/eYEearb
-    scene.load.atlas('flares', 'src/fireworks/flares.png', 'src/fireworks/flares.json');
+    scene.load.atlas('par_flares', 'src/particle/flares.png', 'src/particle/flares.json');
+    scene.load.spritesheet("par_flowers", "src/particle/flowers.png", {frameWidth: 370, frameHeight: 320});
+    scene.load.spritesheet("par_stars", "src/particle/stars.png", {frameWidth: 200, frameHeight: 191});
+    scene.load.spritesheet("par_fluffys", "src/particle/fluffy.png", {frameWidth: 370, frameHeight: 320});
     
     //---tokenBall
     scene.load.image("coin_color_ACA", "src/png/coin_color_ACA.png");
@@ -5296,6 +6103,12 @@ function preload(scene) {
 
 function create(scene) {
 
+    //---group
+    group_star = scene.add.group();
+    group_update = scene.add.group();
+    group_update.runChildUpdate = true;
+    group_info = scene.add.group();
+    
     //---back image
     scene.add.image(640, 480, "back");
     //back_neon = scene.add.image(900, 180, "back_neon").setOrigin(0.5).setScale(0.3);
@@ -5564,6 +6377,56 @@ function create(scene) {
         repeat: -1
     });
     
+    //---animation fluffy
+    //fluffier, blinking
+    for (i=1; i<=12; i++) {
+        let _key = "fluffy_fluffier_" + ("00" + i).slice(-2);
+        let _frames = [1 +8*(i-1), 1 +8*(i-1), 2 +8*(i-1)];
+        scene.anims.create({
+            key: _key,
+            frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {frames: _frames}),
+            frameRate: 1,
+            repeat: -1
+        });
+    }
+
+    //fluffiest, moving, left
+    for (i=1; i<=12; i++) {
+        let _key = "fluffy_fluffiest_" + ("00" + i).slice(-2) + "_left";
+        let _frames = [4 +8*(i-1), 5 +8*(i-1)];
+        scene.anims.create({
+            key: _key,
+            frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {frames: _frames}),
+            frameRate: 2,
+            repeat: -1
+        });
+    }
+    //fluffiest, moving, right
+    for (i=1; i<=12; i++) {
+        let _key = "fluffy_fluffiest_" + ("00" + i).slice(-2) + "_right";
+        let _frames = [6 +8*(i-1), 7 +8*(i-1)];
+        scene.anims.create({
+            key: _key,
+            frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {frames: _frames}),
+            frameRate: 2,
+            repeat: -1
+        });
+    }
+        
+    //---animation nyui
+    scene.anims.create({
+        key: "nyui_moving_left",
+        frames: scene.anims.generateFrameNumbers("nyui_moving", {start:0, end:1}),
+        frameRate: 1,
+        repeat: -1
+    });
+    scene.anims.create({
+        key: "nyui_moving_right",
+        frames: scene.anims.generateFrameNumbers("nyui_moving", {start:2, end:3}),
+        frameRate: 1,
+        repeat: -1
+    });
+    
     //---item_basic
     item_bear = scene.add.sprite(1000,400, "item_bear")
         .setScale(0.45);
@@ -5613,6 +6476,7 @@ function create(scene) {
     item_gold3.visible = false;
 
     //---click button
+    
     let _x;
     let _y;
 
@@ -5627,6 +6491,7 @@ function create(scene) {
         .on('pointerover', () => sound_button_select.play())
         .on('pointerover', () => button_feeding.setTexture("button_feeding_pointerover"))
         .on('pointerout', () => button_feeding.setTexture("button_feeding"));
+    group_info.add(button_feeding);
 
     //grooming
     _x = 1150;
@@ -5640,6 +6505,7 @@ function create(scene) {
         .on('pointerover', () => button_grooming.setTexture("button_grooming_pointerover"))
         .on('pointerout', () => button_grooming.setTexture("button_grooming"))
         .disableInteractive();
+    group_info.add(button_grooming);
 
     //crafting
     _x = 820;
@@ -5654,6 +6520,8 @@ function create(scene) {
         .on('pointerout', () => button_crafting.setTexture("button_crafting_enable"))
         .setDepth(3)
         .disableInteractive();
+    group_info.add(button_crafting);
+
 
     //--crafting_selected_info
     //icon_ohana
@@ -5702,7 +6570,7 @@ function create(scene) {
         {font: "18px Arial", fill: "#000", backgroundColor: "#ecd9ff"}
     ).setDepth(9999);
 
-    //--craftimg_now_info
+    //---craftimg_now_info
     //icon_clock
     icon_crafting_time_remining = scene.add.sprite(_x+60, _y+15, "icon_clock")
         .setDepth(9999)
@@ -5728,10 +6596,12 @@ function create(scene) {
                 })
                 .on("pointerover", () => text_select_item.setStyle({ fontSize: 24, fontFamily: "Arial", fill: '#d19dff' }))
                 .on("pointerout", () => text_select_item.setStyle({ fontSize: 24, fontFamily: "Arial", fill: '#000000' }));
+    group_info.add(text_select_item);
     text_craft_item = scene.add.text(_x+50, _y, "", {font: "18px Arial", fill: "#000"})
                 .setDepth(9999)
                 .setInteractive({useHandCursor: true})
                 .on("pointerdown", () => open_window_craft(scene) )
+    group_info.add(text_craft_item);
 
     //mining
     _x = 60;
@@ -5745,6 +6615,7 @@ function create(scene) {
         .on('pointerover', () => button_mining.setTexture("button_mining_pointerover"))
         .on('pointerout', () => button_mining.setTexture("button_mining_enable"))
         .disableInteractive();
+    group_info.add(button_mining);
     //icon
     icon_mining = scene.add.sprite(_x+55, _y-22, "icon_ohana")
         .setScale(0.07)
@@ -5764,6 +6635,7 @@ function create(scene) {
         .on('pointerover', () => button_farming.setTexture("button_farming_pointerover"))
         .on('pointerout', () => button_farming.setTexture("button_farming_enable"))
         .disableInteractive();
+    group_info.add(button_farming);
     //icon
     icon_farming = scene.add.sprite(_x+55, _y-20, "icon_kusa")
         .setScale(0.09)
@@ -5786,6 +6658,8 @@ function create(scene) {
         .on('pointerout', () => text_level.setText(local_level))
         .disableInteractive();
     text_level = scene.add.text(_x, _y+7, "0", {font: "bold 26px Verdana", fill: "#E5004F"}).setOrigin(0.5);
+    group_info.add(button_levelup);
+    group_info.add(text_level);
 
     //---system click button
     //icon_rotate
@@ -5805,6 +6679,7 @@ function create(scene) {
                 scene.cameras.main.centerOn(640,480);
             }
         });
+    group_info.add(icon_rotate);
 
     //icon_home
     icon_home = scene.add.sprite(1155,915-15, "icon_home")
@@ -5815,6 +6690,7 @@ function create(scene) {
         .on("pointerdown", () => {
                 window.location.href = "./";
         });
+    group_info.add(icon_home);
 
     //---music
     //sound out of focus
@@ -5856,6 +6732,9 @@ function create(scene) {
     sound_window = scene.sound.add("window", {volume:0.2});
     sound_piano1 = scene.sound.add("piano1", {volume:0.3});
     sound_piano2 = scene.sound.add("piano2", {volume:0.25});
+    sound_nainai1 = scene.sound.add("nainai1", {volume:0.2});
+    sound_nainai2 = scene.sound.add("nainai2", {volume:0.2});
+    sound_fluffy = scene.sound.add("fluffy", {volume:0.2});
 
     //---system message
     //system message
@@ -5879,6 +6758,13 @@ function create(scene) {
     //new Button(10, 880, 'kill_summoner', scene, () => contract_burn(summoner));
     //burn name
     //new Button(10, 780, 'burn_name', scene, () => contract_burn_name(summoner));
+    new Button(1170, 530, "[debug]", scene, () => {
+        if (flag_debug == 0) {
+            flag_debug = 1;
+        } else {
+            flag_debug = 0;
+        }
+    });
 
     //curePetrification
     text_curePetrification = scene.add.text(640, 480, " >> Cure Petrification (Cost: Lv x 10 $ASTR) << ", {font: "28px Arial", fill: "#E62E8B", backgroundColor: "#FDEFF5"})
@@ -5895,7 +6781,7 @@ function create(scene) {
 
     //debug info
     //text_turn = scene.add.text(250, 920, "***", {font: "14px Arial", fill: "#727171"});
-    text_turn = scene.add.text(5, 955, "***", {font: "14px Arial", fill: "#303030"})
+    text_fps = scene.add.text(5, 955, "***", {font: "14px Arial", fill: "#303030"})
         .setOrigin(0,1)
         .setDepth(2);
     //text_sync_time = scene.add.text(330, 940, "***", {font: "14px Arial", fill: "#727171"});
@@ -5906,6 +6792,9 @@ function create(scene) {
     text_wallet = scene.add.text(1250, 955, "***", {font: "14px Arial", fill: "#727171"})
         .setOrigin(1)
         .setDepth(9999);
+    group_info.add(text_fps);
+    group_info.add(text_sync_time);
+    group_info.add(text_wallet);
 
     //satiety
     icon_satiety = scene.add.sprite(30,25, "icon_satiety")
@@ -5919,6 +6808,10 @@ function create(scene) {
     bar_satiety.scaleX = 0;
     text_satiety = scene.add.text(60, 16, "0%", {font: "17px Arial", fill: "#ffffff"})
         .setDepth(9999);
+    group_info.add(icon_satiety);
+    group_info.add(bar_satiety_back);
+    group_info.add(bar_satiety);
+    group_info.add(text_satiety);
 
     //happy
     icon_happy = scene.add.sprite(245,25, "icon_happy")
@@ -5932,9 +6825,13 @@ function create(scene) {
     bar_happy.scaleX = 0;
     text_happy = scene.add.text(275, 16, "0%", {font: "17px Arial", fill: "#ffffff"})
         .setDepth(9999);
+    group_info.add(icon_happy);
+    group_info.add(bar_happy_back);
+    group_info.add(bar_happy);
+    group_info.add(text_happy);
 
     //exp
-    scene.add.text(440, 15, "Exp:", font_arg)
+    icon_exp = scene.add.text(440, 15, "Exp:", font_arg)
         .setDepth(9999);
     bar_exp_back = makeBar(scene, 480, 15, 0xBBCCE9)
         .setDepth(9999);
@@ -5947,6 +6844,10 @@ function create(scene) {
     text_exp_earned = scene.add.text(480, 38, "", {font: "17px Arial", fill: "#000000"})
         .setDepth(9999);
     text_exp_earned_count = 0;
+    group_info.add(icon_exp);
+    group_info.add(bar_exp_back);
+    group_info.add(bar_exp);
+    group_info.add(text_exp);
 
     //coin
     icon_ohana = scene.add.sprite(668,23, "icon_ohana")
@@ -5957,6 +6858,8 @@ function create(scene) {
     text_coin_earned = scene.add.text(685, 38, "", {font: "17px Arial", fill: "#000000"})
         .setDepth(9999);
     text_coin_earned_count = 0;
+    group_info.add(icon_ohana);
+    group_info.add(text_coin);
 
     //material
     icon_kusa = scene.add.sprite(815, 25, "icon_kusa")
@@ -5967,6 +6870,8 @@ function create(scene) {
     text_material_earned = scene.add.text(830, 38, "", {font: "17px Arial", fill: "#000000"})
         .setDepth(9999);
     text_material_earned_count = 0;
+    group_info.add(icon_kusa);
+    group_info.add(text_material);
 
     //heart
     icon_heart = scene.add.sprite(960, 21, "icon_heart")
@@ -5985,6 +6890,8 @@ function create(scene) {
                 text_fluffy.setVisible(false);
             }, 1000);
         });
+    group_info.add(icon_heart);
+    group_info.add(text_heart);
 
     //name
     _x = 85;
@@ -6014,6 +6921,8 @@ function create(scene) {
     text_id = scene.add.text(_x-45, _y+32, "#100", {font: "14px Arial", fill: "#000000"});
     //age
     text_age_time = scene.add.text(_x+10, _y+32, "***", {font: "14px Arial", fill: "#000000"});
+    group_info.add(text_id);
+    group_info.add(text_age_time);
 
     //lootlike
     let _dic_color_birthplace = {
@@ -6148,11 +7057,6 @@ function create(scene) {
     group_mint_name.add(text_name_kusa);
     group_mint_name.setVisible(false);
         
-    //---group
-    group_star = scene.add.group();
-    group_update = scene.add.group();
-    group_update.runChildUpdate = true;
-    
     //---tx status
     _x = 250;
     _y = 955
@@ -6208,6 +7112,33 @@ function create(scene) {
         .setScale(0.45);
     group_update.add(murasakisan);
     */
+
+    //---pointer
+    //scene.input.on("pointerdown", (pointer, PointerEvent) => {
+    scene.input.on("pointermove", (pointer, PointerEvent) => {
+        pointer_x = pointer.x;
+        pointer_y = pointer.y;
+        //console.log(pointer.x, pointer.y)
+    });
+    scene.input.on("pointerdown", () => {
+        console.log(
+            Math.round(pointer_x), 
+            Math.round(pointer_y)
+        );
+        //draw_flower(scene, game.input.mousePointer.x, game.input.mousePointer.y);
+        draw_star(scene, game.input.mousePointer.x, game.input.mousePointer.y);
+        //draw_fluffyBit(scene, game.input.mousePointer.x, game.input.mousePointer.y);
+    });
+
+
+    //---nyuinyui
+    nyuinyui = new Nyuinyui(scene, 800, 850, "nyui_moving")
+        .setOrigin(0.5)
+        .setScale(0.25)
+        .setAlpha(0.8)
+        .setDepth(9999+101)
+        .setVisible(false);
+    group_update.add(nyuinyui);
 }
 
 
@@ -6737,28 +7668,63 @@ function update_checkModeChange(this_scene) {
         murasakisan.submode = 0;
         murasakisan.count = 0;
         murasakisan.target_x = 600;
-        murasakisan.target_y = 840;
+        murasakisan.target_y = 820;
         if (typeof group_food != "undefined") {
             group_food.destroy(true);
         }
         group_food = this_scene.add.group();
-        item_potato = this_scene.add.sprite(600, 840+10, "item_sweet_potato").setScale(0.12).setOrigin(0.5);
+        item_potato = this_scene.add.sprite(600, 840+10, "item_food_potato").setScale(0.12).setOrigin(0.5);
         item_potato.depth = 9999;
         group_food.add(item_potato);
         
+        /*
         if (local_items[37] > 0 || local_items[37+64] > 0 || local_items[37+128] > 0) {
-            item_pancake = this_scene.add.sprite(600-35, 840+10, "item_pancake").setScale(0.12).setOrigin(0.5);
+            item_pancake = this_scene.add.sprite(600-45, 840+10, "item_pancake").setScale(0.2).setOrigin(0.5);
             item_pancake.depth = 9999;
             group_food.add(item_pancake);
         }
 
         if (local_items[5] > 0 || local_items[5+64] > 0 || local_items[5+128] > 0) {
-            item_sushi = this_scene.add.sprite(600+50, 840+10, "item_sushi")
-                .setScale(0.25)
+            item_onigiri = this_scene.add.sprite(600+40, 840+10, "item_onigiri")
+                .setScale(0.1)
                 .setOrigin(0.5)
                 .setDepth(9999);
-            group_food.add(item_sushi);
+            group_food.add(item_onigiri);
         }
+        */
+        {
+            let _item_type = 1;
+            if (local_items[1] > 0 || local_items[1+64] > 0 || local_items[1+128] > 0) {
+                item_pancake = this_scene.add.sprite(600-45, 840+10, "item_food_pancake").setScale(0.2).setOrigin(0.5);
+                item_pancake.depth = 9999;
+                group_food.add(item_pancake);
+            }
+        }
+        {
+            let _item_type = 1;
+            if (local_items[1] > 0 || local_items[1+64] > 0 || local_items[1+128] > 0) {
+                item_pancake = this_scene.add.sprite(600+40, 840+10, "item_food_cake").setScale(0.15).setOrigin(0.5);
+                item_pancake.depth = 9999;
+                group_food.add(item_pancake);
+            }
+        }
+        {
+            let _item_type = 1;
+            if (local_items[1] > 0 || local_items[1+64] > 0 || local_items[1+128] > 0) {
+                item_pancake = this_scene.add.sprite(600-20, 840-20, "item_food_onigiri").setScale(0.1).setOrigin(0.5);
+                item_pancake.depth = 9999;
+                group_food.add(item_pancake);
+            }
+        }
+        {
+            let _item_type = 1;
+            if (local_items[1] > 0 || local_items[1+64] > 0 || local_items[1+128] > 0) {
+                item_pancake = this_scene.add.sprite(600+20, 840-20, "item_food_bread").setScale(0.2).setOrigin(0.5);
+                item_pancake.depth = 9999;
+                group_food.add(item_pancake);
+            }
+        }
+        
         sound_feeding.play();
 
     //grooming check, continue
@@ -7184,7 +8150,7 @@ function update_checkItem(this_scene) {
         && local_items_flag[_item_id] != true
     ) {
         local_items_flag[_item_id] = true;
-        dice = new Dice(this_scene, 400, 600).setScale(0.3);
+        dice = new Dice(this_scene, 400, 600).setScale(0.3).setOrigin(0.5);
         group_update.add(dice);
     } else if (
         local_items[_item_id] == 0 
@@ -7482,7 +8448,9 @@ function update_checkItem(this_scene) {
         } else if (local_wallet_score >= 3300) {
             item_wall_sticker = this_scene.add.image(_x, _y, "item_wall_sticker_12");
         }
-        item_wall_sticker.setDepth(1).setAlpha(0.2);
+        if (typeof item_wall_sticker != "undefined") {
+            item_wall_sticker.setDepth(1).setAlpha(0.2);
+        }
         /*
         item_wall_sticker = this_scene.add.image(_x, _y, "item_wall_sticker")
             .setDepth(1)
@@ -7882,7 +8850,6 @@ function update_checkItem(this_scene) {
     }
 
     //###27:Floor Sticker
-    /*
     _item_id = 27;
     if (
         (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
@@ -7891,23 +8858,47 @@ function update_checkItem(this_scene) {
         local_items_flag[_item_id] = true;
         let _x = 640;
         let _y = 480;
-        item_floor_sticker1 = this_scene.add.image(_x, _y, "item_floor_sticker1")
-            .setDepth(2)
-            .setAlpha(0.2);
-        item_floor_sticker2 = this_scene.add.image(_x, _y, "item_floor_sticker2")
-            .setDepth(3)
-            .setAlpha(0.7);
+
+        if (local_wallet_score == 0) {
+            local_items_flag[_item_id] = false;
+        } else if (local_wallet_score < 300) {
+            item_floor_sticker = this_scene.add.image(_x, _y, "item_floor_sticker_01");
+        } else if (local_wallet_score < 600) {
+            item_floor_sticker = this_scene.add.image(_x, _y, "item_floor_sticker_02");
+        } else if (local_wallet_score < 900) {
+            item_floor_sticker = this_scene.add.image(_x, _y, "item_floor_sticker_03");
+        } else if (local_wallet_score < 1200) {
+            item_floor_sticker = this_scene.add.image(_x, _y, "item_floor_sticker_04");
+        } else if (local_wallet_score < 1500) {
+            item_floor_sticker = this_scene.add.image(_x, _y, "item_floor_sticker_05");
+        } else if (local_wallet_score < 1800) {
+            item_floor_sticker = this_scene.add.image(_x, _y, "item_floor_sticker_06");
+        } else if (local_wallet_score < 2100) {
+            item_floor_sticker = this_scene.add.image(_x, _y, "item_floor_sticker_07");
+        } else if (local_wallet_score < 2400) {
+            item_floor_sticker = this_scene.add.image(_x, _y, "item_floor_sticker_08");
+        } else if (local_wallet_score < 2700) {
+            item_floor_sticker = this_scene.add.image(_x, _y, "item_floor_sticker_09");
+        } else if (local_wallet_score < 3000) {
+            item_floor_sticker = this_scene.add.image(_x, _y, "item_floor_sticker_10");
+        } else if (local_wallet_score < 3300) {
+            item_floor_sticker = this_scene.add.image(_x, _y, "item_floor_sticker_11");
+        } else if (local_wallet_score >= 3300) {
+            item_floor_sticker = this_scene.add.image(_x, _y, "item_floor_sticker_12");
+        }
+        if (typeof item_floor_sticker != "undefined") {
+            item_floor_sticker.setDepth(1).setAlpha(0.6);
+        }
+
     } else if (
         local_items[_item_id] == 0 
         && local_items[_item_id+64] == 0 
         && local_items[_item_id+128] == 0
-        && typeof item_floor_sticker1 != "undefined"
+        && typeof item_floor_sticker != "undefined"
     ) {
-        item_floor_sticker1.destroy(true);
-        item_floor_sticker2.destroy(true);
+        item_floor_sticker.destroy(true);
         local_items_flag[_item_id] = false;
     }
-    */
 
     //###33:Table
     _item_id = 33;
@@ -7958,11 +8949,15 @@ function update_checkItem(this_scene) {
             .on('pointerdown', () => {
                 if (flag_radarchart == 0) {
                     flag_radarchart = 1;
+                    flag_info = 1;
+                    group_info.setVisible(true);
                     draw_radarchart(this_scene);
                     item_pad.setTexture("item_pad_on");
                     sound_pad.play();
                 } else {
                     flag_radarchart = 0;
+                    flag_info = 0;
+                    group_info.setVisible(false);
                     group_chart.destroy(true);
                     item_pad.setTexture("item_pad_off");
                     //init_global_variants();
@@ -8010,11 +9005,13 @@ function update_checkItem(this_scene) {
                 .setScale(0.06)
                 .setDepth(1000);
             group_score_counter.add(_img);
+            group_info.add(_img);
             if (_len_score + i + 1 > 7) {
                 _txt = this_scene.add.text(_x-2, _y, _text, _font_arg)
                     .setOrigin(0.5)
                     .setDepth(1001);
                 group_score_counter.add(_txt);
+                group_info.add(_txt);
             }
         }
     } else if (
@@ -8249,6 +9246,10 @@ function update_checkItem(this_scene) {
             .setOrigin(0.5)
             .setScale(0.35);
         group_update.add(murasaki_neon);
+        item_wall_sticker_neon = this_scene.add.image(640, 480, "item_wall_sticker_neon")
+            .setDepth(9999+2)
+            .setAlpha(0.7)
+            .setVisible(false);
         item_switch = this_scene.add.sprite(1230,300, "item_switch")
             .setOrigin(0.5)
             .setScale(0.25)
@@ -8279,6 +9280,9 @@ function update_checkItem(this_scene) {
                         item_window.setTexture("item_window_night_closed");
                     }
                 }
+                if (typeof item_wall_sticker != "undefined" && local_wallet_score >= 2700) {
+                    item_wall_sticker_neon.setVisible(true);
+                }
                 flag_onLight = false;
             } else {
                 item_switch.anims.play("item_switch_off", true);
@@ -8303,6 +9307,9 @@ function update_checkItem(this_scene) {
                     } else if (item_window.texture == game.textures.get("item_window_night_closed")) {
                         item_window.setTexture("item_window_day_closed");
                     }
+                }
+                if (typeof item_wall_sticker != "undefined" && local_wallet_score >= 2700) {
+                    item_wall_sticker_neon.setVisible(false);
                 }
                 flag_onLight = true;
             }
@@ -8350,12 +9357,14 @@ function update_checkItem(this_scene) {
         local_items_flag[_item_id] = true;
         let _x = 1037;
         let _y = 600;
-        item_gauge = this_scene.add.sprite(_x, _y, "item_gauge")
-            .setScale(0.2)
+        item_tokenChest = this_scene.add.sprite(_x, _y, "item_tokenChest")
+            .setFrame(0)
+            .setScale(0.28)
             .setOrigin(0.5)
             .setInteractive({useHandCursor: true})
             .on('pointerdown', async function() {
                 if (flag_tokenBall == 0) {
+                    item_tokenChest.setFrame(1);
                     flag_tokenBall = 1;
                     sound_basket.play();
                     murasakisan.on_click();
@@ -8394,6 +9403,7 @@ function update_checkItem(this_scene) {
                     }
                     */
                 } else {
+                    item_tokenChest.setFrame(0);
                     flag_tokenBall = 0;
                     group_tokenBall.destroy(true);
                 }
@@ -8402,9 +9412,9 @@ function update_checkItem(this_scene) {
         local_items[_item_id] == 0 
         && local_items[_item_id+64] == 0 
         && local_items[_item_id+128] == 0
-        && typeof item_gauge != "undefined"
+        && typeof item_tokenChest != "undefined"
     ) {
-        item_gauge.destroy(true);
+        item_tokenChest.destroy(true);
         local_items_flag[_item_id] = false;
     }
 
@@ -8774,6 +9784,7 @@ function update_checkItem(this_scene) {
                     .setDepth(3);
                 summoned_presentbox.push(_itemId);
                 group_update.add(_present);
+                draw_flower(this_scene, _x, _y);
             }
         });
     }
@@ -8792,9 +9803,10 @@ function update_checkItem(this_scene) {
                 _itemIds.forEach(_itemId => {
                     if (!summoned_fluffies.includes(_itemId)){
                         setTimeout( () => {
-                            summon_fluffy(this_scene, i, "common", _itemId);
+                            //summon_fluffy(this_scene, i, "common", _itemId);
+                            summon_fluffy2(this_scene, i, _itemId);
                         }, _timeout, _itemId);
-                        _timeout += 500;
+                        _timeout += 200;
                         summoned_fluffies.push(_itemId);
                     }
                 });
@@ -8809,9 +9821,10 @@ function update_checkItem(this_scene) {
                 _itemIds.forEach(_itemId => {
                     if (!summoned_fluffies.includes(_itemId)){
                         setTimeout( () => {
-                            summon_fluffy(this_scene, i, "uncommon", _itemId);
+                            //summon_fluffy(this_scene, i, "uncommon", _itemId);
+                            summon_fluffy2(this_scene, i, _itemId);
                         }, _timeout, _itemId);
-                        _timeout += 500;
+                        _timeout += 200;
                         summoned_fluffies.push(_itemId);
                     }
                 });
@@ -8826,9 +9839,10 @@ function update_checkItem(this_scene) {
                 _itemIds.forEach(_itemId => {
                     if (!summoned_fluffies.includes(_itemId)){
                         setTimeout( () => {
-                            summon_fluffy(this_scene, i, "rare", _itemId);
+                            //summon_fluffy(this_scene, i, "rare", _itemId);
+                            summon_fluffy2(this_scene, i, _itemId);
                         }, _timeout, _itemId);
-                        _timeout += 500;
+                        _timeout += 200;
                         summoned_fluffies.push(_itemId);
                     }
                 });
@@ -8875,7 +9889,7 @@ function update_checkItem(this_scene) {
         let _y = 550 + Math.random()*200;
         festligheter = new Festligheter(this_scene, _x, _y, "ff_preFestival")
             .setOrigin(0.5)
-            .setScale(0.3)
+            .setScale(0.25)
             .setAlpha(1)
             .setDepth(3);
         group_update.add(festligheter);
@@ -8903,7 +9917,7 @@ function calc_fps() {
         let _fps = turn - turn_forFPS;
         turn_forFPS = turn; 
         //text_turn.setText("FPS: " + _fps);
-        text_turn.setText(_fps + " fps");
+        text_fps.setText(_fps + " fps");
     }
 }
 
@@ -8949,12 +9963,19 @@ function update(scene) {
     if (turn % 100 == 0 && summoner > 0 && flag_doneFp == 0 && local_wallet == local_owner) {
         send_fp_get(local_wallet, summoner);
         flag_doneFp = 1;
+        /*
         scene.input.on("pointerdown", () => {
             console.log(
-                Math.round(game.input.mousePointer.x), 
-                Math.round(game.input.mousePointer.y)
-            )
+                //Math.round(game.input.mousePointer.x), 
+                //Math.round(game.input.mousePointer.y)
+                Math.round(pointer_x), 
+                Math.round(pointer_y)
+            );
+            //draw_flower(scene, game.input.mousePointer.x, game.input.mousePointer.y);
+            //draw_star(scene, game.input.mousePointer.x, game.input.mousePointer.y);
+            draw_fluffyBit(scene, game.input.mousePointer.x, game.input.mousePointer.y);
         });
+        */
     }
 
     //radarchart
@@ -9105,7 +10126,7 @@ class FirstCheck extends Phaser.Scene {
         
         //loop checking wallet and chain id
         runAll(this);
-        const timerId = setInterval(runAll, 1000, this);
+        const timerId = setInterval(runAll, 5000, this);
     }
 }
 
