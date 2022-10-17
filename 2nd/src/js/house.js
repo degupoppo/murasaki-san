@@ -877,10 +877,6 @@ async function init_global_variants() {
     flag_fadein = 0;
     flag_debug = 0;
     flag_info = 1;
-    
-    //---pointer
-    pointer_x = 0;
-    pointer_y = 0;
 }
 
 init_global_variants();
@@ -3113,7 +3109,7 @@ class Dice extends Phaser.GameObjects.Sprite{
         */
         
         //DOES NOT WORK in phone
-        if (pointer_x > this.x) {
+        if (game.input.activePointer.x > this.x) {
         //if (game.input.mousePointer.x > this.x) {
         //if (game.input.activePointer.position.x > this.x) {
         //if (game.input.pointer1.x > this.x) {
@@ -3285,7 +3281,7 @@ class tokenBall extends Phaser.GameObjects.Sprite{
         */
         
         //DOES NOT WORK in phone
-        if (pointer_x > this.x) {
+        if (game.input.activePointer.x > this.x) {
         //if (game.input.mousePointer.x > this.x) {
         //if (game.input.activePointer.position.x > this.x) {
         //if (game.input.pointer1.x > this.x) {
@@ -3905,7 +3901,7 @@ class Fluffy2 extends Phaser.GameObjects.Sprite{
     //### on_click
     on_click() {
         this.speed_x = 6 + Math.random() * 4;
-        if (pointer_x > this.x) {
+        if (game.input.activePointer.x > this.x) {
             this.speed_x *= -1;
         }
         /*
@@ -7114,16 +7110,20 @@ function create(scene) {
     */
 
     //---pointer
+    /*
     //scene.input.on("pointerdown", (pointer, PointerEvent) => {
     scene.input.on("pointermove", (pointer, PointerEvent) => {
         pointer_x = pointer.x;
         pointer_y = pointer.y;
         //console.log(pointer.x, pointer.y)
     });
+    */
     scene.input.on("pointerdown", () => {
         console.log(
-            Math.round(pointer_x), 
-            Math.round(pointer_y)
+            //Math.round(pointer_x), 
+            //Math.round(pointer_y)
+            Math.round(game.input.activePointer.x), 
+            Math.round(game.input.activePointer.y)
         );
         //draw_flower(scene, game.input.mousePointer.x, game.input.mousePointer.y);
         //draw_star(scene, game.input.mousePointer.x, game.input.mousePointer.y);
