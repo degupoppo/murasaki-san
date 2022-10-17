@@ -7,7 +7,6 @@
 
 //### 1st
 
-<<<<<<< HEAD
    *猫ちゃん実装
         アニメーションの実装
 
@@ -34,27 +33,6 @@
         再読み込み後にクラフト中のアイテム表示されないバグ修正
         宝箱の音の吟味
         お花のフロアステッカーの修正、ウォールステッカーへ？
-=======
-
-    食べ物一つずつ
-
-    fluffyのUI実装
-    
-    catのUI実装
-    猫ちゃん実装
-    
-    お花ウォールステッカーへ
-    
-    ナイナイさん動かす
-    
-    宝箱の音
-    
-    情報の表示/非表示
-    
-    ニュースの修正
-    
-    
->>>>>>> 77ae7e39a53d9290d6d3e6b358d06d13e9c22dda
 
     バイバックコントラの洗練
        *アクティブユーザーのカウント方法の深慮
@@ -3927,7 +3905,6 @@ class Fluffy2 extends Phaser.GameObjects.Sprite{
     //### on_click
     on_click() {
         this.speed_x = 6 + Math.random() * 4;
-<<<<<<< HEAD
         if (pointer_x > this.x) {
             this.speed_x *= -1;
         }
@@ -3936,11 +3913,6 @@ class Fluffy2 extends Phaser.GameObjects.Sprite{
             this.speed_x *= -1;
         }
         */
-=======
-        if (Math.random() > 0.5) {
-            this.speed_x *= -1;
-        }
->>>>>>> 77ae7e39a53d9290d6d3e6b358d06d13e9c22dda
         this.speed_y = 6 + Math.random() * 4;
         //define constant of y = b - a * x
         this.a = Math.random() * 0.8 - 0.4;
@@ -4545,15 +4517,6 @@ class Nyuinyui extends Phaser.GameObjects.Sprite{
         this.on("pointerdown", function (pointer) {
             this.on_click();
         }, this);
-<<<<<<< HEAD
-=======
-        this.text = scene.add.text(
-            this.x, 
-            this.y-40,
-            "test", 
-            {font: "20px Arial", fill: "#000000", backgroundColor: "#ffffff"}
-        ).setOrigin(0.5).setDepth(9999).setVisible(false);
->>>>>>> 77ae7e39a53d9290d6d3e6b358d06d13e9c22dda
     }
     
     //### on_click
@@ -4581,29 +4544,17 @@ class Nyuinyui extends Phaser.GameObjects.Sprite{
             var li = [0,10,20,30,150,160,170,180,190,200,210,330,340,350]
             this.moving_degree = li[Math.floor(Math.random() * li.length)];
             //out of area check
-<<<<<<< HEAD
             if (this.x < 650 && this.moving_degree > 90 && this.moving_degree <270) {
                 this.moving_degree -= 180;
             }else if (this.x > 1000 && (this.moving_degree < 90 || this.moving_degree > 270)) {
-=======
-            if (this.x < 100 && this.moving_degree > 90 && this.moving_degree <270) {
-                this.moving_degree -= 180;
-            }else if (this.x > 1100 && (this.moving_degree < 90 || this.moving_degree > 270)) {
->>>>>>> 77ae7e39a53d9290d6d3e6b358d06d13e9c22dda
                 this.moving_degree -= 180;
             }
             //360 over check
             this.moving_degree = this.moving_degree % 360;
             //out of area check, y
-<<<<<<< HEAD
             if (this.y > 850 && this.moving_degree > 180) {
                 this.moving_degree = 360 - this.moving_degree;
             }else if (this.y < 820 && this.moving_degree < 180) {
-=======
-            if (this.y > 860 && this.moving_degree > 180) {
-                this.moving_degree = 360 - this.moving_degree;
-            }else if (this.y < 500 && this.moving_degree < 180) {
->>>>>>> 77ae7e39a53d9290d6d3e6b358d06d13e9c22dda
                 this.moving_degree = 360 - this.moving_degree;
             }
             //minus check
@@ -4611,11 +4562,7 @@ class Nyuinyui extends Phaser.GameObjects.Sprite{
                 this.moving_degree += 360;
             }
             //determine speed, count
-<<<<<<< HEAD
             this.moving_speed = 0.2 + Math.random() * 0.1;  //0.3-0.5
-=======
-            this.moving_speed = 0.3 + Math.random() * 0.2;  //0.3-0.5
->>>>>>> 77ae7e39a53d9290d6d3e6b358d06d13e9c22dda
             this.moving_count = 70 + Math.random() * 30;    //70-100
             //determine left or right
             if (this.moving_degree > 90 && this.moving_degree <= 270) {
@@ -4631,13 +4578,7 @@ class Nyuinyui extends Phaser.GameObjects.Sprite{
         } else {
             this.x += Math.cos(this.moving_degree * (Math.PI/180)) * this.moving_speed;
             this.y -= Math.sin(this.moving_degree * (Math.PI/180)) * this.moving_speed;
-<<<<<<< HEAD
             //this.depth = this.y;
-=======
-            this.depth = this.y;
-            this.text.x = this.x;
-            this.text.y = this.y-40;
->>>>>>> 77ae7e39a53d9290d6d3e6b358d06d13e9c22dda
             this.movingSubmode += 1;
             if (this.movingSubmode >= 100){
                 this.movingMode = "resting";
@@ -5453,7 +5394,6 @@ function draw_flower(scene, _x, _y) {
 
 //---draw_star
 function draw_star(scene, _x, _y) {
-<<<<<<< HEAD
     let _lifespan = 400;
     const emitterConfig = {
         alpha: 0.5,
@@ -5489,8 +5429,6 @@ function draw_star(scene, _x, _y) {
 
 //---draw_fluffyBit
 function draw_fluffyBit(scene, _x, _y) {
-=======
->>>>>>> 77ae7e39a53d9290d6d3e6b358d06d13e9c22dda
     let _lifespan = 500;
     const emitterConfig = {
         alpha: 0.5,
@@ -5506,21 +5444,13 @@ function draw_fluffyBit(scene, _x, _y) {
         rotate: { min:0, max:360 },
         scale: { min: 0.05, max: 0.10 },
         speed: { min: 50, max: 300 },
-<<<<<<< HEAD
         frame: [0,1,2,3,4,5,6,7,8,9,10,11],
-=======
-        frame: [0,1,2,3,4,5,6,7],
->>>>>>> 77ae7e39a53d9290d6d3e6b358d06d13e9c22dda
         //x: 50+Math.random()*1100, 
         //y: 500+Math.random()*350,
         x: _x, 
         y: _y,
     };
-<<<<<<< HEAD
     const particles = scene.add.particles('par_fluffys')
-=======
-    const particles = scene.add.particles('par_stars')
->>>>>>> 77ae7e39a53d9290d6d3e6b358d06d13e9c22dda
         .setDepth(9999);
     const emitter = particles.createEmitter(emitterConfig);
     scene.time.addEvent({
@@ -5532,10 +5462,6 @@ function draw_fluffyBit(scene, _x, _y) {
 }
 
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 77ae7e39a53d9290d6d3e6b358d06d13e9c22dda
 //---summon_star
 function summon_star(scene, _type) {
     let _dic = {
@@ -5960,10 +5886,7 @@ function preload(scene) {
     scene.load.image("item_wall_sticker_10", "src/png/item_wall_sticker_10.png");
     scene.load.image("item_wall_sticker_11", "src/png/item_wall_sticker_11.png");
     scene.load.image("item_wall_sticker_12", "src/png/item_wall_sticker_12.png");
-<<<<<<< HEAD
     scene.load.image("item_wall_sticker_neon", "src/png/item_wall_sticker_neon.png");
-=======
->>>>>>> 77ae7e39a53d9290d6d3e6b358d06d13e9c22dda
     scene.load.image("item_floor_sticker_01", "src/png/item_floor_sticker_01.png");
     scene.load.image("item_floor_sticker_02", "src/png/item_floor_sticker_02.png");
     scene.load.image("item_floor_sticker_03", "src/png/item_floor_sticker_03.png");
@@ -6081,10 +6004,7 @@ function preload(scene) {
     scene.load.atlas('par_flares', 'src/particle/flares.png', 'src/particle/flares.json');
     scene.load.spritesheet("par_flowers", "src/particle/flowers.png", {frameWidth: 370, frameHeight: 320});
     scene.load.spritesheet("par_stars", "src/particle/stars.png", {frameWidth: 200, frameHeight: 191});
-<<<<<<< HEAD
     scene.load.spritesheet("par_fluffys", "src/particle/fluffy.png", {frameWidth: 370, frameHeight: 320});
-=======
->>>>>>> 77ae7e39a53d9290d6d3e6b358d06d13e9c22dda
     
     //---tokenBall
     scene.load.image("coin_color_ACA", "src/png/coin_color_ACA.png");
@@ -6458,7 +6378,6 @@ function create(scene) {
     });
     
     //---animation fluffy
-<<<<<<< HEAD
     //fluffier, blinking
     for (i=1; i<=12; i++) {
         let _key = "fluffy_fluffier_" + ("00" + i).slice(-2);
@@ -6494,227 +6413,6 @@ function create(scene) {
         });
     }
         
-=======
-    scene.anims.create({
-        key: "fluffy_fluffier_01",
-        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:1 +8*0, end:2 +8*0}),
-        frameRate: 1,
-        repeat: -1
-    });
-    scene.anims.create({
-        key: "fluffy_fluffier_02",
-        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:1 +8*1, end:2 +8*1}),
-        frameRate: 1,
-        repeat: -1
-    });
-    scene.anims.create({
-        key: "fluffy_fluffier_03",
-        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:1 +8*2, end:2 +8*2}),
-        frameRate: 1,
-        repeat: -1
-    });
-    scene.anims.create({
-        key: "fluffy_fluffier_04",
-        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:1 +8*3, end:2 +8*3}),
-        frameRate: 1,
-        repeat: -1
-    });
-    scene.anims.create({
-        key: "fluffy_fluffier_05",
-        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:1 +8*4, end:2 +8*4}),
-        frameRate: 1,
-        repeat: -1
-    });
-    scene.anims.create({
-        key: "fluffy_fluffier_06",
-        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:1 +8*5, end:2 +8*5}),
-        frameRate: 1,
-        repeat: -1
-    });
-    scene.anims.create({
-        key: "fluffy_fluffier_07",
-        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:1 +8*6, end:2 +8*6}),
-        frameRate: 1,
-        repeat: -1
-    });
-    scene.anims.create({
-        key: "fluffy_fluffier_08",
-        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:1 +8*7, end:2 +8*7}),
-        frameRate: 1,
-        repeat: -1
-    });
-    scene.anims.create({
-        key: "fluffy_fluffier_09",
-        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:1 +8*8, end:2 +8*8}),
-        frameRate: 1,
-        repeat: -1
-    });
-    scene.anims.create({
-        key: "fluffy_fluffier_10",
-        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:1 +8*9, end:2 +8*9}),
-        frameRate: 1,
-        repeat: -1
-    });
-    scene.anims.create({
-        key: "fluffy_fluffier_11",
-        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:1 +8*10, end:2 +8*10}),
-        frameRate: 1,
-        repeat: -1
-    });
-    scene.anims.create({
-        key: "fluffy_fluffier_12",
-        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:1 +8*11, end:2 +8*11}),
-        frameRate: 1,
-        repeat: -1
-    });
-
-    scene.anims.create({
-        key: "fluffy_fluffiest_01_left",
-        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:4 +8*0, end:5 +8*0}),
-        frameRate: 1,
-        repeat: -1
-    });
-    scene.anims.create({
-        key: "fluffy_fluffiest_02_left",
-        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:4 +8*1, end:5 +8*1}),
-        frameRate: 1,
-        repeat: -1
-    });
-    scene.anims.create({
-        key: "fluffy_fluffiest_03_left",
-        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:4 +8*2, end:5 +8*2}),
-        frameRate: 1,
-        repeat: -1
-    });
-    scene.anims.create({
-        key: "fluffy_fluffiest_04_left",
-        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:4 +8*3, end:5 +8*3}),
-        frameRate: 1,
-        repeat: -1
-    });
-    scene.anims.create({
-        key: "fluffy_fluffiest_05_left",
-        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:4 +8*4, end:5 +8*4}),
-        frameRate: 1,
-        repeat: -1
-    });
-    scene.anims.create({
-        key: "fluffy_fluffiest_06_left",
-        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:4 +8*5, end:5 +8*5}),
-        frameRate: 1,
-        repeat: -1
-    });
-    scene.anims.create({
-        key: "fluffy_fluffiest_07_left",
-        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:4 +8*6, end:5 +8*6}),
-        frameRate: 1,
-        repeat: -1
-    });
-    scene.anims.create({
-        key: "fluffy_fluffiest_08_left",
-        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:4 +8*7, end:5 +8*7}),
-        frameRate: 1,
-        repeat: -1
-    });
-    scene.anims.create({
-        key: "fluffy_fluffiest_09_left",
-        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:4 +8*8, end:5 +8*8}),
-        frameRate: 1,
-        repeat: -1
-    });
-    scene.anims.create({
-        key: "fluffy_fluffiest_10_left",
-        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:4 +8*9, end:5 +8*9}),
-        frameRate: 1,
-        repeat: -1
-    });
-    scene.anims.create({
-        key: "fluffy_fluffiest_11_left",
-        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:4 +8*10, end:5 +8*10}),
-        frameRate: 1,
-        repeat: -1
-    });
-    scene.anims.create({
-        key: "fluffy_fluffiest_12_left",
-        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:4 +8*11, end:5 +8*11}),
-        frameRate: 1,
-        repeat: -1
-    });
-
-    scene.anims.create({
-        key: "fluffy_fluffiest_01_right",
-        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:6 +8*0, end:7 +8*0}),
-        frameRate: 1,
-        repeat: -1
-    });
-    scene.anims.create({
-        key: "fluffy_fluffiest_02_right",
-        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:6 +8*1, end:7 +8*1}),
-        frameRate: 1,
-        repeat: -1
-    });
-    scene.anims.create({
-        key: "fluffy_fluffiest_03_right",
-        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:6 +8*2, end:7 +8*2}),
-        frameRate: 1,
-        repeat: -1
-    });
-    scene.anims.create({
-        key: "fluffy_fluffiest_04_right",
-        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:6 +8*3, end:7 +8*3}),
-        frameRate: 1,
-        repeat: -1
-    });
-    scene.anims.create({
-        key: "fluffy_fluffiest_05_right",
-        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:6 +8*4, end:7 +8*4}),
-        frameRate: 1,
-        repeat: -1
-    });
-    scene.anims.create({
-        key: "fluffy_fluffiest_06_right",
-        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:6 +8*5, end:7 +8*5}),
-        frameRate: 1,
-        repeat: -1
-    });
-    scene.anims.create({
-        key: "fluffy_fluffiest_07_right",
-        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:6 +8*6, end:7 +8*6}),
-        frameRate: 1,
-        repeat: -1
-    });
-    scene.anims.create({
-        key: "fluffy_fluffiest_08_right",
-        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:6 +8*7, end:7 +8*7}),
-        frameRate: 1,
-        repeat: -1
-    });
-    scene.anims.create({
-        key: "fluffy_fluffiest_09_right",
-        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:6 +8*8, end:7 +8*8}),
-        frameRate: 1,
-        repeat: -1
-    });
-    scene.anims.create({
-        key: "fluffy_fluffiest_10_right",
-        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:6 +8*9, end:7 +8*9}),
-        frameRate: 1,
-        repeat: -1
-    });
-    scene.anims.create({
-        key: "fluffy_fluffiest_11_right",
-        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:6 +8*10, end:7 +8*10}),
-        frameRate: 1,
-        repeat: -1
-    });    
-    scene.anims.create({
-        key: "fluffy_fluffiest_12_right",
-        frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {start:6 +8*11, end:7 +8*11}),
-        frameRate: 1,
-        repeat: -1
-    });    
-    
->>>>>>> 77ae7e39a53d9290d6d3e6b358d06d13e9c22dda
     //---animation nyui
     scene.anims.create({
         key: "nyui_moving_left",
@@ -8368,15 +8066,6 @@ function update_checkItem(this_scene) {
                     localStorage.setItem(_pos_local, JSON.stringify(_pos));
                 })
         }
-
-        //nyui
-        nyuinyui = new Nyuinyui(this_scene, 500, 500, "nyui_moving")
-            .setOrigin(0.5)
-            .setScale(0.25)
-            .setAlpha(1)
-            .setDepth(3);
-        group_update.add(nyuinyui);
-        
 
     } else if (
         local_items[_item_id] == 0 
@@ -10277,7 +9966,6 @@ function update(scene) {
         /*
         scene.input.on("pointerdown", () => {
             console.log(
-<<<<<<< HEAD
                 //Math.round(game.input.mousePointer.x), 
                 //Math.round(game.input.mousePointer.y)
                 Math.round(pointer_x), 
@@ -10286,13 +9974,6 @@ function update(scene) {
             //draw_flower(scene, game.input.mousePointer.x, game.input.mousePointer.y);
             //draw_star(scene, game.input.mousePointer.x, game.input.mousePointer.y);
             draw_fluffyBit(scene, game.input.mousePointer.x, game.input.mousePointer.y);
-=======
-                Math.round(game.input.mousePointer.x), 
-                Math.round(game.input.mousePointer.y)
-            );
-            //draw_flower(scene, game.input.mousePointer.x, game.input.mousePointer.y);
-            draw_star(scene, game.input.mousePointer.x, game.input.mousePointer.y);
->>>>>>> 77ae7e39a53d9290d6d3e6b358d06d13e9c22dda
         });
         */
     }
