@@ -7126,10 +7126,10 @@ function create(scene) {
             Math.round(pointer_y)
         );
         //draw_flower(scene, game.input.mousePointer.x, game.input.mousePointer.y);
-        draw_star(scene, game.input.mousePointer.x, game.input.mousePointer.y);
+        //draw_star(scene, game.input.mousePointer.x, game.input.mousePointer.y);
         //draw_fluffyBit(scene, game.input.mousePointer.x, game.input.mousePointer.y);
+        draw_star(scene, pointer_x, pointer_y);
     });
-
 
     //---nyuinyui
     nyuinyui = new Nyuinyui(scene, 800, 850, "nyui_moving")
