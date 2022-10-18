@@ -1,4 +1,145 @@
 
+//===Header======================================================
+/*
+
+interface IERC721 {
+    event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
+    event Approval(address indexed owner, address indexed approved, uint256 indexed tokenId);
+    event ApprovalForAll(address indexed owner, address indexed operator, bool approved);
+    function balanceOf(address owner) external view returns (uint256 balance);
+    function ownerOf(uint256 tokenId) external view returns (address owner);
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 tokenId
+    ) external;
+    function transferFrom(
+        address from,
+        address to,
+        uint256 tokenId
+    ) external;
+    function approve(address to, uint256 tokenId) external;
+    function getApproved(uint256 tokenId) external view returns (address operator);
+    function setApprovalForAll(address operator, bool _approved) external;
+    function isApprovedForAll(address owner, address operator) external view returns (bool);
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 tokenId,
+        bytes calldata data
+    ) external;
+}
+
+library Strings {
+    function toString(uint256 value) internal pure returns (string memory) {
+        if (value == 0) {
+            return "0";
+        }
+        uint256 temp = value;
+        uint256 digits;
+        while (temp != 0) {
+            digits++;
+            temp /= 10;
+        }
+        bytes memory buffer = new bytes(digits);
+        while (value != 0) {
+            digits -= 1;
+            buffer[digits] = bytes1(uint8(48 + uint256(value % 10)));
+            value /= 10;
+        }
+        return string(buffer);
+    }
+}
+
+interface IERC721Receiver {
+    function onERC721Received(
+        address operator,
+        address from,
+        uint256 tokenId,
+        bytes calldata data
+    ) external returns (bytes4);
+}
+
+contract ERC721 is IERC721 {
+    using Strings for uint256;
+
+    mapping(uint256 => address) private _owners;
+    mapping(address => uint256) private _balances;
+    mapping(uint256 => address) private _tokenApprovals;
+    mapping(address => mapping(address => bool)) private _operatorApprovals;
+    
+    function balanceOf(address owner) public view virtual override returns (uint256) {
+        require(owner != address(0), "ERC721: balance query for the zero address");
+        return _balances[owner];
+    }
+    
+    function ownerOf(uint256 tokenId) public view virtual override returns (address) {
+        address owner = _owners[tokenId];
+        require(owner != address(0), "ERC721: owner query for nonexistent token");
+        return owner;
+    }
+    
+    function _baseURI() internal view virtual returns (string memory) {
+        return "";
+    }
+    
+    function approve(address to, uint256 tokenId) public virtual override {
+        address owner = ERC721.ownerOf(tokenId);
+        require(to != owner, "ERC721: approval to current owner");
+
+        require(
+            msg.sender == owner || isApprovedForAll(owner, msg.sender),
+            "ERC721: approve caller is not owner nor approved for all"
+        );
+
+        _approve(to, tokenId);
+    }
+    
+    function getApproved(uint256 tokenId) public view virtual override returns (address) {
+        require(_exists(tokenId), "ERC721: approved query for nonexistent token");
+
+        return _tokenApprovals[tokenId];
+    }
+    
+    function setApprovalForAll(address operator, bool approved) public virtual override {
+        require(operator != msg.sender, "ERC721: approve to caller");
+
+        _operatorApprovals[msg.sender][operator] = approved;
+        emit ApprovalForAll(msg.sender, operator, approved);
+    }
+    
+    function _isContract(address account) internal view returns (bool) {
+        uint256 size;
+        assembly {
+            size := extcodesize(account)
+        }
+        return size > 0;
+    }
+    
+    function isApprovedForAll(address owner, address operator) public view virtual override returns (bool) {
+        return _operatorApprovals[owner][operator];
+    }
+    
+    function transferFrom(
+        address from,
+        address to,
+        uint256 tokenId
+    ) public virtual override {
+        //solhint-disable-next-line max-line-length
+        require(_isApprovedOrOwner(msg.sender, tokenId), "ERC721: transfer caller is not owner nor approved");
+
+        _transfer(from, to, tokenId);
+    }
+    
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 tokenId
+    ) public virtual override {
+        safeTransferFrom(from, to, tokenId, "");
+    }
+
+*/
 
 //===ToDo========================================================
 
@@ -6,12 +147,6 @@
 /*
 
 //### 1st
-
-   *猫ちゃん実装
-        アニメーションの実装
-
-   *スイッチOFF時のUI改善
-        ステッカーの蛍光塗料を実装
 
    *アイテム順の吟味
         アイテムの種類分け
@@ -21,13 +156,24 @@
         floor stickerの修正
         蛍光塗料の実装
 
+ ok 猫ちゃん実装
+        アニメーションの実装
+
+ ok スイッチOFF時のUI改善
+        ステッカーの蛍光塗料を実装
+
     fluffy修正
         色修正
         正面のアニメーション追加
         サイズ修正
         fluffierの瞬き頻度修正
     
-    ナイナイさん動かす
+    ナイナイさんUIの改善
+        アニメーションの実装
+        出現・退場の改善
+            出現するのはduringFestival_beforeVoteの時だけ
+            afterVoteはチラシなどで現状報告させるか
+            endingの演出をどうするか
         
     ニュースの修正
         ウェルカムボードへ変更する
@@ -841,7 +987,7 @@ async function init_global_variants() {
     screen_exp = 0;
     screen_exp_delta = 0;
     count_sync = 0;
-    happy = 0;
+    happy = 0.1;
     satiety = 0;
     screen_happy = 0;
     screen_happy_delta = 0;
@@ -1960,7 +2106,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
                 }
                 for (let i = 0; i < group_star.getLength(); i++) {
                     if (checkOverlap(this, group_star.getChildren()[i])){
-                        group_star.getChildren()[i].on_click();
+                        group_star.getChildren()[i].on_kick();
                         break;
                     }
                 }
@@ -2004,6 +2150,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         }else if (this.submode == 2) {
             this.anims.play("murasaki_feeding", true);
             //group_food.destroy(true);
+            sound_happy.play();
             //destroy group_food one by one
             if (group_food.getChildren().length > 0) {
                 //group_food.getChildren()[group_food.getChildren().length - 1].destroy();
@@ -2012,7 +2159,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
                 group_food.destroy(true);
             }
             this.count = 0;
-            this.count_limit = this.count + 1000;
+            this.count_limit = this.count + 1150;
             this.submode = 3;
         }else if (this.submode == 3) {
             if (this.count % 200 == 0) {
@@ -2786,9 +2933,19 @@ class HomeCat extends Phaser.GameObjects.Sprite{
             this.anims.play("cat_standing", true);
             this.setInteractive({ useHandCursor: true });
             this.on("pointerdown", async () => {
-                let _array_item_196 = await get_userItems(summoner, 196);
-                if (_array_item_196.length > 0) {
+                if (local_items[196] > 0) {
+                    let _array_item_196 = await get_userItems(summoner, 196);
                     contract_send_mail(summoner, _array_item_196[0]);
+                }
+            });
+            this.on("pointerover", () => {
+                if (local_items[196] > 0) {
+                    this.anims.play("cat_standing_withMail", true);
+                }
+            });
+            this.on("pointerout", () => {
+                if (local_items[196] > 0) {
+                    this.anims.play("cat_standing", true);
                 }
             });
             this.submode += 1;
@@ -2808,7 +2965,7 @@ class HomeCat extends Phaser.GameObjects.Sprite{
     mailSending(){
         if (this.submode == 0) {
             this.speed_x = 1;
-            this.speed_y = Math.random() * 1;
+            this.speed_y = 0.5 + Math.random() * 0.5;
             this.disableInteractive();
             this.anims.play("cat_mailSending", true);
             this.submode += 1;
@@ -2846,7 +3003,7 @@ class HomeCat extends Phaser.GameObjects.Sprite{
         if (this.submode == 0) {
             this.anims.play("cat_goingHome", true);
             this.x = 1300;
-            this.y = 600 + Math.random() * 200; 
+            this.y = 800 + Math.random() * 200; 
             this.target_x = 90;
             this.target_y = 610;
             this.submode += 1;
@@ -2871,11 +3028,11 @@ class HomeCat extends Phaser.GameObjects.Sprite{
     //, mailInterval > 0 and lastMailOpen = true
     //check mailInterval, change to mode:standing
     sleeping(){
-        if (this.sumode == 0){
+        if (this.submode == 0){
             this.x = 90;
             this.y = 610;
-            this.anims.play("cat_sleepig", true);
-            this.sumode += 1;
+            this.anims.play("cat_sleeping", true);
+            this.submode += 1;
         } else {
             if (turn % 100 == 0) {
                 if (local_mail_sending_interval == 0) {
@@ -2912,6 +3069,9 @@ class VisitorCat extends Phaser.GameObjects.Sprite{
         this.scene.add.existing(this);
         this.submode = 0;
         this.firstDecideMode();
+        this.on("pointerdown", () => {
+            contract_open_mail(summoner);
+        });
     }
     
     //### first
@@ -2923,11 +3083,11 @@ class VisitorCat extends Phaser.GameObjects.Sprite{
     //### visiting
     visiting(){
         if (this.submode == 0){
-            this.anims.play("cat_visitor_moving_left", true);
+            this.anims.play("cat_visitor_visiting", true);
             this.x = 1300;
             this.y = 600 + Math.random() * 200; 
-            this.target_x = 200 + Math.random()*600;
-            this.target_y = 400 + Math.random()*200;
+            this.target_x = 400 + Math.random()*400;
+            this.target_y = 500 + Math.random()*200;
             this.submode += 1;
         } else {
             let delta_x = this.target_x - this.x;
@@ -2949,19 +3109,15 @@ class VisitorCat extends Phaser.GameObjects.Sprite{
     //### standing
     standing(){
         if (this.submode == 0){
-            this.standing_count = 100 + Math.random()*100;
+            this.standing_count = 1000 + Math.random()*1000;
             this.anims.play("cat_visitor_standing", true);
             this.setInteractive({ useHandCursor: true });
-            this.on("pointerdown", () => {
-                contract_open_mail(summoner);
-                this.disableInteractive();
-            });
             this.submode += 1;
         } else if (this.submode < this.standing_count)  {
             this.submode += 1;
         } else {
             let _rand = Math.random()*100;
-            if (_rand <= 80) {
+            if (_rand <= 95) {
                 this.mode = "moving";
             } else {
                 this.mode = "sleeping";
@@ -2998,7 +3154,7 @@ class VisitorCat extends Phaser.GameObjects.Sprite{
             //determine speed, count
             //this.moving_speed = 0.2 + Math.random() * 0.1;  //0.3-0.5
             this.moving_speed = 0.3 + Math.random() * 0.2;  //0.3-0.5
-            this.moving_count = 70 + Math.random() * 30;    //70-100
+            this.moving_count = 200 + Math.random() * 200;    //70-100
             //determine left or right
             if (this.moving_degree > 90 && this.moving_degree <= 270) {
                 this.dist = "left";
@@ -3012,7 +3168,7 @@ class VisitorCat extends Phaser.GameObjects.Sprite{
             this.x += Math.cos(this.moving_degree * (Math.PI/180)) * this.moving_speed;
             this.y -= Math.sin(this.moving_degree * (Math.PI/180)) * this.moving_speed;
             this.submode += 1;
-            if (this.submode >= 100){
+            if (this.submode >= this.moving_count){
                 this.mode = "standing";
                 this.submode = 0;
             }
@@ -3027,7 +3183,7 @@ class VisitorCat extends Phaser.GameObjects.Sprite{
             this.submode += 1;
         } else {
             this.submode += 1;
-            if (this.submode >= 500) {
+            if (this.submode >= 4000) {
                 this.mode = "standing";
                 this.submode = 0;
             }
@@ -3040,7 +3196,7 @@ class VisitorCat extends Phaser.GameObjects.Sprite{
             this.speed_x = -1;
             this.speed_y = Math.random() * 1;
             this.disableInteractive();
-            this.anims.play("cat_visitor_moving_left", true);
+            this.anims.play("cat_visitor_goingHome", true);
             this.submode += 1;
         } else {
             this.x += this.speed_x;
@@ -3060,7 +3216,7 @@ class VisitorCat extends Phaser.GameObjects.Sprite{
         else if (this.mode == "goingHome") {this.goingHome();}
         this.depth = this.y;
         if (turn % 100 == 0) {
-            if (local_receiving_mail == 0) {
+            if (local_receiving_mail == 0 && this.mode != "goingHome") {
                 this.mode = "goingHome";
                 this.submode = 0;
             }
@@ -3390,7 +3546,7 @@ class tokenBall extends Phaser.GameObjects.Sprite{
 
 
 //---Star
-
+/*
 
 class Star extends Phaser.GameObjects.Sprite{
     constructor(scene, x, y, sprite_right, sprite_left){
@@ -3442,11 +3598,6 @@ class Star extends Phaser.GameObjects.Sprite{
     update(){
         this.count += 1;
         
-        /*
-        if (this.count % 2 == 0) {
-            return;
-        }
-        */
         //dept
         //this.depth = this.line_y;
         //check speed
@@ -3517,12 +3668,13 @@ class Star extends Phaser.GameObjects.Sprite{
 
     }
 }
+*/
 
 
 
 //---Fluffy
 //***TODO***
-
+/*
 class Fluffy extends Phaser.GameObjects.Sprite{
     constructor(scene, x, y, img, rarity, itemId, type){
         super(scene, x, y, img);
@@ -3548,11 +3700,6 @@ class Fluffy extends Phaser.GameObjects.Sprite{
             ;
         } else if (this.rarity == "uncommon") {
             this.anims.play("fluffy_fluffier_01", true);
-            /*
-            if (this.type == 1) {
-                this.anims.play("murasaki_sleeping", true);
-            }
-            */
         } else if (this.rarity == "rare") {
             
         }
@@ -3744,6 +3891,7 @@ class Fluffy extends Phaser.GameObjects.Sprite{
         }
     }
 }
+*/
 
 
 //---Fluffy2
@@ -3915,6 +4063,26 @@ class Fluffy2 extends Phaser.GameObjects.Sprite{
         }
         */
         this.speed_y = 6 + Math.random() * 4;
+        //define constant of y = b - a * x
+        this.a = Math.random() * 0.8 - 0.4;
+        this.b = this.y + this.a * this.x;
+        //sound
+        sound_dice.play();
+        this.mode = "rolling";
+    }
+
+    //### on_kick
+    on_kick() {
+        this.speed_x = 3 + Math.random() * 2;
+        if (pointer_x > this.x) {
+            this.speed_x *= -1;
+        }
+        /*
+        if (Math.random() > 0.5) {
+            this.speed_x *= -1;
+        }
+        */
+        this.speed_y = 3 + Math.random() * 2;
         //define constant of y = b - a * x
         this.a = Math.random() * 0.8 - 0.4;
         this.b = this.y + this.a * this.x;
@@ -5019,7 +5187,7 @@ function open_window_craft (scene) {
     //mail
     if (local_items[196] > 0) { _rarity = "common" } else { _rarity = null }
     button_crafting_item196  = create_button(870, 80 + 40*17, "[" +local_items[196]+ "] Cat Mail", 196,  scene, _rarity);
-    item196_icon = scene.add.sprite(870-25, 80+15 + 40*17, "item_mail").setScale(0.05);
+    item196_icon = scene.add.sprite(870-0, 80+30 + 40*17, "item_mail").setScale(0.6);
     group_window_crafting.add(button_crafting_item196);
     group_window_crafting.add(item196_icon);
 
@@ -5842,7 +6010,6 @@ function preload(scene) {
     scene.load.image("item_food_onigiri", "src/png/item_food_onigiri.png");
     scene.load.image("item_food_pancake", "src/png/item_food_pancake.png");
     
-
     //---item_craft
     scene.load.spritesheet("item_musicbox", "src/png/item_musicbox.png", {frameWidth: 370, frameHeight: 320});
     scene.load.image("item_violin", "src/png/item_violin.png");
@@ -5953,6 +6120,7 @@ function preload(scene) {
     scene.load.spritesheet("fluffy_fluffys", "src/png/fluffy_fluffys.png", {frameWidth: 370, frameHeight: 320});
     
     //---star
+    /*
     scene.load.image("star_blue", "src/png/star_blue.png");
     scene.load.image("star_green", "src/png/star_green.png");
     scene.load.image("star_orange", "src/png/star_orange.png");
@@ -5961,11 +6129,13 @@ function preload(scene) {
     scene.load.image("star_red", "src/png/star_red.png");
     scene.load.image("star_skyblue", "src/png/star_skyblue.png");
     scene.load.image("star_yellow", "src/png/star_yellow.png");
+    */
         
     //---cat
     scene.load.image("item_mail", "src/png/item_mail.png");
-    scene.load.image("cat_sitting", "src/png/cat_sitting.png");
-    scene.load.spritesheet("cat_sleeping", "src/png/cat_sleeping.png", {frameWidth: 370, frameHeight: 320});
+    //scene.load.image("cat_sitting", "src/png/cat_sitting.png");
+    //scene.load.spritesheet("cat_sleeping", "src/png/cat_sleeping.png", {frameWidth: 370, frameHeight: 320});
+    scene.load.spritesheet("cats", "src/png/cats.png", {frameWidth: 370, frameHeight: 320});
     
     //---item_craft_todo
     scene.load.image("item_cushion", "src/png/item_cushion.png");
@@ -6330,51 +6500,69 @@ function create(scene) {
     //---animation cat
     //***TODO***cat
     scene.anims.create({
+        key: "cat_sleeping",
+        frames: scene.anims.generateFrameNumbers("cats", {frames:[0,1]}),
+        frameRate: 1,
+        repeat: -1
+    });
+    scene.anims.create({
         key: "cat_standing",
-        frames: scene.anims.generateFrameNumbers("cat_sleeping", {start:0, end:1}),
+        frames: scene.anims.generateFrameNumbers("cats", {frames:[2,3]}),
+        frameRate: 1,
+        repeat: -1
+    });
+    scene.anims.create({
+        key: "cat_standing_withMail",
+        frames: scene.anims.generateFrameNumbers("cats", {frames:[4,5]}),
         frameRate: 1,
         repeat: -1
     });
     scene.anims.create({
         key: "cat_mailSending",
-        frames: scene.anims.generateFrameNumbers("cat_sleeping", {start:0, end:1}),
-        frameRate: 1,
+        frames: scene.anims.generateFrameNumbers("cats", {frames:[6,7]}),
+        frameRate: 2,
         repeat: -1
     });
     scene.anims.create({
         key: "cat_goingHome",
-        frames: scene.anims.generateFrameNumbers("cat_sleeping", {start:0, end:1}),
-        frameRate: 1,
+        frames: scene.anims.generateFrameNumbers("cats", {frames:[8,9]}),
+        frameRate: 2,
         repeat: -1
     });
     scene.anims.create({
-        key: "cat_sleeping",
-        frames: scene.anims.generateFrameNumbers("cat_sleeping", {start:0, end:1}),
-        frameRate: 1,
+        key: "cat_visitor_visiting",
+        frames: scene.anims.generateFrameNumbers("cats", {frames:[8,9]}),
+        frameRate: 2,
         repeat: -1
     });
     scene.anims.create({
         key: "cat_visitor_moving_right",
-        frames: scene.anims.generateFrameNumbers("cat_sleeping", {start:0, end:1}),
+        frames: scene.anims.generateFrameNumbers("cats", {frames:[6,7]}),
         frameRate: 1,
         repeat: -1
     });
     scene.anims.create({
         key: "cat_visitor_moving_left",
-        frames: scene.anims.generateFrameNumbers("cat_sleeping", {start:0, end:1}),
+        frames: scene.anims.generateFrameNumbers("cats", {frames:[8,9]}),
         frameRate: 1,
         repeat: -1
     });
     scene.anims.create({
         key: "cat_visitor_standing",
-        frames: scene.anims.generateFrameNumbers("cat_sleeping", {start:0, end:1}),
+        frames: scene.anims.generateFrameNumbers("cats", {frames:[4,5]}),
         frameRate: 1,
         repeat: -1
     });
     scene.anims.create({
         key: "cat_visitor_sleeping",
-        frames: scene.anims.generateFrameNumbers("cat_sleeping", {start:0, end:1}),
+        frames: scene.anims.generateFrameNumbers("cats", {frames:[0,1]}),
         frameRate: 1,
+        repeat: -1
+    });
+    scene.anims.create({
+        key: "cat_visitor_goingHome",
+        frames: scene.anims.generateFrameNumbers("cats", {frames:[8,9]}),
+        frameRate: 2,
         repeat: -1
     });
     
@@ -8636,7 +8824,7 @@ function update_checkItem(this_scene) {
         
         //mail
         mail = this_scene.add.sprite(75, 675, "item_mail")
-            .setScale(0.9)
+            .setScale(0.6)
             .setOrigin(0.5)
             .setDepth(item_cushion.y -50 +2)
             .setVisible(false);
@@ -8664,14 +8852,14 @@ function update_checkItem(this_scene) {
         ) {
             if (local_mail_sending_interval == 0) {
                 text_sending_interval.setText("");
-                cat.visible = true;
+                //cat.visible = true;
             } else {
                 let _d = Math.floor(local_mail_sending_interval / (60 * 60 * 24));
                 let _hr = Math.floor(local_mail_sending_interval % 86400 / 3600);
                 let _min = Math.floor(local_mail_sending_interval % 3600 / 60);
                 let _text = _d + "d:" + _hr + "h:" + _min + "m";
                 text_sending_interval.setText(_text).setFill("#ffffff");
-                cat.visible = false;
+                //cat.visible = false;
             }
         }
 
@@ -9876,17 +10064,25 @@ function update_checkItem(this_scene) {
     }
     
     //###000:VisitorCat
-    if (local_receiving_mail == 1 && typeof cat_visitor != "undefined"){
-        async function run(scene) {
+    if (
+        local_receiving_mail == 1 
+        && (typeof cat_visitor == "undefined" || typeof cat_visitor.scene == "undefined")
+    ){
+        async function _run(scene) {
+            /*
             let _res = await contract_callMailDetail();
             let _summoner_from_id = _res[0];
             let _summoner_from_name = res[1];
             cat_visitor = new VisitorCat(scene, 0, 0, summoner_from_id, summoner_from_name)
                 .setOrigin(0.5)
                 .setScale(0.4);
+            */
+            cat_visitor = new VisitorCat(scene, 0, 0, 99, "test")
+                .setOrigin(0.5)
+                .setScale(0.4);
             group_update.add(cat_visitor);
         }
-        run(this_scene);
+        _run(this_scene);
     }
 
     //###000:Festivaler
