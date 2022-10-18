@@ -148,6 +148,13 @@ contract ERC721 is IERC721 {
 
 //### 1st
 
+   *ナイナイさんUIの改善
+        アニメーションの実装
+        出現・退場の改善
+            出現するのはduringFestival_beforeVoteの時だけ
+            afterVoteはチラシなどで現状報告させるか
+            endingの演出をどうするか
+        
    *アイテム順の吟味
         アイテムの種類分け
         STR/DEX/INT系で同種類アイテムをバラけさせる
@@ -168,13 +175,6 @@ contract ERC721 is IERC721 {
         サイズ修正
         fluffierの瞬き頻度修正
     
-    ナイナイさんUIの改善
-        アニメーションの実装
-        出現・退場の改善
-            出現するのはduringFestival_beforeVoteの時だけ
-            afterVoteはチラシなどで現状報告させるか
-            endingの演出をどうするか
-        
     ニュースの修正
         ウェルカムボードへ変更する
     
@@ -2908,8 +2908,27 @@ class HomeCat extends Phaser.GameObjects.Sprite{
         super(scene, x, y);
         this.x = x;
         this.y = y;
+        //this.setTexture("cats");
         this.scene.add.existing(this);
         this.submode = 0;
+        this.on("pointerdown", async () => {
+            if (local_items[196] > 0) {
+                let _array_item_196 = await get_userItems(summoner, 196);
+                contract_send_mail(summoner, _array_item_196[0]);
+            }
+        });
+        this.on("pointerover", () => {
+            if (local_items[196] > 0) {
+                this.anims.play("cat_standing_withMail", true);
+            }
+        });
+        this.on("pointerout", () => {
+            if (local_items[196] > 0) {
+                this.anims.play("cat_standing", true);
+            }
+        });
+        this.disableInteractive();
+        //this.setInteractive(false);
         this.firstDecideMode();
     }
     
@@ -2932,22 +2951,6 @@ class HomeCat extends Phaser.GameObjects.Sprite{
         if (this.submode == 0) {
             this.anims.play("cat_standing", true);
             this.setInteractive({ useHandCursor: true });
-            this.on("pointerdown", async () => {
-                if (local_items[196] > 0) {
-                    let _array_item_196 = await get_userItems(summoner, 196);
-                    contract_send_mail(summoner, _array_item_196[0]);
-                }
-            });
-            this.on("pointerover", () => {
-                if (local_items[196] > 0) {
-                    this.anims.play("cat_standing_withMail", true);
-                }
-            });
-            this.on("pointerout", () => {
-                if (local_items[196] > 0) {
-                    this.anims.play("cat_standing", true);
-                }
-            });
             this.submode += 1;
         } else {
             if (turn % 100 == 0) {
@@ -2985,6 +2988,7 @@ class HomeCat extends Phaser.GameObjects.Sprite{
     leaving(){
         if (this.submode == 0) {
             this.anims.isPlaying = false;
+            this.disableInteractive();
             this.submode += 1;
         } else {
             if (turn % 100 == 0) {
@@ -3002,6 +3006,7 @@ class HomeCat extends Phaser.GameObjects.Sprite{
     goingHome(){
         if (this.submode == 0) {
             this.anims.play("cat_goingHome", true);
+            this.disableInteractive();
             this.x = 1300;
             this.y = 800 + Math.random() * 200; 
             this.target_x = 90;
@@ -3031,6 +3036,7 @@ class HomeCat extends Phaser.GameObjects.Sprite{
         if (this.submode == 0){
             this.x = 90;
             this.y = 610;
+            this.disableInteractive();
             this.anims.play("cat_sleeping", true);
             this.submode += 1;
         } else {
@@ -3062,6 +3068,7 @@ class VisitorCat extends Phaser.GameObjects.Sprite{
 
     constructor(scene, x, y, summoner_from_id, summoner_from_name){
         super(scene, x, y);
+        this.scene = scene;
         this.x = x;
         this.y = y;
         this.summoner_from_id = summoner_from_id;
@@ -3069,8 +3076,24 @@ class VisitorCat extends Phaser.GameObjects.Sprite{
         this.scene.add.existing(this);
         this.submode = 0;
         this.firstDecideMode();
+        let _text = " Mail from " + summoner_from_name + " ";
+        let _arg = {
+            font: "20px Arial", 
+            fill: "#000000", 
+            backgroundColor: "#ffffff"
+        };
+        this.text = this.scene.add.text(this.x, this.y-60, _text, _arg )
+            .setOrigin(0.5)
+            .setVisible(false)
+            .setDepth(9999);
         this.on("pointerdown", () => {
             contract_open_mail(summoner);
+        });
+        this.on("pointerover", () => {
+            this.text.setVisible(true);
+            setTimeout( () => {
+                this.text.setVisible(false);
+            }, 3000)
         });
     }
     
@@ -3215,6 +3238,8 @@ class VisitorCat extends Phaser.GameObjects.Sprite{
         else if (this.mode == "sleeping") {this.sleeping();}
         else if (this.mode == "goingHome") {this.goingHome();}
         this.depth = this.y;
+        this.text.x = this.x;
+        this.text.y = this.y - 60;
         if (turn % 100 == 0) {
             if (local_receiving_mail == 0 && this.mode != "goingHome") {
                 this.mode = "goingHome";
@@ -10069,17 +10094,17 @@ function update_checkItem(this_scene) {
         && (typeof cat_visitor == "undefined" || typeof cat_visitor.scene == "undefined")
     ){
         async function _run(scene) {
-            /*
             let _res = await contract_callMailDetail();
             let _summoner_from_id = _res[0];
             let _summoner_from_name = res[1];
             cat_visitor = new VisitorCat(scene, 0, 0, summoner_from_id, summoner_from_name)
                 .setOrigin(0.5)
                 .setScale(0.4);
-            */
+            /*
             cat_visitor = new VisitorCat(scene, 0, 0, 99, "test")
                 .setOrigin(0.5)
                 .setScale(0.4);
+            */
             group_update.add(cat_visitor);
         }
         _run(this_scene);
