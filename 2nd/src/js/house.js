@@ -148,6 +148,21 @@ contract ERC721 is IERC721 {
 
 //### 1st
 
+   *アイテム順の吟味
+        アイテムの種類分け
+        STR/DEX/INT系で同種類アイテムをバラけさせる
+    
+   *ステッカー修正
+        floor stickerの修正
+        蛍光塗料の実装
+        
+    NFT絵の表示の実装
+        walletからnftの取得
+        nftからtokenURLの取得
+        URLからpngを取得してloadする機構の実装
+    
+    PhotoFrameのローディング絵の実装
+
     コンセプトの整理：簡潔にわかりやすく
         これはなに？ What's This?
             Astar Networkを利用したgame dapps
@@ -237,15 +252,10 @@ contract ERC721 is IERC721 {
             どんなトークンの寄付も大歓迎です。
             Coder address:
             Illustrator address:
-            
 
-   *アイテム順の吟味
-        アイテムの種類分け
-        STR/DEX/INT系で同種類アイテムをバラけさせる
-    
-   *ステッカー修正
-        floor stickerの修正
-        蛍光塗料の実装
+    上位アイテムの演出の実装
+        Uncommon, Rareの差別化をどうするか
+        particleをうまく使うか。
 
  ok ナイナイさんUIの改善
         アニメーションの実装
@@ -3010,12 +3020,14 @@ class HomeCat extends Phaser.GameObjects.Sprite{
         this.submode = 0;
         this.on("pointerdown", async () => {
             if (local_items[196] > 0) {
+                sound_button_on.play();
                 let _array_item_196 = await get_userItems(summoner, 196);
                 contract_send_mail(summoner, _array_item_196[0]);
             }
         });
         this.on("pointerover", () => {
             if (local_items[196] > 0) {
+                sound_button_select.play();
                 this.anims.play("cat_standing_withMail", true);
             }
         });
@@ -3067,6 +3079,7 @@ class HomeCat extends Phaser.GameObjects.Sprite{
             this.speed_y = 0.5 + Math.random() * 0.5;
             this.disableInteractive();
             this.anims.play("cat_walking_right_withMail_fast", true);
+            sound_cat1.play();
             this.submode += 1;
         } else {
             this.x += this.speed_x;
@@ -3107,6 +3120,7 @@ class HomeCat extends Phaser.GameObjects.Sprite{
             this.y = 800 + Math.random() * 200; 
             this.target_x = 90;
             this.target_y = 610;
+            sound_cat2.play();
             this.submode += 1;
         } else {
             let delta_x = this.target_x - this.x;
@@ -3183,9 +3197,11 @@ class VisitorCat extends Phaser.GameObjects.Sprite{
             .setVisible(false)
             .setDepth(9999);
         this.on("pointerdown", () => {
+            sound_button_on.play();
             contract_open_mail(summoner);
         });
         this.on("pointerover", () => {
+            sound_button_select.play();
             this.text.setVisible(true);
             setTimeout( () => {
                 this.text.setVisible(false);
@@ -3207,6 +3223,7 @@ class VisitorCat extends Phaser.GameObjects.Sprite{
             this.y = 600 + Math.random() * 200; 
             this.target_x = 400 + Math.random()*400;
             this.target_y = 500 + Math.random()*200;
+            sound_cat1.play();
             this.submode += 1;
         } else {
             let delta_x = this.target_x - this.x;
@@ -3316,6 +3333,7 @@ class VisitorCat extends Phaser.GameObjects.Sprite{
             this.speed_y = Math.random() * 1;
             this.disableInteractive();
             this.anims.play("cat_walking_left_fast", true);
+            sound_cat2.play();
             this.submode += 1;
         } else {
             this.x += this.speed_x;
@@ -4188,13 +4206,19 @@ class Fluffy2 extends Phaser.GameObjects.Sprite{
         this.a = Math.random() * 0.8 - 0.4;
         this.b = this.y + this.a * this.x;
         //sound
-        sound_dice.play();
+        let _li = [
+            sound_fluffy2,
+            sound_fluffy3,
+            sound_fluffy4,
+            sound_fluffy5
+        ]
+        _li[Math.floor(Math.random()*_li.length)].play();
         this.mode = "rolling";
     }
 
     //### on_kick
     on_kick() {
-        this.speed_x = 3 + Math.random() * 2;
+        this.speed_x = 4 + Math.random() * 3;
         if (pointer_x > this.x) {
             this.speed_x *= -1;
         }
@@ -4203,12 +4227,18 @@ class Fluffy2 extends Phaser.GameObjects.Sprite{
             this.speed_x *= -1;
         }
         */
-        this.speed_y = 3 + Math.random() * 2;
+        this.speed_y = 4 + Math.random() * 3;
         //define constant of y = b - a * x
         this.a = Math.random() * 0.8 - 0.4;
         this.b = this.y + this.a * this.x;
         //sound
-        sound_dice.play();
+        let _li = [
+            sound_fluffy2,
+            sound_fluffy3,
+            sound_fluffy4,
+            sound_fluffy5,
+        ]
+        _li[Math.floor(Math.random()*_li.length)].play();
         this.mode = "rolling";
     }
     
@@ -4273,7 +4303,7 @@ class Fluffy2 extends Phaser.GameObjects.Sprite{
             this.y = this.line_y;
             this.speed_y *= -0.3;   //bounce coefficient
             if (Math.abs(this.speed_y) > 0.5) {
-                sound_dice_impact.play();
+                //sound_dice_impact.play();
             }
         }
 
@@ -4287,11 +4317,11 @@ class Fluffy2 extends Phaser.GameObjects.Sprite{
         if (this.x >= this.line_x_r) {
             this.x = this.line_x_r;
             this.speed_x *= -0.9;   //bounce coefficient
-            sound_dice_impact.play();
+            //sound_dice_impact.play();
         } else if (this.x <= this.line_x_l) {
             this.x = this.line_x_l;
             this.speed_x *= -0.9;
-            sound_dice_impact.play();
+            //sound_dice_impact.play();
         }
         
         //check speed
@@ -4339,7 +4369,7 @@ class Fluffy2 extends Phaser.GameObjects.Sprite{
             //360 over check
             this.moving_degree = this.moving_degree % 360;
             //out of area check, y
-            if (this.y > 860 && this.moving_degree > 180) {
+            if (this.y > 850 && this.moving_degree > 180) {
                 this.moving_degree = 360 - this.moving_degree;
             }else if (this.y < 500 && this.moving_degree < 180) {
                 this.moving_degree = 360 - this.moving_degree;
@@ -4847,7 +4877,17 @@ class Nyuinyui extends Phaser.GameObjects.Sprite{
     
     //### on_click
     on_click() {
-        ;
+        let _ohana =this.scene.add.image(
+            650+Math.random()*400,
+            850+Math.random()*30,
+            "par_flowers"
+        )
+            .setFrame(Math.floor(Math.random()*5))
+            .setOrigin(0.5)
+            .setScale(0.1)
+            .setAngle(Math.random()*360)
+            .setDepth(9999+101);
+        group_nyuinyui_ohana.add(_ohana);
     }
     
     //### resting
@@ -5105,6 +5145,7 @@ function open_window_craft (scene) {
     async function close_crafting_window(_item) {
         //nyuinyui
         nyuinyui.setVisible(false);
+        group_nyuinyui_ohana.clear(true);
         flag_window_craft = 0;
         //destroy group
         //group_window_crafting.destroy(true);
@@ -5392,6 +5433,7 @@ function open_window_upgrade(scene) {
         group_window_upgrade.destroy(true);
         //nyuinyui
         nyuinyui.setVisible(false);
+        group_nyuinyui_ohana.clear(true);
     }
 
     //create group
@@ -5514,6 +5556,7 @@ function open_window_upgrade(scene) {
 
 //---window:voting
 function open_window_voting(scene) {
+    sound_window_open.play();
     //close window and summon
     function close_window(_summoner, _type) {
         group_window_voting.destroy(true);
@@ -5531,6 +5574,7 @@ function open_window_voting(scene) {
             .on("pointerdown", () => close_window(summoner, _type) )
             .on("pointerover", () => obj.setStyle({ fontSize: 40, fontFamily: "Arial", fill: '#ffff00' }))
             .on("pointerout", () => obj.setStyle({ fontSize: 40, fontFamily: "Arial", fill: _color }))
+            .on("pointerdown", () => sound_window_select.play() );
         return obj;
     }
     //create window
@@ -6139,6 +6183,7 @@ function preload(scene) {
     scene.load.audio("fireworks2", "src/sound/fireworks2.mp3");
     scene.load.audio("basket", "src/sound/basket.mp3");
     scene.load.audio("cat1", "src/sound/cat1.mp3");
+    scene.load.audio("cat2", "src/sound/cat2.mp3");
     scene.load.audio("clock", "src/sound/clock.mp3");
     scene.load.audio("window", "src/sound/window.mp3");
     scene.load.audio("piano1", "src/sound/piano1.mp3");
@@ -6146,6 +6191,11 @@ function preload(scene) {
     scene.load.audio("nainai1", "src/sound/nainai1.mp3");
     scene.load.audio("nainai2", "src/sound/nainai2.mp3");
     scene.load.audio("fluffy", "src/sound/fluffy.mp3");
+    scene.load.audio("fluffy2", "src/sound/fluffy2.mp3");
+    scene.load.audio("fluffy3", "src/sound/fluffy3.mp3");
+    scene.load.audio("fluffy4", "src/sound/fluffy4.mp3");
+    scene.load.audio("fluffy5", "src/sound/fluffy5.mp3");
+    scene.load.audio("tokenChest", "src/sound/tokenChest.mp3");
 
     //---item_basic
     scene.load.image("item_table", "src/png/item_basic_table.png");
@@ -6439,6 +6489,7 @@ function create(scene) {
     group_update = scene.add.group();
     group_update.runChildUpdate = true;
     group_info = scene.add.group();
+    group_nyuinyui_ohana = scene.add.group();
     
     //---back image
     scene.add.image(640, 480, "back");
@@ -7106,6 +7157,7 @@ function create(scene) {
     sound_fireworks2 = scene.sound.add("fireworks2", {volume:0.2});
     sound_basket = scene.sound.add("basket", {volume:0.2});
     sound_cat1 = scene.sound.add("cat1", {volume:0.2});
+    sound_cat2 = scene.sound.add("cat2", {volume:0.2});
     sound_clock = scene.sound.add("clock", {volume:0.2});
     sound_window = scene.sound.add("window", {volume:0.2});
     sound_piano1 = scene.sound.add("piano1", {volume:0.3});
@@ -7113,6 +7165,11 @@ function create(scene) {
     sound_nainai1 = scene.sound.add("nainai1", {volume:0.2});
     sound_nainai2 = scene.sound.add("nainai2", {volume:0.2});
     sound_fluffy = scene.sound.add("fluffy", {volume:0.2});
+    sound_fluffy2 = scene.sound.add("fluffy2", {volume:0.2});
+    sound_fluffy3 = scene.sound.add("fluffy3", {volume:0.2});
+    sound_fluffy4 = scene.sound.add("fluffy4", {volume:0.2});
+    sound_fluffy5 = scene.sound.add("fluffy5", {volume:0.2});
+    sound_tokenChest = scene.sound.add("tokenChest", {volume:0.2});
 
     //---system message
     //system message
@@ -7528,7 +7585,7 @@ function create(scene) {
         .setOrigin(0.5)
         .setScale(0.25)
         .setAlpha(0.8)
-        .setDepth(9999+101)
+        .setDepth(9999+102)
         .setVisible(false);
     group_update.add(nyuinyui);
 }
@@ -8754,6 +8811,8 @@ function update_checkItem(this_scene) {
                 "ex_nft1.png",
                 "ex_nft2.png",
                 "ex_nft3.png",
+                //"https://1.bp.blogspot.com/-7uiCs6dI4a0/YEGQA-8JOrI/AAAAAAABddA/qPFt2E8vDfQwPQsAYLvk4lowkwP-GN7VQCNcBGAsYHQ/s896/buranko_girl_smile.png",
+                //"ipfs://QmQptLUg6Vakr2p3BCccmm2cs7M9hhEGvi4AoZMvMv3DJt/3945.png",
             ];
             let _url = _array[Math.floor(Math.random() * _array.length)];
             return _url;
@@ -8778,7 +8837,7 @@ function update_checkItem(this_scene) {
                     .setInteractive({useHandCursor: true})
                     .on("pointerdown", () => {
                         sound_hat.play();
-                        item_frame_inside.setTexture();
+                        item_frame_inside.setTexture("ff_duringFestival_left");
                         this_scene.textures.remove("pic_nft");
                         let _url = _get_nft_url();
                         this_scene.load.image("pic_nft", _url);
@@ -9741,7 +9800,7 @@ function update_checkItem(this_scene) {
         local_items_flag[_item_id] = false;
     }
 
-    //###42:Token Basket
+    //###42:TokenChest
     _item_id = 42;
     if (
         (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
@@ -9757,9 +9816,10 @@ function update_checkItem(this_scene) {
             .setInteractive({useHandCursor: true})
             .on('pointerdown', async function() {
                 if (flag_tokenBall == 0) {
-                    item_tokenChest.setFrame(1);
                     flag_tokenBall = 1;
-                    sound_basket.play();
+                    item_tokenChest.setFrame(1);
+                    //sound_basket.play();
+                    sound_tokenChest.play();
                     murasakisan.on_click();
                     group_tokenBall = this_scene.add.group();
                     //group_tokenBall.runChildUpdate = true;
@@ -9783,6 +9843,7 @@ function update_checkItem(this_scene) {
                             _tokenBall.on_summon();
                         }
                     }
+                    flag_tokenBall = 2;
                     /*
                     for (i = 0; i < array_image_tokenBall.length; i++) {
                         let _img = array_image_tokenBall[i];
@@ -9795,7 +9856,7 @@ function update_checkItem(this_scene) {
                         _tokenBall.on_summon();
                     }
                     */
-                } else {
+                } else if (flag_tokenBall == 2) {
                     item_tokenChest.setFrame(0);
                     flag_tokenBall = 0;
                     group_tokenBall.destroy(true);
