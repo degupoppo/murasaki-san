@@ -36,7 +36,7 @@ async function update_onMarketItems() {
             let _score = await contract_msn_wss.methods.score(_item).call();
             _item_rarity = "<font color=#E85298>score: " + _score + "</font>";
         } else if (_item_type >= 201 && _item_type <= 212) {
-            _item_rarity = "<font color=green>common</font>";
+            _item_rarity = "<font color=black>common</font>";
         } else if (_item_type >= 213 && _item_type <= 224) {
             _item_rarity = "<font color=blue>uncommon</font>";
         } else if (_item_type >= 225 && _item_type <= 236) {
@@ -99,7 +99,7 @@ async function update_sellingItems() {
         //item_rarity
         let _item_rarity;
         if (_item_type <= 64) {
-            _item_rarity = "<font color=green>common</font>";
+            _item_rarity = "<font color=black>common</font>";
         } else if (_item_type <= 128) {
             _item_rarity = "<font color=blue>uncommon</font>";
         } else if (_item_type <= 192) {
@@ -172,7 +172,7 @@ async function update_userItems() {
         //item_rarity
         let _item_rarity;
         if (_item_type <= 64) {
-            _item_rarity = "<font color=green>common</font>";
+            _item_rarity = "<font color=black>common</font>";
         } else if (_item_type <= 128) {
             _item_rarity = "<font color=blue>uncommon</font>";
         } else if (_item_type <= 192) {

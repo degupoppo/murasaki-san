@@ -148,6 +148,25 @@ contract ERC721 is IERC721 {
 
 //### 1st
 
+    スコアの整理
+        現状スコア的なもの
+            ステータス（≒exp）
+            スコア（exp, coin, leaf, item_crafted, fluffy_recieved）
+            ステーキング量
+            walletスコア
+            item数（購入したものも含めてwallet内すべて）
+            fluffy数（購入したものも含めてwallet内すべて）
+        すべてを加味したものをtotal_score = comfortabilityとするか？
+        ステッカーや金魚鉢などは、基本的にこのスコアを参照するか
+        これとは別に、dapps staking量を反映するものがあっても良いとは思う
+        成長可能なアイテム
+            ウォールステッカー
+            フロアステッカー
+            金魚鉢
+            花瓶
+            鳩時計？
+            
+
    *アイテム順の吟味
         アイテムの種類分け
         STR/DEX/INT系で同種類アイテムをバラけさせる
@@ -160,8 +179,16 @@ contract ERC721 is IERC721 {
         walletからnftの取得
         nftからtokenURLの取得
         URLからpngを取得してloadする機構の実装
-    
-    PhotoFrameのローディング絵の実装
+            ipfsからだと遅いか？
+            tofuNFTなどから取得したいが、可能だろうか
+        ローディング絵の実装
+            NFTのダウンロードは時間がかかると思われるので
+            Loading..の文字と何かしらの宛絵を用意する
+
+    上位アイテムの演出の実装
+        Uncommon, Rareの差別化をどうするか
+        particleをうまく使うか。
+        一覧での色も変える？
 
     コンセプトの整理：簡潔にわかりやすく
         これはなに？ What's This?
@@ -253,10 +280,6 @@ contract ERC721 is IERC721 {
             Coder address:
             Illustrator address:
 
-    上位アイテムの演出の実装
-        Uncommon, Rareの差別化をどうするか
-        particleをうまく使うか。
-
  ok ナイナイさんUIの改善
         アニメーションの実装
         出現・退場の改善
@@ -272,6 +295,18 @@ contract ERC721 is IERC721 {
 
     fluffy修正
         色修正
+        ・グレイ
+        ・ベージュ
+        ・ライムグリーン
+        ・ライトブルー
+        ・ブルー
+        ・パープル
+        ・あかむらさき
+        ・レッド
+        ・オレンジ
+        ・ピンク
+        ・イエロー
+        ・ホワイト
         正面のアニメーション追加
         サイズ修正
         fluffierの瞬き頻度修正
@@ -1027,9 +1062,10 @@ async function init_global_variants() {
     local_calc_feeding = 0;
     local_calc_grooming = 0;
     local_blockNumber = 0;
+    local_fluffy_count = 0;
     
     //---local festival
-    local_ff_each_voting_count = new Array(13).fill(0);
+    local_ff_each_voting_count = new Array(256).fill(0);
     local_ff_next_festival_block =   0;
     local_ff_inSession =             0;
     local_ff_isVotable =             0;
@@ -1069,6 +1105,7 @@ async function init_global_variants() {
     last_local_material_calc = 0;
     last_local_calc_feeding = 0;
     last_local_calc_grooming = 0;
+    previous_local_fluffy_count = 0;
     
     //---local etc
     turn = 0;
@@ -1397,12 +1434,29 @@ async function contract_update_dynamic_status(_summoner) {
     local_items = _allItemBalance;
     local_itemIds = get_itemIds(_myListsAt_withItemType);
 
+    //update fluffy count, not score
+    let _count = 0;
+    for (i=201; i<=236; i++) {
+        _count += local_items[i];
+    }
+    local_fluffy_count = _count;
+
     //***TODO*** debug
     if (flag_debug == 1) {
         for (let i = 1; i <= 64; i++) {
             local_items[i] += 1;
         }
-        local_wallet_score = 9999;
+        local_wallet_score = 1000;
+    } else if (flag_debug == 2) {
+        for (let i = 65; i <= 128; i++) {
+            local_items[i] += 1;
+        }
+        local_wallet_score = 2000;
+    } else if (flag_debug == 3) {
+        for (let i = 129; i <= 192; i++) {
+            local_items[i] += 1;
+        }
+        local_wallet_score = 3300;
     }
 
     //call dynamic status from chain
@@ -1452,7 +1506,7 @@ async function contract_update_dynamic_status(_summoner) {
     local_coin =        Number(_all_dynamic_status[9]);
     local_material =    Number(_all_dynamic_status[10]);
     local_precious =    Number(_all_dynamic_status[30]);
-
+    
     //feeding, grooming
     local_last_feeding_time =   Number(_all_dynamic_status[11]);
     local_last_grooming_time =  Number(_all_dynamic_status[12]);
@@ -1699,18 +1753,18 @@ async function contract_update_festival_info(_summoner) {
     //let _festival_info = await contract_ff.methods.get_info(_summoner).call();    
     let _festival_info = await contract_ff_wss.methods.get_info(_summoner).call();    
    //update local
-   local_ff_each_voting_count[1] =  Number(_festival_info[1]);
-   local_ff_each_voting_count[2] =  Number(_festival_info[2]);
-   local_ff_each_voting_count[3] =  Number(_festival_info[3]);
-   local_ff_each_voting_count[4] =  Number(_festival_info[4]);
-   local_ff_each_voting_count[5] =  Number(_festival_info[5]);
-   local_ff_each_voting_count[6] =  Number(_festival_info[6]);
-   local_ff_each_voting_count[7] =  Number(_festival_info[7]);
-   local_ff_each_voting_count[8] =  Number(_festival_info[8]);
-   local_ff_each_voting_count[9] =  Number(_festival_info[9]);
-   local_ff_each_voting_count[10] = Number(_festival_info[10]);
-   local_ff_each_voting_count[11] = Number(_festival_info[11]);
-   local_ff_each_voting_count[12] = Number(_festival_info[12]);
+   local_ff_each_voting_count[201] =  Number(_festival_info[1]);
+   local_ff_each_voting_count[202] =  Number(_festival_info[2]);
+   local_ff_each_voting_count[203] =  Number(_festival_info[3]);
+   local_ff_each_voting_count[204] =  Number(_festival_info[4]);
+   local_ff_each_voting_count[205] =  Number(_festival_info[5]);
+   local_ff_each_voting_count[206] =  Number(_festival_info[6]);
+   local_ff_each_voting_count[207] =  Number(_festival_info[7]);
+   local_ff_each_voting_count[208] =  Number(_festival_info[8]);
+   local_ff_each_voting_count[209] =  Number(_festival_info[9]);
+   local_ff_each_voting_count[210] = Number(_festival_info[10]);
+   local_ff_each_voting_count[211] = Number(_festival_info[11]);
+   local_ff_each_voting_count[212] = Number(_festival_info[12]);
    local_ff_next_festival_block =   Number(_festival_info[13]);
    local_ff_inSession =             Number(_festival_info[14]);
    local_ff_isVotable =             Number(_festival_info[15]);
@@ -4435,8 +4489,8 @@ class PresentBox extends Phaser.GameObjects.Sprite{
         this.memo = memo;
         this.on_summon();
         let _text = "";
-        _text += "Gift of " + this.memo + "\n"; 
-        _text += "from " + this.summoner_from;
+        _text += " Gift of " + this.memo + " \n"; 
+        _text += " from " + this.summoner_from + " ";
         this.text = scene.add.text(
             this.x, 
             this.y-40,
@@ -4646,11 +4700,10 @@ class Festligheter extends Phaser.GameObjects.Sprite{
         } else if (this.submode % 500 == 1) {
             let _array_sorted = this._get_ranking_sorted();
             let _text = "";
-            _text += " Your vote: " + local_ff_last_voting_type + " \n";
-            _text += " 1st: " + _array_sorted[0][0] + "(" + _array_sorted[0][1] + ")";
-            _text += " 2nd: " + _array_sorted[1][0] + "(" + _array_sorted[1][1] + ")";
-            _text += " 3rd: " + _array_sorted[2][0] + "(" + _array_sorted[2][1] + ")";
-            _text += " \n";
+            _text += " Your vote: " + array_item_name[local_ff_last_voting_type] + " \n";
+            _text += "   1st: " + array_item_name[_array_sorted[0][0]] + "(" + _array_sorted[0][1] + " votes) \n";
+            _text += "   2nd: " + array_item_name[_array_sorted[1][0]] + "(" + _array_sorted[1][1] + " votes) \n";
+            _text += "   3rd: " + array_item_name[_array_sorted[2][0]] + "(" + _array_sorted[2][1] + " votes) \n";
             _text += " (" + (local_ff_subject_end_block - local_blockNumber) + " blocks remaining) ";
             this.text.setText(_text);
         }
@@ -4681,7 +4734,7 @@ class Festligheter extends Phaser.GameObjects.Sprite{
     _get_winner_now() {
         let _count = 0;
         let _type = 0;
-        for (i=1; i<=12; i++) {
+        for (i=201; i<=212; i++) {
             if (local_ff_each_voting_count[i] > _count) {
                 _count = local_ff_each_voting_count[i];
                 _type = i;
@@ -4692,7 +4745,7 @@ class Festligheter extends Phaser.GameObjects.Sprite{
     _get_ranking_sorted() {
         //prepare 2dim array
         let _array = [];
-        for (i=1; i<=12; i++) {
+        for (i=201; i<=212; i++) {
             _array.push([i, local_ff_each_voting_count[i]]);
         }
         //sort, desent
@@ -4965,7 +5018,7 @@ class Nyuinyui extends Phaser.GameObjects.Sprite{
 }
 
 
-//===functions========================================================
+//===[ FUNCTION ]========================================================
 
 
 //---bar
@@ -5224,10 +5277,14 @@ function open_window_craft (scene) {
         let _color = "black";
         if (rarity == "common") {
             _color = "black";
+            //_color = "green";
         }else if (rarity == "uncommon") {
-            _color = "black";
+            _color = "blue";
         }else if (rarity == "rare") {
-            _color = "black";
+            //_color = "orange";
+            //_color = "#d24e01";
+            _color = "#be5504";
+            //_color = "#cc5801";
         }else{
             _color = "gray";
         }
@@ -5376,7 +5433,7 @@ function open_window_craft (scene) {
     if (local_items[195] > 0) { _rarity = "common" } else { _rarity = null }
     button_crafting_item195  = create_button(520, 80 + 40*17, "[" +local_items[195]+ "] Leaf Pouch", 195,  scene, _rarity);
     item194_icon = scene.add.sprite(170-25, 80+17 + 40*17, "item_bank").setScale(0.16);
-    item195_icon = scene.add.sprite(520-25, 80+17 + 40*17, "item_kusa_pouch").setScale(0.05);
+    item195_icon = scene.add.sprite(520-25, 80+17 + 40*17, "item_pouch").setScale(0.05);
     group_window_crafting.add(button_crafting_item194);
     group_window_crafting.add(button_crafting_item195);
     group_window_crafting.add(item194_icon);
@@ -5580,43 +5637,84 @@ function open_window_voting(scene) {
     //create window
     let window_voting = scene.add.sprite(640, 480, "window").setInteractive();
     //create message
-    let _text = "Fluffy Festival!\nPlease choose a color to vote";
-    let msg1 = scene.add.text(150, 150, _text)
-            .setFontSize(24).setFontFamily("Arial").setFill("#000000")
+    let _text = "";
+    _text += "Fluffy Festival is Underway! Vote for your Favorite Fluffy!\n";
+    _text += "\n";
+    _text += "・The festival lasts 24 hours. You can vote only once and get Participation Award.\n";
+    _text += "・The winner fluffy will get x2 luck boost until the next festival.\n";
+    let msg1 = scene.add.text(140, 110, _text)
+            .setFontSize(24).setFontFamily("Arial").setFill("#333333")
+    _text = "";
+    _text += "Festival selection is held at candle auction method.\n";
+    _text += "The winner fluffy of the previous and two previous festival are not listed.\n";
+    _text += "The first voter and the final voter will get additional award.\n";
+    let msg2 = scene.add.text(240, 780, _text)
+            .setFontSize(18).setFontFamily("Arial").setFill("#333333")
     //create button
-    let _x = 200;
+    let _x = 250;
     let _y = 280;
-    let _y_add = 70;
-    button0 = create_button(_x, _y+_y_add*0, "Red", "#E60012", 201, scene);
-    button1 = create_button(_x, _y+_y_add*1, "Orange", "#F39800", 202, scene);
-    button2 = create_button(_x, _y+_y_add*2, "Yello", "#FFF100", 203, scene);
-    button3 = create_button(_x, _y+_y_add*3, "Light Green", "#8FC31F", 204, scene);
-    button4 = create_button(_x, _y+_y_add*4, "Green", "#009944", 205, scene);
-    button5 = create_button(_x, _y+_y_add*5, "Deep Green", "#009E96", 206, scene);
-    button6 = create_button(_x+500, _y+_y_add*0, "Light Blue", "#00A0E9", 207, scene);
-    button7 = create_button(_x+500, _y+_y_add*1, "Blue", "#0068B7", 208, scene);
-    button8 = create_button(_x+500, _y+_y_add*2, "Deep Blue", "#1D2088", 209, scene);
-    button9 = create_button(_x+500, _y+_y_add*3, "Purple", "#920783", 210, scene);
-    button10 = create_button(_x+500, _y+_y_add*4, "Pink", "#E4007F", 211, scene);
-    button11 = create_button(_x+500, _y+_y_add*5, "Vivid Pink", "#E5004F", 212, scene);
-    button_cancel = create_button(1000, 750, "Cancel", "#000000", -1, scene);
+    let _y_add = 80;
+    let _button201 = create_button(_x, _y+_y_add*0, array_item_name[201], "#b3bfc7", 201, scene).setOrigin(0, 0.5);
+    let _button202 = create_button(_x, _y+_y_add*1, array_item_name[202], "#d8bfac", 202, scene).setOrigin(0, 0.5);
+    let _button203 = create_button(_x, _y+_y_add*2, array_item_name[203], "#b7ffd0", 203, scene).setOrigin(0, 0.5);
+    let _button204 = create_button(_x, _y+_y_add*3, array_item_name[204], "#a9e8ff", 204, scene).setOrigin(0, 0.5);
+    let _button205 = create_button(_x, _y+_y_add*4, array_item_name[205], "#8dabff", 205, scene).setOrigin(0, 0.5);
+    let _button206 = create_button(_x, _y+_y_add*5, array_item_name[206], "#dab3ff", 206, scene).setOrigin(0, 0.5);
+    let _button207 = create_button(_x+500, _y+_y_add*0, array_item_name[207], "#fdbeff", 207, scene).setOrigin(0, 0.5);
+    let _button208 = create_button(_x+500, _y+_y_add*1, array_item_name[208], "#ff686b", 208, scene).setOrigin(0, 0.5);
+    let _button209 = create_button(_x+500, _y+_y_add*2, array_item_name[209], "#ffbda8", 209, scene).setOrigin(0, 0.5);
+    let _button210 = create_button(_x+500, _y+_y_add*3, array_item_name[210], "#ffd5d5", 210, scene).setOrigin(0, 0.5);
+    let _button211 = create_button(_x+500, _y+_y_add*4, array_item_name[211], "#ffe381", 211, scene).setOrigin(0, 0.5);
+    let _button212 = create_button(_x+500, _y+_y_add*5, array_item_name[212], "#fbfff0", 212, scene).setOrigin(0, 0.5);
+    let _button_cancel = create_button(1000, 800, "Cancel", "#000000", -1, scene);
+    //create icon
+    let _icon201 = scene.add.image(_x-35, _y + _y_add*0, "fluffy_fluffys").setOrigin(0.5).setScale(0.16).setFrame(3+8*0);
+    let _icon202 = scene.add.image(_x-35, _y + _y_add*1, "fluffy_fluffys").setOrigin(0.5).setScale(0.16).setFrame(3+8*1);
+    let _icon203 = scene.add.image(_x-35, _y + _y_add*2, "fluffy_fluffys").setOrigin(0.5).setScale(0.16).setFrame(3+8*2);
+    let _icon204 = scene.add.image(_x-35, _y + _y_add*3, "fluffy_fluffys").setOrigin(0.5).setScale(0.16).setFrame(3+8*3);
+    let _icon205 = scene.add.image(_x-35, _y + _y_add*4, "fluffy_fluffys").setOrigin(0.5).setScale(0.16).setFrame(3+8*4);
+    let _icon206 = scene.add.image(_x-35, _y + _y_add*5, "fluffy_fluffys").setOrigin(0.5).setScale(0.16).setFrame(3+8*5);
+    let _icon207 = scene.add.image(_x+500-35, _y + _y_add*0, "fluffy_fluffys").setOrigin(0.5).setScale(0.16).setFrame(3+8*6);
+    let _icon208 = scene.add.image(_x+500-35, _y + _y_add*1, "fluffy_fluffys").setOrigin(0.5).setScale(0.16).setFrame(3+8*7);
+    let _icon209 = scene.add.image(_x+500-35, _y + _y_add*2, "fluffy_fluffys").setOrigin(0.5).setScale(0.16).setFrame(3+8*8);
+    let _icon210 = scene.add.image(_x+500-35, _y + _y_add*3, "fluffy_fluffys").setOrigin(0.5).setScale(0.16).setFrame(3+8*9);
+    let _icon211 = scene.add.image(_x+500-35, _y + _y_add*4, "fluffy_fluffys").setOrigin(0.5).setScale(0.16).setFrame(3+8*10);
+    let _icon212 = scene.add.image(_x+500-35, _y + _y_add*5, "fluffy_fluffys").setOrigin(0.5).setScale(0.16).setFrame(3+8*11);
+    //destroy, present and last winner
+    eval("_button" + local_ff_previous_elected_type + ".setVisible(false);");
+    eval("_button" + local_ff_elected_type + ".setVisible(false);");
+    eval("_icon" + local_ff_previous_elected_type + ".setVisible(false);");
+    eval("_icon" + local_ff_elected_type + ".setVisible(false);");
     //create group
     group_window_voting = scene.add.group();
     group_window_voting.add(window_voting);
     group_window_voting.add(msg1);
-    group_window_voting.add(button0);
-    group_window_voting.add(button1);
-    group_window_voting.add(button2);
-    group_window_voting.add(button3);
-    group_window_voting.add(button4);
-    group_window_voting.add(button5);
-    group_window_voting.add(button6);
-    group_window_voting.add(button7);
-    group_window_voting.add(button8);
-    group_window_voting.add(button9);
-    group_window_voting.add(button10);
-    group_window_voting.add(button11);
-    group_window_voting.add(button_cancel);
+    group_window_voting.add(msg2);
+    group_window_voting.add(_button201);
+    group_window_voting.add(_button202);
+    group_window_voting.add(_button203);
+    group_window_voting.add(_button204);
+    group_window_voting.add(_button205);
+    group_window_voting.add(_button206);
+    group_window_voting.add(_button207);
+    group_window_voting.add(_button208);
+    group_window_voting.add(_button209);
+    group_window_voting.add(_button210);
+    group_window_voting.add(_button211);
+    group_window_voting.add(_button212);
+    group_window_voting.add(_button_cancel);
+    group_window_voting.add(_icon201);
+    group_window_voting.add(_icon202);
+    group_window_voting.add(_icon203);
+    group_window_voting.add(_icon204);
+    group_window_voting.add(_icon205);
+    group_window_voting.add(_icon206);
+    group_window_voting.add(_icon207);
+    group_window_voting.add(_icon208);
+    group_window_voting.add(_icon209);
+    group_window_voting.add(_icon210);
+    group_window_voting.add(_icon211);
+    group_window_voting.add(_icon212);
     //depth
     group_window_voting.setDepth(999999);
 }
@@ -5773,9 +5871,9 @@ function draw_star(scene, _x, _y) {
         gravityY: 400,
         lifespan: { min:_lifespan*0.7, max:_lifespan},
         frequency: _lifespan+200,
-        quantity: 20,
+        quantity: 15,
         timeScale: 0.9,
-        reserve: 20,
+        reserve: 15,
         rotate: { min:0, max:360 },
         scale: { min: 0.05, max: 0.08 },
         speed: { min: 50, max: 300 },
@@ -6016,7 +6114,7 @@ function update_tx_text(mode, hash) {
 }    
 
 
-//===phaser3:preload========================================================--------
+//===<Phaser3>:preload========================================================--------
 
 
 function preload(scene) {
@@ -6223,12 +6321,12 @@ function preload(scene) {
     scene.load.image("item_vase", "src/png/item_vase.png");
     scene.load.image("item_kanban", "src/png/item_kanban4.png");
     scene.load.spritesheet("item_crown", "src/png/item_crown.png", {frameWidth: 370, frameHeight: 320});
-    scene.load.image("item_pudding", "src/png/item_pudding2.png");
-    scene.load.image("item_chocolate_bread", "src/png/item_chocolate_bread.png");
+    //scene.load.image("item_pudding", "src/png/item_pudding2.png");
+    //scene.load.image("item_chocolate_bread", "src/png/item_chocolate_bread.png");
     scene.load.image("item_fortune_statue", "src/png/item_fortune_statue.png");
     scene.load.image("item_ribbon", "src/png/item_ribbon3.png");
-    scene.load.image("item_hat_tiny_crown", "src/png/item_hat_tiny_crown.png");
-    scene.load.image("item_kusa_pouch", "src/png/item_kusa_pouch.png");
+    //scene.load.image("item_hat_tiny_crown", "src/png/item_hat_tiny_crown.png");
+    //scene.load.image("item_kusa_pouch", "src/png/item_kusa_pouch.png");
     scene.load.image("item_dice", "src/png/item_dice.png");
     scene.load.image("item_dice_pointerover", "src/png/item_dice_pointerover.png");
     scene.load.image("item_hat_knit", "src/png/item_hat_knit.png");
@@ -6301,7 +6399,7 @@ function preload(scene) {
     scene.load.image("item_presentbox_07", "src/png/item_presentbox_07.png");
     scene.load.image("item_presentbox_08", "src/png/item_presentbox_08.png");
     scene.load.image("item_fishbowl", "src/png/item_fishbowl.png");
-    scene.load.image("item_onigiri", "src/png/item_onigiri.png");
+    //scene.load.image("item_onigiri", "src/png/item_onigiri.png");
     
     //---ff
     scene.load.image("ff_preFestival_left", "src/png/ff_preFestival_left.png");
@@ -6479,7 +6577,7 @@ function preload(scene) {
 }
 
 
-//===phaser3:create========================================================--------
+//===<Phaser3>:create========================================================--------
 
 
 function create(scene) {
@@ -6497,7 +6595,6 @@ function create(scene) {
     //back_neon.angle += 10;
     //back_neon.visible = false;
     //back_neon.depth = 9999+11;
-    
     
     //---animation wall sticker
     scene.anims.create({
@@ -8141,6 +8238,7 @@ function update_checkModeChange(this_scene) {
             group_food.add(item_onigiri);
         }
         */
+        //***TODO*** food id
         {
             let _item_type = 1;
             if (local_items[1] > 0 || local_items[1+64] > 0 || local_items[1+128] > 0) {
@@ -8173,6 +8271,9 @@ function update_checkModeChange(this_scene) {
                 group_food.add(item_pancake);
             }
         }
+        setTimeout( () => {
+            group_food.destroy(true);
+        }, 30000);
         
         sound_feeding.play();
 
@@ -10244,7 +10345,8 @@ function update_checkItem(this_scene) {
     }
 
     //###201-236:Fluffy
-    if (local_precious > previous_local_precious2) {
+    if (local_fluffy_count > previous_local_fluffy_count) {
+    //if (local_precious > previous_local_precious2) {
         let _timeout = 0;
         let _count_fluffy = 0;
         let _count_fluffier = 0;
@@ -10366,7 +10468,8 @@ function update_checkItem(this_scene) {
     previous_local_rolled_dice = local_rolled_dice;
     previous_local_name_str = local_name_str;
     previous_local_score = local_score;
-    previous_local_precious2 = local_precious;
+    //previous_local_precious2 = local_precious;
+    previous_local_fluffy_count = local_fluffy_count;
 }
 
 
@@ -10729,7 +10832,10 @@ class Main extends Phaser.Scene {
         //preload(this);
     }
     create(){
+        let _start = Date.now();
+        console.log("create...");
         create(this);
+        console.log("  OK", Date.now() - _start);
         updateFirst(this);
     }
     update(){
