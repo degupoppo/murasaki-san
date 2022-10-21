@@ -10066,14 +10066,8 @@ function update_checkItem(this_scene) {
             .setInteractive({useHandCursor: true})
             .on('pointerdown', () => {
                 sound_clock.play();
+                setTimeout(sound_clock.play(), 1000);
                 item_clock.anims.play("item_clock_anim");
-                /*
-                if(item_clock.texture == game.textures.get("item_clock")){
-                    item_clock.setTexture("item_clock_opened");
-                } else {
-                    item_clock.setTexture("item_clock");
-                }
-                */
             });
     } else if (
         local_items[_item_id] == 0 
