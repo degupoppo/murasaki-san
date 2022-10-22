@@ -148,14 +148,58 @@ contract ERC721 is IERC721 {
 
 //### 1st
 
-    スコアの整理
+   *アイテム順の吟味
+        アイテムの種類分け
+        STR/DEX/INT系で同種類アイテムをバラけさせる
+    
+   *スコアの整理
+        戦略
+            長くプレイしたことに対するリワード
+                総合スコア
+            使い込まれたwalletに対するリワード
+                walletスコア
+                よりwalletと接続している感の演出
+            ステーキング量に対するリワード
+                少しあざとい
+                どかっと入れればいきなりmaxも可能になってしまう
+                長くステーキングしないとmaxにならない機構を組み込む
+                    feeding時に時間 x staking amountを加算させてゆくスコアを作る、など
+        意味論
+            スコアは一種類でわかりやすいほうが良い
+                計算式は複雑でもよい
+                何を表現しているのか伝わるほうが良い
+                たくさん種類があるとよくわからない
+            表現したいUXはなにか
+                作品内での活動度の反映か
+                walletとの接続感か
+                より金銭的・単純にステーキング量か
+            ハイブリッド型？
+                ステーキングスコア（時間x量）と、
+                総合スコア（total系＋NFT所有数）で、
+                どちらか大きい方が採用されるスコア値
+            総合型？
+                ステーキングスコア + total系スコア + NFT所有スコア
+                total系スコアは現在の計算式でOK
+                NFT所有スコアは計算用コントラが必要
+                    nft x 係数で算出する
+                ステーキングスコアは別途実装が必要
+                    feeding時にstaking amount + 係数を加算させる
+                    あるいはtotal系スコアに加算でも良いか
+                    ステーキングのスコアへの影響の割合が吟味必要
+                        どんなにステーキングしても+20%増しぐらいが良いか
+                    もしくはステーキング量に応じて+aの係数を書けるのでも良いか。
+                        maxは+20%に収束する
+                    スコアは加算するのではなく、total系からその都度算出するので、
+                        加算時にxAするのは現実的ではなかった。
+                        よって、別にtotal_staking_amountを用意し、
+                        これをtotal系スコアの計算式に組み入れることとする。
+                        スコア増加率は+20%程度の係数で。
         現状スコア的なもの
             ステータス（≒exp）
-            スコア（exp, coin, leaf, item_crafted, fluffy_recieved）
+            スコア（exp, coin, leaf, item_crafted, fluffy_recievedの総合点）
             ステーキング量
-            walletスコア
-            item数（購入したものも含めてwallet内すべて）
-            fluffy数（購入したものも含めてwallet内すべて）
+            walletスコア（nonce, ageの総合点）
+            item, fluffy数（購入したものも含めてwallet内すべて）
         すべてを加味したものをtotal_score = comfortabilityとするか？
         ステッカーや金魚鉢などは、基本的にこのスコアを参照するか
         これとは別に、dapps staking量を反映するものがあっても良いとは思う
@@ -170,20 +214,16 @@ contract ERC721 is IERC721 {
         これらのアイテムの成長はどのスコアを参照させるか
             すべてステーキング量に比例でも良いかもしれない
 
+   *ステッカー修正
+        floor stickerの修正
+        蛍光塗料の実装
+        
     UpgradウィンドウUIの改善
         mint先itemアイコンの実装
         fluffyが難しいが、どうするか。
         また、アイテムアイコンの一覧を作るのが大変。
             craft windowと共通化したいところだが。
             
-   *アイテム順の吟味
-        アイテムの種類分け
-        STR/DEX/INT系で同種類アイテムをバラけさせる
-    
-   *ステッカー修正
-        floor stickerの修正
-        蛍光塗料の実装
-        
     NFT絵の表示の実装
         walletからnftの取得
         nftからtokenURLの取得
@@ -289,19 +329,6 @@ contract ERC721 is IERC721 {
             Coder address:
             Illustrator address:
 
- ok ナイナイさんUIの改善
-        アニメーションの実装
-        出現・退場の改善
-            出現するのはduringFestival_beforeVoteの時だけ
-            afterVoteはチラシなどで現状報告させるか
-            endingの演出をどうするか
-        
- ok 猫ちゃん実装
-        アニメーションの実装
-
- ok スイッチOFF時のUI改善
-        ステッカーの蛍光塗料を実装
-
     fluffy修正
         色修正
         ・グレイ
@@ -323,11 +350,7 @@ contract ERC721 is IERC721 {
     ニュースの修正
         ウェルカムボードへ変更する
     
-    バグ・微修正
-        宝箱の音の吟味
-        猫ちゃんに音を実装する
-
-    バイバックコントラの洗練
+   *バイバックコントラの洗練
        *アクティブユーザーのカウント方法の深慮
             mm.next_summoner() - 1ではなく、not petrified summonersを
                 amount per summonerの分母に使用する
@@ -412,7 +435,7 @@ contract ERC721 is IERC721 {
                 理想はdapps stakingで利益をとった上での定常状態化
                 アクティブユーザー数が多すぎるとインフレしにくいだろうか。
 
-    マーケットの改善
+   *マーケットの改善
         情報取得のバッチ処理化
         バイバックシステムの組み込み
             市場で売りに出すかバイバックするかを選択できるように
@@ -427,36 +450,15 @@ contract ERC721 is IERC721 {
         文字情報は極力控える
         アイコンや絵などでわかりやすく表示する
 
-   *メインコンセプトの整理*
-        電子生命
-    
     コントラクトのuint32修正
         エラーのもとで煩わしいので、全てuintへ置換する
         コードとabiの全置換が必要
+    
+    Fluffy FestivalのUI改善
+        ないないさんのアニメーションの実装
+        ないないさんにとんがりボウシをかぶせる
+        winner fluffyにとんがりボウシをかぶせる
 
- ig Fluffy FestivalのUI実装
-        開催直前
-            画面の端に少しだけ見えて待機している
-            開催までの残り時間を知らせてくれる
-        開催中：投票前
-            お部屋の中をにぎやかに動き回る
-            立て看板で「開催中！」とでも表示させるか
-            タップでvote用windowを表示する
-        開催中：投票後
-            投票済みを表す絵を考える
-                看板の表示を変える？
-            開催中はお部屋に居続ける
-            自分の投票先を表示する
-            残り時間を表示する
-            現在の投票結果を表示する
-            終了可能かを表示する
-                終了可能時はタップでend_votingする
-        開催終了
-            画面外へ出てゆく
-        絵の案
-            とんがり帽子をかぶったfluffy達？
-            ないないさん？
-        
     Crafting難易度の調整
         現在の難易度ではItemづまりを起こすだろうか。
         もう少しDCを下げるなど難易度調整する。
@@ -494,13 +496,6 @@ contract ERC721 is IERC721 {
         吹き出しの検討
             位置合わせがとても面倒だが
 
- ok トークンボックス絵の実装
-        宝箱
-        開いた絵と閉じている絵の２種類
-
- ok ネオンちゃんの絵の実装
-        裏の世界である程度動き回る
-
     プレゼント絵の実装
         マウスオーバーで半開きの絵
         出現アニメーション案
@@ -521,18 +516,9 @@ contract ERC721 is IERC721 {
         訪問猫, メールをくわえて右に歩いている絵, 2枚
         訪問猫, 何もくわえずに左に歩いている絵, 2枚
     
-    Fluffyの絵の実装
-        3種類, 12色
-    
     Newspaperの絵の改善
         もう少し見やすく、新聞の絵をもうちょっとリッチに
     
-    読み込み画面の改善
-        オープニングのイメージをどうするか
-    
-    Upgradeウィンドウの改善
-        もっと直感的にわかりやすく
-
     一人遊び用アクセサリー
         積み木
             つっつくむらさきさん絵
@@ -544,8 +530,64 @@ contract ERC721 is IERC721 {
             条件が揃うとペットたちとくっついて寝る
             スイッチで夜もしくは20時以降20時前、満腹度80%以上、happy80%以上
 
-
 //### 2nd
+
+ ok Fluffy FestivalのUI実装
+ 
+        開催直前
+            画面の端に少しだけ見えて待機している
+            開催までの残り時間を知らせてくれる
+        開催中：投票前
+            お部屋の中をにぎやかに動き回る
+            立て看板で「開催中！」とでも表示させるか
+            タップでvote用windowを表示する
+        開催中：投票後
+            投票済みを表す絵を考える
+                看板の表示を変える？
+            開催中はお部屋に居続ける
+            自分の投票先を表示する
+            残り時間を表示する
+            現在の投票結果を表示する
+            終了可能かを表示する
+                終了可能時はタップでend_votingする
+        開催終了
+            画面外へ出てゆく
+        絵の案
+            とんがり帽子をかぶったfluffy達？
+            ないないさん？
+        
+ ig Upgradeウィンドウの改善
+        もっと直感的にわかりやすく
+
+ ok 読み込み画面の改善
+        オープニングのイメージをどうするか
+    
+ ok Fluffyの絵の実装
+        3種類, 12色
+    
+ ok トークンボックス絵の実装
+        宝箱
+        開いた絵と閉じている絵の２種類
+
+ ok ネオンちゃんの絵の実装
+        裏の世界である程度動き回る
+
+ ok ナイナイさんUIの改善
+        アニメーションの実装
+        出現・退場の改善
+            出現するのはduringFestival_beforeVoteの時だけ
+            afterVoteはチラシなどで現状報告させるか
+            endingの演出をどうするか
+        
+ ok 猫ちゃん実装
+        アニメーションの実装
+
+ ok スイッチOFF時のUI改善
+        ステッカーの蛍光塗料を実装
+
+ ok バグ・微修正
+        宝箱の音の吟味
+        猫ちゃんに音を実装する
 
  ok 情報の表示/非表示
         tabletのON/OFFでinfo系すべてON/OFFとする
@@ -1072,6 +1114,7 @@ async function init_global_variants() {
     local_calc_grooming = 0;
     local_blockNumber = 0;
     local_fluffy_count = 0;
+    local_price = 0;
     
     //---local festival
     local_ff_each_voting_count = new Array(256).fill(0);
@@ -1398,6 +1441,7 @@ async function contract_update_static_status(_summoner) {
     local_class =       Number(_all_static_status[0]);
     local_owner =       _all_static_status[1];
     local_name_str =    _all_static_status[2];
+    local_price =       _all_static_status[5];
 
     //lootlike
     let _res = _all_static_status[3];
@@ -3793,10 +3837,10 @@ class Star extends Phaser.GameObjects.Sprite{
     
     //### on_summon
     on_summon() {
-        this.x = 800 + Math.random() * 400;
+        this.x = 800 + Math.random() * 600;
         this.y = -50;
         this.speed_x = -10 - Math.random() * 5;
-        this.speed_y = -20;
+        this.speed_y = -10;
         this.count = 0;
         this.a = Math.random() * 0.8 - 0.4;
         this.b = this.line_y_max+100 + this.a * this.x;
@@ -4728,9 +4772,9 @@ class Festligheter extends Phaser.GameObjects.Sprite{
             let _array_sorted = this._get_ranking_sorted();
             let _text = "";
             _text += " Your vote: " + array_item_name[local_ff_last_voting_type] + " \n";
-            _text += "   1st: " + array_item_name[_array_sorted[0][0]] + "(" + _array_sorted[0][1] + " votes) \n";
-            _text += "   2nd: " + array_item_name[_array_sorted[1][0]] + "(" + _array_sorted[1][1] + " votes) \n";
-            _text += "   3rd: " + array_item_name[_array_sorted[2][0]] + "(" + _array_sorted[2][1] + " votes) \n";
+            _text += "   1st: " + array_item_name[_array_sorted[0][0]] + " (" + _array_sorted[0][1] + " votes) \n";
+            _text += "   2nd: " + array_item_name[_array_sorted[1][0]] + " (" + _array_sorted[1][1] + " votes) \n";
+            _text += "   3rd: " + array_item_name[_array_sorted[2][0]] + " (" + _array_sorted[2][1] + " votes) \n";
             _text += " (" + (local_ff_subject_end_block - local_blockNumber) + " blocks remaining) ";
             this.text.setText(_text);
         }
@@ -5196,6 +5240,70 @@ async function draw_radarchart(scene) {
         //local_luck_withItems_withStaking_withDice
         local_luck_withItems_withDice
     );
+}
+
+
+//---window:summon
+function open_window_summon(scene) {
+    //close window and summon
+    function close_window_summon(_class) {
+        group_window_summon.destroy(true);
+        if (_class >= 0) {
+            contract_summon(_class);
+        }
+    }
+    //create button with color and class
+    function create_button(_x, _y, _text, _color, _class, scene) {
+        let obj = scene.add.text(_x, _y, _text)
+            .setFontSize(40).setFontFamily("Arial").setFill(_color)
+            .setInteractive({useHandCursor: true})
+            .on("pointerdown", () => close_window_summon(_class) )
+            .on("pointerover", () => obj.setStyle({ fontSize: 40, fontFamily: "Arial", fill: '#ffff00' }))
+            .on("pointerout", () => obj.setStyle({ fontSize: 40, fontFamily: "Arial", fill: _color }))
+        return obj;
+    }
+    //create window
+    window_summon = scene.add.sprite(640, 480, "window").setInteractive();
+    //create message
+    let _text = "Summoning your Murasaki-san.\nPlease choose your favorite color.\n(This does not affect any gameplays.)";
+    msg1 = scene.add.text(150, 150, _text)
+            .setFontSize(24).setFontFamily("Arial").setFill("#000000")
+    //create button
+    let _x = 200;
+    let _y = 280;
+    let _y_add = 70;
+    button0 = create_button(_x, _y+_y_add*0, "Red", "#E60012", 0, scene);
+    button1 = create_button(_x, _y+_y_add*1, "Orange", "#F39800", 1, scene);
+    button2 = create_button(_x, _y+_y_add*2, "Yello", "#FFF100", 2, scene);
+    button3 = create_button(_x, _y+_y_add*3, "Light Green", "#8FC31F", 3, scene);
+    button4 = create_button(_x, _y+_y_add*4, "Green", "#009944", 4, scene);
+    button5 = create_button(_x, _y+_y_add*5, "Deep Green", "#009E96", 5, scene);
+    button6 = create_button(_x+500, _y+_y_add*0, "Light Blue", "#00A0E9", 6, scene);
+    button7 = create_button(_x+500, _y+_y_add*1, "Blue", "#0068B7", 7, scene);
+    button8 = create_button(_x+500, _y+_y_add*2, "Deep Blue", "#1D2088", 8, scene);
+    button9 = create_button(_x+500, _y+_y_add*3, "Purple", "#920783", 9, scene);
+    button10 = create_button(_x+500, _y+_y_add*4, "Pink", "#E4007F", 10, scene);
+    button11 = create_button(_x+500, _y+_y_add*5, "Vivid Pink", "#E5004F", 11, scene);
+    button_cancel = create_button(1000, 750, "Cancel", "#000000", -1, scene);
+    //create group
+    group_window_summon = scene.add.group();
+    group_window_summon.add(window_summon);
+    group_window_summon.add(msg1);
+    group_window_summon.add(button0);
+    group_window_summon.add(button1);
+    group_window_summon.add(button2);
+    group_window_summon.add(button3);
+    group_window_summon.add(button4);
+    group_window_summon.add(button5);
+    group_window_summon.add(button6);
+    group_window_summon.add(button7);
+    group_window_summon.add(button8);
+    group_window_summon.add(button9);
+    group_window_summon.add(button10);
+    group_window_summon.add(button11);
+    group_window_summon.add(button_cancel);
+    //depth
+    group_window_summon.setDepth(999999);
 }
 
 
@@ -5803,70 +5911,6 @@ function open_window_voting(scene) {
     group_window_voting.add(msg4);
     //depth
     group_window_voting.setDepth(9999 + 100);
-}
-
-
-//---window:summon
-function open_window_summon(scene) {
-    //close window and summon
-    function close_window_summon(_class) {
-        group_window_summon.destroy(true);
-        if (_class >= 0) {
-            contract_summon(_class);
-        }
-    }
-    //create button with color and class
-    function create_button(_x, _y, _text, _color, _class, scene) {
-        let obj = scene.add.text(_x, _y, _text)
-            .setFontSize(40).setFontFamily("Arial").setFill(_color)
-            .setInteractive({useHandCursor: true})
-            .on("pointerdown", () => close_window_summon(_class) )
-            .on("pointerover", () => obj.setStyle({ fontSize: 40, fontFamily: "Arial", fill: '#ffff00' }))
-            .on("pointerout", () => obj.setStyle({ fontSize: 40, fontFamily: "Arial", fill: _color }))
-        return obj;
-    }
-    //create window
-    window_summon = scene.add.sprite(640, 480, "window").setInteractive();
-    //create message
-    let _text = "Summoning your Murasaki-san.\nPlease choose your favorite color.\n(This does not affect any gameplays.)";
-    msg1 = scene.add.text(150, 150, _text)
-            .setFontSize(24).setFontFamily("Arial").setFill("#000000")
-    //create button
-    let _x = 200;
-    let _y = 280;
-    let _y_add = 70;
-    button0 = create_button(_x, _y+_y_add*0, "Red", "#E60012", 0, scene);
-    button1 = create_button(_x, _y+_y_add*1, "Orange", "#F39800", 1, scene);
-    button2 = create_button(_x, _y+_y_add*2, "Yello", "#FFF100", 2, scene);
-    button3 = create_button(_x, _y+_y_add*3, "Light Green", "#8FC31F", 3, scene);
-    button4 = create_button(_x, _y+_y_add*4, "Green", "#009944", 4, scene);
-    button5 = create_button(_x, _y+_y_add*5, "Deep Green", "#009E96", 5, scene);
-    button6 = create_button(_x+500, _y+_y_add*0, "Light Blue", "#00A0E9", 6, scene);
-    button7 = create_button(_x+500, _y+_y_add*1, "Blue", "#0068B7", 7, scene);
-    button8 = create_button(_x+500, _y+_y_add*2, "Deep Blue", "#1D2088", 8, scene);
-    button9 = create_button(_x+500, _y+_y_add*3, "Purple", "#920783", 9, scene);
-    button10 = create_button(_x+500, _y+_y_add*4, "Pink", "#E4007F", 10, scene);
-    button11 = create_button(_x+500, _y+_y_add*5, "Vivid Pink", "#E5004F", 11, scene);
-    button_cancel = create_button(1000, 750, "Cancel", "#000000", -1, scene);
-    //create group
-    group_window_summon = scene.add.group();
-    group_window_summon.add(window_summon);
-    group_window_summon.add(msg1);
-    group_window_summon.add(button0);
-    group_window_summon.add(button1);
-    group_window_summon.add(button2);
-    group_window_summon.add(button3);
-    group_window_summon.add(button4);
-    group_window_summon.add(button5);
-    group_window_summon.add(button6);
-    group_window_summon.add(button7);
-    group_window_summon.add(button8);
-    group_window_summon.add(button9);
-    group_window_summon.add(button10);
-    group_window_summon.add(button11);
-    group_window_summon.add(button_cancel);
-    //depth
-    group_window_summon.setDepth(999999);
 }
 
 
@@ -8600,10 +8644,10 @@ function update_checkItem(this_scene) {
                 _y = 720;
             }
             let _text = "";
-            _text += " total exp gained: " + local_total_exp_gained + "\n";
-            _text += " total coin mined: " + local_total_coin_mined + "\n";
+            _text += " total exp gained: " + local_total_exp_gained + " \n";
+            _text += " total coin mined: " + local_total_coin_mined + " \n";
             _text += " total leaf farmed: " + local_total_material_farmed + "\n";
-            _text += " total item crafted: " + local_total_item_crafted + "\n";
+            _text += " total item crafted: " + local_total_item_crafted + " \n";
             _text += " total fluffy gifted: " + local_total_precious_received;
             item_book_text = this_scene.add.text(
                 _x,
