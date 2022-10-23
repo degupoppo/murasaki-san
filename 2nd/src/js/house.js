@@ -10986,6 +10986,15 @@ class Loading_overlap extends Phaser.Scene {
             .setOrigin(0.5)
             .setFill("#ff1694")
             .setVisible(false);
+        let _text = "";
+        _text += "This count is stored locally\n";
+        _text += "and does not affect play :)";
+        this.nyui_text2 = this.add.text(_x, _y+60, _text)
+            .setFontSize(16)
+            .setFontFamily("Arial")
+            .setOrigin(0.5)
+            .setFill("#888888")
+            .setVisible(false);
         this.nyui = this.add.sprite(_x, _y, "nyui_loading")
             .setOrigin(0.5)
             .setScale(0.25)
@@ -10995,7 +11004,7 @@ class Loading_overlap extends Phaser.Scene {
                 this.flowerCount += 1;
                 this.nyui_text.setText(this.flowerCount + " flowers");
                 this.nyui_text.setVisible(true);
-                //this.nyui_text2.setVisible(true);
+                this.nyui_text2.setVisible(true);
                 let _ohana =this.add.image(
                     _x-150+Math.random()*300,
                     _y-20+Math.random()*40,
