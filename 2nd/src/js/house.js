@@ -5012,7 +5012,7 @@ class Nyuinyui extends Phaser.GameObjects.Sprite{
             .setAngle(Math.random()*360)
             .setDepth(9999+101);
         group_nyuinyui_ohana.add(_ohana);
-        sound_hat.play();
+        sound_nyui.play();
     }
     
     //### resting
@@ -6439,6 +6439,7 @@ function preload(scene) {
     scene.load.audio("fluffy5", "src/sound/fluffy5.mp3");
     scene.load.audio("tokenChest", "src/sound/tokenChest.mp3");
     scene.load.audio("star", "src/sound/star.mp3");
+    scene.load.audio("nyui", "src/sound/nyui.mp3");
 
     //---item_basic
     scene.load.image("item_table", "src/png/item_basic_table.png");
@@ -7426,6 +7427,7 @@ function create(scene) {
     sound_fluffy5 = scene.sound.add("fluffy5", {volume:0.2});
     sound_tokenChest = scene.sound.add("tokenChest", {volume:0.2});
     sound_star = scene.sound.add("star", {volume:0.1});
+    sound_nyui = scene.sound.add("nyui", {volume:0.1});
 
     //---system message
     //system message
@@ -10862,6 +10864,7 @@ class FirstCheck extends Phaser.Scene {
                 //prevent duplicated starting
                 if (scene.flag_start == 0) {
                     setTimeout( () => {scene.scene.start("Loading")}, 500, scene);
+                    setTimeout( () => {scene.scene.launch("Loading_overlap")}, 100, scene);
                     scene.flag_start = 1;
                 }
                 clearInterval(timerId);
@@ -10924,7 +10927,7 @@ class Loading extends Phaser.Scene {
         this.count_web3Loading += 1;
         this.flag_start = 1;
     }
-    
+
     preload() {
         console.log("scene: Loading");
         this.update_web3(); // start loading web3 without async
@@ -10943,11 +10946,77 @@ class Loading extends Phaser.Scene {
         //check web3 loading, wait for complete
         if (this.flag_start == 1) {
             this._msg1.setText("");
+            this.scene.stop("Loading_overlap");
             this.scene.start("Opeaning");
         } else {
             let _text = "Loading On-Chain Data... (";
             _text += this.count_web3Loading + "/6)";
             this._msg1.setText(_text);
+        }
+    }
+}
+
+
+//---Loading_overlap
+
+class Loading_overlap extends Phaser.Scene {
+
+    constructor() {
+        super({ key:"Loading_overlap", active:false });
+        this.turn = 0;
+        try {
+            let _json = localStorage.getItem("flowerCount");
+            this.flowerCount = JSON.parse(_json);
+        } catch (err) {
+            this.flowerCount = 0;
+        }
+    }
+    
+    preload() {
+        this.load.spritesheet("nyui_loading", "src/png/nyui_moving.png", {frameWidth: 370, frameHeight: 320});
+        this.load.spritesheet("ohana_loading", "src/particle/flowers.png", {frameWidth: 370, frameHeight: 320});
+    }
+    
+    create() {
+        let _x = 400 + Math.random()*300;
+        let _y = 800 + Math.random()*20;
+        this.nyui_text = this.add.text(_x, _y-50, "")
+            .setFontSize(20)
+            .setFontFamily("Arial")
+            .setOrigin(0.5)
+            .setFill("#ff1694")
+            .setVisible(false);
+        this.nyui = this.add.sprite(_x, _y, "nyui_loading")
+            .setOrigin(0.5)
+            .setScale(0.25)
+            .setDepth(9999)
+            .setInteractive({useHandCursor: true })
+            .on("pointerdown", () => {
+                this.flowerCount += 1;
+                this.nyui_text.setText(this.flowerCount + " flowers");
+                this.nyui_text.setVisible(true);
+                //this.nyui_text2.setVisible(true);
+                let _ohana =this.add.image(
+                    _x-150+Math.random()*300,
+                    _y-20+Math.random()*40,
+                    "ohana_loading"
+                )
+                    .setFrame(Math.floor(Math.random()*5))
+                    .setOrigin(0.5)
+                    .setScale(0.1)
+                    .setAngle(Math.random()*360)
+                    .setDepth(9999-1);
+                //sound_nyui_loading.play();
+                localStorage.setItem("flowerCount", JSON.stringify(this.flowerCount));
+            });
+    }
+    
+    update() {
+        this.turn += 1;
+        if (this.turn % 80 == 40) {
+            this.nyui.setFrame(1);
+        } else if (this.turn % 80 == 0) {
+            this.nyui.setFrame(0);
         }
     }
 }
@@ -11072,7 +11141,7 @@ let config = {
         width: 1280,
         height: 960,
     },
-    scene: [FirstCheck, Loading, Opeaning, SomethingWrong, Main],
+    scene: [FirstCheck, Loading, Loading_overlap, Opeaning, SomethingWrong, Main],
     fps: {
         target: 50,
         forceSetTimeOut: true
