@@ -2383,7 +2383,8 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
                 if (group_food.getChildren().length > 0) {
                     group_food.getChildren()[Math.floor(Math.random() * group_food.getChildren().length)].destroy();
                 } else {
-                    group_food.destroy(true);
+                    ;
+                    //group_food.destroy(true);
                 }
             }
             if (this.count >= this.count_limit) {
