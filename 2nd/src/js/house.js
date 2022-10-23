@@ -148,6 +148,22 @@ contract ERC721 is IERC721 {
 
 //### 1st
 
+    必要な絵
+        猫たち絵のアニメーション
+        家猫と訪問猫の差別化、鈴？
+        びっくりしているむらさきさん
+            鳩時計、カーテン、NFT額縁などで使用
+        額縁
+        ふるっふぃー修正
+            fluffier目を大きく
+            fluffiest目を><に, on_clickで使用
+        金魚鉢
+            サイズ違い
+            アニメーション
+        fortune statue
+            目を光らせる
+        neon fluffy
+
    *アイテム順の吟味
         アイテムの種類分け
         STR/DEX/INT系で同種類アイテムをバラけさせる
@@ -1215,10 +1231,19 @@ async function init_global_variants() {
     flag_fadein = 0;
     flag_debug = 0;
     flag_info = 1;
+    flag_syncNow = 0;
     
     //---pointer
     pointer_x = 0;
     pointer_y = 0;
+    
+    //---localStorage
+    try {
+        let _json = localStorage.getItem("flowerCount_inGame");
+        localStorage_flowerCount = JSON.parse(_json);
+    } catch (err) {
+        localStorage_flowerCount = 0;
+    }
 }
 
 init_global_variants();
@@ -2020,14 +2045,20 @@ async function contract_feeding(_summoner) {
     }
     contract_mffg.methods.feeding(_summoner, active_nui_id).send({from:wallet})
         .on("transactionHash", (transactionHash) => update_tx_text("sending", transactionHash))
-        .on("receipt", (receipt) => update_tx_text("done", receipt.transactionHash));
+        .on("receipt", (receipt) => {
+            update_tx_text("done", receipt.transactionHash);
+            flag_syncNow=1;
+        });
 }
 
 //grooming
 async function contract_grooming(_summoner) {
     contract_mffg.methods.grooming(_summoner, active_nui_id).send({from:wallet})
         .on("transactionHash", (transactionHash) => update_tx_text("sending", transactionHash))
-        .on("receipt", (receipt) => update_tx_text("done", receipt.transactionHash));
+        .on("receipt", (receipt) => {
+            update_tx_text("done", receipt.transactionHash);
+            flag_syncNow=1;
+        });
 }
 
 //mining
@@ -2380,12 +2411,19 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             if (this.count % 200 == 0) {
                 sound_happy.play();
                 //destroy group_food one by one
+                try {
+                    group_food.getChildren()[Math.floor(Math.random() * group_food.getChildren().length)].destroy();
+                } catch (err) {
+                    ;
+                }
+                /*
                 if (group_food.getChildren().length > 0) {
                     group_food.getChildren()[Math.floor(Math.random() * group_food.getChildren().length)].destroy();
                 } else {
                     ;
                     //group_food.destroy(true);
                 }
+                */
             }
             if (this.count >= this.count_limit) {
                 this.mode = "resting";
@@ -4993,11 +5031,19 @@ class Nyuinyui extends Phaser.GameObjects.Sprite{
         this.submode = 0;
         this.resting_count = 200;
         this.movingMode = "resting";
-        this.movingSubmode = "";
+        this.movingSubmode = 0;
         this.setInteractive({useHandCursor: true});
         this.on("pointerdown", function (pointer) {
             this.on_click();
         }, this);
+        this.flowerCount = 0;
+        this.nyui_text = scene.add.text(630, 820, "")
+            .setFontSize(20)
+            .setFontFamily("Arial")
+            .setOrigin(0.5)
+            .setFill("#0000ff")
+            .setVisible(false)
+            .setDepth(9999+102);
     }
     
     //### on_click
@@ -5014,6 +5060,29 @@ class Nyuinyui extends Phaser.GameObjects.Sprite{
             .setDepth(9999+101);
         group_nyuinyui_ohana.add(_ohana);
         sound_nyui.play();
+        this.flowerCount += 1;
+        localStorage_flowerCount += 1;
+        if (this.flowerCount == 10) {
+            this.anims.play("nyui_happy");
+            this.mode = "resting";
+            this.movingSubmode = 1;
+            this.resting_count = 99999;
+            sound_nyui2.play();
+        }
+        this.nyui_text.setVisible(true);
+        //this.nyui_text.setText(this.flowerCount + " flowers");
+        this.nyui_text.setText(localStorage_flowerCount + " flowers");
+        localStorage.setItem("flowerCount_inGame", JSON.stringify(localStorage_flowerCount));
+    }
+    
+    //### reset
+    reset() {
+        group_nyuinyui_ohana.clear(true);
+        this.flowerCount = 0;
+        this.movingMode = "resting";
+        this.anims.play("nyui_moving_right");
+        this.movingSubmode = 0;
+        this.nyui_text.setVisible(false);
     }
     
     //### resting
@@ -5087,6 +5156,8 @@ class Nyuinyui extends Phaser.GameObjects.Sprite{
         } else if (this.movingMode == "resting"){
             this.resting();
         }
+        //this.nyui_text.x = this.x;
+        //this.nyui_text.y = this.y - 50;
     }
 }
 
@@ -5313,6 +5384,7 @@ function open_window_craft (scene) {
 
     //nyuinyui
     nyuinyui.setVisible(true);
+    nyuinyui.reset();
 
     //prevent loading error
     if (local_level == 0) {
@@ -5335,7 +5407,7 @@ function open_window_craft (scene) {
     async function close_crafting_window(_item) {
         //nyuinyui
         nyuinyui.setVisible(false);
-        group_nyuinyui_ohana.clear(true);
+        nyuinyui.reset();
         flag_window_craft = 0;
         //destroy group
         //group_window_crafting.destroy(true);
@@ -5621,12 +5693,13 @@ function open_window_upgrade(scene) {
 
     //nyuinyui
     nyuinyui.setVisible(true);
+    nyuinyui.reset();
 
     function close_window_upgrade() {
         group_window_upgrade.destroy(true);
         //nyuinyui
         nyuinyui.setVisible(false);
-        group_nyuinyui_ohana.clear(true);
+        nyuinyui.reset();
     }
 
     //create group
@@ -5755,13 +5828,14 @@ function open_window_voting(scene) {
 
     //nyuinyui
     nyuinyui.setVisible(true);
+    nyuinyui.reset();
 
     sound_window_open.play();
     //close window and summon
     function close_window(_summoner, _type) {
         //nyuinyui
         nyuinyui.setVisible(false);
-        group_nyuinyui_ohana.clear(true);
+        nyuinyui.reset();
         //main
         group_window_voting.destroy(true);
         if (_type >= 0) {
@@ -6441,6 +6515,7 @@ function preload(scene) {
     scene.load.audio("tokenChest", "src/sound/tokenChest.mp3");
     scene.load.audio("star", "src/sound/star.mp3");
     scene.load.audio("nyui", "src/sound/nyui.mp3");
+    scene.load.audio("nyui2", "src/sound/nyui2.mp3");
 
     //---item_basic
     scene.load.image("item_table", "src/png/item_basic_table.png");
@@ -6565,6 +6640,7 @@ function preload(scene) {
 
     //---nyui
     scene.load.spritesheet("nyui_moving", "src/png/nyui_moving.png", {frameWidth: 370, frameHeight: 320});
+    scene.load.spritesheet("nyui_happy", "src/png/nyui_happy.png", {frameWidth: 370, frameHeight: 320});
 
     //---fluffy
     /*
@@ -7098,7 +7174,12 @@ function create(scene) {
         frameRate: 1,
         repeat: -1
     });
-    
+    scene.anims.create({
+        key: "nyui_happy",
+        frames: scene.anims.generateFrameNumbers("nyui_happy", {start:0, end:1}),
+        frameRate: 1,
+        repeat: -1
+    });    
     //---animation ff
     scene.anims.create({
         key: "ff_report",
@@ -7429,6 +7510,7 @@ function create(scene) {
     sound_tokenChest = scene.sound.add("tokenChest", {volume:0.2});
     sound_star = scene.sound.add("star", {volume:0.1});
     sound_nyui = scene.sound.add("nyui", {volume:0.1});
+    sound_nyui2 = scene.sound.add("nyui2", {volume:0.1});
 
     //---system message
     //system message
@@ -10791,7 +10873,8 @@ function update(scene) {
     }
 
     //update onchain data
-    if (turn % 250 == 70 && flag_sync == 1) {
+    if (flag_sync == 1 && (turn % 250 == 70 || flag_syncNow == 1)) {
+        flag_syncNow = 0;
         if (count_sync == 0 || local_notPetrified == 0 || summoner == 0) {
             contract_update_all();
         } else if (summoner > 0) {
@@ -10971,10 +11054,12 @@ class Loading_overlap extends Phaser.Scene {
         } catch (err) {
             this.flowerCount = 0;
         }
+        this.flowerCount_present = 0;
     }
     
     preload() {
         this.load.spritesheet("nyui_loading", "src/png/nyui_moving.png", {frameWidth: 370, frameHeight: 320});
+        this.load.spritesheet("nyui_loading2", "src/png/nyui_happy.png", {frameWidth: 370, frameHeight: 320});
         this.load.spritesheet("ohana_loading", "src/particle/flowers.png", {frameWidth: 370, frameHeight: 320});
     }
     
@@ -11003,6 +11088,7 @@ class Loading_overlap extends Phaser.Scene {
             .setInteractive({useHandCursor: true })
             .on("pointerdown", () => {
                 this.flowerCount += 1;
+                this.flowerCount_present += 1;
                 this.nyui_text.setText(this.flowerCount + " flowers");
                 this.nyui_text.setVisible(true);
                 this.nyui_text2.setVisible(true);
@@ -11023,7 +11109,9 @@ class Loading_overlap extends Phaser.Scene {
     
     update() {
         this.turn += 1;
-        if (this.turn % 80 == 40) {
+        if (this.flowerCount_present >= 10) {
+            this.nyui.setTexture("nyui_loading2");
+        } else if (this.turn % 80 == 40) {
             this.nyui.setFrame(1);
         } else if (this.turn % 80 == 0) {
             this.nyui.setFrame(0);
