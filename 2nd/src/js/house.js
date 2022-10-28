@@ -148,6 +148,37 @@ contract ERC721 is IERC721 {
 
 //### 1st
 
+    Web3精神の深慮
+        コントラクトへ可読性の高い情報が少ない
+        item_typeなどはフロントエンド側にしか名前がない、など
+        コントラクトだけでも世界観が完結できるよう、もう少し気を使うことを検討
+            murasaki_craft_codexでitem_nameを返す
+            しかしitem_nameをいちいちweb3に照会しているとフロントが重くなるジレンマ
+        フロントを作り込みすぎると、特定のフロント内で完結する従来と変わらないUXとなってしまう
+        NFTの強みは、NFT規格で横に世界が広がる可能性があること。
+            そのためには、フロントに依存せずコントラクトだけでも世界観を表現できることが必要。
+            summonerはNTTなので、HoMの中心NFTはitemしか無い。
+            あるいはsummoner=Astar walletと居直ってしまっても良いだろうか。
+
+    ステーキングスコアの導入
+        feeding時の加算をtotalで行うms項目の用意
+
+    必要な絵
+        猫たち絵のアニメーション
+        家猫と訪問猫の差別化、鈴？
+        びっくりしているむらさきさん
+            鳩時計、カーテン、NFT額縁などで使用
+        額縁
+        ふるっふぃー修正
+            fluffier目を大きく
+            fluffiest目を><に, on_clickで使用
+        金魚鉢
+            サイズ違い
+            アニメーション
+        fortune statue
+            目を光らせる
+        neon fluffy
+
    *アイテム順の吟味
         アイテムの種類分け
         STR/DEX/INT系で同種類アイテムをバラけさせる
@@ -1215,10 +1246,19 @@ async function init_global_variants() {
     flag_fadein = 0;
     flag_debug = 0;
     flag_info = 1;
+    flag_syncNow = 0;
     
     //---pointer
     pointer_x = 0;
     pointer_y = 0;
+    
+    //---localStorage
+    try {
+        let _json = localStorage.getItem("flowerCount_inGame");
+        localStorage_flowerCount = JSON.parse(_json);
+    } catch (err) {
+        localStorage_flowerCount = 0;
+    }
 }
 
 init_global_variants();
@@ -2020,14 +2060,20 @@ async function contract_feeding(_summoner) {
     }
     contract_mffg.methods.feeding(_summoner, active_nui_id).send({from:wallet})
         .on("transactionHash", (transactionHash) => update_tx_text("sending", transactionHash))
-        .on("receipt", (receipt) => update_tx_text("done", receipt.transactionHash));
+        .on("receipt", (receipt) => {
+            update_tx_text("done", receipt.transactionHash);
+            flag_syncNow=1;
+        });
 }
 
 //grooming
 async function contract_grooming(_summoner) {
     contract_mffg.methods.grooming(_summoner, active_nui_id).send({from:wallet})
         .on("transactionHash", (transactionHash) => update_tx_text("sending", transactionHash))
-        .on("receipt", (receipt) => update_tx_text("done", receipt.transactionHash));
+        .on("receipt", (receipt) => {
+            update_tx_text("done", receipt.transactionHash);
+            flag_syncNow=1;
+        });
 }
 
 //mining
@@ -2380,11 +2426,19 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             if (this.count % 200 == 0) {
                 sound_happy.play();
                 //destroy group_food one by one
+                try {
+                    group_food.getChildren()[Math.floor(Math.random() * group_food.getChildren().length)].destroy();
+                } catch (err) {
+                    ;
+                }
+                /*
                 if (group_food.getChildren().length > 0) {
                     group_food.getChildren()[Math.floor(Math.random() * group_food.getChildren().length)].destroy();
                 } else {
-                    group_food.destroy(true);
+                    ;
+                    //group_food.destroy(true);
                 }
+                */
             }
             if (this.count >= this.count_limit) {
                 this.mode = "resting";
@@ -4183,33 +4237,41 @@ class Fluffy2 extends Phaser.GameObjects.Sprite{
             this.rarity = "rare";
             this.setScale(0.15);
         }
-        //console.log(this.rarity, this.type, this.itemId);
+        //elected symbol
+        /*
+        this.electedSymbol = this.scene.add.image(this.x, this.y, "par_flowers")
+            .setOrigin(0.5)
+            .setScale(0.08)
+            .setAngle(30)
+            //.setVisible(false)
+            .setFrame(Math.floor(Math.random()*5));
+        */
         //image
         if (this.rarity == "common") {
             if (this.type == 201) {
-                this.setFrame(0 + 8*0);
+                this.setFrame(0 + 10*0);
             } else if (this.type == 202) {
-                this.setFrame(0 + 8*1);
+                this.setFrame(0 + 10*1);
             } else if (this.type == 203) {
-                this.setFrame(0 + 8*2);
+                this.setFrame(0 + 10*2);
             } else if (this.type == 204) {
-                this.setFrame(0 + 8*3);
+                this.setFrame(0 + 10*3);
             } else if (this.type == 205) {
-                this.setFrame(0 + 8*4);
+                this.setFrame(0 + 10*4);
             } else if (this.type == 206) {
-                this.setFrame(0 + 8*5);
+                this.setFrame(0 + 10*5);
             } else if (this.type == 207) {
-                this.setFrame(0 + 8*6);
+                this.setFrame(0 + 10*6);
             } else if (this.type == 208) {
-                this.setFrame(0 + 8*7);
+                this.setFrame(0 + 10*7);
             } else if (this.type == 209) {
-                this.setFrame(0 + 8*8);
+                this.setFrame(0 + 10*8);
             } else if (this.type == 210) {
-                this.setFrame(0 + 8*9);
+                this.setFrame(0 + 10*9);
             } else if (this.type == 211) {
-                this.setFrame(0 + 8*10);
+                this.setFrame(0 + 10*10);
             } else if (this.type == 212) {
-                this.setFrame(0 + 8*11);
+                this.setFrame(0 + 10*11);
             }
         } else if (this.rarity == "uncommon") {
             if (this.type == 213) {
@@ -4239,65 +4301,77 @@ class Fluffy2 extends Phaser.GameObjects.Sprite{
             }
         } else if (this.rarity == "rare") {
             if (this.type == 225) {
-                this.frontFrame = 3 +8*0;
+                this.frontFrame = 3 +10*0;
                 this.setFrame(this.frontFrame);
                 this.anim_right = "fluffy_fluffiest_01_right";
                 this.anim_left = "fluffy_fluffiest_01_left";
+                this.anim_front = "fluffy_fluffiest_01_front";
             } else if (this.type == 226) {
-                this.frontFrame = 3 +8*1;
+                this.frontFrame = 3 +10*1;
                 this.setFrame(this.frontFrame);
                 this.anim_right = "fluffy_fluffiest_02_right";
                 this.anim_left = "fluffy_fluffiest_02_left";
+                this.anim_front = "fluffy_fluffiest_02_front";
             } else if (this.type == 227) {
-                this.frontFrame = 3 +8*2;
+                this.frontFrame = 3 +10*2;
                 this.setFrame(this.frontFrame);
                 this.anim_right = "fluffy_fluffiest_03_right";
                 this.anim_left = "fluffy_fluffiest_03_left";
+                this.anim_front = "fluffy_fluffiest_03_front";
             } else if (this.type == 228) {
-                this.frontFrame = 3 +8*3;
+                this.frontFrame = 3 +10*3;
                 this.setFrame(this.frontFrame);
                 this.anim_right = "fluffy_fluffiest_04_right";
                 this.anim_left = "fluffy_fluffiest_04_left";
+                this.anim_front = "fluffy_fluffiest_04_front";
             } else if (this.type == 229) {
-                this.frontFrame = 3 +8*4;
+                this.frontFrame = 3 +10*4;
                 this.setFrame(this.frontFrame);
                 this.anim_right = "fluffy_fluffiest_05_right";
                 this.anim_left = "fluffy_fluffiest_05_left";
+                this.anim_front = "fluffy_fluffiest_05_front";
             } else if (this.type == 230) {
-                this.frontFrame = 3 +8*5;
+                this.frontFrame = 3 +10*5;
                 this.setFrame(this.frontFrame);
                 this.anim_right = "fluffy_fluffiest_06_right";
                 this.anim_left = "fluffy_fluffiest_06_left";
+                this.anim_front = "fluffy_fluffiest_06_front";
             } else if (this.type == 231) {
-                this.frontFrame = 3 +8*6;
+                this.frontFrame = 3 +10*6;
                 this.setFrame(this.frontFrame);
                 this.anim_right = "fluffy_fluffiest_07_right";
                 this.anim_left = "fluffy_fluffiest_07_left";
+                this.anim_front = "fluffy_fluffiest_07_front";
             } else if (this.type == 232) {
-                this.frontFrame = 3 +8*7;
+                this.frontFrame = 3 +10*7;
                 this.setFrame(this.frontFrame);
                 this.anim_right = "fluffy_fluffiest_08_right";
                 this.anim_left = "fluffy_fluffiest_08_left";
+                this.anim_front = "fluffy_fluffiest_08_front";
             } else if (this.type == 233) {
-                this.frontFrame = 3 +8*8;
+                this.frontFrame = 3 +10*8;
                 this.setFrame(this.frontFrame);
                 this.anim_right = "fluffy_fluffiest_09_right";
                 this.anim_left = "fluffy_fluffiest_09_left";
+                this.anim_front = "fluffy_fluffiest_09_front";
             } else if (this.type == 234) {
-                this.frontFrame = 3 +8*9;
+                this.frontFrame = 3 +10*9;
                 this.setFrame(this.frontFrame);
                 this.anim_right = "fluffy_fluffiest_10_right";
                 this.anim_left = "fluffy_fluffiest_10_left";
+                this.anim_front = "fluffy_fluffiest_10_front";
             } else if (this.type == 235) {
-                this.frontFrame = 3 +8*10;
+                this.frontFrame = 3 +10*10;
                 this.setFrame(this.frontFrame);
                 this.anim_right = "fluffy_fluffiest_11_right";
                 this.anim_left = "fluffy_fluffiest_11_left";
+                this.anim_front = "fluffy_fluffiest_11_front";
             } else if (this.type == 236) {
-                this.frontFrame = 3 +8*11;
+                this.frontFrame = 3 +10*11;
                 this.setFrame(this.frontFrame);
                 this.anim_right = "fluffy_fluffiest_12_right";
                 this.anim_left = "fluffy_fluffiest_12_left";
+                this.anim_front = "fluffy_fluffiest_12_front";
             }
         }
         this.on_summon();
@@ -4327,6 +4401,7 @@ class Fluffy2 extends Phaser.GameObjects.Sprite{
         ]
         _li[Math.floor(Math.random()*_li.length)].play();
         this.mode = "rolling";
+        this.anims.stop();
     }
 
     //### on_kick
@@ -4353,10 +4428,12 @@ class Fluffy2 extends Phaser.GameObjects.Sprite{
         ]
         _li[Math.floor(Math.random()*_li.length)].play();
         this.mode = "rolling";
+        this.anims.stop();
     }
     
     //### on_summon
     on_summon() {
+        this.anims.stop();
         if (count_sync <= 5) {
             //when start, only pos set
             this.x = 200 + Math.random() * 800;
@@ -4365,7 +4442,8 @@ class Fluffy2 extends Phaser.GameObjects.Sprite{
             //define constant of y = b - a * x
             this.a = Math.random() * 0.8 - 0.4;
             this.b = this.y + this.a * this.x;
-            this.mode = "rolling";
+            this.mode = "resting";
+            this.submode = -50 - Math.round(Math.random()*50);
         } else {
             //pos
             this.x = 300 + Math.random() * 500;
@@ -4455,7 +4533,8 @@ class Fluffy2 extends Phaser.GameObjects.Sprite{
             && this.line_y - this.y <= 1
         ) {
             this.mode = "resting";
-            this.submode = 0
+            //this.submode = 0;
+            this.submode = -100;
         }
     }
     
@@ -4464,9 +4543,14 @@ class Fluffy2 extends Phaser.GameObjects.Sprite{
         //low rarity, do nothing
         if (this.rarity == "common" || this.rarity == "uncommon") {
             ;
-        } else if (this.submode == 0){
+        } else if (this.submode < 0){
+            this.submode += 1;
             this.anims.stop();
-            this.setFrame(this.frontFrame);
+        } else if (this.submode == 0){
+            this.angle = 0;
+            //this.anims.stop();
+            //this.setFrame(this.frontFrame);
+            this.anims.play(this.anim_front, true);
             this.resting_count = 200 + Math.random() * 50;
             //this.anims.play("cat_visitor_standing", true);
             this.submode += 1;
@@ -4508,11 +4592,11 @@ class Fluffy2 extends Phaser.GameObjects.Sprite{
             //determine left or right
             if (this.moving_degree > 90 && this.moving_degree <= 270) {
                 this.dist = "left";
-                this.anims.play(this.anim_left);
+                this.anims.play(this.anim_left, true);
                 //this.anims.play("cat_visitor_moving_left", true);
             }else {
                 this.dist = "right";
-                this.anims.play(this.anim_right);
+                this.anims.play(this.anim_right, true);
                 //this.anims.play("cat_visitor_moving_right", true);
             }
             this.angle = 0;
@@ -4539,6 +4623,11 @@ class Fluffy2 extends Phaser.GameObjects.Sprite{
                 this.destroy();
             }
         }
+        /*
+        this.electedSymbol.x = this.x;
+        this.electedSymbol.y = this.y-13;
+        this.electedSymbol.depth = this.depth+1;
+        */
     }
 }
 
@@ -4992,11 +5081,19 @@ class Nyuinyui extends Phaser.GameObjects.Sprite{
         this.submode = 0;
         this.resting_count = 200;
         this.movingMode = "resting";
-        this.movingSubmode = "";
+        this.movingSubmode = 0;
         this.setInteractive({useHandCursor: true});
         this.on("pointerdown", function (pointer) {
             this.on_click();
         }, this);
+        this.flowerCount = 0;
+        this.nyui_text = scene.add.text(630, 820, "")
+            .setFontSize(20)
+            .setFontFamily("Arial")
+            .setOrigin(0.5)
+            .setFill("#0000ff")
+            .setVisible(false)
+            .setDepth(9999+102);
     }
     
     //### on_click
@@ -5012,7 +5109,30 @@ class Nyuinyui extends Phaser.GameObjects.Sprite{
             .setAngle(Math.random()*360)
             .setDepth(9999+101);
         group_nyuinyui_ohana.add(_ohana);
-        sound_hat.play();
+        sound_nyui.play();
+        this.flowerCount += 1;
+        localStorage_flowerCount += 1;
+        if (this.flowerCount == 10) {
+            this.anims.play("nyui_happy");
+            this.movingMode = "resting";
+            this.movingSubmode = 1;
+            this.resting_count = 99999;
+            sound_nyui2.play();
+        }
+        this.nyui_text.setVisible(true);
+        //this.nyui_text.setText(this.flowerCount + " flowers");
+        this.nyui_text.setText(localStorage_flowerCount + " flowers");
+        localStorage.setItem("flowerCount_inGame", JSON.stringify(localStorage_flowerCount));
+    }
+    
+    //### reset
+    reset() {
+        group_nyuinyui_ohana.clear(true);
+        this.flowerCount = 0;
+        this.movingMode = "resting";
+        this.anims.play("nyui_moving_right");
+        this.movingSubmode = 0;
+        this.nyui_text.setVisible(false);
     }
     
     //### resting
@@ -5086,6 +5206,8 @@ class Nyuinyui extends Phaser.GameObjects.Sprite{
         } else if (this.movingMode == "resting"){
             this.resting();
         }
+        //this.nyui_text.x = this.x;
+        //this.nyui_text.y = this.y - 50;
     }
 }
 
@@ -5263,28 +5385,28 @@ function open_window_summon(scene) {
         return obj;
     }
     //create window
-    window_summon = scene.add.sprite(640, 480, "window").setInteractive();
+    let window_summon = scene.add.sprite(640, 480, "window").setInteractive();
     //create message
     let _text = "Summoning your Murasaki-san.\nPlease choose your favorite color.\n(This does not affect any gameplays.)";
-    msg1 = scene.add.text(150, 150, _text)
+    let msg1 = scene.add.text(150, 150, _text)
             .setFontSize(24).setFontFamily("Arial").setFill("#000000")
     //create button
     let _x = 200;
     let _y = 280;
     let _y_add = 70;
-    button0 = create_button(_x, _y+_y_add*0, "Red", "#E60012", 0, scene);
-    button1 = create_button(_x, _y+_y_add*1, "Orange", "#F39800", 1, scene);
-    button2 = create_button(_x, _y+_y_add*2, "Yello", "#FFF100", 2, scene);
-    button3 = create_button(_x, _y+_y_add*3, "Light Green", "#8FC31F", 3, scene);
-    button4 = create_button(_x, _y+_y_add*4, "Green", "#009944", 4, scene);
-    button5 = create_button(_x, _y+_y_add*5, "Deep Green", "#009E96", 5, scene);
-    button6 = create_button(_x+500, _y+_y_add*0, "Light Blue", "#00A0E9", 6, scene);
-    button7 = create_button(_x+500, _y+_y_add*1, "Blue", "#0068B7", 7, scene);
-    button8 = create_button(_x+500, _y+_y_add*2, "Deep Blue", "#1D2088", 8, scene);
-    button9 = create_button(_x+500, _y+_y_add*3, "Purple", "#920783", 9, scene);
-    button10 = create_button(_x+500, _y+_y_add*4, "Pink", "#E4007F", 10, scene);
-    button11 = create_button(_x+500, _y+_y_add*5, "Vivid Pink", "#E5004F", 11, scene);
-    button_cancel = create_button(1000, 750, "Cancel", "#000000", -1, scene);
+    let button0 = create_button(_x, _y+_y_add*0, "Red", "#E60012", 0, scene);
+    let button1 = create_button(_x, _y+_y_add*1, "Orange", "#F39800", 1, scene);
+    let button2 = create_button(_x, _y+_y_add*2, "Yello", "#FFF100", 2, scene);
+    let button3 = create_button(_x, _y+_y_add*3, "Light Green", "#8FC31F", 3, scene);
+    let button4 = create_button(_x, _y+_y_add*4, "Green", "#009944", 4, scene);
+    let button5 = create_button(_x, _y+_y_add*5, "Deep Green", "#009E96", 5, scene);
+    let button6 = create_button(_x+500, _y+_y_add*0, "Light Blue", "#00A0E9", 6, scene);
+    let button7 = create_button(_x+500, _y+_y_add*1, "Blue", "#0068B7", 7, scene);
+    let button8 = create_button(_x+500, _y+_y_add*2, "Deep Blue", "#1D2088", 8, scene);
+    let button9 = create_button(_x+500, _y+_y_add*3, "Purple", "#920783", 9, scene);
+    let button10 = create_button(_x+500, _y+_y_add*4, "Pink", "#E4007F", 10, scene);
+    let button11 = create_button(_x+500, _y+_y_add*5, "Vivid Pink", "#E5004F", 11, scene);
+    let button_cancel = create_button(1000, 750, "Cancel", "#000000", -1, scene);
     //create group
     group_window_summon = scene.add.group();
     group_window_summon.add(window_summon);
@@ -5312,6 +5434,7 @@ function open_window_craft (scene) {
 
     //nyuinyui
     nyuinyui.setVisible(true);
+    nyuinyui.reset();
 
     //prevent loading error
     if (local_level == 0) {
@@ -5333,8 +5456,14 @@ function open_window_craft (scene) {
     //function, closing: destroy group and update selecte_item
     async function close_crafting_window(_item) {
         //nyuinyui
-        nyuinyui.setVisible(false);
-        group_nyuinyui_ohana.clear(true);
+        if (_item >= 0) {
+            nyuinyui.setVisible(false);
+            nyuinyui.reset();
+        }
+        //reset minus _item
+        if (_item < 0) {
+            _item = 0;
+        }
         flag_window_craft = 0;
         //destroy group
         //group_window_crafting.destroy(true);
@@ -5398,29 +5527,13 @@ function open_window_craft (scene) {
 
     //function, create button
     function create_button(_x, _y, _text, _item_type, scene, rarity) {
-        /*
-        let _color;
-        if (rarity == "common") {
-            _color = "green";
-        }else if (rarity == "uncommon") {
-            _color = "blue";
-        }else if (rarity == "rare") {
-            _color = "#FF8B00";
-        }else{
-            _color = "black";
-        }
-        */
         let _color = "black";
         if (rarity == "common") {
             _color = "black";
-            //_color = "green";
         }else if (rarity == "uncommon") {
             _color = "blue";
         }else if (rarity == "rare") {
-            //_color = "orange";
-            //_color = "#d24e01";
             _color = "#be5504";
-            //_color = "#cc5801";
         }else{
             _color = "gray";
         }
@@ -5449,7 +5562,7 @@ function open_window_craft (scene) {
     let _y = 80;
     let _y_add = 40;
     let _item_count = 0;
-    //mining_item
+    //mining_item: button
     for (var i = 1; i <= 16; i++) {
         let _rarity;
         if (local_items[i+128] > 0) {
@@ -5462,18 +5575,35 @@ function open_window_craft (scene) {
             _rarity = "empty";
         }
         //use eval to create dynamic variants
-        eval(`_button  = create_button(_x, _y + _y_add *  ${i}, '[' + local_items[${i}] + ',' + local_items[${i+64}] + ',' + local_items[${i+128}] + '] ' + array_item_name[${i}],  ${i},  scene, _rarity);`)
+        //eval(`_button  = create_button(_x, _y + _y_add *  ${i}, '[' + local_items[${i}] + ',' + local_items[${i+64}] + ',' + local_items[${i+128}] + '] ' + array_item_name[${i}],  ${i},  scene, _rarity);`)
+        eval(`_button  = create_button(_x, _y + _y_add *  ${i}, '[' + local_items[${i}] + ',' + local_items[${i+64}] + ',' + local_items[${i+128}] + '] ' + dic_items_reverse[${i}],  ${i},  scene, _rarity);`)
         group_window_crafting.add(_button);
     }
-    item1_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  1, "item_kanban").setScale(0.125);
-    item2_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  2, "mr_astar_right").setScale(0.08);
-    item3_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  3, "item_dice").setScale(0.18);
-    item4_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  4, "item_hat_helmet").setScale(0.1);
-    item5_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  5, "item_onigiri").setScale(0.1);
-    item6_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  6, "item_crown").setScale(0.15);
-    item7_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  7, "item_ribbon").setScale(0.12);
-    item8_icon = scene.add.sprite(_x-25, _y+12 + _y_add *  8, "item_window_day").setScale(0.15);
-    item9_icon = scene.add.sprite(_x-25, _y+12 + _y_add *  9, "item_hat_knit").setScale(0.14);
+    //mining_item: icon
+    for (var i = 1; i <= 16; i++) {
+        let _item_name = dic_items_reverse[i];
+        let _item_img = dic_items[_item_name]["img_name"];
+        let _height = game.textures.get(_item_img).source[0].height;
+        let _scale = 44 / _height;
+        let _icon = scene.add.image(
+            _x-25,
+            _y+15 + _y_add * i,
+            _item_img
+        )
+            .setOrigin(0.5)
+            .setScale(_scale);
+        group_window_crafting.add(_icon);
+    }
+    /*
+    let item1_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  1, "item_kanban").setScale(0.125);
+    let item2_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  2, "mr_astar_right").setScale(0.08);
+    let item3_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  3, "item_dice").setScale(0.18);
+    let item4_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  4, "item_hat_helmet").setScale(0.1);
+    let item5_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  5, "item_onigiri").setScale(0.1);
+    let item6_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  6, "item_crown").setScale(0.15);
+    let item7_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  7, "item_ribbon").setScale(0.12);
+    let item8_icon = scene.add.sprite(_x-25, _y+12 + _y_add *  8, "item_window_day").setScale(0.15);
+    let item9_icon = scene.add.sprite(_x-25, _y+12 + _y_add *  9, "item_hat_knit").setScale(0.14);
     group_window_crafting.add(item1_icon);
     group_window_crafting.add(item2_icon);
     group_window_crafting.add(item3_icon);
@@ -5483,6 +5613,7 @@ function open_window_craft (scene) {
     group_window_crafting.add(item7_icon);
     group_window_crafting.add(item8_icon);
     group_window_crafting.add(item9_icon);
+    */
 
     //farming_item
     _x = 520;
@@ -5497,18 +5628,35 @@ function open_window_craft (scene) {
         }else{
             _rarity = "empty";
         }
-        eval(`_button  = create_button(_x, _y + _y_add *  ${i-16}, '[' + local_items[${i}] + ',' + local_items[${i+64}] + ',' + local_items[${i+128}] + '] ' + array_item_name[${i}],  ${i},  scene, _rarity);`)
+        //eval(`_button  = create_button(_x, _y + _y_add *  ${i-16}, '[' + local_items[${i}] + ',' + local_items[${i+64}] + ',' + local_items[${i+128}] + '] ' + array_item_name[${i}],  ${i},  scene, _rarity);`)
+        eval(`_button  = create_button(_x, _y + _y_add *  ${i-16}, '[' + local_items[${i}] + ',' + local_items[${i+64}] + ',' + local_items[${i+128}] + '] ' + dic_items_reverse[${i}],  ${i},  scene, _rarity);`)
         group_window_crafting.add(_button);
     }
-    item17_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  1, "item_musicbox").setScale(0.15);
-    item18_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  2, "item_hat_mugiwara").setScale(0.15);
-    item19_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  3, "ms_ether_right").setScale(0.08);
-    item20_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  4, "item_cushion").setScale(0.075);
-    item21_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  5, "uni").setScale(0.1);
-    item22_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  6, "item_fortune_statue").setScale(0.15);
-    item23_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  7, "item_asnya").setScale(0.1);
-    item24_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  8, "item_rugg").setScale(0.18);
-    item25_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  9, "item_vase").setScale(0.08);
+    //farming_item: icon
+    for (var i = 17; i <= 32; i++) {
+        let _item_name = dic_items_reverse[i];
+        let _item_img = dic_items[_item_name]["img_name"];
+        let _height = game.textures.get(_item_img).source[0].height;
+        let _scale = 44 / _height;
+        let _icon = scene.add.image(
+            _x-25,
+            _y+15 + _y_add * (i-16),
+            _item_img
+        )
+            .setOrigin(0.5)
+            .setScale(_scale);
+        group_window_crafting.add(_icon);
+    }
+    /*
+    let item17_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  1, "item_musicbox").setScale(0.15);
+    let item18_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  2, "item_hat_mugiwara").setScale(0.15);
+    let item19_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  3, "ms_ether_right").setScale(0.08);
+    let item20_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  4, "item_cushion").setScale(0.075);
+    let item21_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  5, "uni").setScale(0.1);
+    let item22_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  6, "item_fortune_statue").setScale(0.15);
+    let item23_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  7, "item_asnya").setScale(0.1);
+    let item24_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  8, "item_rugg").setScale(0.18);
+    let item25_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  9, "item_vase").setScale(0.08);
     group_window_crafting.add(item17_icon);
     group_window_crafting.add(item18_icon);
     group_window_crafting.add(item19_icon);
@@ -5518,6 +5666,7 @@ function open_window_craft (scene) {
     group_window_crafting.add(item23_icon);
     group_window_crafting.add(item24_icon);
     group_window_crafting.add(item25_icon);
+    */
 
     //crafting_item
     _x = 870;
@@ -5532,21 +5681,38 @@ function open_window_craft (scene) {
         }else{
             _rarity = "empty";
         }
-        eval(`_button  = create_button(_x, _y + _y_add *  ${i-32}, '[' + local_items[${i}] + ',' + local_items[${i+64}] + ',' + local_items[${i+128}] + '] ' + array_item_name[${i}],  ${i},  scene, _rarity);`)
+        //eval(`_button  = create_button(_x, _y + _y_add *  ${i-32}, '[' + local_items[${i}] + ',' + local_items[${i+64}] + ',' + local_items[${i+128}] + '] ' + array_item_name[${i}],  ${i},  scene, _rarity);`)
+        eval(`_button  = create_button(_x, _y + _y_add *  ${i-32}, '[' + local_items[${i}] + ',' + local_items[${i+64}] + ',' + local_items[${i+128}] + '] ' + dic_items_reverse[${i}],  ${i},  scene, _rarity);`)
         group_window_crafting.add(_button);
     }
-    item33_icon = scene.add.sprite(_x-25, _y+17 + _y_add *  1, "item_pad_on").setScale(0.12);
-    item34_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  2, "item_score_board").setScale(0.12);
-    item35_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  3, "item_hat_mortarboard").setScale(0.14);
-    item36_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  4, "dr_bitco_right").setScale(0.08);
-    item37_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  5, "item_pancake").setScale(0.18);
-    item38_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  6, "item_violin").setScale(0.08);
-    item39_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  7, "item_piano").setScale(0.18);
-    item40_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  8, "item_switch").setScale(0.1);
-    item41_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  9, "item_lanthanum").setScale(0.08);
+    //crafting_item: icon
+    for (var i = 33; i <= 48; i++) {
+        let _item_name = dic_items_reverse[i];
+        let _item_img = dic_items[_item_name]["img_name"];
+        let _height = game.textures.get(_item_img).source[0].height;
+        let _scale = 44 / _height;
+        let _icon = scene.add.image(
+            _x-25,
+            _y+15 + _y_add * (i-32),
+            _item_img
+        )
+            .setOrigin(0.5)
+            .setScale(_scale);
+        group_window_crafting.add(_icon);
+    }
+    /*
+    let item33_icon = scene.add.sprite(_x-25, _y+17 + _y_add *  1, "item_pad_on").setScale(0.12);
+    let item34_icon = scene.add.sprite(_x-25, _y+10 + _y_add *  2, "item_score_board").setScale(0.12);
+    let item35_icon = scene.add.sprite(_x-25, _y+15 + _y_add *  3, "item_hat_mortarboard").setScale(0.14);
+    let item36_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  4, "dr_bitco_right").setScale(0.08);
+    let item37_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  5, "item_pancake").setScale(0.18);
+    let item38_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  6, "item_violin").setScale(0.08);
+    let item39_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  7, "item_piano").setScale(0.18);
+    let item40_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  8, "item_switch").setScale(0.1);
+    let item41_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  9, "item_lanthanum").setScale(0.08);
     //item42_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  9, "item_lanthanum").setScale(0.08);
     //item43_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  9, "item_lanthanum").setScale(0.08);
-    item44_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  12, "item_clock").setScale(0.18);
+    let item44_icon = scene.add.sprite(_x-25, _y+20 + _y_add *  12, "item_clock").setScale(0.18);
     group_window_crafting.add(item33_icon);
     group_window_crafting.add(item34_icon);
     group_window_crafting.add(item35_icon);
@@ -5559,17 +5725,18 @@ function open_window_craft (scene) {
     //group_window_crafting.add(item41_icon);
     //group_window_crafting.add(item41_icon);
     group_window_crafting.add(item44_icon);
+    */
 
     //special items
     let _rarity;
 
     //coin/material bag
     if (local_items[194] > 0) { _rarity = "common" } else { _rarity = null }
-    button_crafting_item194  = create_button(170, 80 + 40*17, "[" +local_items[194]+ "] Coin Bank", 194,  scene, _rarity);
+    let button_crafting_item194  = create_button(170, 80 + 40*17, "[" +local_items[194]+ "] Coin Bank", 194,  scene, _rarity);
     if (local_items[195] > 0) { _rarity = "common" } else { _rarity = null }
-    button_crafting_item195  = create_button(520, 80 + 40*17, "[" +local_items[195]+ "] Leaf Pouch", 195,  scene, _rarity);
-    item194_icon = scene.add.sprite(170-25, 80+17 + 40*17, "item_bank").setScale(0.16);
-    item195_icon = scene.add.sprite(520-25, 80+17 + 40*17, "item_pouch").setScale(0.14);
+    let button_crafting_item195  = create_button(520, 80 + 40*17, "[" +local_items[195]+ "] Leaf Pouch", 195,  scene, _rarity);
+    let item194_icon = scene.add.sprite(170-25, 80+17 + 40*17, "item_bank").setScale(0.16);
+    let item195_icon = scene.add.sprite(520-25, 80+17 + 40*17, "item_pouch").setScale(0.14);
     group_window_crafting.add(button_crafting_item194);
     group_window_crafting.add(button_crafting_item195);
     group_window_crafting.add(item194_icon);
@@ -5577,8 +5744,8 @@ function open_window_craft (scene) {
     
     //mail
     if (local_items[196] > 0) { _rarity = "common" } else { _rarity = null }
-    button_crafting_item196  = create_button(870, 80 + 40*17, "[" +local_items[196]+ "] Cat Mail", 196,  scene, _rarity);
-    item196_icon = scene.add.sprite(870-0, 80+30 + 40*17, "item_mail").setScale(0.6);
+    let button_crafting_item196  = create_button(870, 80 + 40*17, "[" +local_items[196]+ "] Cat Mail", 196,  scene, _rarity);
+    let item196_icon = scene.add.sprite(870-0, 80+30 + 40*17, "item_mail").setScale(0.6);
     group_window_crafting.add(button_crafting_item196);
     group_window_crafting.add(item196_icon);
 
@@ -5593,7 +5760,7 @@ function open_window_craft (scene) {
 
     //cancel
     _rarity = "common";
-    button_crafting_close = create_button(1070, 840, "Cancel", 0, scene, _rarity);
+    let button_crafting_close = create_button(1070, 840, "Cancel", 0, scene, _rarity);
     group_window_crafting.add(button_crafting_close);
     
     //upgrade button
@@ -5602,7 +5769,7 @@ function open_window_craft (scene) {
         .setInteractive({useHandCursor: true})
         .setFill("black")
         .setBackgroundColor("#ecd9ff")
-        .on("pointerdown", () => close_crafting_window(0) )
+        .on("pointerdown", () => close_crafting_window(-1) )
         .on("pointerdown", () => sound_window_open.play() )
         .on("pointerover", () => obj_upgrade.setStyle({ fontSize: 30, fontFamily: "Arial", fill: '#d19dff' }))
         .on("pointerover", () => sound_window_pointerover.play())
@@ -5619,13 +5786,14 @@ function open_window_craft (scene) {
 function open_window_upgrade(scene) {
 
     //nyuinyui
-    nyuinyui.setVisible(true);
+    //nyuinyui.setVisible(true);
+    //nyuinyui.reset();
 
     function close_window_upgrade() {
         group_window_upgrade.destroy(true);
         //nyuinyui
         nyuinyui.setVisible(false);
-        group_nyuinyui_ohana.clear(true);
+        nyuinyui.reset();
     }
 
     //create group
@@ -5633,6 +5801,7 @@ function open_window_upgrade(scene) {
     
     //create window
     let window_upgrade = scene.add.sprite(640, 480, "window").setInteractive();
+    //let window_upgrade = scene.add.sprite(640, 480, "window2").setInteractive();
 
     let _text = "";
     _text += "Upgrade item!\n";
@@ -5651,14 +5820,14 @@ function open_window_upgrade(scene) {
     let _num = 0;
     Object.keys(upgradable_itemIds).forEach(_itemId => {
         // mint uncommon Violin (burn 3 common items, ID: 1, 4, 5)
-        let _item_name = array_item_name[_itemId];
+        let _item_name = dic_items_reverse[_itemId];
         let _item_name_to;
         if (_itemId <= 128) {
             _item_name_to = array_item_name[Number(_itemId)+64];
         } else if (_itemId <= 224) {
             _item_name_to = array_item_name[Number(_itemId)+12];
         } else if (_itemId <= 236) {
-            _item_name_to = "Fluffy Murasaki-san";
+            _item_name_to = "Fluffy murasaki-san";
         }
         let _rarity = "";
         let _rarity_to = "";
@@ -5691,14 +5860,15 @@ function open_window_upgrade(scene) {
             _fontColor = "#E85298";
         }
         //prepare text
-        let _txt = "■ ";
+        //let _txt = "■ ";
+        let _txt = "";
         _txt += _rarity_to + _item_name_to;
         _txt += " (burning item_id: ";
         _txt += upgradable_itemIds[_itemId][0] + ", ";
         _txt += upgradable_itemIds[_itemId][1] + ", ";
         _txt += upgradable_itemIds[_itemId][2] + ")";
         _txt += "\n";
-        let _msg = scene.add.text(160, 220 + 70*_num, _txt)
+        let _msg = scene.add.text(200, 220 + 70*_num, _txt)
             .setFontSize(30)
             .setFontFamily("Arial")
             .setFill(_fontColor)
@@ -5717,19 +5887,38 @@ function open_window_upgrade(scene) {
             .on("pointerover", () => sound_window_pointerover.play())
             .on("pointerout", () => _msg.setStyle({ fontSize: 30, fontFamily: "Arial", fill: _fontColor }));
         //prepare cost text
-        let _cost_coin_text = scene.add.text(210, 223 + 70*_num + 30, _cost_coin)
+        let _cost_coin_text = scene.add.text(250, 223 + 70*_num + 30, _cost_coin)
             .setFontSize(24).setFontFamily("Arial").setFill("#000000");
-        let _cost_leaf_text = scene.add.text(300, 223 + 70*_num + 30, _cost_leaf)
+        let _cost_leaf_text = scene.add.text(340, 223 + 70*_num + 30, _cost_leaf)
             .setFontSize(24).setFontFamily("Arial").setFill("#000000");
-        let icon_upgrading_coin = scene.add.sprite(190, 235 + 70*_num + 30, "icon_ohana")
+        let icon_upgrading_coin = scene.add.sprite(230, 235 + 70*_num + 30, "icon_ohana")
             .setScale(0.07);
-        let icon_upgrading_leaf = scene.add.sprite(290, 235 + 70*_num + 30, "icon_kusa")
+        let icon_upgrading_leaf = scene.add.sprite(330, 235 + 70*_num + 30, "icon_kusa")
             .setScale(0.07);
         group_window_upgrade.add(_msg);
         group_window_upgrade.add(_cost_coin_text);
         group_window_upgrade.add(_cost_leaf_text);
         group_window_upgrade.add(icon_upgrading_coin);
         group_window_upgrade.add(icon_upgrading_leaf);
+        //prepare icon
+        if (_itemId <= 200) {
+            let _item_img = dic_items[_item_name_to]["img_name"];
+            let _height = game.textures.get(_item_img).source[0].height;
+            let _scale = 44 / _height;
+            let _icon = scene.add.image(170, 220+15 + 70*_num, _item_img)
+                .setOrigin(0.5)
+                .setScale(_scale);
+            group_window_upgrade.add(_icon);
+        //fluffy
+        } else if (_itemId >= 201) {
+            let _item_img = dic_items[_item_name_to]["img_name"];
+            let _frame = dic_items[_item_name_to]["frame_no"];
+            let _icon = scene.add.image(170, 220+15 + 70*_num, _item_img)
+                .setOrigin(0.5)
+                .setScale(0.15)
+                .setFrame(_frame);
+            group_window_upgrade.add(_icon);
+        }
         _num += 1;
     });
     
@@ -5753,14 +5942,15 @@ function open_window_upgrade(scene) {
 function open_window_voting(scene) {
 
     //nyuinyui
-    nyuinyui.setVisible(true);
+    //nyuinyui.setVisible(true);
+    //nyuinyui.reset();
 
     sound_window_open.play();
     //close window and summon
     function close_window(_summoner, _type) {
         //nyuinyui
-        nyuinyui.setVisible(false);
-        group_nyuinyui_ohana.clear(true);
+        //nyuinyui.setVisible(false);
+        //nyuinyui.reset();
         //main
         group_window_voting.destroy(true);
         if (_type >= 0) {
@@ -5784,6 +5974,7 @@ function open_window_voting(scene) {
     }
     //create window
     let window_voting = scene.add.sprite(640, 480, "window").setInteractive();
+    //let window_voting = scene.add.sprite(640, 480, "window3").setInteractive();
     //create message
     let _text = "";
     _text += "Fluffy Festival is Underway! Vote for your Favorite Fluffy!\n";
@@ -5828,18 +6019,18 @@ function open_window_voting(scene) {
         _x+500, _y+_y_add*5, " "+array_item_name[212]+" ", "#fbfff0", "#c7cbbc", 212, scene, 36).setOrigin(0, 0.5);
     let _button_cancel = create_button(1070, 840, "Cancel", "#000000", "", -1, scene, 30);
     //create icon
-    let _icon201 = scene.add.image(_x-35, _y + _y_add*0, "fluffy_fluffys").setOrigin(0.5).setScale(0.16).setFrame(3+8*0);
-    let _icon202 = scene.add.image(_x-35, _y + _y_add*1, "fluffy_fluffys").setOrigin(0.5).setScale(0.16).setFrame(3+8*1);
-    let _icon203 = scene.add.image(_x-35, _y + _y_add*2, "fluffy_fluffys").setOrigin(0.5).setScale(0.16).setFrame(3+8*2);
-    let _icon204 = scene.add.image(_x-35, _y + _y_add*3, "fluffy_fluffys").setOrigin(0.5).setScale(0.16).setFrame(3+8*3);
-    let _icon205 = scene.add.image(_x-35, _y + _y_add*4, "fluffy_fluffys").setOrigin(0.5).setScale(0.16).setFrame(3+8*4);
-    let _icon206 = scene.add.image(_x-35, _y + _y_add*5, "fluffy_fluffys").setOrigin(0.5).setScale(0.16).setFrame(3+8*5);
-    let _icon207 = scene.add.image(_x+500-35, _y + _y_add*0, "fluffy_fluffys").setOrigin(0.5).setScale(0.16).setFrame(3+8*6);
-    let _icon208 = scene.add.image(_x+500-35, _y + _y_add*1, "fluffy_fluffys").setOrigin(0.5).setScale(0.16).setFrame(3+8*7);
-    let _icon209 = scene.add.image(_x+500-35, _y + _y_add*2, "fluffy_fluffys").setOrigin(0.5).setScale(0.16).setFrame(3+8*8);
-    let _icon210 = scene.add.image(_x+500-35, _y + _y_add*3, "fluffy_fluffys").setOrigin(0.5).setScale(0.16).setFrame(3+8*9);
-    let _icon211 = scene.add.image(_x+500-35, _y + _y_add*4, "fluffy_fluffys").setOrigin(0.5).setScale(0.16).setFrame(3+8*10);
-    let _icon212 = scene.add.image(_x+500-35, _y + _y_add*5, "fluffy_fluffys").setOrigin(0.5).setScale(0.16).setFrame(3+8*11);
+    let _icon201 = scene.add.image(_x-35, _y + _y_add*0, "fluffy_fluffys").setOrigin(0.5).setScale(0.16).setFrame(3+10*0);
+    let _icon202 = scene.add.image(_x-35, _y + _y_add*1, "fluffy_fluffys").setOrigin(0.5).setScale(0.16).setFrame(3+10*1);
+    let _icon203 = scene.add.image(_x-35, _y + _y_add*2, "fluffy_fluffys").setOrigin(0.5).setScale(0.16).setFrame(3+10*2);
+    let _icon204 = scene.add.image(_x-35, _y + _y_add*3, "fluffy_fluffys").setOrigin(0.5).setScale(0.16).setFrame(3+10*3);
+    let _icon205 = scene.add.image(_x-35, _y + _y_add*4, "fluffy_fluffys").setOrigin(0.5).setScale(0.16).setFrame(3+10*4);
+    let _icon206 = scene.add.image(_x-35, _y + _y_add*5, "fluffy_fluffys").setOrigin(0.5).setScale(0.16).setFrame(3+10*5);
+    let _icon207 = scene.add.image(_x+500-35, _y + _y_add*0, "fluffy_fluffys").setOrigin(0.5).setScale(0.16).setFrame(3+10*6);
+    let _icon208 = scene.add.image(_x+500-35, _y + _y_add*1, "fluffy_fluffys").setOrigin(0.5).setScale(0.16).setFrame(3+10*7);
+    let _icon209 = scene.add.image(_x+500-35, _y + _y_add*2, "fluffy_fluffys").setOrigin(0.5).setScale(0.16).setFrame(3+10*8);
+    let _icon210 = scene.add.image(_x+500-35, _y + _y_add*3, "fluffy_fluffys").setOrigin(0.5).setScale(0.16).setFrame(3+10*9);
+    let _icon211 = scene.add.image(_x+500-35, _y + _y_add*4, "fluffy_fluffys").setOrigin(0.5).setScale(0.16).setFrame(3+10*10);
+    let _icon212 = scene.add.image(_x+500-35, _y + _y_add*5, "fluffy_fluffys").setOrigin(0.5).setScale(0.16).setFrame(3+10*11);
     //destroy, present and last winner
     /*
     eval("_button" + local_ff_previous_elected_type).setVisible(false);
@@ -6332,6 +6523,8 @@ function preload(scene) {
     scene.load.image("back", "src/png/background.png");
     scene.load.image("back_black", "src/png/background_black.png");
     scene.load.image("window", "src/png/background_window.png");
+    //scene.load.image("window2", "src/png/background_window2.png");
+    //scene.load.image("window3", "src/png/background_window3.png");
     //scene.load.image("back_neon", "src/png/background_neon.png");
 
     //---murasaki-san
@@ -6439,6 +6632,8 @@ function preload(scene) {
     scene.load.audio("fluffy5", "src/sound/fluffy5.mp3");
     scene.load.audio("tokenChest", "src/sound/tokenChest.mp3");
     scene.load.audio("star", "src/sound/star.mp3");
+    scene.load.audio("nyui", "src/sound/nyui.mp3");
+    scene.load.audio("nyui2", "src/sound/nyui2.mp3");
 
     //---item_basic
     scene.load.image("item_table", "src/png/item_basic_table.png");
@@ -6504,6 +6699,7 @@ function preload(scene) {
     scene.load.image("item_wall_sticker_10", "src/png/item_wall_sticker_10.png");
     scene.load.image("item_wall_sticker_11", "src/png/item_wall_sticker_11.png");
     scene.load.image("item_wall_sticker_12", "src/png/item_wall_sticker_12.png");
+    scene.load.image("item_wall_sticker_icon", "src/icon/wall_sticker.png");
     scene.load.spritesheet("item_wall_sticker_neon", "src/png/item_wall_sticker_neon.png", {frameWidth: 1280, frameHeight: 960});
     scene.load.image("item_floor_sticker_01", "src/png/item_floor_sticker_01.png");
     scene.load.image("item_floor_sticker_02", "src/png/item_floor_sticker_02.png");
@@ -6563,6 +6759,7 @@ function preload(scene) {
 
     //---nyui
     scene.load.spritesheet("nyui_moving", "src/png/nyui_moving.png", {frameWidth: 370, frameHeight: 320});
+    scene.load.spritesheet("nyui_happy", "src/png/nyui_happy.png", {frameWidth: 370, frameHeight: 320});
 
     //---fluffy
     /*
@@ -6570,7 +6767,8 @@ function preload(scene) {
     scene.load.image("fluffy_fluffier_01", "src/png/fluffy_fluffier_01.png");
     scene.load.image("fluffy_fluffiest_01", "src/png/fluffy_fluffiest_01.png");
     */
-    scene.load.spritesheet("fluffy_fluffys", "src/png/fluffy_fluffys.png", {frameWidth: 370, frameHeight: 320});
+    //scene.load.spritesheet("fluffy_fluffys", "src/png/fluffy_fluffys.png", {frameWidth: 370, frameHeight: 320});
+    scene.load.spritesheet("fluffy_fluffys", "src/png/fluffy_fluffys3.png", {frameWidth: 370, frameHeight: 320});
     
     //---star
     /*
@@ -7051,7 +7249,7 @@ function create(scene) {
     //fluffier, blinking
     for (i=1; i<=12; i++) {
         let _key = "fluffy_fluffier_" + ("00" + i).slice(-2);
-        let _frames = [1 +8*(i-1), 1 +8*(i-1), 2 +8*(i-1)];
+        let _frames = [1 +10*(i-1), 1 +10*(i-1), 2 +10*(i-1)];
         scene.anims.create({
             key: _key,
             frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {frames: _frames}),
@@ -7060,10 +7258,21 @@ function create(scene) {
         });
     }
 
+    //fluffiest, front
+    for (i=1; i<=12; i++) {
+        let _key = "fluffy_fluffiest_" + ("00" + i).slice(-2) + "_front";
+        let _frames = [3 +10*(i-1), 3+1 +10*(i-1)];
+        scene.anims.create({
+            key: _key,
+            frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {frames: _frames}),
+            frameRate: 1,
+            repeat: -1
+        });
+    }
     //fluffiest, moving, left
     for (i=1; i<=12; i++) {
         let _key = "fluffy_fluffiest_" + ("00" + i).slice(-2) + "_left";
-        let _frames = [4 +8*(i-1), 5 +8*(i-1)];
+        let _frames = [5 +10*(i-1), 5+1 +10*(i-1)];
         scene.anims.create({
             key: _key,
             frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {frames: _frames}),
@@ -7074,7 +7283,7 @@ function create(scene) {
     //fluffiest, moving, right
     for (i=1; i<=12; i++) {
         let _key = "fluffy_fluffiest_" + ("00" + i).slice(-2) + "_right";
-        let _frames = [6 +8*(i-1), 7 +8*(i-1)];
+        let _frames = [7 +10*(i-1), 7+1 +10*(i-1)];
         scene.anims.create({
             key: _key,
             frames: scene.anims.generateFrameNumbers("fluffy_fluffys", {frames: _frames}),
@@ -7096,7 +7305,12 @@ function create(scene) {
         frameRate: 1,
         repeat: -1
     });
-    
+    scene.anims.create({
+        key: "nyui_happy",
+        frames: scene.anims.generateFrameNumbers("nyui_happy", {start:0, end:1}),
+        frameRate: 1,
+        repeat: -1
+    });    
     //---animation ff
     scene.anims.create({
         key: "ff_report",
@@ -7426,6 +7640,8 @@ function create(scene) {
     sound_fluffy5 = scene.sound.add("fluffy5", {volume:0.2});
     sound_tokenChest = scene.sound.add("tokenChest", {volume:0.2});
     sound_star = scene.sound.add("star", {volume:0.1});
+    sound_nyui = scene.sound.add("nyui", {volume:0.1});
+    sound_nyui2 = scene.sound.add("nyui2", {volume:0.1});
 
     //---system message
     //system message
@@ -8616,9 +8832,11 @@ function update_checkItem(this_scene) {
     }
 
     let _item_id;
+    let _item_name;
 
     //###1:Nameplate
-    _item_id = 1;
+    _item_name = "Nameplate";
+    _item_id = dic_items[_item_name]["item_id"];
     if (
         (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
         && local_items_flag[_item_id] != true
@@ -8841,9 +9059,10 @@ function update_checkItem(this_scene) {
         }
         
     }
-    
+        
     //###2:Mr.Astar
-    _item_id = 2;
+    _item_name = "Mr. Astar";
+    _item_id = dic_items[_item_name]["item_id"];
     if (
         (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
         && local_items_flag[_item_id] != true
@@ -8869,7 +9088,8 @@ function update_checkItem(this_scene) {
     }
     
     //###3:Dice
-    _item_id = 3;
+    _item_name = "Dice";
+    _item_id = dic_items[_item_name]["item_id"];
     if (
         (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
         && local_items_flag[_item_id] != true
@@ -8888,7 +9108,8 @@ function update_checkItem(this_scene) {
     }
 
     //###4:Helment
-    _item_id = 4;
+    _item_name = "Helmet";
+    _item_id = dic_items[_item_name]["item_id"];
     if (
         (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
         && local_items_flag[_item_id] != true
@@ -8941,7 +9162,8 @@ function update_checkItem(this_scene) {
     //###5:*Sushi
     
     //###6:Crown
-    _item_id = 6;
+    _item_name = "Crown";
+    _item_id = dic_items[_item_name]["item_id"];
     if (
         (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
         && local_items_flag[_item_id] != true
@@ -8973,7 +9195,8 @@ function update_checkItem(this_scene) {
     }
     
     //###7:Ribbon
-    _item_id = 7;
+    _item_name = "Ribbon";
+    _item_id = dic_items[_item_name]["item_id"];
     if (
         (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
         && local_items_flag[_item_id] != true
@@ -8992,7 +9215,8 @@ function update_checkItem(this_scene) {
     }
 
     //###8:Window
-    _item_id = 8;
+    _item_name = "Window";
+    _item_id = dic_items[_item_name]["item_id"];
     if (
         (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
         && local_items_flag[_item_id] != true
@@ -9028,7 +9252,8 @@ function update_checkItem(this_scene) {
     }
        
     //###9:Knit Hat
-    _item_id = 9;
+    _item_name = "Knit Hat";
+    _item_id = dic_items[_item_name]["item_id"];
     if (
         (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
         && local_items_flag[_item_id] != true
@@ -9076,7 +9301,8 @@ function update_checkItem(this_scene) {
     }
 
     //###10:Photo Frame
-    _item_id = 10;
+    _item_name = "Picture Frame";
+    _item_id = dic_items[_item_name]["item_id"];
     if (
         (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
         && local_items_flag[_item_id] != true
@@ -9138,7 +9364,8 @@ function update_checkItem(this_scene) {
     }
 
     //###11:Wall Sticker
-    _item_id = 11;
+    _item_name = "Wall Sticker";
+    _item_id = dic_items[_item_name]["item_id"];
     if (
         (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
         && local_items_flag[_item_id] != true
@@ -9194,7 +9421,8 @@ function update_checkItem(this_scene) {
     }
 
     //###17:Musicbox
-    _item_id = 17;
+    _item_name = "Music Box";
+    _item_id = dic_items[_item_name]["item_id"];
     if (
         (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
         && local_items_flag[_item_id] != true
@@ -9250,7 +9478,8 @@ function update_checkItem(this_scene) {
     }
 
     //###18:Straw Hat
-    _item_id = 18;
+    _item_name = "Straw Hat";
+    _item_id = dic_items[_item_name]["item_id"];
     if (
         (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
         && local_items_flag[_item_id] != true
@@ -9299,7 +9528,8 @@ function update_checkItem(this_scene) {
     }
 
     //###19:Ms.Ether
-    _item_id = 19;
+    _item_name = "Ms. Ether";
+    _item_id = dic_items[_item_name]["item_id"];
     if (
         (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
         && local_items_flag[_item_id] != true
@@ -9325,7 +9555,8 @@ function update_checkItem(this_scene) {
     }
 
     //###20:*Cat Cushion
-    _item_id = 20;
+    _item_name = "Cat Cushion";
+    _item_id = dic_items[_item_name]["item_id"];
     if (
         (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
         && local_items_flag[_item_id] != true
@@ -9398,7 +9629,8 @@ function update_checkItem(this_scene) {
     //###21:Uni
     
     //###22:Fortune Statue
-    _item_id = 22;
+    _item_name = "Fortune Statue";
+    _item_id = dic_items[_item_name]["item_id"];
     if (
         (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
         && local_items_flag[_item_id] != true
@@ -9451,9 +9683,10 @@ function update_checkItem(this_scene) {
         item_fortune_statue.destroy(true);
         local_items_flag[_item_id] = false;
     }
-    
+
     //###23:Asnya
-    _item_id = 23;
+    _item_name = "Asnya";
+    _item_id = dic_items[_item_name]["item_id"];
     if (
         (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
         && local_items_flag[_item_id] != true
@@ -9508,7 +9741,8 @@ function update_checkItem(this_scene) {
     }
 
     //###24:Rug-Pull
-    _item_id = 24;
+    _item_name = "Rug-Pull";
+    _item_id = dic_items[_item_name]["item_id"];
     if (
         (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
         && local_items_flag[_item_id] != true
@@ -9531,7 +9765,8 @@ function update_checkItem(this_scene) {
     }
 
     //###25:Flowerpot
-    _item_id = 25;
+    _item_name = "Flowerpot";
+    _item_id = dic_items[_item_name]["item_id"];
     if (
         (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
         && local_items_flag[_item_id] != true
@@ -9576,8 +9811,10 @@ function update_checkItem(this_scene) {
         local_items_flag[_item_id] = false;
     }
 
+    /*
     //###27:Floor Sticker
-    _item_id = 27;
+    _item_name = "---";
+    _item_id = dic_items[_item_name]["item_id"];
     if (
         (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
         && local_items_flag[_item_id] != true
@@ -9626,9 +9863,11 @@ function update_checkItem(this_scene) {
         item_floor_sticker.destroy(true);
         local_items_flag[_item_id] = false;
     }
+    */
 
     //###33:Table
-    _item_id = 33;
+    _item_name = "Tablet";
+    _item_id = dic_items[_item_name]["item_id"];
     if (
         (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
         && local_items_flag[_item_id] != true
@@ -9703,7 +9942,8 @@ function update_checkItem(this_scene) {
     }
 
     //###34:*Score Board
-    _item_id = 34;
+    _item_name = "Score Meter";
+    _item_id = dic_items[_item_name]["item_id"];
     if (
         (
             (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
@@ -9752,7 +9992,8 @@ function update_checkItem(this_scene) {
     }
     
     //###35:Mortarboard
-    _item_id = 35;
+    _item_name = "Mortarboard";
+    _item_id = dic_items[_item_name]["item_id"];
     if (
         (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
         && local_items_flag[_item_id] != true
@@ -9803,7 +10044,8 @@ function update_checkItem(this_scene) {
     }
 
     //###36:Dr.Bitco
-    _item_id = 36;
+    _item_name = "Dr. Bitco";
+    _item_id = dic_items[_item_name]["item_id"];
     if (
         (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
         && local_items_flag[_item_id] != true
@@ -9831,7 +10073,8 @@ function update_checkItem(this_scene) {
     //###37:(Pancake)
 
     //###38:Violin
-    _item_id = 38;
+    _item_name = "Violin";
+    _item_id = dic_items[_item_name]["item_id"];
     if (
         (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
         && local_items_flag[_item_id] != true
@@ -9886,7 +10129,8 @@ function update_checkItem(this_scene) {
     }
 
     //###39:Piano
-    _item_id = 39;
+    _item_name = "Piano";
+    _item_id = dic_items[_item_name]["item_id"];
     if (
         (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
         && local_items_flag[_item_id] != true
@@ -9953,7 +10197,8 @@ function update_checkItem(this_scene) {
     }
 
     //###40:Light Switch
-    _item_id = 40;
+    _item_name = "Light Switch";
+    _item_id = dic_items[_item_name]["item_id"];
     if (
         (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
         && local_items_flag[_item_id] != true
@@ -10055,7 +10300,8 @@ function update_checkItem(this_scene) {
     }
 
     //###41:Lantern
-    _item_id = 41;
+    _item_name = "Lantern";
+    _item_id = dic_items[_item_name]["item_id"];
     if (
         (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
         && local_items_flag[_item_id] != true
@@ -10078,7 +10324,8 @@ function update_checkItem(this_scene) {
     }
 
     //###42:TokenChest
-    _item_id = 42;
+    _item_name = "Token Chest";
+    _item_id = dic_items[_item_name]["item_id"];
     if (
         (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
         && local_items_flag[_item_id] != true
@@ -10150,7 +10397,8 @@ function update_checkItem(this_scene) {
     }
 
     //###43:*Newspaper
-    _item_id = 43;
+    _item_name = "News Board";
+    _item_id = dic_items[_item_name]["item_id"];
     if (
         (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
         && local_items_flag[_item_id] != true
@@ -10227,7 +10475,8 @@ function update_checkItem(this_scene) {
     }
 
     //###44:Cuckoo Clock
-    _item_id = 44;
+    _item_name = "Cuckoo Clock";
+    _item_id = dic_items[_item_name]["item_id"];
     if (
         (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
         && local_items_flag[_item_id] != true
@@ -10788,7 +11037,8 @@ function update(scene) {
     }
 
     //update onchain data
-    if (turn % 250 == 70 && flag_sync == 1) {
+    if (flag_sync == 1 && (turn % 250 == 70 || flag_syncNow == 1)) {
+        flag_syncNow = 0;
         if (count_sync == 0 || local_notPetrified == 0 || summoner == 0) {
             contract_update_all();
         } else if (summoner > 0) {
@@ -10862,6 +11112,7 @@ class FirstCheck extends Phaser.Scene {
                 //prevent duplicated starting
                 if (scene.flag_start == 0) {
                     setTimeout( () => {scene.scene.start("Loading")}, 500, scene);
+                    setTimeout( () => {scene.scene.launch("Loading_overlap")}, 100, scene);
                     scene.flag_start = 1;
                 }
                 clearInterval(timerId);
@@ -10924,7 +11175,7 @@ class Loading extends Phaser.Scene {
         this.count_web3Loading += 1;
         this.flag_start = 1;
     }
-    
+
     preload() {
         console.log("scene: Loading");
         this.update_web3(); // start loading web3 without async
@@ -10943,11 +11194,91 @@ class Loading extends Phaser.Scene {
         //check web3 loading, wait for complete
         if (this.flag_start == 1) {
             this._msg1.setText("");
+            this.scene.stop("Loading_overlap");
             this.scene.start("Opeaning");
         } else {
             let _text = "Loading On-Chain Data... (";
             _text += this.count_web3Loading + "/6)";
             this._msg1.setText(_text);
+        }
+    }
+}
+
+
+//---Loading_overlap
+
+class Loading_overlap extends Phaser.Scene {
+
+    constructor() {
+        super({ key:"Loading_overlap", active:false });
+        this.turn = 0;
+        try {
+            let _json = localStorage.getItem("flowerCount");
+            this.flowerCount = JSON.parse(_json);
+        } catch (err) {
+            this.flowerCount = 0;
+        }
+        this.flowerCount_present = 0;
+    }
+    
+    preload() {
+        this.load.spritesheet("nyui_loading", "src/png/nyui_moving.png", {frameWidth: 370, frameHeight: 320});
+        this.load.spritesheet("nyui_loading2", "src/png/nyui_happy.png", {frameWidth: 370, frameHeight: 320});
+        this.load.spritesheet("ohana_loading", "src/particle/flowers.png", {frameWidth: 370, frameHeight: 320});
+    }
+    
+    create() {
+        let _x = 400 + Math.random()*300;
+        let _y = 800 + Math.random()*20;
+        this.nyui_text = this.add.text(_x, _y-50, "")
+            .setFontSize(20)
+            .setFontFamily("Arial")
+            .setOrigin(0.5)
+            .setFill("#ff1694")
+            .setVisible(false);
+        let _text = "";
+        _text += "This count is stored locally\n";
+        _text += "and does not affect play :)";
+        this.nyui_text2 = this.add.text(_x, _y+60, _text)
+            .setFontSize(16)
+            .setFontFamily("Arial")
+            .setOrigin(0.5)
+            .setFill("#888888")
+            .setVisible(false);
+        this.nyui = this.add.sprite(_x, _y, "nyui_loading")
+            .setOrigin(0.5)
+            .setScale(0.25)
+            .setDepth(9999)
+            .setInteractive({useHandCursor: true })
+            .on("pointerdown", () => {
+                this.flowerCount += 1;
+                this.flowerCount_present += 1;
+                this.nyui_text.setText(this.flowerCount + " flowers");
+                this.nyui_text.setVisible(true);
+                this.nyui_text2.setVisible(true);
+                let _ohana =this.add.image(
+                    _x-150+Math.random()*300,
+                    _y-20+Math.random()*40,
+                    "ohana_loading"
+                )
+                    .setFrame(Math.floor(Math.random()*5))
+                    .setOrigin(0.5)
+                    .setScale(0.1)
+                    .setAngle(Math.random()*360)
+                    .setDepth(9999-1);
+                //sound_nyui_loading.play();
+                localStorage.setItem("flowerCount", JSON.stringify(this.flowerCount));
+            });
+    }
+    
+    update() {
+        this.turn += 1;
+        if (this.flowerCount_present >= 10) {
+            this.nyui.setTexture("nyui_loading2");
+        } else if (this.turn % 80 == 40) {
+            this.nyui.setFrame(1);
+        } else if (this.turn % 80 == 0) {
+            this.nyui.setFrame(0);
         }
     }
 }
@@ -11072,7 +11403,7 @@ let config = {
         width: 1280,
         height: 960,
     },
-    scene: [FirstCheck, Loading, Opeaning, SomethingWrong, Main],
+    scene: [FirstCheck, Loading, Loading_overlap, Opeaning, SomethingWrong, Main],
     fps: {
         target: 50,
         forceSetTimeOut: true
