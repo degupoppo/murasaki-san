@@ -73,72 +73,6 @@ contract ERC721 is IERC721 {
         return _balances[owner];
     }
     
-    function ownerOf(uint256 tokenId) public view virtual override returns (address) {
-        address owner = _owners[tokenId];
-        require(owner != address(0), "ERC721: owner query for nonexistent token");
-        return owner;
-    }
-    
-    function _baseURI() internal view virtual returns (string memory) {
-        return "";
-    }
-    
-    function approve(address to, uint256 tokenId) public virtual override {
-        address owner = ERC721.ownerOf(tokenId);
-        require(to != owner, "ERC721: approval to current owner");
-
-        require(
-            msg.sender == owner || isApprovedForAll(owner, msg.sender),
-            "ERC721: approve caller is not owner nor approved for all"
-        );
-
-        _approve(to, tokenId);
-    }
-    
-    function getApproved(uint256 tokenId) public view virtual override returns (address) {
-        require(_exists(tokenId), "ERC721: approved query for nonexistent token");
-
-        return _tokenApprovals[tokenId];
-    }
-    
-    function setApprovalForAll(address operator, bool approved) public virtual override {
-        require(operator != msg.sender, "ERC721: approve to caller");
-
-        _operatorApprovals[msg.sender][operator] = approved;
-        emit ApprovalForAll(msg.sender, operator, approved);
-    }
-    
-    function _isContract(address account) internal view returns (bool) {
-        uint256 size;
-        assembly {
-            size := extcodesize(account)
-        }
-        return size > 0;
-    }
-    
-    function isApprovedForAll(address owner, address operator) public view virtual override returns (bool) {
-        return _operatorApprovals[owner][operator];
-    }
-    
-    function transferFrom(
-        address from,
-        address to,
-        uint256 tokenId
-    ) public virtual override {
-        //solhint-disable-next-line max-line-length
-        require(_isApprovedOrOwner(msg.sender, tokenId), "ERC721: transfer caller is not owner nor approved");
-
-        _transfer(from, to, tokenId);
-    }
-    
-    function safeTransferFrom(
-        address from,
-        address to,
-        uint256 tokenId
-    ) public virtual override {
-        safeTransferFrom(from, to, tokenId, "");
-    }
-
 */
 
 //===ToDo========================================================
@@ -148,129 +82,49 @@ contract ERC721 is IERC721 {
 
 //### 1st
 
-    Web3精神の深慮
-        コントラクトへ可読性の高い情報が少ない
-        item_typeなどはフロントエンド側にしか名前がない、など
-        コントラクトだけでも世界観が完結できるよう、もう少し気を使うことを検討
-            murasaki_craft_codexでitem_nameを返す
-            しかしitem_nameをいちいちweb3に照会しているとフロントが重くなるジレンマ
-        フロントを作り込みすぎると、特定のフロント内で完結する従来と変わらないUXとなってしまう
-        NFTの強みは、NFT規格で横に世界が広がる可能性があること。
-            そのためには、フロントに依存せずコントラクトだけでも世界観を表現できることが必要。
-            summonerはNTTなので、HoMの中心NFTはitemしか無い。
-            あるいはsummoner=Astar walletと居直ってしまっても良いだろうか。
+   *細かなUIの改善
+        投票がhappy<10でできなくしてmsgを表示する
+        crafting windowの情報説明msgを表示する
+        mining, farmingがhappy<10, satiety<10でできないことを表示する
+        craftingに音符を表示させる
+        crafting絵の修正、少しずれている
+       *crafting window開いている時にitem更新されるとバグる点の修正
+        crafting中にリロードするとアイテム名が表示されないバグの修正
+            summoner modeを先にcraftingに設定しているのでsetTextが読み込まれていない
+            構造修正が多少必要
 
-    ステーキングスコアの導入
-        feeding時の加算をtotalで行うms項目の用意
+   *winner fluffyの演出の実装
+        お花つける？
+        パーティー帽子？
+        パーティクルを使用する？
 
-    必要な絵
-        猫たち絵のアニメーション
-        家猫と訪問猫の差別化、鈴？
-        びっくりしているむらさきさん
-            鳩時計、カーテン、NFT額縁などで使用
-        額縁
-        ふるっふぃー修正
-            fluffier目を大きく
-            fluffiest目を><に, on_clickで使用
-        金魚鉢
-            サイズ違い
-            アニメーション
-        fortune statue
-            目を光らせる
-        neon fluffy
+   *砂時計アイテムの再実装
+        絵の深慮
+            砂時計で良いか？
+        ステーキング量>0でのみ表示させる
+        あるいはステーキング量=0では非アクティブを表す絵とする
+            ステーキングしてアクティブ化したくなるような楽しい絵にしたい。
+        ステーキング量が多いほど豪華になり、
+            カウンターが進むと何かが溜まってゆく・成長してゆく絵を考える。
 
-   *アイテム順の吟味
-        アイテムの種類分け
-        STR/DEX/INT系で同種類アイテムをバラけさせる
-    
-   *スコアの整理
-        戦略
-            長くプレイしたことに対するリワード
-                総合スコア
-            使い込まれたwalletに対するリワード
-                walletスコア
-                よりwalletと接続している感の演出
-            ステーキング量に対するリワード
-                少しあざとい
-                どかっと入れればいきなりmaxも可能になってしまう
-                長くステーキングしないとmaxにならない機構を組み込む
-                    feeding時に時間 x staking amountを加算させてゆくスコアを作る、など
-        意味論
-            スコアは一種類でわかりやすいほうが良い
-                計算式は複雑でもよい
-                何を表現しているのか伝わるほうが良い
-                たくさん種類があるとよくわからない
-            表現したいUXはなにか
-                作品内での活動度の反映か
-                walletとの接続感か
-                より金銭的・単純にステーキング量か
-            ハイブリッド型？
-                ステーキングスコア（時間x量）と、
-                総合スコア（total系＋NFT所有数）で、
-                どちらか大きい方が採用されるスコア値
-            総合型？
-                ステーキングスコア + total系スコア + NFT所有スコア
-                total系スコアは現在の計算式でOK
-                NFT所有スコアは計算用コントラが必要
-                    nft x 係数で算出する
-                ステーキングスコアは別途実装が必要
-                    feeding時にstaking amount + 係数を加算させる
-                    あるいはtotal系スコアに加算でも良いか
-                    ステーキングのスコアへの影響の割合が吟味必要
-                        どんなにステーキングしても+20%増しぐらいが良いか
-                    もしくはステーキング量に応じて+aの係数を書けるのでも良いか。
-                        maxは+20%に収束する
-                    スコアは加算するのではなく、total系からその都度算出するので、
-                        加算時にxAするのは現実的ではなかった。
-                        よって、別にtotal_staking_amountを用意し、
-                        これをtotal系スコアの計算式に組み入れることとする。
-                        スコア増加率は+20%程度の係数で。
-        現状スコア的なもの
-            ステータス（≒exp）
-            スコア（exp, coin, leaf, item_crafted, fluffy_recievedの総合点）
-            ステーキング量
-            walletスコア（nonce, ageの総合点）
-            item, fluffy数（購入したものも含めてwallet内すべて）
-        すべてを加味したものをtotal_score = comfortabilityとするか？
-        ステッカーや金魚鉢などは、基本的にこのスコアを参照するか
-        これとは別に、dapps staking量を反映するものがあっても良いとは思う
-        成長可能なアイテム
-            ウォールステッカー
-            フロアステッカー
-            金魚鉢
-            花瓶
-            鳩時計？
-            ねおんちゃん？
-                ねおんふるっふぃーを増やすか
-        これらのアイテムの成長はどのスコアを参照させるか
-            すべてステーキング量に比例でも良いかもしれない
+    記念撮影用小物
+        むらさきさん本体
+        おにぎり
+       *さつまいも
+        ダイス
+        バイオリンバッグチャーム
+        小さなお花たくさん
+        くまさん
+        フローリングの床
+        ピンクのラグ
+        ビットコイン、イーサリアムのレプリカ
+        折り紙の本
+        アスタートークン
+        wallet
+        fluffys
+        ないないさん
 
-   *ステッカー修正
-        floor stickerの修正
-        蛍光塗料の実装
-        
-    UpgradウィンドウUIの改善
-        mint先itemアイコンの実装
-        fluffyが難しいが、どうするか。
-        また、アイテムアイコンの一覧を作るのが大変。
-            craft windowと共通化したいところだが。
-            
-    NFT絵の表示の実装
-        walletからnftの取得
-        nftからtokenURLの取得
-        URLからpngを取得してloadする機構の実装
-            ipfsからだと遅いか？
-            tofuNFTなどから取得したいが、可能だろうか
-        ローディング絵の実装
-            NFTのダウンロードは時間がかかると思われるので
-            Loading..の文字と何かしらの宛絵を用意する
-
-    上位アイテムの演出の実装
-        Uncommon, Rareの差別化をどうするか
-        particleをうまく使うか。
-        一覧での色も変える？
-
-    コンセプトの整理：簡潔にわかりやすく
+   *コンセプトの整理：簡潔にわかりやすく
         これはなに？ What's This?
             Astar Networkを利用したgame dapps
             NTT（SBT）とNFTを利用した育成ゲーム
@@ -360,25 +214,62 @@ contract ERC721 is IERC721 {
             Coder address:
             Illustrator address:
 
-    fluffy修正
-        色修正
-        ・グレイ
-        ・ベージュ
-        ・ライムグリーン
-        ・ライトブルー
-        ・ブルー
-        ・パープル
-        ・あかむらさき
-        ・レッド
-        ・オレンジ
-        ・ピンク
-        ・イエロー
-        ・ホワイト
-        正面のアニメーション追加
-        サイズ修正
-        fluffierの瞬き頻度修正
-    
-    ニュースの修正
+   *ステーキング量反映アイテムの修正
+        以下のアイテムは現在のステーキング量を反映するものとする
+            鳩時計
+            金魚鉢
+            ネオンちゃん
+                ねおんふるっふぃーが必要
+            花瓶
+        それぞれ３～５段階とする
+
+   *必要な絵
+        猫の立ち絵のアニメーション
+            しっぽがピコピコ
+        家猫と訪問猫の差別化
+            鈴つける？
+        びっくりしているむらさきさん
+            鳩時計、カーテン、NFT額縁更新、流れ星時などで表示
+        額縁
+            もっと可愛く
+        ふるっふぃー修正
+            fluffier目を大きく
+            fluffiest目を><に, on_clickで使用
+        金魚鉢
+            サイズ違い
+            アニメーション
+        fortune statue
+            目を光らせる
+        neon fluffy
+            dapps staking量によって豪華さを変える？
+        スコア演出の深慮
+            つみき？
+            ふるっふぃー風カウンター？
+        window
+            upgrade用色違いwindow
+            voting用色違いwindow
+
+    Fluffy関数のリファクタリング
+        条件分岐が複雑になりすぎている
+        特に移動とアニメーション周りの可読性が悪い
+        改善する
+
+    wallet infoコントラの実装
+        web3精神を表すため
+        summoner infoとは異なり、情報はある程度吟味してもよいか
+        システムがほぼ完成してからで良いだろうか
+
+    NFT絵の表示の実装
+        walletからnftの取得
+        nftからtokenURLの取得
+        URLからpngを取得してloadする機構の実装
+            ipfsからだと遅いか？
+            tofuNFTなどから取得したいが、可能だろうか
+        ローディング絵の実装
+            NFTのダウンロードは時間がかかると思われるので
+            Loading..の文字と何かしらの宛絵を用意する
+
+    ニュースボードの修正
         ウェルカムボードへ変更する
     
    *バイバックコントラの洗練
@@ -563,6 +454,171 @@ contract ERC721 is IERC721 {
 
 //### 2nd
 
+ ok 上位アイテムの演出の実装
+        Uncommon, Rareの差別化をどうするか
+        particleをうまく使うか。
+        一覧での色も変える？
+
+ ok にゅいにゅいさんのカウンター演出の実装
+        100や777など節目でなにか演出を考える
+            おはなシャワー？
+            特別絵のwindow？
+        dapps staking量によってお花の数を増やすか
+
+ ok アイテム実装の完了
+        食べ物の実装
+            表示位置の順番を考える
+        bookの実装
+        金魚鉢の実装
+    
+ ok ステッカー計算の再実装
+        トータルスコアで段階表示させる
+        ウォレットスコアはイメージしにくいだろう
+        スコアのステップ調整が必要
+        2年で最大成長とする
+        
+ ok fluffy修正
+        色修正
+        ・グレイ
+        ・ベージュ
+        ・ライムグリーン
+        ・ライトブルー
+        ・ブルー
+        ・パープル
+        ・あかむらさき
+        ・レッド
+        ・オレンジ
+        ・ピンク
+        ・イエロー
+        ・ホワイト
+        正面のアニメーション追加
+        サイズ修正
+        fluffierの瞬き頻度修正
+    
+ ok ステッカー修正
+        floor stickerの修正
+        蛍光塗料の実装
+        
+ ok UpgradウィンドウUIの改善
+        mint先itemアイコンの実装
+        fluffyが難しいが、どうするか。
+        また、アイテムアイコンの一覧を作るのが大変。
+            craft windowと共通化したいところだが。
+            
+ ok Web3精神の深慮
+        コントラクトへ可読性の高い情報が少ない
+        item_typeなどはフロントエンド側にしか名前がない、など
+        コントラクトだけでも世界観が完結できるよう、もう少し気を使うことを検討
+            murasaki_craft_codexでitem_nameを返す
+            しかしitem_nameをいちいちweb3に照会しているとフロントが重くなるジレンマ
+        フロントを作り込みすぎると、特定のフロント内で完結する従来と変わらないUXとなってしまう
+        NFTの強みは、NFT規格で横に世界が広がる可能性があること。
+            そのためには、フロントに依存せずコントラクトだけでも世界観を表現できることが必要。
+            summonerはNTTなので、HoMの中心NFTはitemしか無い。
+            あるいはsummoner=Astar walletと居直ってしまっても良いだろうか。
+       *summonerステータス=walletステータスとして、
+            walletステータスは一括でinfoコントラから読み出し可能とする。
+           *やはりsummoner_infoとは別に、wallet_infoコントラは用意する必要があるだろう。
+            情報はある程度厳選しても良いだろうか。
+
+ ok スコアの整理
+        結論
+            シンプルに、
+            ステッカーはトータルスコアで成長させ、
+            金魚鉢などは現在のステーキング量で段階表示させる
+            砂時計だけ要検討か
+        深慮
+            成長系アイテムは結構後半にならないとクラフトできない
+                そのためイマイチ成長を実感しにくい
+            金魚鉢、ネオンちゃん、鳩時計などは単純にステーキング量に比例し
+                ウォールステッカーはスコアに比例する、で良いだろうか。
+            スコアにウォレット内NFTの加算を実装する
+                totalスコア系　＋　現在の所持NFTを反映したスコア
+        戦略
+            長くプレイしたことに対するリワード
+                総合スコア
+            使い込まれたwalletに対するリワード
+                walletスコア
+                よりwalletと接続している感の演出
+            ステーキング量に対するリワード
+                少しあざとい
+                どかっと入れればいきなりmaxも可能になってしまう
+                長くステーキングしないとmaxにならない機構を組み込む
+                    feeding時に時間 x staking amountを加算させてゆくスコアを作る、など
+        意味論
+            スコアは一種類でわかりやすいほうが良い
+                計算式は複雑でもよい
+                何を表現しているのか伝わるほうが良い
+                たくさん種類があるとよくわからない
+            表現したいUXはなにか
+                作品内での活動度の反映か
+                walletとの接続感か
+                より金銭的・単純にステーキング量か
+            ハイブリッド型？
+                ステーキングスコア（時間x量）と、
+                総合スコア（total系＋NFT所有数）で、
+                どちらか大きい方が採用されるスコア値
+            総合型？
+                ステーキングスコア + total系スコア + NFT所有スコア
+                total系スコアは現在の計算式でOK
+                NFT所有スコアは計算用コントラが必要
+                    nft x 係数で算出する
+                ステーキングスコアは別途実装が必要
+                    feeding時にstaking amount + 係数を加算させる
+                    あるいはtotal系スコアに加算でも良いか
+                    ステーキングのスコアへの影響の割合が吟味必要
+                        どんなにステーキングしても+20%増しぐらいが良いか
+                    もしくはステーキング量に応じて+aの係数を書けるのでも良いか。
+                        maxは+20%に収束する
+                    スコアは加算するのではなく、total系からその都度算出するので、
+                        加算時にxAするのは現実的ではなかった。
+                        よって、別にtotal_staking_amountを用意し、
+                        これをtotal系スコアの計算式に組み入れることとする。
+                        スコア増加率は+20%程度の係数で。
+        現状スコア的なもの
+            ステータス（≒exp）
+            スコア（exp, coin, leaf, item_crafted, fluffy_recievedの総合点）
+            ステーキング量
+            walletスコア（nonce, ageの総合点）
+            item, fluffy数（購入したものも含めてwallet内すべて）
+        すべてを加味したものをtotal_score = comfortabilityとするか？
+        ステッカーや金魚鉢などは、基本的にこのスコアを参照するか
+        これとは別に、dapps staking量を反映するものがあっても良いとは思う
+        成長可能なアイテム
+            ウォールステッカー
+            フロアステッカー
+            金魚鉢
+            花瓶
+            鳩時計？
+            ねおんちゃん？
+                ねおんふるっふぃーを増やすか
+        これらのアイテムの成長はどのスコアを参照させるか
+            すべてステーキング量に比例でも良いかもしれない
+
+ ok アイテム順の吟味
+        アイテムの種類分け
+        STR/DEX/INT系で同種類アイテムをバラけさせる
+    
+ ng ステーキングスコアの導入
+        feeding時の加算をtotalで行うms項目の用意
+        あまり必要性を感じなかった。
+        トータルステーキングスコアはたしかに重要そうだが、
+            単位や影響の係数計算が面倒そう。
+        単純に現在のステーキング量を参照で良い気がする。
+
+ ok fluffierのバグ修正
+ ok diceコントラクトの3dへの修正
+ ok dice, mailなどのitem_type修正
+ ng feedingの3dリミット無視の実装
+        実装が難しく断念
+ ok スコアに所持NFTを反映させる
+ ok アイテムID→アイテム名へ変換するコントラクトの実装
+ ng ぬいちゃんの補正値計算の修正
+        スコアではなくtotal_expを参照させるか？
+        スコアはNFTを加味するため。
+        NFT補正は20%程度なのでこのままで良しとする。
+        そもそも救済処置、ボーナスなので。
+    
  ok Fluffy FestivalのUI実装
  
         開催直前
@@ -1501,7 +1557,7 @@ async function contract_update_static_status(_summoner) {
     ELECTED_FLUFFY_TYPE = Number(_all_static_status[7]);
     
     //calc wallet score
-    update_local_wallet_score();
+    //update_local_wallet_score();
 }
 
 
@@ -1821,7 +1877,8 @@ async function contract_update_event_random() {
             _content2 = _value;
             _content2 += " !!";
         } else if (_name == "Crafting") {
-            let _item_name = array_item_name[_value];
+            //let _item_name = array_item_name[_value];
+            let _item_name = dic_items_reverse[_value];
             _content1 = "Crafted";
             _content2 = _item_name;
             _content2 += " !!";
@@ -4401,7 +4458,9 @@ class Fluffy2 extends Phaser.GameObjects.Sprite{
         ]
         _li[Math.floor(Math.random()*_li.length)].play();
         this.mode = "rolling";
-        this.anims.stop();
+        if (this.rarity == "rare") {
+            this.anims.stop();
+        }
     }
 
     //### on_kick
@@ -4428,12 +4487,16 @@ class Fluffy2 extends Phaser.GameObjects.Sprite{
         ]
         _li[Math.floor(Math.random()*_li.length)].play();
         this.mode = "rolling";
-        this.anims.stop();
+        if (this.rarity == "rare") {
+            this.anims.stop();
+        }
     }
     
     //### on_summon
     on_summon() {
-        this.anims.stop();
+        if (this.rarity == "rare") {
+            this.anims.stop();
+        }
         if (count_sync <= 5) {
             //when start, only pos set
             this.x = 200 + Math.random() * 800;
@@ -4545,7 +4608,9 @@ class Fluffy2 extends Phaser.GameObjects.Sprite{
             ;
         } else if (this.submode < 0){
             this.submode += 1;
-            this.anims.stop();
+            if (this.rarity == "rare") {
+                this.anims.stop();
+            }
         } else if (this.submode == 0){
             this.angle = 0;
             //this.anims.stop();
@@ -4577,7 +4642,7 @@ class Fluffy2 extends Phaser.GameObjects.Sprite{
             //360 over check
             this.moving_degree = this.moving_degree % 360;
             //out of area check, y
-            if (this.y > 850 && this.moving_degree > 180) {
+            if (this.y > 750 && this.moving_degree > 180) {
                 this.moving_degree = 360 - this.moving_degree;
             }else if (this.y < 500 && this.moving_degree < 180) {
                 this.moving_degree = 360 - this.moving_degree;
@@ -4658,7 +4723,7 @@ class PresentBox extends Phaser.GameObjects.Sprite{
         ).setOrigin(0.5).setDepth(9999).setVisible(false);
         this.on("pointerover", () => {
             this.text.visible = true;
-            sound_window_select.play();
+            sound_button_select.play();
         })
         this.on("pointerout", () => {
             this.text.visible = false;
@@ -4669,6 +4734,7 @@ class PresentBox extends Phaser.GameObjects.Sprite{
     on_click() {
         //send transaction
         open_presentbox(summoner, this.itemId);
+        sound_button_on.play();
     }
     
     //### on_summon
@@ -4860,10 +4926,16 @@ class Festligheter extends Phaser.GameObjects.Sprite{
         } else if (this.submode % 500 == 1) {
             let _array_sorted = this._get_ranking_sorted();
             let _text = "";
+            _text += " Your vote: " + dic_items_reverse[local_ff_last_voting_type] + " \n";
+            _text += "   1st: " + dic_items_reverse[_array_sorted[0][0]] + " (" + _array_sorted[0][1] + " votes) \n";
+            _text += "   2nd: " + dic_items_reverse[_array_sorted[1][0]] + " (" + _array_sorted[1][1] + " votes) \n";
+            _text += "   3rd: " + dic_items_reverse[_array_sorted[2][0]] + " (" + _array_sorted[2][1] + " votes) \n";
+            /*
             _text += " Your vote: " + array_item_name[local_ff_last_voting_type] + " \n";
             _text += "   1st: " + array_item_name[_array_sorted[0][0]] + " (" + _array_sorted[0][1] + " votes) \n";
             _text += "   2nd: " + array_item_name[_array_sorted[1][0]] + " (" + _array_sorted[1][1] + " votes) \n";
             _text += "   3rd: " + array_item_name[_array_sorted[2][0]] + " (" + _array_sorted[2][1] + " votes) \n";
+            */
             _text += " (" + (local_ff_subject_end_block - local_blockNumber) + " blocks remaining) ";
             this.text.setText(_text);
         }
@@ -5094,6 +5166,15 @@ class Nyuinyui extends Phaser.GameObjects.Sprite{
             .setFill("#0000ff")
             .setVisible(false)
             .setDepth(9999+102);
+        /*
+        this.array_bonusCount = [
+            100, 
+            777, 
+            1000, 
+            3000, 
+            10000
+        ];
+        */
     }
     
     //### on_click
@@ -5123,6 +5204,34 @@ class Nyuinyui extends Phaser.GameObjects.Sprite{
         //this.nyui_text.setText(this.flowerCount + " flowers");
         this.nyui_text.setText(localStorage_flowerCount + " flowers");
         localStorage.setItem("flowerCount_inGame", JSON.stringify(localStorage_flowerCount));
+        //count bonux
+        //if (this.array_bonusCount.includes(localStorage_flowerCount)){
+        if (localStorage_flowerCount % 100 == 0){
+            let _flower_number = 50;
+            if (local_dapps_staking_amount < 500) {
+                _flower_number += 0;
+            } else if (local_dapps_staking_amount < 1000) {
+                _flower_number += 10;
+            } else if (local_dapps_staking_amount < 2000) {
+                _flower_number += 20;                
+            } else if (local_dapps_staking_amount < 4000) {
+                _flower_number += 30;                
+            } else if (local_dapps_staking_amount < 8000) {
+                _flower_number += 40;                
+            } else if (local_dapps_staking_amount < 16000) {
+                _flower_number += 50;                
+            } else if (local_dapps_staking_amount < 32000) {
+                _flower_number += 60;                
+            } else if (local_dapps_staking_amount < 64000) {
+                _flower_number += 70;                
+            } else if (local_dapps_staking_amount >= 64000) {
+                _flower_number += 80;                
+            }
+            for (let i=1; i<=_flower_number; i++) {
+                summon_fallingFlower(this.scene);
+            }
+            sound_hat.play();
+        }
     }
     
     //### reset
@@ -5208,6 +5317,50 @@ class Nyuinyui extends Phaser.GameObjects.Sprite{
         }
         //this.nyui_text.x = this.x;
         //this.nyui_text.y = this.y - 50;
+    }
+}
+
+
+//---FallingFlower
+class FallingFlower extends Phaser.GameObjects.Sprite{
+    constructor(scene, x, y, img){
+        super(scene, x, y, img);
+        this.scene.add.existing(this);
+        this.speed_x = 0;
+        this.speed_y = 0;
+        this.count = 0;
+        this.line_y_limit = 1000;
+        this.depth = 9999+999;
+        this.setOrigin(0.5);
+        this.setAlpha(0.9);
+        this.count = 0;
+        this.on_summon();
+    }
+    
+    //### on_summon
+    on_summon() {
+        this.x = Math.random() * (1280+200);
+        this.y = -50 - Math.random()*500;
+        this.speed_x = -0.1 -Math.random()*1.5;
+        this.speed_y = 2 + Math.random()*4;
+        this.setScale(0.1 + Math.random()*0.1);
+        this.setAngle(Math.random()*360);
+        this.setFrame(Math.floor(Math.random()*5));
+        this.count_update = Math.floor(Math.random()*40);
+    }
+    
+    //### update()
+    update(){
+        this.count += 1;
+        this.x += this.speed_x;
+        this.y += this.speed_y;
+        if (this.count % 50 == this.count_update) {
+            //this.setAngle(Math.random()*360);
+            this.angle += 30;
+        }
+        if (this.y >= this.line_y_limit) {
+            this.destroy(true);
+        }
     }
 }
 
@@ -5494,7 +5647,8 @@ function open_window_craft (scene) {
             icon_crafting_ohana.visible = true;
             icon_crafting_kusa.visible = true;
             icon_crafting_time.visible = true;
-            text_select_item.setText('"'+array_item_name[_item]+'"');
+            //text_select_item.setText('"'+array_item_name[_item]+'"');
+            text_select_item.setText('"'+dic_items_reverse[_item]+'"');
             //get herat required
             //let _heart_required = await contract_get_heart_required(_item);
             //global_selected_crafting_item_required_heart = _heart_required;
@@ -5823,9 +5977,11 @@ function open_window_upgrade(scene) {
         let _item_name = dic_items_reverse[_itemId];
         let _item_name_to;
         if (_itemId <= 128) {
-            _item_name_to = array_item_name[Number(_itemId)+64];
+            //_item_name_to = array_item_name[Number(_itemId)+64];
+            _item_name_to = dic_items_reverse[Number(_itemId)+64];
         } else if (_itemId <= 224) {
-            _item_name_to = array_item_name[Number(_itemId)+12];
+            _item_name_to = dic_items_reverse[Number(_itemId)+12];
+            //_item_name_to = array_item_name[Number(_itemId)+12];
         } else if (_itemId <= 236) {
             _item_name_to = "Fluffy murasaki-san";
         }
@@ -5994,6 +6150,31 @@ function open_window_voting(scene) {
     let _y = 270;
     let _y_add = 80;
     let _button201 = create_button(
+        _x, _y+_y_add*0, " "+dic_items_reverse[201]+" ", "#b3bfc7", "#e7f3fb", 201, scene, 36).setOrigin(0, 0.5);
+    let _button202 = create_button(
+        _x, _y+_y_add*1, " "+dic_items_reverse[202]+" ", "#d8bfac", "#fff3e0", 202, scene, 36).setOrigin(0, 0.5);
+    let _button203 = create_button(
+        _x, _y+_y_add*2, " "+dic_items_reverse[203]+" ", "#b7ffd0", "#9de5b6", 203, scene, 36).setOrigin(0, 0.5);
+    let _button204 = create_button(
+        _x, _y+_y_add*3, " "+dic_items_reverse[204]+" ", "#a9e8ff", "#8fcee5", 204, scene, 36).setOrigin(0, 0.5);
+    let _button205 = create_button(
+        _x, _y+_y_add*4, " "+dic_items_reverse[205]+" ", "#8dabff", "#c1dfff", 205, scene, 36).setOrigin(0, 0.5);
+    let _button206 = create_button(
+        _x, _y+_y_add*5, " "+dic_items_reverse[206]+" ", "#dab3ff", "#ffe7ff", 206, scene, 36).setOrigin(0, 0.5);
+    let _button207 = create_button(
+        _x+500, _y+_y_add*0, " "+dic_items_reverse[207]+" ", "#fdbeff", "#fff2ff", 207, scene, 36).setOrigin(0, 0.5);
+    let _button208 = create_button(
+        _x+500, _y+_y_add*1, " "+dic_items_reverse[208]+" ", "#ff686b", "#ffb6b9", 208, scene, 36).setOrigin(0, 0.5);
+    let _button209 = create_button(
+        _x+500, _y+_y_add*2, " "+dic_items_reverse[209]+" ", "#ffbda8", "#fff1dc", 209, scene, 36).setOrigin(0, 0.5);
+    let _button210 = create_button(
+        _x+500, _y+_y_add*3, " "+dic_items_reverse[210]+" ", "#ffd5d5", "#ffffff", 210, scene, 36).setOrigin(0, 0.5);
+    let _button211 = create_button(
+        _x+500, _y+_y_add*4, " "+dic_items_reverse[211]+" ", "#ffe381", "#e5c967", 211, scene, 36).setOrigin(0, 0.5);
+    let _button212 = create_button(
+        _x+500, _y+_y_add*5, " "+dic_items_reverse[212]+" ", "#fbfff0", "#c7cbbc", 212, scene, 36).setOrigin(0, 0.5);
+    /*
+    let _button201 = create_button(
         _x, _y+_y_add*0, " "+array_item_name[201]+" ", "#b3bfc7", "#e7f3fb", 201, scene, 36).setOrigin(0, 0.5);
     let _button202 = create_button(
         _x, _y+_y_add*1, " "+array_item_name[202]+" ", "#d8bfac", "#fff3e0", 202, scene, 36).setOrigin(0, 0.5);
@@ -6017,6 +6198,7 @@ function open_window_voting(scene) {
         _x+500, _y+_y_add*4, " "+array_item_name[211]+" ", "#ffe381", "#e5c967", 211, scene, 36).setOrigin(0, 0.5);
     let _button212 = create_button(
         _x+500, _y+_y_add*5, " "+array_item_name[212]+" ", "#fbfff0", "#c7cbbc", 212, scene, 36).setOrigin(0, 0.5);
+    */
     let _button_cancel = create_button(1070, 840, "Cancel", "#000000", "", -1, scene, 30);
     //create icon
     let _icon201 = scene.add.image(_x-35, _y + _y_add*0, "fluffy_fluffys").setOrigin(0.5).setScale(0.16).setFrame(3+10*0);
@@ -6178,6 +6360,42 @@ function draw_flower(scene, _x, _y) {
             emitter.stop();
         }
     });
+}
+
+
+//---draw_glitter
+function draw_glitter(scene, _item) {
+//***TODO***
+//need: get giom of following image
+    //let _circle = new Phaser.Geom.Circle(0,0,50);
+    let _geom = new Phaser.Geom.Rectangle(
+        -_item.width * _item.scale/2, 
+        -_item.height * _item.scale/2, 
+        _item.width * _item.scale, 
+        _item.height * _item.scale,
+    );
+    const emitterConfig = {
+        alpha:      { start:1, end:0 },
+        lifespan:   2000,
+        frequency:  2000,
+        quantity:   1,
+        scale:      0.08,
+        frame:      [0,1,2],
+        emitZone:   { type: "random", source: _geom},
+        follow:     _item,
+        origin:     0.5,
+    };
+    const particles = scene.add.particles('par_glitter')
+        .setDepth(9999+10);
+    const emitter = particles.createEmitter(emitterConfig);
+    /*
+    scene.time.addEvent({
+        delay: _lifespan+300000,
+        callback: () => {
+            emitter.stop();
+        }
+    });
+    */
 }
 
 
@@ -6427,6 +6645,13 @@ function summon_fluffy(scene, _type, rarity, itemId) {
         murasakisan.on_click();
         sound_fluffy.play();
     }
+}
+
+
+//---summon_fallingFlower
+function summon_fallingFlower(scene) {
+    let _flower = new FallingFlower(scene, 0, 0, "par_flowers");
+    group_update.add(_flower);
 }
 
 
@@ -6701,6 +6926,7 @@ function preload(scene) {
     scene.load.image("item_wall_sticker_12", "src/png/item_wall_sticker_12.png");
     scene.load.image("item_wall_sticker_icon", "src/icon/wall_sticker.png");
     scene.load.spritesheet("item_wall_sticker_neon", "src/png/item_wall_sticker_neon.png", {frameWidth: 1280, frameHeight: 960});
+    /*
     scene.load.image("item_floor_sticker_01", "src/png/item_floor_sticker_01.png");
     scene.load.image("item_floor_sticker_02", "src/png/item_floor_sticker_02.png");
     scene.load.image("item_floor_sticker_03", "src/png/item_floor_sticker_03.png");
@@ -6713,6 +6939,7 @@ function preload(scene) {
     scene.load.image("item_floor_sticker_10", "src/png/item_floor_sticker_10.png");
     scene.load.image("item_floor_sticker_11", "src/png/item_floor_sticker_11.png");
     scene.load.image("item_floor_sticker_12", "src/png/item_floor_sticker_12.png");
+    :*/
     //scene.load.image("item_window", "src/png/item_window.png");
     scene.load.image("item_lantern", "src/png/item_lantern.png");
     scene.load.image("item_pancake", "src/png/item_pancake.png");
@@ -6827,6 +7054,7 @@ function preload(scene) {
     scene.load.spritesheet("par_flowers", "src/particle/flowers.png", {frameWidth: 370, frameHeight: 320});
     scene.load.spritesheet("par_stars", "src/particle/stars.png", {frameWidth: 200, frameHeight: 191});
     scene.load.spritesheet("par_fluffys", "src/particle/fluffy.png", {frameWidth: 370, frameHeight: 320});
+    scene.load.spritesheet("par_glitter", "src/particle/glitter.png", {frameWidth: 370, frameHeight: 320});
     
     //---tokenBall
     scene.load.image("coin_color_ACA", "src/png/coin_color_ACA.png");
@@ -7470,9 +7698,9 @@ function create(scene) {
 
     //---craftimg_now_info
     //icon_clock
-    icon_crafting_time_remining = scene.add.sprite(_x+60, _y+15, "icon_clock")
+    icon_crafting_time_remining = scene.add.image(_x+60, _y+15, "icon_clock")
         .setDepth(9999)
-        .setScale(0.09)
+        .setScale(0.2)
         .setVisible(false);
     //text
     text_crafting_calc = scene.add.text(
@@ -7483,17 +7711,17 @@ function create(scene) {
     ).setDepth(9999);
     //select crafting_item_type
     text_select_item = scene.add.text(_x+50, _y-30, ">> Select Item <<", {font: "30px Arial", fill: "#000", backgroundColor: "#ecd9ff"})
-                .setDepth(9999)
-                .setFontSize(24).setFontFamily("Arial").setFill('#000000')
-                .setInteractive({useHandCursor: true})
-                .on("pointerdown", () => {
-                    if (flag_window_craft == 0) {
-                        flag_window_craft = 1;
-                        open_window_craft(scene);
-                    }
-                })
-                .on("pointerover", () => text_select_item.setStyle({ fontSize: 24, fontFamily: "Arial", fill: '#d19dff' }))
-                .on("pointerout", () => text_select_item.setStyle({ fontSize: 24, fontFamily: "Arial", fill: '#000000' }));
+        .setDepth(9999)
+        .setFontSize(24).setFontFamily("Arial").setFill('#000000')
+        .setInteractive({useHandCursor: true})
+        .on("pointerdown", () => {
+            if (flag_window_craft == 0) {
+                flag_window_craft = 1;
+                open_window_craft(scene);
+            }
+        })
+        .on("pointerover", () => text_select_item.setStyle({ fontSize: 24, fontFamily: "Arial", fill: '#d19dff' }))
+        .on("pointerout", () => text_select_item.setStyle({ fontSize: 24, fontFamily: "Arial", fill: '#000000' }));
     group_info.add(text_select_item);
     text_craft_item = scene.add.text(_x+50, _y, "", {font: "18px Arial", fill: "#000"})
                 .setDepth(9999)
@@ -7665,12 +7893,13 @@ function create(scene) {
     //new Button(10, 880, 'kill_summoner', scene, () => contract_burn(summoner));
     //burn name
     //new Button(10, 780, 'burn_name', scene, () => contract_burn_name(summoner));
-    new Button(1170, 530, "[debug]", scene, () => {
+    new Button(1220, 600, "🌷", scene, () => {
         if (flag_debug == 0) {
             flag_debug = 1;
         } else {
             flag_debug = 0;
         }
+        sound_system.play();
     });
 
     //curePetrification
@@ -8053,13 +8282,15 @@ function create(scene) {
     });
 
     //---nyuinyui
-    nyuinyui = new Nyuinyui(scene, 800, 850, "nyui_moving")
-        .setOrigin(0.5)
-        .setScale(0.25)
-        .setAlpha(0.8)
-        .setDepth(9999+102)
-        .setVisible(false);
-    group_update.add(nyuinyui);
+    if (local_level >= 3) {
+        nyuinyui = new Nyuinyui(scene, 800, 850, "nyui_moving")
+            .setOrigin(0.5)
+            .setScale(0.25)
+            .setAlpha(0.8)
+            .setDepth(9999+102)
+            .setVisible(false);
+        group_update.add(nyuinyui);
+    }
 }
 
 
@@ -8604,51 +8835,39 @@ function update_checkModeChange(this_scene) {
         item_potato.depth = 9999;
         group_food.add(item_potato);
         
-        /*
-        if (local_items[37] > 0 || local_items[37+64] > 0 || local_items[37+128] > 0) {
-            item_pancake = this_scene.add.sprite(600-45, 840+10, "item_pancake").setScale(0.2).setOrigin(0.5);
-            item_pancake.depth = 9999;
-            group_food.add(item_pancake);
-        }
-
-        if (local_items[5] > 0 || local_items[5+64] > 0 || local_items[5+128] > 0) {
-            item_onigiri = this_scene.add.sprite(600+40, 840+10, "item_onigiri")
-                .setScale(0.1)
-                .setOrigin(0.5)
-                .setDepth(9999);
-            group_food.add(item_onigiri);
-        }
-        */
-        //***TODO*** food id
         {
-            let _item_type = 1;
-            if (local_items[1] > 0 || local_items[1+64] > 0 || local_items[1+128] > 0) {
-                item_pancake = this_scene.add.sprite(600-45, 840+10, "item_food_pancake").setScale(0.2).setOrigin(0.5);
+            //Choco Bread
+            let _item_type = dic_items["Choco Bread"]["item_id"];
+            if (local_items[_item_type] > 0 || local_items[_item_type+64] > 0 || local_items[_item_type+128] > 0) {
+                item_pancake = this_scene.add.sprite(600+35, 840+10, "item_food_bread").setScale(0.2).setOrigin(0.5);
                 item_pancake.depth = 9999;
                 group_food.add(item_pancake);
             }
         }
         {
-            let _item_type = 1;
-            if (local_items[1] > 0 || local_items[1+64] > 0 || local_items[1+128] > 0) {
-                item_pancake = this_scene.add.sprite(600+40, 840+10, "item_food_cake").setScale(0.15).setOrigin(0.5);
+            //Onigiri
+            let _item_type = dic_items["Onigiri"]["item_id"];
+            if (local_items[_item_type] > 0 || local_items[_item_type+64] > 0 || local_items[_item_type+128] > 0) {
+                item_pancake = this_scene.add.sprite(600-35, 840+10, "item_food_onigiri").setScale(0.1).setOrigin(0.5);
                 item_pancake.depth = 9999;
                 group_food.add(item_pancake);
             }
         }
         {
-            let _item_type = 1;
-            if (local_items[1] > 0 || local_items[1+64] > 0 || local_items[1+128] > 0) {
-                item_pancake = this_scene.add.sprite(600-20, 840-20, "item_food_onigiri").setScale(0.1).setOrigin(0.5);
-                item_pancake.depth = 9999;
+            //Pancake
+            let _item_type = dic_items["Pancake"]["item_id"];
+            if (local_items[_item_type] > 0 || local_items[_item_type+64] > 0 || local_items[_item_type+128] > 0) {
+                item_pancake = this_scene.add.sprite(600-25, 840-18, "item_food_pancake").setScale(0.2).setOrigin(0.5);
+                item_pancake.depth = 9999-1;
                 group_food.add(item_pancake);
             }
         }
         {
-            let _item_type = 1;
-            if (local_items[1] > 0 || local_items[1+64] > 0 || local_items[1+128] > 0) {
-                item_pancake = this_scene.add.sprite(600+20, 840-20, "item_food_bread").setScale(0.2).setOrigin(0.5);
-                item_pancake.depth = 9999;
+            //Cake
+            let _item_type = dic_items["Cake"]["item_id"];
+            if (local_items[_item_type] > 0 || local_items[_item_type+64] > 0 || local_items[_item_type+128] > 0) {
+                item_pancake = this_scene.add.sprite(600+25, 840-18, "item_food_cake").setScale(0.15).setOrigin(0.5);
+                item_pancake.depth = 9999-1;
                 group_food.add(item_pancake);
             }
         }
@@ -8699,13 +8918,18 @@ function update_checkModeChange(this_scene) {
         local_material_calc = 0;
 
     //crafting check, continue
-    } else if (local_crafting_status == 1 & murasakisan.mode != "crafting" & murasakisan.mode != "feeding"){
+    } else if (
+        local_crafting_status == 1 
+        & murasakisan.mode != "crafting" 
+        & murasakisan.mode != "feeding"
+    ){
         murasakisan.set_mode = "crafting";
         murasakisan.submode = 0;
         murasakisan.count = 0;
         murasakisan.target_x = 950;
         murasakisan.target_y = 740;
-        text_select_item.setText('"'+array_item_name[local_crafting_item_type]+'"')
+        //text_select_item.setText('"'+array_item_name[local_crafting_item_type]+'"')
+        text_select_item.setText('"'+dic_items_reverse[local_crafting_item_type]+'"')
         sound_crafting.play();
         local_crafting_calc = -1;
     }else if (local_crafting_status == 0 & murasakisan.mode == "crafting") {
@@ -8820,11 +9044,8 @@ function update_checkItem(this_scene) {
     //calc sum of local_items and compare previous one
     let res1 = local_items.reduce((sum, element) => sum + element, 0);
     let res2 = previous_local_items.reduce((sum, element) => sum + element, 0);
-    if (res1 == res2) {
-        //return 0;
-        ;
-    } else {
-        //destroy crafting window group to update item info
+    //when item updated, destroy crafting window group to update item info
+    if (res1 != res2 && flag_window_craft == 0) {
         if (typeof group_window_crafting != "undefined") {
             group_window_crafting.destroy(true);
             delete group_window_crafting;
@@ -8843,173 +9064,6 @@ function update_checkItem(this_scene) {
     ) {
         local_items_flag[_item_id] = true;
         group_kanban.setVisible(true);
-
-        //***TODO***//
-        
-        //book
-        {
-            let _x;
-            let _y;
-            let _pos_local = "pos_item_book";
-            //recover position from localStorage
-            if (localStorage.getItem(_pos_local) != null && local_owner == local_wallet) {
-                let _json = localStorage.getItem(_pos_local);
-                _pos = JSON.parse(_json);
-                _x = _pos[0];
-                _y = _pos[1];
-            } else {
-                _x = 230;
-                _y = 720;
-            }
-            let _text = "";
-            _text += " total exp gained: " + local_total_exp_gained + " \n";
-            _text += " total coin mined: " + local_total_coin_mined + " \n";
-            _text += " total leaf farmed: " + local_total_material_farmed + "\n";
-            _text += " total item crafted: " + local_total_item_crafted + " \n";
-            _text += " total fluffy gifted: " + local_total_precious_received;
-            item_book_text = this_scene.add.text(
-                _x,
-                _y-90,
-                _text,
-                {font: "20px Arial", fill: "#000000", backgroundColor: "#ffffff"}
-            ).setOrigin(0.5).setVisible(false).setDepth(9999);
-            item_book = this_scene.add.sprite(
-                _x, 
-                _y, 
-                "item_book"
-            ).setScale(0.1).setOrigin(0.5)
-                .setInteractive({ draggable: true, useHandCursor: true })
-                .on("pointerdown", () => {
-                    item_book_text.visible = true;
-                    setTimeout( () => {
-                        item_book_text.visible = false;
-                    }, 3000)
-                })
-                .on("drag", () => {
-                    if (this_scene.sys.game.scale.gameSize._width == 1280) {
-                        item_book.x = game.input.activePointer.x;
-                        item_book.y = game.input.activePointer.y;
-                    } else {
-                        item_book.x = game.input.activePointer.y;
-                        item_book.y = 960 - game.input.activePointer.x;
-                    }
-                    item_book_text.x = item_book.x;
-                    item_book_text.y = item_book.y-90;
-                    item_book.depth = item_book.y;
-                    //item_book_text.visible = false;
-                })
-                .on("dragend", () => {
-                    item_book_text.x = item_book.x;
-                    item_book_text.y = item_book.y-90;
-                    let _pos = [item_book.x, item_book.y];
-                    localStorage.setItem(_pos_local, JSON.stringify(_pos));
-                });
-        }
-            
-        //hourglass
-        {
-            let _x;
-            let _y;
-            let _pos_local = "pos_item_hourglass";
-            //recover position from localStorage
-            if (localStorage.getItem(_pos_local) != null && local_owner == local_wallet) {
-                let _json = localStorage.getItem(_pos_local);
-                _pos = JSON.parse(_json);
-                _x = _pos[0];
-                _y = _pos[1];
-            } else {
-                _x = 350;
-                _y = 850;
-            }
-            let _text = "";
-            _text += " dapps staking: " + local_dapps_staking_amount + " $ASTR \n";
-            _text += " rewarding speed: x" + local_staking_reward_speed/100 + " \n";
-            _text += " next reward: " + staking_reward_percent + "%";
-            item_hourglass_text = this_scene.add.text(
-                _x,
-                _y-80,
-                _text,
-                {font: "20px Arial", fill: "#000000", backgroundColor: "#ffffff"}
-            ).setOrigin(0.5).setVisible(false).setDepth(9999);
-            item_hourglass = this_scene.add.sprite(
-                _x,
-                _y,
-                "item_hourglass",
-            ).setOrigin(0.5).setScale(0.08).setDepth(850)
-                .setInteractive({ draggable: true, useHandCursor: true })
-                .on("pointerdown", () => {
-                    item_hourglass_text.visible = true;
-                    setTimeout( () => {
-                        item_hourglass_text.visible = false;
-                    }, 3000)
-                })
-                .on("drag", () => {
-                    if (this_scene.sys.game.scale.gameSize._width == 1280) {
-                        item_hourglass.x = game.input.activePointer.x;
-                        item_hourglass.y = game.input.activePointer.y;
-                    } else {
-                        item_hourglass.x = game.input.activePointer.y;
-                        item_hourglass.y = 960 - game.input.activePointer.x;
-                    }
-                    item_hourglass.depth = item_book.y;
-                    item_hourglass_text.x = item_hourglass.x;
-                    item_hourglass_text.y = item_hourglass.y-80;
-                    //item_hourglass_text.visible = false;
-                })
-                .on("dragend", () => {
-                    item_hourglass_text.x = item_hourglass.x;
-                    item_hourglass_text.y = item_hourglass.y-80;
-                    let _pos = [item_hourglass.x, item_hourglass.y];
-                    localStorage.setItem(_pos_local, JSON.stringify(_pos));
-                })
-        }
-        
-        //fishbowl
-        {
-            let _x;
-            let _y;
-            let _pos_local = "pos_item_fishbowl";
-            //recover position from localStorage
-            if (localStorage.getItem(_pos_local) != null && local_owner == local_wallet) {
-                let _json = localStorage.getItem(_pos_local);
-                _pos = JSON.parse(_json);
-                _x = _pos[0];
-                _y = _pos[1];
-            } else {
-                _x = 350;
-                _y = 500;
-            }
-            item_fishbowl = this_scene.add.sprite(
-                _x,
-                _y,
-                "item_fishbowl",
-            ).setOrigin(0.5).setScale(0.3).setDepth(_y)
-                .setInteractive({ draggable: true, useHandCursor: true })
-                .on("drag", () => {
-                    if (this_scene.sys.game.scale.gameSize._width == 1280) {
-                        item_fishbowl.x = game.input.activePointer.x;
-                        item_fishbowl.y = game.input.activePointer.y;
-                    } else {
-                        item_fishbowl.x = game.input.activePointer.y;
-                        item_fishbowl.y = 960 - game.input.activePointer.x;
-                    }
-                    item_fishbowl.depth = item_fishbowl.y;
-                })
-                .on("dragend", () => {
-                    let _pos = [item_fishbowl.x, item_fishbowl.y];
-                    localStorage.setItem(_pos_local, JSON.stringify(_pos));
-                    if (
-                        item_fishbowl.x >= 100
-                        && item_fishbowl.x <= 1100
-                        && item_fishbowl.y >= 500
-                        && item_fishbowl.y <= 800
-                    ){
-                        sound_hat.play();
-                        murasakisan.try_attenting(item_fishbowl.x, item_fishbowl.y);
-                    }
-                });
-        }
-
     } else if (
         local_items[_item_id] == 0 
         && local_items[_item_id+64] == 0 
@@ -9035,29 +9089,6 @@ function update_checkItem(this_scene) {
             group_mint_name.setVisible(false);
         }
         text_id.setText("#"+summoner);
-        
-        //***TODO***//
-
-        //book
-        {
-            let _text = "";
-            _text += " total exp gained: " + local_total_exp_gained + "\n";
-            _text += " total coin mined: " + local_total_coin_mined + "\n";
-            _text += " total leaf farmed: " + local_total_material_farmed + "\n";
-            _text += " total item crafted: " + local_total_item_crafted + "\n";
-            _text += " total fluffy gifted: " + local_total_precious_received;
-            item_book_text.setText(_text);
-        }
-            
-        //hourglass
-        {
-            let _text = "";
-            _text += " dapps staking: " + local_dapps_staking_amount + " $ASTR \n";
-            _text += " rewarding speed: x" + local_staking_reward_speed/100 + " \n";
-            _text += " next reward: " + staking_reward_percent + "%";
-            item_hourglass_text.setText(_text);
-        }
-        
     }
         
     //###2:Mr.Astar
@@ -9104,6 +9135,8 @@ function update_checkItem(this_scene) {
         && typeof dice != "undefined"
     ) {
         dice.destroy(true);
+        dice.text_rolled_number.destroy(true);
+        dice.text_next_time.destroy(true);
         local_items_flag[_item_id] = false;
     }
 
@@ -9374,6 +9407,35 @@ function update_checkItem(this_scene) {
         let _x = 640;
         let _y = 480;
         
+        if (local_score == 0) {
+            //wait for calculation
+            local_items_flag[_item_id] = false;
+        } else if (local_score < 200000) {
+            item_wall_sticker = this_scene.add.image(_x, _y, "item_wall_sticker_01");
+        } else if (local_score < 400000) {
+            item_wall_sticker = this_scene.add.image(_x, _y, "item_wall_sticker_02");
+        } else if (local_score < 600000) {
+            item_wall_sticker = this_scene.add.image(_x, _y, "item_wall_sticker_03");
+        } else if (local_score < 800000) {
+            item_wall_sticker = this_scene.add.image(_x, _y, "item_wall_sticker_04");
+        } else if (local_score < 1000000) {
+            item_wall_sticker = this_scene.add.image(_x, _y, "item_wall_sticker_05");
+        } else if (local_score < 1200000) {
+            item_wall_sticker = this_scene.add.image(_x, _y, "item_wall_sticker_06");
+        } else if (local_score < 1400000) {
+            item_wall_sticker = this_scene.add.image(_x, _y, "item_wall_sticker_07");
+        } else if (local_score < 1600000) {
+            item_wall_sticker = this_scene.add.image(_x, _y, "item_wall_sticker_08");
+        } else if (local_score < 1800000) {
+            item_wall_sticker = this_scene.add.image(_x, _y, "item_wall_sticker_09");
+        } else if (local_score < 2000000) {
+            item_wall_sticker = this_scene.add.image(_x, _y, "item_wall_sticker_10");
+        } else if (local_score < 2200000) {
+            item_wall_sticker = this_scene.add.image(_x, _y, "item_wall_sticker_11");
+        } else if (local_score >= 2200000) {
+            item_wall_sticker = this_scene.add.image(_x, _y, "item_wall_sticker_12");
+        }
+        /*
         if (local_wallet_score == 0) {
             //wait for calculation
             local_items_flag[_item_id] = false;
@@ -9402,6 +9464,7 @@ function update_checkItem(this_scene) {
         } else if (local_wallet_score >= 3300) {
             item_wall_sticker = this_scene.add.image(_x, _y, "item_wall_sticker_12");
         }
+        */
         if (typeof item_wall_sticker != "undefined") {
             item_wall_sticker.setDepth(1).setAlpha(0.2);
         }
@@ -10253,7 +10316,9 @@ function update_checkItem(this_scene) {
                         item_window.setTexture("item_window_night_closed");
                     }
                 }
-                if (typeof item_wall_sticker != "undefined" && local_wallet_score >= 2700) {
+
+                //if (typeof item_wall_sticker != "undefined" && local_wallet_score >= 2700) {
+                if (typeof item_wall_sticker != "undefined" && local_score >= 1800000) {
                     item_wall_sticker_neon.setVisible(true);
                 }
                 flag_onLight = false;
@@ -10282,7 +10347,8 @@ function update_checkItem(this_scene) {
                         item_window.setTexture("item_window_day_closed");
                     }
                 }
-                if (typeof item_wall_sticker != "undefined" && local_wallet_score >= 2700) {
+                //if (typeof item_wall_sticker != "undefined" && local_wallet_score >= 2700) {
+                if (typeof item_wall_sticker != "undefined" && local_score >= 1800000) {
                     item_wall_sticker_neon.setVisible(false);
                 }
                 flag_onLight = true;
@@ -10472,6 +10538,149 @@ function update_checkItem(this_scene) {
             item_newspaper_text3.setText(local_newsText[2]);
             item_newspaper_text4.setText(local_newsText[3]);
         }
+    }
+
+    //###44:Dairy Book
+    _item_name = "Diary Book";
+    _item_id = dic_items[_item_name]["item_id"];
+    if (
+        (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+        && local_items_flag[_item_id] != true
+    ) {
+        local_items_flag[_item_id] = true;
+        let _x;
+        let _y;
+        let _pos_local = "pos_item_book";
+        //recover position from localStorage
+        if (localStorage.getItem(_pos_local) != null && local_owner == local_wallet) {
+            let _json = localStorage.getItem(_pos_local);
+            _pos = JSON.parse(_json);
+            _x = _pos[0];
+            _y = _pos[1];
+        } else {
+            _x = 300;
+            _y = 750;
+        }
+        let _text = "";
+        _text += " total exp gained: " + local_total_exp_gained + " \n";
+        _text += " total coin mined: " + local_total_coin_mined + " \n";
+        _text += " total leaf farmed: " + local_total_material_farmed + "\n";
+        _text += " total item crafted: " + local_total_item_crafted + " \n";
+        _text += " total fluffy gifted: " + local_total_precious_received;
+        item_book_text = this_scene.add.text(
+            _x,
+            _y-90,
+            _text,
+            {font: "20px Arial", fill: "#000000", backgroundColor: "#ffffff"}
+        ).setOrigin(0.5).setVisible(false).setDepth(9999);
+        item_book = this_scene.add.sprite(
+            _x, 
+            _y, 
+            "item_book"
+        ).setScale(0.1).setOrigin(0.5)
+            .setInteractive({ draggable: true, useHandCursor: true })
+            .on("pointerdown", () => {
+                item_book_text.visible = true;
+                setTimeout( () => {
+                    item_book_text.visible = false;
+                }, 3000)
+            })
+            .on("drag", () => {
+                if (this_scene.sys.game.scale.gameSize._width == 1280) {
+                    item_book.x = game.input.activePointer.x;
+                    item_book.y = game.input.activePointer.y;
+                } else {
+                    item_book.x = game.input.activePointer.y;
+                    item_book.y = 960 - game.input.activePointer.x;
+                }
+                item_book_text.x = item_book.x;
+                item_book_text.y = item_book.y-90;
+                item_book.depth = item_book.y;
+                //item_book_text.visible = false;
+            })
+            .on("dragend", () => {
+                item_book_text.x = item_book.x;
+                item_book_text.y = item_book.y-90;
+                let _pos = [item_book.x, item_book.y];
+                localStorage.setItem(_pos_local, JSON.stringify(_pos));
+            });
+    } else if (
+        local_items[_item_id] == 0 
+        && local_items[_item_id+64] == 0 
+        && local_items[_item_id+128] == 0
+        && typeof item_clock != "undefined"
+    ) {
+        item_book.destroy(true);
+        item_book_text.destroy(true);
+        local_items_flag[_item_id] = false;
+    } else if (local_items_flag[_item_id] == true) {
+        let _text = "";
+        _text += " total exp gained: " + local_total_exp_gained + "\n";
+        _text += " total coin mined: " + local_total_coin_mined + "\n";
+        _text += " total leaf farmed: " + local_total_material_farmed + "\n";
+        _text += " total item crafted: " + local_total_item_crafted + "\n";
+        _text += " total fluffy gifted: " + local_total_precious_received;
+        item_book_text.setText(_text);
+    }
+
+    //###44:Fishbowl
+    _item_name = "Fishbowl";
+    _item_id = dic_items[_item_name]["item_id"];
+    if (
+        (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+        && local_items_flag[_item_id] != true
+    ) {
+        local_items_flag[_item_id] = true;
+        let _x;
+        let _y;
+        let _pos_local = "pos_item_fishbowl";
+        //recover position from localStorage
+        if (localStorage.getItem(_pos_local) != null && local_owner == local_wallet) {
+            let _json = localStorage.getItem(_pos_local);
+            _pos = JSON.parse(_json);
+            _x = _pos[0];
+            _y = _pos[1];
+        } else {
+            _x = 480;
+            _y = 150;
+        }
+        item_fishbowl = this_scene.add.sprite(
+            _x,
+            _y,
+            "item_fishbowl",
+        ).setOrigin(0.5).setScale(0.3).setDepth(_y)
+            .setInteractive({ draggable: true, useHandCursor: true })
+            .on("drag", () => {
+                if (this_scene.sys.game.scale.gameSize._width == 1280) {
+                    item_fishbowl.x = game.input.activePointer.x;
+                    item_fishbowl.y = game.input.activePointer.y;
+                } else {
+                    item_fishbowl.x = game.input.activePointer.y;
+                    item_fishbowl.y = 960 - game.input.activePointer.x;
+                }
+                item_fishbowl.depth = item_fishbowl.y;
+            })
+            .on("dragend", () => {
+                let _pos = [item_fishbowl.x, item_fishbowl.y];
+                localStorage.setItem(_pos_local, JSON.stringify(_pos));
+                if (
+                    item_fishbowl.x >= 100
+                    && item_fishbowl.x <= 1100
+                    && item_fishbowl.y >= 500
+                    && item_fishbowl.y <= 800
+                ){
+                    sound_hat.play();
+                    murasakisan.try_attenting(item_fishbowl.x, item_fishbowl.y);
+                }
+            });
+    } else if (
+        local_items[_item_id] == 0 
+        && local_items[_item_id+64] == 0 
+        && local_items[_item_id+128] == 0
+        && typeof item_clock != "undefined"
+    ) {
+        item_fishbowl.destroy(true);
+        local_items_flag[_item_id] = false;
     }
 
     //###44:Cuckoo Clock
@@ -10781,7 +10990,7 @@ function update_checkItem(this_scene) {
     }
 
     //###201-236:Fluffy
-    if (local_fluffy_count > previous_local_fluffy_count) {
+    if (local_fluffy_count != previous_local_fluffy_count) {
     //if (local_precious > previous_local_precious2) {
         let _timeout = 0;
         let _count_fluffy = 0;
@@ -10896,6 +11105,81 @@ function update_checkItem(this_scene) {
             .setAlpha(1)
             .setDepth(3);
         group_update.add(festligheter);
+    }
+    
+    //###000:Hourglass
+    if (
+        local_dapps_staking_amount > 0
+        && (typeof item_hourglass == "undefined" || typeof item_hourglass.scene == "undefined")
+    ){
+        let _x;
+        let _y;
+        let _pos_local = "pos_item_hourglass";
+        //recover position from localStorage
+        if (localStorage.getItem(_pos_local) != null && local_owner == local_wallet) {
+            let _json = localStorage.getItem(_pos_local);
+            _pos = JSON.parse(_json);
+            _x = _pos[0];
+            _y = _pos[1];
+        } else {
+            _x = 400;
+            _y = 900;
+        }
+        let _text = "";
+        _text += " dapps staking: " + local_dapps_staking_amount + " $ASTR \n";
+        _text += " rewarding speed: x" + local_staking_reward_speed/100 + " \n";
+        _text += " next reward: " + staking_reward_percent + "%";
+        item_hourglass_text = this_scene.add.text(
+            _x,
+            _y-80,
+            _text,
+            {font: "20px Arial", fill: "#000000", backgroundColor: "#ffffff"}
+        ).setOrigin(0.5).setVisible(false).setDepth(9999);
+        item_hourglass = this_scene.add.sprite(
+            _x,
+            _y,
+            "item_hourglass",
+        ).setOrigin(0.5).setScale(0.08).setDepth(850)
+            .setInteractive({ draggable: true, useHandCursor: true })
+            .on("pointerdown", () => {
+                item_hourglass_text.visible = true;
+                setTimeout( () => {
+                    item_hourglass_text.visible = false;
+                }, 3000)
+            })
+            .on("drag", () => {
+                if (this_scene.sys.game.scale.gameSize._width == 1280) {
+                    item_hourglass.x = game.input.activePointer.x;
+                    item_hourglass.y = game.input.activePointer.y;
+                } else {
+                    item_hourglass.x = game.input.activePointer.y;
+                    item_hourglass.y = 960 - game.input.activePointer.x;
+                }
+                item_hourglass.depth = item_hourglass.y;
+                item_hourglass_text.x = item_hourglass.x;
+                item_hourglass_text.y = item_hourglass.y-80;
+                //item_hourglass_text.visible = false;
+            })
+            .on("dragend", () => {
+                item_hourglass_text.x = item_hourglass.x;
+                item_hourglass_text.y = item_hourglass.y-80;
+                let _pos = [item_hourglass.x, item_hourglass.y];
+                localStorage.setItem(_pos_local, JSON.stringify(_pos));
+            })
+    } else if (
+        local_dapps_staking_amount == 0 
+        && (typeof item_hourglass != "undefined" || typeof item_hourglass.scene != "undefined")
+    ){
+        item_hourglass.destroy(true);
+        item_hourglass_text.destroy(true);
+    } else if (
+        typeof item_hourglass != "undefined" && typeof item_hourglass.scene != "undefined"
+    ){
+        let _text = "";
+        _text += " dapps staking: " + local_dapps_staking_amount + " $ASTR \n";
+        _text += " rewarding speed: x" + local_staking_reward_speed/100 + " \n";
+        _text += " next reward: " + staking_reward_percent + "%";
+        item_hourglass_text.setText(_text);
     }
     
     previous_local_items = local_items;
@@ -11177,12 +11461,14 @@ class Loading extends Phaser.Scene {
     }
 
     preload() {
+        //loading web3 and preload parallely
         console.log("scene: Loading");
         this.update_web3(); // start loading web3 without async
         preload(this);
     }
     
     create() {
+        //web3 loading msg
         this._msg1 = this.add.text(640, 480, '')
             .setFontSize(30)
             .setFontFamily("Arial")
@@ -11312,7 +11598,7 @@ class Opeaning extends Phaser.Scene {
         */
         //let back_opeaning = this.add.image(640, 480, "back")
         //fade out
-        contract_update_all();
+        //contract_update_all();
         this.cameras.main.fadeOut(300, 255, 255, 255);
         this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
             this.scene.start("Main");

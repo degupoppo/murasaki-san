@@ -373,6 +373,13 @@ let _dic_items = {
         "img_name":"item_nui",
         "icon_png":"png/item_nui.png",
     },
+    "Present Box":{
+        "item_id":200,
+        "item_id_uncommon":0,
+        "item_id_rare":0,
+        "img_name":"item_presentbox_01",
+        "icon_png":"png/item_presentbox_01.png",
+    },
     
     //fluffy
     "Gray Fluffy":{
