@@ -2169,6 +2169,12 @@ contract Murasaki_Function_Share is Ownable {
 
     //calc_score
     function calc_score(uint32 _summoner) public view returns (uint32) {
+        uint32 _score = 0;
+        _score += _calc_score_total(_summoner);
+        _score += _calc_score_nft(_summoner);
+        return _score;
+    }
+    function _calc_score_total(uint32 _summoner) internal view returns (uint32) {
         Murasaki_Storage_Score mss = Murasaki_Storage_Score(murasaki_storage_score_address);
         uint32 _total_exp_gained = mss.total_exp_gained(_summoner);
         uint32 _total_coin_mined = mss.total_coin_mined(_summoner);
@@ -2181,6 +2187,40 @@ contract Murasaki_Function_Share is Ownable {
         _score += _total_material_farmed;
         _score += _total_item_crafted * 3000 + _total_item_crafted ** 2 * 300;
         _score += _total_precious_received * 500 + _total_precious_received ** 2 * 50;
+        return _score;
+    }
+    function _calc_score_nft(uint32 _summoner) internal view returns (uint32) {
+        uint32[256] memory _array = get_balance_of_type_array_from_summoner(_summoner);
+        uint32 _score = 0;
+        for (uint32 i; i<=256; i++) {
+            if (_array[i] > 0) {
+                //common item, 1/5 of item_crafted
+                if (i <= 64) {
+                    _score += _array[i] * 600;
+                //uncommon item, x4 of common
+                } else if (i <= 128) {
+                    _score += _array[i] * 2400;
+                //rare item, x4 of uncommon
+                } else if (i <= 196) {
+                    _score += _array[i] * 9600;
+                //nui, x4 of fluffiest
+                } else if (i == 197) {
+                    _score += _array[i] * 6400;
+                //bank, pouch, mail, ignored
+                } else if (i <= 200) {
+                    _score += 0;
+                //fluffy, 1/5 of precious_received
+                } else if (i <= 212) {
+                    _score += _array[i] * 100;
+                //fluffier, x4 of fluffy
+                } else if (i <= 224) {
+                    _score += _array[i] * 400;
+                //fluffiest, x4 of fluffier
+                } else if (i <= 236) {
+                    _score += _array[i] * 1600;
+                }
+            }
+        }
         return _score;
     }
     
@@ -2692,10 +2732,12 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
         Murasaki_Parameter mp = Murasaki_Parameter(mfs.murasaki_parameter_address());
-        uint PRICE = mp.PRICE();
         require(mfs.check_owner(_summoner, msg.sender));
         require(!not_petrified(_summoner));
-        uint _price = ms.level(_summoner) * PRICE * 10**18;
+        //uint _price = ms.level(_summoner) * PRICE * 10**18;
+        uint PRICE = mp.PRICE();
+        // cure cost = present mint price
+        uint _price = PRICE * 10**18;
         require(msg.value >= _price);
         uint32 _now = uint32(block.timestamp);
         ms.set_last_feeding_time(_summoner, _now);
@@ -3132,8 +3174,8 @@ contract Murasaki_Function_Crafting is Ownable {
             uint32[4] memory _dc_table = get_item_dc(_item_type);
             uint32 _coin = _dc_table[2];
             uint32 _material = _dc_table[3];
-            ms.set_coin(_summoner, ms.coin(_summoner) + _coin * 8/10);
-            ms.set_material(_summoner, ms.material(_summoner) + _material * 8/10);
+            ms.set_coin(_summoner, ms.coin(_summoner) + _coin);
+            ms.set_material(_summoner, ms.material(_summoner) + _material);
         }
     }
     function _update_storage_nui(uint32 _summoner, uint32 _item_nui) internal {
@@ -3254,13 +3296,13 @@ contract Murasaki_Function_Crafting is Ownable {
         (uint32 _item_type3, , , ,) = mc.items(_item3);
         //require(_item_type1 <= 128 || (_item_type1 >= 201 && _item_type1 <= 224) );
         require(_item_type1 <= 128 || (_item_type1 >= 201 && _item_type1 <= 236) );
-    	require(
-    	    _item_type2 == _item_type1
-    	    && _item_type3 == _item_type1
-    	);
-    	
-    	//determine target item_type
-    	uint32 _target_item_type;
+        require(
+            _item_type2 == _item_type1
+            && _item_type3 == _item_type1
+        );
+        
+        //determine target item_type
+        uint32 _target_item_type;
         if (_item_type1 <= 128) {
             _target_item_type = _item_type1 +64;
         // when fluffy or fluffier, +12
@@ -3270,10 +3312,10 @@ contract Murasaki_Function_Crafting is Ownable {
         } else if (_item_type1 >=225 && _item_type1 <= 236) {
             _target_item_type = 197;
         }
-    	
-    	//pay cost, avoid too deep stack error
-    	_pay_cost(_summoner, _target_item_type);
-    	
+        
+        //pay cost, avoid too deep stack error
+        _pay_cost(_summoner, _target_item_type);
+        
         //burn (transfer) lower rank items
         _burn(_item1);
         _burn(_item2);
@@ -3429,6 +3471,13 @@ contract Murasaki_Function_Crafting is Ownable {
         //event
         emit Precious(_summoner_to, _summoner_from, _item_type);
     }
+    
+    //get item name
+    function get_item_name(uint32 _item_type) public view returns (string memory) {
+        Murasaki_Function_Crafting_Codex mfcc = Murasaki_Function_Crafting_Codex(murasaki_function_crafting_codex_address);
+        return mfcc.get_item_name(_item_type);
+    }
+    
 }
 
 
@@ -3589,6 +3638,11 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
             _material = 600;
         }
         return [_level, _dc, _coin, _material];
+    }
+    
+    //get item name
+    function get_item_name(uint32 _item_type) public view returns (string memory) {
+        return item_name_table[_item_type];
     }
 
     //item level
@@ -3882,6 +3936,286 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
         99999,
         99999
     ];
+    
+
+    //item name
+    string[256] public item_name_table = [
+
+        //1-16
+        "Nameplate",
+        "Mr. Astar",
+        "Onigiri",
+        "Helmet",
+        "Dice",
+        "Wall Sticker",
+        "Token Chest",
+        "Diary Book",
+        "Fishbowl",
+        "Sleeping Bed",
+        "Crown",
+        "Fortune Statue",
+        "Cake",
+        "(Item14)",
+        "(Item15)",
+        "Door of Travel",
+
+        //17-32
+        "Music Box",
+        "Straw Hat",
+        "Ms. Ether",
+        "Window",
+        "Cat Cushion",
+        "Knit Hat",
+        "Pancake",
+        "Fluffy House",
+        "Picture Frame",
+        "Flowerpot",
+        "Piano",
+        "Asnya",
+        "Tea Party Set",
+        "(Item30)",
+        "(Item31)",
+        "Key to Travel",
+
+        //33-48
+        "Tablet",
+        "Choco Bread",
+        "Ribbon",
+        "Dr. Bitco",
+        "Score Meter",
+        "Mortarboard",
+        "News Board",
+        "Light Switch",
+        "Rug-Pull",
+        "Cuckoo Clock",
+        "Lantern",
+        "Violin",
+        "(Item45)",
+        "(Item46)",
+        "(Item47)",
+        "Travel Bag",
+
+        //49-64
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+
+        //65-80
+        "Uncommon Nameplate",
+        "Uncommon Mr. Astar",
+        "Uncommon Onigiri",
+        "Uncommon Helmet",
+        "Uncommon Dice",
+        "Uncommon Wall Sticker",
+        "Uncommon Token Chest",
+        "Uncommon Diary Book",
+        "Uncommon Fishbowl",
+        "Uncommon Sleeping Bed",
+        "Uncommon Crown",
+        "Uncommon Fortune Statue",
+        "Uncommon Cake",
+        "Uncommon (Item14)",
+        "Uncommon (Item15)",
+        "Uncommon Door of Travel",
+
+        //81-96
+        "Uncommon Music Box",
+        "Uncommon Straw Hat",
+        "Uncommon Ms. Ether",
+        "Uncommon Window",
+        "Uncommon Cat Cushion",
+        "Uncommon Knit Hat",
+        "Uncommon Pancake",
+        "Uncommon Fluffy House",
+        "Uncommon Picture Frame",
+        "Uncommon Flowerpot",
+        "Uncommon Piano",
+        "Uncommon Asnya",
+        "Uncommon Tea Party Set",
+        "Uncommon (Item30)",
+        "Uncommon (Item31)",
+        "Uncommon Key to Travel",
+
+        //97-112
+        "Uncommon Tablet",
+        "Uncommon Choco Bread",
+        "Uncommon Ribbon",
+        "Uncommon Dr. Bitco",
+        "Uncommon Score Meter",
+        "Uncommon Mortarboard",
+        "Uncommon News Board",
+        "Uncommon Light Switch",
+        "Uncommon Rug-Pull",
+        "Uncommon Cuckoo Clock",
+        "Uncommon Lantern",
+        "Uncommon Violin",
+        "Uncommon (Item45)",
+        "Uncommon (Item46)",
+        "Uncommon (Item47)",
+        "Uncommon Travel Bag",
+
+        //113-128
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+
+        //129-144
+        "Rare Nameplate",
+        "Rare Mr. Astar",
+        "Rare Onigiri",
+        "Rare Helmet",
+        "Rare Dice",
+        "Rare Wall Sticker",
+        "Rare Token Chest",
+        "Rare Diary Book",
+        "Rare Fishbowl",
+        "Rare Sleeping Bed",
+        "Rare Crown",
+        "Rare Fortune Statue",
+        "Rare Cake",
+        "Rare (Item14)",
+        "Rare (Item15)",
+        "Rare Door of Travel",
+
+        //145-160
+        "Rare Music Box",
+        "Rare Straw Hat",
+        "Rare Ms. Ether",
+        "Rare Window",
+        "Rare Cat Cushion",
+        "Rare Knit Hat",
+        "Rare Pancake",
+        "Rare Fluffy House",
+        "Rare Picture Frame",
+        "Rare Flowerpot",
+        "Rare Piano",
+        "Rare Asnya",
+        "Rare Tea Party Set",
+        "Rare (Item30)",
+        "Rare (Item31)",
+        "Rare Key to Travel",
+
+        //161-176
+        "Rare Tablet",
+        "Rare Choco Bread",
+        "Rare Ribbon",
+        "Rare Dr. Bitco",
+        "Rare Score Meter",
+        "Rare Mortarboard",
+        "Rare News Board",
+        "Rare Light Switch",
+        "Rare Rug-Pull",
+        "Rare Cuckoo Clock",
+        "Rare Lantern",
+        "Rare Violin",
+        "Rare (Item45)",
+        "Rare (Item46)",
+        "Rare (Item47)",
+        "Rare Travel Bag",
+
+        //177-192
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+
+        //193
+        "",
+        //194
+        "Coin Bank",
+        //195
+        "Leaf Pouch",
+        //196
+        "Cat Mail",
+        //197
+        "Fluffy murasaki-san",
+        //198
+        "",
+        //199
+        "",
+        //200
+        "Present Box",
+        
+        //201-212
+        "Gray Fluffy",
+        "Beige Fluffy",
+        "Limegreen Fluffy",
+        "Lightblue Fluffy",
+        "Blue Fluffy",
+        "Purple Fluffy",
+        "Redpurple Fluffy",
+        "Red Fluffy",
+        "Orange Fluffy",
+        "Pink Fluffy",
+        "Yellow Fluffy",
+        "White Fluffy",
+        
+        //213-224
+        "Gray Fluffier",
+        "Beige Fluffier",
+        "Limegreen Fluffier",
+        "Lightblue Fluffier",
+        "Blue Fluffier",
+        "Purple Fluffier",
+        "Redpurple Fluffier",
+        "Red Fluffier",
+        "Orange Fluffier",
+        "Pink Fluffier",
+        "Yellow Fluffier",
+        "White Fluffier",
+
+        //225-236
+        "Gray Fluffiest",
+        "Beige Fluffiest",
+        "Limegreen Fluffiest",
+        "Lightblue Fluffiest",
+        "Blue Fluffiest",
+        "Purple Fluffiest",
+        "Redpurple Fluffiest",
+        "Red Fluffiest",
+        "Orange Fluffiest",
+        "Pink Fluffiest",
+        "Yellow Fluffiest",
+        "White Fluffiest"
+    ];
 
     /*
     //item heart
@@ -4150,8 +4484,13 @@ contract buybackTreasury is Ownable {
 
     uint public amountPaied_total = 0;
     mapping(uint32 => uint) public amountPaied;
+    uint32 public total_notActivated_summoner = 0;
+
+    //update notActivated summoner number by manually
+    function _set2_total_notActivated_summoner(uint32 _value) external onlyOwner {
+        total_notActivated_summoner = _value;
+    }
     
-    //***TODO*** active user
     // not total user but active user count is needed to be caluculated 
     // and to be used for calculation of amount per summoner value
     // need: counting petrified summoners
@@ -4159,7 +4498,8 @@ contract buybackTreasury is Ownable {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Main mm = Murasaki_Main(mfs.murasaki_main_address());
         uint32 _total_summoner = mm.next_summoner() - 1;
-        uint _amount_per_summoner = (amountPaied_total + address(this).balance) / _total_summoner;
+        uint32 _total_active_summoner = _total_summoner - total_notActivated_summoner;
+        uint _amount_per_summoner = (amountPaied_total + address(this).balance) / _total_active_summoner;
         return _amount_per_summoner;
     }
     
@@ -4257,9 +4597,9 @@ contract buybackTreasury is Ownable {
         amountPaied_total += _price;
         //pay
         payable(msg.sender).transfer(_price);
-        //do not exceed amount per summoner after paying
+        //do not exceed x2 amount per summoner after paying
         uint _amount_per_summoner = calc_amount_per_summoner();
-        require(amountPaied[_summoner] <= _amount_per_summoner);
+        require(amountPaied[_summoner] <= _amount_per_summoner * 2);
         //event
         emit Buyback(_summoner, _item, _price);
     }
@@ -4325,7 +4665,7 @@ contract World_Dice is Ownable {
     //variants
     mapping(uint32 => uint32[4]) public rolled_dice;
     mapping(uint32 => uint32) public last_dice_roll_time;
-    uint32 public dice_item_type = 3;
+    uint32 public dice_item_type = 5;
     uint32 public buffer_sec = 14400;  //4 hr
 
     //set dice item_type
@@ -4431,6 +4771,30 @@ contract World_Dice is Ownable {
         ) {
             _mod_dice = 0;
         //calc mod_dice depends on delta_sec
+        // average of 3
+        } else if (_elasped_time > BASE_SEC * 3) {
+            _mod_dice = 0;
+        } else if (_elasped_time > BASE_SEC * 2) {
+            _mod_dice = (
+                0 +
+                0 +
+                rolled_dice[_summoner][3]
+                ) / 3;
+        } else if (_elasped_time > BASE_SEC * 1) {
+            _mod_dice = (
+                0 +
+                rolled_dice[_summoner][2] +
+                rolled_dice[_summoner][3]
+                ) / 3;
+        } else {
+            _mod_dice = (
+                rolled_dice[_summoner][1] +
+                rolled_dice[_summoner][2] +
+                rolled_dice[_summoner][3]
+                ) / 3;
+        }
+        /*
+        //average of 4
         } else if (_elasped_time > BASE_SEC * 4) {
             _mod_dice = 0;
         } else if (_elasped_time > BASE_SEC * 3) {
@@ -4462,6 +4826,7 @@ contract World_Dice is Ownable {
                 rolled_dice[_summoner][3]
                 ) / 4;
         }
+        */
         return _mod_dice;
     }
     
@@ -4524,7 +4889,7 @@ contract Murasaki_Mail is Ownable {
     //interval, both of sending interval & receving limit
     uint32 public interval_sec = 60 * 60 * 24 * 5;    // 5 days
     uint32 public item_type_of_mail = 196;
-    uint32 public item_type_of_cushion = 20;
+    uint32 public item_type_of_cushion = 21;
 
     //admin, set variants
     function set_interval_sec(uint32 _value) external onlyOwner {
@@ -4533,7 +4898,10 @@ contract Murasaki_Mail is Ownable {
     function set_item_type_of_mail(uint32 _value) external onlyOwner {
         item_type_of_mail = _value;
     }
-    
+    function set_item_type_of_cushion(uint32 _value) external onlyOwner {
+        item_type_of_cushion = _value;
+    }
+        
     //check mail
     function check_receiving_mail(uint32 _summoner_to) public view returns (bool) {
         uint32 _mail_id = receiving[_summoner_to];
@@ -5812,10 +6180,12 @@ contract Fluffy_Festival is Ownable {
         return subjects[subject_now].start_block + ELECTION_INTERVAL_BLOCK;
     }
 
+    /*
     //***TODO*** forDebug
     function mint_presentbox(uint32 _summoner, address _wallet_to, string memory _memo) external onlyOwner {
         _mint_presentbox(_summoner, _wallet_to, _memo);
     }
+    */
 }
 
 

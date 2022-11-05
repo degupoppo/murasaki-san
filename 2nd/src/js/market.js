@@ -18,6 +18,7 @@ async function update_onMarketItems() {
         _price = web3.utils.fromWei(_price, "ether");
         let _items = await contract_mc_wss.methods.items(_item).call();
         let _item_type = _items[0];
+        let _item_name = dic_items_reverse[_item_type];
         let _crafted_summoner = _items[2];
         //summoner_name
         let _crafted_summoner_name = await call_name_from_summoner(_crafted_summoner);
@@ -50,15 +51,14 @@ async function update_onMarketItems() {
         _html += "</center></td><td><center>";
         //_html += _item_type;
         _html += "<img src='";
-        _html += "src/market_icon/" + array_item_png[_item_type];
-        _html += "' width='18' height='18'> ";
-        _html += array_item_name[_item_type];
+        _html += "src/" + dic_items[_item_name]["icon_png"];
+        _html += "' width='32' height='32'> ";
+        _html += _item_name;
         _html += "</center></td><td><center>";
         _html += _item_rarity;
         _html += "</center></td><td><center>";
         _html += _crafted_summoner_name;
         _html += "</center></td><td id='" + "input_price_" + _item + "'><center><b>";
-        //_html += (Math.round(_price/(10**18)*100)/100).toFixed(2);
         _html += (Math.round(_price*100)/100).toFixed(2);
         _html += "</b></center></td><td><center>";
         _html += "<button onclick='buy_item(" + _item + "," + _price + ");'>";
@@ -90,6 +90,7 @@ async function update_sellingItems() {
         _price = web3.utils.fromWei(_price, "ether");
         let _items = await contract_mc_wss.methods.items(_item).call();
         let _item_type = _items[0];
+        let _item_name = dic_items_reverse[_item_type];
         let _crafted_summoner = _items[2];
         //summoner_name
         let _crafted_summoner_name = await call_name_from_summoner(_crafted_summoner);
@@ -108,7 +109,7 @@ async function update_sellingItems() {
             let _score = await contract_msn_wss.methods.score(_item).call();
             _item_rarity = "<font color=#E85298>score: " + _score + "</font>";
         } else if (_item_type >= 201 && _item_type <= 212) {
-            _item_rarity = "<font color=green>common</font>";
+            _item_rarity = "<font color=black>common</font>";
         } else if (_item_type >= 213 && _item_type <= 224) {
             _item_rarity = "<font color=blue>uncommon</font>";
         } else if (_item_type >= 225 && _item_type <= 236) {
@@ -121,15 +122,14 @@ async function update_sellingItems() {
         _html += _item;
         _html += "</center></td><td><center>";
         _html += "<img src='";
-        _html += "src/market_icon/" + array_item_png[_item_type];
-        _html += "' width='18' height='18'> ";
-        _html += array_item_name[_item_type];
+        _html += "src/" + dic_items[_item_name]["icon_png"];
+        _html += "' width='32' height='32'> ";
+        _html += _item_name;
         _html += "</center></td><td><center>";
         _html += _item_rarity;
         _html += "</center></td><td><center>";
         _html += _crafted_summoner_name;
         _html += "</center></td><td><center><b>";
-        //_html += (Math.round(_price/(10**18)*100)/100).toFixed(2);
         _html += (Math.round(_price*100)/100).toFixed(2);
         _html += "</b></center></td><td><center>";
         _html += "<button onclick='unlist_item(" + _item + ");'>";
@@ -159,6 +159,7 @@ async function update_userItems() {
         let _item = myListsAt[i];
         _items = await contract_mc_wss.methods.items(_item).call();
         let _item_type = _items[0];
+        let _item_name = dic_items_reverse[_item_type];
         //let _crafted_time = _items[1];
         let _crafted_summoner = _items[2];
         let _crafted_wallet = _items[3];
@@ -181,7 +182,7 @@ async function update_userItems() {
             let _score = await contract_msn_wss.methods.score(_item).call();
             _item_rarity = "<font color=#E85298>score: " + _score + "</font>";
         } else if (_item_type >= 201 && _item_type <= 212) {
-            _item_rarity = "<font color=green>common</font>";
+            _item_rarity = "<font color=black>common</font>";
         } else if (_item_type >= 213 && _item_type <= 224) {
             _item_rarity = "<font color=blue>uncommon</font>";
         } else if (_item_type >= 225 && _item_type <= 236) {
@@ -191,13 +192,13 @@ async function update_userItems() {
         }
         //console.log(_item, _item_type, _crafted_time, _crafted_summoner, _crafted_wallet);
         let _html = "";
-        _html += "<tr><td><center>"
+        _html += "<tr><td valign='middle' align='center'><center>"
         _html += _item;
-        _html += "</center></td><td><center>";
+        _html += "</center></td><td valign='middle' align='center'><center>";
         _html += "<img src='";
-        _html += "src/market_icon/" + array_item_png[_item_type];
-        _html += "' width='20' height='20'> ";
-        _html += array_item_name[_item_type];
+        _html += "src/" + dic_items[_item_name]["icon_png"];
+        _html += "' width='32' height='32'> ";
+        _html += _item_name;
         _html += "</center></td><td><center>";
         //_html += _crafted_time;
         _html += _item_rarity;
@@ -208,7 +209,7 @@ async function update_userItems() {
         //_html += "</center></td><td><center>";
         //_html += _wallet1 + "..." + _wallet2;
         _html += "</center></td><td><center>";
-        _html += "<input type='number' style='width:80px;' id='" + "input_price_" + _item + "'>";
+        _html += "<input type='number' style='width:70px;' id='" + "input_price_" + _item + "'>";
         _html += "&nbsp;&nbsp;";
         _html += "<button onclick='list_item(" + _item + ");'>";
         _html += "List";
@@ -254,7 +255,7 @@ async function list_item(_item) {
 
 //approve
 async function approve() {
-    await contract_mmt.methods.setApprovalForAll(contract_murasaki_item_market, true).send({from:wallet});
+    await contract_mc.methods.setApprovalForAll(contract_murasaki_item_market, true).send({from:wallet});
 }
 
 async function transfer_item() {

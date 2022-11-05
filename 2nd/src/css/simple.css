@@ -8,7 +8,9 @@
 
   /* Default (light) theme */
   --bg: #FDEFF5;
-  --accent-bg: #FADCE9;
+  //--accent-bg: #FADCE9;
+  --accent-bg: #facadf;
+  --accent-bg2: #fce1ec;
   --text: #3E3A39;
   --text-light: #585858;
   --border: #C9CACA;
@@ -287,8 +289,8 @@ nav a:last-child {
 
 /* Format the expanding box */
 details {
-  background: var(--accent-bg);
-  border: 1px solid var(--border);
+  background: var(--accent-bg2);
+  border: 0.5px solid var(--border);
   border-radius: 5px;
   margin-bottom: 1rem;
 }
@@ -528,3 +530,20 @@ pre code {
   margin: 0;
   padding: 0;
 }
+
+/*
+b {
+    color: #d81b60;
+}
+*/
+
+p {
+    text-align: justify;
+    vertical-align: middle;
+}
+
+img {
+    vertical-align: middle;
+}
+
+
