@@ -10867,7 +10867,8 @@ class Loading_overlap extends Phaser.Scene {
     preload() {
         this.load.spritesheet("nyui_loading", "src/png/nyui_moving.png", {frameWidth: 370, frameHeight: 320});
         this.load.spritesheet("nyui_loading2", "src/png/nyui_happy.png", {frameWidth: 370, frameHeight: 320});
-        this.load.spritesheet("ohana_loading", "src/particle/flowers.png", {frameWidth: 370, frameHeight: 320});
+        //this.load.spritesheet("ohana_loading", "src/particle/flowers.png", {frameWidth: 370, frameHeight: 320});
+        this.load.spritesheet("ohana_loading", "src/particle/stars.png", {frameWidth: 200, frameHeight: 191});
     }
     
     create() {
