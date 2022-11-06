@@ -82,12 +82,29 @@ contract ERC721 is IERC721 {
 
 //### 1st
 
-    Bot対策の深慮
+   *Bot対策の深慮
         他キャラプレイをどのように許可・制限するか
 
+   *summon時の演出の改善
+
+   *winner fluffyの演出の実装
+        お花つける？
+        パーティー帽子？
+        パーティクルを使用する？
+
+   *砂時計アイテムの再実装
+        絵の深慮
+            砂時計で良いか？
+        ステーキング量>0でのみ表示させる
+        あるいはステーキング量=0では非アクティブを表す絵とする
+            ステーキングしてアクティブ化したくなるような楽しい絵にしたい。
+        ステーキング量が多いほど豪華になり、
+            カウンターが進むと何かが溜まってゆく・成長してゆく絵を考える。
+
     Level<3でvotingできないことの表示
-    select itemはlevel 3から表示とする
-    summon時の演出の改善
+        むしろできるようにするか
+    
+ ok select itemはlevel 3から表示とする
 
    *マーケットページの改善
         情報取得のバッチ処理化
@@ -129,20 +146,6 @@ contract ERC721 is IERC721 {
      ok crafting中にリロードするとアイテム名が表示されないバグの修正
             summoner modeを先にcraftingに設定しているのでsetTextが読み込まれていない
             構造修正が多少必要
-
-   *winner fluffyの演出の実装
-        お花つける？
-        パーティー帽子？
-        パーティクルを使用する？
-
-   *砂時計アイテムの再実装
-        絵の深慮
-            砂時計で良いか？
-        ステーキング量>0でのみ表示させる
-        あるいはステーキング量=0では非アクティブを表す絵とする
-            ステーキングしてアクティブ化したくなるような楽しい絵にしたい。
-        ステーキング量が多いほど豪華になり、
-            カウンターが進むと何かが溜まってゆく・成長してゆく絵を考える。
 
     記念撮影用小物
         むらさきさん本体
@@ -7045,7 +7048,7 @@ function create(scene) {
         .setInteractive({useHandCursor: true})
         .on('pointerdown', () => {
             sound_button_on.play();
-            if (happy > 10 && satiety > 10) {
+            if ((happy > 10 && satiety > 10) || murasakisan.mode == "mining") {
                 contract_mining(summoner);
             } else {
                 let _text = "Too low Satiety or Happy...";
@@ -7078,7 +7081,7 @@ function create(scene) {
         .setInteractive({useHandCursor: true})
         .on('pointerdown', () => {
             sound_button_on.play();
-            if (happy > 10 && satiety > 10) {
+            if ((happy > 10 && satiety > 10) || murasakisan.mode == "farming") {
                 contract_farming(summoner);
             } else {
                 let _text = "Too low Satiety or Happy...";
