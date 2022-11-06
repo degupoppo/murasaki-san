@@ -7227,6 +7227,7 @@ function create(scene) {
     //new Button(10, 880, 'kill_summoner', scene, () => contract_burn(summoner));
     //burn name
     //new Button(10, 780, 'burn_name', scene, () => contract_burn_name(summoner));
+    /*
     new Button(1220, 600, "🌷", scene, () => {
         if (flag_debug == 0) {
             flag_debug = 1;
@@ -7235,6 +7236,7 @@ function create(scene) {
         }
         sound_system.play();
     });
+    */
 
     //curePetrification
     text_curePetrification = scene.add.text(640, 480, " >> Cure Petrification (Cost: Lv x 10 $ASTR) << ", {font: "28px Arial", fill: "#E62E8B", backgroundColor: "#FDEFF5"})
@@ -8371,6 +8373,11 @@ function update_checkButtonActivation(this_scene) {
         button_crafting.on('pointerover', () => button_crafting.setTexture("button_crafting_pointerover"));
         button_crafting.on('pointerout', () => button_crafting.setTexture("button_crafting_enable"));
         button_crafting.setInteractive();
+    }
+    if (local_level < 3) {
+        text_select_item.setVisible(false);
+    } else {
+        text_select_item.setVisible(true);
     }
 
     //level-up button triggered by exp change
