@@ -82,7 +82,12 @@ contract ERC721 is IERC721 {
 
 //### 1st
 
+    Bot対策の深慮
+        他キャラプレイをどのように許可・制限するか
+
     Level<3でvotingできないことの表示
+    select itemはlevel 3から表示とする
+    summon時の演出の改善
 
    *マーケットページの改善
         情報取得のバッチ処理化
@@ -5026,7 +5031,7 @@ function open_window_summon(scene) {
 function open_window_craft (scene) {
 
     //nyuinyui
-    if (typeof nyuinyi != "undefined") {
+    if (typeof nyuinyui != "undefined") {
         nyuinyui.setVisible(true);
         nyuinyui.reset();
     }
@@ -5052,7 +5057,7 @@ function open_window_craft (scene) {
     async function close_crafting_window(_item) {
         //nyuinyui
         if (_item >= 0) {
-            if (typeof nyuinyi != "undefined") {
+            if (typeof nyuinyui != "undefined") {
                 nyuinyui.setVisible(false);
                 nyuinyui.reset();
             }
@@ -5329,7 +5334,7 @@ function open_window_upgrade(scene) {
     function close_window_upgrade() {
         group_window_upgrade.destroy(true);
         //nyuinyui
-        if (typeof nyuinyi != "undefined") {
+        if (typeof nyuinyui != "undefined") {
             nyuinyui.setVisible(false);
             nyuinyui.reset();
         }
@@ -7670,7 +7675,6 @@ function update_systemMessage(this_scene) {
     if (count_sync == 0) {
         //text_system_message.setText(" --- Connecting to Astar Network --- ");
         text_system_message.setText("");
-        murasakisan.visible = true;
     } else if (summoner == 0) {
         text_system_message.setText(" --- You have not minted Murasaki-san yet --- ");
         text_summon.visible = true;
@@ -7684,6 +7688,7 @@ function update_systemMessage(this_scene) {
         text_system_message.setText("");
         text_summon.visible = false;
         text_curePetrification.visible = false;
+        murasakisan.visible = true;
     }
 }
 
@@ -10897,7 +10902,7 @@ class Loading_overlap extends Phaser.Scene {
             .on("pointerdown", () => {
                 this.flowerCount += 1;
                 this.flowerCount_present += 1;
-                this.nyui_text.setText(this.flowerCount + " flowers");
+                this.nyui_text.setText(this.flowerCount + " stars");
                 this.nyui_text.setVisible(true);
                 this.nyui_text2.setVisible(true);
                 let _ohana =this.add.image(
