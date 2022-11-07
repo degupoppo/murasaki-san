@@ -8238,8 +8238,10 @@ function update_checkModeChange(this_scene) {
             //summon_star(this_scene);
         }
         */
-        draw_firework(this_scene);
-        murasakisan.on_click();
+        if (count_sync >= 3) {
+            draw_firework(this_scene);
+            murasakisan.on_click();
+        }
         //update radarchart
         if (flag_radarchart == 1) {
             draw_radarchart(this_scene);
