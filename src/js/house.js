@@ -7396,7 +7396,8 @@ function create(scene) {
     text_kanban = scene.add.text(_x+2, _y+17, "", {font: "17px Arial", fill: "#000000"})
         .setOrigin(0.5)
 	    .setInteractive({useHandCursor: true})
-	    .on('pointerdown', () => {scene.rexUI.edit(text_kanban);}, scene)
+	    //.on('pointerdown', () => {scene.rexUI.edit(text_kanban);}, scene)
+	    .on('pointerdown', () => {game.scene.scenes[1].rexUI.edit(text_kanban);}, scene)
         .setDepth(9999+2);
     text_mint_name = scene.add.text(_x+80, _y-5, "[MINT NAME]", {font: "17px Arial", fill: "#000000"})
         .setInteractive({useHandCursor: true})
@@ -10857,6 +10858,16 @@ class Loading extends Phaser.Scene {
         console.log("scene: Loading");
         this.update_web3(); // start loading web3 without async
         preload(this);
+
+        //load plugin here
+        //this plugin can acces as game.scene.scenes[1].rexUI
+        //in other scenes
+        this.load.scenePlugin({
+            key: 'rexuiplugin',
+            url: "lib/rexuiplugin.min.js",
+            sceneKey: 'rexUI'
+        });
+
     }
     
     create() {
@@ -11039,12 +11050,16 @@ class Main extends Phaser.Scene {
     }
     preload(){
         //preload(this);
+        
+        /*
         this.load.scenePlugin({
             key: 'rexuiplugin',
             url: "lib/rexuiplugin.min.js",
             sceneKey: 'rexUI'
         });
-        this.load.plugin('rextexteditplugin', 'lib/rextexteditplugin.min.js', true);
+        */
+        
+        //this.load.plugin('rextexteditplugin', 'lib/rextexteditplugin.min.js', true);
     }
     create(){
         let _start = Date.now();
@@ -11056,21 +11071,23 @@ class Main extends Phaser.Scene {
     update(){
         //fade in
         if (flag_fadein == 0) {
-            this.cameras.main.fadeIn(600, 255, 255, 255, update(this));
+            //this.cameras.main.fadeIn(600, 255, 255, 255, update(this));
+            this.cameras.main.fadeIn(600, 255, 255, 255);
             flag_fadein = 1;
             
             //plugin: rexuiplugin
             //need for nameplate
             //need to load in Main secene,
             //need to load after fadein because of camera flashing
+            // -> to prevent flas, load in Loading scene
             /*
             this.load.scenePlugin({
                 key: 'rexuiplugin',
                 url: "lib/rexuiplugin.min.js",
                 sceneKey: 'rexUI'
             });
-            this.load.plugin('rextexteditplugin', 'lib/rextexteditplugin.min.js', true);
             */
+            //this.load.plugin('rextexteditplugin', 'lib/rextexteditplugin.min.js', true);
         }
         update(this);
     }
