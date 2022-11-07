@@ -87,6 +87,9 @@ contract ERC721 is IERC721 {
             3キャラでminer, farmer, crafterの分業
             coin, leafを1つのsummonerに送り続ける、など。
             transfer feeを設けることである程度抑制できそう
+            3キャラを独立して育てる分には問題ない
+            earnできるようになった場合は3倍だが、
+                プレイヤーが3人なのか1人なのか判別できない
         ひたすらmining/farmingしてcoin/leafを売り続けるプレイを良しとするかどうするか
             いずれ適正価格に落ち着くだろうか
             coin/leafを売れる機構を残す限り、こういうプレイヤーは必ず出現する
@@ -94,6 +97,9 @@ contract ERC721 is IERC721 {
             mint価格に対してcoin/leafの値段が下がり過ぎたら抑制される
             しかし、ここまで下がると市場で格安でcoin/leafを買う→craftingが効率的となりそう。
                 おそらく0.1 $ASTRとかになってしまうだろう。
+            buyback priceから算出する適正価格は0.03 $ASTR / 1000 coin/leaf
+            一種のNPCとして許容するか
+                稼げなくなったり、mint価格に比べてearnが低くなりすぎたら消えるだろう
         transferにfeeを設けるかどうか
             transfer自体には難しいので、activateの有無を実装するか
             marketやcraftなどで得たものは即座にactivateされる
@@ -101,12 +107,16 @@ contract ERC721 is IERC721 {
             UIの整備が大変。
             補正計算時のアイテム数カウントが大変
                 別にcount_of_type_activatedが必要になるか
-                
+        避けねばならないこと
+            のんびり遊んでくれている人のUXの阻害
+                低すぎるNFT価格
+                coin/leafの暴落
+                    → プラスに働くこともあるか？
+                mining/farmingする意義の消失
+                    暴落したmaterialを格安で買ってcraftingのみを行う方が効率が良い
+        mining/farmingを自力で行うことのインセンティブをもう少し付与する
+            
         
-   *summon時の演出の改善
-        花火
-        on_click()
-
    *winner fluffyの演出の実装
         お花つける？
         パーティー帽子？
@@ -121,12 +131,61 @@ contract ERC721 is IERC721 {
         ステーキング量が多いほど豪華になり、
             カウンターが進むと何かが溜まってゆく・成長してゆく絵を考える。
 
-    Level<3でvotingできないことの表示
-        むしろできるようにするか
+    wallet infoコントラの実装
+        web3精神を表すため
+        summoner infoとは異なり、情報はある程度吟味してもよいか
+        システムがほぼ完成してからで良いだろうか
+
+    実績システムの検討
+        一旦ボツにしたが、称号や勲章の様にあっても良いだろうか。
+        実績によって増える小さななにかを考える。
+            ちょうちょ？
+            お花？
+            小さな宝石？
+            壁にくっつくなにか？
+        これを見ることでゲームの進捗がすぐわかるように。
+            
+    実績コントラクトの設計
+        実績達成をtrue/falseで判定するfunction
+            1つの実績につき1 function
+        達成済み実績をtrue/falseで記憶するstorage
+            achievement uint32[256]のようなarray
+        新たに達成した実績の数をuint32でreturnするfunction
+            もしくはarrayでreturnする
+            達成時は項目を表示させたいため
+        実績判定のタイミングをどうするか
+            mining/farmin時などにいちいち行っていたらgas代かさむか
+            level-up時にまとめて行うか
+        実績案
+            coin/material:max 500,000
+                gain 1,000
+                gain 10,000
+                gain 100,000...
+            craft:0-48
+                4,8,12,16,20,24
+                craft 10
+                craft 30
+                craft 100...
+            heart
+                received 10
+                received 30
+                received 100...
+            level-up:1-20
+                3,6,9,12,15,18
+
+ ok summon時の演出の改善
+        花火
+        on_click()
+
+ ok Level<3でvotingできないことの表示
+        →むしろできるようにするか
+        Level制限撤廃
     
  ok select itemはlevel 3から表示とする
 
    *マーケットページの改善
+        → 実際の実装はdapps stakingの目処が立った後、かつローンチ後1ヶ月程度
+            よって、現時点で公開はできない。
         情報取得のバッチ処理化
        *バイバックシステムの組み込み
             市場で売りに出すかバイバックするかを選択できるように
@@ -227,11 +286,6 @@ contract ERC721 is IERC721 {
         条件分岐が複雑になりすぎている
         特に移動とアニメーション周りの可読性が悪い
         改善する
-
-    wallet infoコントラの実装
-        web3精神を表すため
-        summoner infoとは異なり、情報はある程度吟味してもよいか
-        システムがほぼ完成してからで良いだろうか
 
     NFT絵の表示の実装
         walletからnftの取得
@@ -8177,11 +8231,15 @@ function update_checkModeChange(this_scene) {
     //level up
     } else if (local_level > previous_local_level) {
         //fireworks
+        /*
         if (previous_local_level > 0) {
             draw_firework(this_scene);
             murasakisan.on_click();
             //summon_star(this_scene);
         }
+        */
+        draw_firework(this_scene);
+        murasakisan.on_click();
         //update radarchart
         if (flag_radarchart == 1) {
             draw_radarchart(this_scene);

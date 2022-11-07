@@ -5896,7 +5896,7 @@ contract Fluffy_Festival is Ownable {
     
     //global variants
     uint32 public ELECTION_PERIOD_BLOCK = 7200; //1 days, 12sec/block
-    uint32 public LEVEL_REQUIRED = 3;
+    uint32 public LEVEL_REQUIRED = 1;
     uint32 public SATIETY_REQUIRED = 10;
     uint32 public HAPPY_REQUIRED = 10;
     uint32 public ELECTION_INTERVAL_BLOCK = 216000; //30 days, 12sec/block
