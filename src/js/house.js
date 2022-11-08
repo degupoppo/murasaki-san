@@ -82,6 +82,32 @@ contract ERC721 is IERC721 {
 
 //### 1st
 
+    イベント監視システムを構築する
+        眺めるようと、bot監視ように。
+        event垂れ流しを一般公開するかどうかは難しいところ。
+            テキストのストリーミング公開が難しそう
+            アクティビティが如実にわかるので冷めそうであるし
+
+ ok 存在しないsummoner指定時のバグ修正
+        isActive = falseのパターンと
+        まだsummonされていないパターンとある
+        また、petrifiedの動作もうまくいくか確認する
+
+    presentboxを開いた時に少しExpを得られるようにするか
+        ちょっとだけ嬉しいように。+50ぐらい。
+        1日のEXP量が+1000～2000, 平均+1500ぐらい。
+        +50で3%, +100で6%程度。
+        +50程度が妥当か。
+        presentboxは...
+            staking: 1/7d
+            mail: 2/5d
+            craft: 1/7d
+            festival: 1/30d
+            = 4/7d, 0.5/dぐらい
+        こまめに受け取れば、平均して+1-2% EXP効率がupする程度。
+        +100にすると、+3% up程度。
+        mpに記録して可変とする。
+
    *Bot対策の深慮
         多キャラプレイをどのように許可・制限するか
             3キャラでminer, farmer, crafterの分業
@@ -115,8 +141,7 @@ contract ERC721 is IERC721 {
                 mining/farmingする意義の消失
                     暴落したmaterialを格安で買ってcraftingのみを行う方が効率が良い
         mining/farmingを自力で行うことのインセンティブをもう少し付与する
-            
-        
+
    *winner fluffyの演出の実装
         お花つける？
         パーティー帽子？
@@ -1001,9 +1026,18 @@ async function contract_update_static_status(_summoner) {
         return 0;
     }
     
-    //call info from chain
-    //let _all_static_status = await contract_info.methods.allStaticStatus(_summoner).call();
-    let _all_static_status = await contract_info_wss.methods.allStaticStatus(_summoner).call();
+    //call info from chain, try&catch
+    let _all_static_status = 0;
+    try {
+        //let _all_static_status = await contract_info.methods.allStaticStatus(_summoner).call();
+        _all_static_status = await contract_info_wss.methods.allStaticStatus(_summoner).call();
+    } catch(error) {
+        console.log("***ERROR***: update_static_status");
+    }
+    if (_all_static_status == 0) {
+        local_isActive = false;
+        return 0;
+    }
 
     //class, owner, name
     local_class =       Number(_all_static_status[0]);
@@ -1064,7 +1098,15 @@ async function contract_update_dynamic_status(_summoner) {
     let _res;
 
     //call item
-    let _myListsAt_withItemType = await get_myListsAt_withItemType(local_owner);
+    let _myListsAt_withItemType = 0;
+    try {
+        _myListsAt_withItemType = await get_myListsAt_withItemType(local_owner);
+    } catch(error) {
+        console.log("***ERROR***: update_dynamic_status, call item");
+    }
+    if (_myListsAt_withItemType == 0) {
+        return 0;
+    }
 
     //generate and update local item info
     local_myListsAt_withItemType = _myListsAt_withItemType;
@@ -1098,8 +1140,16 @@ async function contract_update_dynamic_status(_summoner) {
     }
 
     //call dynamic status from chain
-    //let _all_dynamic_status = await contract_info.methods.allDynamicStatus(_summoner).call();
-    let _all_dynamic_status = await contract_info_wss.methods.allDynamicStatus(_summoner).call();
+    let _all_dynamic_status = 0;
+    try {
+        //let _all_dynamic_status = await contract_info.methods.allDynamicStatus(_summoner).call();
+        _all_dynamic_status = await contract_info_wss.methods.allDynamicStatus(_summoner).call();
+    } catch(error) {
+        console.log("***ERROR***: update_dynamic_status, call status");
+    }
+    if (_all_dynamic_status == 0) {
+        return 0;
+    }
     
     //update local status
 
@@ -1392,32 +1442,40 @@ async function contract_update_festival_info(_summoner) {
         return 0;
     }
     //call
-    //let _festival_info = await contract_ff.methods.get_info(_summoner).call();    
-    let _festival_info = await contract_ff_wss.methods.get_info(_summoner).call();    
-   //update local
-   local_ff_each_voting_count[201] =  Number(_festival_info[1]);
-   local_ff_each_voting_count[202] =  Number(_festival_info[2]);
-   local_ff_each_voting_count[203] =  Number(_festival_info[3]);
-   local_ff_each_voting_count[204] =  Number(_festival_info[4]);
-   local_ff_each_voting_count[205] =  Number(_festival_info[5]);
-   local_ff_each_voting_count[206] =  Number(_festival_info[6]);
-   local_ff_each_voting_count[207] =  Number(_festival_info[7]);
-   local_ff_each_voting_count[208] =  Number(_festival_info[8]);
-   local_ff_each_voting_count[209] =  Number(_festival_info[9]);
-   local_ff_each_voting_count[210] = Number(_festival_info[10]);
-   local_ff_each_voting_count[211] = Number(_festival_info[11]);
-   local_ff_each_voting_count[212] = Number(_festival_info[12]);
-   local_ff_next_festival_block =   Number(_festival_info[13]);
-   local_ff_inSession =             Number(_festival_info[14]);
-   local_ff_isVotable =             Number(_festival_info[15]);
-   local_ff_last_voting_block =     Number(_festival_info[16]);
-   local_ff_last_voting_type =      Number(_festival_info[17]);
-   local_ff_subject_now =           Number(_festival_info[18]);
-   local_ff_subject_start_block =   Number(_festival_info[19]);
-   local_ff_subject_end_block =     Number(_festival_info[20]);
-   local_ff_isEndable =             Number(_festival_info[21]);
-   local_ff_elected_type =          Number(_festival_info[22]);
-   local_ff_previous_elected_type = Number(_festival_info[23]);
+    let _festival_info = 0;
+    try {
+        //let _festival_info = await contract_ff.methods.get_info(_summoner).call();    
+        _festival_info = await contract_ff_wss.methods.get_info(_summoner).call();    
+    } catch(error) {
+        console.log("***ERROR***: update_festival_info");
+    }
+    if (_festival_info == 0) {
+        return 0;
+    }
+    //update local
+    local_ff_each_voting_count[201] =  Number(_festival_info[1]);
+    local_ff_each_voting_count[202] =  Number(_festival_info[2]);
+    local_ff_each_voting_count[203] =  Number(_festival_info[3]);
+    local_ff_each_voting_count[204] =  Number(_festival_info[4]);
+    local_ff_each_voting_count[205] =  Number(_festival_info[5]);
+    local_ff_each_voting_count[206] =  Number(_festival_info[6]);
+    local_ff_each_voting_count[207] =  Number(_festival_info[7]);
+    local_ff_each_voting_count[208] =  Number(_festival_info[8]);
+    local_ff_each_voting_count[209] =  Number(_festival_info[9]);
+    local_ff_each_voting_count[210] = Number(_festival_info[10]);
+    local_ff_each_voting_count[211] = Number(_festival_info[11]);
+    local_ff_each_voting_count[212] = Number(_festival_info[12]);
+    local_ff_next_festival_block =   Number(_festival_info[13]);
+    local_ff_inSession =             Number(_festival_info[14]);
+    local_ff_isVotable =             Number(_festival_info[15]);
+    local_ff_last_voting_block =     Number(_festival_info[16]);
+    local_ff_last_voting_type =      Number(_festival_info[17]);
+    local_ff_subject_now =           Number(_festival_info[18]);
+    local_ff_subject_start_block =   Number(_festival_info[19]);
+    local_ff_subject_end_block =     Number(_festival_info[20]);
+    local_ff_isEndable =             Number(_festival_info[21]);
+    local_ff_elected_type =          Number(_festival_info[22]);
+    local_ff_previous_elected_type = Number(_festival_info[23]);
 }
 
 //---call
@@ -7752,10 +7810,11 @@ function protection_code(this_scene) {
 //---system message
 function update_systemMessage(this_scene) {
     //if (summoner == -1) {
-    if (count_sync == 0) {
-        //text_system_message.setText(" --- Connecting to Astar Network --- ");
-        text_system_message.setText("");
-    } else if (summoner == 0) {
+    //if (count_sync == 0) {
+    //    //text_system_message.setText(" --- Connecting to Astar Network --- ");
+    //    text_system_message.setText("");
+    //} else if (summoner == 0) {
+    if (summoner == 0) {
         text_system_message.setText(" --- You have not minted Murasaki-san yet --- ");
         text_summon.visible = true;
         murasakisan.visible = false;
@@ -8238,8 +8297,10 @@ function update_checkModeChange(this_scene) {
             //summon_star(this_scene);
         }
         */
-        draw_firework(this_scene);
-        murasakisan.on_click();
+        if (count_sync >= 3) {
+            draw_firework(this_scene);
+            murasakisan.on_click();
+        }
         //update radarchart
         if (flag_radarchart == 1) {
             draw_radarchart(this_scene);

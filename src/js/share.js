@@ -69,7 +69,7 @@ async function init_web3(){
 
     //storage
     contract_murasaki_parameter = 
-        "0x48A0e9B13A4Fd78b9e4F85D1B7f1Fc7969A16eAe";
+        "0xCf97C03186B8AdFAf651c7714B2Cc01BB6F377cd";
     contract_murasaki_storage = 
         "0x05d8D02a6C48d89Efa7620d71De21661019ce8da";
     contract_murasaki_storage_score = 
@@ -87,7 +87,7 @@ async function init_web3(){
     contract_murasaki_function_mining_and_farming = 
         "0x9398C16849C6c2A294ef2C4dC95F5b81f32731E4";
     contract_murasaki_function_crafting = 
-        "0xAc33D2A22A88F7e87d8a860b1cE24405c3599844";
+        "0x85F6f922cd0F53a1424351Bb9e1fa939D6019A43";
     contract_murasaki_function_crafting_codex = 
         "0x86Fdd60c366FE92707586eFf62a735F79EF93F1a";
     contract_murasaki_function_name = 

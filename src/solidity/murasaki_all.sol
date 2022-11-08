@@ -1606,7 +1606,7 @@ contract Murasaki_Craft is ERC721, Ownable{
 //===Storage==================================================================================================================
 
 
-//---Murasaki_Parameter
+//---*Murasaki_Parameter
 
 
 contract Murasaki_Parameter is Ownable {
@@ -1631,6 +1631,7 @@ contract Murasaki_Parameter is Ownable {
     uint32 public STAKING_REWARD_SEC = 2592000; //30 days
     uint32 public ELECTED_FLUFFY_TYPE = 0;
     string public DEVELOPER_SUMMONER_NAME = "*Fluffy Kingdom*";
+    uint32 public EXP_FROM_PRESENTBOX = 50;
 
     //admin, set global variants
     function _set_isPaused(bool _bool) external {
@@ -1660,6 +1661,10 @@ contract Murasaki_Parameter is Ownable {
     function _set_developer_summoner_name(string memory _string) external {
         require(permitted_address[msg.sender] == true);
         DEVELOPER_SUMMONER_NAME = _string;
+    }
+    function _set_exp_from_presentbox(uint32 _value) external {
+        require(permitted_address[msg.sender] == true);
+        EXP_FROM_PRESENTBOX = _value;
     }
 }
 
@@ -3085,7 +3090,7 @@ contract Murasaki_Function_Mining_and_Farming is Ownable {
 }
 
 
-//---Crafting
+//---*Crafting
 
 
 contract Murasaki_Function_Crafting is Ownable {
@@ -3474,6 +3479,16 @@ contract Murasaki_Function_Crafting is Ownable {
         //mint precious
         //need: summoner_to, summoner_from, to_wallet
         _mint_precious(_summoner, crafted_summoner, msg.sender);
+        //add some exp
+        Murasaki_Parameter mp = Murasaki_Parameter(mfs.murasaki_parameter_address());
+        uint32 _exp_add = mp.EXP_FROM_PRESENTBOX();
+        Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
+        uint32 _exp = ms.exp(_summoner) + _exp_add;
+        ms.set_exp(_summoner, _exp);
+        //update score
+        Murasaki_Storage_Score mss = Murasaki_Storage_Score(mfs.murasaki_storage_score_address());
+        uint32 _total_exp_gained = mss.total_exp_gained(_summoner) + _exp_add;
+        mss.set_total_exp_gained(_summoner, _total_exp_gained);
     }
     //mint precious
     event Precious(uint32 indexed _summoner_to, uint32 _summoner_from, uint32 _item_type);
