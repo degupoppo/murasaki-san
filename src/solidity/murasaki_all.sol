@@ -1606,7 +1606,7 @@ contract Murasaki_Craft is ERC721, Ownable{
 //===Storage==================================================================================================================
 
 
-//---*Murasaki_Parameter
+//---Murasaki_Parameter
 
 
 contract Murasaki_Parameter is Ownable {
@@ -2001,7 +2001,7 @@ contract Murasaki_Storage_Nui is Ownable {
 //===Function==================================================================================================================
 
 
-//---Share
+//---*Share
 
 
 contract Murasaki_Function_Share is Ownable {
@@ -2148,6 +2148,7 @@ contract Murasaki_Function_Share is Ownable {
         Murasaki_Parameter mp = Murasaki_Parameter(murasaki_parameter_address);
         uint32[256] memory _balance_of_type = get_balance_of_type_array_from_summoner(_summoner);
         uint32 _precious_score = 0;
+        //fluffy
         uint32 _elected_precious_type = mp.ELECTED_FLUFFY_TYPE();
         for (uint i = 201; i <= 212; i++) {
             if (_balance_of_type[i+24] > 0) {
@@ -2169,6 +2170,10 @@ contract Murasaki_Function_Share is Ownable {
                     _precious_score += _balance_of_type[i] * 3;
                 }
             }
+        }
+        //nui
+        if (_balance_of_type[197] > 0) {
+            _precious_score += _balance_of_type[197] * 3*64;
         }
         //level cap, 800/Lv20 = 40/Lv
         uint32 _lv = ms.level(_summoner);
@@ -2296,6 +2301,7 @@ contract Murasaki_Function_Share is Ownable {
         return _staker;
     }
     
+    /*
     //get luck addition by dapps staking
     function get_luck_by_staking(uint32 _summoner) public view returns (uint32) {
         address _owner = get_owner(_summoner);
@@ -2335,6 +2341,7 @@ contract Murasaki_Function_Share is Ownable {
         uint32 _luck_add = _luck_addMin + (_luck_addMax - _luck_addMin) * (_level - 1) / 19;
         return _luck_add;
     }
+    */
     
     //get speed_of_dappsStaking
     function get_speed_of_dappsStaking(uint32 _summoner) external view returns (uint32) {
@@ -3090,7 +3097,7 @@ contract Murasaki_Function_Mining_and_Farming is Ownable {
 }
 
 
-//---*Crafting
+//---Crafting
 
 
 contract Murasaki_Function_Crafting is Ownable {
@@ -4202,7 +4209,7 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
         //196
         "Cat Mail",
         //197
-        "Fluffy murasaki-san",
+        "Fluffy Doll",
         //198
         "",
         //199

@@ -82,31 +82,46 @@ contract ERC721 is IERC721 {
 
 //### 1st
 
+    Fluffy DollのLUK補正の実装
+        +0%だった。
+        LUK補正　＋　Exp補正　にするか。
+        EXP補正+3%はLUK+3.00相当で強力だが、
+            クラフトによってLUKが下がるのはあまりよろしくないだろう。
+        fluffy dollはfluffy x27個分
+        1ヶ月で10-15個とすると、2ヶ月で作成可能
+        また、市場で買えばもっと早めに作成可能
+            流石に安すぎるだろうか。
+
+    Fluffy FestivalコントラのEvent実装
+        全く作っていなかった
+        start_voting
+        voting
+        end_voting
+
     イベント監視システムを構築する
         眺めるようと、bot監視ように。
         event垂れ流しを一般公開するかどうかは難しいところ。
             テキストのストリーミング公開が難しそう
             アクティビティが如実にわかるので冷めそうであるし
+        監視対象のコントラクト
+            mfsl
+            mffg
+            mfmf
+            mfc
+            mfn
+            mml
+            wd
+            (ff)
 
- ok 存在しないsummoner指定時のバグ修正
-        isActive = falseのパターンと
-        まだsummonされていないパターンとある
-        また、petrifiedの動作もうまくいくか確認する
-
-    presentboxを開いた時に少しExpを得られるようにするか
-        ちょっとだけ嬉しいように。+50ぐらい。
-        1日のEXP量が+1000～2000, 平均+1500ぐらい。
-        +50で3%, +100で6%程度。
-        +50程度が妥当か。
-        presentboxは...
-            staking: 1/7d
-            mail: 2/5d
-            craft: 1/7d
-            festival: 1/30d
-            = 4/7d, 0.5/dぐらい
-        こまめに受け取れば、平均して+1-2% EXP効率がupする程度。
-        +100にすると、+3% up程度。
-        mpに記録して可変とする。
+    複アカ対策の意味論と深慮
+        インフレを低く抑え、時間をリソースの中心に据えているため、
+            複アカによる時間リソースの倍増は単純に有利になる。
+        植民地キャラを使い潰してメインキャラの効率を上げるプレイは誰でも思いつくし、
+            なんとかしてやりたい気持ちもよく分かる。
+        費用対効果がプラスならば、100キャラ並行などのbottingも可能となる。
+            これは基準を決めて手動でpetrifyし続けることとする。
+        規制を強くすると隔絶された個人プレイとなってしまい、相互作用が阻害される。
+            規制をあまり設けないと、
 
    *Bot対策の深慮
         多キャラプレイをどのように許可・制限するか
@@ -141,6 +156,12 @@ contract ERC721 is IERC721 {
                 mining/farmingする意義の消失
                     暴落したmaterialを格安で買ってcraftingのみを行う方が効率が良い
         mining/farmingを自力で行うことのインセンティブをもう少し付与する
+        総じて複アカプレイに対する耐性が低すぎるだろうか
+            fluffyも2～3キャラで都合つければ効率が良い
+            farming/miningも2-3キャラで分散すれば有利となる
+            この複アカプレイをどこまで許可するか、どの様に制限するか。
+            やりすぎるとまともなユーザー間の相互作用まで阻害される。
+            放置するとbotの温床となる。
 
    *winner fluffyの演出の実装
         お花つける？
@@ -197,6 +218,27 @@ contract ERC721 is IERC721 {
                 received 100...
             level-up:1-20
                 3,6,9,12,15,18
+
+ ok 存在しないsummoner指定時のバグ修正
+        isActive = falseのパターンと
+        まだsummonされていないパターンとある
+        また、petrifiedの動作もうまくいくか確認する
+
+ ok presentboxを開いた時に少しExpを得られるようにするか
+        ちょっとだけ嬉しいように。+50ぐらい。
+        1日のEXP量が+1000～2000, 平均+1500ぐらい。
+        +50で3%, +100で6%程度。
+        +50程度が妥当か。
+        presentboxは...
+            staking: 1/7d
+            mail: 2/5d
+            craft: 1/7d
+            festival: 1/30d
+            = 4/7d, 0.5/dぐらい
+        こまめに受け取れば、平均して+1-2% EXP効率がupする程度。
+        +100にすると、+3% up程度。
+        mpに記録して可変とする。
+            ひとまず+50で運用する
 
  ok summon時の演出の改善
         花火
@@ -5882,7 +5924,13 @@ function draw_glitter(scene, _item) {
     };
     const particles = scene.add.particles('par_glitter')
         .setDepth(9999+10);
-    const emitter = particles.createEmitter(emitterConfig);
+    scene.time.addEvent({
+        delay: Math.random() * 1000,
+        callback: () => {
+            const emitter = particles.createEmitter(emitterConfig);
+        }
+    });
+    //const emitter = particles.createEmitter(emitterConfig);
     /*
     scene.time.addEvent({
         delay: _lifespan+300000,
@@ -8574,6 +8622,10 @@ function update_checkItem(this_scene) {
     ) {
         local_items_flag[_item_id] = true;
         group_kanban.setVisible(true);
+        //uncommon
+        if (local_items[_item_id+64] != 0) {
+            draw_glitter(this_scene, item_kanban);
+        }
     } else if (
         local_items[_item_id] == 0 
         && local_items[_item_id+64] == 0 
@@ -8618,6 +8670,10 @@ function update_checkItem(this_scene) {
             "mining"
         ).setScale(0.12);
         group_update.add(mr_astar);
+        //uncommon
+        if (local_items[_item_id+64] != 0) {
+            draw_glitter(this_scene, mr_astar);
+        }
     } else if (
         local_items[_item_id] == 0 
         && local_items[_item_id+64] == 0 
@@ -8638,6 +8694,10 @@ function update_checkItem(this_scene) {
         local_items_flag[_item_id] = true;
         dice = new Dice(this_scene, 400, 600).setScale(0.3).setOrigin(0.5);
         group_update.add(dice);
+        //uncommon
+        if (local_items[_item_id+64] != 0) {
+            draw_glitter(this_scene, dice);
+        }
     } else if (
         local_items[_item_id] == 0 
         && local_items[_item_id+64] == 0 
@@ -8692,6 +8752,10 @@ function update_checkItem(this_scene) {
                 item_hat_helmet.setAngle(0);
             }
         }
+        //uncommon
+        if (local_items[_item_id+64] != 0) {
+            draw_glitter(this_scene, item_hat_helmet);
+        }
     } else if (
         local_items[_item_id] == 0 
         && local_items[_item_id+64] == 0 
@@ -8726,7 +8790,10 @@ function update_checkItem(this_scene) {
             }
         });
         item_crown.depth = 9999;
-        //console.log(item_crown.anims.is);
+        //uncommon
+        if (local_items[_item_id+64] != 0) {
+            draw_glitter(this_scene, item_crown);
+        }
     } else if (
         local_items[_item_id] == 0 
         && local_items[_item_id+64] == 0 
@@ -8747,6 +8814,10 @@ function update_checkItem(this_scene) {
         local_items_flag[_item_id] = true;
         item_ribbon = this_scene.add.sprite(1037, 401, "item_ribbon").setScale(0.15).setOrigin(0.5);
         item_ribbon.depth = 9999;
+        //uncommon
+        if (local_items[_item_id+64] != 0) {
+            draw_glitter(this_scene, item_ribbon);
+        }
     } else if (
         local_items[_item_id] == 0 
         && local_items[_item_id+64] == 0 
@@ -8784,6 +8855,10 @@ function update_checkItem(this_scene) {
                     item_window.setTexture("item_window_night");
                 }
             });
+        //uncommon
+        if (local_items[_item_id+64] != 0) {
+            draw_glitter(this_scene, item_window);
+        }
     } else if (
         local_items[_item_id] == 0 
         && local_items[_item_id+64] == 0 
@@ -8833,6 +8908,10 @@ function update_checkItem(this_scene) {
                 item_hat_knit.y = _y;
             }
         });
+        //uncommon
+        if (local_items[_item_id+64] != 0) {
+            draw_glitter(this_scene, item_hat_knit);
+        }
     } else if (
         local_items[_item_id] == 0 
         && local_items[_item_id+64] == 0 
@@ -8894,6 +8973,10 @@ function update_checkItem(this_scene) {
                                 item_frame_inside.setTexture("pic_nft");
                             });
                     });
+                //uncommon
+                if (local_items[_item_id+64] != 0) {
+                    draw_glitter(this_scene, item_frame);
+                }
             });
     } else if (
         local_items[_item_id] == 0 
@@ -9040,6 +9123,10 @@ function update_checkItem(this_scene) {
                 }
             })
             .on('pointerdown', () => music() );
+        //uncommon
+        if (local_items[_item_id+64] != 0) {
+            draw_glitter(this_scene, item_musicbox);
+        }
     } else if (
         local_items[_item_id] == 0 
         && local_items[_item_id+64] == 0 
@@ -9090,6 +9177,10 @@ function update_checkItem(this_scene) {
                 item_hat_mugiwara.setAngle(0);
             }
         }
+        //uncommon
+        if (local_items[_item_id+64] != 0) {
+            draw_glitter(this_scene, item_hat_mugiwara);
+        }
     } else if (
         local_items[_item_id] == 0 
         && local_items[_item_id+64] == 0 
@@ -9117,6 +9208,10 @@ function update_checkItem(this_scene) {
             "farming"
         ).setScale(0.12);
         group_update.add(ms_ether);
+        //uncommon
+        if (local_items[_item_id+64] != 0) {
+            draw_glitter(this_scene, ms_ether);
+        }
     } else if (
         local_items[_item_id] == 0 
         && local_items[_item_id+64] == 0 
@@ -9139,6 +9234,10 @@ function update_checkItem(this_scene) {
         //cushion
         item_cushion = this_scene.add.sprite(90, 620, "item_cushion").setScale(0.25).setOrigin(0.5);
         item_cushion.depth = item_cushion.y - 50;
+        //uncommon
+        if (local_items[_item_id+64] != 0) {
+            draw_glitter(this_scene, item_cushion);
+        }
         
         //text_sending_interval
         text_sending_interval = this_scene.add.text(70, 640, "00h:00m", {font: "15px Arial", fill: "#ffffff"})
@@ -9247,6 +9346,10 @@ function update_checkItem(this_scene) {
                     murasakisan.try_attenting(item_fortune_statue.x, item_fortune_statue.y);
                 }
             });
+        //uncommon
+        if (local_items[_item_id+64] != 0) {
+            draw_glitter(this_scene, item_fortune_statue);
+        }
     } else if (
         local_items[_item_id] == 0 
         && local_items[_item_id+64] == 0 
@@ -9303,6 +9406,10 @@ function update_checkItem(this_scene) {
                     murasakisan.try_attenting(item_asnya.x, item_asnya.y);
                 }
             });
+        //uncommon
+        if (local_items[_item_id+64] != 0) {
+            draw_glitter(this_scene, item_asnya);
+        }
     } else if (
         local_items[_item_id] == 0 
         && local_items[_item_id+64] == 0 
@@ -9327,6 +9434,10 @@ function update_checkItem(this_scene) {
             .setScale(1.7)
             .setOrigin(0.5)
             .setDepth(2);
+        //uncommon
+        if (local_items[_item_id+64] != 0) {
+            draw_glitter(this_scene, item_rugg);
+        }
     } else if (
         local_items[_item_id] == 0 
         && local_items[_item_id+64] == 0 
@@ -9374,6 +9485,10 @@ function update_checkItem(this_scene) {
                 let _pos = [item_vase.x, item_vase.y];
                 localStorage.setItem(_pos_local, JSON.stringify(_pos));
             });
+        //uncommon
+        if (local_items[_item_id+64] != 0) {
+            draw_glitter(this_scene, item_vase);
+        }
     } else if (
         local_items[_item_id] == 0 
         && local_items[_item_id+64] == 0 
@@ -9504,6 +9619,10 @@ function update_checkItem(this_scene) {
             });
         flag_radarchart = 1;
         draw_radarchart(this_scene);
+        //uncommon
+        if (local_items[_item_id+64] != 0) {
+            draw_glitter(this_scene, item_pad);
+        }
     } else if (
         local_items[_item_id] == 0 
         && local_items[_item_id+64] == 0 
@@ -9606,6 +9725,10 @@ function update_checkItem(this_scene) {
                 item_hat_mortarboard.setAngle(0);
             }
         }
+        //uncommon
+        if (local_items[_item_id+64] != 0) {
+            draw_glitter(this_scene, item_hat_mortarboard);
+        }
     } else if (
         local_items[_item_id] == 0 
         && local_items[_item_id+64] == 0 
@@ -9633,6 +9756,10 @@ function update_checkItem(this_scene) {
             "crafting"
         ).setScale(0.11);
         group_update.add(dr_bitco);
+        //uncommon
+        if (local_items[_item_id+64] != 0) {
+            draw_glitter(this_scene, dr_bitco);
+        }
     } else if (
         local_items[_item_id] == 0 
         && local_items[_item_id+64] == 0 
@@ -9691,6 +9818,10 @@ function update_checkItem(this_scene) {
                     murasakisan.try_attenting(item_violin.x, item_violin.y);
                 }
             });
+        //uncommon
+        if (local_items[_item_id+64] != 0) {
+            draw_glitter(this_scene, item_violin);
+        }
     } else if (
         local_items[_item_id] == 0 
         && local_items[_item_id+64] == 0 
@@ -9759,6 +9890,10 @@ function update_checkItem(this_scene) {
                     item_piano.setTexture("item_piano");
                 }
             });
+        //uncommon
+        if (local_items[_item_id+64] != 0) {
+            draw_glitter(this_scene, item_piano);
+        }
     } else if (
         local_items[_item_id] == 0 
         && local_items[_item_id+64] == 0 
@@ -9865,6 +10000,10 @@ function update_checkItem(this_scene) {
             }
         });
         item_switch.depth = item_switch.y;
+        //uncommon
+        if (local_items[_item_id+64] != 0) {
+            draw_glitter(this_scene, item_switch);
+        }
     } else if (
         local_items[_item_id] == 0 
         && local_items[_item_id+64] == 0 
@@ -9889,6 +10028,10 @@ function update_checkItem(this_scene) {
             .setScale(0.4)
             .setOrigin(0.5)
             .setDepth(2);
+        //uncommon
+        if (local_items[_item_id+64] != 0) {
+            draw_glitter(this_scene, item_lantern);
+        }
     } else if (
         local_items[_item_id] == 0 
         && local_items[_item_id+64] == 0 
@@ -9962,6 +10105,10 @@ function update_checkItem(this_scene) {
                     group_tokenBall.destroy(true);
                 }
             });
+        //uncommon
+        if (local_items[_item_id+64] != 0) {
+            draw_glitter(this_scene, item_tokenChest);
+        }
     } else if (
         local_items[_item_id] == 0 
         && local_items[_item_id+64] == 0 
@@ -10025,6 +10172,10 @@ function update_checkItem(this_scene) {
         //item_newsbunner = this_scene.add.image(640, 485, "item_newsbunner")
         //    .setDepth(900).setAlpha(0.8);
         */
+        //uncommon
+        if (local_items[_item_id+64] != 0) {
+            draw_glitter(this_scene, item_newspaper);
+        }
     } else if (
         local_items[_item_id] == 0 
         && local_items[_item_id+64] == 0 
@@ -10114,6 +10265,10 @@ function update_checkItem(this_scene) {
                 let _pos = [item_book.x, item_book.y];
                 localStorage.setItem(_pos_local, JSON.stringify(_pos));
             });
+        //uncommon
+        if (local_items[_item_id+64] != 0) {
+            draw_glitter(this_scene, item_book);
+        }
     } else if (
         local_items[_item_id] == 0 
         && local_items[_item_id+64] == 0 
@@ -10183,6 +10338,10 @@ function update_checkItem(this_scene) {
                     murasakisan.try_attenting(item_fishbowl.x, item_fishbowl.y);
                 }
             });
+        //uncommon
+        if (local_items[_item_id+64] != 0) {
+            draw_glitter(this_scene, item_fishbowl);
+        }
     } else if (
         local_items[_item_id] == 0 
         && local_items[_item_id+64] == 0 
@@ -10230,6 +10389,10 @@ function update_checkItem(this_scene) {
                     sound_clock.play();
                 }, 4000);
             });
+        //uncommon
+        if (local_items[_item_id+64] != 0) {
+            draw_glitter(this_scene, item_clock);
+        }
     } else if (
         local_items[_item_id] == 0 
         && local_items[_item_id+64] == 0 
