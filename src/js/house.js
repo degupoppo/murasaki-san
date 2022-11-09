@@ -82,6 +82,24 @@ contract ERC721 is IERC721 {
 
 //### 1st
 
+    walletの状態を反映するギミックをもう少し実装する
+        所持NFT：photo frame内に表示される
+        所持token：tokenChestから出てくる
+        nonce：nonceが多いほど変化する何かを考える
+            wall stickerはやはりnonceを参照させるか。
+
+    細かなUIの修正
+        working textがiPad OFFで表示されることの修正
+        crafting windowのflower 位置、nyuinyuiのy軸、説明文位置の修正
+
+    アイテムNFTのユニーク性の深慮
+        画一的ではなく、作ったitemに何かしらの記号をもたせたい
+            もちろん、crafterは刻まれているのだが。
+        seedを使ったlootlike変換器でも良いだろうか。
+            プレイには直接影響しない接頭語など。
+            無価値な言葉遊びだが、だからこそ作り込みたい。
+        しかし、表示させるタイミングがない。
+
     transfer feeの導入
         やはりtransfer feeで複アカの効率をコントロールする戦略が、
             UI的にもわかりやすいだろう
@@ -90,7 +108,8 @@ contract ERC721 is IERC721 {
             別にactivated count_of_typeの実装が必要
             また、着払いはなんか嫌であるし。
         複アカ使ってでもプレイしたい人は手数料を落としてもらう。
-        普通のプレイでは障害にならないfeeであるし。
+            普通のプレイでは障害にならないfeeであるし。
+            もちろん、過剰な複アカのbottingは処罰する
         将来的にopean seaやtofu NFT等を使えるよう、noFee addressの機構を組み込む
 
     マーケットルールの改善
@@ -101,8 +120,8 @@ contract ERC721 is IERC721 {
         crafter royaltyの導入を検討する
             platform feeとcrafter royaltyを別に設定する
             しかし、upgrade素材に使われるとcrafter royaltyは消滅するのだが。
-            upgradeで生じたitemのcrafterはupgradeしたキャラとなるため
-            fluffy dollについてはcrafter royaltyはある程度有効に働くだろう。
+            upgradeで生じたitemのcrafterはupgradeしたキャラとなるため。
+            fluffy dollについてはcrafter royaltyはある程度有効に働くだろうか。
 
     Fluffy DollのLUK補正の実装
         +0%だった。
