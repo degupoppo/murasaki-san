@@ -337,7 +337,7 @@ async function get_recent_activity() {
             }
             let _item = await contract_mc_wss.methods.items(_item_id).call();
             let _item_type = _item[0];
-            let _item_name = array_item_name[_item_type];
+            let _item_name = dic_items_reverse[_item_type];
             let _text = "&nbsp;&nbsp;&nbsp;" + _block + " : <u>" + _name_buyer + "</u> bought <b>" + _item_name + "</b> from <u>" + _name_seller + "</u> for <b>" + _price + " $ASTR</b>.<br>"
             recentActivity.innerHTML += _text;
         }
