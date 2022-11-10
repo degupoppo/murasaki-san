@@ -82,6 +82,27 @@ contract ERC721 is IERC721 {
 
 //### 1st
 
+    burn周りのコード改善
+        burnはpermitted addressなら自由に行えてしまう
+            NFTとSBTはユーザーの資産で、運営が全くタッチできない機構にするべき。
+            故に設計はシンプルかつ慎重に。
+        NFTとSBTについては、ユーザーの資産なので
+            ユーザーの許可がないとtransfer, burnできない設計にすることが望ましい。
+            運営側がいつでもburn可能な機構を残しておくのは印象が良くない。
+            仮に、将来高額の値段がついた際にネックになるし、
+            そもそもこういったユーザーがコントロールできない機構のNFTは
+            信用が低く価値が上がりにくいだろう。
+        ユーザーの許可を必要とするapprove & transferへと改善したいところだが。
+            しかしそうすると、upgradeにapproveが必要になってしまう。
+            approveのUIをどうするか。
+        改善が必要な機構：
+            ★ upgrade時のapprove不要のburn
+        ひとまず、add permissionが可能なownerの権限を将来破棄する、という宣言で許してもらうか。
+        しかし、やはりNFTが勝手にburnされるのは良くないだろうか。
+            一応funcionコントラクトではowner checkはしているのだが。
+        別に一点物の絵画のような価値を付与したいのではなく、
+            あくまで運営の箱庭内の価値を担保できれば良いと考えるか。
+
     walletの状態を反映するギミックをもう少し実装する
         所持NFT：photo frame内に表示される
         所持token：tokenChestから出てくる
@@ -100,7 +121,8 @@ contract ERC721 is IERC721 {
             無価値な言葉遊びだが、だからこそ作り込みたい。
         しかし、表示させるタイミングがない。
 
-    transfer feeの導入
+   *transfer feeの導入
+        https://github.com/ethereum/EIPs/issues/2665
         やはりtransfer feeで複アカの効率をコントロールする戦略が、
             UI的にもわかりやすいだろう
         activationはUIの作り込みが少し面倒。
@@ -111,8 +133,11 @@ contract ERC721 is IERC721 {
             普通のプレイでは障害にならないfeeであるし。
             もちろん、過剰な複アカのbottingは処罰する
         将来的にopean seaやtofu NFT等を使えるよう、noFee addressの機構を組み込む
+        noFee address:
+            buybackTreasury
+            Market
 
-    マーケットルールの改善
+   *マーケットルールの改善
         coin/leaf bagは70%しかearnできないようにする
             移動手数料30%
             miner/farmerキャラの抑制
@@ -123,7 +148,7 @@ contract ERC721 is IERC721 {
             upgradeで生じたitemのcrafterはupgradeしたキャラとなるため。
             fluffy dollについてはcrafter royaltyはある程度有効に働くだろうか。
 
-    Fluffy DollのLUK補正の実装
+   *Fluffy DollのLUK補正の実装
         +0%だった。
         LUK補正　＋　Exp補正　にするか。
         EXP補正+3%はLUK+3.00相当で強力だが、
@@ -137,13 +162,13 @@ contract ERC721 is IERC721 {
         x3でup-gradeではなく、x4でup-gradeとするか？
         x3で+33%は破格か？
 
-    Fluffy FestivalコントラのEvent実装
+   *Fluffy FestivalコントラのEvent実装
         全く作っていなかった
         start_voting
         voting
         end_voting
 
-    イベント監視システムを構築する
+   *イベント監視システムを構築する
         眺めるようと、bot監視ように。
         event垂れ流しを一般公開するかどうかは難しいところ。
             テキストのストリーミング公開が難しそう
@@ -2123,11 +2148,16 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             //group_food.destroy(true);
             sound_happy.play();
             //destroy group_food one by one
-            if (group_food.getChildren().length > 0) {
-                //group_food.getChildren()[group_food.getChildren().length - 1].destroy();
-                group_food.getChildren()[Math.floor(Math.random() * group_food.getChildren().length)].destroy();
-            } else {
-                group_food.destroy(true);
+            //try catche to prevent err when not focus to the tab for a long time
+            try {
+                if (group_food.getChildren().length > 0) {
+                    //group_food.getChildren()[group_food.getChildren().length - 1].destroy();
+                    group_food.getChildren()[Math.floor(Math.random() * group_food.getChildren().length)].destroy();
+                } else {
+                    group_food.destroy(true);
+                }
+            } catch (err) {
+                ;
             }
             this.count = 0;
             this.count_limit = this.count + 1150;

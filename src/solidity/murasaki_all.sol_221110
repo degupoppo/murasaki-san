@@ -1,6 +1,6 @@
 
 //SPDX-License-Identifier: MIT
-pragma solidity ^0.8.7;
+//pragma solidity ^0.8.7;
 
 
 //===ToDo==================================================================================================================
@@ -18,8 +18,152 @@ pragma solidity ^0.8.7;
 //===Basic==================================================================================================================
 
 
-//---ERC721
+//---ERC2665
 
+
+pragma solidity ^0.6.6;
+
+/// @title ERC-2665 NFT Transfer Fee Extension
+/// @dev See https://github.com/ethereum/EIPs/issues/2665
+///  Note: the ERC-165 identifier for this interface is 0x509ffea4.
+///  Note: you must also implement the ERC-165 identifier of ERC-721, which is 0x80ac58cd.
+interface ERC2665 /* is ERC165, is ERC721 but overide it's Design by contract specifications */ {
+    /// @dev This emits when ownership of any NFT changes by any mechanism.
+    ///  This event emits when NFTs are created (`from` == 0) and destroyed
+    ///  (`to` == 0). Exception: during contract creation, any number of NFTs
+    ///  may be created and assigned without emitting Transfer. At the time of
+    ///  any transfer, the approved address for that NFT (if any) is reset to none.
+    event Transfer(address indexed _from, address indexed _to, uint256 indexed _tokenId);
+
+    /// @dev This emits when the approved address for an NFT is changed or
+    ///  reaffirmed. The zero address indicates there is no approved address.
+    ///  When a Transfer event emits, this also indicates that the approved
+    ///  address for that NFT (if any) is reset to none.
+    event Approval(address indexed _owner, address indexed _approved, uint256 indexed _tokenId);
+
+    /// @dev This emits when an operator is enabled or disabled for an owner.
+    ///  The operator can manage all NFTs of the owner.
+    event ApprovalForAll(address indexed _owner, address indexed _operator, bool _approved);
+
+    /// @notice Count all NFTs assigned to an owner
+    /// @dev NFTs assigned to the zero address are considered invalid, and this
+    ///  function throws for queries about the zero address.
+    /// @param _owner An address for whom to query the balance
+    /// @return The number of NFTs owned by `_owner`, possibly zero
+    function balanceOf(address _owner) external view returns (uint256);
+
+    /// @notice Find the owner of an NFT
+    /// @dev NFTs assigned to zero address are considered invalid, and queries
+    ///  about them do throw.
+    /// @param _tokenId The identifier for an NFT
+    /// @return The address of the owner of the NFT
+    function ownerOf(uint256 _tokenId) external view returns (address);
+
+    /// @notice Transfers the ownership of an NFT from one address to another address
+    /// @dev Throws unless `msg.sender` is the current owner, an authorized
+    ///  operator, or the approved address for this NFT. Throws if `_from` is
+    ///  not the current owner. Throws if `msg.value` < `getTransferFee(_tokenId)`.
+    ///  If the fee is not to be paid in ETH, then token publishers SHOULD provide a way to pay the
+    ///  fee when calling this function or it's overloads, and throwing if said fee is not paid.
+    ///  Throws if `_to` is the zero address. Throws if `_tokenId` is not a valid NFT.
+    ///  When transfer is complete, this function checks if `_to` is a smart
+    ///  contract (code size > 0). If so, it calls `onERC2665Received` on `_to`
+    ///  and throws if the return value is not
+    ///  `bytes4(keccak256("onERC2665Received(address,address,uint256,bytes)"))`.
+    /// @param _from The current owner of the NFT
+    /// @param _to The new owner
+    /// @param _tokenId The NFT to transfer
+    /// @param data Additional data with no specified format, sent in call to `_to`
+    function safeTransferFrom(address _from, address _to, uint256 _tokenId, bytes calldata data) external payable;
+
+    /// @notice Transfers the ownership of an NFT from one address to another address
+    /// @dev This works identically to the other function with an extra data parameter,
+    ///  except this function just sets data to "".
+    /// @param _from The current owner of the NFT
+    /// @param _to The new owner
+    /// @param _tokenId The NFT to transfer
+    function safeTransferFrom(address _from, address _to, uint256 _tokenId) external payable;
+
+    /// @notice Transfer ownership of an NFT -- THE CALLER IS RESPONSIBLE
+    ///  TO CONFIRM THAT `_to` IS CAPABLE OF RECEIVING NFTS OR ELSE
+    ///  THEY MAY BE PERMANENTLY LOST
+    /// @dev Throws unless `msg.sender` is the current owner, an authorized
+    ///  operator, or the approved address for this NFT. Throws if `_from` is
+    ///  not the current owner. Throws if `_to` is the zero address. Throws if
+    ///  `_tokenId` is not a valid NFT. Throws if `msg.value` < `getTransferFee(_tokenId)`.
+    ///  If the fee is not to be paid in ETH, then token publishers SHOULD provide a way to pay the
+    ///  fee when calling this function and throw if said fee is not paid.
+    ///  Throws if `_to` is the zero address. Throws if `_tokenId` is not a valid NFT.
+    /// @param _from The current owner of the NFT
+    /// @param _to The new owner
+    /// @param _tokenId The NFT to transfer
+    function transferFrom(address _from, address _to, uint256 _tokenId) external payable;
+
+    /// @notice Change or reaffirm the approved address for an NFT
+    /// @dev The zero address indicates there is no approved address.
+    ///  Throws unless `msg.sender` is the current NFT owner, or an authorized
+    ///  operator of the current owner. After a successful call and if
+    ///  `msg.value == getTransferFee(_tokenId)`, then a subsequent atomic call to
+    ///  `getTransferFee(_tokenId)` would eval to 0. If the fee is not to be paid in ETH,
+    ///  then token publishers MUST provide a way to pay the fee when calling this function,
+    ///  and throw if the fee is not paid.
+    /// @param _approved The new approved NFT controller
+    /// @param _tokenId The NFT to approve
+    function approve(address _approved, uint256 _tokenId) external payable;
+
+    /// @notice Enable or disable approval for a third party ("operator") to manage
+    ///  all of `msg.sender`'s assets
+    /// @dev Emits the ApprovalForAll event. The contract MUST allow
+    ///  multiple operators per owner.
+    /// @param _operator Address to add to the set of authorized operators
+    /// @param _approved True if the operator is approved, false to revoke approval
+    function setApprovalForAll(address _operator, bool _approved) external;
+
+    /// @notice Get the approved address for a single NFT
+    /// @dev Throws if `_tokenId` is not a valid NFT.
+    /// @param _tokenId The NFT to find the approved address for
+    /// @return The approved address for this NFT, or the zero address if there is none
+    function getApproved(uint256 _tokenId) external view returns (address);
+
+    /// @notice Query if an address is an authorized operator for another address
+    /// @param _owner The address that owns the NFTs
+    /// @param _operator The address that acts on behalf of the owner
+    /// @return True if `_operator` is an approved operator for `_owner`, false otherwise
+    function isApprovedForAll(address _owner, address _operator) external view returns (bool);
+
+    /// @notice Query what is the transfer fee for a specific token
+    /// @dev If a call would returns 0, then any subsequent calls witht the same argument
+    /// must also return 0 until the Transfer event has been emitted.
+    /// @param _tokenId The NFT to find the Transfer Fee amount for
+    /// @return The amount of Wei that need to be sent along a call to a transfer function
+    function getTransferFee(uint256 _tokenId) external view returns (uint256);
+
+    /// @notice Query what is the transfer fee for a specific token if the fee is to be paid
+    /// @dev If a call would returns 0, then any subsequent calls with the same arguments
+    /// must also return 0 until the Transfer event has been emitted. If _currencySymbol == 'ETH',
+    /// then this function must return the same result as if `getTransferFee(uint256 _tokenId)` was called.
+    /// @param _tokenId The NFT to find the Transfer Fee amount for
+    /// @param _currencySymbol The currency in which the fee is to be paid
+    /// @return The amount of Currency that need to be sent along a call to a transfer function
+    function getTransferFee(uint256 _tokenId, string calldata _currencySymbol) external view returns (uint256);
+
+}
+
+interface ERC165 {
+    /// @notice Query if a contract implements an interface
+    /// @param interfaceID The interface identifier, as specified in ERC-165
+    /// @dev Interface identification is specified in ERC-165. This function
+    ///  uses less than 30,000 gas.
+    /// @return `true` if the contract implements `interfaceID` and
+    ///  `interfaceID` is not 0xffffffff, `false` otherwise
+    function supportsInterface(bytes4 interfaceID) external view returns (bool);
+}
+
+
+//---IERC721
+
+
+pragma solidity ^0.8.7;
 
 interface IERC721 {
     event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
@@ -398,430 +542,69 @@ contract ERC721 is IERC721 {
 }
 
 
-//---ERC2665
+/**
+ * @title ERC-721 Non-Fungible Token Standard, optional enumeration extension
+ * @dev See https://eips.ethereum.org/EIPS/eip-721
+ */
+interface IERC721Enumerable is IERC721 {
+    /**
+     * @dev Returns the total amount of tokens stored by the contract.
+     */
+    function totalSupply() external view returns (uint256);
 
+    /**
+     * @dev Returns a token ID owned by `owner` at a given `index` of its token list.
+     * Use along with {balanceOf} to enumerate all of ``owner``'s tokens.
+     */
+    function tokenOfOwnerByIndex(address owner, uint256 index) external view returns (uint256 tokenId);
 
-/// @title ERC-2665 NFT Transfer Fee Extension
-/// @dev See https://github.com/ethereum/EIPs/issues/2665
-///  Note: the ERC-165 identifier for this interface is 0x509ffea4.
-///  Note: you must also implement the ERC-165 identifier of ERC-721, which is 0x80ac58cd.
-interface IERC2665 /* is ERC165, is ERC721 but overide it's Design by contract specifications */ {
-    /// @dev This emits when ownership of any NFT changes by any mechanism.
-    ///  This event emits when NFTs are created (`from` == 0) and destroyed
-    ///  (`to` == 0). Exception: during contract creation, any number of NFTs
-    ///  may be created and assigned without emitting Transfer. At the time of
-    ///  any transfer, the approved address for that NFT (if any) is reset to none.
-    event Transfer(address indexed _from, address indexed _to, uint256 indexed _tokenId);
-
-    /// @dev This emits when the approved address for an NFT is changed or
-    ///  reaffirmed. The zero address indicates there is no approved address.
-    ///  When a Transfer event emits, this also indicates that the approved
-    ///  address for that NFT (if any) is reset to none.
-    event Approval(address indexed _owner, address indexed _approved, uint256 indexed _tokenId);
-
-    /// @dev This emits when an operator is enabled or disabled for an owner.
-    ///  The operator can manage all NFTs of the owner.
-    event ApprovalForAll(address indexed _owner, address indexed _operator, bool _approved);
-
-    /// @notice Count all NFTs assigned to an owner
-    /// @dev NFTs assigned to the zero address are considered invalid, and this
-    ///  function throws for queries about the zero address.
-    /// @param _owner An address for whom to query the balance
-    /// @return The number of NFTs owned by `_owner`, possibly zero
-    function balanceOf(address _owner) external view returns (uint256);
-
-    /// @notice Find the owner of an NFT
-    /// @dev NFTs assigned to zero address are considered invalid, and queries
-    ///  about them do throw.
-    /// @param _tokenId The identifier for an NFT
-    /// @return The address of the owner of the NFT
-    function ownerOf(uint256 _tokenId) external view returns (address);
-
-    /// @notice Transfers the ownership of an NFT from one address to another address
-    /// @dev Throws unless `msg.sender` is the current owner, an authorized
-    ///  operator, or the approved address for this NFT. Throws if `_from` is
-    ///  not the current owner. Throws if `msg.value` < `getTransferFee(_tokenId)`.
-    ///  If the fee is not to be paid in ETH, then token publishers SHOULD provide a way to pay the
-    ///  fee when calling this function or it's overloads, and throwing if said fee is not paid.
-    ///  Throws if `_to` is the zero address. Throws if `_tokenId` is not a valid NFT.
-    ///  When transfer is complete, this function checks if `_to` is a smart
-    ///  contract (code size > 0). If so, it calls `onERC2665Received` on `_to`
-    ///  and throws if the return value is not
-    ///  `bytes4(keccak256("onERC2665Received(address,address,uint256,bytes)"))`.
-    /// @param _from The current owner of the NFT
-    /// @param _to The new owner
-    /// @param _tokenId The NFT to transfer
-    /// @param data Additional data with no specified format, sent in call to `_to`
-    function safeTransferFrom(address _from, address _to, uint256 _tokenId, bytes calldata data) external payable;
-
-    /// @notice Transfers the ownership of an NFT from one address to another address
-    /// @dev This works identically to the other function with an extra data parameter,
-    ///  except this function just sets data to "".
-    /// @param _from The current owner of the NFT
-    /// @param _to The new owner
-    /// @param _tokenId The NFT to transfer
-    function safeTransferFrom(address _from, address _to, uint256 _tokenId) external payable;
-
-    /// @notice Transfer ownership of an NFT -- THE CALLER IS RESPONSIBLE
-    ///  TO CONFIRM THAT `_to` IS CAPABLE OF RECEIVING NFTS OR ELSE
-    ///  THEY MAY BE PERMANENTLY LOST
-    /// @dev Throws unless `msg.sender` is the current owner, an authorized
-    ///  operator, or the approved address for this NFT. Throws if `_from` is
-    ///  not the current owner. Throws if `_to` is the zero address. Throws if
-    ///  `_tokenId` is not a valid NFT. Throws if `msg.value` < `getTransferFee(_tokenId)`.
-    ///  If the fee is not to be paid in ETH, then token publishers SHOULD provide a way to pay the
-    ///  fee when calling this function and throw if said fee is not paid.
-    ///  Throws if `_to` is the zero address. Throws if `_tokenId` is not a valid NFT.
-    /// @param _from The current owner of the NFT
-    /// @param _to The new owner
-    /// @param _tokenId The NFT to transfer
-    function transferFrom(address _from, address _to, uint256 _tokenId) external payable;
-
-    /// @notice Change or reaffirm the approved address for an NFT
-    /// @dev The zero address indicates there is no approved address.
-    ///  Throws unless `msg.sender` is the current NFT owner, or an authorized
-    ///  operator of the current owner. After a successful call and if
-    ///  `msg.value == getTransferFee(_tokenId)`, then a subsequent atomic call to
-    ///  `getTransferFee(_tokenId)` would eval to 0. If the fee is not to be paid in ETH,
-    ///  then token publishers MUST provide a way to pay the fee when calling this function,
-    ///  and throw if the fee is not paid.
-    /// @param _approved The new approved NFT controller
-    /// @param _tokenId The NFT to approve
-    function approve(address _approved, uint256 _tokenId) external payable;
-
-    /// @notice Enable or disable approval for a third party ("operator") to manage
-    ///  all of `msg.sender`'s assets
-    /// @dev Emits the ApprovalForAll event. The contract MUST allow
-    ///  multiple operators per owner.
-    /// @param _operator Address to add to the set of authorized operators
-    /// @param _approved True if the operator is approved, false to revoke approval
-    function setApprovalForAll(address _operator, bool _approved) external;
-
-    /// @notice Get the approved address for a single NFT
-    /// @dev Throws if `_tokenId` is not a valid NFT.
-    /// @param _tokenId The NFT to find the approved address for
-    /// @return The approved address for this NFT, or the zero address if there is none
-    function getApproved(uint256 _tokenId) external view returns (address);
-
-    /// @notice Query if an address is an authorized operator for another address
-    /// @param _owner The address that owns the NFTs
-    /// @param _operator The address that acts on behalf of the owner
-    /// @return True if `_operator` is an approved operator for `_owner`, false otherwise
-    function isApprovedForAll(address _owner, address _operator) external view returns (bool);
-
-    /// @notice Query what is the transfer fee for a specific token
-    /// @dev If a call would returns 0, then any subsequent calls witht the same argument
-    /// must also return 0 until the Transfer event has been emitted.
-    /// @param _tokenId The NFT to find the Transfer Fee amount for
-    /// @return The amount of Wei that need to be sent along a call to a transfer function
-    function getTransferFee(uint256 _tokenId) external view returns (uint256);
-
-    /// @notice Query what is the transfer fee for a specific token if the fee is to be paid
-    /// @dev If a call would returns 0, then any subsequent calls with the same arguments
-    /// must also return 0 until the Transfer event has been emitted. If _currencySymbol == 'ETH',
-    /// then this function must return the same result as if `getTransferFee(uint256 _tokenId)` was called.
-    /// @param _tokenId The NFT to find the Transfer Fee amount for
-    /// @param _currencySymbol The currency in which the fee is to be paid
-    /// @return The amount of Currency that need to be sent along a call to a transfer function
-    function getTransferFee(uint256 _tokenId, string calldata _currencySymbol) external view returns (uint256);
-
+    /**
+     * @dev Returns a token ID at a given `index` of all the tokens stored by the contract.
+     * Use along with {totalSupply} to enumerate all tokens.
+     */
+    function tokenByIndex(uint256 index) external view returns (uint256);
 }
 
-contract ERC2665 is IERC2665 {
-    using Strings for uint256;
 
-    mapping(uint256 => address) private _owners;
-    mapping(address => uint256) private _balances;
-    mapping(uint256 => address) private _tokenApprovals;
-    mapping(address => mapping(address => bool)) private _operatorApprovals;
-    
-    function balanceOf(address owner) public view virtual override returns (uint256) {
-        require(owner != address(0), "ERC721: balance query for the zero address");
-        return _balances[owner];
-    }
-    
-    function ownerOf(uint256 tokenId) public view virtual override returns (address) {
-        address owner = _owners[tokenId];
-        require(owner != address(0), "ERC721: owner query for nonexistent token");
-        return owner;
-    }
-    
-    function _baseURI() internal view virtual returns (string memory) {
-        return "";
-    }
-    
-    function approve(address to, uint256 tokenId) public virtual override payable {
-        address owner = ERC2665.ownerOf(tokenId);
-        require(to != owner, "ERC721: approval to current owner");
+/**
+ * @dev This implements an optional extension of {ERC721} defined in the EIP that adds
+ * enumerability of all the token ids in the contract as well as all token ids owned by each
+ * account.
+ */
+abstract contract ERC721Enumerable is ERC721, IERC721Enumerable {
+    // Mapping from owner to list of owned token IDs
+    mapping(address => mapping(uint256 => uint256)) private _ownedTokens;
 
-        require(
-            msg.sender == owner || isApprovedForAll(owner, msg.sender),
-            "ERC721: approve caller is not owner nor approved for all"
-        );
+    // Mapping from token ID to index of the owner tokens list
+    mapping(uint256 => uint256) private _ownedTokensIndex;
 
-        _approve(to, tokenId);
-    }
-    
-    function getApproved(uint256 tokenId) public view virtual override returns (address) {
-        require(_exists(tokenId), "ERC721: approved query for nonexistent token");
+    // Array with all token ids, used for enumeration
+    uint256[] private _allTokens;
 
-        return _tokenApprovals[tokenId];
-    }
-    
-    function setApprovalForAll(address operator, bool approved) public virtual override {
-        require(operator != msg.sender, "ERC721: approve to caller");
+    // Mapping from token id to position in the allTokens array
+    mapping(uint256 => uint256) private _allTokensIndex;
 
-        _operatorApprovals[msg.sender][operator] = approved;
-        emit ApprovalForAll(msg.sender, operator, approved);
-    }
-    
-    function _isContract(address account) internal view returns (bool) {
-        uint256 size;
-        assembly {
-            size := extcodesize(account)
-        }
-        return size > 0;
-    }
-    
-    function isApprovedForAll(address owner, address operator) public view virtual override returns (bool) {
-        return _operatorApprovals[owner][operator];
-    }
-    
-    function transferFrom(
-        address from,
-        address to,
-        uint256 tokenId
-    ) public virtual override payable {
-        //solhint-disable-next-line max-line-length
-        require(_isApprovedOrOwner(msg.sender, tokenId), "ERC721: transfer caller is not owner nor approved");
-
-        _transfer(from, to, tokenId);
-    }
-    
-    function safeTransferFrom(
-        address from,
-        address to,
-        uint256 tokenId
-    ) public virtual override payable {
-        safeTransferFrom(from, to, tokenId, "");
+    /**
+     * @dev See {IERC721Enumerable-tokenOfOwnerByIndex}.
+     */
+    function tokenOfOwnerByIndex(address owner, uint256 index) public view virtual override returns (uint256) {
+        require(index < ERC721.balanceOf(owner), "ERC721Enumerable: owner index out of bounds");
+        return _ownedTokens[owner][index];
     }
 
     /**
-     * @dev See {IERC721-safeTransferFrom}.
+     * @dev See {IERC721Enumerable-totalSupply}.
      */
-    function safeTransferFrom(
-        address from,
-        address to,
-        uint256 tokenId,
-        bytes memory _data
-    ) public virtual override payable {
-        require(_isApprovedOrOwner(msg.sender, tokenId), "ERC721: transfer caller is not owner nor approved");
-        _safeTransfer(from, to, tokenId, _data);
+    function totalSupply() public view virtual override returns (uint256) {
+        return _allTokens.length;
     }
 
     /**
-     * @dev Safely transfers `tokenId` token from `from` to `to`, checking first that contract recipients
-     * are aware of the ERC721 protocol to prevent tokens from being forever locked.
-     *
-     * `_data` is additional data, it has no specified format and it is sent in call to `to`.
-     *
-     * This internal function is equivalent to {safeTransferFrom}, and can be used to e.g.
-     * implement alternative mechanisms to perform token transfer, such as signature-based.
-     *
-     * Requirements:
-     *
-     * - `from` cannot be the zero address.
-     * - `to` cannot be the zero address.
-     * - `tokenId` token must exist and be owned by `from`.
-     * - If `to` refers to a smart contract, it must implement {IERC721Receiver-onERC721Received}, which is called upon a safe transfer.
-     *
-     * Emits a {Transfer} event.
+     * @dev See {IERC721Enumerable-tokenByIndex}.
      */
-    function _safeTransfer(
-        address from,
-        address to,
-        uint256 tokenId,
-        bytes memory _data
-    ) internal virtual {
-        _transfer(from, to, tokenId);
-        require(_checkOnERC721Received(from, to, tokenId, _data), "ERC721: transfer to non ERC721Receiver implementer");
-    }
-
-    /**
-     * @dev Returns whether `tokenId` exists.
-     *
-     * Tokens can be managed by their owner or approved accounts via {approve} or {setApprovalForAll}.
-     *
-     * Tokens start existing when they are minted (`_mint`),
-     * and stop existing when they are burned (`_burn`).
-     */
-    function _exists(uint256 tokenId) internal view virtual returns (bool) {
-        return _owners[tokenId] != address(0);
-    }
-
-    /**
-     * @dev Returns whether `spender` is allowed to manage `tokenId`.
-     *
-     * Requirements:
-     *
-     * - `tokenId` must exist.
-     */
-    function _isApprovedOrOwner(address spender, uint256 tokenId) internal view virtual returns (bool) {
-        require(_exists(tokenId), "ERC721: operator query for nonexistent token");
-        address owner = ERC2665.ownerOf(tokenId);
-        return (spender == owner || getApproved(tokenId) == spender || isApprovedForAll(owner, spender));
-    }
-
-    /**
-     * @dev Safely mints `tokenId` and transfers it to `to`.
-     *
-     * Requirements:
-     *
-     * - `tokenId` must not exist.
-     * - If `to` refers to a smart contract, it must implement {IERC721Receiver-onERC721Received}, which is called upon a safe transfer.
-     *
-     * Emits a {Transfer} event.
-     */
-    function _safeMint(address to, uint256 tokenId) internal virtual {
-        _safeMint(to, tokenId, "");
-    }
-
-    /**
-     * @dev Same as {xref-ERC721-_safeMint-address-uint256-}[`_safeMint`], with an additional `data` parameter which is
-     * forwarded in {IERC721Receiver-onERC721Received} to contract recipients.
-     */
-    function _safeMint(
-        address to,
-        uint256 tokenId,
-        bytes memory _data
-    ) internal virtual {
-        _mint(to, tokenId);
-        require(
-            _checkOnERC721Received(address(0), to, tokenId, _data),
-            "ERC721: transfer to non ERC721Receiver implementer"
-        );
-    }
-
-    /**
-     * @dev Mints `tokenId` and transfers it to `to`.
-     *
-     * WARNING: Usage of this method is discouraged, use {_safeMint} whenever possible
-     *
-     * Requirements:
-     *
-     * - `tokenId` must not exist.
-     * - `to` cannot be the zero address.
-     *
-     * Emits a {Transfer} event.
-     */
-    function _mint(address to, uint256 tokenId) internal virtual {
-        require(to != address(0), "ERC721: mint to the zero address");
-        require(!_exists(tokenId), "ERC721: token already minted");
-
-        _beforeTokenTransfer(address(0), to, tokenId);
-
-        _balances[to] += 1;
-        _owners[tokenId] = to;
-
-        emit Transfer(address(0), to, tokenId);
-    }
-
-    /**
-     * @dev Destroys `tokenId`.
-     * The approval is cleared when the token is burned.
-     *
-     * Requirements:
-     *
-     * - `tokenId` must exist.
-     *
-     * Emits a {Transfer} event.
-     */
-    function _burn(uint256 tokenId) internal virtual {
-        address owner = ERC2665.ownerOf(tokenId);
-
-        _beforeTokenTransfer(owner, address(0), tokenId);
-
-        // Clear approvals
-        _approve(address(0), tokenId);
-
-        _balances[owner] -= 1;
-        delete _owners[tokenId];
-
-        emit Transfer(owner, address(0), tokenId);
-    }
-
-    /**
-     * @dev Transfers `tokenId` from `from` to `to`.
-     *  As opposed to {transferFrom}, this imposes no restrictions on msg.sender.
-     *
-     * Requirements:
-     *
-     * - `to` cannot be the zero address.
-     * - `tokenId` token must be owned by `from`.
-     *
-     * Emits a {Transfer} event.
-     */
-    function _transfer(
-        address from,
-        address to,
-        uint256 tokenId
-    ) internal virtual {
-        require(ERC2665.ownerOf(tokenId) == from, "ERC721: transfer of token that is not own");
-        require(to != address(0), "ERC721: transfer to the zero address");
-
-        _beforeTokenTransfer(from, to, tokenId);
-
-        // Clear approvals from the previous owner
-        _approve(address(0), tokenId);
-
-        _balances[from] -= 1;
-        _balances[to] += 1;
-        _owners[tokenId] = to;
-
-        emit Transfer(from, to, tokenId);
-    }
-
-    /**
-     * @dev Approve `to` to operate on `tokenId`
-     *
-     * Emits a {Approval} event.
-     */
-    function _approve(address to, uint256 tokenId) internal virtual {
-        _tokenApprovals[tokenId] = to;
-        emit Approval(ERC2665.ownerOf(tokenId), to, tokenId);
-    }
-
-    /**
-     * @dev Internal function to invoke {IERC721Receiver-onERC721Received} on a target address.
-     * The call is not executed if the target address is not a contract.
-     *
-     * @param from address representing the previous owner of the given token ID
-     * @param to target address that will receive the tokens
-     * @param tokenId uint256 ID of the token to be transferred
-     * @param _data bytes optional data to send along with the call
-     * @return bool whether the call correctly returned the expected magic value
-     */
-    function _checkOnERC721Received(
-        address from,
-        address to,
-        uint256 tokenId,
-        bytes memory _data
-    ) private returns (bool) {
-        if (_isContract(to)) {
-            try IERC721Receiver(to).onERC721Received(msg.sender, from, tokenId, _data) returns (bytes4 retval) {
-                return retval == IERC721Receiver(to).onERC721Received.selector;
-            } catch (bytes memory reason) {
-                if (reason.length == 0) {
-                    revert("ERC721: transfer to non ERC721Receiver implementer");
-                } else {
-                    assembly {
-                        revert(add(32, reason), mload(reason))
-                    }
-                }
-            }
-        } else {
-            return true;
-        }
+    function tokenByIndex(uint256 index) public view virtual override returns (uint256) {
+        require(index < ERC721Enumerable.totalSupply(), "ERC721Enumerable: global index out of bounds");
+        return _allTokens[index];
     }
 
     /**
@@ -834,7 +617,8 @@ contract ERC2665 is IERC2665 {
      * transferred to `to`.
      * - When `from` is zero, `tokenId` will be minted for `to`.
      * - When `to` is zero, ``from``'s `tokenId` will be burned.
-     * - `from` and `to` are never both zero.
+     * - `from` cannot be the zero address.
+     * - `to` cannot be the zero address.
      *
      * To learn more about hooks, head to xref:ROOT:extending-contracts.adoc#using-hooks[Using Hooks].
      */
@@ -842,15 +626,92 @@ contract ERC2665 is IERC2665 {
         address from,
         address to,
         uint256 tokenId
-    ) internal virtual {}
+    ) internal virtual override {
+        super._beforeTokenTransfer(from, to, tokenId);
 
-    //added
-    function getTransferFee(uint256 _tokenId) external view virtual returns (uint256) {
-        return 0;
+        if (from == address(0)) {
+            _addTokenToAllTokensEnumeration(tokenId);
+        } else if (from != to) {
+            _removeTokenFromOwnerEnumeration(from, tokenId);
+        }
+        if (to == address(0)) {
+            _removeTokenFromAllTokensEnumeration(tokenId);
+        } else if (to != from) {
+            _addTokenToOwnerEnumeration(to, tokenId);
+        }
     }
 
-    function getTransferFee(uint256 _tokenId, string calldata _currencySymbol) external view virtual returns (uint256) {
-        return 0;
+    /**
+     * @dev Private function to add a token to this extension's ownership-tracking data structures.
+     * @param to address representing the new owner of the given token ID
+     * @param tokenId uint256 ID of the token to be added to the tokens list of the given address
+     */
+    function _addTokenToOwnerEnumeration(address to, uint256 tokenId) private {
+        uint256 length = ERC721.balanceOf(to);
+        _ownedTokens[to][length] = tokenId;
+        _ownedTokensIndex[tokenId] = length;
+    }
+
+    /**
+     * @dev Private function to add a token to this extension's token tracking data structures.
+     * @param tokenId uint256 ID of the token to be added to the tokens list
+     */
+    function _addTokenToAllTokensEnumeration(uint256 tokenId) private {
+        _allTokensIndex[tokenId] = _allTokens.length;
+        _allTokens.push(tokenId);
+    }
+
+    /**
+     * @dev Private function to remove a token from this extension's ownership-tracking data structures. Note that
+     * while the token is not assigned a new owner, the `_ownedTokensIndex` mapping is _not_ updated: this allows for
+     * gas optimizations e.g. when performing a transfer operation (avoiding double writes).
+     * This has O(1) time complexity, but alters the order of the _ownedTokens array.
+     * @param from address representing the previous owner of the given token ID
+     * @param tokenId uint256 ID of the token to be removed from the tokens list of the given address
+     */
+    function _removeTokenFromOwnerEnumeration(address from, uint256 tokenId) private {
+        // To prevent a gap in from's tokens array, we store the last token in the index of the token to delete, and
+        // then delete the last slot (swap and pop).
+
+        uint256 lastTokenIndex = ERC721.balanceOf(from) - 1;
+        uint256 tokenIndex = _ownedTokensIndex[tokenId];
+
+        // When the token to delete is the last token, the swap operation is unnecessary
+        if (tokenIndex != lastTokenIndex) {
+            uint256 lastTokenId = _ownedTokens[from][lastTokenIndex];
+
+            _ownedTokens[from][tokenIndex] = lastTokenId; // Move the last token to the slot of the to-delete token
+            _ownedTokensIndex[lastTokenId] = tokenIndex; // Update the moved token's index
+        }
+
+        // This also deletes the contents at the last position of the array
+        delete _ownedTokensIndex[tokenId];
+        delete _ownedTokens[from][lastTokenIndex];
+    }
+
+    /**
+     * @dev Private function to remove a token from this extension's token tracking data structures.
+     * This has O(1) time complexity, but alters the order of the _allTokens array.
+     * @param tokenId uint256 ID of the token to be removed from the tokens list
+     */
+    function _removeTokenFromAllTokensEnumeration(uint256 tokenId) private {
+        // To prevent a gap in the tokens array, we store the last token in the index of the token to delete, and
+        // then delete the last slot (swap and pop).
+
+        uint256 lastTokenIndex = _allTokens.length - 1;
+        uint256 tokenIndex = _allTokensIndex[tokenId];
+
+        // When the token to delete is the last token, the swap operation is unnecessary. However, since this occurs so
+        // rarely (when the last minted token is burnt) that we still do the swap here to avoid the gas cost of adding
+        // an 'if' statement (like in _removeTokenFromOwnerEnumeration)
+        uint256 lastTokenId = _allTokens[lastTokenIndex];
+
+        _allTokens[tokenIndex] = lastTokenId; // Move the last token to the slot of the to-delete token
+        _allTokensIndex[lastTokenId] = tokenIndex; // Update the moved token's index
+
+        // This also deletes the contents at the last position of the array
+        delete _allTokensIndex[tokenId];
+        _allTokens.pop();
     }
 }
 
@@ -1692,6 +1553,21 @@ contract Murasaki_Craft is ERC721, Ownable{
         permitted_address[_address] = false;
     }
 
+    //noFee address
+    mapping(address => bool) public noFee_address;
+    function _add_noFee_address(address _address) external onlyOwner {
+        noFee_address[_address] = true;
+    }
+    function _remove_noFee_address(address _address) external onlyOwner {
+        noFee_address[_address] = false;
+    }
+    
+    //transfer fee
+    uint TRANSFER_FEE = 0;
+    function _set_transferFee(uint _value) external onlyOwner {
+        TRANSFER_FEE = _value;
+    }
+
     //admin. withdraw
     function withdraw(address rec)public onlyOwner{
         payable(rec).transfer(address(this).balance);
@@ -1843,251 +1719,6 @@ contract Murasaki_Craft is ERC721, Ownable{
     //call items as array, need to write in Craft contract
     function get_balance_of_type(address _wallet) public view returns (uint32[256] memory) {
         return balance_of_type[_wallet];
-    }
-}
-
-
-//---Murasaki_Craft_withFee
-
-
-contract Murasaki_Craft_withFee is ERC2665, Ownable{
-
-    //permitted address
-    mapping(address => bool) public permitted_address;
-
-    //admin, add or remove permitted_address
-    function _add_permitted_address(address _address) external onlyOwner {
-        permitted_address[_address] = true;
-    }
-    function _remove_permitted_address(address _address) external onlyOwner {
-        permitted_address[_address] = false;
-    }
-
-    //admin. withdraw
-    function withdraw(address rec)public onlyOwner{
-        payable(rec).transfer(address(this).balance);
-    }
-
-    using EnumerableSet for EnumerableSet.UintSet;
-    mapping(address => EnumerableSet.UintSet) private mySet;
-
-    //name
-    string constant public name = "Murasaki Craft";
-    string constant public symbol = "MC";
-
-    //global variants
-    uint32 public next_item = 1;
-    struct item {
-        uint32 item_type;
-        uint32 crafted_time;
-        uint32 crafted_summoner;
-        address crafted_wallet;
-        string memo;
-    }
-    mapping(uint256 => item) public items;
-    mapping(address => uint32[256]) public balance_of_type;
-    mapping(uint32 => uint32) public seed;
-    mapping(uint32 => uint32) public count_of_mint; //item_type => count_of_mint
-
-    //override ERC721 transfer, 
-    function _transfer(
-        address from,
-        address to,
-        uint256 tokenId
-    ) internal virtual override {
-        ERC2665._transfer(from, to, tokenId);
-        uint32 _item_type = items[tokenId].item_type;
-        balance_of_type[from][_item_type] -= 1;
-        balance_of_type[to][_item_type] += 1;
-        mySet[from].remove(tokenId);
-        mySet[to].add(tokenId);
-    }
-
-    //override ERC721 burn
-    function _burn(uint256 tokenId) internal virtual override {
-        uint32 _item_type = items[tokenId].item_type;
-        address _owner = ERC2665.ownerOf(tokenId);
-        balance_of_type[_owner][_item_type] -= 1;
-        mySet[_owner].remove(tokenId);
-        //ERC721._burn(tokenId);
-        ERC2665._transfer(_owner, address(this), tokenId);
-    }
-
-    //burn
-    function burn(uint256 tokenId) external {
-        require(permitted_address[msg.sender] == true);
-        _burn(tokenId);
-    }
-
-    //craft
-    function craft(
-        uint32 _item_type, 
-        uint32 _summoner, 
-        address _wallet, 
-        uint32 _seed, 
-        string memory _memo
-    ) external {
-        //require(msg.sender == murasaki_function_address);
-        require(permitted_address[msg.sender] == true);
-        uint32 _now = uint32(block.timestamp);
-        uint32 _crafting_item = next_item;
-        items[_crafting_item] = item(_item_type, _now, _summoner, _wallet, _memo);
-        balance_of_type[_wallet][_item_type] += 1;  //balanceOf each item type
-        count_of_mint[_item_type]++;
-        seed[_crafting_item] = _seed;
-        mySet[_wallet].add(_crafting_item);
-        next_item++;
-        _safeMint(_wallet, _crafting_item);
-    }  
-
-    /// @dev Returns list the total number of listed summoners of the given user.
-    function myListLength(address user) external view returns (uint) {
-        return mySet[user].length();
-    }
-
-    /// @dev Returns the ids and the prices of the listed summoners of the given user.
-    function myListsAt(
-        address user,
-        uint start,
-        uint count
-    ) external view returns (uint[] memory rIds) {
-        rIds = new uint[](count);
-        for (uint idx = 0; idx < count; idx++) {
-            rIds[idx] = mySet[user].at(start + idx);
-        }
-    }
-
-    /// @dev Returns the ids and the prices of the listed summoners of the given user.
-    function myListsAt_withItemType(
-        address user,
-        uint start,
-        uint count
-    ) external view returns (uint[] memory rIds) {
-        rIds = new uint[](count*2);
-        for (uint idx = 0; idx < count; idx++) {
-            uint _id = mySet[user].at(start + idx);
-            rIds[idx*2] = _id;
-            item memory _item = items[_id];
-            rIds[idx*2+1] = _item.item_type;
-        }
-    }
-
-    //URI
-    //Inspired by OraclizeAPI's implementation - MIT license
-    //https://github.com/oraclize/ethereum-api/blob/b42146b063c7d6ee1358846c198246239e9360e8/oraclizeAPI_0.4.25.sol
-    function toString(uint256 value) internal pure returns (string memory) {
-        if (value == 0) {
-            return "0";
-        }
-        uint256 temp = value;
-        uint256 digits;
-        while (temp != 0) {
-            digits++;
-            temp /= 10;
-        }
-        bytes memory buffer = new bytes(digits);
-        while (value != 0) {
-            digits -= 1;
-            buffer[digits] = bytes1(uint8(48 + uint256(value % 10)));
-            value /= 10;
-        }
-        return string(buffer);
-    }
-    function tokenURI (uint32 _item) public view returns (string memory) {
-        string[9] memory parts;
-        parts[0] = '<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin meet" viewBox="0 0 350 350"><style>.base { fill: white; font-family: serif; font-size: 14px; }</style><rect width="100%" height="100%" fill="black" /><text x="10" y="20" class="base">';
-        parts[1] = string(abi.encodePacked("id", " ", toString(_item)));
-        parts[2] = '</text><text x="10" y="40" class="base">';
-        parts[3] = string(abi.encodePacked("type", " ", toString(items[_item].item_type)));
-        parts[4] = '</text><text x="10" y="60" class="base">';
-        parts[5] = string(abi.encodePacked("crafted time", " ", toString(items[_item].crafted_time)));
-        parts[6] = '</text><text x="10" y="80" class="base">';
-        parts[7] = string(abi.encodePacked("crafted summoner", " ", toString(items[_item].crafted_summoner)));
-        parts[8] = '</text></svg>';
-        string memory output = 
-            string(abi.encodePacked(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7], parts[8]));
-        string memory json = Base64.encode(bytes(string(abi.encodePacked('{"name": "summoner #', toString(_item), '", "description": "House of Murasaki-san. Murasaki-san is a pet living in your wallet. They grow with your dedication. https://murasaki-san.com/", "image": "data:image/svg+xml;base64,', Base64.encode(bytes(output)), '"}'))));
-        output = string(abi.encodePacked('data:application/json;base64,', json));
-        return output;
-    }
-
-    //call items as array, need to write in Craft contract
-    function get_balance_of_type(address _wallet) public view returns (uint32[256] memory) {
-        return balance_of_type[_wallet];
-    }
-
-    //221110 added: Transfer fees
-    
-    //noFee address
-    mapping(address => bool) private noFee_address;
-    
-    //set transfer fee
-    uint public TRANSFER_FEE = 0;   //ether
-    
-    //a wallet collecting fees
-    address private bufferTreasury_address;
-    
-    //admin
-    function _add_noFee_address(address _address) external onlyOwner {
-        noFee_address[_address] = true;
-    }
-    function _remove_noFee_address(address _address) external onlyOwner {
-        noFee_address[_address] = false;
-    }
-    function _set_transfer_fee(uint _value) external onlyOwner {
-        TRANSFER_FEE = _value;
-    }
-    function _set_bufferTreasury_address(address _address) external onlyOwner {
-        bufferTreasury_address = _address;
-    }
-    
-    //override interface IERC2665
-    function getTransferFee(uint256 _tokenId) external view override returns (uint256) {
-        return TRANSFER_FEE;
-    }
-    function getTransferFee(uint256 _tokenId, string calldata _currencySymbol) external view override returns (uint256) {
-        return TRANSFER_FEE;
-    }
-    
-    //override transfer functions
-    function transferFrom(
-        address from,
-        address to,
-        uint256 tokenId
-    ) public virtual override payable {
-        //added code, when not noFee address, require transfer fee
-        if (noFee_address[from] == false && noFee_address[to] == false) {
-            require(msg.value >= TRANSFER_FEE * 10**18);
-            payable(bufferTreasury_address).transfer(address(this).balance);
-        }
-        require(_isApprovedOrOwner(msg.sender, tokenId), "ERC721: transfer caller is not owner nor approved");
-        _transfer(from, to, tokenId);
-    }
-
-    function safeTransferFrom(
-        address from,
-        address to,
-        uint256 tokenId
-    ) public virtual override payable {
-        if (noFee_address[from] == false && noFee_address[to] == false) {
-            require(msg.value >= TRANSFER_FEE * 10**18);
-            payable(bufferTreasury_address).transfer(address(this).balance);
-        }
-        safeTransferFrom(from, to, tokenId, "");
-    }
-
-    function safeTransferFrom(
-        address from,
-        address to,
-        uint256 tokenId,
-        bytes memory _data
-    ) public virtual override payable {
-        if (noFee_address[from] == false && noFee_address[to] == false) {
-            require(msg.value >= TRANSFER_FEE * 10**18);
-            payable(bufferTreasury_address).transfer(address(this).balance);
-        }
-        require(_isApprovedOrOwner(msg.sender, tokenId), "ERC721: transfer caller is not owner nor approved");
-        _safeTransfer(from, to, tokenId, _data);
     }
 }
 
@@ -6651,7 +6282,33 @@ contract Fluffy_Festival is Ownable {
 
 /*
 
+ ok Pauseフラグの実装
+        summonやfeedingなどはisPause=falseの時しか行えない
+        事前に全部準備しておき、開始時にisPause=true→falseにする
+    
+ ok 外出フラグの実装
+        将来的にsummonerを外出させる時、isActiveフラグだけだと不都合だと思われる
+        inHomeフラグを作り、外出時の演出を変える
+        また、feedingやgroomingもisHome=trueの時しか行えないようにするか
 
+ ok Dapps Staking Luck Boostの見直し
+        上限をmax 100,000とする
+        レベルキャップを実装する
+        どのレベルでも100,000までluckが上昇するが、
+        レベルが高いほうが効率が良くなるよう計算する
+            Lv1では500以上は変わらない、ではない。
+            どんなレベルでも100,000までは掛け金に応じて有利になる
+        指数関数的に。
+
+ ok 収集NFTの実装
+        IDはnormal:201-212, uncommon:213-224, rare:225-236
+        upgradeに対応させる, preciousは+12
+        calc_heartの計算式を修正する
+
+ ok 要求_item_idの整備
+        _item_idテーブルが確定してから
+        nameplateにrequire
+        murasaki_mailにクッションをrequire
 
 */
 
