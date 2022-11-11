@@ -82,6 +82,12 @@ contract ERC721 is IERC721 {
 
 //### 1st
 
+    Offeringオーダーの実装
+        予めほしいアイテムに値段を決めてofferingを出しておき、
+            それ以下の値段でlistされたときは即座に売買を成立させる
+        UIの改善、bot対策、マーケットを利用したtransferの抑制に有用だろう
+        
+
     burn周りのコード改善
         burnはpermitted addressなら自由に行えてしまう
             NFTとSBTはユーザーの資産で、運営が全くタッチできない機構にするべき。
@@ -97,6 +103,7 @@ contract ERC721 is IERC721 {
             approveのUIをどうするか。
         改善が必要な機構：
             ★ upgrade時のapprove不要のburn
+            しかしapproveが必要なfunctionが複数ありUIが阻害される
         ひとまず、add permissionが可能なownerの権限を将来破棄する、という宣言で許してもらうか。
         しかし、やはりNFTが勝手にburnされるのは良くないだろうか。
             一応funcionコントラクトではowner checkはしているのだが。
@@ -5755,6 +5762,9 @@ function open_window_upgrade(scene) {
 //---window:voting
 function open_window_voting(scene) {
 
+    //create group
+    group_window_voting = scene.add.group();
+
     sound_window_open.play();
     //close window and summon
     function close_window(_summoner, _type) {
@@ -5878,8 +5888,6 @@ function open_window_voting(scene) {
     let _bar2_y = eval("_icon" + local_ff_elected_type).y;
     _bar2.fillRect(_bar2_x-30, _bar2_y, 350, 5);
     */
-    //create group
-    group_window_voting = scene.add.group();
     group_window_voting.add(window_voting);
     group_window_voting.add(msg1);
     group_window_voting.add(msg2);

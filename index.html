@@ -75,25 +75,25 @@ and this project adheres to [Semantic Versioning](http://semver.org/).<br>
 
 <h3 id="whats_this">What's This? &#127808;</h3>
 <p>
-House of Murasaki-san project is a dApp game built on Astar Network.<br>
+<b>House of Murasaki-san</b> is a dApp game built on Astar Network.<br>
 You can summon your Murasaki-san character and care them to grow.<br>
 </p>
 <p>
 You can <b><a href="house.html?summoner=1">Demo Preview</a></b> before summoning your Murasaki-san.<br>
-(Developer's character. No transactions are allowed except for Feeding.) <br>
+(It's the developer's character. Try <b>Feeding</b> our Murasaki-san.) <br>
 </p>
 
 <details><summary>What's the Murasaki-san...?</summary>
 <p>
 <p>
-&nbsp;&nbsp;&nbsp;One day, when I asked a friend to "create an original character that doesn't exist anywhere else," Murasaki-san was born on the edge of our sketchbook. Well, we all know that the name, murasaki-san, is a bit strange; murasaki-san means "Mr. Purple" in Japanese. My friend first painted this little character purple so we could only call it murasaki-san and we finally ended up naming it "Murasaki-san", even though it's actually a little pink ;)<br>
+&nbsp;&nbsp;&nbsp;One day, when I asked a friend to "create an original character that doesn't exist anywhere else," Murasaki-san was born on the edge of our sketchbook. Well, we all know that the name, murasaki-san, is a bit strange; murasaki-san means "Mr. Purple" in Japanese. My friend first painted this little character purple so we could only call it murasaki-san and we finally ended up naming it "Murasaki-san", even though I think it's actually a little pink ;)<br>
 </p>
 <p>
 &nbsp;&nbsp;&nbsp;That's why I started creating on a game to move, take care of, and grow Murasaki-san. It was just two weeks after the Astar Network launched and we wanted to build something fun on Astar chain. After about a year of development period, we are happy to launch our product on the Astar Network :)<br>
 </p>
 <p>
 &nbsp;&nbsp;&nbsp;Cheers to Astar and Murasaki-san.<br>
-<img src="src/icon/murasakisan_02.png" width="96" height="96">&lt;cheers!
+<img src="src/icon/murasakisan_02.png" width="96" height="96">&lt;&nbsp;cheers!
 </p>
 </p>
 </details>
@@ -137,7 +137,7 @@ Please take it easy and watch over them.
   <figcaption>Game screen</figcaption>
 </figure>
 <b>Summary:</b><br>
-&nbsp;&nbsp;&nbsp;<u>Feed twice a day</u> and <u>Groom once every three days</u>.<br>
+&nbsp;&nbsp;&nbsp;<u>Feed at least twice a day</u> and <u>Groom at least once every three days</u>.<br>
 &nbsp;&nbsp;&nbsp;That way your Murasaki-san will always be healthy and happy.<br>
 </p>
 
@@ -447,7 +447,7 @@ Our priority is to control inflation rate and keep the game going.<br>
 The project will move to the next season in a couple of years.<br>
 </p>
 <p>
-It takes at least about <b>two years</b> for House of Murasaki-san to reach maximum growth. Over this two years, we plan to create the next product which uses the statuses of each Murasaki-san. Since Astar Network supports both EVM and WASM, so we plan to use Rust to create our next product on WASM, and interacting with House of Murasaki-san on EVM via XCM (Well, the coder is enjoying learning Rust now, while waiting for XCM to be enabled on Astar Network).<br>
+It takes at least about <b>two years</b> for House of Murasaki-san to reach maximum growth. Over this two years, we plan to create the next product which uses the statuses of each Murasaki-san. Since Astar Network supports both EVM and WASM, so we plan to use Rust to create our next product on WASM, and interacting with House of Murasaki-san on EVM via XCM (Well, the coder is enjoying learning ink! now, while waiting for XCM to be enabled on Astar Network).<br>
 </p>
 <p>
 The concept of the next product is still undecided yet, but we would like to make a work related to the travel. Actually, the last items Murasaki-san can craft are related to travel.
@@ -459,14 +459,14 @@ One day, a grown your Murasaki-san may set off on a journey with their friends f
 <b>Abount security:</b><br>
 </p>
 <p>
-All parameters and status of NFTs and SBTs in this project are recorded on Astar chain. Some solidity codes, which are only allowed to be used by the owner wallet, have a mechanism that can be used to rewrite user states, but at this time we believe it is necessary for game balance adjustment, bug fixes, contract upgrades, and anti-bots.
+All parameters and status of NFTs and SBTs in this project are recorded on Astar chain. Some solidity codes, which are only allowed to be used by the administrator wallet, have a mechanism that can be used to rewrite user states, but at this time we believe it is necessary for game balance adjustment, bug fixes, contract upgrades, and anti-bots.
 </p>
 <p>
-These permissions are only granted to the following owner address:<br>
+These permissions are only granted to the following administrator wallet:<br>
 &nbsp;&nbsp;&nbsp;(not deployed on the mainnet yet)
 </p>
 <p>
-After this work is sufficiently on track, we plan to gradually relinquish ownership of each contract.
+After this product is sufficiently stable, we plan to gradually relinquish ownership of each solidity contract.
 </p>
 
 
@@ -478,13 +478,38 @@ We prepared <a href="">the contract</a> to refer to the information of this proj
 </p>
 <p>
 <ul>
-<li>Contract Address: XXX<br>
-<li>Contract ABI: XXX<br>
-<li>Contract interface in Solidity: YYY<br>
+<li>Contract Address:&nbsp;&nbsp;&nbsp;<b><font color="blue" size="-0.5">0x115862538947FB676eFF5449b1c3Af1A82AA5C37</font></b><br>
+<li>Contract ABI:&nbsp;&nbsp;&nbsp;<b><a href="src/solidity/abi_Murasaki_Info_fromWallet.json">abi_Murasaki_Info_fromWallet.json</a></b><br>
+<li>Contract interface:&nbsp;&nbsp;&nbsp;<b><a href="src/solidity/IMurasaki_Info_from_wallet.sol">IMurasaki_Info_from_wallet.sol</a></b><br>
 </ul>
 </p>
 <p>
 This contract allows you to use Murasaki-san information in your web pages or contracts (ex: display the Murasaki-san Name of the connected wallet in your web page, etc.). 
+</p>
+<p>
+For example:<br>
+<script>
+async function _show_info() {
+    let web3 = await new Web3(window.ethereum);
+    //let web3 = await new Web3("wss://testnetwss.murasaki-san.com");
+    await window.ethereum.request({method: 'eth_requestAccounts'});
+    let wallets = await web3.eth.getAccounts();
+    let wallet = wallets[0];
+    let abi = [{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"inputs":[{"internalType":"address","name":"_address","type":"address"}],"name":"_set1_murasaki_function_share_address","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_address","type":"address"}],"name":"_set2_murasaki_info_address","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"age","outputs":[{"internalType":"uint32","name":"","type":"uint32"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"allStatus","outputs":[{"internalType":"string[5]","name":"","type":"string[5]"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"class","outputs":[{"internalType":"uint32","name":"","type":"uint32"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"coin","outputs":[{"internalType":"uint32","name":"","type":"uint32"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"dexterity","outputs":[{"internalType":"uint32","name":"","type":"uint32"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"dexterity_withItems","outputs":[{"internalType":"uint32","name":"","type":"uint32"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"exp","outputs":[{"internalType":"uint32","name":"","type":"uint32"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"happy","outputs":[{"internalType":"uint32","name":"","type":"uint32"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"inHouse","outputs":[{"internalType":"uint32","name":"","type":"uint32"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"intelligence","outputs":[{"internalType":"uint32","name":"","type":"uint32"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"intelligence_withItems","outputs":[{"internalType":"uint32","name":"","type":"uint32"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"isActive","outputs":[{"internalType":"uint32","name":"","type":"uint32"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"level","outputs":[{"internalType":"uint32","name":"","type":"uint32"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"luck","outputs":[{"internalType":"uint32","name":"","type":"uint32"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"luck_withItems","outputs":[{"internalType":"uint32","name":"","type":"uint32"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"luck_withItems_withDice","outputs":[{"internalType":"uint32","name":"","type":"uint32"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"material","outputs":[{"internalType":"uint32","name":"","type":"uint32"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"murasaki_function_share_address","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"murasaki_info_address","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"not_petrified","outputs":[{"internalType":"uint32","name":"","type":"uint32"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"precious","outputs":[{"internalType":"uint32","name":"","type":"uint32"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"satiety","outputs":[{"internalType":"uint32","name":"","type":"uint32"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"score","outputs":[{"internalType":"uint32","name":"","type":"uint32"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"strength","outputs":[{"internalType":"uint32","name":"","type":"uint32"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"strength_withItems","outputs":[{"internalType":"uint32","name":"","type":"uint32"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"summoner","outputs":[{"internalType":"uint32","name":"","type":"uint32"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"total_coin_mined","outputs":[{"internalType":"uint32","name":"","type":"uint32"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"total_exp_gained","outputs":[{"internalType":"uint32","name":"","type":"uint32"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"total_item_crafted","outputs":[{"internalType":"uint32","name":"","type":"uint32"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"total_material_farmed","outputs":[{"internalType":"uint32","name":"","type":"uint32"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"total_precious_received","outputs":[{"internalType":"uint32","name":"","type":"uint32"}],"stateMutability":"view","type":"function"}];
+    let address = "0x115862538947FB676eFF5449b1c3Af1A82AA5C37";
+    let contract = new web3.eth.Contract(abi, address);
+    let _name = await contract.methods.name(wallet).call();
+    let _level = await contract.methods.level(wallet).call();
+    let _text = "";
+    _text += "&nbsp;&nbsp;&nbsp;";
+    _text += "Hellow! owner of <b>" + _name + "</b>!<br>";
+    _text += "&nbsp;&nbsp;&nbsp;";
+    _text += "Your Murasaki-san is Level <b>" + _level + "</b>.";
+    let target = document.getElementById("output");
+    target.innerHTML = _text;
+}
+</script>
+<div id="output"><button style="height:28px;font-size:80%" onclick="_show_info();">greeting</button></div>
 </p>
 <p>
 Please feel free to use it.
@@ -495,7 +520,7 @@ Please feel free to use it.
 
 <h3 id="about">About Us &#x1f33c;</h3>
 <p>
-We are one of the supporter of Astar Network ecosystem and Polkadot union. This is our fan project using Astar blockchain and our manufacturing concept is: <br>
+We are one of the supporter of Astar Network ecosystem and Polkadot union, and also participated in Astar parachain auction in late 2021. This is our fan product using Astar blockchain and our manufacturing concept is: <br>
 <i>"making the product that we ourselves also enjoy playing".</i><br>
 We hope you like too.
 <ul>
