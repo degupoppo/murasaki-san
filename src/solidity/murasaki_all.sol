@@ -1229,7 +1229,7 @@ contract Murasaki_Parameter is Ownable {
     bool public isPaused = true;
     uint32 public BASE_SEC = 86400;
     uint32 public SPEED = 1000; //100=100%
-    uint32 public PRICE = 0;    //uin32, ether, need to recalc 10**18 in methods
+    uint32 public PRICE = 200;    //uin32, ether, need to recalc 10**18 in methods
     uint32 public DAY_PETRIFIED = 30;
     uint32 public STAKING_REWARD_SEC = 2592000; //30 days
     uint32 public ELECTED_FLUFFY_TYPE = 0;
@@ -3127,7 +3127,7 @@ contract Murasaki_Function_Crafting is Ownable, ReentrancyGuard {
 }
 
 
-//---Crafting_Codex
+//---*Crafting_Codex
 
 
 contract Murasaki_Function_Crafting_Codex is Ownable {
@@ -3239,15 +3239,15 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
         //194: coin bag
         if (_item_type == 194){
             _level = 99;
-            _dc = 20;    //30min
-            _coin = 1000;
-            _material = 10;
+            _dc = 40;    //30min
+            _coin = 1200;
+            _material = 100;
         //195: material bag
         } else if (_item_type == 195) {
             _level = 99;
-            _dc = 20;
-            _coin = 10;
-            _material = 1000;
+            _dc = 40;
+            _coin = 100;
+            _material = 1200;
         //196: mail
         } else if (_item_type == 196) {
             _level = 99;
@@ -4696,13 +4696,28 @@ contract Murasaki_Lootlike is Ownable {
     function get_personality(uint32 _summoner) public view returns (string memory) {
         return pluckName(_summoner, "personality", personality);
     }
-    function get_allStatus(uint32 _summoner) public view returns (string[5] memory) {
-        string[5] memory _status;
+    function get_flower(uint32 _summoner) public view returns (string memory) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Main mm = Murasaki_Main(mfs.murasaki_main_address());
+        uint32 _class = mm.class(_summoner);
+        return flower[_class];
+    }
+    function get_street(uint32 _summoner) public view returns (string memory) {
+        return pluckName(_summoner, "street", street);
+    }
+    function get_city(uint32 _summoner) public view returns (string memory) {
+        return pluckName(_summoner, "city", city);
+    }
+    function get_allStatus(uint32 _summoner) public view returns (string[8] memory) {
+        string[8] memory _status;
         _status[0] = get_birthplace(_summoner);
         _status[1] = get_softness(_summoner);
         _status[2] = get_fluffiness(_summoner);
         _status[3] = get_elasticity(_summoner);
         _status[4] = get_personality(_summoner);
+        _status[5] = get_flower(_summoner);        
+        _status[6] = get_street(_summoner);        
+        _status[7] = get_city(_summoner);        
         return _status;
     }
 
@@ -4741,93 +4756,164 @@ contract Murasaki_Lootlike is Ownable {
     }
 
     string[] private birthplace = [
-        "fluffy sweater",
-        "fluffy blanket",
-        "fluffy carpet",
-        "fluffy cushion",
-        "fluffy scarf",
-        "fluffy towel",
-        "woolly sweater",
-        "woolly blanket",
-        "woolly carpet",
-        "woolly cushion",
-        "woolly scarf",
-        "woolly towel",
-        "feathery sweater",
-        "feathery blanket",
-        "feathery carpet",
-        "feathery cushion",
-        "feathery scarf",
-        "feathery towel"
+        "Fluffy Sweater",
+        "Fluffy Blanket",
+        "Fluffy Carpet",
+        "Fluffy Cushion",
+        "Fluffy Scarf",
+        "Fluffy Towel",
+        "Woolly Sweater",
+        "Woolly Blanket",
+        "Woolly Carpet",
+        "Woolly Cushion",
+        "Woolly Scarf",
+        "Wwoolly Towel",
+        "Feathery Sweater",
+        "Feathery Blanket",
+        "Feathery Carpet",
+        "Feathery Cushion",
+        "Ffeathery Scarf",
+        "Ffeathery Towel"
     ];
     
     string[] private softness = [
-        "inredible",
-        "marvelous",
-        "excellent",
-        "amazing",
-        "great",
-        "fabulous",
-        "wonderful",
-        "gorgeous",
-        "awesome",
-        "fantastic",
-        "lovely",
-        "brilliant",
-        "impressive",
-        "superb"
+        "Inredible",
+        "Marvelous",
+        "Excellent",
+        "Amazing",
+        "Great",
+        "Fabulous",
+        "Wonderful",
+        "Gorgeous",
+        "Awesome",
+        "Fantastic",
+        "Lovely",
+        "Brilliant",
+        "Impressive",
+        "Superb"
     ];
     
     string[] private fluffiness = [
-        "inredible",
-        "marvelous",
-        "excellent",
-        "amazing",
-        "great",
-        "fabulous",
-        "wonderful",
-        "gorgeous",
-        "awesome",
-        "fantastic",
-        "lovely",
-        "brilliant",
-        "impressive",
-        "superb"
+        "Inredible",
+        "Marvelous",
+        "Excellent",
+        "Amazing",
+        "Great",
+        "Fabulous",
+        "Wonderful",
+        "Gorgeous",
+        "Awesome",
+        "Fantastic",
+        "Lovely",
+        "Brilliant",
+        "Impressive",
+        "Superb"
     ];
 
     string[] private elasticity = [
-        "inredible",
-        "marvelous",
-        "excellent",
-        "amazing",
-        "great",
-        "fabulous",
-        "wonderful",
-        "gorgeous",
-        "awesome",
-        "fantastic",
-        "lovely",
-        "brilliant",
-        "impressive",
-        "superb"
+        "Inredible",
+        "Marvelous",
+        "Excellent",
+        "Amazing",
+        "Great",
+        "Fabulous",
+        "Wonderful",
+        "Gorgeous",
+        "Awesome",
+        "Fantastic",
+        "Lovely",
+        "Brilliant",
+        "Impressive",
+        "Superb"
     ];
     
     string[] private personality = [
-        "friendly",
-        "reliable",
-        "optimistic",
-        "frisky",
-        "thoughtful",
-        "honest",
-        "easygoing",
-        "tolerant",
-        "mild",
-        "affectionate",
-        "intelligent",
-        "patient",
-        "faithful",
-        "innocent",
-        "gentle"
+        "Friendly",
+        "Reliable",
+        "Optimistic",
+        "Frisky",
+        "Thoughtful",
+        "Honest",
+        "Easygoing",
+        "Tolerant",
+        "Mild",
+        "Affectionate",
+        "Intelligent",
+        "Patient",
+        "Faithful",
+        "Innocent",
+        "Gentle"
+    ];
+    
+    string[] private flower = [
+        "Rose",
+        "Marigold",
+        "Dandelion",
+        "Rosemary",
+        "Olive",
+        "Holly",
+        "Nemophila",
+        "Hydrangea",
+        "Forget-me-not",
+        "Sumire",
+        "Gerbera",
+        "Anemone"
+    ];
+    
+    string[] private city = [
+        "Garnet City",
+        "Amethyst City",
+        "Aquamarine City",
+        "Diamond City",
+        "Emerald City",
+        "Pearl City",
+        "Ruby Town",
+        "Peridot Town",
+        "Sapphire Town",
+        "Opal Town",
+        "Topaz Town",
+        "Turquoise Town"
+    ];
+
+    string[] private street = [
+        "Apple Ave",
+        "Strawberry Ave",
+        "Avocado Ave",
+        "Orange Ave",
+        "Raspberry Ave",
+        "Kiwi Ave",
+        "Grapefrit Ave",
+        "Coconut Ave",
+        "Cherry Ave",
+        "Pineapple Ave",
+        "Banana Ave",
+        "Grape Ave",
+        "Blueberry Ave",
+        "Muskmelon Ave",
+        "Mango Ave",
+        "Peach Ave",
+        "Yuzu Ave",
+        "Lemon Ave",
+        "Lime Ave",
+        "Pumpkin St",
+        "Cabbage St",
+        "Cucumber St",
+        "Sesami St",
+        "Potato St",
+        "Ginger St",
+        "Leek St",
+        "Soybean St",
+        "Onion St",
+        "Tomato St",
+        "Carrot St",
+        "Garlic St",
+        "Basil St",
+        "Paprika St",
+        "Broccoli St",
+        "Lotus St",
+        "Califlower St",
+        "Bamboo St",
+        "Eggplant St"
     ];
 }
 
@@ -5190,7 +5276,7 @@ contract Murasaki_Info is Ownable {
     }
     
     //Lootlike
-    function allStatus(uint32 _summoner) public view returns (string[5] memory) {
+    function allStatus(uint32 _summoner) public view returns (string[8] memory) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Lootlike mll = Murasaki_Lootlike(mfs.murasaki_lootlike_address());
         return mll.get_allStatus(_summoner);
@@ -5341,7 +5427,7 @@ contract Murasaki_Info is Ownable {
         uint32,
         address,
         string memory,
-        string[5] memory,
+        string[8] memory,
         uint32,
         uint32,
         uint32,
@@ -5350,7 +5436,7 @@ contract Murasaki_Info is Ownable {
         uint32 _class = class(_summoner);
         address _owner = owner(_summoner);
         string memory _name = name(_summoner);
-        string[5] memory lootStatus = allStatus(_summoner);
+        string[8] memory lootStatus = allStatus(_summoner);
         return (
             _class, 
             _owner, 
@@ -5396,8 +5482,16 @@ interface IMurasaki_Info_fromWallet {
     function level  (address _wallet) external view returns (uint32);
 
     // Character
-    //  0: birthplace, 1:softness, 2:fluffiness, 3:elasticity, 4:personality
-    function allStatus(address _wallet) external view returns (string[5] memory);
+    function birthplace  (address _wallet) external view returns (string memory);
+    function softness    (address _wallet) external view returns (string memory);
+    function fluffiness  (address _wallet) external view returns (string memory);
+    function elasticity  (address _wallet) external view returns (string memory);
+    function personality (address _wallet) external view returns (string memory);
+    function flower      (address _wallet) external view returns (string memory);
+
+    // Address
+    function street      (address _wallet) external view returns (string memory);
+    function city        (address _wallet) external view returns (string memory);
 
     // Parameters
     function strength       (address _wallet) external view returns (uint32);
@@ -5406,32 +5500,32 @@ interface IMurasaki_Info_fromWallet {
     function luck           (address _wallet) external view returns (uint32);
 
     // Parameters with item modification
-    function strength_withItems(address _wallet) external view returns (uint32);
-    function dexterity_withItems(address _wallet) external view returns (uint32);
-    function intelligence_withItems(address _wallet) external view returns (uint32);
-    function luck_withItems(address _wallet) external view returns (uint32);
-    function luck_withItems_withDice(address _wallet) external view returns (uint32);
+    function strength_withItems      (address _wallet) external view returns (uint32);
+    function dexterity_withItems     (address _wallet) external view returns (uint32);
+    function intelligence_withItems  (address _wallet) external view returns (uint32);
+    function luck_withItems          (address _wallet) external view returns (uint32);
+    function luck_withItems_withDice (address _wallet) external view returns (uint32);
     
     // Present status, material means leaf, precious means fluffy_score
-    function satiety(address _wallet) external view returns (uint32);
-    function happy(address _wallet) external view returns (uint32);
-    function exp(address _wallet) external view returns (uint32);
-    function coin(address _wallet) external view returns (uint32);
-    function material(address _wallet) external view returns (uint32);
-    function precious(address _wallet) external view returns (uint32);
+    function satiety    (address _wallet) external view returns (uint32);
+    function happy      (address _wallet) external view returns (uint32);
+    function exp        (address _wallet) external view returns (uint32);
+    function coin       (address _wallet) external view returns (uint32);
+    function material   (address _wallet) external view returns (uint32);
+    function precious   (address _wallet) external view returns (uint32);
 
     // Scores
-    function score(address _wallet) external view returns (uint32);
-    function total_exp_gained(address _wallet) external view returns (uint32);
-    function total_coin_mined(address _wallet) external view returns (uint32);
-    function total_material_farmed(address _wallet) external view returns (uint32);
-    function total_item_crafted(address _wallet) external view returns (uint32);
-    function total_precious_received(address _wallet) external view returns (uint32);
+    function score                      (address _wallet) external view returns (uint32);
+    function total_exp_gained           (address _wallet) external view returns (uint32);
+    function total_coin_mined           (address _wallet) external view returns (uint32);
+    function total_material_farmed      (address _wallet) external view returns (uint32);
+    function total_item_crafted         (address _wallet) external view returns (uint32);
+    function total_precious_received    (address _wallet) external view returns (uint32);
 
     // etc
-    function not_petrified(address _wallet) external view returns (uint32);
-    function isActive(address _wallet) external view returns (uint32);
-    function inHouse(address _wallet) external view returns (uint32);
+    function not_petrified  (address _wallet) external view returns (uint32);
+    function isActive       (address _wallet) external view returns (uint32);
+    function inHouse        (address _wallet) external view returns (uint32);
 }
 
 
@@ -5606,10 +5700,45 @@ contract Murasaki_Info_fromWallet is Ownable, IMurasaki_Info_fromWallet {
         Murasaki_Info mi = Murasaki_Info(murasaki_info_address);
         return mi.inHouse(summoner(_wallet));
     }
-    //allStatus
-    function allStatus(address _wallet) external view returns (string[5] memory) {
+    //birthplace
+    function birthplace(address _wallet) external view returns (string memory) {
         Murasaki_Info mi = Murasaki_Info(murasaki_info_address);
-        return mi.allStatus(summoner(_wallet));
+        return mi.allStatus(summoner(_wallet))[0];
+    }
+    //softness
+    function softness(address _wallet) external view returns (string memory) {
+        Murasaki_Info mi = Murasaki_Info(murasaki_info_address);
+        return mi.allStatus(summoner(_wallet))[1];
+    }
+    //fluffiness
+    function fluffiness(address _wallet) external view returns (string memory) {
+        Murasaki_Info mi = Murasaki_Info(murasaki_info_address);
+        return mi.allStatus(summoner(_wallet))[2];
+    }
+    //elasticity
+    function elasticity(address _wallet) external view returns (string memory) {
+        Murasaki_Info mi = Murasaki_Info(murasaki_info_address);
+        return mi.allStatus(summoner(_wallet))[3];
+    }
+    //personality
+    function personality(address _wallet) external view returns (string memory) {
+        Murasaki_Info mi = Murasaki_Info(murasaki_info_address);
+        return mi.allStatus(summoner(_wallet))[4];
+    }
+    //flower
+    function flower(address _wallet) external view returns (string memory) {
+        Murasaki_Info mi = Murasaki_Info(murasaki_info_address);
+        return mi.allStatus(summoner(_wallet))[5];
+    }
+    //street
+    function street(address _wallet) external view returns (string memory) {
+        Murasaki_Info mi = Murasaki_Info(murasaki_info_address);
+        return mi.allStatus(summoner(_wallet))[6];
+    }
+    //city
+    function city(address _wallet) external view returns (string memory) {
+        Murasaki_Info mi = Murasaki_Info(murasaki_info_address);
+        return mi.allStatus(summoner(_wallet))[7];
     }
 }
 
@@ -5709,6 +5838,8 @@ contract Fluffy_Festival is Ownable, ReentrancyGuard {
     mapping(uint32 => uint32) public winner_inStep;
 
     //voting
+    event Start_Voting(uint32 indexed _summoner);
+    event Voting(uint32 indexed _summoner, uint32 _select);
     function voting(uint32 _summoner, uint32 _select) external nonReentrant {
         require(isActive);
         //reject present and previous elected type
@@ -5717,6 +5848,7 @@ contract Fluffy_Festival is Ownable, ReentrancyGuard {
         require(_select >= 201 && _select <= 212);
         //check fist voting
         if ( check_start_voting() ){
+            emit Start_Voting(_summoner);
             _start_voting();
         }
         //chekc votable of summoner
@@ -5738,6 +5870,7 @@ contract Fluffy_Festival is Ownable, ReentrancyGuard {
         if ( check_end_voting() ) {
             end_voting(_summoner);
         }
+        emit Voting(_summoner, _select);
     }
     function check_votable(uint32 _summoner) public view returns (bool) {
         //get subject_now
@@ -5748,7 +5881,7 @@ contract Fluffy_Festival is Ownable, ReentrancyGuard {
             //or after start, meet the all condition
             || (
                 //check summoner
-                _check_summoner(_summoner)
+                _check_summoner(_summoner, msg.sender)
                 //check not have already voted
                 && _subject.start_block > last_voting_block[_summoner]
                 //check not ended
@@ -5760,7 +5893,7 @@ contract Fluffy_Festival is Ownable, ReentrancyGuard {
             return false;
         }
     }
-    function _check_summoner (uint32 _summoner) public view returns (bool) {
+    function _check_summoner (uint32 _summoner, address _wallet) internal view returns (bool) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Parameter mp = Murasaki_Parameter(mfs.murasaki_parameter_address());
         Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
@@ -5768,7 +5901,7 @@ contract Fluffy_Festival is Ownable, ReentrancyGuard {
             //check pause
             mp.isPaused() == false
             //check owner
-            && mfs.check_owner(_summoner, msg.sender)
+            && mfs.check_owner(_summoner, _wallet)
             //check summoner status
             && ms.inHouse(_summoner)
             && mfs.calc_satiety(_summoner) >= SATIETY_REQUIRED
@@ -5831,6 +5964,7 @@ contract Fluffy_Festival is Ownable, ReentrancyGuard {
         //vonus mint
         string memory _memo = "first vote bonus";
         _mint_presentbox(uint32(0), msg.sender, _memo);
+        //emit Start_Voting(_summoner);
     }
     
     //end voting
@@ -5843,6 +5977,7 @@ contract Fluffy_Festival is Ownable, ReentrancyGuard {
         }
     }
     //public, executable without voting
+    event End_Voting(uint32 indexed _summoner, uint32 _winner);
     function end_voting(uint32 _summoner) public nonReentrant {
         require(
             _check_summoner(_summoner)
@@ -5865,6 +6000,7 @@ contract Fluffy_Festival is Ownable, ReentrancyGuard {
         //vonus mint
         string memory _memo = "final vote bonus";
         _mint_presentbox(uint32(0), msg.sender, _memo);
+        emit End_Voting(_summoner, _winner);
     }
     function _select_winner(uint32 _summoner) internal view returns (uint32) {
         //candle auction

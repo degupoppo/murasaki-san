@@ -82,33 +82,65 @@ contract ERC721 is IERC721 {
 
 //### 1st
 
+
+   *msg.sender周りのコードの修正
+        もしかしたら、msg.senderはpublic, internal, externalで挙動が変わるのかも
+        同じコントラ内でも関数から呼び出される場合は、internalとpublicで中身が違う？
+        mining/farmingの数がtx前後で一致しないのはこれが原因だったのか？
+            msg.senderをつかってitem_countingしているため。
+        実験して把握すること。
+        どうやら、viewはmsg.senderが0になってしまうようだ！
+            https://medium.com/nayuta-inc/ethereum-solidity%E3%81%AEmsg-sender-f8c34c5653a4
+        これを回避するために、ownerはsummonerから逆引きを徹底する
+        むしろ、mining/farmingでmsg.senderを使ってしまうと、
+            他人のsummonerに自分のwalletのitem補正がかかってしまう。
+        一度msg.sender周りのコードを丁寧に洗い出すこと。
+            msg.senderの使用はcheck_summoner時以外は極力避ける。
+            また、check_summoner時もweb3js側でfrom:walletしていないとmsg.senderが0になる。
+
+   *fluffy festivalのバグ修正
+        2人目が投票できないバグあり
+        isVotableがtrueにならない模様
+        msg.senderが原因か？要究明
+
+
+    murasaki_craftのitem移行関数の実装
+        next_itemの書き換えの実装
+        旧コントラからidを指定して新コントラにmintさせる関数の実装
+            制限をゆるくしたcraftを用意する
+            この際、item_idは異なっても仕方ないとする
+            item_idを指定してこのrecraft関数を叩く関数も用意する
+        すべてrecraftし終えたら、最後にnext_itemを修正して完了
+
+    fluffyシステムの個数調整
+        upgradeの個数調整
+            x3 -> x1は安すぎるか？
+            fluffy dollがあまりに量産されすぎるのも良くない
+            x3 , x4, x5と段階的に上げていっても良いか。
+        いずれにしても、要調整だろうか
+
+    マーケットルールの改善
+        transfer fee導入後はsell即buyのitem移動が発生しうる
+        最低listing価格を決めておくか？
+            この場合、最低価格よりbuyback価格が低ければ印象が悪いだろう
+        0.1 $ASTRぐらいか？
+            しかし、0.1 * 0.05 $ASTRでアイテムの移動ができてしまうので、
+            list&buyを利用したmulti-walletは防げないだろうか。
+        offeringシステムを実装できれば、市場に最低価格を決めてもらうことができる。
+        summonerを有するwalletしかマーケットコントラを使えないので、
+            コントラをつかったlist&buyボットは使用することはできない。
+            手動でも十分だろうが。
+        つまり、event監視型の防衛botは運用可能
+            最低価格でlistされたものを監視して即座に買い取る防衛型bot
+            伝統金融では市場操作になって違法なのだろうが。
+
     Offeringオーダーの実装
         予めほしいアイテムに値段を決めてofferingを出しておき、
             それ以下の値段でlistされたときは即座に売買を成立させる
         UIの改善、bot対策、マーケットを利用したtransferの抑制に有用だろう
-        
 
-    burn周りのコード改善
-        burnはpermitted addressなら自由に行えてしまう
-            NFTとSBTはユーザーの資産で、運営が全くタッチできない機構にするべき。
-            故に設計はシンプルかつ慎重に。
-        NFTとSBTについては、ユーザーの資産なので
-            ユーザーの許可がないとtransfer, burnできない設計にすることが望ましい。
-            運営側がいつでもburn可能な機構を残しておくのは印象が良くない。
-            仮に、将来高額の値段がついた際にネックになるし、
-            そもそもこういったユーザーがコントロールできない機構のNFTは
-            信用が低く価値が上がりにくいだろう。
-        ユーザーの許可を必要とするapprove & transferへと改善したいところだが。
-            しかしそうすると、upgradeにapproveが必要になってしまう。
-            approveのUIをどうするか。
-        改善が必要な機構：
-            ★ upgrade時のapprove不要のburn
-            しかしapproveが必要なfunctionが複数ありUIが阻害される
-        ひとまず、add permissionが可能なownerの権限を将来破棄する、という宣言で許してもらうか。
-        しかし、やはりNFTが勝手にburnされるのは良くないだろうか。
-            一応funcionコントラクトではowner checkはしているのだが。
-        別に一点物の絵画のような価値を付与したいのではなく、
-            あくまで運営の箱庭内の価値を担保できれば良いと考えるか。
+    訪問時のUI修正
+        他のsummonerを表示した時にfeedingボタンしか表示させないように修正する
 
     walletの状態を反映するギミックをもう少し実装する
         所持NFT：photo frame内に表示される
@@ -143,37 +175,6 @@ contract ERC721 is IERC721 {
         noFee address:
             buybackTreasury
             Market
-
-   *マーケットルールの改善
-        coin/leaf bagは70%しかearnできないようにする
-            移動手数料30%
-            miner/farmerキャラの抑制
-            自分でmining/farmingするインセンティブを大きくする
-        crafter royaltyの導入を検討する
-            platform feeとcrafter royaltyを別に設定する
-            しかし、upgrade素材に使われるとcrafter royaltyは消滅するのだが。
-            upgradeで生じたitemのcrafterはupgradeしたキャラとなるため。
-            fluffy dollについてはcrafter royaltyはある程度有効に働くだろうか。
-
-   *Fluffy DollのLUK補正の実装
-        +0%だった。
-        LUK補正　＋　Exp補正　にするか。
-        EXP補正+3%はLUK+3.00相当で強力だが、
-            クラフトによってLUKが下がるのはあまりよろしくないだろう。
-        fluffy dollはfluffy x27個分
-        1ヶ月で10-15個とすると、2ヶ月で作成可能
-        また、市場で買えばもっと早めに作成可能
-            流石に安すぎるだろうか。
-            Lvキャップがあるのでバランス崩壊とはならないだろうが。
-                +0.4/Lv, +8/20Lvが上限
-        x3でup-gradeではなく、x4でup-gradeとするか？
-        x3で+33%は破格か？
-
-   *Fluffy FestivalコントラのEvent実装
-        全く作っていなかった
-        start_voting
-        voting
-        end_voting
 
    *イベント監視システムを構築する
         眺めるようと、bot監視ように。
@@ -311,37 +312,6 @@ contract ERC721 is IERC721 {
                 received 100...
             level-up:1-20
                 3,6,9,12,15,18
-
- ok 存在しないsummoner指定時のバグ修正
-        isActive = falseのパターンと
-        まだsummonされていないパターンとある
-        また、petrifiedの動作もうまくいくか確認する
-
- ok presentboxを開いた時に少しExpを得られるようにするか
-        ちょっとだけ嬉しいように。+50ぐらい。
-        1日のEXP量が+1000～2000, 平均+1500ぐらい。
-        +50で3%, +100で6%程度。
-        +50程度が妥当か。
-        presentboxは...
-            staking: 1/7d
-            mail: 2/5d
-            craft: 1/7d
-            festival: 1/30d
-            = 4/7d, 0.5/dぐらい
-        こまめに受け取れば、平均して+1-2% EXP効率がupする程度。
-        +100にすると、+3% up程度。
-        mpに記録して可変とする。
-            ひとまず+50で運用する
-
- ok summon時の演出の改善
-        花火
-        on_click()
-
- ok Level<3でvotingできないことの表示
-        →むしろできるようにするか
-        Level制限撤廃
-    
- ok select itemはlevel 3から表示とする
 
    *マーケットページの改善
         → 実際の実装はdapps stakingの目処が立った後、かつローンチ後1ヶ月程度
@@ -572,7 +542,99 @@ contract ERC721 is IERC721 {
             条件が揃うとペットたちとくっついて寝る
             スイッチで夜もしくは20時以降20時前、満腹度80%以上、happy80%以上
 
+
 //### 2nd
+
+
+ ok 存在しないsummoner指定時のバグ修正
+        isActive = falseのパターンと
+        まだsummonされていないパターンとある
+        また、petrifiedの動作もうまくいくか確認する
+
+ ok presentboxを開いた時に少しExpを得られるようにするか
+        ちょっとだけ嬉しいように。+50ぐらい。
+        1日のEXP量が+1000～2000, 平均+1500ぐらい。
+        +50で3%, +100で6%程度。
+        +50程度が妥当か。
+        presentboxは...
+            staking: 1/7d
+            mail: 2/5d
+            craft: 1/7d
+            festival: 1/30d
+            = 4/7d, 0.5/dぐらい
+        こまめに受け取れば、平均して+1-2% EXP効率がupする程度。
+        +100にすると、+3% up程度。
+        mpに記録して可変とする。
+            ひとまず+50で運用する
+
+ ok summon時の演出の改善
+        花火
+        on_click()
+
+ ok Level<3でvotingできないことの表示
+        →むしろできるようにするか
+        Level制限撤廃
+    
+ ok select itemはlevel 3から表示とする
+
+ ok Fluffy DollのLUK補正の実装
+        +0%だった。
+        LUK補正　＋　Exp補正　にするか。
+        EXP補正+3%はLUK+3.00相当で強力だが、
+            クラフトによってLUKが下がるのはあまりよろしくないだろう。
+        fluffy dollはfluffy x27個分
+        1ヶ月で10-15個とすると、2ヶ月で作成可能
+        また、市場で買えばもっと早めに作成可能
+            流石に安すぎるだろうか。
+            Lvキャップがあるのでバランス崩壊とはならないだろうが。
+                +0.4/Lv, +8/20Lvが上限
+        x3でup-gradeではなく、x4でup-gradeとするか？
+        x3で+33%は破格か？
+
+ ok Fluffy FestivalコントラのEvent実装
+        全く作っていなかった
+        start_voting
+        voting
+        end_voting
+
+ ok マーケットルールの改善
+        coin/leaf bagは70%しかearnできないようにする
+            移動手数料30%
+            miner/farmerキャラの抑制
+            自分でmining/farmingするインセンティブを大きくする
+     ng crafter royaltyの導入を検討する
+            platform feeとcrafter royaltyを別に設定する
+            しかし、upgrade素材に使われるとcrafter royaltyは消滅するのだが。
+            upgradeで生じたitemのcrafterはupgradeしたキャラとなるため。
+            fluffy dollについてはcrafter royaltyはある程度有効に働くだろうか。
+
+ ok ランダム住所の導入
+        lootlikeの拡張
+            320 Martin Ave/St, Tucson, AZ, USA
+            house #1, 0x2F7...8805, (Xxx) Ave/St, (Yyy), Astar Network EVM, United Chains of Polkadot, Web3.
+        通りの名前と、町の名前の2箇所を考える。
+
+ ig burn周りのコード改善
+        burnはpermitted addressなら自由に行えてしまう
+            NFTとSBTはユーザーの資産で、運営が全くタッチできない機構にするべき。
+            故に設計はシンプルかつ慎重に。
+        NFTとSBTについては、ユーザーの資産なので
+            ユーザーの許可がないとtransfer, burnできない設計にすることが望ましい。
+            運営側がいつでもburn可能な機構を残しておくのは印象が良くない。
+            仮に、将来高額の値段がついた際にネックになるし、
+            そもそもこういったユーザーがコントロールできない機構のNFTは
+            信用が低く価値が上がりにくいだろう。
+        ユーザーの許可を必要とするapprove & transferへと改善したいところだが。
+            しかしそうすると、upgradeにapproveが必要になってしまう。
+            approveのUIをどうするか。
+        改善が必要な機構：
+            ★ upgrade時のapprove不要のburn
+            しかしapproveが必要なfunctionが複数ありUIが阻害される
+        ひとまず、add permissionが可能なownerの権限を将来破棄する、という宣言で許してもらうか。
+        しかし、やはりNFTが勝手にburnされるのは良くないだろうか。
+            一応funcionコントラクトではowner checkはしているのだが。
+        別に一点物の絵画のような価値を付与したいのではなく、
+            あくまで運営の箱庭内の価値を担保できれば良いと考えるか。
 
  ok change logの書き方
         https://blog.yux3.net/entry/2017/05/04/035811
@@ -833,7 +895,10 @@ async function init_global_variants() {
     local_blockNumber = 0;
     local_fluffy_count = 0;
     local_price = 0;
-    local_class_name = "";
+    //local_class_name = "";
+    local_flower = "";
+    local_street = "";
+    local_city = "";
     
     //---local festival
     local_ff_each_voting_count = new Array(256).fill(0);
@@ -1180,6 +1245,7 @@ async function contract_update_static_status(_summoner) {
     local_name_str =    _all_static_status[2];
     local_price =       _all_static_status[5];
     
+    /*
     //class string
     let _array = [
         "Rose",
@@ -1196,6 +1262,7 @@ async function contract_update_static_status(_summoner) {
         "Anemone",
     ];
     local_class_name = _array[local_class];
+    */
 
     //lootlike
     let _res = _all_static_status[3];
@@ -1204,6 +1271,9 @@ async function contract_update_static_status(_summoner) {
     local_fluffiness =  _res[2];
     local_elasticity =  _res[3];
     local_personality = _res[4];
+    local_flower =      _res[5];
+    local_street =      _res[6];
+    local_city =        _res[7];
 
     //call speed
     SPEED = Number(_all_static_status[4])/100;
@@ -1239,7 +1309,8 @@ async function contract_update_dynamic_status(_summoner) {
     } catch(error) {
         console.log("***ERROR***: update_dynamic_status, call item");
     }
-    if (_myListsAt_withItemType == 0) {
+    if (_myListsAt_withItemType === 0) {
+        console.log("***ERROR***: _myListsAt_withItemType == 0")
         return 0;
     }
 
@@ -1282,7 +1353,8 @@ async function contract_update_dynamic_status(_summoner) {
     } catch(error) {
         console.log("***ERROR***: update_dynamic_status, call status");
     }
-    if (_all_dynamic_status == 0) {
+    if (_all_dynamic_status === 0) {
+        console.log("***ERROR***: _all_dynamic_status == 0")
         return 0;
     }
     
@@ -7695,57 +7767,57 @@ function create(scene) {
         "Anemone":"#E5004F",
     };
     let _dic_color_birthplace = {
-        "fluffy sweater":"#EB6100",
-        "fluffy blanket":"#F39800",
-        "fluffy carpet":"#FCC800",
-        "fluffy cushion":"#FFF100",
-        "fluffy scarf":"#CFDB00",
-        "fluffy towel":"#8FC31F",
-        "woolly sweater":"#22AC38",
-        "woolly blanket":"#009944",
-        "woolly carpet":"#009B6B",
-        "woolly cushion":"#009E96",
-        "woolly scarf":"#00A0C1",
-        "woolly towel":"#00A0E9",
-        "feathery sweater":"#0086D1",
-        "feathery blanket":"#0068B7",
-        "feathery carpet":"#00479D",
-        "feathery cushion":"#1D2088",
-        "feathery scarf":"#601986",
-        "feathery towel":"#920783",
+        "Fluffy Wweater":"#EB6100",
+        "Fluffy Blanket":"#F39800",
+        "Fluffy Carpet":"#FCC800",
+        "Fluffy Cushion":"#FFF100",
+        "Fluffy Scarf":"#CFDB00",
+        "Fluffy Towel":"#8FC31F",
+        "Woolly Sweater":"#22AC38",
+        "Woolly Blanket":"#009944",
+        "Woolly Carpet":"#009B6B",
+        "Woolly Cushion":"#009E96",
+        "Woolly Scarf":"#00A0C1",
+        "Woolly Towel":"#00A0E9",
+        "Feathery Sweater":"#0086D1",
+        "Feathery Blanket":"#0068B7",
+        "Feathery Carpet":"#00479D",
+        "Feathery Cushion":"#1D2088",
+        "Feathery Scarf":"#601986",
+        "Feathery Towel":"#920783",
     };
     let _dic_color_personality = {
-        "friendly":"#EB6100",
-        "reliable":"#F39800",
-        "optimistic":"#FCC800",
-        "frisky":"#FFF100",
-        "thoughtful":"#CFDB00",
-        "honest":"#8FC31F",
-        "easygoing":"#22AC38",
-        "tolerant":"#009944",
-        "mild":"#009B6B",
-        "affectionate":"#009E96",
-        "intelligent":"#00A0C1",
-        "patient":"#00A0E9",
-        "faithful":"#0086D1",
-        "innocent":"#0068B7",
-        "gentle":"#00479D",
+        "Friendly":"#EB6100",
+        "Reliable":"#F39800",
+        "Optimistic":"#FCC800",
+        "Frisky":"#FFF100",
+        "Thoughtful":"#CFDB00",
+        "Honest":"#8FC31F",
+        "Easygoing":"#22AC38",
+        "Tolerant":"#009944",
+        "Mild":"#009B6B",
+        "Affectionate":"#009E96",
+        "Intelligent":"#00A0C1",
+        "Patient":"#00A0E9",
+        "Faithful":"#0086D1",
+        "Innocent":"#0068B7",
+        "Gentle":"#00479D",
     };
     let _dic_color_other = {
-        "inredible":"#EB6100",
-        "marvelous":"#F39800",
-        "excellent":"#FCC800",
-        "amazing":"#FFF100",
-        "great":"#CFDB00",
-        "fabulous":"#8FC31F",
-        "wonderful":"#22AC38",
-        "gorgeous":"#009944",
-        "awesome":"#009B6B",
-        "fantastic":"#009E96",
-        "lovely":"#00A0C1",
-        "brilliant":"#00A0E9",
-        "impressive":"#0086D1",
-        "superb":"#0068B7",
+        "Inredible":"#EB6100",
+        "Marvelous":"#F39800",
+        "Excellent":"#FCC800",
+        "Amazing":"#FFF100",
+        "Great":"#CFDB00",
+        "Fabulous":"#8FC31F",
+        "Wonderful":"#22AC38",
+        "Gorgeous":"#009944",
+        "Awesome":"#009B6B",
+        "Fantastic":"#009E96",
+        "Lovely":"#00A0C1",
+        "Brilliant":"#00A0E9",
+        "Impressive":"#0086D1",
+        "Superb":"#0068B7",
     };
     let _text_lootlike_base = "";
     _text_lootlike_base += " Flower:                                \n";
@@ -7754,7 +7826,7 @@ function create(scene) {
     _text_lootlike_base += " Fluffiness:                            \n";
     _text_lootlike_base += " Elasticity:                            \n";
     _text_lootlike_base += " Personality:                           ";
-    let _text_lootlike_class =          "                       " + local_class_name;
+    let _text_lootlike_class =          "                       " + local_flower;
     let _text_lootlike_birthplace =     "\n                       " + local_birthplace;
     let _text_lootlike_softness =       "\n\n                       " + local_softness;
     let _text_lootlike_fluffiness =     "\n\n\n                       " + local_fluffiness;
@@ -7770,7 +7842,7 @@ function create(scene) {
         _x-70, 
         _y+60, 
         _text_lootlike_class, 
-        {font: "18px Arial", fill: _dic_color_class[local_class_name]}
+        {font: "18px Arial", fill: _dic_color_class[local_flower]}
     );
     let text_lootlike_birthplace = scene.add.text(
         _x-70, 
@@ -7836,7 +7908,7 @@ function create(scene) {
     group_mint_name.setVisible(false);
         
     //---tx status
-    _x = 250;
+    _x = 200;
     _y = 955
     icon_tx = scene.add.sprite(_x, _y, "coin_color_ASTR")
         .setOrigin(0,1)
@@ -8396,6 +8468,23 @@ function update_parametersWithoutAnimation(this_scene) {
     let _owner2 = local_owner.slice(-4);
     let _text = "";
     if (local_owner == local_wallet || local_owner == "0x0000000000000000000000000000000000000000") {
+        _text += "House #" + summoner + ", ";
+        _text += _owner1 + "..." + _owner2 + ", ";
+        _text += local_street + ", " + local_city + ", ";
+        _text += "Astar EVM, United Chains of Polkadot, Web3.";
+        text_wallet.setText(_text);
+        text_wallet.setColor("#FF4264");
+    } else {
+        _text += "House #" + summoner + ", ";
+        _text += _owner1 + "..." + _owner2 + ", ";
+        _text += local_street + ", " + local_city + ", ";
+        _text += "Astar EVM, United Chains of Polkadot, Web3.";
+        _text += " (not owner)";
+        text_wallet.setText(_text);
+        text_wallet.setColor("blue");
+    }
+    /*
+    if (local_owner == local_wallet || local_owner == "0x0000000000000000000000000000000000000000") {
         _text += "Lives at: ";
         _text += "house #" + summoner + ", ";
         //_text += local_owner + ", ";
@@ -8413,6 +8502,7 @@ function update_parametersWithoutAnimation(this_scene) {
         text_wallet.setText(_text);
         text_wallet.setColor("blue");
     }
+    */
     
     //radarchart
     if (previous_local_rolled_dice != local_rolled_dice && flag_radarchart == 1) {
