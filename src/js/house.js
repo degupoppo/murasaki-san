@@ -7908,7 +7908,7 @@ function create(scene) {
     group_mint_name.setVisible(false);
         
     //---tx status
-    _x = 200;
+    _x = 180;
     _y = 955
     icon_tx = scene.add.sprite(_x, _y, "coin_color_ASTR")
         .setOrigin(0,1)
@@ -8471,7 +8471,7 @@ function update_parametersWithoutAnimation(this_scene) {
         _text += "House #" + summoner + ", ";
         _text += _owner1 + "..." + _owner2 + ", ";
         _text += local_street + ", " + local_city + ", ";
-        _text += "Astar EVM, United Chains of Polkadot, Web3.";
+        _text += "Astar EVM, United Parachains of Polkadot, WEB3.";
         text_wallet.setText(_text);
         text_wallet.setColor("#FF4264");
     } else {
