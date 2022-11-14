@@ -82,7 +82,6 @@ contract ERC721 is IERC721 {
 
 //### 1st
 
-<<<<<<< HEAD
     tokenURIの実装
         svg型tokenURIの解説：
             https://qiita.com/hakumai-iida/items/c96d7c053379f42ba9b8
@@ -129,10 +128,6 @@ contract ERC721 is IERC721 {
             tokenOfさえ実装しておけば、ERC721由来だろうがBadgeだろうが問題なし。
 
  ok msg.sender周りのコードの修正
-=======
-
-   *msg.sender周りのコードの修正
->>>>>>> 31c73601b0494751bfc6d1a597f64c377b5367d1
         もしかしたら、msg.senderはpublic, internal, externalで挙動が変わるのかも
         同じコントラ内でも関数から呼び出される場合は、internalとpublicで中身が違う？
         mining/farmingの数がtx前後で一致しないのはこれが原因だったのか？
@@ -146,27 +141,17 @@ contract ERC721 is IERC721 {
         一度msg.sender周りのコードを丁寧に洗い出すこと。
             msg.senderの使用はcheck_summoner時以外は極力避ける。
             また、check_summoner時もweb3js側でfrom:walletしていないとmsg.senderが0になる。
-<<<<<<< HEAD
             Remixのcallは自動的にfrom:walletが付くためわかりにくかった。
         無用なエラーを避けるため、summoner主体のコードに修正する。
             owner walletから直接叩くfunctionでのみmsg.senderを使う
             むしろ、msg.senderはcheckOwner以外には使わない。
 
  ok fluffy festivalのバグ修正
-=======
-
-   *fluffy festivalのバグ修正
->>>>>>> 31c73601b0494751bfc6d1a597f64c377b5367d1
         2人目が投票できないバグあり
         isVotableがtrueにならない模様
         msg.senderが原因か？要究明
 
-<<<<<<< HEAD
  ok murasaki_craftのitem移行関数の実装
-=======
-
-    murasaki_craftのitem移行関数の実装
->>>>>>> 31c73601b0494751bfc6d1a597f64c377b5367d1
         next_itemの書き換えの実装
         旧コントラからidを指定して新コントラにmintさせる関数の実装
             制限をゆるくしたcraftを用意する
