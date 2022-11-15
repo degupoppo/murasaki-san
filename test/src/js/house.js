@@ -82,17 +82,11 @@ contract ERC721 is IERC721 {
 
 //### 1st
 
-    tokenURIの実装
-        svg型tokenURIの解説：
-            https://qiita.com/hakumai-iida/items/c96d7c053379f42ba9b8
-        svg形式で絵を表示する方法を調べる
-        パラメータなどを表示したいが、クラスなどがせいぜいだろうか。
-
-    移行戦略
-        mm, ms, mc, mss
-        一度新コントラで完全に動作を確認してから、
-        旧mm -> 新mmなどとパラメータをコピーする
-        mnは再ミントしてもらうこととする。
+   *新craftボタンの実装
+        start, pause, resume, cancel, completeの5つのtxを飛ばす
+        start/resume button
+            このときcancel buttonを少し離して表示
+        pause/complete button
 
    *craftingのレジューム機能の実装
         craftカウンターはstart時にのみ決定される
@@ -110,11 +104,32 @@ contract ERC721 is IERC721 {
             また、start -> 中断 -> cancel or resumeを選択させるUIとする。
             つまり、中断中はcancelとresumeの2つのボタンを表示させる。
 
+    tokenURIの実装
+        svg型tokenURIの解説：
+            https://qiita.com/hakumai-iida/items/c96d7c053379f42ba9b8
+        svg形式で絵を表示する方法を調べる
+        パラメータなどを表示したいが、クラスなどがせいぜいだろうか。
+        pngからsvgへの変換、カラー可能
+            https://onlineconvertfree.com/ja/convert/png/
+
+    移行戦略
+        mm, ms, mc, mss
+        一度新コントラで完全に動作を確認してから、
+        旧mm -> 新mmなどとパラメータをコピーする
+        mnは再ミントしてもらうこととする。
+        手順：
+            mcは1つもmintしてはいけない。
+            mcはaddress(0)もコンバート可能。何も考えずに1からコンバートする。
+            contract_adminを用意
+            contract_adminをmcとmsへadd_permitted
+            msとmcをコンバート
+
     fluffy festivalのUI改善
         問題点：
             festival後に結果がわからない
             現在のfluffy所持数がわかりにくい
         さて、どうするか。
+            もぐらさんを使うか？
             
  ok SBTの規格合わせ
         あまり有名ではないBadgeコードを使っている
@@ -946,7 +961,11 @@ async function init_global_variants() {
     local_flower = "";
     local_street = "";
     local_city = "";
-    
+    local_crafting_resume_flag = 0;
+    local_crafting_resume_item_type = 0;
+    local_crafting_resume_item_dc = 0;   
+    local_total_staking_reward_counter = 0;
+
     //---local festival
     local_ff_each_voting_count = new Array(256).fill(0);
     local_ff_next_festival_block =   0;
@@ -1490,6 +1509,7 @@ async function contract_update_dynamic_status(_summoner) {
     local_dapps_staking_amount =    Number(_all_dynamic_status[32]);
     local_staking_reward_counter = Number(_all_dynamic_status[56]);
     local_staking_reward_speed = Number(_all_dynamic_status[58]);
+    local_total_staking_reward_counter = Number(_all_dynamic_status[59]);
     
     //festival
     local_ff_next_festival_block = Number(_all_dynamic_status[60]);
@@ -1504,6 +1524,11 @@ async function contract_update_dynamic_status(_summoner) {
     //feeding/grooming calc
     local_calc_feeding = Number(_all_dynamic_status[54]);
     local_calc_grooming = Number(_all_dynamic_status[55]);
+    
+    //crafting resume
+    local_crafting_resume_flag = Number(_all_dynamic_status[61]);
+    local_crafting_resume_item_type = Number(_all_dynamic_status[62]);
+    local_crafting_resume_item_dc = Number(_all_dynamic_status[63]);    
     
     //update last_sync_time
     last_sync_time = Date.now();
@@ -1741,7 +1766,7 @@ async function contract_callMailDetail(_summoner){
     let _summoner_from_id = _mail[2];
     //let _summoner_from_name = await contract_mn.methods.call_name_from_summoner(_summoner_from_id).call();
     let _summoner_from_name = await contract_mfs_wss.methods.call_name_from_summoner(_summoner_from_id).call();
-    return (_summoner_from_id, _summoner_from_name);
+    return [_summoner_from_id, _summoner_from_name];
 }
 
 //get item_nui, summoner and score
@@ -2004,6 +2029,34 @@ async function _contract_crafting_with_heart(_summoner, _item_type_to_craft, _he
     }
 }
 */
+
+
+//crafting, New
+async function contract_start_crafting(_summoner, _item_type) {
+    contract_mfc.methods.start_crafting(_summoner, _item_type).send({from:wallet})
+        .on("transactionHash", (transactionHash) => update_tx_text("sending", transactionHash))
+        .on("receipt", (receipt) => update_tx_text("done", receipt.transactionHash));
+}
+async function contract_pause_crafting(_summoner) {
+    contract_mfc.methods.pause_crafting(_summoner).send({from:wallet})
+        .on("transactionHash", (transactionHash) => update_tx_text("sending", transactionHash))
+        .on("receipt", (receipt) => update_tx_text("done", receipt.transactionHash));
+}
+async function contract_resume_crafting(_summoner) {
+    contract_mfc.methods.resume_crafting(_summoner).send({from:wallet})
+        .on("transactionHash", (transactionHash) => update_tx_text("sending", transactionHash))
+        .on("receipt", (receipt) => update_tx_text("done", receipt.transactionHash));
+}
+async function contract_cancel_crafting(_summoner) {
+    contract_mfc.methods.cancel_crafting(_summoner).send({from:wallet})
+        .on("transactionHash", (transactionHash) => update_tx_text("sending", transactionHash))
+        .on("receipt", (receipt) => update_tx_text("done", receipt.transactionHash));
+}
+async function contract_complete_crafting(_summoner) {
+    contract_mfc.methods.complete_crafting(_summoner).send({from:wallet})
+        .on("transactionHash", (transactionHash) => update_tx_text("sending", transactionHash))
+        .on("receipt", (receipt) => update_tx_text("done", receipt.transactionHash));
+}
 
 //send mail
 async function contract_send_mail(_summoner, _item_mail) {
@@ -8789,7 +8842,47 @@ function update_checkButtonActivation(this_scene) {
         button_farming.setInteractive();
     }
 
-    //crafting
+    //crafting //***TODO***: New button
+    
+    // check level
+    if (
+        local_level < 3
+        || local_mining_status == 1
+        || local_farming_status == 1
+    ) {
+
+        button_crafting.setTexture("button_crafting_unable");
+        button_crafting.disableInteractive();
+
+    } else {
+    
+        // prepare variants
+        let _crafting_status = local_crafting_status;
+        let _resume_flag = local_crafting_resume_flag;
+        let _calc_crafting = local_crafting_calc;
+
+        //start
+        if (_crafting_status == 0 && _resume_flag == 0) {
+            
+        //pause
+        } else if (_crafting_status == 1 && _calc_crafting > 0) {
+            
+        //resume or cancel
+        } else if (_crafting_status == 0 && _resume_flag == 1) {
+            
+        //complete
+        } else if (_crafting_status == 1 && _calc_crafting == 0) {
+            
+        }
+    
+    // check level: text
+    if (local_level < 3) {
+        text_select_item.setVisible(false);
+    } else {
+        text_select_item.setVisible(true);
+    }
+
+    /*
     if (local_mining_status == 1 || local_farming_status == 1 || local_level <= 2) {
         button_crafting.setTexture("button_crafting_unable");
         button_crafting.disableInteractive();
@@ -8814,6 +8907,7 @@ function update_checkButtonActivation(this_scene) {
     } else {
         text_select_item.setVisible(true);
     }
+    */
 
     //level-up button triggered by exp change
     if (
@@ -10987,10 +11081,10 @@ function update_checkItem(this_scene) {
         && (typeof cat_visitor == "undefined" || typeof cat_visitor.scene == "undefined")
     ){
         async function _run(scene) {
-            let _res = await contract_callMailDetail();
+            let _res = await contract_callMailDetail(summoner);
             let _summoner_from_id = _res[0];
-            let _summoner_from_name = res[1];
-            cat_visitor = new VisitorCat(scene, 0, 0, summoner_from_id, summoner_from_name)
+            let _summoner_from_name = _res[1];
+            cat_visitor = new VisitorCat(scene, 0, 0, _summoner_from_id, _summoner_from_name)
                 .setOrigin(0.5)
                 .setScale(0.4);
             /*
