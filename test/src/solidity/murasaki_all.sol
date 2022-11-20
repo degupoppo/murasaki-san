@@ -6,19 +6,6 @@ pragma solidity ^0.8.7;
 //===ToDo==================================================================================================================
 
 
-/*
-
-    buybackTreajuryの改善
-        active userの増減によってはbuyback -> bufferへと移動させることも必要になる
-        active user数を取得した上でインフレ率を計算するよう修正する
-        手順としては：
-            インフレ率を手動で設定
-            脱落ユーザー数を手動で集計して設定
-            インフレ率に基づいて、buybackTreajury <-> BufferTreajuryの資金移動を行う
-                これはコントラクトコードで実装する
-            続く処理でbufferTreajuryに残った資金はteamTreajuryへと移動する
-*/
-
 
 //===Basic==================================================================================================================
 
@@ -530,14 +517,14 @@ contract ERC2665 is IERC2665 {
 abstract contract SoulBoundBadge is ERC721 {
     
     // tokens and tokenOf getter
-    mapping(address => uint32) private _tokens;
-    function tokenOf(address _owner) public view returns (uint32) {
+    mapping(address => uint) private _tokens;
+    function tokenOf(address _owner) public view returns (uint) {
         require(_owner != address(0));
         return _tokens[_owner];
     }
 
     // next_token
-    uint32 public next_token = 1;
+    uint public next_token = 1;
     
     // non-transferable
     function _beforeTokenTransfer(address from, address to, uint256, uint256) internal pure override {
@@ -549,7 +536,7 @@ abstract contract SoulBoundBadge is ERC721 {
         // when mint
         if ( from == address(0) ) {
             require(_tokens[to] == 0, "Owner already has a token");
-            _tokens[to] = uint32(tokenId);
+            _tokens[to] = tokenId;
             next_token++;
         // when burn
         } else if ( to == address(0) ) {
@@ -565,8 +552,6 @@ abstract contract SoulBoundBadge is ERC721 {
 //---Murasaki_Main
 
 
-//ERC721, SBT
-//https://docs.chainstack.com/tutorials/gnosis/simple-soulbound-token-with-remix-and-openzeppelin#create-and-compile-the-soulbound-contract
 contract Murasaki_Main is SoulBoundBadge, Ownable{
 
     //permitted address
@@ -581,7 +566,7 @@ contract Murasaki_Main is SoulBoundBadge, Ownable{
     }
 
     //admin pause
-    bool notPaused = false;
+    bool notPaused = true;
     function _set_notPaused(bool _bool) external onlyOwner {
         notPaused = _bool;
     }
@@ -597,6 +582,7 @@ contract Murasaki_Main is SoulBoundBadge, Ownable{
     //summon
     function summon(address _owner, uint _class, uint _seed) external {
         require(permitted_address[msg.sender] == true);
+        require(notPaused);
         //update summoner info
         uint _now = block.timestamp;
         class[next_token] = _class;
@@ -611,6 +597,36 @@ contract Murasaki_Main is SoulBoundBadge, Ownable{
         require(permitted_address[msg.sender] == true);
         ERC721._burn(_summoner);
     }
+
+    string[] private flower = [
+        "Rose",
+        "Marigold",
+        "Dandelion",
+        "Rosemary",
+        "Olive",
+        "Holly",
+        "Nemophila",
+        "Hydrangea",
+        "Forget-me-not",
+        "Sumire",
+        "Gerbera",
+        "Anemone"
+    ];
+
+    string[] private color = [
+        "#E60012",
+        "#F39800",
+        "#FFF100",
+        "#8FC31F",
+        "#009944",
+        "#009E96",
+        "#00A0E9",
+        "#0068B7",
+        "#1D2088",
+        "#920783",
+        "#E4007F",
+        "#E5004F"
+    ];
 
     //URI
     //Inspired by OraclizeAPI's implementation - MIT license
@@ -635,18 +651,25 @@ contract Murasaki_Main is SoulBoundBadge, Ownable{
     }
     function tokenURI (uint _summoner) public view override returns (string memory) {
         string[9] memory parts;
-        parts[0] = '<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin meet" viewBox="0 0 350 350"><style>.base { fill: white; font-family: serif; font-size: 14px; }</style><rect width="100%" height="100%" fill="black" /><text x="10" y="20" class="base">';
-        parts[1] = string(abi.encodePacked("id", " ", toString(_summoner)));
-        parts[2] = '</text><text x="10" y="40" class="base">';
-        parts[3] = string(abi.encodePacked("class", " ", toString(class[_summoner])));
-        parts[4] = '</text><text x="10" y="60" class="base">';
-        parts[5] = string(abi.encodePacked("summoned time", " ", toString(summoned_time[_summoner])));
-        parts[6] = '</text></svg>';
+        parts[0] = '<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin meet" viewBox="0 0 128 128"><style>.base { fill: #D81B60; font-family: arial; font-size: 12px; }</style><rect width="128" height="128" fill="';
+        parts[1] = color[class[_summoner]];
+        parts[2] = '" fill-opacity="0.5"/>';
+        parts[3] = '<image width="128" height="128" x="0" y="0" href="data:image/png;base64,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"/><text x="24" y="88" class="base" font-weight="bold">';
+        parts[4] = string(abi.encodePacked("#", toString(_summoner)));
+        parts[5] = '</text><text x="22" y="102" class="base" font-weight="bold">';
+        parts[6] = string(abi.encodePacked("&#x273f;", flower[class[_summoner]]));
+        parts[7] = '</text></svg>';
         string memory output = 
-            string(abi.encodePacked(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6]));
-        string memory json = Base64.encode(bytes(string(abi.encodePacked('{"name": "summoner #', toString(_summoner), '", "description": "House of Murasaki-san. Murasaki-san is a pet living in your wallet. They grow with your dedication. https://murasaki-san.com/", "image": "data:image/svg+xml;base64,', Base64.encode(bytes(output)), '"}'))));
+            string(abi.encodePacked(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7]));
+        string memory json = Base64.encode(bytes(string(abi.encodePacked('{"name": "Murasaki-san #', toString(_summoner), '", "description": "House of Murasaki-san. Murasaki-san is a pet living in your wallet on Astar Network. https://murasaki-san.com/", "image": "data:image/svg+xml;base64,', Base64.encode(bytes(output)), '"}'))));
         output = string(abi.encodePacked('data:application/json;base64,', json));
         return output;
+    }
+    
+    //admin, for convert
+    function set_summoned_time(uint _summoner, uint _value) external {
+        require(permitted_address[msg.sender] == true);
+        summoned_time[_summoner] = _value;
     }
 }
 
@@ -1124,23 +1147,26 @@ contract Murasaki_Craft is ERC2665, Ownable{
     function _admin_craft_convert(
         uint _item_type, 
         uint _summoner, 
-        address _wallet, 
-        uint _seed, 
-        string memory _memo,
+        address _wallet_crafted, 
+        //uint _seed, 
+        //string memory _memo,
         uint _item_id,
-        uint _crafted_time
+        uint _crafted_time,
+        address _wallet_to
     ) external {
         require(permitted_address[msg.sender] == true);
         //uint32 _now = uint32(block.timestamp);
         //uint32 _crafting_item = next_item;
         //items[_crafting_item] = item(_item_type, _now, _summoner, _wallet, _memo);
-        items[_item_id] = item(_item_type, _crafted_time, _summoner, _wallet, _memo);
-        balance_of_type[_wallet][_item_type] += 1;  //balanceOf each item type
+        string memory _memo = "converted";
+        items[_item_id] = item(_item_type, _crafted_time, _summoner, _wallet_crafted, _memo);
+        balance_of_type[_wallet_to][_item_type] += 1;  //balanceOf each item type
         count_of_mint[_item_type]++;
-        seed[_item_id] = _seed;
-        mySet[_wallet].add(_item_id);
+        //seed[_item_id] = _seed;
+        seed[_item_id] = 8888;
+        mySet[_wallet_to].add(_item_id);
         //next_item++;
-        _safeMint(_wallet, _item_id);
+        _safeMint(_wallet_to, _item_id);
     }
     
     //admin, using convertion, set next_item
@@ -1180,6 +1206,7 @@ contract Murasaki_Parameter is Ownable {
     uint public ELECTED_FLUFFY_TYPE = 0;
     string public DEVELOPER_SUMMONER_NAME = "*Fluffy Kingdom*";
     uint public EXP_FROM_PRESENTBOX = 50;
+    uint public LIMIT_MINT = 9999999999;
 
     //modifier
     modifier onlyPermitted {
@@ -1211,6 +1238,9 @@ contract Murasaki_Parameter is Ownable {
     }
     function _set_exp_from_presentbox(uint _value) external onlyPermitted {
         EXP_FROM_PRESENTBOX = _value;
+    }
+    function _set_limit_mint(uint _value) external onlyPermitted {
+        LIMIT_MINT = _value;
     }
 }
 
@@ -1598,7 +1628,9 @@ contract Murasaki_Function_Share is Ownable {
     //check owner of summoner
     function check_owner(uint _summoner, address _wallet) external view returns (bool) {
         Murasaki_Main mm = Murasaki_Main(murasaki_main_address);
-        return (mm.ownerOf(_summoner) == _wallet);
+        Murasaki_Storage ms = Murasaki_Storage(murasaki_storage_address);
+        // possess and isActive
+        return (mm.ownerOf(_summoner) == _wallet && ms.isActive(_summoner));
     }
 
     //get owner of summoner
@@ -2011,6 +2043,7 @@ contract Murasaki_Function_Summon_and_LevelUp is Ownable, ReentrancyGuard {
         Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
         Murasaki_Parameter mp = Murasaki_Parameter(mfs.murasaki_parameter_address());
         require(mp.isPaused() == false);
+        require( mm.next_token() < mp.LIMIT_MINT() );
         uint PRICE = mp.PRICE();
         uint BASE_SEC = mp.BASE_SEC();
         uint SPEED = mp.SPEED();
@@ -2156,24 +2189,9 @@ contract Murasaki_Function_Summon_and_LevelUp is Ownable, ReentrancyGuard {
         }else if (_next_level == 19) {
             ms.set_next_exp_required(_summoner, 190000);
         }
-        //mint_jewel
-        //_mint_jewel(_summoner);
         //event
         emit Level_up(_summoner, _next_level);
     }
-
-    /*
-    //mint jewel
-    event Jewel_mint(uint indexed _summoner, uint _item_type);
-    function _mint_jewel(uint _summoner) internal {
-        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
-        Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
-        uint _seed = mfs.seed(_summoner);
-        uint _item_type = 200 + mfs.d10(_summoner) + 1;   //201-212
-        mc.craft(_item_type, _summoner, msg.sender, _seed);
-        emit Jewel_mint(_summoner, _item_type);
-    }
-    */
 }
 
 
@@ -2674,6 +2692,7 @@ contract Murasaki_Function_Crafting is Ownable, ReentrancyGuard {
         require(ms.crafting_status(_summoner) == 0);
         require(ms.crafting_resume_flag(_summoner) == 0);        
         //check item_type
+        require(_item_type > 0);
         require(
             _item_type <= 64        //normal items
             || _item_type == 194    //coin bag
@@ -3321,7 +3340,7 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
     //item level
     uint[64] public level_table = [
         //0:dummy
-        0,
+        9999999999,
         //1-16: mining item
         1,
         2,
@@ -3394,7 +3413,7 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
     //item dc
     uint[64] public dc_table = [
         //0:dummy
-        0,
+        9999999999,
         //1-16: mining item
         3000,
         6000,
@@ -3467,7 +3486,7 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
     //item coin
     uint[64] public coin_table = [
         //0:dummy
-        0,
+        9999999999,
         //1-16: mining item
         3000,
         3600,
@@ -3540,7 +3559,7 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
     //item material
     uint[64] public material_table = [
         //0:dummy
-        0,
+        9999999999,
         //1-16: mining item
         300,
         360,
@@ -4187,9 +4206,10 @@ contract buybackTreasury is Ownable, ReentrancyGuard {
     event Buyback(uint indexed _summoner, uint _item, uint _price);    
     function buyback(uint _summoner, uint _item) external nonReentrant {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
-        Murasaki_Main mm = Murasaki_Main(mfs.murasaki_main_address());
         Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
-        require(mm.ownerOf(_summoner) == msg.sender);
+        Murasaki_Parameter mp = Murasaki_Parameter(mfs.murasaki_parameter_address());
+        require(mp.isPaused() == false);
+        require(mfs.check_owner(_summoner, msg.sender));
         require(mc.ownerOf(_item) == msg.sender);
         mc.safeTransferFrom(msg.sender, address(this), _item);
         uint _price = calc_buybackPrice(_item);
@@ -4505,6 +4525,9 @@ contract Murasaki_Mail is Ownable, ReentrancyGuard {
         
     //check mail
     function check_receiving_mail(uint _summoner_to) public view returns (bool) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Parameter mp = Murasaki_Parameter(mfs.murasaki_parameter_address());
+        uint SPEED = mp.SPEED();
         uint _mail_id = receiving[_summoner_to];
         //no mail
         if (_mail_id == 0) {
@@ -4512,7 +4535,7 @@ contract Murasaki_Mail is Ownable, ReentrancyGuard {
         } else {
             Mail memory _mail = mails[_mail_id];
             uint _now = block.timestamp;
-            uint _delta = _now - _mail.send_time;
+            uint _delta = (_now - _mail.send_time) * SPEED/100;
             //expired
             if (_delta >= interval_sec) {
                 return false;
@@ -5776,6 +5799,140 @@ contract Murasaki_Info_fromWallet is Ownable, IMurasaki_Info_fromWallet {
 }
 
 
+//---Murasaki_tokenURI
+
+
+contract Murasaki_tokenURI is Ownable {
+
+    //address
+    address public murasaki_function_share_address;
+    address public murasaki_info_address;
+    
+    //admin, set address
+    function _set1_murasaki_function_share_address(address _address) external onlyOwner {
+        murasaki_function_share_address = _address;
+    }
+    function _set2_murasaki_info_address(address _address) external onlyOwner {
+        murasaki_info_address = _address;
+    }
+
+    string[] private color = [
+        "#E60012",
+        "#F39800",
+        "#FFF100",
+        "#8FC31F",
+        "#009944",
+        "#009E96",
+        "#00A0E9",
+        "#0068B7",
+        "#1D2088",
+        "#920783",
+        "#E4007F",
+        "#E5004F"
+    ];
+
+    string[] private flower = [
+        "Rose",
+        "Marigold",
+        "Dandelion",
+        "Rosemary",
+        "Olive",
+        "Holly",
+        "Nemophila",
+        "Hydrangea",
+        "Forget-me-not",
+        "Sumire",
+        "Gerbera",
+        "Anemone"
+    ];
+
+    function toString(uint256 value) internal pure returns (string memory) {
+        if (value == 0) {
+            return "0";
+        }
+        uint256 temp = value;
+        uint256 digits;
+        while (temp != 0) {
+            digits++;
+            temp /= 10;
+        }
+        bytes memory buffer = new bytes(digits);
+        while (value != 0) {
+            digits -= 1;
+            buffer[digits] = bytes1(uint8(48 + uint256(value % 10)));
+            value /= 10;
+        }
+        return string(buffer);
+    }
+    
+    function _balanceOfItems(uint _summoner) internal view returns (uint) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
+        if (_summoner == 0) {
+            return 0;
+        }
+        return mc.balanceOf(mfs.get_owner(_summoner));
+    }
+    
+    function _get_endSVG(uint _summoner) internal pure returns (string memory) {
+        if (_summoner == 0) {
+            //token not found
+            return '</text><rect width="128" height="128" fill="#ffffff" rx="5" ry="5" fill-opacity="0.8"/><text x="64"  y="60" class="base" text-anchor="middle">Token</text><text x="64"  y="80" class="base" text-anchor="middle">Not Found</text></svg>';
+        } else {
+            return '</text></svg>';
+        }
+    }
+    
+    function ownerOf(uint _token) public view returns (address) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        return mfs.get_owner(_token);
+    }
+        
+    function _get_SVG(uint _summoner) internal view returns (string memory) {
+        Murasaki_Info mi = Murasaki_Info(murasaki_info_address);
+        //string memory output = string(abi.encodePacked(
+        return string(
+            bytes.concat(
+                abi.encodePacked(
+                    '<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin meet" viewBox="0 0 128 128"><style>.base { fill: #000000; font-family: arial; font-size: 18px; font-weight: bold}</style><rect width="128" height="128" fill="',
+                    string(abi.encodePacked(color[mi.class(_summoner)])),
+                    '" rx="10" ry="10" fill-opacity="0.4"/><image width="128" height="128" x="0" y="0" href="data:image/png;base64,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"/><text x="3"  y="18"  class="base" text-anchor="start">#',
+                    string(abi.encodePacked(toString(_summoner))),
+                    '</text><text x="124" y="22"  class="base" text-anchor="end">Lv<tspan font-size="24px">',
+                    string(abi.encodePacked(toString(mi.level(_summoner))))
+                ),
+                abi.encodePacked(
+                    '</tspan></text><text x="64"  y="92" class="base" text-anchor="middle"><tspan font-size="20px">',
+                    string(abi.encodePacked(mi.name(_summoner))),
+                    '</tspan></text><text x="124" y="122" class="base" text-anchor="end">&#x1f4bc;',
+                    string(abi.encodePacked(toString(_balanceOfItems(_summoner)))),
+                    _get_endSVG(_summoner)
+                )
+            )
+        );
+    }
+    
+    function tokenURI(uint _summoner) public view returns (string memory) {
+        string memory output = _get_SVG(_summoner);
+        string memory json = Base64.encode(bytes(string(abi.encodePacked(
+            '{"name": "Murasaki-san #', 
+            toString(_summoner), 
+            '", "description": "House of Murasaki-san. Murasaki-san is a pet living in your wallet on Astar Network. https://murasaki-san.com/", "image": "data:image/svg+xml;base64,', 
+            Base64.encode(bytes(output)), '"}'
+        ))));
+        return string(abi.encodePacked('data:application/json;base64,', json));
+    }
+    
+    function tokenURI_fromWallet(address _wallet) public view returns (string memory) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Main mm = Murasaki_Main(mfs.murasaki_main_address());
+        uint _summoner = mm.tokenOf(_wallet);
+        return tokenURI(_summoner);
+    }
+}
+
+
+
 //---Fluffy_Festival
 
 
@@ -6185,43 +6342,58 @@ interface Murasaki_Storage_Old {
     function staking_reward_counter (uint32 _summoner) external view returns (uint32);
 }
 
+interface Murasaki_Main_Old {
+    function class (uint32 _summoner) external view returns (uint32);
+    function seed (uint32 _summoner) external view returns (uint32);
+    function ownerOf (uint32 _summoner) external view returns (address);
+    function summoned_time (uint32 _summoner) external view returns (uint32);
+}
+
+interface Murasaki_Storage_Score_Old {
+    function total_exp_gained (uint32 _summoner) external view returns (uint32);
+    function total_coin_mined (uint32 _summoner) external view returns (uint32);
+    function total_material_farmed (uint32 _summoner) external view returns (uint32);
+    function total_item_crafted (uint32 _summoner) external view returns (uint32);
+    function total_precious_received (uint32 _summoner) external view returns (uint32);
+}
+
+interface Murasaki_Name_Old {
+    function names (uint32 _summoner) external view returns (string memory);
+    function seed (uint32 _summoner) external view returns (uint32);
+    function ownerOf (uint32 _summoner) external view returns (address);
+}
+
 
 contract Admin_Convert is Ownable {
     
-    function mc_convert (
+    function mm_convert (
         address _old_address, 
         address _new_address, 
-        uint _item_id_256
+        uint _summoner_256
     ) external onlyOwner {
-        uint32 _item_id = uint32(_item_id_256);
-        Murasaki_Craft_Old mcOld = Murasaki_Craft_Old(_old_address);
-        //Murasaki_Craft_withFee mcNew = Murasaki_Craft_withFee(_new_address);
-        Murasaki_Craft mcNew = Murasaki_Craft(_new_address);
-        //correct old item infromation
-        (
-            uint _item_type, 
-            uint _crafted_time, 
-            uint _crafted_summoner, 
-            address _crafted_wallet, 
-            string memory _memo
-        ) = mcOld.items(_item_id);
-        uint32 _seed = mcOld.seed(_item_id);
-        //craft_convert in new contract
-        mcNew._admin_craft_convert(
-            _item_type,
-            _crafted_summoner,
-            _crafted_wallet,
-            _seed,
-            _memo,
-            _item_id,
-            _crafted_time
-        );
+        uint32 _summoner = uint32(_summoner_256);
+        Murasaki_Main_Old mmOld = Murasaki_Main_Old(_old_address);
+        Murasaki_Main mmNew = Murasaki_Main(_new_address);
+        uint32 _class = mmOld.class(_summoner);
+        uint32 _summoned_time = mmOld.summoned_time(_summoner);
+        uint32 _seed = mmOld.seed(_summoner);
+        address _owner = mmOld.ownerOf(_summoner);
+        mmNew.summon(_owner, _class, _seed);
+        mmNew.set_summoned_time(_summoner, _summoned_time);
     }
-    
-    function mc_set_next_item (address _address, uint _value) external onlyOwner {
-        //Murasaki_Craft_withFee mcNew = Murasaki_Craft_withFee(_address);
-        Murasaki_Craft mcNew = Murasaki_Craft(_address);
-        mcNew._admin_set_next_item(_value);
+
+    function mn_convert (
+        address _old_address, 
+        address _new_address, 
+        uint _tokenId_256
+    ) external onlyOwner {
+        uint32 _tokenId = uint32(_tokenId_256);
+        Murasaki_Name_Old mnOld = Murasaki_Name_Old(_old_address);
+        Murasaki_Name mnNew = Murasaki_Name(_new_address);
+        string memory _name = mnOld.names(_tokenId);
+        uint32 _seed = mnOld.seed(_tokenId);
+        address _owner = mnOld.ownerOf(_tokenId);
+        mnNew.mint(_owner, _name, _seed);
     }
     
     function ms_convert (
@@ -6261,6 +6433,63 @@ contract Admin_Convert is Ownable {
         msNew.set_isActive(_summoner, msOld.isActive(_summoner));
         msNew.set_inHouse(_summoner, msOld.inHouse(_summoner));
         msNew.set_staking_reward_counter(_summoner, msOld.staking_reward_counter(_summoner));
+    }
+    
+    function mss_convert (
+        address _old_address,
+        address _new_address,
+        uint _summoner_uint256
+    ) external onlyOwner {
+        uint32 _summoner = uint32(_summoner_uint256);
+        Murasaki_Storage_Score_Old mssOld = Murasaki_Storage_Score_Old(_old_address);
+        Murasaki_Storage_Score mssNew = Murasaki_Storage_Score(_new_address);
+        mssNew.set_total_exp_gained(_summoner, mssOld.total_exp_gained(_summoner));
+        mssNew.set_total_coin_mined(_summoner, mssOld.total_coin_mined(_summoner));
+        mssNew.set_total_material_farmed(_summoner, mssOld.total_material_farmed(_summoner));
+        mssNew.set_total_item_crafted(_summoner, mssOld.total_item_crafted(_summoner));
+        mssNew.set_total_precious_received(_summoner, mssOld.total_precious_received(_summoner));
+    }
+
+    function mc_convert (
+        address _old_address, 
+        address _new_address, 
+        uint _item_id_256
+    ) external onlyOwner {
+        uint32 _item_id = uint32(_item_id_256);
+        Murasaki_Craft_Old mcOld = Murasaki_Craft_Old(_old_address);
+        //Murasaki_Craft_withFee mcNew = Murasaki_Craft_withFee(_new_address);
+        Murasaki_Craft mcNew = Murasaki_Craft(_new_address);
+        {
+        //correct old item infromation
+        (
+            uint _item_type, 
+            uint _crafted_time, 
+            uint _crafted_summoner, 
+            address _crafted_wallet, 
+            //string memory _memo
+        ) = mcOld.items(uint32(_item_id_256));
+        //uint32 _seed = mcOld.seed(_item_id);
+        address _wallet_to = mcOld.ownerOf(_item_id);
+        //craft_convert in new contract
+        mcNew._admin_craft_convert(
+            _item_type,
+            _crafted_summoner,
+            _crafted_wallet,
+            //mcOld.seed(uint32(_item_id_256)),
+            //888,
+            //_memo,
+            _item_id_256,
+            _crafted_time,
+            //mcOld.ownerOf(_item_id)
+            _wallet_to
+        );
+        }
+    }
+    
+    function mc_set_next_item (address _address, uint _value) external onlyOwner {
+        //Murasaki_Craft_withFee mcNew = Murasaki_Craft_withFee(_address);
+        Murasaki_Craft mcNew = Murasaki_Craft(_address);
+        mcNew._admin_set_next_item(_value);
     }
 }
 

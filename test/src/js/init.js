@@ -90,10 +90,19 @@ async function initialize_contract() {
     contract_info.methods._set5_fluffy_festival_address(address_Fluffy_Festival).send({from:wallet});
     contract_info_fromWallet.methods._set1_murasaki_function_share_address(address_Murasaki_Function_Share).send({from:wallet});
     contract_info_fromWallet.methods._set2_murasaki_info_address(address_Murasaki_Info).send({from:wallet});
+    contract_mu.methods._set1_murasaki_function_share_address(address_Murasaki_Function_Share).send({from:wallet});
+    contract_mu.methods._set2_murasaki_info_address(address_Murasaki_tokenURI).send({from:wallet});
     
     //treasury
     contract_bbt.methods._set1_murasaki_function_share_address(address_Murasaki_Function_Share).send({from:wallet});
     contract_bft.methods._set1_murasaki_function_share_address(address_Murasaki_Function_Share).send({from:wallet});
+        
+    //admin
+    contract_mm.methods._add_permitted_address(address_Admin_Convert).send({from:wallet});
+    contract_mn.methods._add_permitted_address(address_Admin_Convert).send({from:wallet});
+    contract_ms.methods._add_permitted_address(address_Admin_Convert).send({from:wallet});
+    contract_mss.methods._add_permitted_address(address_Admin_Convert).send({from:wallet});
+    contract_mc.methods._add_permitted_address(address_Admin_Convert).send({from:wallet});
     
     //activate
     contract_mp.methods._set_isPaused(false).send({from:wallet});

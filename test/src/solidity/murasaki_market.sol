@@ -815,7 +815,7 @@ contract Murasaki_Market_Item is Initializable, ERC721Holder {
         _check_wallet(msg.sender);
         require(price > 0, 'bad price');
         require(prices[_item] == 0, 'already listed');
-        require(price > lowestPrice * 10**18 /1000, 'under the lowest price');
+        require(price >= lowestPrice * 10**18 /1000, 'under the lowest price');
         //rarity.safeTransferFrom(msg.sender, address(this), summonerId);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
