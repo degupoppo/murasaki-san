@@ -6,19 +6,6 @@ pragma solidity ^0.8.7;
 //===ToDo==================================================================================================================
 
 
-/*
-
-    buybackTreajuryの改善
-        active userの増減によってはbuyback -> bufferへと移動させることも必要になる
-        active user数を取得した上でインフレ率を計算するよう修正する
-        手順としては：
-            インフレ率を手動で設定
-            脱落ユーザー数を手動で集計して設定
-            インフレ率に基づいて、buybackTreajury <-> BufferTreajuryの資金移動を行う
-                これはコントラクトコードで実装する
-            続く処理でbufferTreajuryに残った資金はteamTreajuryへと移動する
-*/
-
 
 //===Basic==================================================================================================================
 
@@ -32,9 +19,21 @@ import "github.com/OpenZeppelin/openzeppelin-contracts/contracts/token/ERC721/IE
 import "github.com/AstarNetwork/astarbase/contract/example/IAstarBase.sol";
 
 
-//---ERC2665
-//https://github.com/ethereum/EIPs/issues/2665
+/* for solc
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import "@openzeppelin/contracts/utils/Base64.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+import "@astarbase/contract/example/IAstarBase.sol";
+*/
 
+
+//---IERC2665
+
+// @dev of HoM: ERC-2665
+// @dev of HoM: https://github.com/ethereum/EIPs/issues/2665
 
 /// @title ERC-2665 NFT Transfer Fee Extension
 /// @dev See https://github.com/ethereum/EIPs/issues/2665
@@ -162,8 +161,11 @@ interface IERC2665 /* is ERC165, is ERC721 but overide it's Design by contract s
 }
 
 
+//---ERC2665
+
 // @dev of HoM: ERC2665 is ERC721 but added payable modifier at transfer functions
-// @dev of HoM: based on ERC721 codes from https://github.com/andrecronje/rarity
+// @dev of HoM: Following ERC721 codes are based on https://github.com/andrecronje/rarity
+
 contract ERC2665 is IERC2665 {
     using Strings for uint256;
 
@@ -496,147 +498,51 @@ contract ERC2665 is IERC2665 {
     ) internal virtual {}
 
     //added to match the interface
+    //function getTransferFee(uint256 _tokenId) external view virtual returns (uint256) {
     function getTransferFee(uint256) external view virtual returns (uint256) {
         return 0;
     }
 
+    //function getTransferFee(uint256 _tokenId, string calldata _currencySymbol) external view virtual returns (uint256) {
     function getTransferFee(uint256, string calldata) external view virtual returns (uint256) {
         return 0;
     }
 }
 
 
-//---Badge
-// https://github.com/ra-phael/badge-token/tree/main/contracts/withoutTimestamp
-// based on "github.com/ra-phael/badge-token/contracts/withoutTimestamp/Badge.sol";
-// @dev of HoM: We modified the interface to change the type of tokenId from bytes32 to uint32.
+//---SoulBoundBadge
 
+// @dev of HoM: SBB is ERC721 but non-transferable, only one per wallet, burnable
 
-// @dev of HoM: the type of tokenId is changed from bytes32 to uint32
-interface IBadge {
-	// @dev Emitted when `tokenId` token is minted to `to`, an address.
-	event Minted(
-		address indexed to,
-		uint32 indexed tokenId,
-		uint256 timestamp
-	);
+abstract contract SoulBoundBadge is ERC721 {
+    
+    // tokens and tokenOf getter
+    mapping(address => uint) private _tokens;
+    function tokenOf(address _owner) public view returns (uint) {
+        require(_owner != address(0));
+        return _tokens[_owner];
+    }
 
-	// @dev Emitted when `tokenId` token is burned.
-	event Burned(
-		address indexed owner,
-		uint32 indexed tokenId,
-		uint256 timestamp
-	);
-
-	// @dev Returns the badge's name
-	function name() external view returns (string memory);
-
-	// @dev Returns the badge's symbol.
-	function symbol() external view returns (string memory);
-
-	// @dev Returns the ID of the token owned by `owner`, if it owns one, and 0 otherwise
-	//function tokenOf(address owner) external view returns (bytes32);
-	function tokenOf(address owner) external view returns (uint32);
-
-	// @dev Returns the owner of the `tokenId` token.
-	//function ownerOf(bytes32 tokenId) external view returns (address);
-	function ownerOf(uint32 tokenId) external view returns (address);
-}
-
-
-// @dev of HoM: the type of tokenId is changed from bytes32 to uint32
-contract Badge is IBadge {
-	// Badge's name
-	string private _name;
-
-	// Badge's symbol
-	string private _symbol;
-
-	// Mapping from token ID to owner's address
-	//mapping(bytes32 => address) private _owners;
-	mapping(uint32 => address) private _owners; // @dev of HoM: modified
-
-	// Mapping from owner's address to token ID
-	//mapping(address => bytes32) private _tokens;
-	mapping(address => uint32) private _tokens; // @dev of HoM: modified
-
-	constructor(string memory name_, string memory symbol_) {
-		_name = name_;
-		_symbol = symbol_;
-	}
-
-	// Returns the badge's name
-	function name() public view virtual override returns (string memory) {
-		return _name;
-	}
-
-	// Returns the badge's symbol
-	function symbol() public view virtual override returns (string memory) {
-		return _symbol;
-	}
-
-	// Returns the token ID owned by `owner`, if it exists, and 0 otherwise
-	function tokenOf(address owner)
-		public
-		view
-		virtual
-		override
-		//returns (bytes32)
-		returns (uint32)    // @dev of HoM: modified
-	{
-		require(owner != address(0), "Invalid owner at zero address");
-
-		return _tokens[owner];
-	}
-
-	// Returns the owner of a given token ID, reverts if the token does not exist
-	//function ownerOf(bytes32 tokenId)
-	function ownerOf(uint32 tokenId)    // @dev of HoM: modified
-		public
-		view
-		virtual
-		override
-		returns (address)
-	{
-		require(tokenId != 0, "Invalid tokenId value");
-
-		address owner = _owners[tokenId];
-
-		require(owner != address(0), "Invalid owner at zero address");
-
-		return owner;
-	}
-
-	// Checks if a token ID exists
-	//function _exists(bytes32 tokenId) internal view virtual returns (bool) {
-	function _exists(uint32 tokenId) internal view virtual returns (bool) { // @dev of HoM: modified
-		return _owners[tokenId] != address(0);
-	}
-
-	// @dev Mints `tokenId` and transfers it to `to`.
-	//function _mint(address to, bytes32 tokenId) internal virtual {
-	function _mint(address to, uint32 tokenId) internal virtual {  // @dev of HoM: modified
-		require(to != address(0), "Invalid owner at zero address");
-		require(tokenId != 0, "Token ID cannot be zero");
-		require(!_exists(tokenId), "Token already minted");
-		require(tokenOf(to) == 0, "Owner already has a token");
-
-		_tokens[to] = tokenId;
-		_owners[tokenId] = to;
-
-		emit Minted(to, tokenId, block.timestamp);
-	}
-
-	// @dev Burns `tokenId`.
-	//function _burn(bytes32 tokenId) internal virtual {
-	function _burn(uint32 tokenId) internal virtual {   // @dev of HoM: modified
-		address owner = Badge.ownerOf(tokenId);
-
-		delete _tokens[owner];
-		delete _owners[tokenId];
-
-		emit Burned(owner, tokenId, block.timestamp);
-	}
+    // next_token
+    uint public next_token = 1;
+    
+    // non-transferable
+    function _beforeTokenTransfer(address from, address to, uint256, uint256) internal pure override {
+        require(from == address(0) || to == address(0), "This a Soulbound token. It cannot be transferred. It can only be burned by the token owner.");
+    }
+    
+    // only one per wallet, burnable
+    function _afterTokenTransfer(address from, address to, uint256 tokenId, uint256) internal override {
+        // when mint
+        if ( from == address(0) ) {
+            require(_tokens[to] == 0, "Owner already has a token");
+            _tokens[to] = tokenId;
+            next_token++;
+        // when burn
+        } else if ( to == address(0) ) {
+            _tokens[from] = 0;
+        }
+    }
 }
 
 
@@ -646,7 +552,7 @@ contract Badge is IBadge {
 //---Murasaki_Main
 
 
-contract Murasaki_Main is Badge, Ownable{
+contract Murasaki_Main is SoulBoundBadge, Ownable{
 
     //permitted address
     mapping(address => bool) public permitted_address;
@@ -659,42 +565,68 @@ contract Murasaki_Main is Badge, Ownable{
         permitted_address[_address] = false;
     }
 
-    //names
-    constructor() Badge("House of Murasaki-san Craft", "HoM") {}
-
-    //static status
-    mapping(uint32 => uint32) public class;
-    mapping(uint32 => uint32) public summoned_time;
-    mapping(uint32 => uint32) public seed;
-
-    //variants     
-    uint32 public next_summoner = 1;
-    bool notPaused = false;
-    
     //admin pause
+    bool notPaused = true;
     function _set_notPaused(bool _bool) external onlyOwner {
         notPaused = _bool;
     }
 
+    //names
+    constructor() ERC721("House of Murasaki-san", "HoM") {}
+
+    //summoner info
+    mapping(uint => uint) public class;
+    mapping(uint => uint) public summoned_time;
+    mapping(uint => uint) public seed;
+
     //summon
-    function summon(address _owner, uint32 _class, uint32 _seed) external {
-        require(notPaused);
+    function summon(address _owner, uint _class, uint _seed) external {
         require(permitted_address[msg.sender] == true);
-        uint32 _now = uint32(block.timestamp);
-        uint32 _summoning_summoner = next_summoner;
-        class[_summoning_summoner] = _class;
-        summoned_time[_summoning_summoner] = _now;
-        seed[_summoning_summoner] = _seed;
+        require(notPaused);
+        //update summoner info
+        uint _now = block.timestamp;
+        class[next_token] = _class;
+        summoned_time[next_token] = _now;
+        seed[next_token] = _seed;
         //mint
-        next_summoner++;
-        _mint(_owner, _summoning_summoner);
+        _safeMint(_owner, next_token);
     }
 
     //burn
-    function burn(uint32 _summoner) external {
+    function burn(uint _summoner) external {
         require(permitted_address[msg.sender] == true);
-        Badge._burn(_summoner);
+        ERC721._burn(_summoner);
     }
+
+    string[] private flower = [
+        "Rose",
+        "Marigold",
+        "Dandelion",
+        "Rosemary",
+        "Olive",
+        "Holly",
+        "Nemophila",
+        "Hydrangea",
+        "Forget-me-not",
+        "Sumire",
+        "Gerbera",
+        "Anemone"
+    ];
+
+    string[] private color = [
+        "#E60012",
+        "#F39800",
+        "#FFF100",
+        "#8FC31F",
+        "#009944",
+        "#009E96",
+        "#00A0E9",
+        "#0068B7",
+        "#1D2088",
+        "#920783",
+        "#E4007F",
+        "#E5004F"
+    ];
 
     //URI
     //Inspired by OraclizeAPI's implementation - MIT license
@@ -717,20 +649,27 @@ contract Murasaki_Main is Badge, Ownable{
         }
         return string(buffer);
     }
-    function tokenURI (uint32 _summoner) public view returns (string memory) {
+    function tokenURI (uint _summoner) public view override returns (string memory) {
         string[9] memory parts;
-        parts[0] = '<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin meet" viewBox="0 0 350 350"><style>.base { fill: white; font-family: serif; font-size: 14px; }</style><rect width="100%" height="100%" fill="black" /><text x="10" y="20" class="base">';
-        parts[1] = string(abi.encodePacked("id", " ", toString(_summoner)));
-        parts[2] = '</text><text x="10" y="40" class="base">';
-        parts[3] = string(abi.encodePacked("class", " ", toString(class[_summoner])));
-        parts[4] = '</text><text x="10" y="60" class="base">';
-        parts[5] = string(abi.encodePacked("summoned time", " ", toString(summoned_time[_summoner])));
-        parts[6] = '</text></svg>';
+        parts[0] = '<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin meet" viewBox="0 0 128 128"><style>.base { fill: #D81B60; font-family: arial; font-size: 12px; }</style><rect width="128" height="128" fill="';
+        parts[1] = color[class[_summoner]];
+        parts[2] = '" fill-opacity="0.5"/>';
+        parts[3] = '<image width="128" height="128" x="0" y="0" href="data:image/png;base64,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"/><text x="24" y="88" class="base" font-weight="bold">';
+        parts[4] = string(abi.encodePacked("#", toString(_summoner)));
+        parts[5] = '</text><text x="22" y="102" class="base" font-weight="bold">';
+        parts[6] = string(abi.encodePacked("&#x273f;", flower[class[_summoner]]));
+        parts[7] = '</text></svg>';
         string memory output = 
-            string(abi.encodePacked(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6]));
-        string memory json = Base64.encode(bytes(string(abi.encodePacked('{"name": "summoner #', toString(_summoner), '", "description": "House of Murasaki-san. Murasaki-san is a pet living in your wallet. They grow with your dedication. https://murasaki-san.com/", "image": "data:image/svg+xml;base64,', Base64.encode(bytes(output)), '"}'))));
+            string(abi.encodePacked(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7]));
+        string memory json = Base64.encode(bytes(string(abi.encodePacked('{"name": "Murasaki-san #', toString(_summoner), '", "description": "House of Murasaki-san. Murasaki-san is a pet living in your wallet on Astar Network. https://murasaki-san.com/", "image": "data:image/svg+xml;base64,', Base64.encode(bytes(output)), '"}'))));
         output = string(abi.encodePacked('data:application/json;base64,', json));
         return output;
+    }
+    
+    //admin, for convert
+    function set_summoned_time(uint _summoner, uint _value) external {
+        require(permitted_address[msg.sender] == true);
+        summoned_time[_summoner] = _value;
     }
 }
 
@@ -738,7 +677,7 @@ contract Murasaki_Main is Badge, Ownable{
 //---Murasaki_Name
 
 
-contract Murasaki_Name is Badge, Ownable{
+contract Murasaki_Name is SoulBoundBadge, Ownable {
 
     //permitted address
     mapping(address => bool) public permitted_address;
@@ -752,50 +691,47 @@ contract Murasaki_Name is Badge, Ownable{
     }
     
     //admin, overwrite name
-    function update_name(uint32 _name_id, string memory _name_str) external onlyOwner {
+    function update_name(uint _name_id, string memory _name_str) external onlyOwner {
         names[_name_id] = _name_str;
     }
 
     //names
-    constructor() Badge("Murasaki Name", "MN") {}
+    constructor() ERC721("Murasaki Name", "MN") {}
 
-    //static status
-    mapping(uint32 => string) public names;
-    mapping(uint32 => uint32) public minted_time;
-    mapping(uint32 => uint32) public seed;
+    //token info
+    mapping(uint => string) public names;
+    mapping(uint => uint) public minted_time;
+    mapping(uint => uint) public seed;
+    
+    //name info
     mapping(string => bool) public isMinted;
 
-    //variants
-    uint32 public next_name = 1;
-
     //mint
-    function mint(address _owner, string memory _name_str, uint32 _seed) external {
+    function mint(address _owner, string memory _name_str, uint _seed) external {
         require(permitted_address[msg.sender] == true);
-        uint32 _now = uint32(block.timestamp);
-        uint32 _minting_name_id = next_name;
-        names[_minting_name_id] = _name_str;
-        minted_time[_minting_name_id] = _now;
-        seed[_minting_name_id] = _seed;
+        names[next_token] = _name_str;
+        uint _now = block.timestamp;
+        minted_time[next_token] = _now;
+        seed[next_token] = _seed;
         //mint
-        next_name++;
         isMinted[_name_str] = true;
-        _mint(_owner, _minting_name_id);
+        _safeMint(_owner, next_token);
     }
 
     //burn
-    function burn(uint32 _name_id) external {
+    function burn(uint _name_id) external {
         require(permitted_address[msg.sender] == true);
         string memory _name_str = names[_name_id];
         isMinted[_name_str] = false;
-        Badge._burn(_name_id);
+        ERC721._burn(_name_id);
     }
 }
 
 
-//---Murasaki_Craft
+//---Murasaki_Craft_Old
 
 
-contract Murasaki_Craft is ERC721, Ownable{
+contract Murasaki_Craft_Old is ERC721, Ownable{
 
     //permitted address
     mapping(address => bool) public permitted_address;
@@ -962,10 +898,12 @@ contract Murasaki_Craft is ERC721, Ownable{
 }
 
 
-//---Murasaki_Craft_withFee
 
 
-contract Murasaki_Craft_withFee is ERC2665, Ownable{
+//---Murasaki_Craft
+
+
+contract Murasaki_Craft is ERC2665, Ownable{
 
     //permitted address
     mapping(address => bool) public permitted_address;
@@ -990,18 +928,18 @@ contract Murasaki_Craft_withFee is ERC2665, Ownable{
     constructor() ERC2665("Murasaki Craft", "MC") {}
 
     //global variants
-    uint32 public next_item = 1;
+    uint public next_item = 1;
     struct item {
-        uint32 item_type;
-        uint32 crafted_time;
-        uint32 crafted_summoner;
+        uint item_type;
+        uint crafted_time;
+        uint crafted_summoner;
         address crafted_wallet;
         string memo;
     }
-    mapping(uint256 => item) public items;
-    mapping(address => uint32[256]) public balance_of_type;
-    mapping(uint32 => uint32) public seed;
-    mapping(uint32 => uint32) public count_of_mint; //item_type => count_of_mint
+    mapping(uint => item) public items;
+    mapping(address => uint[256]) public balance_of_type;
+    mapping(uint => uint) public seed;
+    mapping(uint => uint) public count_of_mint; //item_type => count_of_mint
 
     //override ERC721 transfer, 
     function _transfer(
@@ -1010,7 +948,7 @@ contract Murasaki_Craft_withFee is ERC2665, Ownable{
         uint256 tokenId
     ) internal virtual override {
         ERC2665._transfer(from, to, tokenId);
-        uint32 _item_type = items[tokenId].item_type;
+        uint _item_type = items[tokenId].item_type;
         balance_of_type[from][_item_type] -= 1;
         balance_of_type[to][_item_type] += 1;
         mySet[from].remove(tokenId);
@@ -1019,7 +957,7 @@ contract Murasaki_Craft_withFee is ERC2665, Ownable{
 
     //override ERC721 burn
     function _burn(uint256 tokenId) internal virtual override {
-        uint32 _item_type = items[tokenId].item_type;
+        uint _item_type = items[tokenId].item_type;
         address _owner = ERC2665.ownerOf(tokenId);
         balance_of_type[_owner][_item_type] -= 1;
         mySet[_owner].remove(tokenId);
@@ -1035,16 +973,15 @@ contract Murasaki_Craft_withFee is ERC2665, Ownable{
 
     //craft
     function craft(
-        uint32 _item_type, 
-        uint32 _summoner, 
+        uint _item_type, 
+        uint _summoner, 
         address _wallet, 
-        uint32 _seed, 
+        uint _seed, 
         string memory _memo
     ) external {
-        //require(msg.sender == murasaki_function_address);
         require(permitted_address[msg.sender] == true);
-        uint32 _now = uint32(block.timestamp);
-        uint32 _crafting_item = next_item;
+        uint _now = block.timestamp;
+        uint _crafting_item = next_item;
         items[_crafting_item] = item(_item_type, _now, _summoner, _wallet, _memo);
         balance_of_type[_wallet][_item_type] += 1;  //balanceOf each item type
         count_of_mint[_item_type]++;
@@ -1107,7 +1044,7 @@ contract Murasaki_Craft_withFee is ERC2665, Ownable{
         }
         return string(buffer);
     }
-    function tokenURI (uint32 _item) public view returns (string memory) {
+    function tokenURI (uint _item) public view returns (string memory) {
         string[9] memory parts;
         parts[0] = '<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin meet" viewBox="0 0 350 350"><style>.base { fill: white; font-family: serif; font-size: 14px; }</style><rect width="100%" height="100%" fill="black" /><text x="10" y="20" class="base">';
         parts[1] = string(abi.encodePacked("id", " ", toString(_item)));
@@ -1126,17 +1063,17 @@ contract Murasaki_Craft_withFee is ERC2665, Ownable{
     }
 
     //call items as array, need to write in Craft contract
-    function get_balance_of_type(address _wallet) public view returns (uint32[256] memory) {
+    function get_balance_of_type(address _wallet) public view returns (uint[256] memory) {
         return balance_of_type[_wallet];
     }
 
-    //221110 added: Transfer fees
+    // Transfer fees
     
     //noFee address
     mapping(address => bool) private noFee_address;
     
     //set transfer fee
-    uint public TRANSFER_FEE = 0;   //ether
+    uint public TRANSFER_FEE = 10;   //ether
     
     //a wallet collecting fees
     address private bufferTreasury_address;
@@ -1156,9 +1093,11 @@ contract Murasaki_Craft_withFee is ERC2665, Ownable{
     }
     
     //override interface IERC2665
+    //function getTransferFee(uint256 _tokenId) external view override returns (uint256) {
     function getTransferFee(uint256) external view override returns (uint256) {
         return TRANSFER_FEE;
     }
+    //function getTransferFee(uint256 _tokenId, string calldata _currencySymbol) external view override returns (uint256) {
     function getTransferFee(uint256, string calldata) external view override returns (uint256) {
         return TRANSFER_FEE;
     }
@@ -1203,6 +1142,38 @@ contract Murasaki_Craft_withFee is ERC2665, Ownable{
         require(_isApprovedOrOwner(msg.sender, tokenId), "ERC721: transfer caller is not owner nor approved");
         _safeTransfer(from, to, tokenId, _data);
     }
+    
+    //admin, using convertion, convert item info from old contract
+    function _admin_craft_convert(
+        uint _item_type, 
+        uint _summoner, 
+        address _wallet_crafted, 
+        //uint _seed, 
+        //string memory _memo,
+        uint _item_id,
+        uint _crafted_time,
+        address _wallet_to
+    ) external {
+        require(permitted_address[msg.sender] == true);
+        //uint32 _now = uint32(block.timestamp);
+        //uint32 _crafting_item = next_item;
+        //items[_crafting_item] = item(_item_type, _now, _summoner, _wallet, _memo);
+        string memory _memo = "converted";
+        items[_item_id] = item(_item_type, _crafted_time, _summoner, _wallet_crafted, _memo);
+        balance_of_type[_wallet_to][_item_type] += 1;  //balanceOf each item type
+        count_of_mint[_item_type]++;
+        //seed[_item_id] = _seed;
+        seed[_item_id] = 8888;
+        mySet[_wallet_to].add(_item_id);
+        //next_item++;
+        _safeMint(_wallet_to, _item_id);
+    }
+    
+    //admin, using convertion, set next_item
+    function _admin_set_next_item (uint _next_item) external {
+        require(permitted_address[msg.sender] == true);
+        next_item = _next_item;
+    }
 }
 
 
@@ -1227,47 +1198,49 @@ contract Murasaki_Parameter is Ownable {
 
     //global variants
     bool public isPaused = true;
-    uint32 public BASE_SEC = 86400;
-    uint32 public SPEED = 1000; //100=100%
-    uint32 public PRICE = 200;    //uin32, ether, need to recalc 10**18 in methods
-    uint32 public DAY_PETRIFIED = 30;
-    uint32 public STAKING_REWARD_SEC = 2592000; //30 days
-    uint32 public ELECTED_FLUFFY_TYPE = 0;
+    uint public BASE_SEC = 86400;
+    uint public SPEED = 1000; //100=100%
+    uint public PRICE = 200;    //uin32, ether, need to recalc 10**18 in methods
+    uint public DAY_PETRIFIED = 30;
+    uint public STAKING_REWARD_SEC = 2592000; //30 days
+    uint public ELECTED_FLUFFY_TYPE = 0;
     string public DEVELOPER_SUMMONER_NAME = "*Fluffy Kingdom*";
-    uint32 public EXP_FROM_PRESENTBOX = 50;
+    uint public EXP_FROM_PRESENTBOX = 50;
+    uint public LIMIT_MINT = 9999999999;
+
+    //modifier
+    modifier onlyPermitted {
+        require(permitted_address[msg.sender]);
+        _;
+    }
 
     //admin, set global variants
-    function _set_isPaused(bool _bool) external {
-        require(permitted_address[msg.sender] == true);
+    function _set_isPaused(bool _bool) external onlyPermitted {
         isPaused = _bool;
     }
-    function _set_base_sec(uint32 _base_sec) external {
-        require(permitted_address[msg.sender] == true);
+    function _set_base_sec(uint _base_sec) external onlyPermitted {
         BASE_SEC = _base_sec;
     }
-    function _set_speed(uint32 _speed) external {
-        require(permitted_address[msg.sender] == true);
+    function _set_speed(uint _speed) external onlyPermitted {
         SPEED = _speed;
     }
-    function _set_price(uint32 _price) external {
-        require(permitted_address[msg.sender] == true);
+    function _set_price(uint _price) external onlyPermitted {
         PRICE = _price;
     }
-    function _set_day_petrified(uint32 _day_petrified) external {
-        require(permitted_address[msg.sender] == true);
+    function _set_day_petrified(uint _day_petrified) external onlyPermitted {
         DAY_PETRIFIED = _day_petrified;
     }
-    function _set_elected_fluffy_type(uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
+    function _set_elected_fluffy_type(uint _value) external onlyPermitted {
         ELECTED_FLUFFY_TYPE = _value;
     }
-    function _set_developer_summoner_name(string memory _string) external {
-        require(permitted_address[msg.sender] == true);
+    function _set_developer_summoner_name(string memory _string) external onlyPermitted {
         DEVELOPER_SUMMONER_NAME = _string;
     }
-    function _set_exp_from_presentbox(uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
+    function _set_exp_from_presentbox(uint _value) external onlyPermitted {
         EXP_FROM_PRESENTBOX = _value;
+    }
+    function _set_limit_mint(uint _value) external onlyPermitted {
+        LIMIT_MINT = _value;
     }
 }
 
@@ -1276,14 +1249,6 @@ contract Murasaki_Parameter is Ownable {
 
 
 contract Murasaki_Storage is Ownable {
-
-    /*
-        permission require:
-            function_summon_and_levelup
-            function_feeding_and_grooming
-            function_mining_and_farming
-            function_crafting
-    */
 
     //permitted address
     mapping(address => bool) public permitted_address;
@@ -1297,164 +1262,159 @@ contract Murasaki_Storage is Ownable {
     }
 
     //status
-    mapping(uint32 => uint32) public level;
-    mapping(uint32 => uint32) public exp;
-    mapping(uint32 => uint32) public strength;
-    mapping(uint32 => uint32) public dexterity;
-    mapping(uint32 => uint32) public intelligence;
-    mapping(uint32 => uint32) public luck;
-    mapping(uint32 => uint32) public next_exp_required;
-    mapping(uint32 => uint32) public last_level_up_time;
+    mapping(uint => uint) public level;
+    mapping(uint => uint) public exp;
+    mapping(uint => uint) public strength;
+    mapping(uint => uint) public dexterity;
+    mapping(uint => uint) public intelligence;
+    mapping(uint => uint) public luck;
+    mapping(uint => uint) public next_exp_required;
+    mapping(uint => uint) public last_level_up_time;
 
     //resouse
-    mapping(uint32 => uint32) public coin;
-    mapping(uint32 => uint32) public material;
+    mapping(uint => uint) public coin;
+    mapping(uint => uint) public material;
 
     //treating
-    mapping(uint32 => uint32) public last_feeding_time;
-    mapping(uint32 => uint32) public last_grooming_time;
+    mapping(uint => uint) public last_feeding_time;
+    mapping(uint => uint) public last_grooming_time;
 
     //working
-    mapping(uint32 => uint32) public mining_status;
-    mapping(uint32 => uint32) public mining_start_time;
-    mapping(uint32 => uint32) public farming_status;
-    mapping(uint32 => uint32) public farming_start_time;
-    mapping(uint32 => uint32) public crafting_status;
-    mapping(uint32 => uint32) public crafting_start_time;
-    mapping(uint32 => uint32) public crafting_item_type;
-    mapping(uint32 => uint32) public total_mining_sec;
-    mapping(uint32 => uint32) public total_farming_sec;
-    mapping(uint32 => uint32) public total_crafting_sec;
-    mapping(uint32 => uint32) public last_total_mining_sec;
-    mapping(uint32 => uint32) public last_total_farming_sec;
-    mapping(uint32 => uint32) public last_total_crafting_sec;
-    mapping(uint32 => uint32) public last_grooming_time_plus_working_time;
+    mapping(uint => uint) public mining_status;
+    mapping(uint => uint) public mining_start_time;
+    mapping(uint => uint) public farming_status;
+    mapping(uint => uint) public farming_start_time;
+    mapping(uint => uint) public crafting_status;
+    mapping(uint => uint) public crafting_start_time;
+    mapping(uint => uint) public crafting_item_type;
+    mapping(uint => uint) public total_mining_sec;
+    mapping(uint => uint) public total_farming_sec;
+    mapping(uint => uint) public total_crafting_sec;
+    mapping(uint => uint) public last_total_mining_sec;
+    mapping(uint => uint) public last_total_farming_sec;
+    mapping(uint => uint) public last_total_crafting_sec;
+    mapping(uint => uint) public last_grooming_time_plus_working_time;
 
     //active or disable, initial default value = false, using burn
-    mapping(uint32 => bool) public isActive;
+    mapping(uint => bool) public isActive;
     
     //inHouse
-    mapping(uint32 => bool) public inHouse;
+    mapping(uint => bool) public inHouse;
     
     //staking reward counter
-    mapping(uint32 => uint32) public staking_reward_counter;
+    mapping(uint => uint) public staking_reward_counter;
+    mapping(uint => uint) public total_staking_reward_counter;
+    
+    //crafting resume
+    mapping(uint => uint) public crafting_resume_flag;
+    mapping(uint => uint) public crafting_resume_item_type;
+    mapping(uint => uint) public crafting_resume_item_dc;
+
+    //modifier
+    modifier onlyPermitted {
+        require(permitted_address[msg.sender]);
+        _;
+    }
 
     //set status
-    function set_level(uint32 _summoner, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
+    function set_level(uint _summoner, uint _value) external onlyPermitted {
         level[_summoner] = _value;
     }
-    function set_exp(uint32 _summoner, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
+    function set_exp(uint _summoner, uint _value) external onlyPermitted {
         exp[_summoner] = _value;
     }
-    function set_strength(uint32 _summoner, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
+    function set_strength(uint _summoner, uint _value) external onlyPermitted {
         strength[_summoner] = _value;
     }
-    function set_dexterity(uint32 _summoner, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
+    function set_dexterity(uint _summoner, uint _value) external onlyPermitted {
         dexterity[_summoner] = _value;
     }
-    function set_intelligence(uint32 _summoner, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
+    function set_intelligence(uint _summoner, uint _value) external onlyPermitted {
         intelligence[_summoner] = _value;
     }
-    function set_luck(uint32 _summoner, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
+    function set_luck(uint _summoner, uint _value) external onlyPermitted {
         luck[_summoner] = _value;
     }
-    function set_next_exp_required(uint32 _summoner, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
+    function set_next_exp_required(uint _summoner, uint _value) external onlyPermitted {
         next_exp_required[_summoner] = _value;
     }
-    function set_last_level_up_time(uint32 _summoner, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
+    function set_last_level_up_time(uint _summoner, uint _value) external onlyPermitted {
         last_level_up_time[_summoner] = _value;
     }
-    function set_coin(uint32 _summoner, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
+    function set_coin(uint _summoner, uint _value) external onlyPermitted {
         coin[_summoner] = _value;
     }
-    function set_material(uint32 _summoner, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
+    function set_material(uint _summoner, uint _value) external onlyPermitted {
         material[_summoner] = _value;
     }
-    function set_last_feeding_time(uint32 _summoner, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
+    function set_last_feeding_time(uint _summoner, uint _value) external onlyPermitted {
         last_feeding_time[_summoner] = _value;
     }
-    function set_last_grooming_time(uint32 _summoner, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
+    function set_last_grooming_time(uint _summoner, uint _value) external onlyPermitted {
         last_grooming_time[_summoner] = _value;
     }
-    function set_mining_status(uint32 _summoner, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
+    function set_mining_status(uint _summoner, uint _value) external onlyPermitted {
         mining_status[_summoner] = _value;
     }
-    function set_mining_start_time(uint32 _summoner, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
+    function set_mining_start_time(uint _summoner, uint _value) external onlyPermitted {
         mining_start_time[_summoner] = _value;
     }
-    function set_farming_status(uint32 _summoner, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
+    function set_farming_status(uint _summoner, uint _value) external onlyPermitted {
         farming_status[_summoner] = _value;
     }
-    function set_farming_start_time(uint32 _summoner, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
+    function set_farming_start_time(uint _summoner, uint _value) external onlyPermitted {
         farming_start_time[_summoner] = _value;
     }
-    function set_crafting_status(uint32 _summoner, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
+    function set_crafting_status(uint _summoner, uint _value) external onlyPermitted {
         crafting_status[_summoner] = _value;
     }
-    function set_crafting_start_time(uint32 _summoner, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
+    function set_crafting_start_time(uint _summoner, uint _value) external onlyPermitted {
         crafting_start_time[_summoner] = _value;
     }
-    function set_crafting_item_type(uint32 _summoner, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
+    function set_crafting_item_type(uint _summoner, uint _value) external onlyPermitted {
         crafting_item_type[_summoner] = _value;
     }
-    function set_total_mining_sec(uint32 _summoner, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
+    function set_total_mining_sec(uint _summoner, uint _value) external onlyPermitted {
         total_mining_sec[_summoner] = _value;
     }
-    function set_total_farming_sec(uint32 _summoner, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
+    function set_total_farming_sec(uint _summoner, uint _value) external onlyPermitted {
         total_farming_sec[_summoner] = _value;
     }
-    function set_total_crafting_sec(uint32 _summoner, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
+    function set_total_crafting_sec(uint _summoner, uint _value) external onlyPermitted {
         total_crafting_sec[_summoner] = _value;
     }
-    function set_last_total_mining_sec(uint32 _summoner, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
+    function set_last_total_mining_sec(uint _summoner, uint _value) external onlyPermitted {
         last_total_mining_sec[_summoner] = _value;
     }
-    function set_last_total_farming_sec(uint32 _summoner, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
+    function set_last_total_farming_sec(uint _summoner, uint _value) external onlyPermitted {
         last_total_farming_sec[_summoner] = _value;
     }
-    function set_last_total_crafting_sec(uint32 _summoner, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
+    function set_last_total_crafting_sec(uint _summoner, uint _value) external onlyPermitted {
         last_total_crafting_sec[_summoner] = _value;
     }
-    function set_last_grooming_time_plus_working_time(uint32 _summoner, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
+    function set_last_grooming_time_plus_working_time(uint _summoner, uint _value) external onlyPermitted {
         last_grooming_time_plus_working_time[_summoner] = _value;
     }
-    function set_isActive(uint32 _summoner, bool _bool) external {
-        require(permitted_address[msg.sender] == true);
+    function set_isActive(uint _summoner, bool _bool) external onlyPermitted {
         isActive[_summoner] = _bool;
     }
-    function set_inHouse(uint32 _summoner, bool _bool) external {
-        require(permitted_address[msg.sender] == true);
+    function set_inHouse(uint _summoner, bool _bool) external onlyPermitted {
         inHouse[_summoner] = _bool;
     }
-    function set_staking_reward_counter(uint32 _summoner, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
+    function set_staking_reward_counter(uint _summoner, uint _value) external onlyPermitted {
         staking_reward_counter[_summoner] = _value;
+    }
+    function set_total_staking_reward_counter(uint _summoner, uint _value) external onlyPermitted {
+        total_staking_reward_counter[_summoner] = _value;
+    }
+    function set_crafting_resume_flag(uint _summoner, uint _value) external onlyPermitted {
+        crafting_resume_flag[_summoner] = _value;
+    }
+    function set_crafting_resume_item_type(uint _summoner, uint _value) external onlyPermitted {
+        crafting_resume_item_type[_summoner] = _value;
+    }
+    function set_crafting_resume_item_dc(uint _summoner, uint _value) external onlyPermitted {
+        crafting_resume_item_dc[_summoner] = _value;
     }
 }
 
@@ -1476,31 +1436,32 @@ contract Murasaki_Storage_Score is Ownable {
     }
 
     //status
-    mapping(uint32 => uint32) public total_exp_gained;
-    mapping(uint32 => uint32) public total_coin_mined;
-    mapping(uint32 => uint32) public total_material_farmed;
-    mapping(uint32 => uint32) public total_item_crafted;
-    mapping(uint32 => uint32) public total_precious_received;
+    mapping(uint => uint) public total_exp_gained;
+    mapping(uint => uint) public total_coin_mined;
+    mapping(uint => uint) public total_material_farmed;
+    mapping(uint => uint) public total_item_crafted;
+    mapping(uint => uint) public total_precious_received;
+
+    //modifier
+    modifier onlyPermitted {
+        require(permitted_address[msg.sender]);
+        _;
+    }
 
     //set status
-    function set_total_exp_gained(uint32 _summoner, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
+    function set_total_exp_gained(uint _summoner, uint _value) external onlyPermitted {
         total_exp_gained[_summoner] = _value;
     }
-    function set_total_coin_mined(uint32 _summoner, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
+    function set_total_coin_mined(uint _summoner, uint _value) external onlyPermitted {
         total_coin_mined[_summoner] = _value;
     }
-    function set_total_material_farmed(uint32 _summoner, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
+    function set_total_material_farmed(uint _summoner, uint _value) external onlyPermitted {
         total_material_farmed[_summoner] = _value;
     }
-    function set_total_item_crafted(uint32 _summoner, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
+    function set_total_item_crafted(uint _summoner, uint _value) external onlyPermitted {
         total_item_crafted[_summoner] = _value;
     }
-    function set_total_precious_received(uint32 _summoner, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
+    function set_total_precious_received(uint _summoner, uint _value) external onlyPermitted {
         total_precious_received[_summoner] = _value;
     }
 }
@@ -1510,9 +1471,6 @@ contract Murasaki_Storage_Score is Ownable {
 
 
 contract Murasaki_Storage_Nui is Ownable {
-
-    //item_type_of_nui = 197
-    //permittion required: function_crafting
 
     //permitted address
     mapping(address => bool) public permitted_address;
@@ -1526,76 +1484,68 @@ contract Murasaki_Storage_Nui is Ownable {
     }
     
     //status of nui
-    mapping(uint32 => uint32) public mint_time;
-    mapping(uint32 => uint32) public summoner;
-    mapping(uint32 => uint32) public class;
-    mapping(uint32 => uint32) public level;
-    mapping(uint32 => uint32) public strength;
-    mapping(uint32 => uint32) public dexterity;
-    mapping(uint32 => uint32) public intelligence;
-    mapping(uint32 => uint32) public luck;
-    mapping(uint32 => uint32) public total_exp_gained;
-    mapping(uint32 => uint32) public total_coin_mined;
-    mapping(uint32 => uint32) public total_material_farmed;
-    mapping(uint32 => uint32) public total_item_crafted;
-    mapping(uint32 => uint32) public total_precious_received;
-    mapping(uint32 => uint32) public score;
+    mapping(uint => uint) public mint_time;
+    mapping(uint => uint) public summoner;
+    mapping(uint => uint) public class;
+    mapping(uint => uint) public level;
+    mapping(uint => uint) public strength;
+    mapping(uint => uint) public dexterity;
+    mapping(uint => uint) public intelligence;
+    mapping(uint => uint) public luck;
+    mapping(uint => uint) public total_exp_gained;
+    mapping(uint => uint) public total_coin_mined;
+    mapping(uint => uint) public total_material_farmed;
+    mapping(uint => uint) public total_item_crafted;
+    mapping(uint => uint) public total_precious_received;
+    mapping(uint => uint) public score;
+
+    //modifier
+    modifier onlyPermitted {
+        require(permitted_address[msg.sender]);
+        _;
+    }
 
     //set status
-    function set_mint_time(uint32 _item_nui, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
+    function set_mint_time(uint _item_nui, uint _value) external onlyPermitted {
         mint_time[_item_nui] = _value;
     }
-    function set_summoner(uint32 _item_nui, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
+    function set_summoner(uint _item_nui, uint _value) external onlyPermitted {
         summoner[_item_nui] = _value;
     }
-    function set_class(uint32 _item_nui, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
+    function set_class(uint _item_nui, uint _value) external onlyPermitted {
         class[_item_nui] = _value;
     }
-    function set_level(uint32 _item_nui, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
+    function set_level(uint _item_nui, uint _value) external onlyPermitted {
         level[_item_nui] = _value;
     }
-    function set_strength(uint32 _item_nui, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
+    function set_strength(uint _item_nui, uint _value) external onlyPermitted {
         strength[_item_nui] = _value;
     }
-    function set_dexterity(uint32 _item_nui, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
+    function set_dexterity(uint _item_nui, uint _value) external onlyPermitted {
         dexterity[_item_nui] = _value;
     }
-    function set_intelligence(uint32 _item_nui, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
+    function set_intelligence(uint _item_nui, uint _value) external onlyPermitted {
         intelligence[_item_nui] = _value;
     }
-    function set_luck(uint32 _item_nui, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
+    function set_luck(uint _item_nui, uint _value) external onlyPermitted {
         luck[_item_nui] = _value;
     }
-    function set_total_exp_gained(uint32 _item_nui, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
+    function set_total_exp_gained(uint _item_nui, uint _value) external onlyPermitted {
         total_exp_gained[_item_nui] = _value;
     }
-    function set_total_coin_mined(uint32 _item_nui, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
+    function set_total_coin_mined(uint _item_nui, uint _value) external onlyPermitted {
         total_coin_mined[_item_nui] = _value;
     }
-    function set_total_material_farmed(uint32 _item_nui, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
+    function set_total_material_farmed(uint _item_nui, uint _value) external onlyPermitted {
         total_material_farmed[_item_nui] = _value;
     }
-    function set_total_item_crafted(uint32 _item_nui, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
+    function set_total_item_crafted(uint _item_nui, uint _value) external onlyPermitted {
         total_item_crafted[_item_nui] = _value;
     }
-    function set_total_precious_received(uint32 _item_nui, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
+    function set_total_precious_received(uint _item_nui, uint _value) external onlyPermitted {
         total_precious_received[_item_nui] = _value;
     }
-    function set_score(uint32 _item_nui, uint32 _value) external {
-        require(permitted_address[msg.sender] == true);
+    function set_score(uint _item_nui, uint _value) external onlyPermitted {
         score[_item_nui] = _value;
     }
 }
@@ -1604,7 +1554,7 @@ contract Murasaki_Storage_Nui is Ownable {
 //===Function==================================================================================================================
 
 
-//---*Share
+//---Share
 
 
 contract Murasaki_Function_Share is Ownable {
@@ -1626,8 +1576,8 @@ contract Murasaki_Function_Share is Ownable {
     address public murasaki_parameter_address;
     
     //salt
-    uint32 private _salt = 0;
-    function _update_salt(uint32 _summoner) external onlyOwner {
+    uint private _salt = 0;
+    function _update_salt(uint _summoner) external onlyOwner {
         _salt = dn(_summoner, 10);
     }
 
@@ -1676,13 +1626,15 @@ contract Murasaki_Function_Share is Ownable {
     }
 
     //check owner of summoner
-    function check_owner(uint32 _summoner, address _wallet) external view returns (bool) {
+    function check_owner(uint _summoner, address _wallet) external view returns (bool) {
         Murasaki_Main mm = Murasaki_Main(murasaki_main_address);
-        return (mm.ownerOf(_summoner) == _wallet);
+        Murasaki_Storage ms = Murasaki_Storage(murasaki_storage_address);
+        // possess and isActive
+        return (mm.ownerOf(_summoner) == _wallet && ms.isActive(_summoner));
     }
 
     //get owner of summoner
-    function get_owner(uint32 _summoner) public view returns (address) {
+    function get_owner(uint _summoner) public view returns (address) {
         Murasaki_Main mm = Murasaki_Main(murasaki_main_address);
         return mm.ownerOf(_summoner);
     }
@@ -1690,19 +1642,19 @@ contract Murasaki_Function_Share is Ownable {
     //craft
 
     //get balance of type
-    function get_balance_of_type_specific(address _wallet, uint32 _item_type) public view returns (uint32) {
+    function get_balance_of_type_specific(address _wallet, uint _item_type) public view returns (uint) {
         Murasaki_Craft mc = Murasaki_Craft(murasaki_craft_address);
         return mc.balance_of_type(_wallet, _item_type);
     }
 
     //call items as array
-    function get_balance_of_type_array(address _wallet) external view returns (uint32[256] memory) {
+    function get_balance_of_type_array(address _wallet) external view returns (uint[256] memory) {
         Murasaki_Craft mc = Murasaki_Craft(murasaki_craft_address);
         return mc.get_balance_of_type(_wallet);
     }
 
     //call items as array from summoner
-    function get_balance_of_type_array_from_summoner(uint32 _summoner) public view returns (uint32[256] memory) {
+    function get_balance_of_type_array_from_summoner(uint _summoner) public view returns (uint[256] memory) {
         Murasaki_Main mm = Murasaki_Main(murasaki_main_address);
         address _owner = mm.ownerOf(_summoner);
         Murasaki_Craft mc = Murasaki_Craft(murasaki_craft_address);
@@ -1710,15 +1662,15 @@ contract Murasaki_Function_Share is Ownable {
     }
 
     //calc satiety
-    function calc_satiety(uint32 _summoner) public view returns (uint32) {
+    function calc_satiety(uint _summoner) public view returns (uint) {
         Murasaki_Storage ms = Murasaki_Storage(murasaki_storage_address);
         Murasaki_Parameter mp = Murasaki_Parameter(murasaki_parameter_address);
-        uint32 SPEED = mp.SPEED();
-        uint32 BASE_SEC = mp.BASE_SEC();
-        uint32 _now = uint32(block.timestamp);
-        uint32 _delta_sec = _now - ms.last_feeding_time(_summoner);
-        uint32 _base = BASE_SEC /2 *100/SPEED;
-        uint32 _satiety;
+        uint SPEED = mp.SPEED();
+        uint BASE_SEC = mp.BASE_SEC();
+        uint _now = block.timestamp;
+        uint _delta_sec = _now - ms.last_feeding_time(_summoner);
+        uint _base = BASE_SEC /2 *100/SPEED;
+        uint _satiety;
         if (_delta_sec >= _base) {
             _satiety = 0;
         }else {
@@ -1728,15 +1680,15 @@ contract Murasaki_Function_Share is Ownable {
     }
 
     //calc happy
-    function calc_happy(uint32 _summoner) public view returns (uint32) {
+    function calc_happy(uint _summoner) public view returns (uint) {
         Murasaki_Storage ms = Murasaki_Storage(murasaki_storage_address);
         Murasaki_Parameter mp = Murasaki_Parameter(murasaki_parameter_address);
-        uint32 SPEED = mp.SPEED();
-        uint32 BASE_SEC = mp.BASE_SEC();
-        uint32 _now = uint32(block.timestamp);
-        uint32 _delta_sec = _now - ms.last_grooming_time(_summoner);
-        uint32 _base = BASE_SEC *3 *100/SPEED;
-        uint32 _happy;
+        uint SPEED = mp.SPEED();
+        uint BASE_SEC = mp.BASE_SEC();
+        uint _now = block.timestamp;
+        uint _delta_sec = _now - ms.last_grooming_time(_summoner);
+        uint _base = BASE_SEC *3 *100/SPEED;
+        uint _happy;
         if (_delta_sec >= _base) {
             _happy = 0;
         }else {
@@ -1746,13 +1698,13 @@ contract Murasaki_Function_Share is Ownable {
     }
 
     //calc precious
-    function calc_precious(uint32 _summoner) public view returns (uint32) {
+    function calc_precious(uint _summoner) public view returns (uint) {
         Murasaki_Storage ms = Murasaki_Storage(murasaki_storage_address);
         Murasaki_Parameter mp = Murasaki_Parameter(murasaki_parameter_address);
-        uint32[256] memory _balance_of_type = get_balance_of_type_array_from_summoner(_summoner);
-        uint32 _precious_score = 0;
+        uint[256] memory _balance_of_type = get_balance_of_type_array_from_summoner(_summoner);
+        uint _precious_score = 0;
         //fluffy
-        uint32 _elected_precious_type = mp.ELECTED_FLUFFY_TYPE();
+        uint _elected_precious_type = mp.ELECTED_FLUFFY_TYPE();
         for (uint i = 201; i <= 212; i++) {
             if (_balance_of_type[i+24] > 0) {
                 _precious_score += _balance_of_type[i+24] * 3*16;
@@ -1779,7 +1731,7 @@ contract Murasaki_Function_Share is Ownable {
             _precious_score += _balance_of_type[197] * 3*64;
         }
         //level cap, 800/Lv20 = 40/Lv
-        uint32 _lv = ms.level(_summoner);
+        uint _lv = ms.level(_summoner);
         if (_precious_score > _lv*40) {
             _precious_score = _lv*40;
         }
@@ -1787,7 +1739,7 @@ contract Murasaki_Function_Share is Ownable {
     }
 
     //call_name_from_summoner
-    function call_name_from_summoner(uint32 _summoner) external view returns (string memory) {
+    function call_name_from_summoner(uint _summoner) external view returns (string memory) {
         if (_summoner == 0) {
             Murasaki_Parameter mp = Murasaki_Parameter(murasaki_parameter_address);
             return mp.DEVELOPER_SUMMONER_NAME();
@@ -1795,26 +1747,26 @@ contract Murasaki_Function_Share is Ownable {
         Murasaki_Name mn = Murasaki_Name(murasaki_name_address);
         Murasaki_Main mm = Murasaki_Main(murasaki_main_address);
         address _owner = mm.ownerOf(_summoner);
-        uint32 _name_id = mn.tokenOf(_owner);
+        uint _name_id = mn.tokenOf(_owner);
         string memory _name_str = mn.names(_name_id);
         return _name_str;
     }
 
     //calc_score
-    function calc_score(uint32 _summoner) public view returns (uint32) {
-        uint32 _score = 0;
+    function calc_score(uint _summoner) public view returns (uint) {
+        uint _score = 0;
         _score += _calc_score_total(_summoner);
         _score += _calc_score_nft(_summoner);
         return _score;
     }
-    function _calc_score_total(uint32 _summoner) internal view returns (uint32) {
+    function _calc_score_total(uint _summoner) internal view returns (uint) {
         Murasaki_Storage_Score mss = Murasaki_Storage_Score(murasaki_storage_score_address);
-        uint32 _total_exp_gained = mss.total_exp_gained(_summoner);
-        uint32 _total_coin_mined = mss.total_coin_mined(_summoner);
-        uint32 _total_material_farmed = mss.total_material_farmed(_summoner);
-        uint32 _total_item_crafted = mss.total_item_crafted(_summoner);
-        uint32 _total_precious_received = mss.total_precious_received(_summoner);
-        uint32 _score = 0;
+        uint _total_exp_gained = mss.total_exp_gained(_summoner);
+        uint _total_coin_mined = mss.total_coin_mined(_summoner);
+        uint _total_material_farmed = mss.total_material_farmed(_summoner);
+        uint _total_item_crafted = mss.total_item_crafted(_summoner);
+        uint _total_precious_received = mss.total_precious_received(_summoner);
+        uint _score = 0;
         _score += _total_exp_gained;
         _score += _total_coin_mined;
         _score += _total_material_farmed;
@@ -1822,10 +1774,10 @@ contract Murasaki_Function_Share is Ownable {
         _score += _total_precious_received * 500 + _total_precious_received ** 2 * 50;
         return _score;
     }
-    function _calc_score_nft(uint32 _summoner) internal view returns (uint32) {
-        uint32[256] memory _array = get_balance_of_type_array_from_summoner(_summoner);
-        uint32 _score = 0;
-        for (uint32 i=1; i<=255; i++) {
+    function _calc_score_nft(uint _summoner) internal view returns (uint) {
+        uint[256] memory _array = get_balance_of_type_array_from_summoner(_summoner);
+        uint _score = 0;
+        for (uint i=1; i<=255; i++) {
             if (_array[i] > 0) {
                 //common item, 1/5 of item_crafted
                 if (i <= 64) {
@@ -1859,14 +1811,14 @@ contract Murasaki_Function_Share is Ownable {
         
     //calc_exp_addition_rate_from_nui, item_nui required
     //return XXX% (100% - 200%, x1 - x2 ratio)
-    function calc_exp_addition_rate(uint32 _summoner, uint32 _item_nui) external view returns (uint32) {
+    function calc_exp_addition_rate(uint _summoner, uint _item_nui) external view returns (uint) {
         //call summoner score
-        uint32 _score_summoner = calc_score(_summoner);
+        uint _score_summoner = calc_score(_summoner);
         //call nui score
         Murasaki_Storage_Nui msn = Murasaki_Storage_Nui(murasaki_storage_nui_address);
-        uint32 _score_nui = msn.score(_item_nui);
+        uint _score_nui = msn.score(_item_nui);
         //formula: _score_nui / _score_summoner * 100 (%)
-        uint32 _percent = _score_nui * 100 / (_score_summoner + 1);
+        uint _percent = _score_nui * 100 / (_score_summoner + 1);
         if (_percent <= 103) {
             return 103;
         } else if (_percent >= 300) {
@@ -1877,14 +1829,14 @@ contract Murasaki_Function_Share is Ownable {
     }
 
     //cehck petrification, debends on only feeding
-    function not_petrified(uint32 _summoner) public view returns (bool) {
+    function not_petrified(uint _summoner) public view returns (bool) {
         Murasaki_Storage ms = Murasaki_Storage(murasaki_storage_address);
         Murasaki_Parameter mp = Murasaki_Parameter(murasaki_parameter_address);
-        uint32 SPEED = mp.SPEED();
-        uint32 BASE_SEC = mp.BASE_SEC();
-        uint32 DAY_PETRIFIED = mp.DAY_PETRIFIED();
-        uint32 _now = uint32(block.timestamp);
-        uint32 _delta_sec = _now - ms.last_feeding_time(_summoner);
+        uint SPEED = mp.SPEED();
+        uint BASE_SEC = mp.BASE_SEC();
+        uint DAY_PETRIFIED = mp.DAY_PETRIFIED();
+        uint _now = block.timestamp;
+        uint _delta_sec = _now - ms.last_feeding_time(_summoner);
         if ( _delta_sec >= BASE_SEC * DAY_PETRIFIED *100/SPEED) {
             return false;
         }else {
@@ -1897,23 +1849,23 @@ contract Murasaki_Function_Share is Ownable {
     //Shibuya, AstarBase: 0xF183f51D3E8dfb2513c15B046F848D4a68bd3F5D
     //Astar, AstarBase: 0x8E2fa5A4D4e4f0581B69aF2f8F2Ef2CF205aE8F0
     //Astar, communy reward: 0x101B453a02f961b4E3f0526eCd4c533c3A80d795
-    function calc_dapps_staking_amount(address _wallet) public view returns (uint32) {
+    function calc_dapps_staking_amount(address _wallet) public view returns (uint) {
         IAstarBase ASTARBASE = IAstarBase(astarbase_address);
         uint _staker_raw = ASTARBASE.checkStakerStatusOnContract(_wallet, murasaki_main_address);
-        uint32 _staker = uint32(_staker_raw / (10 ** 18));
+        uint _staker = _staker_raw / (10 ** 18);
         return _staker;
     }
     
     /*
     //get luck addition by dapps staking
-    function get_luck_by_staking(uint32 _summoner) public view returns (uint32) {
+    function get_luck_by_staking(uint _summoner) public view returns (uint) {
         address _owner = get_owner(_summoner);
-        uint32 _staker = calc_dapps_staking_amount(_owner);
+        uint _staker = calc_dapps_staking_amount(_owner);
         Murasaki_Storage ms = Murasaki_Storage(murasaki_storage_address);
-        uint32 _level = ms.level(_summoner);
+        uint _level = ms.level(_summoner);
         //luck_add = luck_addMin + (luck_addMax - luck_addMin) * (Lv-1)/(20-1)
-        uint32 _luck_addMin;
-        uint32 _luck_addMax;
+        uint _luck_addMin;
+        uint _luck_addMax;
         if (_staker < 500) {
             return 0;
         } else if (_staker < 1000) {
@@ -1941,16 +1893,16 @@ contract Murasaki_Function_Share is Ownable {
             _luck_addMin = 200;
             _luck_addMax = 400;
         }
-        uint32 _luck_add = _luck_addMin + (_luck_addMax - _luck_addMin) * (_level - 1) / 19;
+        uint _luck_add = _luck_addMin + (_luck_addMax - _luck_addMin) * (_level - 1) / 19;
         return _luck_add;
     }
     */
     
     //get speed_of_dappsStaking
-    function get_speed_of_dappsStaking(uint32 _summoner) external view returns (uint32) {
+    function get_speed_of_dappsStaking(uint _summoner) external view returns (uint) {
         address _owner = get_owner(_summoner);
-        uint32 _staker = calc_dapps_staking_amount(_owner);
-        uint32 _speed;
+        uint _staker = calc_dapps_staking_amount(_owner);
+        uint _speed;
         if (_staker < 500) {
             _speed = 0;
         } else if (_staker < 1000) {
@@ -1976,9 +1928,9 @@ contract Murasaki_Function_Share is Ownable {
     }
     
     /*
-    function get_luck_by_staking(uint32 _summoner) public view returns (uint32) {
+    function get_luck_by_staking(uint _summoner) public view returns (uint) {
         address _owner = get_owner(_summoner);
-        uint32 _staker = calc_dapps_staking_amount(_owner);
+        uint _staker = calc_dapps_staking_amount(_owner);
         // y = [ 1 + { 5.7 / (x + 570) } ]^x
         if (_staker < 500) {
             return 0;
@@ -1999,10 +1951,10 @@ contract Murasaki_Function_Share is Ownable {
     */
     
     //luck challenge
-    function luck_challenge(uint32 _summoner) external view returns (bool) {
+    function luck_challenge(uint _summoner) external view returns (bool) {
         Murasaki_Storage ms = Murasaki_Storage(murasaki_storage_address);
         World_Dice wd = World_Dice(world_dice_address);
-        uint32 _luck = ms.luck(_summoner);
+        uint _luck = ms.luck(_summoner);
         //_luck += calc_precious(_summoner) * 1;
         _luck += calc_precious(_summoner);
         _luck += wd.get_rolled_dice(_summoner);
@@ -2016,43 +1968,43 @@ contract Murasaki_Function_Share is Ownable {
 
     //random
     //for block chain
-    function d10000(uint32 _summoner) external view returns (uint32) {
+    function d10000(uint _summoner) external view returns (uint) {
         return dn(_summoner, 10000);
     }
-    function d1000(uint32 _summoner) external view returns (uint32) {
+    function d1000(uint _summoner) external view returns (uint) {
         return dn(_summoner, 1000);
     }
-    function d100(uint32 _summoner) external view returns (uint32) {
+    function d100(uint _summoner) external view returns (uint) {
         return dn(_summoner, 100);
     }
-    function seed(uint32 _summoner) external view returns (uint32) {
-        return uint32(_seed(_summoner));
+    function seed(uint _summoner) external view returns (uint) {
+        return _seed(_summoner);
     }
-    function d20(uint32 _summoner) external view returns (uint32) {
+    function d20(uint _summoner) external view returns (uint) {
         return dn(_summoner, 20);
     }    
-    function d12(uint32 _summoner) external view returns (uint32) {
+    function d12(uint _summoner) external view returns (uint) {
         return dn(_summoner, 12);
     }    
-    function d10(uint32 _summoner) external view returns (uint32) {
+    function d10(uint _summoner) external view returns (uint) {
         return dn(_summoner, 10);
     }
-    function d8(uint32 _summoner) external view returns (uint32) {
+    function d8(uint _summoner) external view returns (uint) {
         return dn(_summoner, 8);
     }
-    function d6(uint32 _summoner) external view returns (uint32) {
+    function d6(uint _summoner) external view returns (uint) {
         return dn(_summoner, 6);
     }
-    function d4(uint32 _summoner) external view returns (uint32) {
+    function d4(uint _summoner) external view returns (uint) {
         return dn(_summoner, 4);
     }
-    function dn(uint32 _summoner, uint32 _number) public view returns (uint32) {
-        return uint32(_seed(_summoner) % _number);
+    function dn(uint _summoner, uint _number) public view returns (uint) {
+        return _seed(_summoner) % _number;
     }
     function _random(string memory input) internal pure returns (uint256) {
         return uint256(keccak256(abi.encodePacked(input)));
     }
-    function _seed(uint32 _summoner) internal view returns (uint rand) {
+    function _seed(uint _summoner) internal view returns (uint rand) {
         rand = _random(
             string(
                 abi.encodePacked(
@@ -2084,24 +2036,25 @@ contract Murasaki_Function_Summon_and_LevelUp is Ownable, ReentrancyGuard {
     }
 
     //summon
-    event Summon(uint32 indexed _summoner, address _wallet, uint32 _class);
-    function summon(uint32 _class) external payable nonReentrant {
+    event Summon(uint indexed _summoner, address _wallet, uint _class);
+    function summon(uint _class) external payable nonReentrant {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Main mm = Murasaki_Main(mfs.murasaki_main_address());
         Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
         Murasaki_Parameter mp = Murasaki_Parameter(mfs.murasaki_parameter_address());
         require(mp.isPaused() == false);
+        require( mm.next_token() < mp.LIMIT_MINT() );
         uint PRICE = mp.PRICE();
-        uint32 BASE_SEC = mp.BASE_SEC();
-        uint32 SPEED = mp.SPEED();
+        uint BASE_SEC = mp.BASE_SEC();
+        uint SPEED = mp.SPEED();
         require(msg.value >= PRICE * 10**18);
         require(0 <= _class && _class <= 11);
         //summon on mm, mint NTT
-        uint32 _summoner = mm.next_summoner();
-        uint32 _seed = mfs.seed(_summoner);
+        uint _summoner = mm.next_token();
+        uint _seed = mfs.seed(_summoner);
         mm.summon(msg.sender, _class, _seed);
         //summon on ms, initialize sutatus
-        uint32 _now = uint32(block.timestamp);
+        uint _now = block.timestamp;
         ms.set_level(_summoner, 1);
         ms.set_exp(_summoner, 0);
         ms.set_strength(_summoner, 300);
@@ -2139,8 +2092,8 @@ contract Murasaki_Function_Summon_and_LevelUp is Ownable, ReentrancyGuard {
     }
 
     //burn
-    event Burn(uint32 indexed _summoner);
-    function burn(uint32 _summoner) external nonReentrant {
+    event Burn(uint indexed _summoner);
+    function burn(uint _summoner) external nonReentrant {
         //check owner
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         require(mfs.check_owner(_summoner, msg.sender));
@@ -2155,14 +2108,14 @@ contract Murasaki_Function_Summon_and_LevelUp is Ownable, ReentrancyGuard {
     }
 
     //petrified check
-    function not_petrified(uint32 _summoner) internal view returns (bool) {
+    function not_petrified(uint _summoner) internal view returns (bool) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         return mfs.not_petrified(_summoner);
     }
 
     //level-up
-    event Level_up(uint32 indexed _summoner, uint32 _level);
-    function level_up(uint32 _summoner) external nonReentrant {
+    event Level_up(uint indexed _summoner, uint _level);
+    function level_up(uint _summoner) external nonReentrant {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
         require(mfs.check_owner(_summoner, msg.sender));
@@ -2171,16 +2124,16 @@ contract Murasaki_Function_Summon_and_LevelUp is Ownable, ReentrancyGuard {
         //petrified check
         require(not_petrified(_summoner));
         //calculate working percent
-        uint32 _now = uint32(block.timestamp);
-        uint32 _base_sec = _now - ms.last_level_up_time(_summoner);
-        uint32 _resting_sec = _base_sec
+        uint _now = block.timestamp;
+        uint _base_sec = _now - ms.last_level_up_time(_summoner);
+        uint _resting_sec = _base_sec
              - ms.last_total_mining_sec(_summoner)
              - ms.last_total_farming_sec(_summoner)
              - ms.last_total_crafting_sec(_summoner);
-        uint32 _percent_mining = 200 * (ms.last_total_mining_sec(_summoner) + _resting_sec/4) / _base_sec;
-        uint32 _percent_farming = 200 * (ms.last_total_farming_sec(_summoner) + _resting_sec/4) / _base_sec;
-        uint32 _percent_crafting = 200 * (ms.last_total_crafting_sec(_summoner) + _resting_sec/4) / _base_sec;
-        uint32 _percent_resting = 200 * (_resting_sec/4) / _base_sec;
+        uint _percent_mining = 200 * (ms.last_total_mining_sec(_summoner) + _resting_sec/4) / _base_sec;
+        uint _percent_farming = 200 * (ms.last_total_farming_sec(_summoner) + _resting_sec/4) / _base_sec;
+        uint _percent_crafting = 200 * (ms.last_total_crafting_sec(_summoner) + _resting_sec/4) / _base_sec;
+        uint _percent_resting = 200 * (_resting_sec/4) / _base_sec;
         //status addition
         ms.set_strength(_summoner, ms.strength(_summoner) + _percent_mining);
         ms.set_dexterity(_summoner, ms.dexterity(_summoner) + _percent_farming);
@@ -2195,7 +2148,7 @@ contract Murasaki_Function_Summon_and_LevelUp is Ownable, ReentrancyGuard {
         ms.set_last_grooming_time(_summoner, _now);
         ms.set_exp(_summoner, 0);
         //level-up
-        uint32 _next_level = ms.level(_summoner) + 1;
+        uint _next_level = ms.level(_summoner) + 1;
         ms.set_level(_summoner, _next_level);
         ms.set_last_level_up_time(_summoner, _now);
         //update next_exp_required
@@ -2236,24 +2189,9 @@ contract Murasaki_Function_Summon_and_LevelUp is Ownable, ReentrancyGuard {
         }else if (_next_level == 19) {
             ms.set_next_exp_required(_summoner, 190000);
         }
-        //mint_jewel
-        //_mint_jewel(_summoner);
         //event
         emit Level_up(_summoner, _next_level);
     }
-
-    /*
-    //mint jewel
-    event Jewel_mint(uint32 indexed _summoner, uint32 _item_type);
-    function _mint_jewel(uint32 _summoner) internal {
-        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
-        Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
-        uint32 _seed = mfs.seed(_summoner);
-        uint32 _item_type = 200 + mfs.d10(_summoner) + 1;   //201-212
-        mc.craft(_item_type, _summoner, msg.sender, _seed);
-        emit Jewel_mint(_summoner, _item_type);
-    }
-    */
 }
 
 
@@ -2274,8 +2212,8 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable, ReentrancyGuard {
     }
 
     //feeding
-    event Feeding(uint32 indexed _summoner, uint32 _exp_gained, bool _critical);
-    function feeding(uint32 _summoner, uint32 _item_nui) external nonReentrant {
+    event Feeding(uint indexed _summoner, uint _exp_gained, bool _critical);
+    function feeding(uint _summoner, uint _item_nui) external nonReentrant {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
         Murasaki_Parameter mp = Murasaki_Parameter(mfs.murasaki_parameter_address());
@@ -2283,17 +2221,17 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable, ReentrancyGuard {
         require(ms.inHouse(_summoner));
         //require(mfs.check_owner(_summoner, msg.sender));
         require(not_petrified(_summoner));
-        uint32 _now = uint32(block.timestamp);
-        uint32 _satiety = mfs.calc_satiety(_summoner);
-        uint32 _exp_add = 500 * (100 - _satiety) / 100;
+        uint _now = block.timestamp;
+        uint _satiety = mfs.calc_satiety(_summoner);
+        uint _exp_add = 500 * (100 - _satiety) / 100;
         //for staking counter, sec before boost
-        uint32 _delta_sec = ( _now - ms.last_feeding_time(_summoner) ) * mp.SPEED()/100;
+        uint _delta_sec = ( _now - ms.last_feeding_time(_summoner) ) * mp.SPEED()/100;
         //nui boost
         if (_item_nui > 0) {
             address _owner = mfs.get_owner(_summoner);
             Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
             require(mc.ownerOf(_item_nui) == _owner);
-            uint32 _percent = mfs.calc_exp_addition_rate(_summoner, _item_nui);
+            uint _percent = mfs.calc_exp_addition_rate(_summoner, _item_nui);
             _exp_add = _exp_add * _percent/100;
         }
         //luck challenge
@@ -2303,18 +2241,18 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable, ReentrancyGuard {
             _exp_add = _exp_add * 2;
             _critical = true;
         }
-        uint32 _exp = ms.exp(_summoner) + _exp_add;
+        uint _exp = ms.exp(_summoner) + _exp_add;
         ms.set_exp(_summoner, _exp);
         ms.set_last_feeding_time(_summoner, _now);
         //update score
         Murasaki_Storage_Score mss = Murasaki_Storage_Score(mfs.murasaki_storage_score_address());
-        uint32 _total_exp_gained = mss.total_exp_gained(_summoner);
+        uint _total_exp_gained = mss.total_exp_gained(_summoner);
         mss.set_total_exp_gained(_summoner, _total_exp_gained + _exp_add);
         //owner check, gain some exp when not your summoner
         Murasaki_Main mm = Murasaki_Main(mfs.murasaki_main_address());
-        uint32 _summoner_yours = mm.tokenOf(msg.sender);
+        uint _summoner_yours = mm.tokenOf(msg.sender);
         if (_summoner_yours != 0 && _summoner != _summoner_yours) {
-            uint32 _exp_yours = ms.exp(_summoner_yours);
+            uint _exp_yours = ms.exp(_summoner_yours);
             ms.set_exp(_summoner_yours, _exp_yours + _exp_add / 50);
         }
         //update staking reward counter
@@ -2322,20 +2260,20 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable, ReentrancyGuard {
         //event
         emit Feeding(_summoner, _exp_add, _critical);
     }
-    function calc_feeding(uint32 _summoner) external view returns (uint32) {
+    function calc_feeding(uint _summoner) external view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
-        uint32 _satiety = mfs.calc_satiety(_summoner);
-        uint32 _exp_add = 500 * (100 - _satiety) / 100;
+        uint _satiety = mfs.calc_satiety(_summoner);
+        uint _exp_add = 500 * (100 - _satiety) / 100;
         return _exp_add;
     }
-    function _update_staking_reward_counter(uint32 _summoner, uint32 _delta_sec) internal {
+    function _update_staking_reward_counter(uint _summoner, uint _delta_sec) internal {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
         Murasaki_Parameter mp = Murasaki_Parameter(mfs.murasaki_parameter_address());
-        uint32 _speed = mfs.get_speed_of_dappsStaking(_summoner);
+        uint _speed = mfs.get_speed_of_dappsStaking(_summoner);
         if (_speed > 0) {
-            uint32 _decrease = _speed * _delta_sec / 100;
-            uint32 _counter = ms.staking_reward_counter(_summoner);
+            uint _decrease = _speed * _delta_sec / 100;
+            uint _counter = ms.staking_reward_counter(_summoner);
             //decrease counter sec
             if (_counter > _decrease) {
                 _counter = _counter - _decrease;
@@ -2346,25 +2284,30 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable, ReentrancyGuard {
                 _mint_presentbox(_summoner, _owner);
                 ms.set_staking_reward_counter(_summoner, mp.STAKING_REWARD_SEC());   //reset counter
             }
+            //update total_counter
+            ms.set_total_staking_reward_counter(
+                _summoner,
+                ms.total_staking_reward_counter(_summoner) + _decrease
+            );
         }
     }
     //mint presentbox
-    function _mint_presentbox(uint32 _summoner_from, address _wallet_to) internal {
+    function _mint_presentbox(uint _summoner_from, address _wallet_to) internal {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
-        uint32 _seed = mfs.seed(_summoner_from);
-        uint32 _item_type = 200;
+        uint _seed = mfs.seed(_summoner_from);
+        uint _item_type = 200;
         string memory _memo = "dapps staking";
-        mc.craft(_item_type, uint32(0), _wallet_to, _seed, _memo);
+        mc.craft(_item_type, uint(0), _wallet_to, _seed, _memo);
     }
 
     //petrification, debends on only feeding
-    function not_petrified(uint32 _summoner) internal view returns (bool) {
+    function not_petrified(uint _summoner) internal view returns (bool) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         return mfs.not_petrified(_summoner);
     }
-    event Cure_Petrification(uint32 indexed _summoner, uint _price);
-    function cure_petrification(uint32 _summoner) external payable nonReentrant {
+    event Cure_Petrification(uint indexed _summoner, uint _price);
+    function cure_petrification(uint _summoner) external payable nonReentrant {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
         Murasaki_Parameter mp = Murasaki_Parameter(mfs.murasaki_parameter_address());
@@ -2375,7 +2318,7 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable, ReentrancyGuard {
         // cure cost = present mint price
         uint _price = PRICE * 10**18;
         require(msg.value >= _price);
-        uint32 _now = uint32(block.timestamp);
+        uint _now = block.timestamp;
         ms.set_last_feeding_time(_summoner, _now);
         ms.set_mining_status(_summoner, 0);
         ms.set_farming_status(_summoner, 0);
@@ -2387,8 +2330,8 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable, ReentrancyGuard {
     }
 
     //grooming
-    event Grooming(uint32 indexed _summoner, uint32 _exp_gained, bool _critical);
-    function grooming(uint32 _summoner, uint32 _item_nui) external nonReentrant {
+    event Grooming(uint indexed _summoner, uint _exp_gained, bool _critical);
+    function grooming(uint _summoner, uint _item_nui) external nonReentrant {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
         Murasaki_Parameter mp = Murasaki_Parameter(mfs.murasaki_parameter_address());
@@ -2397,15 +2340,15 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable, ReentrancyGuard {
         require(mfs.check_owner(_summoner, msg.sender));
         require(not_petrified(_summoner));
         require(ms.mining_status(_summoner) == 0 && ms.farming_status(_summoner) == 0 && ms.crafting_status(_summoner) == 0);
-        uint32 _now = uint32(block.timestamp);
-        uint32 _happy = _calc_happy_real(_summoner);
-        uint32 _exp_add = 3000 * (100 - _happy) / 100;
+        uint _now = block.timestamp;
+        uint _happy = _calc_happy_real(_summoner);
+        uint _exp_add = 3000 * (100 - _happy) / 100;
         //nui boost
         if (_item_nui > 0) {
             address _owner = mfs.get_owner(_summoner);
             Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
             require(mc.ownerOf(_item_nui) == _owner);
-            uint32 _percent = mfs.calc_exp_addition_rate(_summoner, _item_nui);
+            uint _percent = mfs.calc_exp_addition_rate(_summoner, _item_nui);
             _exp_add = _exp_add * _percent/100;
         }
         //luck challenge
@@ -2416,28 +2359,28 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable, ReentrancyGuard {
             _critical = true;
         }
         //add exp
-        uint32 _exp = ms.exp(_summoner) + _exp_add;
+        uint _exp = ms.exp(_summoner) + _exp_add;
         ms.set_exp(_summoner, _exp);
         ms.set_last_grooming_time(_summoner, _now);
         ms.set_last_grooming_time_plus_working_time(_summoner, _now);
         //update score
         Murasaki_Storage_Score mss = Murasaki_Storage_Score(mfs.murasaki_storage_score_address());
-        uint32 _total_exp_gained = mss.total_exp_gained(_summoner);
+        uint _total_exp_gained = mss.total_exp_gained(_summoner);
         mss.set_total_exp_gained(_summoner, _total_exp_gained + _exp_add);
         //event
         emit Grooming(_summoner, _exp_add, _critical);
     }
     //calc happy, modified with working_time
-    function _calc_happy_real(uint32 _summoner) internal view returns (uint32) {
+    function _calc_happy_real(uint _summoner) internal view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
         Murasaki_Parameter mp = Murasaki_Parameter(mfs.murasaki_parameter_address());
-        uint32 SPEED = mp.SPEED();
-        uint32 BASE_SEC = mp.BASE_SEC();
-        uint32 _now = uint32(block.timestamp);
-        uint32 _delta_sec = _now - ms.last_grooming_time_plus_working_time(_summoner);  //working_time
-        uint32 _base = BASE_SEC *3 *100/SPEED;
-        uint32 _happy;
+        uint SPEED = mp.SPEED();
+        uint BASE_SEC = mp.BASE_SEC();
+        uint _now = block.timestamp;
+        uint _delta_sec = _now - ms.last_grooming_time_plus_working_time(_summoner);  //working_time
+        uint _base = BASE_SEC *3 *100/SPEED;
+        uint _happy;
         if (_delta_sec >= _base) {
             _happy = 0;
         }else {
@@ -2445,14 +2388,14 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable, ReentrancyGuard {
         }
         return _happy;
     }
-    function calc_grooming(uint32 _summoner) external view returns (uint32) {
-        uint32 _happy = _calc_happy_real(_summoner);
-        uint32 _exp_add = 3000 * (100 - _happy) / 100;
+    function calc_grooming(uint _summoner) external view returns (uint) {
+        uint _happy = _calc_happy_real(_summoner);
+        uint _exp_add = 3000 * (100 - _happy) / 100;
         return _exp_add;
     }
 
     //luck challenge of mffg
-    function luck_challenge(uint32 _summoner) public view returns (bool) {
+    function luck_challenge(uint _summoner) public view returns (bool) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         return mfs.luck_challenge(_summoner);
     }    
@@ -2476,7 +2419,7 @@ contract Murasaki_Function_Mining_and_Farming is Ownable, ReentrancyGuard {
     }
 
     //mining
-    function start_mining(uint32 _summoner) external nonReentrant {
+    function start_mining(uint _summoner) external nonReentrant {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
         Murasaki_Parameter mp = Murasaki_Parameter(mfs.murasaki_parameter_address());
@@ -2486,18 +2429,18 @@ contract Murasaki_Function_Mining_and_Farming is Ownable, ReentrancyGuard {
         require(ms.mining_status(_summoner) == 0 && ms.farming_status(_summoner) == 0 && ms.crafting_status(_summoner) == 0);
         require(mfs.calc_satiety(_summoner) >= 10 && mfs.calc_happy(_summoner) >= 10);
         require(ms.level(_summoner) >= 2);
-        uint32 _now = uint32(block.timestamp);
+        uint _now = block.timestamp;
         ms.set_mining_status(_summoner, 1);
         ms.set_mining_start_time(_summoner, _now);
     }
-    event Mining(uint32 indexed _summoner, uint32 _coin_mined, bool _critical);
-    function stop_mining(uint32 _summoner) external nonReentrant {
+    event Mining(uint indexed _summoner, uint _coin_mined, bool _critical);
+    function stop_mining(uint _summoner) external nonReentrant {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
         require(mfs.check_owner(_summoner, msg.sender));
         require(ms.mining_status(_summoner) == 1);
-        uint32 _now = uint32(block.timestamp);
-        uint32 _delta = calc_mining(_summoner);
+        uint _now = block.timestamp;
+        uint _delta = calc_mining(_summoner);
         //luck challenge
         bool _critical;
         if (mfs.luck_challenge(_summoner)) {
@@ -2506,40 +2449,41 @@ contract Murasaki_Function_Mining_and_Farming is Ownable, ReentrancyGuard {
             _critical = true;
         }
         //add coin
-        uint32 _coin = ms.coin(_summoner) + _delta;
+        uint _coin = ms.coin(_summoner) + _delta;
         ms.set_coin(_summoner, _coin);
         //update timestamp
-        uint32 _delta_sec = _now - ms.mining_start_time(_summoner);
-        //uint32 _total_mining_sec = ms.total_mining_sec(_summoner) + _delta_sec;
+        uint _delta_sec = _now - ms.mining_start_time(_summoner);
+        //uint _total_mining_sec = ms.total_mining_sec(_summoner) + _delta_sec;
         //ms.set_total_mining_sec(_summoner, _total_mining_sec);
-        uint32 _last_total_mining_sec = ms.last_total_mining_sec(_summoner) + _delta_sec;
+        uint _last_total_mining_sec = ms.last_total_mining_sec(_summoner) + _delta_sec;
         ms.set_last_total_mining_sec(_summoner, _last_total_mining_sec);
-        uint32 _last_grooming_time_plus_working_time = ms.last_grooming_time_plus_working_time(_summoner) + _delta_sec;
+        uint _last_grooming_time_plus_working_time = ms.last_grooming_time_plus_working_time(_summoner) + _delta_sec;
         ms.set_last_grooming_time_plus_working_time(_summoner, _last_grooming_time_plus_working_time);
         ms.set_mining_status(_summoner, 0);
         //update score
         Murasaki_Storage_Score mss = Murasaki_Storage_Score(mfs.murasaki_storage_score_address());
-        uint32 _total_coin_mined = mss.total_coin_mined(_summoner);
+        uint _total_coin_mined = mss.total_coin_mined(_summoner);
         mss.set_total_coin_mined(_summoner, _total_coin_mined + _delta);
         //event
         emit Mining(_summoner, _delta, _critical);
     }
-    function calc_mining(uint32 _summoner) public view returns (uint32) {
+    function calc_mining(uint _summoner) public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
         Murasaki_Parameter mp = Murasaki_Parameter(mfs.murasaki_parameter_address());
-        uint32 SPEED = mp.SPEED();
-        uint32 BASE_SEC = mp.BASE_SEC();
+        //address _owner = mfs.get_owner(_summoner);
+        uint SPEED = mp.SPEED();
+        uint BASE_SEC = mp.BASE_SEC();
         //require(ms.mining_status(_summoner) == 1);
         if (ms.mining_status(_summoner) == 0) {
-            return uint32(0);
+            return uint(0);
         }
-        uint32 _now = uint32(block.timestamp);
-        //uint32 _delta = (_now - ms.mining_start_time(_summoner)) * SPEED/100;   //sec
-        uint32 _delta = _now - ms.mining_start_time(_summoner);   //sec
+        uint _now = block.timestamp;
+        //uint _delta = (_now - ms.mining_start_time(_summoner)) * SPEED/100;   //sec
+        uint _delta = _now - ms.mining_start_time(_summoner);   //sec
         //happy limit: if happy=0, no more earning
-        uint32 _delta_grooming = _now - ms.last_grooming_time(_summoner);
-        uint32 _base_grooming = BASE_SEC *3 *100/SPEED;
+        uint _delta_grooming = _now - ms.last_grooming_time(_summoner);
+        uint _base_grooming = BASE_SEC *3 *100/SPEED;
         if (_delta_grooming >= _base_grooming) {
             //_delta = ms.last_grooming_time(_summoner) + BASE_SEC * 3;
             _delta = _base_grooming;
@@ -2549,17 +2493,19 @@ contract Murasaki_Function_Mining_and_Farming is Ownable, ReentrancyGuard {
         //1day = +1000
         _delta = _delta * 1000 / BASE_SEC;
         //status, level, item boost
-        uint32 _mod = ms.strength(_summoner) + ms.level(_summoner)*100 + count_mining_items(msg.sender);
+        //uint _mod = ms.strength(_summoner) + ms.level(_summoner)*100 + count_mining_items(msg.sender);
+        //uint _mod = ms.strength(_summoner) + ms.level(_summoner)*100 + count_mining_items(_owner);
+        uint _mod = ms.strength(_summoner) + ms.level(_summoner)*100 + count_mining_items(mfs.get_owner(_summoner));
         //5%/point, 100 -> 1.00
         _mod = _mod * 5 / 100;
         //boost
         _delta += _delta * _mod / 100;
         return _delta;
     }
-    function count_mining_items(address _address) public view returns (uint32) {
+    function count_mining_items(address _address) public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
-        uint32[256] memory _balance_of_type = mfs.get_balance_of_type_array(_address);
-        uint32 _mining_items = 0;
+        uint[256] memory _balance_of_type = mfs.get_balance_of_type_array(_address);
+        uint _mining_items = 0;
         for (uint i = 1; i <= 16; i++) {
             if (_balance_of_type[i+128] > 0) {
                 _mining_items += 200;
@@ -2583,7 +2529,7 @@ contract Murasaki_Function_Mining_and_Farming is Ownable, ReentrancyGuard {
     }
 
     //farming
-    function start_farming(uint32 _summoner) external nonReentrant {
+    function start_farming(uint _summoner) external nonReentrant {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
         Murasaki_Parameter mp = Murasaki_Parameter(mfs.murasaki_parameter_address());
@@ -2593,18 +2539,18 @@ contract Murasaki_Function_Mining_and_Farming is Ownable, ReentrancyGuard {
         require(ms.mining_status(_summoner) == 0 && ms.farming_status(_summoner) == 0 && ms.crafting_status(_summoner) == 0);
         require(mfs.calc_satiety(_summoner) >= 10 && mfs.calc_happy(_summoner) >= 10);
         require(ms.level(_summoner) >= 2);
-        uint32 _now = uint32(block.timestamp);
+        uint _now = block.timestamp;
         ms.set_farming_status(_summoner, 1);
         ms.set_farming_start_time(_summoner, _now);
     }
-    event Farming(uint32 indexed _summoner, uint32 _material_farmed, bool _critical);
-    function stop_farming(uint32 _summoner) external nonReentrant {
+    event Farming(uint indexed _summoner, uint _material_farmed, bool _critical);
+    function stop_farming(uint _summoner) external nonReentrant {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
         require(mfs.check_owner(_summoner, msg.sender));
         require(ms.farming_status(_summoner) == 1);
-        uint32 _now = uint32(block.timestamp);
-        uint32 _delta = calc_farming(_summoner);
+        uint _now = block.timestamp;
+        uint _delta = calc_farming(_summoner);
         //luck challenge
         bool _critical;
         if (mfs.luck_challenge(_summoner)) {
@@ -2613,39 +2559,40 @@ contract Murasaki_Function_Mining_and_Farming is Ownable, ReentrancyGuard {
             _critical = true;
         }
         //add coin
-        uint32 _material = ms.material(_summoner) + _delta;
+        uint _material = ms.material(_summoner) + _delta;
         ms.set_material(_summoner, _material);
         //update timestamp
-        uint32 _delta_sec = _now - ms.farming_start_time(_summoner);
-        //uint32 _total_farming_sec = ms.total_farming_sec(_summoner) + _delta_sec;
+        uint _delta_sec = _now - ms.farming_start_time(_summoner);
+        //uint _total_farming_sec = ms.total_farming_sec(_summoner) + _delta_sec;
         //ms.set_total_farming_sec(_summoner, _total_farming_sec);
-        uint32 _last_total_farming_sec = ms.last_total_farming_sec(_summoner) + _delta_sec;
+        uint _last_total_farming_sec = ms.last_total_farming_sec(_summoner) + _delta_sec;
         ms.set_last_total_farming_sec(_summoner, _last_total_farming_sec);
-        uint32 _last_grooming_time_plus_working_time = ms.last_grooming_time_plus_working_time(_summoner) + _delta_sec;
+        uint _last_grooming_time_plus_working_time = ms.last_grooming_time_plus_working_time(_summoner) + _delta_sec;
         ms.set_last_grooming_time_plus_working_time(_summoner, _last_grooming_time_plus_working_time);
         ms.set_farming_status(_summoner, 0);
         //update score
         Murasaki_Storage_Score mss = Murasaki_Storage_Score(mfs.murasaki_storage_score_address());
-        uint32 _total_material_farmed = mss.total_material_farmed(_summoner);
+        uint _total_material_farmed = mss.total_material_farmed(_summoner);
         mss.set_total_material_farmed(_summoner, _total_material_farmed + _delta);
         //event
         emit Farming(_summoner, _delta, _critical);
     }
-    function calc_farming(uint32 _summoner) public view returns (uint32) {
+    function calc_farming(uint _summoner) public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
         Murasaki_Parameter mp = Murasaki_Parameter(mfs.murasaki_parameter_address());
-        uint32 SPEED = mp.SPEED();
-        uint32 BASE_SEC = mp.BASE_SEC();
+        //address _owner = mfs.get_owner(_summoner);
+        uint SPEED = mp.SPEED();
+        uint BASE_SEC = mp.BASE_SEC();
         //require(ms.farming_status(_summoner) == 1);
         if (ms.farming_status(_summoner) == 0) {
-            return uint32(0);
+            return uint(0);
         }
-        uint32 _now = uint32(block.timestamp);
-        uint32 _delta = _now - ms.farming_start_time(_summoner);   //sec
+        uint _now = block.timestamp;
+        uint _delta = _now - ms.farming_start_time(_summoner);   //sec
         //happy limit: if happy=0, no more earning
-        uint32 _delta_grooming = _now - ms.last_grooming_time(_summoner);
-        uint32 _base_grooming = BASE_SEC *3 *100/SPEED;
+        uint _delta_grooming = _now - ms.last_grooming_time(_summoner);
+        uint _base_grooming = BASE_SEC *3 *100/SPEED;
         if (_delta_grooming >= _base_grooming) {
             //_delta = ms.last_grooming_time(_summoner) + BASE_SEC * 3;
             _delta = _base_grooming;
@@ -2655,21 +2602,23 @@ contract Murasaki_Function_Mining_and_Farming is Ownable, ReentrancyGuard {
         //1day = +1000
         _delta = _delta * 1000 / BASE_SEC;
         /*
-        uint32 _delta = (_now - ms.farming_start_time(_summoner)) * SPEED/100;  //sec
+        uint _delta = (_now - ms.farming_start_time(_summoner)) * SPEED/100;  //sec
         _delta = _delta * 1000 / BASE_SEC; // 1 day = +1000
         */
         //status and item boost
-        uint32 _mod = ms.dexterity(_summoner) + ms.level(_summoner)*100 + count_farming_items(msg.sender);
+        //uint _mod = ms.dexterity(_summoner) + ms.level(_summoner)*100 + count_farming_items(msg.sender);
+        //uint _mod = ms.dexterity(_summoner) + ms.level(_summoner)*100 + count_farming_items(_owner);
+        uint _mod = ms.dexterity(_summoner) + ms.level(_summoner)*100 + count_farming_items(mfs.get_owner(_summoner));
         //5%/point, 100 -> 1.00
         _mod = _mod * 5 / 100;
         //boost
         _delta += _delta * _mod / 100;
         return _delta;
     }
-    function count_farming_items(address _address) public view returns (uint32) {
+    function count_farming_items(address _address) public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
-        uint32[256] memory _balance_of_type = mfs.get_balance_of_type_array(_address);
-        uint32 _farming_items = 0;
+        uint[256] memory _balance_of_type = mfs.get_balance_of_type_array(_address);
+        uint _farming_items = 0;
         for (uint i = 17; i <= 32; i++) {
             if (_balance_of_type[i+128] > 0) {
                 _farming_items += 200;
@@ -2693,7 +2642,7 @@ contract Murasaki_Function_Mining_and_Farming is Ownable, ReentrancyGuard {
     }
 
     //luck challenge of mfmf
-    function luck_challenge(uint32 _summoner) public view returns (bool) {
+    function luck_challenge(uint _summoner) public view returns (bool) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         return mfs.luck_challenge(_summoner);
     }    
@@ -2720,107 +2669,193 @@ contract Murasaki_Function_Crafting is Ownable, ReentrancyGuard {
         payable(rec).transfer(address(this).balance);
     }
 
-    //crafting
-    function start_crafting(uint32 _summoner, uint32 _item_type) external nonReentrant {
+    /*  ### crafting comdition ###
+                    crafting_status     resume_flag     calc_crafting
+        Start               0               0               -
+        Pause               1               -               >0
+        Resume              0               1               -
+        Cancel              0               1               -
+        Complete            1               -               ==0
+    */
+
+    //start_crafting, resume_flag==0
+    function start_crafting(uint _summoner, uint _item_type) external nonReentrant {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
         Murasaki_Parameter mp = Murasaki_Parameter(mfs.murasaki_parameter_address());
         require(mp.isPaused() == false);
         require(ms.inHouse(_summoner));
-        //Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
         require(mfs.check_owner(_summoner, msg.sender));
-        require(ms.mining_status(_summoner) == 0 && ms.farming_status(_summoner) == 0 && ms.crafting_status(_summoner) == 0);
-        require(mfs.calc_satiety(_summoner) >= 10 && mfs.calc_happy(_summoner) >= 10);
         require(ms.level(_summoner) >= 3);
+        require(mfs.calc_satiety(_summoner) >= 10 && mfs.calc_happy(_summoner) >= 10);
+        require(ms.mining_status(_summoner) == 0 && ms.farming_status(_summoner) == 0);
+        require(ms.crafting_status(_summoner) == 0);
+        require(ms.crafting_resume_flag(_summoner) == 0);        
+        //check item_type
+        require(_item_type > 0);
+        require(
+            _item_type <= 64        //normal items
+            || _item_type == 194    //coin bag
+            || _item_type == 195    //material bag
+            || _item_type == 196    //mail
+        );
+        //get dc, cost, heart
+        uint[4] memory _dc_table = get_item_dc(_item_type);
+        uint _coin = _dc_table[2];
+        uint _material = _dc_table[3];
+        //check coin, material
+        require(ms.coin(_summoner) >= _coin);
+        require(ms.material(_summoner) >= _material);
+        //pay coin, material
+        ms.set_coin(_summoner, ms.coin(_summoner) - _coin);
+        ms.set_material(_summoner, ms.material(_summoner) - _material);
+        //start crafting
+        ms.set_crafting_item_type(_summoner, _item_type);
+        ms.set_crafting_status(_summoner, 1);
+        ms.set_crafting_start_time(_summoner, block.timestamp);
+    }
+
+    //pause_crafting, remining_time > 0
+    function pause_crafting(uint _summoner) external nonReentrant {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
+        Murasaki_Parameter mp = Murasaki_Parameter(mfs.murasaki_parameter_address());
+        require(mfs.check_owner(_summoner, msg.sender));
+        require(ms.crafting_status(_summoner) == 1);
+        require(calc_crafting(_summoner) > 0);
+        uint _now = block.timestamp;
+        uint _delta_sec = (_now - ms.crafting_start_time(_summoner));
+        uint _item_type = ms.crafting_item_type(_summoner);
+        //get remining sec
+        uint _remining_time = calc_crafting(_summoner);
+        //calc remining dc
+        uint BASE_SEC = mp.BASE_SEC();
+        uint _remining_dc = _remining_time * 1000 / BASE_SEC;
+        //stop
+        ms.set_last_total_crafting_sec(
+            _summoner, 
+            ms.last_total_crafting_sec(_summoner) + _delta_sec
+        );
+        ms.set_last_grooming_time_plus_working_time(
+            _summoner, 
+            ms.last_grooming_time_plus_working_time(_summoner) + _delta_sec
+        );
+        ms.set_crafting_status(_summoner, 0);
+        //pause crafting to resume
+        ms.set_crafting_resume_flag(_summoner, 1);
+        ms.set_crafting_resume_item_type(_summoner, _item_type);
+        ms.set_crafting_resume_item_dc(_summoner, _remining_dc);
+    }
+
+    //cancel_crafting, crafting_status==0 & resume_flag==1
+    function cancel_crafting(uint _summoner) external nonReentrant {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
+        require(mfs.check_owner(_summoner, msg.sender));
+        require(ms.crafting_status(_summoner) == 0);
+        require(ms.crafting_resume_flag(_summoner) == 1);
+        uint _item_type = ms.crafting_item_type(_summoner);
+        //calcel resume
+        ms.set_crafting_resume_flag(_summoner, 0);
+        //return coin/material
+        uint[4] memory _dc_table = get_item_dc(_item_type);
+        uint _coin = _dc_table[2];
+        uint _material = _dc_table[3];
+        ms.set_coin(_summoner, ms.coin(_summoner) + _coin);
+        ms.set_material(_summoner, ms.material(_summoner) + _material);
+    }
+
+    //resume_crafting, crafting_status==0 & resume_flag==1
+    function resume_crafting(uint _summoner) external nonReentrant {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
+        Murasaki_Parameter mp = Murasaki_Parameter(mfs.murasaki_parameter_address());
+        require(mp.isPaused() == false);
+        require(ms.inHouse(_summoner));
+        require(mfs.check_owner(_summoner, msg.sender));
+        require(ms.level(_summoner) >= 3);
+        require(mfs.calc_satiety(_summoner) >= 10 && mfs.calc_happy(_summoner) >= 10);
+        require(ms.mining_status(_summoner) == 0 && ms.farming_status(_summoner) == 0);
+        require(ms.crafting_status(_summoner) == 0);
+        require(ms.crafting_resume_flag(_summoner) == 1);
+        //resume item_type
+        uint _item_type = ms.crafting_resume_item_type(_summoner);
         //check item_type
         require(
             _item_type <= 64        //normal items
             || _item_type == 194    //coin bag
             || _item_type == 195    //material bag
             || _item_type == 196    //mail
-            //|| _item_type == 197    //nui
         );
+        /*  no cost is needed to resume...?
         //get dc, cost, heart
-        uint32[4] memory _dc_table = get_item_dc(_item_type);
-        uint32 _coin = _dc_table[2];
-        uint32 _material = _dc_table[3];
-        //uint32 _heart = get_heart_required(_item_type);
+        uint[4] memory _dc_table = get_item_dc(_item_type);
+        uint _coin = _dc_table[2];
+        uint _material = _dc_table[3];
         //check coin, material, heart
         require(ms.coin(_summoner) >= _coin);
         require(ms.material(_summoner) >= _material);
-        //require(ms.heart(_summoner) >= _heart);
         //pay coin, material, heart
         ms.set_coin(_summoner, ms.coin(_summoner) - _coin);
         ms.set_material(_summoner, ms.material(_summoner) - _material);
-        //ms.set_heart(_summoner, ms.heart(_summoner) - _heart);
+        */
         //start crafting
         ms.set_crafting_item_type(_summoner, _item_type);
         ms.set_crafting_status(_summoner, 1);
-        ms.set_crafting_start_time(_summoner, uint32(block.timestamp));
+        ms.set_crafting_start_time(_summoner, block.timestamp);
+        //**when resume_flag==1, _resume_dc is used for calc_crafting
     }
-    event Crafting(uint32 indexed _summoner, uint32 _item_type, uint32 _item, bool _critical);
-    function stop_crafting(uint32 _summoner) external nonReentrant {
+
+    //complete_crafting, crafting_status==1 & remining_time == 0
+    event Crafting(uint indexed _summoner, uint _item_type, uint _item, bool _critical);
+    function complete_crafting(uint _summoner) external nonReentrant {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
         require(mfs.check_owner(_summoner, msg.sender));
         require(ms.crafting_status(_summoner) == 1);
-        uint32 _now = uint32(block.timestamp);
-        uint32 _delta_sec = (_now - ms.crafting_start_time(_summoner));
-        uint32 _item_type = ms.crafting_item_type(_summoner);
+        require(calc_crafting(_summoner) == 0);
+        uint _now = block.timestamp;
+        uint _delta_sec = (_now - ms.crafting_start_time(_summoner));
+        uint _item_type = ms.crafting_item_type(_summoner);
         //stop
-        //ms.set_total_crafting_sec(_summoner, ms.total_crafting_sec(_summoner) + _delta_sec);
         ms.set_last_total_crafting_sec(_summoner, ms.last_total_crafting_sec(_summoner) + _delta_sec);
         ms.set_last_grooming_time_plus_working_time(
             _summoner, ms.last_grooming_time_plus_working_time(_summoner) + _delta_sec);
+        ms.set_crafting_status(_summoner, 0);
+        //reset resume
+        ms.set_crafting_resume_flag(_summoner, 0);
         //craft
-        uint32 _calc_crafting = calc_crafting(_summoner);
-        ms.set_crafting_status(_summoner, 0);   //before tx, required status must be updated
-        if (_calc_crafting == 0) {
-            //luck challenge
-            bool _critical;
-            if (mfs.luck_challenge(_summoner)) {
-                _item_type += 64;
-                _critical = true;
-            }
-            //craft
-            Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
-            //uint32 _crafting_item = mc.next_item();
-            uint32 _seed = mfs.seed(_summoner);
-            string memory _memo = "";
-            mc.craft(_item_type, _summoner, msg.sender, _seed, _memo);
-            //when normal items, mint precious and update score
-            if (_item_type <= 128) {
-                //_mint_precious(_summoner);
-                _send_randomPresentbox(_summoner);
-                //update score
-                Murasaki_Storage_Score mss = Murasaki_Storage_Score(mfs.murasaki_storage_score_address());
-                uint32 _total_item_crafted = mss.total_item_crafted(_summoner);
-                mss.set_total_item_crafted(_summoner, _total_item_crafted + 1);
-            }
-            /*
-            //when nui-chan, update Storage_Nui
-            if (_item_type == 197) {
-                _update_storage_nui(_summoner, mc.next_item()-1);
-            }
-            */
-            //event
-            emit Crafting(_summoner, _item_type, mc.next_item()-1, _critical);
-        //not completed, return coin/material
-        } else {
-            uint32[4] memory _dc_table = get_item_dc(_item_type);
-            uint32 _coin = _dc_table[2];
-            uint32 _material = _dc_table[3];
-            ms.set_coin(_summoner, ms.coin(_summoner) + _coin);
-            ms.set_material(_summoner, ms.material(_summoner) + _material);
+        //luck challenge
+        bool _critical;
+        if (mfs.luck_challenge(_summoner)) {
+            _item_type += 64;
+            _critical = true;
         }
+        //mint
+        Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
+        uint _seed = mfs.seed(_summoner);
+        string memory _memo = "";
+        mc.craft(_item_type, _summoner, msg.sender, _seed, _memo);
+        //when normal items, mint precious and update score
+        if (_item_type <= 128) {
+            //_mint_precious(_summoner);
+            _send_randomPresentbox(_summoner);
+            //update score
+            Murasaki_Storage_Score mss = Murasaki_Storage_Score(mfs.murasaki_storage_score_address());
+            uint _total_item_crafted = mss.total_item_crafted(_summoner);
+            mss.set_total_item_crafted(_summoner, _total_item_crafted + 1);
+        }
+        //event
+        emit Crafting(_summoner, _item_type, mc.next_item()-1, _critical);
     }
-    function _update_storage_nui(uint32 _summoner, uint32 _item_nui) internal {
+
+    function _update_storage_nui(uint _summoner, uint _item_nui) internal {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Storage_Nui msn = Murasaki_Storage_Nui(mfs.murasaki_storage_nui_address());
         Murasaki_Main mm = Murasaki_Main(mfs.murasaki_main_address());
         Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
         Murasaki_Storage_Score mss = Murasaki_Storage_Score(mfs.murasaki_storage_score_address());
-        uint32 _now = uint32(block.timestamp);
+        uint _now = block.timestamp;
         //set status
         msn.set_mint_time(_item_nui, _now);
         msn.set_summoner(_item_nui, _summoner);
@@ -2838,83 +2873,33 @@ contract Murasaki_Function_Crafting is Ownable, ReentrancyGuard {
         msn.set_score(_item_nui, mfs.calc_score(_summoner));
     }
     //get modified dc, using codex
-    function get_modified_dc(uint32 _summoner, uint32 _item_type) public view returns (uint32) {
+    function get_modified_dc(uint _summoner, uint _item_type) public view returns (uint) {
         Murasaki_Function_Crafting_Codex mfcc = Murasaki_Function_Crafting_Codex(murasaki_function_crafting_codex_address);
         return mfcc.get_modified_dc(_summoner, _item_type);
     }
     //calc crafting, using codex
-    function calc_crafting(uint32 _summoner) public view returns (uint32) {
+    function calc_crafting(uint _summoner) public view returns (uint) {
         Murasaki_Function_Crafting_Codex mfcc = Murasaki_Function_Crafting_Codex(murasaki_function_crafting_codex_address);
         return mfcc.calc_crafting(_summoner);
     }
     //count crafting items, using codex
-    function count_crafting_items(address _address) public view returns (uint32) {
+    function count_crafting_items(address _address) public view returns (uint) {
         Murasaki_Function_Crafting_Codex mfcc = Murasaki_Function_Crafting_Codex(murasaki_function_crafting_codex_address);
         return mfcc.count_crafting_items(_address);
     }
     //get item dc, using codex contract
-    function get_item_dc(uint32 _item_type) public view returns (uint32[4] memory) {
+    function get_item_dc(uint _item_type) public view returns (uint[4] memory) {
         Murasaki_Function_Crafting_Codex mfcc = Murasaki_Function_Crafting_Codex(murasaki_function_crafting_codex_address);
         return mfcc.get_item_dc(_item_type);
     }
-    /*
-    //get heart required
-    function get_heart_required(uint32 _item_type) public view returns (uint32) {
-        Murasaki_Function_Crafting_Codex mfcc = Murasaki_Function_Crafting_Codex(murasaki_function_crafting_codex_address);
-        return mfcc.get_heart_required(_item_type);
-    }
-    */
-
-    /*
-    //mint_precious
-    event Precious(uint32 indexed _summoner_to, uint32 _summoner_from, uint32 _item_type);
-    function _mint_precious(uint32 _summoner_from) internal {
-        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
-        Murasaki_Main mm = Murasaki_Main(mfs.murasaki_main_address());
-        Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
-        Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
-        //get random _to_summoner
-        uint32 _count_summoners = mm.next_summoner() - 1;
-        uint32 _summoner_to = mfs.dn(_summoner_from, _count_summoners) + 1;
-        //check _to_summoner
-        bool _isActive = ms.isActive(_summoner_to);
-        address _walleto_to;
-        if (
-            _isActive == true
-            && ms.level(_summoner_to) >= 3
-            && mfs.calc_satiety(_summoner_to) >= 10
-            && mfs.calc_happy(_summoner_to) >= 10
-        ) {
-            //when _summoner_to is active
-            _walleto_to = mm.ownerOf(_summoner_to);
-        } else {
-            //when _summoner_to is not active, wallet = msg.sender
-            _walleto_to = msg.sender;
-            _summoner_to = _summoner_from;
-        }
-        //mint precious
-        uint32 _seed = mfs.seed(_summoner_from);
-        uint32 _item_type = 200 + mfs.d10(_summoner_from) + 1;   //201-212
-        mc.craft(_item_type, _summoner_from, _walleto_to, _seed);
-        //mc.craft(193, _created_summoner, _to_wallet, _seed);
-        //ms.set_heart(_summoner_from, ms.heart(_summoner_from) + 1);
-        //ms.set_heart(_summoner_to, ms.heart(_summoner_to) + 1);
-        //update score
-        Murasaki_Storage_Score mss = Murasaki_Storage_Score(mfs.murasaki_storage_score_address());
-        uint32 _total_precious_received = mss.total_precious_received(_summoner_to);
-        mss.set_total_precious_received(_summoner_to, _total_precious_received + 1);
-        //event
-        emit Precious(_summoner_to, _summoner_from, _item_type);        
-    }
-    */
 
     //upgrade item
-    event Upgrade(uint32 indexed _summoner, uint32 _item_type, uint32 _item);
+    event Upgrade(uint indexed _summoner, uint _item_type, uint _item);
     function upgrade_item(
-        uint32 _summoner, 
-        uint32 _item1, 
-        uint32 _item2, 
-        uint32 _item3
+        uint _summoner, 
+        uint _item1, 
+        uint _item2, 
+        uint _item3
     ) external nonReentrant {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
@@ -2927,9 +2912,9 @@ contract Murasaki_Function_Crafting is Ownable, ReentrancyGuard {
             && mc.ownerOf(_item3) == msg.sender
         );
         //check item_type
-        (uint32 _item_type1, , , ,) = mc.items(_item1);
-        (uint32 _item_type2, , , ,) = mc.items(_item2);
-        (uint32 _item_type3, , , ,) = mc.items(_item3);
+        (uint _item_type1, , , ,) = mc.items(_item1);
+        (uint _item_type2, , , ,) = mc.items(_item2);
+        (uint _item_type3, , , ,) = mc.items(_item3);
         //require(_item_type1 <= 128 || (_item_type1 >= 201 && _item_type1 <= 224) );
         require(_item_type1 <= 128 || (_item_type1 >= 201 && _item_type1 <= 236) );
         require(
@@ -2938,7 +2923,7 @@ contract Murasaki_Function_Crafting is Ownable, ReentrancyGuard {
         );
         
         //determine target item_type
-        uint32 _target_item_type;
+        uint _target_item_type;
         if (_item_type1 <= 128) {
             _target_item_type = _item_type1 +64;
         // when fluffy or fluffier, +12
@@ -2957,7 +2942,7 @@ contract Murasaki_Function_Crafting is Ownable, ReentrancyGuard {
         _burn(_item2);
         _burn(_item3);
         //mint upper rank item
-        uint32 _seed = mfs.seed(_summoner);
+        uint _seed = mfs.seed(_summoner);
         string memory _memo = "";
         mc.craft(_target_item_type, _summoner, msg.sender, _seed, _memo);
         //when nui-chan, update nuichna score
@@ -2967,13 +2952,13 @@ contract Murasaki_Function_Crafting is Ownable, ReentrancyGuard {
         //event
         emit Upgrade(_summoner, _item_type1, mc.next_item());
     }
-    function _pay_cost(uint32 _summoner, uint32 _target_item_type) internal {
+    function _pay_cost(uint _summoner, uint _target_item_type) internal {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
         //get dc, cost
-        uint32[4] memory _dc_table = get_item_dc(_target_item_type);
-        uint32 _coin = _dc_table[2];
-        uint32 _material = _dc_table[3];
+        uint[4] memory _dc_table = get_item_dc(_target_item_type);
+        uint _coin = _dc_table[2];
+        uint _material = _dc_table[3];
         //check coin, material
         require(ms.coin(_summoner) >= _coin);
         require(ms.material(_summoner) >= _material);
@@ -2983,8 +2968,8 @@ contract Murasaki_Function_Crafting is Ownable, ReentrancyGuard {
     }
     
     //unpack coin/material
-    event Unpack(uint32 indexed _summoner, uint32 _item_type, uint32 _item);
-    function unpack_bag(uint32 _summoner, uint32 _item) external nonReentrant {
+    event Unpack(uint indexed _summoner, uint _item_type, uint _item);
+    function unpack_bag(uint _summoner, uint _item) external nonReentrant {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
         Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
@@ -2992,7 +2977,7 @@ contract Murasaki_Function_Crafting is Ownable, ReentrancyGuard {
         require(mfs.check_owner(_summoner, msg.sender));
         require(mc.ownerOf(_item) == msg.sender);
         //check item_type
-        (uint32 _item_type, , , ,) = mc.items(_item);
+        (uint _item_type, , , ,) = mc.items(_item);
         require(_item_type == 194 || _item_type == 195);
         //burn _item
         //mc.transferFrom(msg.sender, address(this), _item);
@@ -3009,16 +2994,16 @@ contract Murasaki_Function_Crafting is Ownable, ReentrancyGuard {
     }
     
     //burn, internal
-    //function _burn(address _owner, uint32 _item) internal {
-    function _burn(uint32 _item) internal {
+    //function _burn(address _owner, uint _item) internal {
+    function _burn(uint _item) internal {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
         //mc.transferFrom(_owner, address(this), _item);
         mc.burn(_item);
     }
     //burn mail, external, only from Murasaki_Mail
-    //function burn_mail(address _owner, uint32 _item) external {
-    function burn_mail(uint32 _item) external {
+    //function burn_mail(address _owner, uint _item) external {
+    function burn_mail(uint _item) external {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         //only from Murasaki_Mail
         require(msg.sender == mfs.murasaki_mail_address());
@@ -3027,20 +3012,20 @@ contract Murasaki_Function_Crafting is Ownable, ReentrancyGuard {
     }
 
     //luck challenge of mfc
-    function luck_challenge(uint32 _summoner) public view returns (bool) {
+    function luck_challenge(uint _summoner) public view returns (bool) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         return mfs.luck_challenge(_summoner);
     }
 
     //send random presentbox
-    event SendPresentbox(uint32 indexed _summoner_from, uint32 _summoner_to);
-    function _send_randomPresentbox(uint32 _summoner_from) internal {
+    event SendPresentbox(uint indexed _summoner_from, uint _summoner_to);
+    function _send_randomPresentbox(uint _summoner_from) internal {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Main mm = Murasaki_Main(mfs.murasaki_main_address());
         Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
         //get random _to_summoner
-        uint32 _count_summoners = mm.next_summoner() - 1;
-        uint32 _summoner_to = mfs.dn(_summoner_from, _count_summoners) + 1;
+        uint _count_summoners = mm.next_token() - 1;
+        uint _summoner_to = mfs.dn(_summoner_from, _count_summoners) + 1;
         //check _to_summoner
         bool _isActive = ms.isActive(_summoner_to);
         address _wallet_to;
@@ -3054,7 +3039,8 @@ contract Murasaki_Function_Crafting is Ownable, ReentrancyGuard {
             _wallet_to = mm.ownerOf(_summoner_to);
         //when _summoner_to is not active, wallet = msg.sender
         } else {
-            _wallet_to = msg.sender;
+            //_wallet_to = msg.sender;
+            _wallet_to = mm.ownerOf(_summoner_from);
             _summoner_to = _summoner_from;
         }
         //mint presentbox
@@ -3064,25 +3050,25 @@ contract Murasaki_Function_Crafting is Ownable, ReentrancyGuard {
     
     }
     //mint presentbox
-    function _mint_presentbox(uint32 _summoner_from, address _wallet_to) internal {
+    function _mint_presentbox(uint _summoner_from, address _wallet_to) internal {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
-        uint32 _seed = mfs.seed(_summoner_from);
-        uint32 _item_type = 200;
+        uint _seed = mfs.seed(_summoner_from);
+        uint _item_type = 200;
         string memory _memo = "item crafting";
         mc.craft(_item_type, _summoner_from, _wallet_to, _seed, _memo);
     }
     
     //open present box and mint precious
     //presentbox = 200
-    function open_presentbox(uint32 _summoner, uint32 _item) external nonReentrant {
+    function open_presentbox(uint _summoner, uint _item) external nonReentrant {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
         //check owner
         require(mfs.check_owner(_summoner, msg.sender));
         require(mc.ownerOf(_item) == msg.sender);
         //check item_type
-        (uint32 _item_type, , uint32 crafted_summoner, ,) = mc.items(_item);
+        (uint _item_type, , uint crafted_summoner, ,) = mc.items(_item);
         require(_item_type == 200);
         //burn _item
         _burn(_item);
@@ -3091,35 +3077,35 @@ contract Murasaki_Function_Crafting is Ownable, ReentrancyGuard {
         _mint_precious(_summoner, crafted_summoner, msg.sender);
         //add some exp
         Murasaki_Parameter mp = Murasaki_Parameter(mfs.murasaki_parameter_address());
-        uint32 _exp_add = mp.EXP_FROM_PRESENTBOX();
+        uint _exp_add = mp.EXP_FROM_PRESENTBOX();
         Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
-        uint32 _exp = ms.exp(_summoner) + _exp_add;
+        uint _exp = ms.exp(_summoner) + _exp_add;
         ms.set_exp(_summoner, _exp);
         //update score
         Murasaki_Storage_Score mss = Murasaki_Storage_Score(mfs.murasaki_storage_score_address());
-        uint32 _total_exp_gained = mss.total_exp_gained(_summoner) + _exp_add;
+        uint _total_exp_gained = mss.total_exp_gained(_summoner) + _exp_add;
         mss.set_total_exp_gained(_summoner, _total_exp_gained);
     }
     //mint precious
-    event Precious(uint32 indexed _summoner_to, uint32 _summoner_from, uint32 _item_type);
-    function _mint_precious(uint32 _summoner_to, uint32 _summoner_from, address _wallet_to) internal {
+    event Precious(uint indexed _summoner_to, uint _summoner_from, uint _item_type);
+    function _mint_precious(uint _summoner_to, uint _summoner_from, address _wallet_to) internal {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
         //mint precious
-        uint32 _seed = mfs.seed(_summoner_from);
-        uint32 _item_type = 200 + mfs.d12(_summoner_from) + 1;   //201-212
+        uint _seed = mfs.seed(_summoner_from);
+        uint _item_type = 200 + mfs.d12(_summoner_from) + 1;   //201-212
         string memory _memo = "";
         mc.craft(_item_type, _summoner_from, _wallet_to, _seed, _memo);
         //update score
         Murasaki_Storage_Score mss = Murasaki_Storage_Score(mfs.murasaki_storage_score_address());
-        uint32 _total_precious_received = mss.total_precious_received(_summoner_to);
+        uint _total_precious_received = mss.total_precious_received(_summoner_to);
         mss.set_total_precious_received(_summoner_to, _total_precious_received + 1);
         //event
         emit Precious(_summoner_to, _summoner_from, _item_type);
     }
     
     //get item name
-    function get_item_name(uint32 _item_type) public view returns (string memory) {
+    function get_item_name(uint _item_type) public view returns (string memory) {
         Murasaki_Function_Crafting_Codex mfcc = Murasaki_Function_Crafting_Codex(murasaki_function_crafting_codex_address);
         return mfcc.get_item_name(_item_type);
     }
@@ -3127,7 +3113,7 @@ contract Murasaki_Function_Crafting is Ownable, ReentrancyGuard {
 }
 
 
-//---*Crafting_Codex
+//---Crafting_Codex
 
 
 contract Murasaki_Function_Crafting_Codex is Ownable {
@@ -3139,58 +3125,118 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
     }
 
     //calc crafting
-    function calc_crafting(uint32 _summoner) public view returns (uint32) {
+    /*  ### pattern ###
+        crafting_status     resume_flag     _remining_time
+               0                 0                0
+               0                 1         dc * BASE_SEC/1000
+               1                 0            calc from item_dc
+               1                 1            calc from resume_dc
+    */
+    function calc_crafting(uint _summoner) public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
         Murasaki_Parameter mp = Murasaki_Parameter(mfs.murasaki_parameter_address());
-        //require(ms.crafting_status(_summoner) == 1);
-        if (ms.crafting_status(_summoner) == 0) {
-            return uint32(0);
+        //when crafting=0 & resume_flag=0, return 0
+        if (
+            ms.crafting_status(_summoner) == 0 
+            && ms.crafting_resume_flag(_summoner) == 0
+        ) {
+            return 0;
+        //when crafting=0 & resume_flag=1, remining sec
+        } else if (
+            ms.crafting_status(_summoner) == 0 
+            && ms.crafting_resume_flag(_summoner) == 1
+        ) {
+            uint BASE_SEC = mp.BASE_SEC();
+            uint _dc = ms.crafting_resume_item_dc(_summoner);
+            return _dc * BASE_SEC/1000;
+        //when crafting=1 & resume_flag=0, calc from item_dc
+        } else if (
+            ms.crafting_status(_summoner) == 1
+            && ms.crafting_resume_flag(_summoner) == 0
+        ) {
+            return _calc_crafting_noResume(_summoner);
+        //when crafting=1 & resume_flag=1, calc from resume_dc
+        } else if (
+            ms.crafting_status(_summoner) == 1 
+            && ms.crafting_resume_flag(_summoner) == 1
+        ) {
+            return _calc_crafting_resume(_summoner);
         }
-        uint32 SPEED = mp.SPEED();
-        uint32 _now = uint32(block.timestamp);
-        uint32 _item_type = ms.crafting_item_type(_summoner);
-        //get modified dc
-        uint32 _dc = get_modified_dc(_summoner, _item_type);
+        return 0;
+    }
+    function _calc_crafting_noResume(uint _summoner) internal view returns (uint) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
+        Murasaki_Parameter mp = Murasaki_Parameter(mfs.murasaki_parameter_address());
+        //uint SPEED = mp.SPEED();
+        //uint _now = block.timestamp;
+        uint _item_type = ms.crafting_item_type(_summoner);
+        //## get modified dc ##
+        uint _dc = get_modified_dc(_summoner, _item_type);
         //calc remaining sec
-        uint32 BASE_SEC = mp.BASE_SEC();
-        uint32 _dc_sec = _dc * BASE_SEC / 1000;   //1000dc = 1day = 86400sec
+        //uint BASE_SEC = mp.BASE_SEC();
+        uint _dc_sec = _dc * mp.BASE_SEC() / 1000;   //1000dc = 1day = 86400sec
         //calc remining sec
-        uint32 _delta_time = uint32( ( _now - ms.crafting_start_time(_summoner) ) * SPEED/100);
-        uint32 _remining_time;
+        uint _remining_time;
+        uint _delta_time = ( block.timestamp - ms.crafting_start_time(_summoner) ) * mp.SPEED()/100;
         if (_delta_time >= _dc_sec) {
             _remining_time = 0;
         }else {
-            _remining_time = uint32(_dc_sec - _delta_time);
+            _remining_time = _dc_sec - _delta_time;
+        }
+        return _remining_time;        
+    }
+    function _calc_crafting_resume(uint _summoner) internal view returns (uint) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
+        Murasaki_Parameter mp = Murasaki_Parameter(mfs.murasaki_parameter_address());
+        //uint SPEED = mp.SPEED();
+        //uint _now = block.timestamp;
+        //uint _item_type = ms.crafting_item_type(_summoner);
+        //## get resume_dc ##
+        uint _dc = ms.crafting_resume_item_dc(_summoner);
+        //calc remaining sec
+        //uint BASE_SEC = mp.BASE_SEC();
+        uint _dc_sec = _dc * mp.BASE_SEC() / 1000;   //1000dc = 1day = 86400sec
+        //calc remining sec
+        uint _remining_time;
+        uint _delta_time = ( block.timestamp - ms.crafting_start_time(_summoner) ) * mp.SPEED()/100;
+        if (_delta_time >= _dc_sec) {
+            _remining_time = 0;
+        }else {
+            _remining_time = _dc_sec - _delta_time;
         }
         return _remining_time;
     }
 
     //get modified_dc
-    function get_modified_dc(uint32 _summoner, uint32 _item_type) public view returns (uint32) {
+    function get_modified_dc(uint _summoner, uint _item_type) public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
-        uint32[4] memory _dc_table = get_item_dc(_item_type);
+        address _owner = mfs.get_owner(_summoner);
+        uint[4] memory _dc_table = get_item_dc(_item_type);
         //get dc
-        uint32 _level = _dc_table[0];
-        uint32 _dc = _dc_table[1];
+        uint _level = _dc_table[0];
+        uint _dc = _dc_table[1];
         // when not normal items: return exact dc
         if (_item_type >= 192) {
             return _dc;
         // when normal crafting items: modified by status
         } else {
             //status boost
-            uint32 _mod = ms.intelligence(_summoner) + ms.level(_summoner)*100 + count_crafting_items(msg.sender);
+            //uint _mod = ms.intelligence(_summoner) + ms.level(_summoner)*100 + count_crafting_items(msg.sender);
+            uint _mod = ms.intelligence(_summoner) + ms.level(_summoner)*100 + count_crafting_items(_owner);
             //initial point = 400 (1Lv*100, 3INT*100)
             //point per level = 150 (1Lv*100 + 0.5INT*100)
             //minimum dc = 3000 (3 days)
             // _mod_dc = _dc - ( _dc / (_level * 150) ) * (_mod - 400) >= 3000
             // _delta = (_mod - 400) / (_level * 150) * _dc
             // _mod_dc = _dc - _delta >= 3000
-            //uint32 _delta = (_mod - 400) / (_level * 150) * _dc;  //original concept law, but not good
-            //uint32 _delta = _dc * (_mod - 400) / (_level * 150);    //division should be done last
-            uint32 _delta = _dc * (_mod - 400) / (_level * 300);    //150 -> 300, 220401
-            uint32 _mod_dc;
+            //uint _delta = (_mod - 400) / (_level * 150) * _dc;  //original concept law, but not good
+            //uint _delta = _dc * (_mod - 400) / (_level * 150);    //division should be done last
+            uint _delta = _dc * (_mod - 400) / (_level * 300);    //150 -> 300, 220401
+            uint _mod_dc;
             if (_dc < 3000 + _delta) {
                 _mod_dc = 3000;
             } else {
@@ -3201,10 +3247,10 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
     }
 
     //count crafting items
-    function count_crafting_items(address _address) public view returns (uint32) {
+    function count_crafting_items(address _address) public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
-        uint32[256] memory _balance_of_type = mfs.get_balance_of_type_array(_address);
-        uint32 _crafting_items = 0;
+        uint[256] memory _balance_of_type = mfs.get_balance_of_type_array(_address);
+        uint _crafting_items = 0;
         for (uint i = 33; i <= 48; i++) {
             if (_balance_of_type[i+128] > 0) {
                 _crafting_items += 200;
@@ -3228,12 +3274,12 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
     }
 
     //get item dc
-    function get_item_dc(uint32 _item_type) public view returns (uint32[4] memory) {
+    function get_item_dc(uint _item_type) public view returns (uint[4] memory) {
         //return: level, dc, coin, material
-        uint32 _level = 999999;
-        uint32 _dc = 999999;
-        uint32 _coin = 999999;
-        uint32 _material = 999999;
+        uint _level = 999999;
+        uint _dc = 999999;
+        uint _coin = 999999;
+        uint _material = 999999;
 
         // for crafting
         //194: coin bag
@@ -3287,14 +3333,14 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
     }
     
     //get item name
-    function get_item_name(uint32 _item_type) public view returns (string memory) {
+    function get_item_name(uint _item_type) public view returns (string memory) {
         return item_name_table[_item_type];
     }
 
     //item level
-    uint32[64] public level_table = [
+    uint[64] public level_table = [
         //0:dummy
-        0,
+        9999999999,
         //1-16: mining item
         1,
         2,
@@ -3365,9 +3411,9 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
     ];
 
     //item dc
-    uint32[64] public dc_table = [
+    uint[64] public dc_table = [
         //0:dummy
-        0,
+        9999999999,
         //1-16: mining item
         3000,
         6000,
@@ -3438,9 +3484,9 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
     ];
 
     //item coin
-    uint32[64] public coin_table = [
+    uint[64] public coin_table = [
         //0:dummy
-        0,
+        9999999999,
         //1-16: mining item
         3000,
         3600,
@@ -3511,9 +3557,9 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
     ];
 
     //item material
-    uint32[64] public material_table = [
+    uint[64] public material_table = [
         //0:dummy
-        0,
+        9999999999,
         //1-16: mining item
         300,
         360,
@@ -3882,15 +3928,15 @@ contract Murasaki_Function_Name is Ownable, ReentrancyGuard {
     }
     
     //nameplate item_type
-    uint32 public nameplate_item_type = 1;
+    uint public nameplate_item_type = 1;
     //set dice item_type
-    function _set2_nameplate_item_type(uint32 _item_type) external onlyOwner {
+    function _set2_nameplate_item_type(uint _item_type) external onlyOwner {
         nameplate_item_type = _item_type;
     }
 
     //mint
-    event Name(uint32 indexed _summoner, string _name_str, uint32 _name_id);
-    function mint(uint32 _summoner, string memory _name_str) external nonReentrant {
+    event Name(uint indexed _summoner, string _name_str, uint _name_id);
+    function mint(uint _summoner, string memory _name_str) external nonReentrant {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Name mn = Murasaki_Name(mfs.murasaki_name_address());
         Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
@@ -3911,27 +3957,28 @@ contract Murasaki_Function_Name is Ownable, ReentrancyGuard {
         //level check
         require(ms.level(_summoner) >= 3);
         //cost check
-        uint32 _coin = 100;
-        uint32 _material = 100;
+        uint _coin = 100;
+        uint _material = 100;
         require(ms.coin(_summoner) >= _coin && ms.material(_summoner) >= _material);
         //pay cost
         ms.set_coin(_summoner, ms.coin(_summoner) - _coin);
         ms.set_material(_summoner, ms.material(_summoner) - _material);
         //mint
-        uint32 _seed = mfs.seed(_summoner);
+        uint _seed = mfs.seed(_summoner);
         mn.mint(msg.sender, _name_str, _seed);
         //event
-        emit Name(_summoner, _name_str, mn.next_name());
+        //emit Name(_summoner, _name_str, mn.next_name());
+        emit Name(_summoner, _name_str, mn.next_token()-1);
     }
 
     //burn
-    event Burn(uint32 indexed _summoner, uint32 _name_id);
-    function burn(uint32 _summoner) external nonReentrant {
+    event Burn(uint indexed _summoner, uint _name_id);
+    function burn(uint _summoner) external nonReentrant {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Name mn = Murasaki_Name(mfs.murasaki_name_address());
         require(mfs.check_owner(_summoner, msg.sender));
         address _owner = mfs.get_owner(_summoner);
-        uint32 _name_id = mn.tokenOf(_owner);
+        uint _name_id = mn.tokenOf(_owner);
         require(_name_id > 0);
         mn.burn(_name_id);
         //event
@@ -3939,11 +3986,11 @@ contract Murasaki_Function_Name is Ownable, ReentrancyGuard {
     }
 
     //call_name_from_summoner
-    function call_name_from_summoner(uint32 _summoner) external view returns (string memory) {
+    function call_name_from_summoner(uint _summoner) external view returns (string memory) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Name mn = Murasaki_Name(mfs.murasaki_name_address());
         address _owner = mfs.get_owner(_summoner);
-        uint32 _name_id = mn.tokenOf(_owner);
+        uint _name_id = mn.tokenOf(_owner);
         string memory _name_str = mn.names(_name_id);
         return _name_str;
     }
@@ -3998,10 +4045,10 @@ contract bufferTreasury is Ownable, ReentrancyGuard {
     fallback() external payable {
     }
     
-    uint32 public inflationRate = 300;    //300 = 3%
+    uint public inflationRate = 300;    //300 = 3%
 
     //admin, set rate
-    function set_inflationRate(uint32 _value) external onlyOwner {
+    function set_inflationRate(uint _value) external onlyOwner {
         inflationRate = _value;
     }
 
@@ -4055,11 +4102,11 @@ contract buybackTreasury is Ownable, ReentrancyGuard {
     }
 
     uint public amountPaied_total = 0;
-    mapping(uint32 => uint) public amountPaied;
-    uint32 public total_notActivated_summoner = 0;
+    mapping(uint => uint) public amountPaied;
+    uint public total_notActivated_summoner = 0;
 
     //update notActivated summoner number by manually
-    function _set2_total_notActivated_summoner(uint32 _value) external onlyOwner {
+    function _set2_total_notActivated_summoner(uint _value) external onlyOwner {
         total_notActivated_summoner = _value;
     }
     
@@ -4070,14 +4117,14 @@ contract buybackTreasury is Ownable, ReentrancyGuard {
     function calc_amount_per_summoner() public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Main mm = Murasaki_Main(mfs.murasaki_main_address());
-        uint32 _total_summoner = mm.next_summoner() - 1;
-        uint32 _total_active_summoner = _total_summoner - total_notActivated_summoner;
+        uint _total_summoner = mm.next_token() - 1;
+        uint _total_active_summoner = _total_summoner - total_notActivated_summoner;
         uint _amount_per_summoner = (amountPaied_total + address(this).balance) / _total_active_summoner;
         return _amount_per_summoner;
     }
     
-    function calc_itemPrice_fromLevel(uint32 _item_level) public view returns (uint) {
-        uint32 _coefficient;
+    function calc_itemPrice_fromLevel(uint _item_level) public view returns (uint) {
+        uint _coefficient;
         if (_item_level == 1) {
             _coefficient = 10;
         } else if (_item_level == 2) {
@@ -4115,15 +4162,15 @@ contract buybackTreasury is Ownable, ReentrancyGuard {
         return _price;
     }
     
-    function calc_buybackPrice(uint32 _item) public view returns (uint) {
+    function calc_buybackPrice(uint _item) public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
-        (uint32 _item_type, , , ,) = mc.items(_item);
-        uint32 _item_level = _item_type % 16;
+        (uint _item_type, , , ,) = mc.items(_item);
+        uint _item_level = _item_type % 16;
         if (_item_level == 0) {
             _item_level = 16;
         }
-        uint32 _item_rarity;
+        uint _item_rarity;
         if (_item_type >= 129) {    //rare, x9
             _item_rarity = 9;
         } else if (_item_type >= 65) {  //uncommon, x3
@@ -4156,12 +4203,13 @@ contract buybackTreasury is Ownable, ReentrancyGuard {
         return _res;
     }
 
-    event Buyback(uint32 indexed _summoner, uint32 _item, uint _price);    
-    function buyback(uint32 _summoner, uint32 _item) external nonReentrant {
+    event Buyback(uint indexed _summoner, uint _item, uint _price);    
+    function buyback(uint _summoner, uint _item) external nonReentrant {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
-        Murasaki_Main mm = Murasaki_Main(mfs.murasaki_main_address());
         Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
-        require(mm.ownerOf(_summoner) == msg.sender);
+        Murasaki_Parameter mp = Murasaki_Parameter(mfs.murasaki_parameter_address());
+        require(mp.isPaused() == false);
+        require(mfs.check_owner(_summoner, msg.sender));
         require(mc.ownerOf(_item) == msg.sender);
         mc.safeTransferFrom(msg.sender, address(this), _item);
         uint _price = calc_buybackPrice(_item);
@@ -4236,39 +4284,39 @@ contract World_Dice is Ownable, ReentrancyGuard {
     }
 
     //variants
-    mapping(uint32 => uint32[4]) public rolled_dice;
-    mapping(uint32 => uint32) public last_dice_roll_time;
-    uint32 public dice_item_type = 5;
-    uint32 public buffer_sec = 14400;  //4 hr
+    mapping(uint => uint[4]) public rolled_dice;
+    mapping(uint => uint) public last_dice_roll_time;
+    uint public dice_item_type = 5;
+    uint public buffer_sec = 14400;  //4 hr
 
     //set dice item_type
-    function _set2_dice_item_type(uint32 _item_type) external onlyOwner {
+    function _set2_dice_item_type(uint _item_type) external onlyOwner {
         dice_item_type = _item_type;
     }
 
     //set buffer_sec
-    function _set3_buffer_sec(uint32 _sec) external onlyOwner {
+    function _set3_buffer_sec(uint _sec) external onlyOwner {
         buffer_sec = _sec;
     }
 
     //calc elasped_time
-    function calc_elasped_time(uint32 _summoner) public view returns (uint32) {
+    function calc_elasped_time(uint _summoner) public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         //Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
         Murasaki_Parameter mp = Murasaki_Parameter(mfs.murasaki_parameter_address());
         if (last_dice_roll_time[_summoner] == 0) {
             return 86400 * 10;  //if not rolled yet, return 10 days
         } else {
-            uint32 _now = uint32(block.timestamp);
-            uint32 SPEED = mp.SPEED();
-            uint32 _elasped_time = uint32( (_now - last_dice_roll_time[_summoner]) * SPEED/100 );
+            uint _now = block.timestamp;
+            uint SPEED = mp.SPEED();
+            uint _elasped_time = (_now - last_dice_roll_time[_summoner]) * SPEED/100;
             return _elasped_time;
         }
     }
 
     //dice roll
-    event Dice_Roll(uint32 indexed _summoner, uint32 _rolled_dice);
-    function dice_roll(uint32 _summoner) external nonReentrant {
+    event Dice_Roll(uint indexed _summoner, uint _rolled_dice);
+    function dice_roll(uint _summoner) external nonReentrant {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         //Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
         Murasaki_Parameter mp = Murasaki_Parameter(mfs.murasaki_parameter_address());
@@ -4282,11 +4330,11 @@ contract World_Dice is Ownable, ReentrancyGuard {
             || mfs.get_balance_of_type_specific(_owner, dice_item_type +128) > 0
         );
         //check elasped_time
-        uint32 BASE_SEC = mp.BASE_SEC();
-        uint32 _elasped_time = calc_elasped_time(_summoner);
+        uint BASE_SEC = mp.BASE_SEC();
+        uint _elasped_time = calc_elasped_time(_summoner);
         require(_elasped_time >= BASE_SEC - buffer_sec);
         //dice roll
-        uint32 _dice_roll = (mfs.d20(_summoner) + 1) * 10;
+        uint _dice_roll = (mfs.d20(_summoner) + 1) * 10;
         //update rolled_dice, after 48hr, input 0 in each 24hr
         if (_elasped_time > BASE_SEC * 4) {
             rolled_dice[_summoner] = [
@@ -4318,24 +4366,24 @@ contract World_Dice is Ownable, ReentrancyGuard {
             ];
         }
         //update last time
-        uint32 _now = uint32(block.timestamp);
+        uint _now = block.timestamp;
         last_dice_roll_time[_summoner] = _now;
         //event
         emit Dice_Roll(_summoner, _dice_roll);
     }
     
     //get rolled dice, average of 4 dices
-    function get_rolled_dice(uint32 _summoner) external view returns (uint32) {
+    function get_rolled_dice(uint _summoner) external view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         //Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
         Murasaki_Parameter mp = Murasaki_Parameter(mfs.murasaki_parameter_address());
         //get elasped_time
-        uint32 BASE_SEC = mp.BASE_SEC();
-        uint32 _elasped_time = calc_elasped_time(_summoner);
+        uint BASE_SEC = mp.BASE_SEC();
+        uint _elasped_time = calc_elasped_time(_summoner);
         //get owner of summoner
         address _owner = mfs.get_owner(_summoner);
         //calc mod_dice
-        uint32 _mod_dice;
+        uint _mod_dice;
         //ignore when not possessed item_dice
         if (
             mfs.get_balance_of_type_specific(_owner, dice_item_type) == 0
@@ -4404,13 +4452,13 @@ contract World_Dice is Ownable, ReentrancyGuard {
     }
     
     //get last_rolled_dice
-    function get_last_rolled_dice(uint32 _summoner) external view returns (uint32) {
+    function get_last_rolled_dice(uint _summoner) external view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         //Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
         Murasaki_Parameter mp = Murasaki_Parameter(mfs.murasaki_parameter_address());
         address _owner = mfs.get_owner(_summoner);
-        uint32 BASE_SEC = mp.BASE_SEC();
-        uint32 _elasped_time = calc_elasped_time(_summoner);
+        uint BASE_SEC = mp.BASE_SEC();
+        uint _elasped_time = calc_elasped_time(_summoner);
         if (
             mfs.get_balance_of_type_specific(_owner, dice_item_type) == 0
             && mfs.get_balance_of_type_specific(_owner, dice_item_type +64) == 0
@@ -4445,46 +4493,49 @@ contract Murasaki_Mail is Ownable, ReentrancyGuard {
     
     //mail
     struct Mail {
-        uint32 send_time;
-        uint32 open_time;
-        uint32 summoner_from;
-        uint32 summoner_to;
+        uint send_time;
+        uint open_time;
+        uint summoner_from;
+        uint summoner_to;
     }
-    mapping(uint32 => Mail) public mails;
+    mapping(uint => Mail) public mails;
 
     //mapping
-    mapping(uint32 => uint32) public sending;   //[_summoner_from] = mails;
-    mapping(uint32 => uint32) public receiving; //[_summoner_to] = mails;
-    mapping(uint32 => uint32) public total_sent;
-    mapping(uint32 => uint32) public total_opened;
+    mapping(uint => uint) public sending;   //[_summoner_from] = mails;
+    mapping(uint => uint) public receiving; //[_summoner_to] = mails;
+    mapping(uint => uint) public total_sent;
+    mapping(uint => uint) public total_opened;
     
     //variants
     //interval, both of sending interval & receving limit
-    uint32 public interval_sec = 60 * 60 * 24 * 5;    // 5 days
-    uint32 public item_type_of_mail = 196;
-    uint32 public item_type_of_cushion = 21;
+    uint public interval_sec = 60 * 60 * 24 * 5;    // 5 days
+    uint public item_type_of_mail = 196;
+    uint public item_type_of_cushion = 21;
 
     //admin, set variants
-    function set_interval_sec(uint32 _value) external onlyOwner {
+    function set_interval_sec(uint _value) external onlyOwner {
         interval_sec = _value;
     }
-    function set_item_type_of_mail(uint32 _value) external onlyOwner {
+    function set_item_type_of_mail(uint _value) external onlyOwner {
         item_type_of_mail = _value;
     }
-    function set_item_type_of_cushion(uint32 _value) external onlyOwner {
+    function set_item_type_of_cushion(uint _value) external onlyOwner {
         item_type_of_cushion = _value;
     }
         
     //check mail
-    function check_receiving_mail(uint32 _summoner_to) public view returns (bool) {
-        uint32 _mail_id = receiving[_summoner_to];
+    function check_receiving_mail(uint _summoner_to) public view returns (bool) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Parameter mp = Murasaki_Parameter(mfs.murasaki_parameter_address());
+        uint SPEED = mp.SPEED();
+        uint _mail_id = receiving[_summoner_to];
         //no mail
         if (_mail_id == 0) {
             return false;
         } else {
             Mail memory _mail = mails[_mail_id];
-            uint32 _now = uint32(block.timestamp);
-            uint32 _delta = _now - _mail.send_time;
+            uint _now = block.timestamp;
+            uint _delta = (_now - _mail.send_time) * SPEED/100;
             //expired
             if (_delta >= interval_sec) {
                 return false;
@@ -4498,20 +4549,20 @@ contract Murasaki_Mail is Ownable, ReentrancyGuard {
     }
     
     //calc sending interval
-    function calc_sending_interval(uint32 _summoner_from) public view returns (uint32) {
+    function calc_sending_interval(uint _summoner_from) public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         //Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
         Murasaki_Parameter mp = Murasaki_Parameter(mfs.murasaki_parameter_address());
-        uint32 SPEED = mp.SPEED();
-        uint32 _mail_id = sending[_summoner_from];
+        uint SPEED = mp.SPEED();
+        uint _mail_id = sending[_summoner_from];
         //not send yet
         if (_mail_id == 0) {
             return 0;
         }
         //mail sending
         Mail memory _mail = mails[_mail_id];
-        uint32 _now = uint32(block.timestamp);
-        uint32 _delta = uint32( (_now - _mail.send_time) * SPEED/100 );
+        uint _now = block.timestamp;
+        uint _delta = (_now - _mail.send_time) * SPEED/100;
         if (_delta >= interval_sec) {
             return 0;
         } else {
@@ -4520,8 +4571,8 @@ contract Murasaki_Mail is Ownable, ReentrancyGuard {
     }
     
     //check last mail open
-    function check_lastMailOpen(uint32 _summoner_from) public view returns (bool) {
-        uint32 _mail_id = sending[_summoner_from];
+    function check_lastMailOpen(uint _summoner_from) public view returns (bool) {
+        uint _mail_id = sending[_summoner_from];
         if (_mail_id == 0) {
             return false;
         }
@@ -4534,8 +4585,8 @@ contract Murasaki_Mail is Ownable, ReentrancyGuard {
     }
     
     //send mail, need to burn item_mail nft
-    event Send_Mail(uint32 indexed _summoner_from, uint32 _summoner_to, uint32 _item_mail);
-    function send_mail(uint32 _summoner_from, uint32 _item_mail) external nonReentrant {
+    event Send_Mail(uint indexed _summoner_from, uint _summoner_to, uint _item_mail);
+    function send_mail(uint _summoner_from, uint _item_mail) external nonReentrant {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Parameter mp = Murasaki_Parameter(mfs.murasaki_parameter_address());
         require(mp.isPaused() == false);
@@ -4552,15 +4603,15 @@ contract Murasaki_Mail is Ownable, ReentrancyGuard {
         require(calc_sending_interval(_summoner_from) == 0);
         //check _item_mail nft
         Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
-        (uint32 _item_type, , , ,) = mc.items(_item_mail);
+        (uint _item_type, , , ,) = mc.items(_item_mail);
         require(_item_type == item_type_of_mail);
         require(mc.ownerOf(_item_mail) == msg.sender);
         //burn mail nft
         _burn_mail(_item_mail);
         //select _summoner_to
-        uint32 _summoner_to = _select_random_summoner_to(_summoner_from);
+        uint _summoner_to = _select_random_summoner_to(_summoner_from);
         //prepare Mail, id = _item_mail
-        uint32 _now = uint32(block.timestamp);
+        uint _now = block.timestamp;
         Mail memory _mail = Mail(_now, 0, _summoner_from, _summoner_to);
         mails[_item_mail] = _mail;
         //send mail
@@ -4570,17 +4621,17 @@ contract Murasaki_Mail is Ownable, ReentrancyGuard {
         //event
         emit Send_Mail(_summoner_from, _summoner_to, _item_mail);
     }
-    function _select_random_summoner_to(uint32 _summoner_from) internal view returns (uint32) {
+    function _select_random_summoner_to(uint _summoner_from) internal view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Main mm = Murasaki_Main(mfs.murasaki_main_address());
         Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
-        uint32 _count_summoners = mm.next_summoner() - 1;
-        uint32 _summoner_to = 0;
-        uint32 _count = 0;
+        uint _count_summoners = mm.next_token() - 1;
+        uint _summoner_to = 0;
+        uint _count = 0;
         while (_count < 5) {
-            uint32 _summoner_tmp = mfs.dn(_summoner_from + _count, _count_summoners) + 1;
+            uint _summoner_tmp = mfs.dn(_summoner_from + _count, _count_summoners) + 1;
             bool _isActive = ms.isActive(_summoner_tmp);
-            uint32 _happy = mfs.calc_happy(_summoner_tmp);
+            uint _happy = mfs.calc_happy(_summoner_tmp);
             if (
                 _summoner_to == 0
                 && _isActive == true
@@ -4594,15 +4645,15 @@ contract Murasaki_Mail is Ownable, ReentrancyGuard {
         }
         return _summoner_to;
     }
-    function _burn_mail(uint32 _item_mail) internal {
+    function _burn_mail(uint _item_mail) internal {
         Murasaki_Function_Crafting mfc = Murasaki_Function_Crafting(murasaki_function_crafting_address);
         //mfc.burn_mail(msg.sender, _item_mail);
         mfc.burn_mail(_item_mail);
     }
     
     //open mail
-    event Open_Mail(uint32 indexed _summoner_to, uint32 _summoner_from);
-    function open_mail(uint32 _summoner_to) external nonReentrant {
+    event Open_Mail(uint indexed _summoner_to, uint _summoner_from);
+    function open_mail(uint _summoner_to) external nonReentrant {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Parameter mp = Murasaki_Parameter(mfs.murasaki_parameter_address());
         require(mp.isPaused() == false);
@@ -4611,11 +4662,11 @@ contract Murasaki_Mail is Ownable, ReentrancyGuard {
         //check receving mail
         require(check_receiving_mail(_summoner_to));
         //get mail
-        uint32 _mail_id = receiving[_summoner_to];
+        uint _mail_id = receiving[_summoner_to];
         Mail storage _mail = mails[_mail_id];
         receiving[_summoner_to] = 0;
         //open mail
-        uint32 _now = uint32(block.timestamp);
+        uint _now = block.timestamp;
         _mail.open_time = _now;
         //mint precious
         //_mint_precious(_summoner_to, _mail.summoner_from);
@@ -4624,33 +4675,33 @@ contract Murasaki_Mail is Ownable, ReentrancyGuard {
         //event
         emit Open_Mail(_summoner_to, _mail.summoner_from);
     }
-    function _mint_presentboxBoth(uint32 _summoner_to, uint32 _summoner_from) internal {
+    function _mint_presentboxBoth(uint _summoner_to, uint _summoner_from) internal {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Main mm = Murasaki_Main(mfs.murasaki_main_address());
         _mint_presentbox(_summoner_from, mm.ownerOf(_summoner_to));
         _mint_presentbox(_summoner_to, mm.ownerOf(_summoner_from));
     }
-    function _mint_presentbox(uint32 _summoner_from, address _wallet_to) internal {
+    function _mint_presentbox(uint _summoner_from, address _wallet_to) internal {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
-        uint32 _seed = mfs.seed(_summoner_from);
-        uint32 _item_type = 200;
+        uint _seed = mfs.seed(_summoner_from);
+        uint _item_type = 200;
         string memory _memo = "mail opening";
         mc.craft(_item_type, _summoner_from, _wallet_to, _seed, _memo);
     }    
     /*
-    event Precious(uint32 indexed _summoner_to, uint32 _summoner_from, uint32 _item_type);
-    function _mint_precious(uint32 _summoner_to, uint32 _summoner_from) internal {
+    event Precious(uint indexed _summoner_to, uint _summoner_from, uint _item_type);
+    function _mint_precious(uint _summoner_to, uint _summoner_from) internal {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
         Murasaki_Main mm = Murasaki_Main(mfs.murasaki_main_address());
-        uint32 _seed = mfs.seed(_summoner_to);
-        uint32 _item_type = 200 + mfs.d10(_summoner_to) + 1;   //201-212
+        uint _seed = mfs.seed(_summoner_to);
+        uint _item_type = 200 + mfs.d10(_summoner_to) + 1;   //201-212
         mc.craft(_item_type, _summoner_from, mm.ownerOf(_summoner_to), _seed);
         mc.craft(_item_type, _summoner_to, mm.ownerOf(_summoner_from), _seed);
         //update score
         Murasaki_Storage_Score mss = Murasaki_Storage_Score(mfs.murasaki_storage_score_address());
-        uint32 _total_precious_received = mss.total_precious_received(_summoner_to);
+        uint _total_precious_received = mss.total_precious_received(_summoner_to);
         mss.set_total_precious_received(_summoner_to, _total_precious_received + 1);
         _total_precious_received = mss.total_precious_received(_summoner_from);
         mss.set_total_precious_received(_summoner_from, _total_precious_received + 1);
@@ -4660,7 +4711,7 @@ contract Murasaki_Mail is Ownable, ReentrancyGuard {
     }
     */
     /*
-    function _create_tiny_heart(uint32 _summoner_to, uint32 _summoner_from) internal {
+    function _create_tiny_heart(uint _summoner_to, uint _summoner_from) internal {
         Murasaki_Function_Crafting mfc = Murasaki_Function_Crafting(murasaki_function_crafting_address);
         mfc.create_tiny_heart(_summoner_to, _summoner_from);
     }
@@ -4681,34 +4732,34 @@ contract Murasaki_Lootlike is Ownable {
         murasaki_function_share_address = _address;
     }
     
-    function get_birthplace(uint32 _summoner) public view returns (string memory) {
+    function get_birthplace(uint _summoner) public view returns (string memory) {
         return pluckName(_summoner, "birthplace", birthplace);
     }
-    function get_softness(uint32 _summoner) public view returns (string memory) {
+    function get_softness(uint _summoner) public view returns (string memory) {
         return pluckName(_summoner, "softness", softness);
     }
-    function get_fluffiness(uint32 _summoner) public view returns (string memory) {
+    function get_fluffiness(uint _summoner) public view returns (string memory) {
         return pluckName(_summoner, "fluffiness", fluffiness);
     }
-    function get_elasticity(uint32 _summoner) public view returns (string memory) {
+    function get_elasticity(uint _summoner) public view returns (string memory) {
         return pluckName(_summoner, "elasticity", elasticity);
     }
-    function get_personality(uint32 _summoner) public view returns (string memory) {
+    function get_personality(uint _summoner) public view returns (string memory) {
         return pluckName(_summoner, "personality", personality);
     }
-    function get_flower(uint32 _summoner) public view returns (string memory) {
+    function get_flower(uint _summoner) public view returns (string memory) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Main mm = Murasaki_Main(mfs.murasaki_main_address());
-        uint32 _class = mm.class(_summoner);
+        uint _class = mm.class(_summoner);
         return flower[_class];
     }
-    function get_street(uint32 _summoner) public view returns (string memory) {
+    function get_street(uint _summoner) public view returns (string memory) {
         return pluckName(_summoner, "street", street);
     }
-    function get_city(uint32 _summoner) public view returns (string memory) {
+    function get_city(uint _summoner) public view returns (string memory) {
         return pluckName(_summoner, "city", city);
     }
-    function get_allStatus(uint32 _summoner) public view returns (string[8] memory) {
+    function get_allStatus(uint _summoner) public view returns (string[8] memory) {
         string[8] memory _status;
         _status[0] = get_birthplace(_summoner);
         _status[1] = get_softness(_summoner);
@@ -4746,7 +4797,7 @@ contract Murasaki_Lootlike is Ownable {
         return uint256(keccak256(abi.encodePacked(input)));
     }
 
-    function pluckName(uint32 _summoner, string memory keyPrefix, string[] memory sourceArray) internal view returns (string memory) {
+    function pluckName(uint _summoner, string memory keyPrefix, string[] memory sourceArray) internal view returns (string memory) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         address _owner = mfs.get_owner(_summoner);
         //address _owner = address(this);
@@ -4947,25 +4998,25 @@ contract Murasaki_Info is Ownable {
     }
     
     //Murasaki_Main
-    function owner(uint32 _summoner) public view returns (address) {
+    function owner(uint _summoner) public view returns (address) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         return mfs.get_owner(_summoner);
     }
-    function class(uint32 _summoner) public view returns (uint32) {
+    function class(uint _summoner) public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Main mm = Murasaki_Main(mfs.murasaki_main_address());
         return mm.class(_summoner);
     }
-    function age(uint32 _summoner) public view returns (uint32) {
+    function age(uint _summoner) public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Main mm = Murasaki_Main(mfs.murasaki_main_address());
-        uint32 _now = uint32(block.timestamp);
-        uint32 _age = _now - mm.summoned_time(_summoner);
+        uint _now = block.timestamp;
+        uint _age = _now - mm.summoned_time(_summoner);
         return _age;
     }
     
     //Murasaki_Name
-    function name(uint32 _summoner) public view returns (string memory) {
+    function name(uint _summoner) public view returns (string memory) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Name mn = Murasaki_Name(mfs.murasaki_name_address());
         return mn.names(_summoner);
@@ -4973,7 +5024,7 @@ contract Murasaki_Info is Ownable {
     
     /*
     //Murasaki_Craft
-    function balance_of_item(uint32 _summoner) public view returns (uint32[256] memory) {
+    function balance_of_item(uint _summoner) public view returns (uint[256] memory) {
         address _owner = owner(_summoner);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
@@ -4982,266 +5033,286 @@ contract Murasaki_Info is Ownable {
     */
     
     //Murasaki_Storage
-    function level(uint32 _summoner) public view returns (uint32) {
+    function level(uint _summoner) public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
         return ms.level(_summoner);
     }
-    function exp(uint32 _summoner) public view returns (uint32) {
+    function exp(uint _summoner) public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
         return ms.exp(_summoner);
     }
-    function strength(uint32 _summoner) public view returns (uint32) {
+    function strength(uint _summoner) public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
         return ms.strength(_summoner);
     }
-    function dexterity(uint32 _summoner) public view returns (uint32) {
+    function dexterity(uint _summoner) public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
         return ms.dexterity(_summoner);
     }
-    function intelligence(uint32 _summoner) public view returns (uint32) {
+    function intelligence(uint _summoner) public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
         return ms.intelligence(_summoner);
     }
-    function luck(uint32 _summoner) public view returns (uint32) {
+    function luck(uint _summoner) public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
         return ms.luck(_summoner);
     }
-    function next_exp_required(uint32 _summoner) public view returns (uint32) {
+    function next_exp_required(uint _summoner) public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
         return ms.next_exp_required(_summoner);
     }
     /*
-    function last_level_up_time(uint32 _summoner) external view returns (uint32) {
+    function last_level_up_time(uint _summoner) external view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
         return ms.last_level_up_time(_summoner);
     }
     */
-    function coin(uint32 _summoner) public view returns (uint32) {
+    function coin(uint _summoner) public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
         return ms.coin(_summoner);
     }
-    function material(uint32 _summoner) public view returns (uint32) {
+    function material(uint _summoner) public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
         return ms.material(_summoner);
     }
-    function last_feeding_time(uint32 _summoner) public view returns (uint32) {
+    function last_feeding_time(uint _summoner) public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
         return ms.last_feeding_time(_summoner);
     }
-    function last_grooming_time(uint32 _summoner) public view returns (uint32) {
+    function last_grooming_time(uint _summoner) public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
         return ms.last_grooming_time(_summoner);
     }
-    function mining_status(uint32 _summoner) public view returns (uint32) {
+    function mining_status(uint _summoner) public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
         return ms.mining_status(_summoner);
     }
-    function mining_start_time(uint32 _summoner) public view returns (uint32) {
+    function mining_start_time(uint _summoner) public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
         return ms.mining_start_time(_summoner);
     }
-    function farming_status(uint32 _summoner) public view returns (uint32) {
+    function farming_status(uint _summoner) public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
         return ms.farming_status(_summoner);
     }
-    function farming_start_time(uint32 _summoner) public view returns (uint32) {
+    function farming_start_time(uint _summoner) public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
         return ms.farming_start_time(_summoner);
     }
-    function crafting_status(uint32 _summoner) public view returns (uint32) {
+    function crafting_status(uint _summoner) public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
         return ms.crafting_status(_summoner);
     }
-    function crafting_start_time(uint32 _summoner) public view returns (uint32) {
+    function crafting_start_time(uint _summoner) public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
         return ms.crafting_start_time(_summoner);
     }
-    function crafting_item_type(uint32 _summoner) public view returns (uint32) {
+    function crafting_item_type(uint _summoner) public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
         return ms.crafting_item_type(_summoner);
     }
     /*
-    function total_mining_sec(uint32 _summoner) public view returns (uint32) {
+    function total_mining_sec(uint _summoner) public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
         return ms.total_mining_sec(_summoner);
     }
-    function total_farming_sec(uint32 _summoner) public view returns (uint32) {
+    function total_farming_sec(uint _summoner) public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
         return ms.total_farming_sec(_summoner);
     }
-    function total_crafting_sec(uint32 _summoner) public view returns (uint32) {
+    function total_crafting_sec(uint _summoner) public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
         return ms.total_crafting_sec(_summoner);
     }
     */
-    function staking_reward_counter(uint32 _summoner) public view returns (uint32) {
+    function staking_reward_counter(uint _summoner) public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
         return ms.staking_reward_counter(_summoner);
     }
     /*
-    function last_grooming_time_plus_working_time(uint32 _summoner) external view returns (uint32) {
+    function last_grooming_time_plus_working_time(uint _summoner) external view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
         return ms.last_grooming_time_plus_working_time(_summoner);
     }
     */
+    function total_staking_reward_counter(uint _summoner) public view returns (uint) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
+        return ms.total_staking_reward_counter(_summoner);
+    }
+    function crafting_resume_flag(uint _summoner) public view returns (uint) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
+        return ms.crafting_resume_flag(_summoner);
+    }
+    function crafting_resume_item_type(uint _summoner) public view returns (uint) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
+        return ms.crafting_resume_item_type(_summoner);
+    }
+    function crafting_resume_item_dc(uint _summoner) public view returns (uint) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
+        return ms.crafting_resume_item_dc(_summoner);
+    }
 
     //Murasaki_Storage_Score
-    function total_exp_gained(uint32 _summoner) public view returns (uint32) {
+    function total_exp_gained(uint _summoner) public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Storage_Score mss = Murasaki_Storage_Score(mfs.murasaki_storage_score_address());
         return mss.total_exp_gained(_summoner);
     }
-    function total_coin_mined(uint32 _summoner) public view returns (uint32) {
+    function total_coin_mined(uint _summoner) public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Storage_Score mss = Murasaki_Storage_Score(mfs.murasaki_storage_score_address());
         return mss.total_coin_mined(_summoner);
     }
-    function total_material_farmed(uint32 _summoner) public view returns (uint32) {
+    function total_material_farmed(uint _summoner) public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Storage_Score mss = Murasaki_Storage_Score(mfs.murasaki_storage_score_address());
         return mss.total_material_farmed(_summoner);
     }
-    function total_item_crafted(uint32 _summoner) public view returns (uint32) {
+    function total_item_crafted(uint _summoner) public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Storage_Score mss = Murasaki_Storage_Score(mfs.murasaki_storage_score_address());
         return mss.total_item_crafted(_summoner);
     }
-    function total_precious_received(uint32 _summoner) public view returns (uint32) {
+    function total_precious_received(uint _summoner) public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Storage_Score mss = Murasaki_Storage_Score(mfs.murasaki_storage_score_address());
         return mss.total_precious_received(_summoner);
     }
     
     //Function_Share
-    function satiety(uint32 _summoner) public view returns (uint32) {
+    function satiety(uint _summoner) public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         return mfs.calc_satiety(_summoner);
     }
-    function happy(uint32 _summoner) public view returns (uint32) {
+    function happy(uint _summoner) public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         return mfs.calc_happy(_summoner);
     }
-    function precious(uint32 _summoner) public view returns (uint32) {
+    function precious(uint _summoner) public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         return mfs.calc_precious(_summoner);
     }
-    function not_petrified(uint32 _summoner) public view returns (uint32) {
+    function not_petrified(uint _summoner) public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         bool _res = mfs.not_petrified(_summoner);
         if (_res == true) {
-            return uint32(1);
+            return uint(1);
         } else {
-            return uint32(0);
+            return uint(0);
         }
     }
-    function dapps_staking_amount(uint32 _summoner) public view returns (uint32) {
+    function dapps_staking_amount(uint _summoner) public view returns (uint) {
         address _owner = owner(_summoner);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         return mfs.calc_dapps_staking_amount(_owner);
     }
-    function score(uint32 _summoner) public view returns (uint32) {
+    function score(uint _summoner) public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         return mfs.calc_score(_summoner);
     }
-    function get_speed_of_dappsStaking(uint32 _summoner) public view returns (uint32) {
+    function get_speed_of_dappsStaking(uint _summoner) public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         return mfs.get_speed_of_dappsStaking(_summoner);
     }
     
     //Function_Working
-    function calc_mining(uint32 _summoner) public view returns (uint32) {
+    function calc_mining(uint _summoner) public view returns (uint) {
         Murasaki_Function_Mining_and_Farming mfmf = Murasaki_Function_Mining_and_Farming(murasaki_function_mining_and_farming_address);
         return mfmf.calc_mining(_summoner);
     }
-    function calc_farming(uint32 _summoner) public view returns (uint32) {
+    function calc_farming(uint _summoner) public view returns (uint) {
         Murasaki_Function_Mining_and_Farming mfmf = Murasaki_Function_Mining_and_Farming(murasaki_function_mining_and_farming_address);
         return mfmf.calc_farming(_summoner);
     }
-    function calc_crafting(uint32 _summoner) public view returns (uint32) {
+    function calc_crafting(uint _summoner) public view returns (uint) {
         Murasaki_Function_Crafting mfc = Murasaki_Function_Crafting(murasaki_function_crafting_address);
         return mfc.calc_crafting(_summoner);
     }
-    function strength_withItems(uint32 _summoner) public view returns (uint32) {
+    function strength_withItems(uint _summoner) public view returns (uint) {
         address _owner = owner(_summoner);
-        uint32 _str = strength(_summoner);
+        uint _str = strength(_summoner);
         Murasaki_Function_Mining_and_Farming mfmf = Murasaki_Function_Mining_and_Farming(murasaki_function_mining_and_farming_address);
         _str += mfmf.count_mining_items(_owner);
         return _str;
     }
-    function dexterity_withItems(uint32 _summoner) public view returns (uint32) {
+    function dexterity_withItems(uint _summoner) public view returns (uint) {
         address _owner = owner(_summoner);
-        uint32 _dex = dexterity(_summoner);
+        uint _dex = dexterity(_summoner);
         Murasaki_Function_Mining_and_Farming mfmf = Murasaki_Function_Mining_and_Farming(murasaki_function_mining_and_farming_address);
         _dex += mfmf.count_farming_items(_owner);
         return _dex;
     }
-    function intelligence_withItems(uint32 _summoner) public view returns (uint32) {
+    function intelligence_withItems(uint _summoner) public view returns (uint) {
         address _owner = owner(_summoner);
-        uint32 _int = intelligence(_summoner);
+        uint _int = intelligence(_summoner);
         Murasaki_Function_Crafting mfc = Murasaki_Function_Crafting(murasaki_function_crafting_address);
         _int += mfc.count_crafting_items(_owner);
         return _int;
     }
-    function luck_withItems(uint32 _summoner) public view returns (uint32) {
-        uint32 _luk = luck(_summoner);
+    function luck_withItems(uint _summoner) public view returns (uint) {
+        uint _luk = luck(_summoner);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         _luk += mfs.calc_precious(_summoner);
         return _luk;
     }
     /*
-    function luck_withItems_withStaking(uint32 _summoner) public view returns (uint32) {
-        uint32 _luk = luck_withItems(_summoner);
+    function luck_withItems_withStaking(uint _summoner) public view returns (uint) {
+        uint _luk = luck_withItems(_summoner);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         _luk += mfs.get_luck_by_staking(_summoner);
         return _luk;
     }
     */
-    function calc_feeding(uint32 _summoner) public view returns (uint32) {
+    function calc_feeding(uint _summoner) public view returns (uint) {
         Murasaki_Function_Feeding_and_Grooming mffg = Murasaki_Function_Feeding_and_Grooming(murasaki_function_feeding_and_grooming_address);
         return mffg.calc_feeding(_summoner);
     }
-    function calc_grooming(uint32 _summoner) public view returns (uint32) {
+    function calc_grooming(uint _summoner) public view returns (uint) {
         Murasaki_Function_Feeding_and_Grooming mffg = Murasaki_Function_Feeding_and_Grooming(murasaki_function_feeding_and_grooming_address);
         return mffg.calc_grooming(_summoner);
     }
     
     //Dice
-    function last_rolled_dice(uint32 _summoner) public view returns (uint32) {
+    function last_rolled_dice(uint _summoner) public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         World_Dice wd = World_Dice(mfs.world_dice_address());
         return wd.get_last_rolled_dice(_summoner);
     }
-    function last_dice_roll_time(uint32 _summoner) public view returns (uint32) {
+    function last_dice_roll_time(uint _summoner) public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         World_Dice wd = World_Dice(mfs.world_dice_address());
         return wd.last_dice_roll_time(_summoner);
     }
-    function luck_withItems_withDice(uint32 _summoner) public view returns (uint32) {
-        uint32 _luk = luck_withItems(_summoner);
+    function luck_withItems_withDice(uint _summoner) public view returns (uint) {
+        uint _luk = luck_withItems(_summoner);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         World_Dice wd = World_Dice(mfs.world_dice_address());
         _luk += wd.get_rolled_dice(_summoner);
@@ -5249,115 +5320,97 @@ contract Murasaki_Info is Ownable {
     }
     
     //Mail
-    function receiving_mail(uint32 _summoner) public view returns (uint32) {
+    function receiving_mail(uint _summoner) public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Mail mml = Murasaki_Mail(mfs.murasaki_mail_address());
         bool _res = mml.check_receiving_mail(_summoner);
         if (_res == true) {
-            return uint32(1);
+            return uint(1);
         } else {
-            return uint32(0);
+            return uint(0);
         }
     }
-    function sending_interval(uint32 _summoner) public view returns (uint32) {
+    function sending_interval(uint _summoner) public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Mail mml = Murasaki_Mail(mfs.murasaki_mail_address());
         return mml.calc_sending_interval(_summoner);
     }
-    function check_lastMailOpen(uint32 _summoner) public view returns (uint32) {
+    function check_lastMailOpen(uint _summoner) public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Mail mml = Murasaki_Mail(mfs.murasaki_mail_address());
         bool _res = mml.check_lastMailOpen(_summoner);
         if (_res == true) {
-            return uint32(1);
+            return uint(1);
         } else {
-            return uint32(0);
+            return uint(0);
         }
     }
     
     //Lootlike
-    function allStatus(uint32 _summoner) public view returns (string[8] memory) {
+    function allStatus(uint _summoner) public view returns (string[8] memory) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Lootlike mll = Murasaki_Lootlike(mfs.murasaki_lootlike_address());
         return mll.get_allStatus(_summoner);
     }
     
     //isActive
-    function isActive(uint32 _summoner) public view returns (uint32) {
+    function isActive(uint _summoner) public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
         bool _isActive = ms.isActive(_summoner);
         if (_isActive == true) {
-            return uint32(1);
+            return uint(1);
         } else {
-            return uint32(0);
+            return uint(0);
         }
     }
     
     //inHouse
-    function inHouse(uint32 _summoner) public view returns (uint32) {
+    function inHouse(uint _summoner) public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
         bool _inHouse = ms.inHouse(_summoner);
         if (_inHouse == true) {
-            return uint32(1);
+            return uint(1);
         } else {
-            return uint32(0);
+            return uint(0);
         }
     }
     
-    //fluffy festival
-    /*
-    function check_votable(uint32 _summoner) public view returns (uint32) {
-        Fluffy_Festival ff = Fluffy_Festival(fluffy_festival_address);
-        bool _isVotable = ff.check_votable(_summoner);
-        if (_isVotable == true) {
-            return uint32(1);
-        } else {
-            return uint32(0);
-        }
-    }
-    function inSession() public view returns (uint32) {
-        Fluffy_Festival ff = Fluffy_Festival(fluffy_festival_address);
-        bool _inSession = ff.inSession();
-        if (_inSession == true) {
-            return uint32(1);
-        } else {
-            return uint32(0);
-        }
-    }
-    */
-    function next_festival_block() public view returns (uint32) {
+    function next_festival_block() public view returns (uint) {
         Fluffy_Festival ff = Fluffy_Festival(fluffy_festival_address);
         return ff.next_festival_block();
     }
     
     //parameter
-    function speed() public view returns (uint32) {
+    function speed() public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Parameter mp = Murasaki_Parameter(mfs.murasaki_parameter_address());
         return mp.SPEED();
     }
-    function price() public view returns (uint32) {
+    function price() public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Parameter mp = Murasaki_Parameter(mfs.murasaki_parameter_address());
         return mp.PRICE();
     }
-    function staking_reward_sec() public view returns (uint32) {
+    function staking_reward_sec() public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Parameter mp = Murasaki_Parameter(mfs.murasaki_parameter_address());
         return mp.STAKING_REWARD_SEC();
     }
-    function elected_fluffy_type() public view returns (uint32) {
+    function elected_fluffy_type() public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Parameter mp = Murasaki_Parameter(mfs.murasaki_parameter_address());
         return mp.ELECTED_FLUFFY_TYPE();
     }
     
+    //crafting resume
+    
+    
     //###dynamic
-    function allDynamicStatus(uint32 _summoner) external view returns (uint32[64] memory) {
-        uint32[64] memory _res;
-        _res[0] = uint32(block.number);
+    function allDynamicStatus(uint _summoner) external view returns (uint[64] memory) {
+        uint[64] memory _res;
+        _res[0] = block.number;
         _res[1] = age(_summoner);
         _res[2] = level(_summoner);
         _res[3] = exp(_summoner);
@@ -5417,23 +5470,26 @@ contract Murasaki_Info is Ownable {
         _res[56] = staking_reward_counter(_summoner);
         //_res[57] = check_votable(_summoner);
         _res[58] = get_speed_of_dappsStaking(_summoner);
-        //_res[59] = inSession();
+        _res[59] = total_staking_reward_counter(_summoner);
         _res[60] = next_festival_block();
+        _res[61] = crafting_resume_flag(_summoner);
+        _res[62] = crafting_resume_item_type(_summoner);
+        _res[63] = crafting_resume_item_dc(_summoner);
         return _res;
     }
     
     //###static
-    function allStaticStatus(uint32 _summoner) external view returns (
-        uint32,
+    function allStaticStatus(uint _summoner) external view returns (
+        uint,
         address,
         string memory,
         string[8] memory,
-        uint32,
-        uint32,
-        uint32,
-        uint32
+        uint,
+        uint,
+        uint,
+        uint
     ) {
-        uint32 _class = class(_summoner);
+        uint _class = class(_summoner);
         address _owner = owner(_summoner);
         string memory _name = name(_summoner);
         string[8] memory lootStatus = allStatus(_summoner);
@@ -5450,14 +5506,14 @@ contract Murasaki_Info is Ownable {
     }
 
     //item
-    function allItemBalance(uint32 _summoner) public view returns (uint32[256] memory) {
+    function allItemBalance(uint _summoner) public view returns (uint[256] memory) {
         address _owner = owner(_summoner);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
         return mc.get_balance_of_type(_owner);
     }
     
-    function allItemId_withItemType(uint32 _summoner) public view returns (uint[] memory) {
+    function allItemId_withItemType(uint _summoner) public view returns (uint[] memory) {
         address _owner = owner(_summoner);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
@@ -5473,13 +5529,13 @@ contract Murasaki_Info is Ownable {
 interface IMurasaki_Info_fromWallet {
 
     // Murasaki-san ID of wallet
-    function summoner   (address _wallet) external view returns (uint32);
+    function summoner   (address _wallet) external view returns (uint);
 
     // Basic informations
-    function class  (address _wallet) external view returns (uint32);
-    function age    (address _wallet) external view returns (uint32);
+    function class  (address _wallet) external view returns (uint);
+    function age    (address _wallet) external view returns (uint);
     function name   (address _wallet) external view returns (string memory);
-    function level  (address _wallet) external view returns (uint32);
+    function level  (address _wallet) external view returns (uint);
 
     // Character
     function birthplace  (address _wallet) external view returns (string memory);
@@ -5494,38 +5550,38 @@ interface IMurasaki_Info_fromWallet {
     function city        (address _wallet) external view returns (string memory);
 
     // Parameters
-    function strength       (address _wallet) external view returns (uint32);
-    function dexterity      (address _wallet) external view returns (uint32);
-    function intelligence   (address _wallet) external view returns (uint32);
-    function luck           (address _wallet) external view returns (uint32);
+    function strength       (address _wallet) external view returns (uint);
+    function dexterity      (address _wallet) external view returns (uint);
+    function intelligence   (address _wallet) external view returns (uint);
+    function luck           (address _wallet) external view returns (uint);
 
     // Parameters with item modification
-    function strength_withItems      (address _wallet) external view returns (uint32);
-    function dexterity_withItems     (address _wallet) external view returns (uint32);
-    function intelligence_withItems  (address _wallet) external view returns (uint32);
-    function luck_withItems          (address _wallet) external view returns (uint32);
-    function luck_withItems_withDice (address _wallet) external view returns (uint32);
+    function strength_withItems      (address _wallet) external view returns (uint);
+    function dexterity_withItems     (address _wallet) external view returns (uint);
+    function intelligence_withItems  (address _wallet) external view returns (uint);
+    function luck_withItems          (address _wallet) external view returns (uint);
+    function luck_withItems_withDice (address _wallet) external view returns (uint);
     
     // Present status, material means leaf, precious means fluffy_score
-    function satiety    (address _wallet) external view returns (uint32);
-    function happy      (address _wallet) external view returns (uint32);
-    function exp        (address _wallet) external view returns (uint32);
-    function coin       (address _wallet) external view returns (uint32);
-    function material   (address _wallet) external view returns (uint32);
-    function precious   (address _wallet) external view returns (uint32);
+    function satiety    (address _wallet) external view returns (uint);
+    function happy      (address _wallet) external view returns (uint);
+    function exp        (address _wallet) external view returns (uint);
+    function coin       (address _wallet) external view returns (uint);
+    function material   (address _wallet) external view returns (uint);
+    function precious   (address _wallet) external view returns (uint);
 
     // Scores
-    function score                      (address _wallet) external view returns (uint32);
-    function total_exp_gained           (address _wallet) external view returns (uint32);
-    function total_coin_mined           (address _wallet) external view returns (uint32);
-    function total_material_farmed      (address _wallet) external view returns (uint32);
-    function total_item_crafted         (address _wallet) external view returns (uint32);
-    function total_precious_received    (address _wallet) external view returns (uint32);
+    function score                      (address _wallet) external view returns (uint);
+    function total_exp_gained           (address _wallet) external view returns (uint);
+    function total_coin_mined           (address _wallet) external view returns (uint);
+    function total_material_farmed      (address _wallet) external view returns (uint);
+    function total_item_crafted         (address _wallet) external view returns (uint);
+    function total_precious_received    (address _wallet) external view returns (uint);
 
     // etc
-    function not_petrified  (address _wallet) external view returns (uint32);
-    function isActive       (address _wallet) external view returns (uint32);
-    function inHouse        (address _wallet) external view returns (uint32);
+    function not_petrified  (address _wallet) external view returns (uint);
+    function isActive       (address _wallet) external view returns (uint);
+    function inHouse        (address _wallet) external view returns (uint);
 }
 
 
@@ -5544,10 +5600,10 @@ contract Murasaki_Info_fromWallet is Ownable, IMurasaki_Info_fromWallet {
     }
 
     //summoner
-    function summoner(address _wallet) public view returns (uint32) {
+    function summoner(address _wallet) public view returns (uint) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Main mm = Murasaki_Main(mfs.murasaki_main_address());
-        uint32 _summoner = mm.tokenOf(_wallet);
+        uint _summoner = mm.tokenOf(_wallet);
         if (_summoner == 0) {
             return 0;
         }
@@ -5561,12 +5617,12 @@ contract Murasaki_Info_fromWallet is Ownable, IMurasaki_Info_fromWallet {
     }
     
     //class
-    function class(address _wallet) external view returns (uint32) {
+    function class(address _wallet) external view returns (uint) {
         Murasaki_Info mi = Murasaki_Info(murasaki_info_address);
         return mi.class(summoner(_wallet));
     }
     //age
-    function age(address _wallet) external view returns (uint32) {
+    function age(address _wallet) external view returns (uint) {
         Murasaki_Info mi = Murasaki_Info(murasaki_info_address);
         return mi.age(summoner(_wallet));
     }
@@ -5576,127 +5632,127 @@ contract Murasaki_Info_fromWallet is Ownable, IMurasaki_Info_fromWallet {
         return mi.name(summoner(_wallet));
     }
     //level
-    function level(address _wallet) external view returns (uint32) {
+    function level(address _wallet) external view returns (uint) {
         Murasaki_Info mi = Murasaki_Info(murasaki_info_address);
         return mi.level(summoner(_wallet));
     }
     //exp
-    function exp(address _wallet) external view returns (uint32) {
+    function exp(address _wallet) external view returns (uint) {
         Murasaki_Info mi = Murasaki_Info(murasaki_info_address);
         return mi.exp(summoner(_wallet));
     }
     //strength
-    function strength(address _wallet) external view returns (uint32) {
+    function strength(address _wallet) external view returns (uint) {
         Murasaki_Info mi = Murasaki_Info(murasaki_info_address);
         return mi.strength(summoner(_wallet));
     }
     //dexterity
-    function dexterity(address _wallet) external view returns (uint32) {
+    function dexterity(address _wallet) external view returns (uint) {
         Murasaki_Info mi = Murasaki_Info(murasaki_info_address);
         return mi.dexterity(summoner(_wallet));
     }
     //intelligence
-    function intelligence(address _wallet) external view returns (uint32) {
+    function intelligence(address _wallet) external view returns (uint) {
         Murasaki_Info mi = Murasaki_Info(murasaki_info_address);
         return mi.intelligence(summoner(_wallet));
     }
     //luck
-    function luck(address _wallet) external view returns (uint32) {
+    function luck(address _wallet) external view returns (uint) {
         Murasaki_Info mi = Murasaki_Info(murasaki_info_address);
         return mi.luck(summoner(_wallet));
     }
     //coin
-    function coin(address _wallet) external view returns (uint32) {
+    function coin(address _wallet) external view returns (uint) {
         Murasaki_Info mi = Murasaki_Info(murasaki_info_address);
         return mi.coin(summoner(_wallet));
     }
     //material
-    function material(address _wallet) external view returns (uint32) {
+    function material(address _wallet) external view returns (uint) {
         Murasaki_Info mi = Murasaki_Info(murasaki_info_address);
         return mi.material(summoner(_wallet));
     }
     //total_exp_gained
-    function total_exp_gained(address _wallet) external view returns (uint32) {
+    function total_exp_gained(address _wallet) external view returns (uint) {
         Murasaki_Info mi = Murasaki_Info(murasaki_info_address);
         return mi.total_exp_gained(summoner(_wallet));
     }
     //total_coin_mined
-    function total_coin_mined(address _wallet) external view returns (uint32) {
+    function total_coin_mined(address _wallet) external view returns (uint) {
         Murasaki_Info mi = Murasaki_Info(murasaki_info_address);
         return mi.total_coin_mined(summoner(_wallet));
     }
     //total_material_farmed
-    function total_material_farmed(address _wallet) external view returns (uint32) {
+    function total_material_farmed(address _wallet) external view returns (uint) {
         Murasaki_Info mi = Murasaki_Info(murasaki_info_address);
         return mi.total_material_farmed(summoner(_wallet));
     }
     //total_item_crafted
-    function total_item_crafted(address _wallet) external view returns (uint32) {
+    function total_item_crafted(address _wallet) external view returns (uint) {
         Murasaki_Info mi = Murasaki_Info(murasaki_info_address);
         return mi.total_item_crafted(summoner(_wallet));
     }
     //total_precious_received
-    function total_precious_received(address _wallet) external view returns (uint32) {
+    function total_precious_received(address _wallet) external view returns (uint) {
         Murasaki_Info mi = Murasaki_Info(murasaki_info_address);
         return mi.total_precious_received(summoner(_wallet));
     }
     //satiety
-    function satiety(address _wallet) external view returns (uint32) {
+    function satiety(address _wallet) external view returns (uint) {
         Murasaki_Info mi = Murasaki_Info(murasaki_info_address);
         return mi.satiety(summoner(_wallet));
     }
     //happy
-    function happy(address _wallet) external view returns (uint32) {
+    function happy(address _wallet) external view returns (uint) {
         Murasaki_Info mi = Murasaki_Info(murasaki_info_address);
         return mi.happy(summoner(_wallet));
     }
     //precious
-    function precious(address _wallet) external view returns (uint32) {
+    function precious(address _wallet) external view returns (uint) {
         Murasaki_Info mi = Murasaki_Info(murasaki_info_address);
         return mi.precious(summoner(_wallet));
     }
     //not_petrified
-    function not_petrified(address _wallet) external view returns (uint32) {
+    function not_petrified(address _wallet) external view returns (uint) {
         Murasaki_Info mi = Murasaki_Info(murasaki_info_address);
         return mi.not_petrified(summoner(_wallet));
     }
     //score
-    function score(address _wallet) external view returns (uint32) {
+    function score(address _wallet) external view returns (uint) {
         Murasaki_Info mi = Murasaki_Info(murasaki_info_address);
         return mi.score(summoner(_wallet));
     }
     //strength_withItems
-    function strength_withItems(address _wallet) external view returns (uint32) {
+    function strength_withItems(address _wallet) external view returns (uint) {
         Murasaki_Info mi = Murasaki_Info(murasaki_info_address);
         return mi.strength_withItems(summoner(_wallet));
     }
     //dexterity_withItems
-    function dexterity_withItems(address _wallet) external view returns (uint32) {
+    function dexterity_withItems(address _wallet) external view returns (uint) {
         Murasaki_Info mi = Murasaki_Info(murasaki_info_address);
         return mi.dexterity_withItems(summoner(_wallet));
     }
     //intelligence_withItems
-    function intelligence_withItems(address _wallet) external view returns (uint32) {
+    function intelligence_withItems(address _wallet) external view returns (uint) {
         Murasaki_Info mi = Murasaki_Info(murasaki_info_address);
         return mi.intelligence_withItems(summoner(_wallet));
     }
     //luck_withItems
-    function luck_withItems(address _wallet) external view returns (uint32) {
+    function luck_withItems(address _wallet) external view returns (uint) {
         Murasaki_Info mi = Murasaki_Info(murasaki_info_address);
         return mi.luck_withItems(summoner(_wallet));
     }
     //luck_withItems_withDice
-    function luck_withItems_withDice(address _wallet) external view returns (uint32) {
+    function luck_withItems_withDice(address _wallet) external view returns (uint) {
         Murasaki_Info mi = Murasaki_Info(murasaki_info_address);
         return mi.luck_withItems_withDice(summoner(_wallet));
     }
     //isActive
-    function isActive(address _wallet) external view returns (uint32) {
+    function isActive(address _wallet) external view returns (uint) {
         Murasaki_Info mi = Murasaki_Info(murasaki_info_address);
         return mi.isActive(summoner(_wallet));
     }
     //inHouse
-    function inHouse(address _wallet) external view returns (uint32) {
+    function inHouse(address _wallet) external view returns (uint) {
         Murasaki_Info mi = Murasaki_Info(murasaki_info_address);
         return mi.inHouse(summoner(_wallet));
     }
@@ -5743,6 +5799,140 @@ contract Murasaki_Info_fromWallet is Ownable, IMurasaki_Info_fromWallet {
 }
 
 
+//---Murasaki_tokenURI
+
+
+contract Murasaki_tokenURI is Ownable {
+
+    //address
+    address public murasaki_function_share_address;
+    address public murasaki_info_address;
+    
+    //admin, set address
+    function _set1_murasaki_function_share_address(address _address) external onlyOwner {
+        murasaki_function_share_address = _address;
+    }
+    function _set2_murasaki_info_address(address _address) external onlyOwner {
+        murasaki_info_address = _address;
+    }
+
+    string[] private color = [
+        "#E60012",
+        "#F39800",
+        "#FFF100",
+        "#8FC31F",
+        "#009944",
+        "#009E96",
+        "#00A0E9",
+        "#0068B7",
+        "#1D2088",
+        "#920783",
+        "#E4007F",
+        "#E5004F"
+    ];
+
+    string[] private flower = [
+        "Rose",
+        "Marigold",
+        "Dandelion",
+        "Rosemary",
+        "Olive",
+        "Holly",
+        "Nemophila",
+        "Hydrangea",
+        "Forget-me-not",
+        "Sumire",
+        "Gerbera",
+        "Anemone"
+    ];
+
+    function toString(uint256 value) internal pure returns (string memory) {
+        if (value == 0) {
+            return "0";
+        }
+        uint256 temp = value;
+        uint256 digits;
+        while (temp != 0) {
+            digits++;
+            temp /= 10;
+        }
+        bytes memory buffer = new bytes(digits);
+        while (value != 0) {
+            digits -= 1;
+            buffer[digits] = bytes1(uint8(48 + uint256(value % 10)));
+            value /= 10;
+        }
+        return string(buffer);
+    }
+    
+    function _balanceOfItems(uint _summoner) internal view returns (uint) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
+        if (_summoner == 0) {
+            return 0;
+        }
+        return mc.balanceOf(mfs.get_owner(_summoner));
+    }
+    
+    function _get_endSVG(uint _summoner) internal pure returns (string memory) {
+        if (_summoner == 0) {
+            //token not found
+            return '</text><rect width="128" height="128" fill="#ffffff" rx="5" ry="5" fill-opacity="0.8"/><text x="64"  y="60" class="base" text-anchor="middle">Token</text><text x="64"  y="80" class="base" text-anchor="middle">Not Found</text></svg>';
+        } else {
+            return '</text></svg>';
+        }
+    }
+    
+    function ownerOf(uint _token) public view returns (address) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        return mfs.get_owner(_token);
+    }
+        
+    function _get_SVG(uint _summoner) internal view returns (string memory) {
+        Murasaki_Info mi = Murasaki_Info(murasaki_info_address);
+        //string memory output = string(abi.encodePacked(
+        return string(
+            bytes.concat(
+                abi.encodePacked(
+                    '<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin meet" viewBox="0 0 128 128"><style>.base { fill: #000000; font-family: arial; font-size: 18px; font-weight: bold}</style><rect width="128" height="128" fill="',
+                    string(abi.encodePacked(color[mi.class(_summoner)])),
+                    '" rx="10" ry="10" fill-opacity="0.4"/><image width="128" height="128" x="0" y="0" href="data:image/png;base64,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"/><text x="3"  y="18"  class="base" text-anchor="start">#',
+                    string(abi.encodePacked(toString(_summoner))),
+                    '</text><text x="124" y="22"  class="base" text-anchor="end">Lv<tspan font-size="24px">',
+                    string(abi.encodePacked(toString(mi.level(_summoner))))
+                ),
+                abi.encodePacked(
+                    '</tspan></text><text x="64"  y="92" class="base" text-anchor="middle"><tspan font-size="20px">',
+                    string(abi.encodePacked(mi.name(_summoner))),
+                    '</tspan></text><text x="124" y="122" class="base" text-anchor="end">&#x1f4bc;',
+                    string(abi.encodePacked(toString(_balanceOfItems(_summoner)))),
+                    _get_endSVG(_summoner)
+                )
+            )
+        );
+    }
+    
+    function tokenURI(uint _summoner) public view returns (string memory) {
+        string memory output = _get_SVG(_summoner);
+        string memory json = Base64.encode(bytes(string(abi.encodePacked(
+            '{"name": "Murasaki-san #', 
+            toString(_summoner), 
+            '", "description": "House of Murasaki-san. Murasaki-san is a pet living in your wallet on Astar Network. https://murasaki-san.com/", "image": "data:image/svg+xml;base64,', 
+            Base64.encode(bytes(output)), '"}'
+        ))));
+        return string(abi.encodePacked('data:application/json;base64,', json));
+    }
+    
+    function tokenURI_fromWallet(address _wallet) public view returns (string memory) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Main mm = Murasaki_Main(mfs.murasaki_main_address());
+        uint _summoner = mm.tokenOf(_wallet);
+        return tokenURI(_summoner);
+    }
+}
+
+
+
 //---Fluffy_Festival
 
 
@@ -5759,30 +5949,30 @@ contract Fluffy_Festival is Ownable, ReentrancyGuard {
     }
     
     //global variants
-    uint32 public ELECTION_PERIOD_BLOCK = 7200; //1 days, 12sec/block
-    uint32 public LEVEL_REQUIRED = 1;
-    uint32 public SATIETY_REQUIRED = 10;
-    uint32 public HAPPY_REQUIRED = 10;
-    uint32 public ELECTION_INTERVAL_BLOCK = 216000; //30 days, 12sec/block
+    uint public ELECTION_PERIOD_BLOCK = 7200; //1 days, 12sec/block
+    uint public LEVEL_REQUIRED = 1;
+    uint public SATIETY_REQUIRED = 10;
+    uint public HAPPY_REQUIRED = 10;
+    uint public ELECTION_INTERVAL_BLOCK = 216000; //30 days, 12sec/block
     bool public inSession;
     bool public isActive = true;
-    uint32 public elected_type = 0;
-    uint32 public previous_elected_type = 0;
+    uint public elected_type = 0;
+    uint public previous_elected_type = 0;
     
     //admin, change global variants
-    function _setA_election_period_block(uint32  _value) external onlyOwner {
+    function _setA_election_period_block(uint  _value) external onlyOwner {
         ELECTION_PERIOD_BLOCK = _value;
     }
-    function _setB_level_required(uint32  _value) external onlyOwner {
+    function _setB_level_required(uint  _value) external onlyOwner {
         LEVEL_REQUIRED = _value;
     }
-    function _setC_satiety_required(uint32  _value) external onlyOwner {
+    function _setC_satiety_required(uint  _value) external onlyOwner {
         SATIETY_REQUIRED = _value;
     }
-    function _setD_happy_required(uint32  _value) external onlyOwner {
+    function _setD_happy_required(uint  _value) external onlyOwner {
         HAPPY_REQUIRED = _value;
     }
-    function _setE_election_interval_block(uint32  _value) external onlyOwner {
+    function _setE_election_interval_block(uint  _value) external onlyOwner {
         ELECTION_INTERVAL_BLOCK = _value;
     }
     function _setF_inSession(bool _bool) external onlyOwner {
@@ -5792,14 +5982,14 @@ contract Fluffy_Festival is Ownable, ReentrancyGuard {
         isActive = _bool;
     }
     
-    //admin, modify subject parameters
+    //admin, modify subject parameters for maintenance
     function _modify_subject(
-        uint32 _subject_no,
-        uint32 _start_block,
-        uint32 _end_block,
-        uint32 _start_step,
-        uint32 _end_step,
-        uint32 _elected_type
+        uint _subject_no,
+        uint _start_block,
+        uint _end_block,
+        uint _start_step,
+        uint _end_step,
+        uint _elected_type
     ) external onlyOwner {
         subjects[_subject_no] = Subject(
             _start_block, 
@@ -5811,36 +6001,43 @@ contract Fluffy_Festival is Ownable, ReentrancyGuard {
     }
 
     //subject
-    uint32 subject_now = 0;
+    uint subject_now = 0;
     struct Subject {
-        uint32 start_block;
-        uint32 end_block;
-        uint32 start_step;
-        uint32 end_step;
-        uint32 elected_type;
+        uint start_block;
+        uint end_block;
+        uint start_step;
+        uint end_step;
+        uint elected_type;
     }
-    mapping(uint32 => Subject) public subjects;
+    mapping(uint => Subject) public subjects;
     
     //vote
-    uint32 next_vote = 1;
+    uint next_vote = 1;
     struct vote {
-        uint32 blocknumber;
-        uint32 summoner;
-        uint32 value;
+        uint blocknumber;
+        uint summoner;
+        uint value;
     }
-    mapping(uint32 => vote) public votes;
-    uint32[256] each_voting_count;
-    mapping(uint32 => uint32) public last_voting_block; //summoner => blocknumber
-    mapping(uint32 => uint32) public last_voting_type;  //summoner => fluffy_type
+    mapping(uint => vote) public votes;
+    uint[256] each_voting_count;
+    mapping(uint => uint) public last_voting_block; //summoner => blocknumber
+    mapping(uint => uint) public last_voting_type;  //summoner => fluffy_type
     
     //step
-    uint32 next_step = 1;
-    mapping(uint32 => uint32) public winner_inStep;
+    uint next_step = 1;
+    mapping(uint => uint) public winner_inStep;
 
-    //voting
-    event Voting(uint32 indexed _summoner, uint32 _select);
-    function voting(uint32 _summoner, uint32 _select) external nonReentrant {
+    //Voting
+    event Start_Voting(uint indexed _summoner);
+    event Voting(uint indexed _summoner, uint _select);
+    function voting(uint _summoner, uint _select) external nonReentrant {
+        //check ff active
         require(isActive);
+        //check owner
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        require(mfs.check_owner(_summoner, msg.sender));
+        //check summoner
+        require(_check_summoner(_summoner));
         //reject present and previous elected type
         require(_select != elected_type);
         require(_select != previous_elected_type);
@@ -5848,12 +6045,12 @@ contract Fluffy_Festival is Ownable, ReentrancyGuard {
         //check fist voting
         if ( check_start_voting() ){
             emit Start_Voting(_summoner);
-            _start_voting();
+            _start_voting(msg.sender);
         }
-        //chekc votable of summoner
+        //check votable of summoner
         require(check_votable(_summoner));
         //vote
-        uint32 _block = uint32(block.number);
+        uint _block = block.number;
         votes[next_vote] = vote(_block, _summoner, _select);
         last_voting_block[_summoner] = _block;
         last_voting_type[_summoner] = _select;
@@ -5864,14 +6061,14 @@ contract Fluffy_Festival is Ownable, ReentrancyGuard {
         next_step += 1;
         //mint presentbox
         string memory _memo = "participation award";
-        _mint_presentbox(uint32(0), msg.sender, _memo);
+        _mint_presentbox(uint(0), msg.sender, _memo);
         //check final voting
         if ( check_end_voting() ) {
-            end_voting(_summoner);
+            _end_voting(_summoner, msg.sender);
         }
         emit Voting(_summoner, _select);
     }
-    function check_votable(uint32 _summoner) public view returns (bool) {
+    function check_votable(uint _summoner) public view returns (bool) {
         //get subject_now
         Subject memory _subject = subjects[subject_now];
         if (
@@ -5879,12 +6076,10 @@ contract Fluffy_Festival is Ownable, ReentrancyGuard {
             check_start_voting()
             //or after start, meet the all condition
             || (
-                //check summoner
-                _check_summoner(_summoner)
+                //check in session
+                inSession
                 //check not have already voted
                 && _subject.start_block > last_voting_block[_summoner]
-                //check not ended
-                && inSession
             )
         ){
             return true;
@@ -5892,7 +6087,7 @@ contract Fluffy_Festival is Ownable, ReentrancyGuard {
             return false;
         }
     }
-    function _check_summoner (uint32 _summoner) public view returns (bool) {
+    function _check_summoner (uint _summoner) internal view returns (bool) {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Parameter mp = Murasaki_Parameter(mfs.murasaki_parameter_address());
         Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
@@ -5900,7 +6095,7 @@ contract Fluffy_Festival is Ownable, ReentrancyGuard {
             //check pause
             mp.isPaused() == false
             //check owner
-            && mfs.check_owner(_summoner, msg.sender)
+            //&& mfs.check_owner(_summoner, _wallet)
             //check summoner status
             && ms.inHouse(_summoner)
             && mfs.calc_satiety(_summoner) >= SATIETY_REQUIRED
@@ -5912,12 +6107,12 @@ contract Fluffy_Festival is Ownable, ReentrancyGuard {
             return false;
         }
     }
-    function _get_winner_inStep_now() internal view returns (uint32) {
+    function _get_winner_inStep_now() internal view returns (uint) {
         //return fluffy type with the biggest voting count
         //when equal, smaller type number win
-        uint32 _winner = 0;
-        uint32 _voted = 0;
-        for (uint32 i=201; i<=212; i++) {
+        uint _winner = 0;
+        uint _voted = 0;
+        for (uint i=201; i<=212; i++) {
             if (each_voting_count[i] > _voted) {
                 _winner = i;
                 _voted = each_voting_count[i];
@@ -5925,11 +6120,11 @@ contract Fluffy_Festival is Ownable, ReentrancyGuard {
         }
         return _winner;
     }
-    function _mint_presentbox(uint32 _summoner, address _wallet_to, string memory _memo) internal {
+    function _mint_presentbox(uint _summoner, address _wallet_to, string memory _memo) internal {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
-        uint32 _seed = mfs.seed(_summoner);
-        uint32 _item_type = 200;
+        uint _seed = mfs.seed(_summoner);
+        uint _item_type = 200;
         mc.craft(_item_type, _summoner, _wallet_to, _seed, _memo);
     }
     
@@ -5943,10 +6138,9 @@ contract Fluffy_Festival is Ownable, ReentrancyGuard {
             return false;
         }
     }
-    event Start_Voting(uint32 indexed _summoner);
-    function _start_voting() internal {
+    function _start_voting(address _starter) internal {
         //create and initialize subject
-        uint32 _block = uint32(block.number);
+        uint _block = block.number;
         subject_now += 1;
         subjects[subject_now] = Subject(
             _block, 
@@ -5956,14 +6150,14 @@ contract Fluffy_Festival is Ownable, ReentrancyGuard {
             0
         );
         //reset voting count
-        for (uint32 i=201; i<=212; i++) {
+        for (uint i=201; i<=212; i++) {
             each_voting_count[i] = 0;
         }
         //voting in session
         inSession = true;
-        //vonus mint
+        //bonus mint
         string memory _memo = "first vote bonus";
-        _mint_presentbox(uint32(0), msg.sender, _memo);
+        _mint_presentbox(uint(0), _starter, _memo);
         //emit Start_Voting(_summoner);
     }
     
@@ -5977,8 +6171,9 @@ contract Fluffy_Festival is Ownable, ReentrancyGuard {
         }
     }
     //public, executable without voting
-    event End_Voting(uint32 indexed _summoner, uint32 _winner);
-    function end_voting(uint32 _summoner) public nonReentrant {
+    event End_Voting(uint indexed _summoner, uint _winner);
+    /*
+    function end_voting(uint _summoner) public nonReentrant {
         require(
             _check_summoner(_summoner)
             && check_end_voting()
@@ -5986,7 +6181,7 @@ contract Fluffy_Festival is Ownable, ReentrancyGuard {
         //update session status
         inSession = false;
         //select winner
-        uint32 _winner = _select_winner(_summoner);
+        uint _winner = _select_winner(_summoner);
         //update mp parameter
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Parameter mp = Murasaki_Parameter(mfs.murasaki_parameter_address());
@@ -5999,24 +6194,52 @@ contract Fluffy_Festival is Ownable, ReentrancyGuard {
         elected_type = _winner;
         //vonus mint
         string memory _memo = "final vote bonus";
-        _mint_presentbox(uint32(0), msg.sender, _memo);
+        _mint_presentbox(uint(0), msg.sender, _memo);
         emit End_Voting(_summoner, _winner);
     }
-    function _select_winner(uint32 _summoner) internal view returns (uint32) {
+    */
+    function end_voting(uint _summoner) external nonReentrant {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        require(mfs.check_owner(_summoner, msg.sender));
+        require(_check_summoner(_summoner));
+        _end_voting(_summoner, msg.sender);
+    }
+    function _end_voting(uint _summoner, address _ender) internal {
+        //update session status
+        inSession = false;
+        //select winner
+        uint _winner = _select_winner(_summoner);
+        //update mp parameter
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Parameter mp = Murasaki_Parameter(mfs.murasaki_parameter_address());
+        mp._set_elected_fluffy_type(_winner);
+        //insert end step into last subject
+        subjects[subject_now].end_step = next_step - 1;
+        //update elected type
+        subjects[subject_now].elected_type = _winner;
+        previous_elected_type = elected_type;
+        elected_type = _winner;
+        //vonus mint
+        string memory _memo = "final vote bonus";
+        //_mint_presentbox(uint(0), msg.sender, _memo);
+        _mint_presentbox(uint(0), _ender, _memo);
+        emit End_Voting(_summoner, _winner);
+    }
+    function _select_winner(uint _summoner) internal view returns (uint) {
         //candle auction
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         //select random step in the range between from start_step to latest step
         Subject memory _subject = subjects[subject_now];
-        uint32 _delta_step = (next_step) - _subject.start_step;
-        uint32 _rand = mfs.dn(_summoner, _delta_step);
-        uint32 _elected_step = _subject.start_step + _rand;
+        uint _delta_step = (next_step) - _subject.start_step;
+        uint _rand = mfs.dn(_summoner, _delta_step);
+        uint _elected_step = _subject.start_step + _rand;
         //return winner as winner_inStep of the elected_step
         return winner_inStep[_elected_step];
     }
     
     //info
-    function get_info(uint32 _summoner) external view returns (uint32[24] memory) {
-        uint32[24] memory _res;
+    function get_info(uint _summoner) external view returns (uint[24] memory) {
+        uint[24] memory _res;
         //_res[0] = each_voting_count[0];
         _res[1] = each_voting_count[201];
         _res[2] = each_voting_count[202];
@@ -6043,41 +6266,231 @@ contract Fluffy_Festival is Ownable, ReentrancyGuard {
         _res[23] = previous_elected_type;
         return _res;
     }
-    function _inSession() internal view returns (uint32) {
+    function _inSession() internal view returns (uint) {
         bool _bool = inSession;
         if (_bool == true) {
-            return uint32(1);
+            return uint(1);
         } else {
-            return uint32(0);
+            return uint(0);
         }    
     }
-    function _isVotable(uint32 _summoner) internal view returns (uint32) {
+    function _isVotable(uint _summoner) internal view returns (uint) {
         bool _bool = check_votable(_summoner);
         if (_bool == true) {
-            return uint32(1);
+            return uint(1);
         } else {
-            return uint32(0);
+            return uint(0);
         }
     }
-    function _isEndable() internal view returns (uint32) {
+    function _isEndable() internal view returns (uint) {
         bool _bool = check_end_voting();
         if (_bool == true) {
-            return uint32(1);
+            return uint(1);
         } else {
-            return uint32(0);
+            return uint(0);
         }
     }
-    function next_festival_block() public view returns (uint32) {
+    function next_festival_block() public view returns (uint) {
         //in first festival, return past block number (0+INTERVAL)
+        //for murasaki_info
         return subjects[subject_now].start_block + ELECTION_INTERVAL_BLOCK;
     }
 
     /*
     //***TODO*** forDebug
-    function mint_presentbox(uint32 _summoner, address _wallet_to, string memory _memo) external onlyOwner {
+    function mint_presentbox(uint _summoner, address _wallet_to, string memory _memo) external onlyOwner {
         _mint_presentbox(_summoner, _wallet_to, _memo);
     }
     */
+}
+
+
+//===admin==================================================================================================================
+
+
+//---Admin_Convert
+
+interface Murasaki_Storage_Old {
+    function level (uint32 _summoner) external view returns (uint32);
+    function exp (uint32 _summoner) external view returns (uint32);
+    function strength (uint32 _summoner) external view returns (uint32);
+    function dexterity (uint32 _summoner) external view returns (uint32);
+    function intelligence (uint32 _summoner) external view returns (uint32);
+    function luck (uint32 _summoner) external view returns (uint32);
+    function next_exp_required (uint32 _summoner) external view returns (uint32);
+    function last_level_up_time (uint32 _summoner) external view returns (uint32);
+    function coin (uint32 _summoner) external view returns (uint32);
+    function material (uint32 _summoner) external view returns (uint32);
+    function last_feeding_time (uint32 _summoner) external view returns (uint32);
+    function last_grooming_time (uint32 _summoner) external view returns (uint32);
+    function mining_status (uint32 _summoner) external view returns (uint32);
+    function mining_start_time (uint32 _summoner) external view returns (uint32);
+    function farming_status (uint32 _summoner) external view returns (uint32);
+    function farming_start_time (uint32 _summoner) external view returns (uint32);
+    function crafting_status (uint32 _summoner) external view returns (uint32);
+    function crafting_start_time (uint32 _summoner) external view returns (uint32);
+    function crafting_item_type (uint32 _summoner) external view returns (uint32);
+    function total_mining_sec (uint32 _summoner) external view returns (uint32);
+    function total_farming_sec (uint32 _summoner) external view returns (uint32);
+    function total_crafting_sec (uint32 _summoner) external view returns (uint32);
+    function last_total_mining_sec (uint32 _summoner) external view returns (uint32);
+    function last_total_farming_sec (uint32 _summoner) external view returns (uint32);
+    function last_total_crafting_sec (uint32 _summoner) external view returns (uint32);
+    function last_grooming_time_plus_working_time (uint32 _summoner) external view returns (uint32);
+    function isActive (uint32 _summoner) external view returns (bool);
+    function inHouse (uint32 _summoner) external view returns (bool);
+    function staking_reward_counter (uint32 _summoner) external view returns (uint32);
+}
+
+interface Murasaki_Main_Old {
+    function class (uint32 _summoner) external view returns (uint32);
+    function seed (uint32 _summoner) external view returns (uint32);
+    function ownerOf (uint32 _summoner) external view returns (address);
+    function summoned_time (uint32 _summoner) external view returns (uint32);
+}
+
+interface Murasaki_Storage_Score_Old {
+    function total_exp_gained (uint32 _summoner) external view returns (uint32);
+    function total_coin_mined (uint32 _summoner) external view returns (uint32);
+    function total_material_farmed (uint32 _summoner) external view returns (uint32);
+    function total_item_crafted (uint32 _summoner) external view returns (uint32);
+    function total_precious_received (uint32 _summoner) external view returns (uint32);
+}
+
+interface Murasaki_Name_Old {
+    function names (uint32 _summoner) external view returns (string memory);
+    function seed (uint32 _summoner) external view returns (uint32);
+    function ownerOf (uint32 _summoner) external view returns (address);
+}
+
+
+contract Admin_Convert is Ownable {
+    
+    function mm_convert (
+        address _old_address, 
+        address _new_address, 
+        uint _summoner_256
+    ) external onlyOwner {
+        uint32 _summoner = uint32(_summoner_256);
+        Murasaki_Main_Old mmOld = Murasaki_Main_Old(_old_address);
+        Murasaki_Main mmNew = Murasaki_Main(_new_address);
+        uint32 _class = mmOld.class(_summoner);
+        uint32 _summoned_time = mmOld.summoned_time(_summoner);
+        uint32 _seed = mmOld.seed(_summoner);
+        address _owner = mmOld.ownerOf(_summoner);
+        mmNew.summon(_owner, _class, _seed);
+        mmNew.set_summoned_time(_summoner, _summoned_time);
+    }
+
+    function mn_convert (
+        address _old_address, 
+        address _new_address, 
+        uint _tokenId_256
+    ) external onlyOwner {
+        uint32 _tokenId = uint32(_tokenId_256);
+        Murasaki_Name_Old mnOld = Murasaki_Name_Old(_old_address);
+        Murasaki_Name mnNew = Murasaki_Name(_new_address);
+        string memory _name = mnOld.names(_tokenId);
+        uint32 _seed = mnOld.seed(_tokenId);
+        address _owner = mnOld.ownerOf(_tokenId);
+        mnNew.mint(_owner, _name, _seed);
+    }
+    
+    function ms_convert (
+        address _old_address,
+        address _new_address,
+        uint _summoner_uint256
+    ) external onlyOwner {
+        uint32 _summoner = uint32(_summoner_uint256);
+        Murasaki_Storage_Old msOld = Murasaki_Storage_Old(_old_address);
+        Murasaki_Storage msNew = Murasaki_Storage(_new_address);
+        msNew.set_level(_summoner, msOld.level(_summoner));
+        msNew.set_exp(_summoner, msOld.exp(_summoner));
+        msNew.set_strength(_summoner, msOld.strength(_summoner));
+        msNew.set_dexterity(_summoner, msOld.dexterity(_summoner));
+        msNew.set_intelligence(_summoner, msOld.intelligence(_summoner));
+        msNew.set_luck(_summoner, msOld.luck(_summoner));
+        msNew.set_next_exp_required(_summoner, msOld.next_exp_required(_summoner));
+        msNew.set_last_level_up_time(_summoner, msOld.last_level_up_time(_summoner));
+        msNew.set_coin(_summoner, msOld.coin(_summoner));
+        msNew.set_material(_summoner, msOld.material(_summoner));
+        msNew.set_last_feeding_time(_summoner, msOld.last_feeding_time(_summoner));
+        msNew.set_last_grooming_time(_summoner, msOld.last_grooming_time(_summoner));
+        msNew.set_mining_status(_summoner, msOld.mining_status(_summoner));
+        msNew.set_mining_start_time(_summoner, msOld.mining_start_time(_summoner));
+        msNew.set_farming_status(_summoner, msOld.farming_status(_summoner));
+        msNew.set_farming_start_time(_summoner, msOld.farming_start_time(_summoner));
+        msNew.set_crafting_status(_summoner, msOld.crafting_status(_summoner));
+        msNew.set_crafting_start_time(_summoner, msOld.crafting_start_time(_summoner));
+        msNew.set_crafting_item_type(_summoner, msOld.crafting_item_type(_summoner));
+        msNew.set_total_mining_sec(_summoner, msOld.total_mining_sec(_summoner));
+        msNew.set_total_farming_sec(_summoner, msOld.total_farming_sec(_summoner));
+        msNew.set_total_crafting_sec(_summoner, msOld.total_crafting_sec(_summoner));
+        msNew.set_last_total_mining_sec(_summoner, msOld.last_total_mining_sec(_summoner));
+        msNew.set_last_total_farming_sec(_summoner, msOld.last_total_farming_sec(_summoner));
+        msNew.set_last_total_crafting_sec(_summoner, msOld.last_total_crafting_sec(_summoner));
+        msNew.set_last_grooming_time_plus_working_time(_summoner, msOld.last_grooming_time_plus_working_time(_summoner));
+        msNew.set_isActive(_summoner, msOld.isActive(_summoner));
+        msNew.set_inHouse(_summoner, msOld.inHouse(_summoner));
+        msNew.set_staking_reward_counter(_summoner, msOld.staking_reward_counter(_summoner));
+    }
+    
+    function mss_convert (
+        address _old_address,
+        address _new_address,
+        uint _summoner_uint256
+    ) external onlyOwner {
+        uint32 _summoner = uint32(_summoner_uint256);
+        Murasaki_Storage_Score_Old mssOld = Murasaki_Storage_Score_Old(_old_address);
+        Murasaki_Storage_Score mssNew = Murasaki_Storage_Score(_new_address);
+        mssNew.set_total_exp_gained(_summoner, mssOld.total_exp_gained(_summoner));
+        mssNew.set_total_coin_mined(_summoner, mssOld.total_coin_mined(_summoner));
+        mssNew.set_total_material_farmed(_summoner, mssOld.total_material_farmed(_summoner));
+        mssNew.set_total_item_crafted(_summoner, mssOld.total_item_crafted(_summoner));
+        mssNew.set_total_precious_received(_summoner, mssOld.total_precious_received(_summoner));
+    }
+
+    function mc_convert (
+        address _old_address, 
+        address _new_address, 
+        uint _item_id_256
+    ) external onlyOwner {
+        uint32 _item_id = uint32(_item_id_256);
+        Murasaki_Craft_Old mcOld = Murasaki_Craft_Old(_old_address);
+        //Murasaki_Craft_withFee mcNew = Murasaki_Craft_withFee(_new_address);
+        Murasaki_Craft mcNew = Murasaki_Craft(_new_address);
+        {
+        //correct old item infromation
+        (
+            uint _item_type, 
+            uint _crafted_time, 
+            uint _crafted_summoner, 
+            address _crafted_wallet, 
+            //string memory _memo
+        ) = mcOld.items(uint32(_item_id_256));
+        //uint32 _seed = mcOld.seed(_item_id);
+        address _wallet_to = mcOld.ownerOf(_item_id);
+        //craft_convert in new contract
+        mcNew._admin_craft_convert(
+            _item_type,
+            _crafted_summoner,
+            _crafted_wallet,
+            //mcOld.seed(uint32(_item_id_256)),
+            //888,
+            //_memo,
+            _item_id_256,
+            _crafted_time,
+            //mcOld.ownerOf(_item_id)
+            _wallet_to
+        );
+        }
+    }
+    
+    function mc_set_next_item (address _address, uint _value) external onlyOwner {
+        //Murasaki_Craft_withFee mcNew = Murasaki_Craft_withFee(_address);
+        Murasaki_Craft mcNew = Murasaki_Craft(_address);
+        mcNew._admin_set_next_item(_value);
+    }
 }
 
 

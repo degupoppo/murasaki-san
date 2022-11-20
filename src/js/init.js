@@ -13,28 +13,28 @@ async function initialize_contract() {
 
     //set nft,ntt
     contract_mm.methods._set_notPaused(true).send({from:wallet});
-    contract_mm.methods._add_permitted_address(contract_murasaki_function_summon_and_levelup).send({from:wallet});
-    contract_mn.methods._add_permitted_address(contract_murasaki_function_name).send({from:wallet});
-    contract_mc.methods._add_permitted_address(contract_murasaki_function_crafting).send({from:wallet});
-    contract_mc.methods._add_permitted_address(contract_murasaki_mail).send({from:wallet});
-    contract_mc.methods._add_permitted_address(contract_murasaki_function_feeding_and_grooming).send({from:wallet});
-    contract_mc.methods._add_permitted_address(contract_fluffy_festival).send({from:wallet});
+    contract_mm.methods._add_permitted_address(address_Murasaki_Function_Summon_and_LevelUp).send({from:wallet});
+    contract_mn.methods._add_permitted_address(address_Murasaki_Function_Name).send({from:wallet});
+    contract_mc.methods._add_permitted_address(address_Murasaki_Function_Crafting).send({from:wallet});
+    contract_mc.methods._add_permitted_address(address_Murasaki_Mail).send({from:wallet});
+    contract_mc.methods._add_permitted_address(address_Murasaki_Function_Feeding_and_Grooming).send({from:wallet});
+    contract_mc.methods._add_permitted_address(address_Fluffy_Festival).send({from:wallet});
 
-    //set function_share
-    contract_mfs.methods._set1_murasaki_main_address(contract_murasaki_main).send({from:wallet});
-    contract_mfs.methods._set2_murasaki_storage_address(contract_murasaki_storage).send({from:wallet});
-    contract_mfs.methods._set3_murasaki_craft_address(contract_murasaki_craft).send({from:wallet});
-    contract_mfs.methods._set4_world_dice_address(contract_world_dice).send({from:wallet});
-    contract_mfs.methods._set5_murasaki_name_address(contract_murasaki_name).send({from:wallet});
-    contract_mfs.methods._set6_murasaki_storage_score_address(contract_murasaki_storage_score).send({from:wallet});
-    contract_mfs.methods._set7_murasaki_mail_address(contract_murasaki_mail).send({from:wallet});
-    contract_mfs.methods._set8_murasaki_storage_nui_address(contract_murasaki_storage_nui).send({from:wallet});
-    //contract_mfs.methods._set9_astarbase_address(contract_murasaki_storage_nui).send({from:wallet});
-    contract_mfs.methods._setA_bufferTreqsury_address(contract_bufferTreasury).send({from:wallet});
-    contract_mfs.methods._setB_buybackTreasury_address(contract_buybackTreasury).send({from:wallet});
-    contract_mfs.methods._setC_teamTreasury_address(contract_teamTreasury).send({from:wallet});
-    contract_mfs.methods._setD_murasaki_lootlike_address(contract_murasaki_lootlike).send({from:wallet});
-    contract_mfs.methods._setE_murasaki_parameter_address(contract_murasaki_parameter).send({from:wallet});
+    //set Function_Share
+    contract_mfs.methods._set1_murasaki_main_address(address_Murasaki_Main).send({from:wallet});
+    contract_mfs.methods._set2_murasaki_storage_address(address_Murasaki_Storage).send({from:wallet});
+    contract_mfs.methods._set3_murasaki_craft_address(address_Murasaki_Craft).send({from:wallet});
+    contract_mfs.methods._set4_world_dice_address(address_World_Dice).send({from:wallet});
+    contract_mfs.methods._set5_murasaki_name_address(address_Murasaki_Name).send({from:wallet});
+    contract_mfs.methods._set6_murasaki_storage_score_address(address_Murasaki_Storage_Score).send({from:wallet});
+    contract_mfs.methods._set7_murasaki_mail_address(address_Murasaki_Mail).send({from:wallet});
+    contract_mfs.methods._set8_murasaki_storage_nui_address(address_Murasaki_Storage_Nui).send({from:wallet});
+    //contract_mfs.methods._set9_astarbase_address(address_Murasaki_Storage_nui).send({from:wallet});
+    contract_mfs.methods._setA_bufferTreqsury_address(address_bufferTreasury).send({from:wallet});
+    contract_mfs.methods._setB_buybackTreasury_address(address_buybackTreasury).send({from:wallet});
+    contract_mfs.methods._setC_teamTreasury_address(address_teamTreasury).send({from:wallet});
+    contract_mfs.methods._setD_murasaki_lootlike_address(address_Murasaki_Lootlike).send({from:wallet});
+    contract_mfs.methods._setE_murasaki_parameter_address(address_Murasaki_Parameter).send({from:wallet});
     
     //astarbase, local
     //contract_mfs.methods._set9_astarbase_address("0x64582688EF82Bcce7F6260eE1384656e1D33b4bB").send({from:wallet});
@@ -45,54 +45,64 @@ async function initialize_contract() {
     //astarbase, shibuya
     //contract_mfs.methods._set9_astarbase_address("0xF183f51D3E8dfb2513c15B046F848D4a68bd3F5D").send({from:wallet});
 
-    //set other functions
-    contract_mfsl.methods._set1_murasaki_function_share_address(contract_murasaki_function_share).send({from:wallet});
-    contract_mffg.methods._set1_murasaki_function_share_address(contract_murasaki_function_share).send({from:wallet});
-    contract_mfmf.methods._set1_murasaki_function_share_address(contract_murasaki_function_share).send({from:wallet});
-    contract_mfc.methods._set1_murasaki_function_share_address(contract_murasaki_function_share).send({from:wallet});
-    contract_mfc.methods._set2_murasaki_function_crafting_codex_address(contract_murasaki_function_crafting_codex).send({from:wallet});
-    contract_mfcc.methods._set1_murasaki_function_share_address(contract_murasaki_function_share).send({from:wallet});
-    contract_mfn.methods._set1_murasaki_function_share_address(contract_murasaki_function_share).send({from:wallet});
+    //set other Functions
+    contract_mfsl.methods._set1_murasaki_function_share_address(address_Murasaki_Function_Share).send({from:wallet});
+    contract_mffg.methods._set1_murasaki_function_share_address(address_Murasaki_Function_Share).send({from:wallet});
+    contract_mfmf.methods._set1_murasaki_function_share_address(address_Murasaki_Function_Share).send({from:wallet});
+    contract_mfc.methods._set1_murasaki_function_share_address(address_Murasaki_Function_Share).send({from:wallet});
+    contract_mfc.methods._set2_murasaki_function_crafting_codex_address(address_Murasaki_Function_Crafting_Codex).send({from:wallet});
+    contract_mfcc.methods._set1_murasaki_function_share_address(address_Murasaki_Function_Share).send({from:wallet});
+    contract_mfn.methods._set1_murasaki_function_share_address(address_Murasaki_Function_Share).send({from:wallet});
 
     //set others
-    contract_wd.methods._set1_murasaki_function_share_address(contract_murasaki_function_share).send({from:wallet});
-    contract_mml.methods._set1_murasaki_function_share_address(contract_murasaki_function_share).send({from:wallet});
-    contract_mml.methods._set2_murasaki_function_crafting_address(contract_murasaki_function_crafting).send({from:wallet});
-    contract_mll.methods._set1_murasaki_function_share_address(contract_murasaki_function_share).send({from:wallet});
-    contract_ff.methods._set1_murasaki_function_share_address(contract_murasaki_function_share).send({from:wallet});
+    contract_wd.methods._set1_murasaki_function_share_address(address_Murasaki_Function_Share).send({from:wallet});
+    contract_mml.methods._set1_murasaki_function_share_address(address_Murasaki_Function_Share).send({from:wallet});
+    contract_mml.methods._set2_murasaki_function_crafting_address(address_Murasaki_Function_Crafting).send({from:wallet});
+    contract_mll.methods._set1_murasaki_function_share_address(address_Murasaki_Function_Share).send({from:wallet});
+    contract_ff.methods._set1_murasaki_function_share_address(address_Murasaki_Function_Share).send({from:wallet});
 
-    //set storage
+    //set Storage
     contract_mp.methods._add_permitted_address(wallet).send({from:wallet});
-    contract_mp.methods._add_permitted_address(contract_fluffy_festival).send({from:wallet});
-    contract_ms.methods._add_permitted_address(contract_murasaki_function_summon_and_levelup).send({from:wallet});
-    contract_ms.methods._add_permitted_address(contract_murasaki_function_feeding_and_grooming).send({from:wallet});
-    contract_ms.methods._add_permitted_address(contract_murasaki_function_mining_and_farming).send({from:wallet});
-    contract_ms.methods._add_permitted_address(contract_murasaki_function_crafting).send({from:wallet});
-    contract_ms.methods._add_permitted_address(contract_murasaki_function_name).send({from:wallet});
-    contract_ms.methods._add_permitted_address(contract_murasaki_mail).send({from:wallet});
-    contract_mss.methods._add_permitted_address(contract_murasaki_function_summon_and_levelup).send({from:wallet});
-    contract_mss.methods._add_permitted_address(contract_murasaki_function_feeding_and_grooming).send({from:wallet});
-    contract_mss.methods._add_permitted_address(contract_murasaki_function_mining_and_farming).send({from:wallet});
-    contract_mss.methods._add_permitted_address(contract_murasaki_function_crafting).send({from:wallet});
-    contract_mss.methods._add_permitted_address(contract_murasaki_function_name).send({from:wallet});
-    contract_msn.methods._add_permitted_address(contract_murasaki_function_crafting).send({from:wallet});
-    //contract_msn.methods._add_permitted_address(contract_murasaki_admin).send({from:wallet});
+    contract_mp.methods._add_permitted_address(address_Fluffy_Festival).send({from:wallet});
+    contract_ms.methods._add_permitted_address(address_Murasaki_Function_Summon_and_LevelUp).send({from:wallet});
+    contract_ms.methods._add_permitted_address(address_Murasaki_Function_Feeding_and_Grooming).send({from:wallet});
+    contract_ms.methods._add_permitted_address(address_Murasaki_Function_Mining_and_Farming).send({from:wallet});
+    contract_ms.methods._add_permitted_address(address_Murasaki_Function_Crafting).send({from:wallet});
+    contract_ms.methods._add_permitted_address(address_Murasaki_Function_Name).send({from:wallet});
+    contract_ms.methods._add_permitted_address(address_Murasaki_Mail).send({from:wallet});
+    contract_mss.methods._add_permitted_address(address_Murasaki_Function_Summon_and_LevelUp).send({from:wallet});
+    contract_mss.methods._add_permitted_address(address_Murasaki_Function_Feeding_and_Grooming).send({from:wallet});
+    contract_mss.methods._add_permitted_address(address_Murasaki_Function_Mining_and_Farming).send({from:wallet});
+    contract_mss.methods._add_permitted_address(address_Murasaki_Function_Crafting).send({from:wallet});
+    contract_mss.methods._add_permitted_address(address_Murasaki_Function_Name).send({from:wallet});
+    contract_msn.methods._add_permitted_address(address_Murasaki_Function_Crafting).send({from:wallet});
+    //contract_msn.methods._add_permitted_address(address_Murasaki_admin).send({from:wallet});
 
     //market
-    contract_mmt.methods._set1_murasaki_function_share_address(contract_murasaki_function_share).send({from:wallet});
+    contract_mmt.methods._set1_murasaki_function_share_address(address_Murasaki_Function_Share).send({from:wallet});
+    contract_mc.methods._add_noFee_address(address_Murasaki_Item_Market).send({from:wallet});
 
     //info
-    contract_info.methods._set1_murasaki_function_share_address(contract_murasaki_function_share).send({from:wallet});
-    contract_info.methods._set2_murasaki_function_mining_and_farming_address(contract_murasaki_function_mining_and_farming).send({from:wallet});
-    contract_info.methods._set3_murasaki_function_crafting_address(contract_murasaki_function_crafting).send({from:wallet});
-    contract_info.methods._set4_murasaki_function_feeding_and_grooming_address(contract_murasaki_function_feeding_and_grooming).send({from:wallet});
-    contract_info.methods._set5_fluffy_festival_address(contract_fluffy_festival).send({from:wallet});
-    contract_info_fromWallet.methods._set1_murasaki_function_share_address(contract_murasaki_function_share).send({from:wallet});
-    contract_info_fromWallet.methods._set2_murasaki_info_address(contract_murasaki_info).send({from:wallet});
+    contract_info.methods._set1_murasaki_function_share_address(address_Murasaki_Function_Share).send({from:wallet});
+    contract_info.methods._set2_murasaki_function_mining_and_farming_address(address_Murasaki_Function_Mining_and_Farming).send({from:wallet});
+    contract_info.methods._set3_murasaki_function_crafting_address(address_Murasaki_Function_Crafting).send({from:wallet});
+    contract_info.methods._set4_murasaki_function_feeding_and_grooming_address(address_Murasaki_Function_Feeding_and_Grooming).send({from:wallet});
+    contract_info.methods._set5_fluffy_festival_address(address_Fluffy_Festival).send({from:wallet});
+    contract_info_fromWallet.methods._set1_murasaki_function_share_address(address_Murasaki_Function_Share).send({from:wallet});
+    contract_info_fromWallet.methods._set2_murasaki_info_address(address_Murasaki_Info).send({from:wallet});
+    contract_mu.methods._set1_murasaki_function_share_address(address_Murasaki_Function_Share).send({from:wallet});
+    contract_mu.methods._set2_murasaki_info_address(address_Murasaki_tokenURI).send({from:wallet});
     
     //treasury
-    contract_bbt.methods._set1_murasaki_function_share_address(contract_murasaki_function_share).send({from:wallet});
-    contract_bft.methods._set1_murasaki_function_share_address(contract_murasaki_function_share).send({from:wallet});
+    contract_bbt.methods._set1_murasaki_function_share_address(address_Murasaki_Function_Share).send({from:wallet});
+    contract_bft.methods._set1_murasaki_function_share_address(address_Murasaki_Function_Share).send({from:wallet});
+        
+    //admin
+    contract_mm.methods._add_permitted_address(address_Admin_Convert).send({from:wallet});
+    contract_mn.methods._add_permitted_address(address_Admin_Convert).send({from:wallet});
+    contract_ms.methods._add_permitted_address(address_Admin_Convert).send({from:wallet});
+    contract_mss.methods._add_permitted_address(address_Admin_Convert).send({from:wallet});
+    contract_mc.methods._add_permitted_address(address_Admin_Convert).send({from:wallet});
     
     //activate
     contract_mp.methods._set_isPaused(false).send({from:wallet});

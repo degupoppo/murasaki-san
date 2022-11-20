@@ -51,7 +51,6 @@ async function update_onMarketItems() {
         _html += "</center></td><td><center>";
         //_html += _item_type;
         _html += "<img src='";
-        console.log(_item_name);
         _html += "src/" + dic_items[_item_name]["icon_png"];
         _html += "' width='32' height='32'> ";
         _html += _item_name;
@@ -256,7 +255,7 @@ async function list_item(_item) {
 
 //approve
 async function approve() {
-    await contract_mc.methods.setApprovalForAll(contract_murasaki_item_market, true).send({from:wallet});
+    await contract_mc.methods.setApprovalForAll(address_Murasaki_Item_Market, true).send({from:wallet});
 }
 
 async function transfer_item() {
@@ -292,7 +291,7 @@ async function upgrade_item() {
 
 //check_approve_upgrade
 async function check_approve_upgrade() {
-    let _res = await contract_mc_wss.methods.isApprovedForAll(wallet, contract_murasaki_function_crafting).call();
+    let _res = await contract_mc_wss.methods.isApprovedForAll(wallet, address_Murasaki_Function_Crafting).call();
     //console.log(_res);
     if (_res == true) {
         document.getElementById("button_approve_upgrade").disabled = true;
@@ -302,7 +301,7 @@ async function check_approve_upgrade() {
     
 //check_approve
 async function check_approve() {
-    let _res = await contract_mc_wss.methods.isApprovedForAll(wallet, contract_murasaki_item_market).call();
+    let _res = await contract_mc_wss.methods.isApprovedForAll(wallet, address_Murasaki_Item_Market).call();
     //console.log(_res);
     if (_res == true) {
         document.getElementById("button_approve").disabled = true;

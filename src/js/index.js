@@ -1,9 +1,26 @@
 
+
+//reset item position
+function reset_item_position() {
+    localStorage.removeItem("pos_item_musicbox");
+    localStorage.removeItem("pos_item_fortune_status");
+    localStorage.removeItem("pos_item_asnya");
+    localStorage.removeItem("pos_item_vase");
+    localStorage.removeItem("pos_item_tablet");
+    localStorage.removeItem("pos_item_violin");
+    localStorage.removeItem("pos_item_piano");
+    localStorage.removeItem("pos_item_book");
+    localStorage.removeItem("pos_item_fishbowl");
+    localStorage.removeItem("pos_item_hourglass");
+}
+
+
 //update summoner
 function button_select_summoner() {
     summoner = document.getElementById("summoner").value;
     window.location.href = "house.html?summoner=" + summoner;
 }
+
 
 /*
 //connect to metamask

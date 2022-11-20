@@ -82,119 +82,107 @@ contract ERC721 is IERC721 {
 
 //### 1st
 
-<<<<<<< HEAD
-    tokenURIの実装
+    Web3文化の改善
+        せっかくブロックチェーン上で作るので、web3の哲学を組み込みたい
+            現在はいささか中央集権的、Web2的な作品になってしまっている
+        NFTの所持はユーザー
+            ゲーム世界でのみしか使えない、というイメージをできるだけ小さくする
+        他作品での使用の許可とハードルを下げる
+            コントラクトと使い方のマニュアル化と公開
+        Walletとのリンクを強く
+            token, nftの情報を反映
+        経済圏の構築
+        金融資産
+            
+
+    fluffy修正
+        まばたきが全員同期しているのでずらす
+            アニメーション開始時間をずらすのだが、さてどうするか。
+
+ ok tokenURIの実装
         svg型tokenURIの解説：
             https://qiita.com/hakumai-iida/items/c96d7c053379f42ba9b8
         svg形式で絵を表示する方法を調べる
         パラメータなどを表示したいが、クラスなどがせいぜいだろうか。
+        pngからsvgへの変換、カラー可能
+            https://onlineconvertfree.com/ja/convert/png/
+        むらさきさんの背景に、Lvやflowerなどを表示させる
+            アイコン絵をtokenURIで実装してみたい。
+            フルオンチェーンのSBT絵となる。
+        jsでwebでそのまま使用可能なコードも併せて用意する。
+        2パターン用意する
+         ok 1: mmのみで完結するtokenURI
+                むらさきさんのsvgにオーバーラップさせて最低限の情報を表示する
+                summoner ID, classのみを表示させる
+                classはflower名に置換するか
+                背景をflower colorにしても良いかもしれない
+            2: infoを反映した専用コントラのtokenURI
+                成長度を反映させたtokenURI
+                パット見てむらさきさんの成長度を視認できる情報はなんであろうか
+                    Name, Lv, age, scoreあたりだろうか。
+        svg化の手順を把握する：
+            https://qiita.com/hakumai-iida/items/c96d7c053379f42ba9b8
+            too deep stackをどうやって回避するか。
 
-    移行戦略
-        mm, ms, mc, mss
-        一度新コントラで完全に動作を確認してから、
-        旧mm -> 新mmなどとパラメータをコピーする
-        mnは再ミントしてもらうこととする。
+   *buybackTreajuryの改善
+        active userの増減によってはbuyback -> bufferへと移動させることも必要になる
+        active user数を取得した上でインフレ率を計算するよう修正する
+        手順としては：
+            インフレ率を手動で設定
+            脱落ユーザー数を手動で集計して設定
+            インフレ率に基づいて、buybackTreajury <-> BufferTreajuryの資金移動を行う
+                これはコントラクトコードで実装する
+            続く処理でbufferTreajuryに残った資金はteamTreajuryへと移動する
 
-   *craftingのレジューム機能の実装
-        craftカウンターはstart時にのみ決定される
-            statusによってカウンターの多さが異なる
-        中断時にレベルアップしたとしても、カウンターには影響しない
-        カウンターの進みは単純に秒数で減らす
-        start時に大量にアイテムを抱えてブーストすることもできるが、
-            transfer feeがあるのであまり問題にはならないだろうか。
-        calc_craftingは_dcからdelta_secを引いて残り時間を計算している
-            つまり、_toResume_dcをmsに記録しておき、
-            _toResume_dc>0ならばクラフト途中ということになる。
-            あとはstart_craft時に元の_dcの代わりに、
-            目減りした_toResume_dcを代入すれば良い。
-        上記の機構を実装する。
-            また、start -> 中断 -> cancel or resumeを選択させるUIとする。
-            つまり、中断中はcancelとresumeの2つのボタンを表示させる。
+    Treajuryシステムの刷新
+        bufferTreajuryからの資金移動を関数化する
+            Staking wallet -> bufferTreajuryは事前に手動で行う
+            bufferTreajury <-> buybackTreajury, 相互移動
+            bufferTreajury -> developer wallets, 5% x 2
+            bufferTreajury -> Staking wallet, 残った資金全部, bufferをカラにする
+        手順：
+            手動でbuybackTreajuryにnot active user数を設定する
+                all user - not active user = active user数を算出する
+            手動でbufferTreajuryにインフレ率を設定する
+                関数でそのインフレ率を達成するために必要なamountを算出する
+            手動で不足amount分をstaking walletからbufferTreajuryへ送金する
+                不足しないようにインフレ率を設定したいところ
+                あるいはインフレ率を達成するamountがbufferに貯まるまで待つ
+            コントラで、buffer -> buyback, dev wallets, staking walletへの送金を一度に行う。
+                dev wallet: 5%
+                buyback: インフレ率を達成する分
+                staking: 残り全て
+            buybackに余剰資金がある場合は資金を逆流させる
+                not active userを設定した直後はbuyback価格が上昇してしまうので、
+                このタイミングでbuybackされない機構を考える。
+                
+
+    給食botの実装
+        1日1 $ASTRなどの手数料を支払ってfeedingを一括で行うbot
+            onlyOwnerでオフチェーンから11時間ごとなどに叩く。
+            掛け金と期日を管理するコントラを実装する。
+            また、掛け金はonlyOwnerで回収できるようにする。
+        コントラからガス代を支払う方法を調べる。
+            rarityが参考になるだろう。
+        Web上にUIを実装する
+            Marketページにでも追加してみるか
+            掛け金と、残り日数を表示する
+            キャンセルも可能とする
+            キャンセルすると、残り日数に応じたASTRが返金される
 
     fluffy festivalのUI改善
         問題点：
             festival後に結果がわからない
             現在のfluffy所持数がわかりにくい
         さて、どうするか。
+            もぐらさんを使うか？
             
- ok SBTの規格合わせ
-        あまり有名ではないBadgeコードを使っている
-        これを所持上限1, non-transferableなERC721とする。
-        ERC721を利用したSBT例：
-            https://docs.chainstack.com/tutorials/gnosis/simple-soulbound-token-with-remix-and-openzeppelin#create-and-compile-the-soulbound-contract
-            _beforeTokenTransferを利用してnon-transferableを実装している
-            あとはこれにpossession limit = 1を組み込めば行けるか
-        ERC721に実装されていなtokenOfも実装する
-            現状、他で使用しているbadge由来のインターフェイスはtokenOfのみ。
-            tokenOfさえ実装しておけば、ERC721由来だろうがBadgeだろうが問題なし。
-
- ok msg.sender周りのコードの修正
-=======
-
-   *msg.sender周りのコードの修正
->>>>>>> 31c73601b0494751bfc6d1a597f64c377b5367d1
-        もしかしたら、msg.senderはpublic, internal, externalで挙動が変わるのかも
-        同じコントラ内でも関数から呼び出される場合は、internalとpublicで中身が違う？
-        mining/farmingの数がtx前後で一致しないのはこれが原因だったのか？
-            msg.senderをつかってitem_countingしているため。
-        実験して把握すること。
-        どうやら、viewはmsg.senderが0になってしまうようだ！
-            https://medium.com/nayuta-inc/ethereum-solidity%E3%81%AEmsg-sender-f8c34c5653a4
-        これを回避するために、ownerはsummonerから逆引きを徹底する
-        むしろ、mining/farmingでmsg.senderを使ってしまうと、
-            他人のsummonerに自分のwalletのitem補正がかかってしまう。
-        一度msg.sender周りのコードを丁寧に洗い出すこと。
-            msg.senderの使用はcheck_summoner時以外は極力避ける。
-            また、check_summoner時もweb3js側でfrom:walletしていないとmsg.senderが0になる。
-<<<<<<< HEAD
-            Remixのcallは自動的にfrom:walletが付くためわかりにくかった。
-        無用なエラーを避けるため、summoner主体のコードに修正する。
-            owner walletから直接叩くfunctionでのみmsg.senderを使う
-            むしろ、msg.senderはcheckOwner以外には使わない。
-
- ok fluffy festivalのバグ修正
-=======
-
-   *fluffy festivalのバグ修正
->>>>>>> 31c73601b0494751bfc6d1a597f64c377b5367d1
-        2人目が投票できないバグあり
-        isVotableがtrueにならない模様
-        msg.senderが原因か？要究明
-
-<<<<<<< HEAD
- ok murasaki_craftのitem移行関数の実装
-=======
-
-    murasaki_craftのitem移行関数の実装
->>>>>>> 31c73601b0494751bfc6d1a597f64c377b5367d1
-        next_itemの書き換えの実装
-        旧コントラからidを指定して新コントラにmintさせる関数の実装
-            制限をゆるくしたcraftを用意する
-            この際、item_idは異なっても仕方ないとする
-            item_idを指定してこのrecraft関数を叩く関数も用意する
-        すべてrecraftし終えたら、最後にnext_itemを修正して完了
-
     fluffyシステムの個数調整
         upgradeの個数調整
             x3 -> x1は安すぎるか？
             fluffy dollがあまりに量産されすぎるのも良くない
             x3 , x4, x5と段階的に上げていっても良いか。
         いずれにしても、要調整だろうか
-
-    マーケットルールの改善
-        transfer fee導入後はsell即buyのitem移動が発生しうる
-        最低listing価格を決めておくか？
-            この場合、最低価格よりbuyback価格が低ければ印象が悪いだろう
-        0.1 $ASTRぐらいか？
-            しかし、0.1 * 0.05 $ASTRでアイテムの移動ができてしまうので、
-            list&buyを利用したmulti-walletは防げないだろうか。
-        offeringシステムを実装できれば、市場に最低価格を決めてもらうことができる。
-        summonerを有するwalletしかマーケットコントラを使えないので、
-            コントラをつかったlist&buyボットは使用することはできない。
-            手動でも十分だろうが。
-        つまり、event監視型の防衛botは運用可能
-            最低価格でlistされたものを監視して即座に買い取る防衛型bot
-            伝統金融では市場操作になって違法なのだろうが。
 
     Offeringオーダーの実装
         予めほしいアイテムに値段を決めてofferingを出しておき、
@@ -221,22 +209,6 @@ contract ERC721 is IERC721 {
             プレイには直接影響しない接頭語など。
             無価値な言葉遊びだが、だからこそ作り込みたい。
         しかし、表示させるタイミングがない。
-
- ok transfer feeの導入
-        https://github.com/ethereum/EIPs/issues/2665
-        やはりtransfer feeで複アカの効率をコントロールする戦略が、
-            UI的にもわかりやすいだろう
-        activationはUIの作り込みが少し面倒。
-            あとitem calculationが大変。
-            別にactivated count_of_typeの実装が必要
-            また、着払いはなんか嫌であるし。
-        複アカ使ってでもプレイしたい人は手数料を落としてもらう。
-            普通のプレイでは障害にならないfeeであるし。
-            もちろん、過剰な複アカのbottingは処罰する
-        将来的にopean seaやtofu NFT等を使えるよう、noFee addressの機構を組み込む
-        noFee address:
-            buybackTreasury
-            Market
 
    *イベント監視システムを構築する
         眺めるようと、bot監視ように。
@@ -319,11 +291,6 @@ contract ERC721 is IERC721 {
             やりすぎるとまともなユーザー間の相互作用まで阻害される。
             放置するとbotの温床となる。
 
- ok winner fluffyの演出の実装
-        お花つける？
-        パーティー帽子？
-        パーティクルを使用する？
-
    *砂時計アイテムの再実装
         絵の深慮
             砂時計で良いか？
@@ -332,11 +299,6 @@ contract ERC721 is IERC721 {
             ステーキングしてアクティブ化したくなるような楽しい絵にしたい。
         ステーキング量が多いほど豪華になり、
             カウンターが進むと何かが溜まってゆく・成長してゆく絵を考える。
-
-    wallet infoコントラの実装
-        web3精神を表すため
-        summoner infoとは異なり、情報はある程度吟味してもよいか
-        システムがほぼ完成してからで良いだろうか
 
     実績システムの検討
         一旦ボツにしたが、称号や勲章の様にあっても良いだろうか。
@@ -569,10 +531,6 @@ contract ERC721 is IERC721 {
         文字情報は極力控える
         アイコンや絵などでわかりやすく表示する
 
-    コントラクトのuint32修正
-        エラーのもとで煩わしいので、全てuintへ置換する
-        コードとabiの全置換が必要
-    
     Fluffy FestivalのUI改善
         ないないさんのアニメーションの実装
         ないないさんにとんがりボウシをかぶせる
@@ -607,6 +565,145 @@ contract ERC721 is IERC721 {
 
 //### 2nd
 
+
+ ok コントラクトのuint32修正
+        エラーのもとで煩わしいので、全てuintへ置換する
+        コードとabiの全置換が必要
+    
+ ok wallet infoコントラの実装
+        web3精神を表すため
+        summoner infoとは異なり、情報はある程度吟味してもよいか
+        システムがほぼ完成してからで良いだろうか
+
+ ok winner fluffyの演出の実装
+        お花つける？
+        パーティー帽子？
+        パーティクルを使用する？
+
+ ok マーケットルールの改善
+        transfer fee導入後はsell即buyのitem移動が発生しうる
+        最低listing価格を決めておくか？
+            この場合、最低価格よりbuyback価格が低ければ印象が悪いだろう
+        0.1 $ASTRぐらいか？
+            しかし、0.1 * 0.05 $ASTRでアイテムの移動ができてしまうので、
+            list&buyを利用したmulti-walletは防げないだろうか。
+        offeringシステムを実装できれば、市場に最低価格を決めてもらうことができる。
+        summonerを有するwalletしかマーケットコントラを使えないので、
+            コントラをつかったlist&buyボットは使用することはできない。
+            手動でも十分だろうが。
+        つまり、event監視型の防衛botは運用可能
+            最低価格でlistされたものを監視して即座に買い取る防衛型bot
+            伝統金融では市場操作になって違法なのだろうが。
+
+ ok crafting windowのUI整理
+        crafting中itemの表示周りが弱い
+            ウィンドウを閉じるときしか更新しないので、
+            なにかの表紙にselect itemになるとずっとそのまま。
+            今何を作っているか不明なこともママある。
+        crafting中は定期的にselect itemをチェックして書き換える機構を実装する
+        また、resumeがあるときは残り時間とアイテム名を表示し続ける
+            itemをセレクトしても反映させない
+        cancelボタンの配置場所が難しい。
+
+ ok Fluffiestの動作バグ修正
+        画面外へ逃げていってしまう。
+
+ ok 発行上限を実装する
+        事故防止と、何かしらの希少価値をつけるため。
+        初期にadminのみmintする時など。
+
+ ok transfer feeの導入
+        https://github.com/ethereum/EIPs/issues/2665
+        やはりtransfer feeで複アカの効率をコントロールする戦略が、
+            UI的にもわかりやすいだろう
+        activationはUIの作り込みが少し面倒。
+            あとitem calculationが大変。
+            別にactivated count_of_typeの実装が必要
+            また、着払いはなんか嫌であるし。
+        複アカ使ってでもプレイしたい人は手数料を落としてもらう。
+            普通のプレイでは障害にならないfeeであるし。
+            もちろん、過剰な複アカのbottingは処罰する
+        将来的にopean seaやtofu NFT等を使えるよう、noFee addressの機構を組み込む
+        noFee address:
+            buybackTreasury
+            Market
+
+ ok murasaki_craftのitem移行関数の実装
+        next_itemの書き換えの実装
+        旧コントラからidを指定して新コントラにmintさせる関数の実装
+            制限をゆるくしたcraftを用意する
+            この際、item_idは異なっても仕方ないとする
+            item_idを指定してこのrecraft関数を叩く関数も用意する
+        すべてrecraftし終えたら、最後にnext_itemを修正して完了
+
+ ok msg.sender周りのコードの修正
+        もしかしたら、msg.senderはpublic, internal, externalで挙動が変わるのかも
+        同じコントラ内でも関数から呼び出される場合は、internalとpublicで中身が違う？
+        mining/farmingの数がtx前後で一致しないのはこれが原因だったのか？
+            msg.senderをつかってitem_countingしているため。
+        実験して把握すること。
+        どうやら、viewはmsg.senderが0になってしまうようだ！
+            https://medium.com/nayuta-inc/ethereum-solidity%E3%81%AEmsg-sender-f8c34c5653a4
+        これを回避するために、ownerはsummonerから逆引きを徹底する
+        むしろ、mining/farmingでmsg.senderを使ってしまうと、
+            他人のsummonerに自分のwalletのitem補正がかかってしまう。
+        一度msg.sender周りのコードを丁寧に洗い出すこと。
+            msg.senderの使用はcheck_summoner時以外は極力避ける。
+            また、check_summoner時もweb3js側でfrom:walletしていないとmsg.senderが0になる。
+            Remixのcallは自動的にfrom:walletが付くためわかりにくかった。
+        無用なエラーを避けるため、summoner主体のコードに修正する。
+            owner walletから直接叩くfunctionでのみmsg.senderを使う
+            むしろ、msg.senderはcheckOwner以外には使わない。
+
+ ok fluffy festivalのバグ修正
+        2人目が投票できないバグあり
+        isVotableがtrueにならない模様
+        msg.senderが原因か？要究明
+
+ ok SBTの規格合わせ
+        あまり有名ではないBadgeコードを使っている
+        これを所持上限1, non-transferableなERC721とする。
+        ERC721を利用したSBT例：
+            https://docs.chainstack.com/tutorials/gnosis/simple-soulbound-token-with-remix-and-openzeppelin#create-and-compile-the-soulbound-contract
+            _beforeTokenTransferを利用してnon-transferableを実装している
+            あとはこれにpossession limit = 1を組み込めば行けるか
+        ERC721に実装されていなtokenOfも実装する
+            現状、他で使用しているbadge由来のインターフェイスはtokenOfのみ。
+            tokenOfさえ実装しておけば、ERC721由来だろうがBadgeだろうが問題なし。
+
+ ok 移行戦略
+        mm, ms, mc, mss
+        一度新コントラで完全に動作を確認してから、
+        旧mm -> 新mmなどとパラメータをコピーする
+        mnは再ミントしてもらうこととする。
+        手順：
+            mcは1つもmintしてはいけない。
+            mcはaddress(0)もコンバート可能。何も考えずに1からコンバートする。
+            contract_adminを用意
+            contract_adminをmcとmsへadd_permitted
+            msとmcをコンバート
+
+ ok 新craftボタンの実装
+        start, pause, resume, cancel, completeの5つのtxを飛ばす
+        start/resume button
+            このときcancel buttonを少し離して表示
+        pause/complete button
+
+ ok craftingのレジューム機能の実装
+        craftカウンターはstart時にのみ決定される
+            statusによってカウンターの多さが異なる
+        中断時にレベルアップしたとしても、カウンターには影響しない
+        カウンターの進みは単純に秒数で減らす
+        start時に大量にアイテムを抱えてブーストすることもできるが、
+            transfer feeがあるのであまり問題にはならないだろうか。
+        calc_craftingは_dcからdelta_secを引いて残り時間を計算している
+            つまり、_toResume_dcをmsに記録しておき、
+            _toResume_dc>0ならばクラフト途中ということになる。
+            あとはstart_craft時に元の_dcの代わりに、
+            目減りした_toResume_dcを代入すれば良い。
+        上記の機構を実装する。
+            また、start -> 中断 -> cancel or resumeを選択させるUIとする。
+            つまり、中断中はcancelとresumeの2つのボタンを表示させる。
 
  ok 存在しないsummoner指定時のバグ修正
         isActive = falseのパターンと
@@ -961,7 +1058,11 @@ async function init_global_variants() {
     local_flower = "";
     local_street = "";
     local_city = "";
-    
+    local_crafting_resume_flag = 0;
+    local_crafting_resume_item_type = 0;
+    local_crafting_resume_item_dc = 0;   
+    local_total_staking_reward_counter = 0;
+
     //---local festival
     local_ff_each_voting_count = new Array(256).fill(0);
     local_ff_next_festival_block =   0;
@@ -1505,6 +1606,7 @@ async function contract_update_dynamic_status(_summoner) {
     local_dapps_staking_amount =    Number(_all_dynamic_status[32]);
     local_staking_reward_counter = Number(_all_dynamic_status[56]);
     local_staking_reward_speed = Number(_all_dynamic_status[58]);
+    local_total_staking_reward_counter = Number(_all_dynamic_status[59]);
     
     //festival
     local_ff_next_festival_block = Number(_all_dynamic_status[60]);
@@ -1519,6 +1621,11 @@ async function contract_update_dynamic_status(_summoner) {
     //feeding/grooming calc
     local_calc_feeding = Number(_all_dynamic_status[54]);
     local_calc_grooming = Number(_all_dynamic_status[55]);
+    
+    //crafting resume
+    local_crafting_resume_flag = Number(_all_dynamic_status[61]);
+    local_crafting_resume_item_type = Number(_all_dynamic_status[62]);
+    local_crafting_resume_item_dc = Number(_all_dynamic_status[63]);    
     
     //update last_sync_time
     last_sync_time = Date.now();
@@ -2019,6 +2126,34 @@ async function _contract_crafting_with_heart(_summoner, _item_type_to_craft, _he
     }
 }
 */
+
+
+//crafting, New
+async function contract_start_crafting(_summoner, _item_type) {
+    contract_mfc.methods.start_crafting(_summoner, _item_type).send({from:wallet})
+        .on("transactionHash", (transactionHash) => update_tx_text("sending", transactionHash))
+        .on("receipt", (receipt) => update_tx_text("done", receipt.transactionHash));
+}
+async function contract_pause_crafting(_summoner) {
+    contract_mfc.methods.pause_crafting(_summoner).send({from:wallet})
+        .on("transactionHash", (transactionHash) => update_tx_text("sending", transactionHash))
+        .on("receipt", (receipt) => update_tx_text("done", receipt.transactionHash));
+}
+async function contract_resume_crafting(_summoner) {
+    contract_mfc.methods.resume_crafting(_summoner).send({from:wallet})
+        .on("transactionHash", (transactionHash) => update_tx_text("sending", transactionHash))
+        .on("receipt", (receipt) => update_tx_text("done", receipt.transactionHash));
+}
+async function contract_cancel_crafting(_summoner) {
+    contract_mfc.methods.cancel_crafting(_summoner).send({from:wallet})
+        .on("transactionHash", (transactionHash) => update_tx_text("sending", transactionHash))
+        .on("receipt", (receipt) => update_tx_text("done", receipt.transactionHash));
+}
+async function contract_complete_crafting(_summoner) {
+    contract_mfc.methods.complete_crafting(_summoner).send({from:wallet})
+        .on("transactionHash", (transactionHash) => update_tx_text("sending", transactionHash))
+        .on("receipt", (receipt) => update_tx_text("done", receipt.transactionHash));
+}
 
 //send mail
 async function contract_send_mail(_summoner, _item_mail) {
@@ -4463,31 +4598,36 @@ class Fluffy2 extends Phaser.GameObjects.Sprite{
     moving() {
         if (this.submode == 0){
             let _distance = this.calc_distance(murasakisan.x, murasakisan.y);
-            if (_distance > 400) {
+            if (_distance > 300) {
                 this.moving_degree = this.get_degree(murasakisan.x, murasakisan.y);
             } else {
                 //determine degree, 0-30, 150-210, 330-360
                 var li = [0,10,20,30,150,160,170,180,190,200,210,330,340,350]
                 this.moving_degree = li[Math.floor(Math.random() * li.length)];
             }
+
             //out of area check
             if (this.x < 100 && this.moving_degree > 90 && this.moving_degree <270) {
                 this.moving_degree -= 180;
             }else if (this.x > 1100 && (this.moving_degree < 90 || this.moving_degree > 270)) {
                 this.moving_degree -= 180;
             }
-            //360 over check
-            this.moving_degree = this.moving_degree % 360;
+
             //out of area check, y
             if (this.y > 750 && this.moving_degree > 180) {
                 this.moving_degree = 360 - this.moving_degree;
             }else if (this.y < 500 && this.moving_degree < 180) {
                 this.moving_degree = 360 - this.moving_degree;
             }
+
             //minus check
             if (this.moving_degree < 0) {
                 this.moving_degree += 360;
             }
+
+            //360 over check
+            this.moving_degree = this.moving_degree % 360;
+
             //determine speed, count
             this.moving_speed = 0.3 + Math.random() * 0.2;  //0.3-0.5
             this.moving_count = 70 + Math.random() * 30;    //70-100
@@ -4495,11 +4635,9 @@ class Fluffy2 extends Phaser.GameObjects.Sprite{
             if (this.moving_degree > 90 && this.moving_degree <= 270) {
                 this.dist = "left";
                 this.anims.play(this.anim_left, true);
-                //this.anims.play("cat_visitor_moving_left", true);
             }else {
                 this.dist = "right";
                 this.anims.play(this.anim_right, true);
-                //this.anims.play("cat_visitor_moving_right", true);
             }
             this.angle = 0;
             this.submode += 1;
@@ -4522,11 +4660,7 @@ class Fluffy2 extends Phaser.GameObjects.Sprite{
     get_degree(target_x, target_y){
         let _delta_x = target_x - this.x;
         let _delta_y = -1 * (target_y - this.y);
-        //using arc sin, too complexed..., radian * Math.PI/180 = degree
-        let _degree = (Math.asin(
-            _delta_y / this.calc_distance(target_x, target_y)
-            ) / (Math.PI/180) + 180) * -1; //arcsin
-        //console.log(_degree);
+        let _degree = Math.atan2(_delta_y, _delta_x) / (Math.PI/180); //arctan
         return _degree;
     }
     
@@ -5488,7 +5622,7 @@ function open_window_craft (scene) {
         //group_window_crafting.destroy(true);
         group_window_crafting.setVisible(false);
         //during crafting, return 0
-        if (local_crafting_status == 1) {
+        if (local_crafting_status == 1 || button_crafting_resume.visible == true) {
             return 0;
         }
         //update selected item
@@ -5499,8 +5633,9 @@ function open_window_craft (scene) {
         //update text_craft_item
         let _level = global_selected_crafting_item_dc[0]
         //text_craft_item.setText("time= " + _dc + ", ohana = " + _coin + ", kusa = " + _material);
-        if (_level > 0) {
+        if (_level > 0 && _item > 0) {
             let _dc = await get_modified_dc(summoner, _item);
+            console.log(_dc);
             let _total_sec = _dc / 1000 * BASE_SEC;
             let _day = Math.floor(_total_sec / 86400);
             let _hr = Math.floor(_total_sec % 86400 / 3600);
@@ -6500,12 +6635,14 @@ function preload(scene) {
     scene.load.image("button_farming_pointerover", "src/png/button_farming_pointerover.png");
     scene.load.image("button_farming_working", "src/png/button_farming_working.png");
     scene.load.image("button_farming_pointerover_stop", "src/png/button_farming_pointerover_stop.png");
+    /*
     scene.load.image("button_crafting_enable", "src/png/button_crafting_enable.png");
     scene.load.image("button_crafting_unable", "src/png/button_crafting_unable.png");
     scene.load.image("button_crafting_pointerover", "src/png/button_crafting_pointerover.png");
     scene.load.image("button_crafting_working", "src/png/button_crafting_working.png");
     scene.load.image("button_crafting_pointerover_stop", "src/png/button_crafting_pointerover_stop.png");
     scene.load.image("button_crafting_pointerover_mint", "src/png/button_crafting_pointerover_mint.png");
+    */
     scene.load.image("button_grooming_enable", "src/png/button_grooming_enable.png");
     scene.load.image("button_grooming_unable", "src/png/button_grooming_unable.png");
     scene.load.image("button_grooming_pointerover", "src/png/button_grooming_pointerover.png");
@@ -6513,6 +6650,19 @@ function preload(scene) {
     scene.load.image("button_levelup_unable", "src/png/button_levelup_unable.png");
     scene.load.image("button_levelup_pointerover", "src/png/button_levelup_pointerover.png");
     scene.load.image("back_level", "src/png/button_level.png");
+    //scene.load.image("button_crafting_enable", "src/png/button_crafting_enable.png");
+    //crafting new
+    scene.load.image("button_crafting_unable", "src/png/button_crafting_unable.png");
+    scene.load.image("button_crafting_start_on", "src/png/button_crafting_start_on.png");
+    scene.load.image("button_crafting_start_off", "src/png/button_crafting_start_off.png");
+    scene.load.image("button_crafting_pause_on", "src/png/button_crafting_pause_on.png");
+    scene.load.image("button_crafting_pause_off", "src/png/button_crafting_pause_off.png");
+    scene.load.image("button_crafting_complete_on", "src/png/button_crafting_complete_on.png");
+    scene.load.image("button_crafting_complete_off", "src/png/button_crafting_complete_off.png");
+    scene.load.image("button_crafting_resume_on", "src/png/button_crafting_resume_on.png");
+    scene.load.image("button_crafting_resume_off", "src/png/button_crafting_resume_off.png");
+    scene.load.image("button_crafting_cancel_on", "src/png/button_crafting_cancel_on.png");
+    scene.load.image("button_crafting_cancel_off", "src/png/button_crafting_cancel_off.png");
 
     //---pet
     scene.load.spritesheet("mr_astar_right", "src/png/pet_mr_astar_right.png", {frameWidth: 600, frameHeight: 600});
@@ -7346,12 +7496,116 @@ function create(scene) {
         .disableInteractive();
     group_info.add(button_grooming);
 
-    //crafting
+    //crafting //***TODO***:crafting
     _x = 820;
     _y = 870;
+    
+    //unable button
+    button_crafting_unable = scene.add.sprite(_x, _y, "button_crafting_unable")
+        .setScale(0.16).setDepth(3);
+    group_info.add(button_crafting_unable);
+    
+    //start button
+    button_crafting_start = scene.add.sprite(_x, _y, "button_crafting_start_off")
+        .on("pointerover", () => {
+            sound_button_on.play();
+            button_crafting_start.setTexture("button_crafting_start_on");
+        })
+        .on("pointerout", () => {
+            button_crafting_start.setTexture("button_crafting_start_off")
+        })
+        .on("pointerdown", () => {
+            sound_button_select.play();
+            if (global_selected_crafting_item > 0) {
+                contract_start_crafting(summoner, global_selected_crafting_item);
+            }
+        })
+        .setScale(0.16)
+        .setDepth(4)
+        .setInteractive({useHandCursor: true})
+        .setVisible(false);
+    group_info.add(button_crafting_start);
+
+    //pause button
+    button_crafting_pause = scene.add.sprite(_x, _y, "button_crafting_pause_off")
+        .on("pointerover", () => {
+            sound_button_on.play();
+            button_crafting_pause.setTexture("button_crafting_pause_on");
+        })
+        .on("pointerout", () => {
+            button_crafting_pause.setTexture("button_crafting_pause_off")
+        })
+        .on("pointerdown", () => {
+            sound_button_select.play();
+            contract_pause_crafting(summoner);
+        })
+        .setScale(0.16)
+        .setDepth(5)
+        .setInteractive({useHandCursor: true})
+        .setVisible(false);
+    group_info.add(button_crafting_pause);
+
+    //complete button
+    button_crafting_complete = scene.add.sprite(_x, _y, "button_crafting_complete_off")
+        .on("pointerover", () => {
+            sound_button_on.play();
+            button_crafting_complete.setTexture("button_crafting_complete_on");
+        })
+        .on("pointerout", () => {
+            button_crafting_complete.setTexture("button_crafting_complete_off")
+        })
+        .on("pointerdown", () => {
+            sound_button_select.play();
+            contract_complete_crafting(summoner);
+        })
+        .setScale(0.16)
+        .setDepth(6)
+        .setInteractive({useHandCursor: true})
+        .setVisible(false);
+    group_info.add(button_crafting_complete);
+
+    //resume button
+    button_crafting_resume = scene.add.sprite(_x, _y, "button_crafting_resume_off")
+        .on("pointerover", () => {
+            sound_button_on.play();
+            button_crafting_resume.setTexture("button_crafting_resume_on");
+        })
+        .on("pointerout", () => {
+            button_crafting_resume.setTexture("button_crafting_resume_off")
+        })
+        .on("pointerdown", () => {
+            sound_button_select.play();
+            contract_resume_crafting(summoner);
+        })
+        .setScale(0.16)
+        .setDepth(7)
+        .setInteractive({useHandCursor: true})
+        .setVisible(false);
+    group_info.add(button_crafting_resume);
+
+    //cancel button
+    button_crafting_cancel = scene.add.sprite(_x+250, _y, "button_crafting_cancel_off")
+        .on("pointerover", () => {
+            sound_button_on.play();
+            button_crafting_cancel.setTexture("button_crafting_cancel_on");
+        })
+        .on("pointerout", () => {
+            button_crafting_cancel.setTexture("button_crafting_cancel_off")
+        })
+        .on("pointerdown", () => {
+            sound_button_select.play();
+            contract_cancel_crafting(summoner);
+        })
+        .setScale(0.16)
+        .setDepth(8)
+        .setInteractive({useHandCursor: true})
+        .setVisible(false);
+    group_info.add(button_crafting_cancel);
+    
+    /*
     button_crafting = scene.add.sprite(_x, _y, "button_crafting_unable")
         .setScale(0.16)
-        .setInteractive({useHandCursor: true})
+        //.setInteractive({useHandCursor: true})
         .on('pointerdown', () => {
             sound_button_on.play();
             if (
@@ -7371,12 +7625,13 @@ function create(scene) {
                 }, 3000, scene);
             }
         })
-        .on('pointerover', () => sound_button_select.play())
-        .on('pointerover', () => button_crafting.setTexture("button_crafting_pointerover"))
-        .on('pointerout', () => button_crafting.setTexture("button_crafting_enable"))
-        .setDepth(3)
-        .disableInteractive();
+        //.on('pointerover', () => sound_button_select.play())
+        //.on('pointerover', () => button_crafting.setTexture("button_crafting_pointerover"))
+        //.on('pointerout', () => button_crafting.setTexture("button_crafting_enable"))
+        .setDepth(3);
+        //.disableInteractive();
     group_info.add(button_crafting);
+    */
 
 
     //--crafting_selected_info
@@ -8438,7 +8693,7 @@ function update_parametersWithoutAnimation(this_scene) {
     */
 
     //update progression status
-    let _mode = murasakisan.get_mode;
+    let _mode = murasakisan.mode;
     if (_mode == "mining") {
         icon_mining.visible = true;
         let _delta = (now_time - local_mining_start_time) * SPEED;
@@ -8487,6 +8742,7 @@ function update_parametersWithoutAnimation(this_scene) {
         icon_crafting_ohana.visible = false;
         icon_crafting_kusa.visible = false;
         icon_crafting_time.visible = false;
+        text_select_item.setText('"'+dic_items_reverse[local_crafting_item_type]+'"');
         //icon_crafting_heart.visible = false;
         if (local_crafting_calc == 0) {
             text_crafting_calc
@@ -8507,8 +8763,19 @@ function update_parametersWithoutAnimation(this_scene) {
             text_crafting_calc
                 .setText(_day + "d:" + _hr + "h:" + _min + "m")
                 .setFill("#0000FF");
-            text_select_item.setText('"'+dic_items_reverse[local_crafting_item_type]+'"');
+            //text_select_item.setText('"'+dic_items_reverse[local_crafting_item_type]+'"');
         }
+    //when having resume
+    }else if (button_crafting_resume.visible == true) {
+        text_select_item.setText('"'+dic_items_reverse[local_crafting_resume_item_type]+'"');
+        icon_crafting_time_remining.visible = true;
+        let _total_sec = local_crafting_calc;
+        let _day = Math.floor(_total_sec / 86400);
+        let _hr = Math.floor(_total_sec % 86400 / 3600);
+        let _min = Math.floor(_total_sec % 3600 / 60);
+        text_crafting_calc
+            .setText(_day + "d:" + _hr + "h:" + _min + "m")
+            .setFill("#0000FF");
     }else {
         text_mining_calc.setText("");
         text_farming_calc.setText("");
@@ -8529,7 +8796,7 @@ function update_parametersWithoutAnimation(this_scene) {
         item_tree2.visible = false;
         item_tree3.visible = false;
     }
-    if (local_crafting_status != 1) {
+    if (local_crafting_status != 1 && local_crafting_resume_flag != 1) {
         icon_crafting_time_remining.visible = false;
     }
     
@@ -8626,9 +8893,10 @@ function update_checkModeChange(this_scene) {
         }
         if (local_level == 3) {
             //enable crafting button
-            button_crafting.setTexture("button_crafting_enable");
-            button_crafting.on('pointerover', () => button_crafting.setTexture("button_crafting_pointerover"));
-            button_crafting.on('pointerout', () => button_crafting.setTexture("button_crafting_enable"));
+            //button_crafting.setTexture("button_crafting_enable");
+            button_crafting.setTexture("button_crafting_start_off");
+            button_crafting.on('pointerover', () => button_crafting.setTexture("button_crafting_start_on"));
+            button_crafting.on('pointerout', () => button_crafting.setTexture("button_crafting_start_off"));
             button_crafting.setInteractive();
         }
 
@@ -8745,12 +9013,15 @@ function update_checkModeChange(this_scene) {
         sound_crafting.play();
         local_crafting_calc = -1;
     }else if (local_crafting_status == 0 & murasakisan.mode == "crafting") {
-        murasakisan.set_mode = "hugging";
-        text_select_item.setText(">> Select Item <<")
-        //icon invisible
-        icon_crafting_time_remining.visible = false;
-        sound_earn.play();
-        flag_item_update = 1;
+        if (local_crafting_resume_flag == 0) {
+            murasakisan.set_mode = "hugging";
+            text_select_item.setText(">> Select Item <<")
+            icon_crafting_time_remining.visible = false;
+            sound_earn.play();
+            flag_item_update = 1;
+        } else {
+            murasakisan.set_mode = "resting";
+        }
     }
 
     previous_local_last_feeding_time = local_last_feeding_time;
@@ -8804,7 +9075,65 @@ function update_checkButtonActivation(this_scene) {
         button_farming.setInteractive();
     }
 
-    //crafting
+    //crafting //***TODO***: New button
+    
+    // check level
+    if (
+        local_level < 3
+        || local_mining_status == 1
+        || local_farming_status == 1
+    ) {
+        button_crafting_start.visible = false;
+        button_crafting_pause.visible = false;
+        button_crafting_resume.visible = false;
+        button_crafting_cancel.visible = false;
+        button_crafting_complete.visible = false;
+    } else {
+    
+        // prepare variants
+        let _crafting_status = local_crafting_status;
+        let _resume_flag = local_crafting_resume_flag;
+        let _calc_crafting = local_crafting_calc;
+
+        //start
+        if (_crafting_status == 0 && _resume_flag == 0) {
+            button_crafting_start.visible = true;
+            button_crafting_pause.visible = false;
+            button_crafting_resume.visible = false;
+            button_crafting_cancel.visible = false;
+            button_crafting_complete.visible = false;
+        //pause
+        } else if (_crafting_status == 1 && _calc_crafting > 0) {
+            button_crafting_start.visible = false;
+            button_crafting_pause.visible = true;
+            button_crafting_resume.visible = false;
+            button_crafting_cancel.visible = false;
+            button_crafting_complete.visible = false;            
+        //resume or cancel
+        } else if (_crafting_status == 0 && _resume_flag == 1) {
+            button_crafting_start.visible = false;
+            button_crafting_pause.visible = false;
+            button_crafting_resume.visible = true;
+            button_crafting_cancel.visible = true;
+            button_crafting_complete.visible = false;            
+        //complete
+        } else if (_crafting_status == 1 && _calc_crafting == 0) {
+            button_crafting_start.visible = false;
+            button_crafting_pause.visible = false;
+            button_crafting_resume.visible = false;
+            button_crafting_cancel.visible = false;
+            button_crafting_complete.visible = true;           
+        }
+    }
+    
+    // check level: text
+    if (local_level < 3) {
+        text_select_item.setVisible(false);
+    } else {
+        text_select_item.setVisible(true);
+    }
+
+    /*
     if (local_mining_status == 1 || local_farming_status == 1 || local_level <= 2) {
         button_crafting.setTexture("button_crafting_unable");
         button_crafting.disableInteractive();
@@ -8829,6 +9158,7 @@ function update_checkButtonActivation(this_scene) {
     } else {
         text_select_item.setVisible(true);
     }
+    */
 
     //level-up button triggered by exp change
     if (
@@ -11001,7 +11331,6 @@ function update_checkItem(this_scene) {
         local_receiving_mail == 1 
         && (typeof cat_visitor == "undefined" || typeof cat_visitor.scene == "undefined")
     ){
-        console.log("  summon cat_visitor");
         async function _run(scene) {
             let _res = await contract_callMailDetail(summoner);
             let _summoner_from_id = _res[0];
@@ -11017,7 +11346,6 @@ function update_checkItem(this_scene) {
             group_update.add(cat_visitor);
         }
         _run(this_scene);
-        console.log("    OK.");
     }
 
     //###000:Festivaler
