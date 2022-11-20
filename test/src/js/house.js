@@ -5633,7 +5633,7 @@ function open_window_craft (scene) {
         //update text_craft_item
         let _level = global_selected_crafting_item_dc[0]
         //text_craft_item.setText("time= " + _dc + ", ohana = " + _coin + ", kusa = " + _material);
-        if (_level > 0) {
+        if (_level > 0 && _item > 0) {
             let _dc = await get_modified_dc(summoner, _item);
             console.log(_dc);
             let _total_sec = _dc / 1000 * BASE_SEC;
