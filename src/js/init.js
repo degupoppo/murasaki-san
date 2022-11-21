@@ -91,7 +91,7 @@ async function initialize_contract() {
     contract_info_fromWallet.methods._set1_murasaki_function_share_address(address_Murasaki_Function_Share).send({from:wallet});
     contract_info_fromWallet.methods._set2_murasaki_info_address(address_Murasaki_Info).send({from:wallet});
     contract_mu.methods._set1_murasaki_function_share_address(address_Murasaki_Function_Share).send({from:wallet});
-    contract_mu.methods._set2_murasaki_info_address(address_Murasaki_tokenURI).send({from:wallet});
+    contract_mu.methods._set2_murasaki_info_address(address_Murasaki_Info).send({from:wallet});
     
     //treasury
     contract_bbt.methods._set1_murasaki_function_share_address(address_Murasaki_Function_Share).send({from:wallet});

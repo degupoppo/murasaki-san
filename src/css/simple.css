@@ -546,4 +546,22 @@ img {
     vertical-align: middle;
 }
 
+a {
+    vertical-align: middle;
+}
 
+.contentIcon{
+    width: 20%;
+    text-align: left; 
+}
+
+.contentMsg{
+    width: 80%;
+    text-align: center; 
+}
+
+.contentMain{
+    display: flex;
+    height: 64px;
+    vertical-align: middle;
+}

@@ -82,48 +82,6 @@ contract ERC721 is IERC721 {
 
 //### 1st
 
-    Web3文化の改善
-        せっかくブロックチェーン上で作るので、web3の哲学を組み込みたい
-            現在はいささか中央集権的、Web2的な作品になってしまっている
-        NFTの所持はユーザー
-            ゲーム世界でのみしか使えない、というイメージをできるだけ小さくする
-        他作品での使用の許可とハードルを下げる
-            コントラクトと使い方のマニュアル化と公開
-        Walletとのリンクを強く
-            token, nftの情報を反映
-        経済圏の構築
-        金融資産
-            
-
-    fluffy修正
-        まばたきが全員同期しているのでずらす
-            アニメーション開始時間をずらすのだが、さてどうするか。
-
- ok tokenURIの実装
-        svg型tokenURIの解説：
-            https://qiita.com/hakumai-iida/items/c96d7c053379f42ba9b8
-        svg形式で絵を表示する方法を調べる
-        パラメータなどを表示したいが、クラスなどがせいぜいだろうか。
-        pngからsvgへの変換、カラー可能
-            https://onlineconvertfree.com/ja/convert/png/
-        むらさきさんの背景に、Lvやflowerなどを表示させる
-            アイコン絵をtokenURIで実装してみたい。
-            フルオンチェーンのSBT絵となる。
-        jsでwebでそのまま使用可能なコードも併せて用意する。
-        2パターン用意する
-         ok 1: mmのみで完結するtokenURI
-                むらさきさんのsvgにオーバーラップさせて最低限の情報を表示する
-                summoner ID, classのみを表示させる
-                classはflower名に置換するか
-                背景をflower colorにしても良いかもしれない
-            2: infoを反映した専用コントラのtokenURI
-                成長度を反映させたtokenURI
-                パット見てむらさきさんの成長度を視認できる情報はなんであろうか
-                    Name, Lv, age, scoreあたりだろうか。
-        svg化の手順を把握する：
-            https://qiita.com/hakumai-iida/items/c96d7c053379f42ba9b8
-            too deep stackをどうやって回避するか。
-
    *buybackTreajuryの改善
         active userの増減によってはbuyback -> bufferへと移動させることも必要になる
         active user数を取得した上でインフレ率を計算するよう修正する
@@ -155,7 +113,54 @@ contract ERC721 is IERC721 {
             buybackに余剰資金がある場合は資金を逆流させる
                 not active userを設定した直後はbuyback価格が上昇してしまうので、
                 このタイミングでbuybackされない機構を考える。
-                
+
+    バグ・仕様修正
+     ok fluffyが空を飛ぶバグ
+        crafting pause中にminingすると表示が変になるバグ
+        tabletをoffにするとresume, cancelボタンが表示されるバグ
+        happyが0になったらcraftingのdcが減らないようにしたい
+     ok catが2匹になるバグ
+
+    Web3文化の改善
+        せっかくブロックチェーン上で作るので、web3の哲学を組み込みたい
+            現在はいささか中央集権的、Web2的な作品になってしまっている
+        NFTの所持はユーザー
+            ゲーム世界でのみしか使えない、というイメージをできるだけ小さくする
+        他作品での使用の許可とハードルを下げる
+            コントラクトと使い方のマニュアル化と公開
+        Walletとのリンクを強く
+            token, nftの情報を反映
+        経済圏の構築
+        金融資産
+
+    fluffy修正
+        まばたきが全員同期しているのでずらす
+            アニメーション開始時間をずらすのだが、さてどうするか。
+
+ ok tokenURIの実装
+        svg型tokenURIの解説：
+            https://qiita.com/hakumai-iida/items/c96d7c053379f42ba9b8
+        svg形式で絵を表示する方法を調べる
+        パラメータなどを表示したいが、クラスなどがせいぜいだろうか。
+        pngからsvgへの変換、カラー可能
+            https://onlineconvertfree.com/ja/convert/png/
+        むらさきさんの背景に、Lvやflowerなどを表示させる
+            アイコン絵をtokenURIで実装してみたい。
+            フルオンチェーンのSBT絵となる。
+        jsでwebでそのまま使用可能なコードも併せて用意する。
+        2パターン用意する
+         ok 1: mmのみで完結するtokenURI
+                むらさきさんのsvgにオーバーラップさせて最低限の情報を表示する
+                summoner ID, classのみを表示させる
+                classはflower名に置換するか
+                背景をflower colorにしても良いかもしれない
+            2: infoを反映した専用コントラのtokenURI
+                成長度を反映させたtokenURI
+                パット見てむらさきさんの成長度を視認できる情報はなんであろうか
+                    Name, Lv, age, scoreあたりだろうか。
+        svg化の手順を把握する：
+            https://qiita.com/hakumai-iida/items/c96d7c053379f42ba9b8
+            too deep stackをどうやって回避するか。
 
     給食botの実装
         1日1 $ASTRなどの手数料を支払ってfeedingを一括で行うbot
@@ -2041,7 +2046,7 @@ async function contract_feeding(_summoner) {
     if (_summoner == 0) {
         return 0;
     }
-    contract_mffg.methods.feeding(_summoner, active_nui_id).send({from:wallet})
+    contract_mffg_wss.methods.feeding(_summoner, active_nui_id).send({from:wallet})
         .on("transactionHash", (transactionHash) => update_tx_text("sending", transactionHash))
         .on("receipt", (receipt) => {
             update_tx_text("done", receipt.transactionHash);
@@ -3062,6 +3067,9 @@ class Pet extends Phaser.GameObjects.Sprite{
         }else if (this.count < this.moving_count) {
             this.x += Math.cos(this.moving_degree * (Math.PI/180)) * this.moving_speed;
             this.y -= Math.sin(this.moving_degree * (Math.PI/180)) * this.moving_speed;
+            //out of area check
+            if (this.y < 500) { this.y = 500; }
+            if (this.x < 50) { this.x = 50; }
         //return to resting
         }else if (this.count >= this.moving_count) {
             this.mode = "resting";
@@ -3464,9 +3472,9 @@ class VisitorCat extends Phaser.GameObjects.Sprite{
             //360 over check
             this.moving_degree = this.moving_degree % 360;
             //out of area check, y
-            if (this.y > 860 && this.moving_degree > 180) {
+            if (this.y > 800 && this.moving_degree > 180) {
                 this.moving_degree = 360 - this.moving_degree;
-            }else if (this.y < 500 && this.moving_degree < 180) {
+            }else if (this.y < 550 && this.moving_degree < 180) {
                 this.moving_degree = 360 - this.moving_degree;
             }
             //minus check
@@ -3489,6 +3497,9 @@ class VisitorCat extends Phaser.GameObjects.Sprite{
         } else {
             this.x += Math.cos(this.moving_degree * (Math.PI/180)) * this.moving_speed;
             this.y -= Math.sin(this.moving_degree * (Math.PI/180)) * this.moving_speed;
+            //out of area check
+            if (this.y < 500) { this.y = 500; }
+            if (this.x < 50) { this.x = 50; }
             this.submode += 1;
             if (this.submode >= this.moving_count){
                 this.mode = "standing";
@@ -4644,6 +4655,9 @@ class Fluffy2 extends Phaser.GameObjects.Sprite{
         } else {
             this.x += Math.cos(this.moving_degree * (Math.PI/180)) * this.moving_speed;
             this.y -= Math.sin(this.moving_degree * (Math.PI/180)) * this.moving_speed;
+            //out of area check
+            if (this.y < 500) { this.y = 500; }
+            if (this.x < 50) { this.x = 50; }
             this.submode += 1;
             if (this.submode >= 100){
                 this.mode = "resting";
@@ -7508,14 +7522,14 @@ function create(scene) {
     //start button
     button_crafting_start = scene.add.sprite(_x, _y, "button_crafting_start_off")
         .on("pointerover", () => {
-            sound_button_on.play();
+            sound_button_select.play();
             button_crafting_start.setTexture("button_crafting_start_on");
         })
         .on("pointerout", () => {
             button_crafting_start.setTexture("button_crafting_start_off")
         })
         .on("pointerdown", () => {
-            sound_button_select.play();
+            sound_button_on.play();
             if (global_selected_crafting_item > 0) {
                 contract_start_crafting(summoner, global_selected_crafting_item);
             }
@@ -7529,14 +7543,14 @@ function create(scene) {
     //pause button
     button_crafting_pause = scene.add.sprite(_x, _y, "button_crafting_pause_off")
         .on("pointerover", () => {
-            sound_button_on.play();
+            sound_button_select.play();
             button_crafting_pause.setTexture("button_crafting_pause_on");
         })
         .on("pointerout", () => {
             button_crafting_pause.setTexture("button_crafting_pause_off")
         })
         .on("pointerdown", () => {
-            sound_button_select.play();
+            sound_button_on.play();
             contract_pause_crafting(summoner);
         })
         .setScale(0.16)
@@ -7548,14 +7562,14 @@ function create(scene) {
     //complete button
     button_crafting_complete = scene.add.sprite(_x, _y, "button_crafting_complete_off")
         .on("pointerover", () => {
-            sound_button_on.play();
+            sound_button_select.play();
             button_crafting_complete.setTexture("button_crafting_complete_on");
         })
         .on("pointerout", () => {
             button_crafting_complete.setTexture("button_crafting_complete_off")
         })
         .on("pointerdown", () => {
-            sound_button_select.play();
+            sound_button_on.play();
             contract_complete_crafting(summoner);
         })
         .setScale(0.16)
@@ -7567,14 +7581,14 @@ function create(scene) {
     //resume button
     button_crafting_resume = scene.add.sprite(_x, _y, "button_crafting_resume_off")
         .on("pointerover", () => {
-            sound_button_on.play();
+            sound_button_select.play();
             button_crafting_resume.setTexture("button_crafting_resume_on");
         })
         .on("pointerout", () => {
             button_crafting_resume.setTexture("button_crafting_resume_off")
         })
         .on("pointerdown", () => {
-            sound_button_select.play();
+            sound_button_on.play();
             contract_resume_crafting(summoner);
         })
         .setScale(0.16)
@@ -7586,14 +7600,14 @@ function create(scene) {
     //cancel button
     button_crafting_cancel = scene.add.sprite(_x+250, _y, "button_crafting_cancel_off")
         .on("pointerover", () => {
-            sound_button_on.play();
+            sound_button_select.play();
             button_crafting_cancel.setTexture("button_crafting_cancel_on");
         })
         .on("pointerout", () => {
             button_crafting_cancel.setTexture("button_crafting_cancel_off")
         })
         .on("pointerdown", () => {
-            sound_button_select.play();
+            sound_button_on.play();
             contract_cancel_crafting(summoner);
         })
         .setScale(0.16)
@@ -11328,7 +11342,8 @@ function update_checkItem(this_scene) {
     
     //###000:VisitorCat
     if (
-        local_receiving_mail == 1 
+        count_sync >= 3
+        && local_receiving_mail == 1 
         && (typeof cat_visitor == "undefined" || typeof cat_visitor.scene == "undefined")
     ){
         async function _run(scene) {
