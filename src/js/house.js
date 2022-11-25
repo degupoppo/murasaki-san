@@ -114,12 +114,51 @@ contract ERC721 is IERC721 {
                 not active userを設定した直後はbuyback価格が上昇してしまうので、
                 このタイミングでbuybackされない機構を考える。
 
+    実績システムのUI検討
+        一旦ボツにしたが、称号や勲章の様にあっても良いだろうか。
+        実績によって増える小さななにかを考える。
+            ちょうちょ？
+            お花？
+            小さな宝石？
+            壁にくっつくなにか？
+        これを見ることでゲームの進捗がすぐわかるように。
+            
+ ok 実績コントラクトの設計
+        実績達成をtrue/falseで判定するfunction
+            1つの実績につき1 function
+        達成済み実績をtrue/falseで記憶するstorage
+            achievement uint32[256]のようなarray
+        新たに達成した実績の数をuint32でreturnするfunction
+            もしくはarrayでreturnする
+            達成時は項目を表示させたいため
+        実績判定のタイミングをどうするか
+            mining/farmin時などにいちいち行っていたらgas代かさむか
+            level-up時にまとめて行うか
+        実績案
+            coin/material:max 500,000
+                gain 1,000
+                gain 10,000
+                gain 100,000...
+            craft:0-48
+                4,8,12,16,20,24
+                craft 10
+                craft 30
+                craft 100...
+            heart
+                received 10
+                received 30
+                received 100...
+            level-up:1-20
+                3,6,9,12,15,18
+
     バグ・仕様修正
      ok fluffyが空を飛ぶバグ
         crafting pause中にminingすると表示が変になるバグ
         tabletをoffにするとresume, cancelボタンが表示されるバグ
         happyが0になったらcraftingのdcが減らないようにしたい
      ok catが2匹になるバグ
+        festivalのvoteにLvやscoreの重み付けをする
+            基本＝100とし、Lvやscoreで+aする
 
     Web3文化の改善
         せっかくブロックチェーン上で作るので、web3の哲学を組み込みたい
@@ -131,7 +170,12 @@ contract ERC721 is IERC721 {
         Walletとのリンクを強く
             token, nftの情報を反映
         経済圏の構築
+            marketplaceに消費税を導入してインフレ率でコントロールする
         金融資産
+            この作品において、価値のあるNFTとはなんであろうか
+            summoner自体はSBTなので直接の価値は付与しにくい
+                mint上限の決まっている限定NFT
+                作成に労力のかかるNFT：ぬいちゃん
 
     fluffy修正
         まばたきが全員同期しているのでずらす
@@ -304,43 +348,6 @@ contract ERC721 is IERC721 {
             ステーキングしてアクティブ化したくなるような楽しい絵にしたい。
         ステーキング量が多いほど豪華になり、
             カウンターが進むと何かが溜まってゆく・成長してゆく絵を考える。
-
-    実績システムの検討
-        一旦ボツにしたが、称号や勲章の様にあっても良いだろうか。
-        実績によって増える小さななにかを考える。
-            ちょうちょ？
-            お花？
-            小さな宝石？
-            壁にくっつくなにか？
-        これを見ることでゲームの進捗がすぐわかるように。
-            
-    実績コントラクトの設計
-        実績達成をtrue/falseで判定するfunction
-            1つの実績につき1 function
-        達成済み実績をtrue/falseで記憶するstorage
-            achievement uint32[256]のようなarray
-        新たに達成した実績の数をuint32でreturnするfunction
-            もしくはarrayでreturnする
-            達成時は項目を表示させたいため
-        実績判定のタイミングをどうするか
-            mining/farmin時などにいちいち行っていたらgas代かさむか
-            level-up時にまとめて行うか
-        実績案
-            coin/material:max 500,000
-                gain 1,000
-                gain 10,000
-                gain 100,000...
-            craft:0-48
-                4,8,12,16,20,24
-                craft 10
-                craft 30
-                craft 100...
-            heart
-                received 10
-                received 30
-                received 100...
-            level-up:1-20
-                3,6,9,12,15,18
 
    *マーケットページの改善
         → 実際の実装はdapps stakingの目処が立った後、かつローンチ後1ヶ月程度
@@ -2346,7 +2353,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
 
             //tokenBall
             if (
-                flag_tokenBall == 1
+                flag_tokenBall == 2
                 && this.count == 2 
                 && Math.random()*100 >= 50
             ) {
@@ -4609,7 +4616,7 @@ class Fluffy2 extends Phaser.GameObjects.Sprite{
     moving() {
         if (this.submode == 0){
             let _distance = this.calc_distance(murasakisan.x, murasakisan.y);
-            if (_distance > 300) {
+            if (_distance > 400) {
                 this.moving_degree = this.get_degree(murasakisan.x, murasakisan.y);
             } else {
                 //determine degree, 0-30, 150-210, 330-360
@@ -4625,7 +4632,7 @@ class Fluffy2 extends Phaser.GameObjects.Sprite{
             }
 
             //out of area check, y
-            if (this.y > 750 && this.moving_degree > 180) {
+            if (this.y > 900 && this.moving_degree > 180) {
                 this.moving_degree = 360 - this.moving_degree;
             }else if (this.y < 500 && this.moving_degree < 180) {
                 this.moving_degree = 360 - this.moving_degree;
@@ -5498,7 +5505,7 @@ function radarchart2(
 async function draw_radarchart(scene) {
     let _x = 1160;
     let _y = 115;
-    let _r = 75;
+    let _r = 70;
     radarchart2(
         scene, 
         _x, 
@@ -6503,7 +6510,7 @@ function summon_fluffy(scene, _type, rarity, itemId) {
     group_star.add(_fluffy);
     group_update.add(_fluffy);
     //murasaki hugging
-    if (count_sync > 10) {
+    if (count_sync > 3) {
         murasakisan.on_click();
         sound_fluffy.play();
     }
@@ -7862,7 +7869,7 @@ function create(scene) {
     sound_farming = scene.sound.add("farming", {volume:0.1});
     sound_farming_during = scene.sound.add("farming_during", {volume:0.2});
     sound_crafting = scene.sound.add("crafting", {volume:0.1});
-    sound_crafting_during = scene.sound.add("crafting_during", {volume:0.1});
+    sound_crafting_during = scene.sound.add("crafting_during", {volume:0.05});
     sound_happy = scene.sound.add("happy", {volume:0.2});
     sound_earn = scene.sound.add("earn", {volume:0.2});
     sound_dice = scene.sound.add("dice", {volume:0.15});
@@ -8615,7 +8622,7 @@ function update_parametersWithAnimation(this_scene) {
             if (local_happy > previous_happy) {
                 _logical_addition += last_local_calc_grooming;
             }
-            if (_logical_addition + 1 < _delta) {
+            if (_logical_addition + 100 < _delta) {
                 text_exp_earned.setText(_sign + _delta + " lucky♪");
                 text_exp_earned.setColor("#0000ff");
             } else {

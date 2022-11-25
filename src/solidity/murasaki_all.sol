@@ -1574,6 +1574,7 @@ contract Murasaki_Function_Share is Ownable {
     address public teamTreasury_address;
     address public murasaki_lootlike_address;
     address public murasaki_parameter_address;
+    address public murasaki_storage_achievement_address;
     
     //salt
     uint private _salt = 0;
@@ -1623,6 +1624,9 @@ contract Murasaki_Function_Share is Ownable {
     }
     function _setE_murasaki_parameter_address(address _address) external onlyOwner {
         murasaki_parameter_address = _address;
+    }
+    function _setF_murasaki_storage_achievement_address(address _address) external onlyOwner {
+        murasaki_storage_achievement_address = _address;
     }
 
     //check owner of summoner
@@ -4072,8 +4076,6 @@ contract bufferTreasury is Ownable, ReentrancyGuard {
         uint _amount_for_buybackTreasury = calc_amount_by_inflationRate();
         payable(mfs.buybackTreasury_address()).transfer(_amount_for_buybackTreasury);
         payable(mfs.teamTreasury_address()).transfer(address(this).balance);
-        //payable(rec).transfer(address(this).balance);   // transfer the rest to dev wallet
-        //withdraw(rec);
     }
 }
 
@@ -4084,13 +4086,21 @@ contract bufferTreasury is Ownable, ReentrancyGuard {
 //for buyback items
 contract buybackTreasury is Ownable, ReentrancyGuard {
 
+    //*approve of mc is needed
+
+    //variants
+    uint public amountPaied_total = 0;
+    mapping(uint => uint) public amountPaied;
+    uint public total_notActivated_summoner = 0;
+    bool public isPaused;
+
     //address
     address public murasaki_function_share_address;
     function _set1_murasaki_function_share_address(address _address) external onlyOwner {
         murasaki_function_share_address = _address;
     }
 
-    //admin. withdraw all, for emergency
+    //admin, withdraw all, for emergency
     function withdraw(address rec) public onlyOwner{
         payable(rec).transfer(address(this).balance);
     }
@@ -4101,9 +4111,10 @@ contract buybackTreasury is Ownable, ReentrancyGuard {
     fallback() external payable {
     }
 
-    uint public amountPaied_total = 0;
-    mapping(uint => uint) public amountPaied;
-    uint public total_notActivated_summoner = 0;
+    //admin, set isPaused
+    function _set_isPaused(bool _bool) external onlyOwner{
+        isPaused = _bool;
+    }
 
     //update notActivated summoner number by manually
     function _set2_total_notActivated_summoner(uint _value) external onlyOwner {
@@ -4123,7 +4134,7 @@ contract buybackTreasury is Ownable, ReentrancyGuard {
         return _amount_per_summoner;
     }
     
-    function calc_itemPrice_fromLevel(uint _item_level) public view returns (uint) {
+    function _calc_itemPrice_fromLevel(uint _item_level) internal view returns (uint) {
         uint _coefficient;
         if (_item_level == 1) {
             _coefficient = 10;
@@ -4178,28 +4189,28 @@ contract buybackTreasury is Ownable, ReentrancyGuard {
         } else {    //common, x1
             _item_rarity = 1;
         }
-        uint _price = calc_itemPrice_fromLevel(_item_level) * _item_rarity;
+        uint _price = _calc_itemPrice_fromLevel(_item_level) * _item_rarity;
         return _price;
     }
     
     function calc_buybackPrice_asArray() public view returns (uint[17] memory) {
         uint[17] memory _res;
-        _res[1] = calc_itemPrice_fromLevel(1);
-        _res[2] = calc_itemPrice_fromLevel(2);
-        _res[3] = calc_itemPrice_fromLevel(3);
-        _res[4] = calc_itemPrice_fromLevel(4);
-        _res[5] = calc_itemPrice_fromLevel(5);
-        _res[6] = calc_itemPrice_fromLevel(6);
-        _res[7] = calc_itemPrice_fromLevel(7);
-        _res[8] = calc_itemPrice_fromLevel(8);
-        _res[9] = calc_itemPrice_fromLevel(9);
-        _res[10] = calc_itemPrice_fromLevel(10);
-        _res[11] = calc_itemPrice_fromLevel(11);
-        _res[12] = calc_itemPrice_fromLevel(12);
-        _res[13] = calc_itemPrice_fromLevel(13);
-        _res[14] = calc_itemPrice_fromLevel(14);
-        _res[15] = calc_itemPrice_fromLevel(15);
-        _res[16] = calc_itemPrice_fromLevel(16);
+        _res[1] = _calc_itemPrice_fromLevel(1);
+        _res[2] = _calc_itemPrice_fromLevel(2);
+        _res[3] = _calc_itemPrice_fromLevel(3);
+        _res[4] = _calc_itemPrice_fromLevel(4);
+        _res[5] = _calc_itemPrice_fromLevel(5);
+        _res[6] = _calc_itemPrice_fromLevel(6);
+        _res[7] = _calc_itemPrice_fromLevel(7);
+        _res[8] = _calc_itemPrice_fromLevel(8);
+        _res[9] = _calc_itemPrice_fromLevel(9);
+        _res[10] = _calc_itemPrice_fromLevel(10);
+        _res[11] = _calc_itemPrice_fromLevel(11);
+        _res[12] = _calc_itemPrice_fromLevel(12);
+        _res[13] = _calc_itemPrice_fromLevel(13);
+        _res[14] = _calc_itemPrice_fromLevel(14);
+        _res[15] = _calc_itemPrice_fromLevel(15);
+        _res[16] = _calc_itemPrice_fromLevel(16);
         return _res;
     }
 
@@ -4209,6 +4220,7 @@ contract buybackTreasury is Ownable, ReentrancyGuard {
         Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
         Murasaki_Parameter mp = Murasaki_Parameter(mfs.murasaki_parameter_address());
         require(mp.isPaused() == false);
+        require(isPaused() == false);
         require(mfs.check_owner(_summoner, msg.sender));
         require(mc.ownerOf(_item) == msg.sender);
         mc.safeTransferFrom(msg.sender, address(this), _item);
@@ -6302,6 +6314,182 @@ contract Fluffy_Festival is Ownable, ReentrancyGuard {
         _mint_presentbox(_summoner, _wallet_to, _memo);
     }
     */
+}
+
+
+//---Achievement
+
+
+contract Murasaki_Storage_Achievement is Ownable {
+
+    //permitted address
+    mapping(address => bool) public permitted_address;
+
+    //admin, add or remove permitted_address
+    function _add_permitted_address(address _address) external onlyOwner {
+        permitted_address[_address] = true;
+    }
+    function _remove_permitted_address(address _address) external onlyOwner {
+        permitted_address[_address] = false;
+    }
+
+    //modifier
+    modifier onlyPermitted {
+        require(permitted_address[msg.sender]);
+        _;
+    }
+
+    //achievements
+    mapping(uint => bool[32]) public achievements;
+    
+    //set achievement
+    function set_achievement(uint _summoner, uint _achv_id, bool _bool) external onlyPermitted {
+        achievements[_summoner][_achv_id] = _bool;
+    }
+    
+    //getter
+    function get_achievements(uint _summoner) external view returns (bool[32] memory) {
+        return achievements[_summoner];
+    }    
+}
+
+
+contract Murasaki_Function_Achievement is Ownable, ReentrancyGuard {
+
+    //address
+    address public murasaki_function_share_address;
+    function _set1_murasaki_function_share_address(address _address) external onlyOwner {
+        murasaki_function_share_address = _address;
+    }
+    
+    //external, update_achv
+    //***TOD*** from only levelup...? or enable to manual update...?
+    function update_achievement (uint _summoner) external nonReentrant {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Storage_Achievement msa = Murasaki_Storage_Achievement(mfs.murasaki_storage_achievement_address());
+        bool[32] memory _achievements = msa.get_achievements(_summoner);
+        for (uint _achv_id=1; _achv_id<32; _achv_id++) {
+            if (_achievements[_achv_id] == false && _check_achievement(_summoner, _achv_id)) {
+                msa.set_achievement(_summoner, _achv_id, true);
+            }
+        }        
+    }
+
+    //internal, check_achv
+    function _check_achievement(uint _summoner, uint _achievement_id) internal view returns (bool) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Storage_Score mss = Murasaki_Storage_Score(mfs.murasaki_storage_score_address());
+        //1: total_coin > 10000
+        if (_achievement_id == 1) {
+            if (mss.total_coin_mined(_summoner) >= 10000) {
+                return true;
+            }
+        //2: total_coin > 30000
+        } else if (_achievement_id == 2) {
+            if (mss.total_coin_mined(_summoner) >= 30000) {
+                return true;
+            }
+        //3: total_coin > 100000
+        } else if (_achievement_id == 3) {
+            if (mss.total_coin_mined(_summoner) >= 100000) {
+                return true;
+            }
+        //4: total_coin > 300000
+        } else if (_achievement_id == 4) {
+            if (mss.total_coin_mined(_summoner) >= 300000) {
+                return true;
+            }
+        //5: total_coin > 1000000
+        } else if (_achievement_id == 5) {
+            if (mss.total_coin_mined(_summoner) >= 1000000) {
+                return true;
+            }
+        //6: total_coin > 10000
+        } else if (_achievement_id == 6) {
+            if (mss.total_material_farmed(_summoner) >= 10000) {
+                return true;
+            }
+        //7: total_coin > 30000
+        } else if (_achievement_id == 7) {
+            if (mss.total_material_farmed(_summoner) >= 30000) {
+                return true;
+            }
+        //8: total_coin > 100000
+        } else if (_achievement_id == 8) {
+            if (mss.total_material_farmed(_summoner) >= 100000) {
+                return true;
+            }
+        //9: total_coin > 300000
+        } else if (_achievement_id == 9) {
+            if (mss.total_material_farmed(_summoner) >= 300000) {
+                return true;
+            }
+        //10: total_coin > 1000000
+        } else if (_achievement_id == 10) {
+            if (mss.total_material_farmed(_summoner) >= 1000000) {
+                return true;
+            }
+        //11: total_item > 5
+        } else if (_achievement_id == 11) {
+            if (mss.total_item_crafted(_summoner) >= 5) {
+                return true;
+            }
+        //12: total_item > 10
+        } else if (_achievement_id == 12) {
+            if (mss.total_item_crafted(_summoner) >= 10) {
+                return true;
+            }
+        //13: total_item > 20
+        } else if (_achievement_id == 13) {
+            if (mss.total_item_crafted(_summoner) >= 20) {
+                return true;
+            }
+        //14: total_item > 40
+        } else if (_achievement_id == 14) {
+            if (mss.total_item_crafted(_summoner) >= 40) {
+                return true;
+            }
+        //15: total_item > 80
+        } else if (_achievement_id == 15) {
+            if (mss.total_item_crafted(_summoner) >= 80) {
+                return true;
+            }
+        //16: total_fluffy > 30
+        } else if (_achievement_id == 16) {
+            if (mss.total_precious_received(_summoner) >= 30) {
+                return true;
+            }
+        //17: total_fluffy > 60
+        } else if (_achievement_id == 17) {
+            if (mss.total_precious_received(_summoner) >= 60) {
+                return true;
+            }
+        //18: total_fluffy > 120
+        } else if (_achievement_id == 18) {
+            if (mss.total_precious_received(_summoner) >= 120) {
+                return true;
+            }
+        //19: total_fluffy > 240
+        } else if (_achievement_id == 19) {
+            if (mss.total_precious_received(_summoner) >= 240) {
+                return true;
+            }
+        //20: total_fluffy > 480
+        } else if (_achievement_id == 20) {
+            if (mss.total_precious_received(_summoner) >= 480) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    //internal getter of achv
+    function get_achievements (uint _summoner) public view returns (bool[32] memory) {
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Storage_Achievement msa = Murasaki_Storage_Achievement(mfs.murasaki_storage_achievement_address());
+        return msa.get_achievements(_summoner);
+    }
+    
 }
 
 
