@@ -82,22 +82,29 @@ contract ERC721 is IERC721 {
 
 //### 1st
 
-   *buybackTreajuryの改善
-        active userの増減によってはbuyback -> bufferへと移動させることも必要になる
-        active user数を取得した上でインフレ率を計算するよう修正する
-        手順としては：
-            インフレ率を手動で設定
-            脱落ユーザー数を手動で集計して設定
-            インフレ率に基づいて、buybackTreajury <-> BufferTreajuryの資金移動を行う
-                これはコントラクトコードで実装する
-            続く処理でbufferTreajuryに残った資金はteamTreajuryへと移動する
-
     Treajuryシステムの刷新
-        bufferTreajuryからの資金移動を関数化する
-            Staking wallet -> bufferTreajuryは事前に手動で行う
-            bufferTreajury <-> buybackTreajury, 相互移動
-            bufferTreajury -> developer wallets, 5% x 2
-            bufferTreajury -> Staking wallet, 残った資金全部, bufferをカラにする
+        資金場所
+            BufferVault：コントラクト
+                全ての資金は一旦ここに集められる
+                Mint feeもここに入れることとする
+            BuybackTreajury：コントラクト
+                月に1回、資金量を増減させて調整する
+                常にactive user数 * amount per user量を確保する
+            StakingWallet：EOA
+                残りの資金はここに格納される
+                dApps stakingへ全額ステークする
+                余計なtxは飛ばさないように注意する
+            Administrator Wallet：EOA
+                全コントラクトの所有権を有する
+                必要な時だけ、コントラクトのメンテナンスを行う
+                余計なtxは飛ばさないように注意する
+            Developer wallet：EOA
+                BufferVaultから5% * 2を2つのプライベートwalletへ移動する            
+        BufferVaultからの資金移動を関数化する
+            Staking wallet -> BufferVaultは事前に手動で行う
+            BufferVault <-> BuybackTreajury, 相互移動
+            BufferVault -> Developer wallets, 5% x 2
+            BufferVault -> Staking Wallet, 残った資金全部, bufferをカラにする
         手順：
             手動でbuybackTreajuryにnot active user数を設定する
                 all user - not active user = active user数を算出する
@@ -113,6 +120,20 @@ contract ERC721 is IERC721 {
             buybackに余剰資金がある場合は資金を逆流させる
                 not active userを設定した直後はbuyback価格が上昇してしまうので、
                 このタイミングでbuybackされない機構を考える。
+
+   *buybackTreajuryの改善
+        active userの増減によってはbuyback -> bufferへと移動させることも必要になる
+        active user数を取得した上でインフレ率を計算するよう修正する
+        手順としては：
+            インフレ率を手動で設定
+            脱落ユーザー数を手動で集計して設定
+            インフレ率に基づいて、buybackTreajury <-> BufferTreajuryの資金移動を行う
+                これはコントラクトコードで実装する
+            続く処理でbufferTreajuryに残った資金はteamTreajuryへと移動する
+
+    privacy policyの整備
+        alchemyのpp：
+            https://www.alchemy.com/policies/privacy-policy
 
     実績システムのUI検討
         一旦ボツにしたが、称号や勲章の様にあっても良いだろうか。
@@ -6615,6 +6636,7 @@ function preload(scene) {
 
     //---back
     scene.load.image("back", "src/png/background.png");
+    scene.load.image("back_achv", "src/png/background_achv.png");
     scene.load.image("back_black", "src/png/background_black.png");
     scene.load.image("window", "src/png/background_window.png");
     //scene.load.image("window2", "src/png/background_window2.png");
@@ -7047,6 +7069,7 @@ function create(scene) {
     
     //---back image
     scene.add.image(640, 480, "back");
+    scene.add.image(640, 480, "back_achv").setAlpha(0.5);
     //back_neon = scene.add.image(900, 180, "back_neon").setOrigin(0.5).setScale(0.3);
     //back_neon.angle += 10;
     //back_neon.visible = false;
