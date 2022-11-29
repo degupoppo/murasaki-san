@@ -83,6 +83,9 @@ contract ERC721 is IERC721 {
 //### 1st
 
     Treajuryシステムの刷新
+        mint feeの取り扱いと脱ポンジ
+            old userのbuybackTreajury分をnew userのmint feeで賄う構図は避ける
+            mint fee
         資金場所
             BufferVault：コントラクト
                 全ての資金は一旦ここに集められる
@@ -180,6 +183,8 @@ contract ERC721 is IERC721 {
      ok catが2匹になるバグ
         festivalのvoteにLvやscoreの重み付けをする
             基本＝100とし、Lvやscoreで+aする
+        feeding/grooming時はアニメーションが終わってからworkingを開始させる
+        fluffyの移動ラインとon_click時のラインが異なるので修正する
 
     Web3文化の改善
         せっかくブロックチェーン上で作るので、web3の哲学を組み込みたい
@@ -6636,12 +6641,34 @@ function preload(scene) {
 
     //---back
     scene.load.image("back", "src/png/background.png");
-    scene.load.image("back_achv", "src/png/background_achv.png");
+    //scene.load.image("back_achv", "src/png/background_achv.png");
     scene.load.image("back_black", "src/png/background_black.png");
     scene.load.image("window", "src/png/background_window.png");
     //scene.load.image("window2", "src/png/background_window2.png");
     //scene.load.image("window3", "src/png/background_window3.png");
     //scene.load.image("back_neon", "src/png/background_neon.png");
+    
+    //---achievement
+    scene.load.image("back_achv_01", "src/png/background_achv_01.png");
+    scene.load.image("back_achv_02", "src/png/background_achv_02.png");
+    scene.load.image("back_achv_03", "src/png/background_achv_03.png");
+    scene.load.image("back_achv_04", "src/png/background_achv_04.png");
+    scene.load.image("back_achv_05", "src/png/background_achv_05.png");
+    scene.load.image("back_achv_06", "src/png/background_achv_06.png");
+    scene.load.image("back_achv_07", "src/png/background_achv_07.png");
+    scene.load.image("back_achv_08", "src/png/background_achv_08.png");
+    scene.load.image("back_achv_09", "src/png/background_achv_09.png");
+    scene.load.image("back_achv_10", "src/png/background_achv_10.png");
+    scene.load.image("back_achv_11", "src/png/background_achv_11.png");
+    scene.load.image("back_achv_12", "src/png/background_achv_12.png");
+    scene.load.image("back_achv_13", "src/png/background_achv_13.png");
+    scene.load.image("back_achv_14", "src/png/background_achv_14.png");
+    scene.load.image("back_achv_15", "src/png/background_achv_15.png");
+    scene.load.image("back_achv_16", "src/png/background_achv_16.png");
+    scene.load.image("back_achv_17", "src/png/background_achv_17.png");
+    scene.load.image("back_achv_18", "src/png/background_achv_18.png");
+    scene.load.image("back_achv_19", "src/png/background_achv_19.png");
+    scene.load.image("back_achv_20", "src/png/background_achv_20.png");
 
     //---murasaki-san
     scene.load.spritesheet("murasaki_right", "src/png/murasaki_right.png", {frameWidth: 370, frameHeight: 320});
@@ -7069,11 +7096,34 @@ function create(scene) {
     
     //---back image
     scene.add.image(640, 480, "back");
-    scene.add.image(640, 480, "back_achv").setAlpha(0.5);
+    //scene.add.image(640, 480, "back_achv").setAlpha(0.6);
     //back_neon = scene.add.image(900, 180, "back_neon").setOrigin(0.5).setScale(0.3);
     //back_neon.angle += 10;
     //back_neon.visible = false;
     //back_neon.depth = 9999+11;
+    
+    //---achievement
+    let _achv_alpha = 0.6;
+    achv_01 = scene.add.image(640, 480, "back_achv_01").setAlpha(_achv_alpha);
+    achv_02 = scene.add.image(640, 480, "back_achv_02").setAlpha(_achv_alpha);
+    achv_03 = scene.add.image(640, 480, "back_achv_03").setAlpha(_achv_alpha);
+    //achv_04 = scene.add.image(640, 480, "back_achv_04").setAlpha(_achv_alpha);
+    //achv_05 = scene.add.image(640, 480, "back_achv_05").setAlpha(_achv_alpha);
+    achv_06 = scene.add.image(640, 480, "back_achv_06").setAlpha(_achv_alpha);
+    achv_07 = scene.add.image(640, 480, "back_achv_07").setAlpha(_achv_alpha);
+    achv_08 = scene.add.image(640, 480, "back_achv_08").setAlpha(_achv_alpha);
+    //achv_09 = scene.add.image(640, 480, "back_achv_09").setAlpha(_achv_alpha);
+    //achv_10 = scene.add.image(640, 480, "back_achv_10").setAlpha(_achv_alpha);
+    achv_11 = scene.add.image(640, 480, "back_achv_11").setAlpha(_achv_alpha);
+    achv_12 = scene.add.image(640, 480, "back_achv_12").setAlpha(_achv_alpha);
+    achv_13 = scene.add.image(640, 480, "back_achv_13").setAlpha(_achv_alpha);
+    //achv_14 = scene.add.image(640, 480, "back_achv_14").setAlpha(_achv_alpha);
+    //achv_15 = scene.add.image(640, 480, "back_achv_15").setAlpha(_achv_alpha);
+    achv_16 = scene.add.image(640, 480, "back_achv_16").setAlpha(_achv_alpha);
+    achv_17 = scene.add.image(640, 480, "back_achv_17").setAlpha(_achv_alpha);
+    achv_18 = scene.add.image(640, 480, "back_achv_18").setAlpha(_achv_alpha);
+    //achv_19 = scene.add.image(640, 480, "back_achv_19").setAlpha(_achv_alpha);
+    //achv_20 = scene.add.image(640, 480, "back_achv_20").setAlpha(_achv_alpha);
     
     //---animation wall sticker
     scene.anims.create({

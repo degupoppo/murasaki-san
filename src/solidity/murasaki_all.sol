@@ -4031,27 +4031,35 @@ contract Murasaki_Function_Name is Ownable, ReentrancyGuard {
 //===Treasury======================================================================================================
 
 
-//---bufferTreasury
+//***TODO*** need to refacturing
+
+/*
+//---bufferVault
 
 
 //trading fee, cure fee, dapps staking reward, other fees
-contract bufferTreasury is Ownable, ReentrancyGuard {
+contract bufferVault is Ownable, ReentrancyGuard {
 
-    //address
-    address public murasaki_function_share_address;
-    function _set1_murasaki_function_share_address(address _address) external onlyOwner {
-        murasaki_function_share_address = _address;
-    }
-    
     //receivable
     receive() external payable {
     }
     fallback() external payable {
     }
     
+    //address
+    address public murasaki_function_share_address;
+    function _set1_murasaki_function_share_address(address _address) external onlyOwner {
+        murasaki_function_share_address = _address;
+    }
+    
+    //address, staking wallet
+    address public staking_wallet;
+    function _set2_staking_wallet(address _address) external onlyOwner {
+        staking_wallet = _address;
+    }
+    
+    //inflation rate
     uint public inflationRate = 300;    //300 = 3%
-
-    //admin, set rate
     function set_inflationRate(uint _value) external onlyOwner {
         inflationRate = _value;
     }
@@ -4088,39 +4096,52 @@ contract buybackTreasury is Ownable, ReentrancyGuard {
 
     //*approve of mc is needed
 
-    //variants
-    uint public amountPaied_total = 0;
-    mapping(uint => uint) public amountPaied;
-    uint public total_notActivated_summoner = 0;
-    bool public isPaused;
-
-    //address
-    address public murasaki_function_share_address;
-    function _set1_murasaki_function_share_address(address _address) external onlyOwner {
-        murasaki_function_share_address = _address;
-    }
-
-    //admin, withdraw all, for emergency
-    function withdraw(address rec) public onlyOwner{
-        payable(rec).transfer(address(this).balance);
-    }
-    
     //receivable
     receive() external payable {
     }
     fallback() external payable {
     }
 
+    //variants
+    uint public amountPaied_total = 0;
+    mapping(uint => uint) public amountPaied;
+    uint public total_notActivated_summoner = 0;
+    bool public isPaused;
+    uint public amount_per_summoner = 0;
+
+    //admin, withdraw all, for emergency
+    function withdraw(address rec) public onlyOwner{
+        payable(rec).transfer(address(this).balance);
+    }
+    
+    //admin, address
+    address public murasaki_function_share_address;
+    function _set1_murasaki_function_share_address(address _address) external onlyOwner {
+        murasaki_function_share_address = _address;
+    }
+
     //admin, set isPaused
-    function _set_isPaused(bool _bool) external onlyOwner{
+    function _set2_isPaused(bool _bool) external onlyOwner{
         isPaused = _bool;
     }
 
-    //update notActivated summoner number by manually
-    function _set2_total_notActivated_summoner(uint _value) external onlyOwner {
+    //admin, update notActivated summoner number by manually
+    function _set3_total_notActivated_summoner(uint _value) external onlyOwner {
         total_notActivated_summoner = _value;
     }
+
+    //admin, set amount_per_summoner
+    function _set4_amount_per_summoner(uint _value) external onlyOwner {
+        amount_per_summoner = _value;
+    }
     
+    //admin, transfer to bufferVault, only from bufferVault
+    function _admin_transferToBufferVault(uint _value) external {
+        //require(msg.sender == mfs.bufferTreajury());
+        payable(msg.sender).transfer(_value);
+        
+    }
+        
     //***TODO*** more complicated
     // not total user but active user count is needed to be caluculated 
     // and to be used for calculation of amount per summoner value
@@ -4169,7 +4190,8 @@ contract buybackTreasury is Ownable, ReentrancyGuard {
         } else if (_item_level == 16) {
             _coefficient = 510;
         }
-        uint _price = calc_amount_per_summoner() * _coefficient / 3227;
+        //uint _price = calc_amount_per_summoner() * _coefficient / 3227;
+        uint _price = amount_per_summoner * _coefficient / 3227;
         return _price;
     }
     
@@ -4225,34 +4247,21 @@ contract buybackTreasury is Ownable, ReentrancyGuard {
         require(mc.ownerOf(_item) == msg.sender);
         mc.safeTransferFrom(msg.sender, address(this), _item);
         uint _price = calc_buybackPrice(_item);
+        require(_price > 0);
         //update amount paied
         amountPaied[_summoner] += _price;
         amountPaied_total += _price;
         //pay
         payable(msg.sender).transfer(_price);
         //do not exceed x2 amount per summoner after paying
-        uint _amount_per_summoner = calc_amount_per_summoner();
+        //uint _amount_per_summoner = calc_amount_per_summoner();
+        //require(amountPaied[_summoner] <= _amount_per_summoner * 2);
         require(amountPaied[_summoner] <= _amount_per_summoner * 2);
         //event
         emit Buyback(_summoner, _item, _price);
     }
 }
-
-
-//---teamTreasury
-
-
-contract teamTreasury is Ownable {
-    //admin. withdraw all
-    function withdraw(address rec)public onlyOwner{
-        payable(rec).transfer(address(this).balance);
-    }
-    //receivable
-    receive() external payable {
-    }
-    fallback() external payable {
-    }
-}
+*/
 
 
 //===etc==================================================================================================================
@@ -6367,6 +6376,8 @@ contract Murasaki_Function_Achievement is Ownable, ReentrancyGuard {
     function update_achievement (uint _summoner) external nonReentrant {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
         Murasaki_Storage_Achievement msa = Murasaki_Storage_Achievement(mfs.murasaki_storage_achievement_address());
+        //***TODO*** require...?
+        require(mfs.check_owner(_summoner, msg.sender);
         bool[32] memory _achievements = msa.get_achievements(_summoner);
         for (uint _achv_id=1; _achv_id<32; _achv_id++) {
             if (_achievements[_achv_id] == false && _check_achievement(_summoner, _achv_id)) {
@@ -6404,27 +6415,27 @@ contract Murasaki_Function_Achievement is Ownable, ReentrancyGuard {
             if (mss.total_coin_mined(_summoner) >= 1000000) {
                 return true;
             }
-        //6: total_coin > 10000
+        //6: total_material > 10000
         } else if (_achievement_id == 6) {
             if (mss.total_material_farmed(_summoner) >= 10000) {
                 return true;
             }
-        //7: total_coin > 30000
+        //7: total_material > 30000
         } else if (_achievement_id == 7) {
             if (mss.total_material_farmed(_summoner) >= 30000) {
                 return true;
             }
-        //8: total_coin > 100000
+        //8: total_material > 100000
         } else if (_achievement_id == 8) {
             if (mss.total_material_farmed(_summoner) >= 100000) {
                 return true;
             }
-        //9: total_coin > 300000
+        //9: total_material > 300000
         } else if (_achievement_id == 9) {
             if (mss.total_material_farmed(_summoner) >= 300000) {
                 return true;
             }
-        //10: total_coin > 1000000
+        //10: total_material > 1000000
         } else if (_achievement_id == 10) {
             if (mss.total_material_farmed(_summoner) >= 1000000) {
                 return true;
