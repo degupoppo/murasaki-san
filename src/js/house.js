@@ -82,6 +82,14 @@ contract ERC721 is IERC721 {
 
 //### 1st
 
+    tokenURIの再実装
+        mcのuriにpngへのURLを返すように設定する
+
+    NFTの希少性の深慮
+        NFTの希少性について考える
+            BCGのインフレし続けるNFTは価値が希釈され続けていく
+            何かしらの希少価値はメカニズムとして組み込みたい
+
     Treajuryシステムの刷新
         mint feeの取り扱いと脱ポンジ
             old userのbuybackTreajury分をnew userのmint feeで賄う構図は避ける
@@ -1410,7 +1418,7 @@ function get_upgradable_itemIds(_myListsAt_withItemType) {
     Object.keys(_dict).forEach(__itemType => {
         if (
             _dict[__itemType].length >= 3 && (
-                __itemType <= 128  || (__itemType >= 201 && __itemType <= 224)
+                __itemType <= 128  || (__itemType >= 201 && __itemType <= 236)
             )
         ){
             _res[__itemType] = _dict[__itemType];
@@ -5972,7 +5980,7 @@ function open_window_upgrade(scene) {
             _item_name_to = dic_items_reverse[Number(_itemId)+12];
             //_item_name_to = array_item_name[Number(_itemId)+12];
         } else if (_itemId <= 236) {
-            _item_name_to = "Fluffy murasaki-san";
+            _item_name_to = "Fluffy Murasaki-San";
         }
         let _rarity = "";
         let _rarity_to = "";
@@ -7103,6 +7111,7 @@ function create(scene) {
     //back_neon.depth = 9999+11;
     
     //---achievement
+    /*
     let _achv_alpha = 0.6;
     achv_01 = scene.add.image(640, 480, "back_achv_01").setAlpha(_achv_alpha);
     achv_02 = scene.add.image(640, 480, "back_achv_02").setAlpha(_achv_alpha);
@@ -7124,6 +7133,7 @@ function create(scene) {
     achv_18 = scene.add.image(640, 480, "back_achv_18").setAlpha(_achv_alpha);
     //achv_19 = scene.add.image(640, 480, "back_achv_19").setAlpha(_achv_alpha);
     //achv_20 = scene.add.image(640, 480, "back_achv_20").setAlpha(_achv_alpha);
+    */
     
     //---animation wall sticker
     scene.anims.create({
