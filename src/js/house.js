@@ -82,13 +82,11 @@ contract ERC721 is IERC721 {
 
 //### 1st
 
+    priceの係数計算
+        10**18で取得されるので整数化する
+
     tokenURIの再実装
         mcのuriにpngへのURLを返すように設定する
-
-    NFTの希少性の深慮
-        NFTの希少性について考える
-            BCGのインフレし続けるNFTは価値が希釈され続けていく
-            何かしらの希少価値はメカニズムとして組み込みたい
 
     Treajuryシステムの刷新
         mint feeの取り扱いと脱ポンジ
@@ -141,6 +139,50 @@ contract ERC721 is IERC721 {
             インフレ率に基づいて、buybackTreajury <-> BufferTreajuryの資金移動を行う
                 これはコントラクトコードで実装する
             続く処理でbufferTreajuryに残った資金はteamTreajuryへと移動する
+
+    Travel of Murasaki-Sanの構想案
+        旅の目的は？
+            宝物SBTもしくはNFTの取得
+            どこに行ったかのスタンプのようなものなので、SBTのほうが良いだろうか
+        旅報酬を受け取る条件は？
+            特定の座標？
+            移動距離に応じて確率が上がるランダム取得？
+        旅報酬のユースケースは？
+            移動効率アップ
+
+    動作軽量化対策
+        fpsを120などに上昇させ、何が重いのか調査する
+            全画面画像は重い？
+            透過処理画像が重い？
+
+    バランス調整
+     ok item_dcテーブルの調整
+            後半のアイテムほど最低dcを大きくする
+     ok catインターバルの調整
+            5日 → 7日
+        fluffy必要量の調整
+            3個, 4個, 5個？
+        coin/materialの必要量の調整
+            後半のアイテムは3日分→5日分程度へ計算して調整
+     ng ffの補正修正
+            x2ではなくx1.5程度にする
+            → 割り算が困難なため保留
+        fluffy供給量の調整
+            現在のバランスだと0.5日に1個で多すぎるか
+
+    coin/material per dayの正確な計算
+        拡大再生産を実感できるように
+    
+    wallet反映アイテムの実装
+        age反映アイテム：
+            なに？
+        nonce反映アイテム：
+            時計の針を進める？
+
+    NFTの希少性の深慮
+        NFTの希少性について考える
+            BCGのインフレし続けるNFTは価値が希釈され続けていく
+            何かしらの希少価値はメカニズムとして組み込みたい
 
     privacy policyの整備
         alchemyのpp：
@@ -2053,7 +2095,8 @@ async function call_item_info(_itemId) {
 //summon
 async function contract_summon(_class) {
     let _price = await contract_mp.methods.PRICE().call();
-    _price = Number(_price) * 10**18;
+    //_price = Number(_price) * 10**18;
+    _price = Number(_price);
     contract_mfsl.methods.summon(_class).send({from:wallet, value:_price})
         .on("transactionHash", (transactionHash) => update_tx_text("sending", transactionHash))
         .on("receipt", (receipt) => update_tx_text("done", receipt.transactionHash));
@@ -2062,7 +2105,8 @@ async function contract_summon(_class) {
 //cure petrification
 async function contract_curePetrification(_summoner) {
     let _price = await contract_mp.methods.PRICE().call();
-    _price = Number(_price) * 10**18 * local_level;
+    //_price = Number(_price) * 10**18 * local_level;
+    _price = Number(_price);
     contract_mffg.methods.cure_petrification(_summoner).send({from:wallet, value:_price})
         .on("transactionHash", (transactionHash) => update_tx_text("sending", transactionHash))
         .on("receipt", (receipt) => update_tx_text("done", receipt.transactionHash));
@@ -6657,26 +6701,26 @@ function preload(scene) {
     //scene.load.image("back_neon", "src/png/background_neon.png");
     
     //---achievement
-    scene.load.image("back_achv_01", "src/png/background_achv_01.png");
-    scene.load.image("back_achv_02", "src/png/background_achv_02.png");
-    scene.load.image("back_achv_03", "src/png/background_achv_03.png");
-    scene.load.image("back_achv_04", "src/png/background_achv_04.png");
-    scene.load.image("back_achv_05", "src/png/background_achv_05.png");
-    scene.load.image("back_achv_06", "src/png/background_achv_06.png");
-    scene.load.image("back_achv_07", "src/png/background_achv_07.png");
-    scene.load.image("back_achv_08", "src/png/background_achv_08.png");
-    scene.load.image("back_achv_09", "src/png/background_achv_09.png");
-    scene.load.image("back_achv_10", "src/png/background_achv_10.png");
-    scene.load.image("back_achv_11", "src/png/background_achv_11.png");
-    scene.load.image("back_achv_12", "src/png/background_achv_12.png");
-    scene.load.image("back_achv_13", "src/png/background_achv_13.png");
-    scene.load.image("back_achv_14", "src/png/background_achv_14.png");
-    scene.load.image("back_achv_15", "src/png/background_achv_15.png");
-    scene.load.image("back_achv_16", "src/png/background_achv_16.png");
-    scene.load.image("back_achv_17", "src/png/background_achv_17.png");
-    scene.load.image("back_achv_18", "src/png/background_achv_18.png");
-    scene.load.image("back_achv_19", "src/png/background_achv_19.png");
-    scene.load.image("back_achv_20", "src/png/background_achv_20.png");
+    scene.load.image("achv_01", "src/png/achv_01.png");
+    scene.load.image("achv_02", "src/png/achv_02.png");
+    scene.load.image("achv_03", "src/png/achv_03.png");
+    scene.load.image("achv_04", "src/png/achv_04.png");
+    scene.load.image("achv_05", "src/png/achv_05.png");
+    scene.load.image("achv_06", "src/png/achv_06.png");
+    scene.load.image("achv_07", "src/png/achv_07.png");
+    scene.load.image("achv_08", "src/png/achv_08.png");
+    scene.load.image("achv_09", "src/png/achv_09.png");
+    scene.load.image("achv_10", "src/png/achv_10.png");
+    scene.load.image("achv_11", "src/png/achv_11.png");
+    scene.load.image("achv_12", "src/png/achv_12.png");
+    scene.load.image("achv_13", "src/png/achv_13.png");
+    scene.load.image("achv_14", "src/png/achv_14.png");
+    scene.load.image("achv_15", "src/png/achv_15.png");
+    scene.load.image("achv_16", "src/png/achv_16.png");
+    scene.load.image("achv_17", "src/png/achv_17.png");
+    scene.load.image("achv_18", "src/png/achv_18.png");
+    scene.load.image("achv_19", "src/png/achv_19.png");
+    scene.load.image("achv_20", "src/png/achv_20.png");
 
     //---murasaki-san
     scene.load.spritesheet("murasaki_right", "src/png/murasaki_right.png", {frameWidth: 370, frameHeight: 320});
@@ -7111,30 +7155,28 @@ function create(scene) {
     //back_neon.depth = 9999+11;
     
     //---achievement
-    /*
-    let _achv_alpha = 0.6;
-    achv_01 = scene.add.image(640, 480, "back_achv_01").setAlpha(_achv_alpha);
-    achv_02 = scene.add.image(640, 480, "back_achv_02").setAlpha(_achv_alpha);
-    achv_03 = scene.add.image(640, 480, "back_achv_03").setAlpha(_achv_alpha);
-    //achv_04 = scene.add.image(640, 480, "back_achv_04").setAlpha(_achv_alpha);
-    //achv_05 = scene.add.image(640, 480, "back_achv_05").setAlpha(_achv_alpha);
-    achv_06 = scene.add.image(640, 480, "back_achv_06").setAlpha(_achv_alpha);
-    achv_07 = scene.add.image(640, 480, "back_achv_07").setAlpha(_achv_alpha);
-    achv_08 = scene.add.image(640, 480, "back_achv_08").setAlpha(_achv_alpha);
-    //achv_09 = scene.add.image(640, 480, "back_achv_09").setAlpha(_achv_alpha);
-    //achv_10 = scene.add.image(640, 480, "back_achv_10").setAlpha(_achv_alpha);
-    achv_11 = scene.add.image(640, 480, "back_achv_11").setAlpha(_achv_alpha);
-    achv_12 = scene.add.image(640, 480, "back_achv_12").setAlpha(_achv_alpha);
-    achv_13 = scene.add.image(640, 480, "back_achv_13").setAlpha(_achv_alpha);
-    //achv_14 = scene.add.image(640, 480, "back_achv_14").setAlpha(_achv_alpha);
-    //achv_15 = scene.add.image(640, 480, "back_achv_15").setAlpha(_achv_alpha);
-    achv_16 = scene.add.image(640, 480, "back_achv_16").setAlpha(_achv_alpha);
-    achv_17 = scene.add.image(640, 480, "back_achv_17").setAlpha(_achv_alpha);
-    achv_18 = scene.add.image(640, 480, "back_achv_18").setAlpha(_achv_alpha);
-    //achv_19 = scene.add.image(640, 480, "back_achv_19").setAlpha(_achv_alpha);
-    //achv_20 = scene.add.image(640, 480, "back_achv_20").setAlpha(_achv_alpha);
-    */
-    
+    let _achv_alpha = 0.7;
+    achv_01 = scene.add.image(1155, 568, "achv_01").setAlpha(_achv_alpha);
+    achv_02 = scene.add.image(1190, 595, "achv_02").setAlpha(_achv_alpha);
+    achv_03 = scene.add.image(1248, 660, "achv_03").setAlpha(_achv_alpha);
+    //achv_04 = scene.add.image(600, 480, "achv_04").setAlpha(_achv_alpha);
+    //achv_05 = scene.add.image(632, 489, "achv_05").setAlpha(_achv_alpha);
+    achv_06 = scene.add.image(330, 472, "achv_06").setAlpha(_achv_alpha);
+    achv_07 = scene.add.image(285, 472, "achv_07").setAlpha(_achv_alpha);
+    achv_08 = scene.add.image(240, 474, "achv_08").setAlpha(_achv_alpha);
+    //achv_09 = scene.add.image(310, 420, "achv_09").setAlpha(_achv_alpha);
+    //achv_10 = scene.add.image(255, 420, "achv_10").setAlpha(_achv_alpha);
+    achv_11 = scene.add.image(1255, 619, "achv_11").setAlpha(_achv_alpha);
+    achv_12 = scene.add.image(1263, 683, "achv_12").setAlpha(_achv_alpha);
+    achv_13 = scene.add.image(1140, 533, "achv_13").setAlpha(_achv_alpha);
+    //achv_14 = scene.add.image(1190, 540, "achv_14").setAlpha(_achv_alpha);
+    //achv_15 = scene.add.image(365, 408, "achv_15").setAlpha(_achv_alpha);
+    achv_16 = scene.add.image(825, 480, "achv_16").setAlpha(_achv_alpha);
+    achv_17 = scene.add.image(1215, 633, "achv_17").setAlpha(_achv_alpha);
+    achv_18 = scene.add.image(836, 448, "achv_18").setAlpha(_achv_alpha);
+    //achv_19 = scene.add.image(1232, 580, "achv_19").setAlpha(_achv_alpha);
+    //achv_20 = scene.add.image(365, 470, "achv_20").setAlpha(_achv_alpha);
+
     //---animation wall sticker
     scene.anims.create({
         key: "wall_sticker_neon",

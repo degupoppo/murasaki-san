@@ -64,6 +64,7 @@ async function initialize_contract() {
     //set Storage
     contract_mp.methods._add_permitted_address(wallet).send({from:wallet});
     contract_mp.methods._add_permitted_address(address_Fluffy_Festival).send({from:wallet});
+    contract_mp.methods._add_permitted_address(address_BufferVault).send({from:wallet});
     contract_ms.methods._add_permitted_address(address_Murasaki_Function_Summon_and_LevelUp).send({from:wallet});
     contract_ms.methods._add_permitted_address(address_Murasaki_Function_Feeding_and_Grooming).send({from:wallet});
     contract_ms.methods._add_permitted_address(address_Murasaki_Function_Mining_and_Farming).send({from:wallet});
