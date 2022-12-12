@@ -315,7 +315,7 @@ let _dic_items = {
         "img_name":"item_violin",
         "icon_png":"png/item_violin.png",
     },
-    "Ukulele":{
+    "Ukrere":{
         "item_id":45,
         "item_id_uncommon":45+64,
         "item_id_rare":45+128,
@@ -366,7 +366,7 @@ let _dic_items = {
         "img_name":"item_mail",
         "icon_png":"icon/mail.png",
     },
-    "Fluffy Doll":{
+    "Fluffy Murasaki-San":{
         "item_id":197,
         "item_id_uncommon":0,
         "item_id_rare":0,
