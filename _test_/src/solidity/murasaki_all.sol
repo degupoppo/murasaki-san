@@ -848,7 +848,7 @@ contract Murasaki_Craft is ERC2665, Ownable{
     }
 
     //URI
-    string public baseURI = "https://murasa-kisan.com/[test]/src/json/";
+    string public baseURI = "https://murasaki-san.com/[test]/src/json/";
     string public tailURI = ".json";
     function set_baseURI(string memory _string) external onlyOwner {
         baseURI = _string;

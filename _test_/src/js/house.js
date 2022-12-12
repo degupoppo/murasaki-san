@@ -9045,6 +9045,7 @@ function update_checkModeChange(this_scene) {
             button_farming.on('pointerout', () => button_farming.setTexture("button_farming_enable"));
             button_farming.setInteractive();
         }
+        /*
         if (local_level == 3) {
             //enable crafting button
             //button_crafting.setTexture("button_crafting_enable");
@@ -9053,6 +9054,7 @@ function update_checkModeChange(this_scene) {
             button_crafting.on('pointerout', () => button_crafting.setTexture("button_crafting_start_off"));
             button_crafting.setInteractive();
         }
+        */
 
     //feeding check, continue
     } else if (local_last_feeding_time > previous_local_last_feeding_time){
