@@ -94,7 +94,7 @@ let _dic_items = {
         "img_name":"item_food_cake",
         "icon_png":"png/item_food_cake.png",
     },
-    "(Item14)":{
+    "Ukrere":{
         "item_id":14,
         "item_id_uncommon":14+64,
         "item_id_rare":14+128,
@@ -201,7 +201,7 @@ let _dic_items = {
         "img_name":"item_asnya",
         "icon_png":"png/item_asnya.png",
     },
-    "Tea Party Set":{
+    "Tea Set":{
         "item_id":29,
         "item_id_uncommon":29+64,
         "item_id_rare":29+128,
@@ -315,7 +315,7 @@ let _dic_items = {
         "img_name":"item_violin",
         "icon_png":"png/item_violin.png",
     },
-    "Ukulele":{
+    "Crayon":{
         "item_id":45,
         "item_id_uncommon":45+64,
         "item_id_rare":45+128,
@@ -366,7 +366,7 @@ let _dic_items = {
         "img_name":"item_mail",
         "icon_png":"icon/mail.png",
     },
-    "Fluffy Doll":{
+    "Fluffy Murasaki-San":{
         "item_id":197,
         "item_id_uncommon":0,
         "item_id_rare":0,

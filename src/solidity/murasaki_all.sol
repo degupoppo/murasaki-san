@@ -848,6 +848,44 @@ contract Murasaki_Craft is ERC2665, Ownable{
     }
 
     //URI
+    string public baseURI = "https://murasaki-san.com/[test]/src/json/";
+    string public tailURI = ".json";
+    function set_baseURI(string memory _string) external onlyOwner {
+        baseURI = _string;
+    }
+    function set_tailURI(string memory _string) external onlyOwner {
+        tailURI = _string;
+    }
+    function toString(uint256 value) internal pure returns (string memory) {
+        if (value == 0) {
+            return "0";
+        }
+        uint256 temp = value;
+        uint256 digits;
+        while (temp != 0) {
+            digits++;
+            temp /= 10;
+        }
+        bytes memory buffer = new bytes(digits);
+        while (value != 0) {
+            digits -= 1;
+            buffer[digits] = bytes1(uint8(48 + uint256(value % 10)));
+            value /= 10;
+        }
+        return string(buffer);
+    }
+    function tokenURI (uint _tokenId) public view returns (string memory) {
+        require(_exists(_tokenId), "token must exist");
+        uint _item_type = items[_tokenId].item_type;
+        return string(
+            abi.encodePacked(
+                baseURI,
+                toString(_item_type),
+                tailURI
+            )
+        );
+    }
+    /*
     //Inspired by OraclizeAPI's implementation - MIT license
     //https://github.com/oraclize/ethereum-api/blob/b42146b063c7d6ee1358846c198246239e9360e8/oraclizeAPI_0.4.25.sol
     function toString(uint256 value) internal pure returns (string memory) {
@@ -885,6 +923,7 @@ contract Murasaki_Craft is ERC2665, Ownable{
         output = string(abi.encodePacked('data:application/json;base64,', json));
         return output;
     }
+    */
 
     //call items as array, need to write in Craft contract
     function get_balance_of_type(address _wallet) public view returns (uint[256] memory) {
@@ -897,7 +936,7 @@ contract Murasaki_Craft is ERC2665, Ownable{
     mapping(address => bool) private noFee_address;
     
     //set transfer fee
-    uint public TRANSFER_FEE = 10;   //ether
+    uint public TRANSFER_FEE = 10 * 10**18;   //ether
     
     //a wallet collecting fees
     address private bufferTreasury_address;
@@ -934,7 +973,7 @@ contract Murasaki_Craft is ERC2665, Ownable{
     ) public virtual override payable {
         //added code, when not noFee address, require transfer fee
         if (noFee_address[from] == false && noFee_address[to] == false) {
-            require(msg.value >= TRANSFER_FEE * 10**18);
+            require(msg.value >= TRANSFER_FEE);
             payable(bufferTreasury_address).transfer(address(this).balance);
         }
         require(_isApprovedOrOwner(msg.sender, tokenId), "ERC721: transfer caller is not owner nor approved");
@@ -947,7 +986,7 @@ contract Murasaki_Craft is ERC2665, Ownable{
         uint256 tokenId
     ) public virtual override payable {
         if (noFee_address[from] == false && noFee_address[to] == false) {
-            require(msg.value >= TRANSFER_FEE * 10**18);
+            require(msg.value >= TRANSFER_FEE);
             payable(bufferTreasury_address).transfer(address(this).balance);
         }
         safeTransferFrom(from, to, tokenId, "");
@@ -960,7 +999,7 @@ contract Murasaki_Craft is ERC2665, Ownable{
         bytes memory _data
     ) public virtual override payable {
         if (noFee_address[from] == false && noFee_address[to] == false) {
-            require(msg.value >= TRANSFER_FEE * 10**18);
+            require(msg.value >= TRANSFER_FEE);
             payable(bufferTreasury_address).transfer(address(this).balance);
         }
         require(_isApprovedOrOwner(msg.sender, tokenId), "ERC721: transfer caller is not owner nor approved");
@@ -1611,6 +1650,13 @@ contract Murasaki_Function_Share is Ownable {
 
     //craft
 
+    //check owner of item
+    function check_owner_ofItem(uint _item, address _wallet) external view returns (bool) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Craft mc = Murasaki_Craft(ma.address_Murasaki_Craft());
+        return (mc.ownerOf(_item) == _wallet);
+    }
+
     //get balance of type
     function get_balance_of_type_specific(address _wallet, uint _item_type) public view returns (uint) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
@@ -1682,29 +1728,32 @@ contract Murasaki_Function_Share is Ownable {
         //fluffy
         uint _elected_precious_type = mp.ELECTED_FLUFFY_TYPE();
         for (uint i = 201; i <= 212; i++) {
+            //fluffiest, fluffy * 20
             if (_balance_of_type[i+24] > 0) {
-                _precious_score += _balance_of_type[i+24] * 3*16;
+                _precious_score += _balance_of_type[i+24] * 2*20 +8 +2;
                 //fluffly festival modification, x2 score
                 if (i == _elected_precious_type) {
-                    _precious_score += _balance_of_type[i+24] * 3*16;
+                    _precious_score += _balance_of_type[i+24] * 2*20 +8 +2;
                 }
             }
+            //fluffier, fluffy * 5
             if (_balance_of_type[i+12] > 0) {
-                _precious_score += _balance_of_type[i+12] * 3*4;
+                _precious_score += _balance_of_type[i+12] * 2*5 +2;
                 if (i == _elected_precious_type) {
-                    _precious_score += _balance_of_type[i+12] * 3*4;
+                    _precious_score += _balance_of_type[i+12] * 2*5 +2;
                 }
             }
+            //fluffy
             if (_balance_of_type[i] > 0) {
-                _precious_score += _balance_of_type[i] * 3;
+                _precious_score += _balance_of_type[i] * 2;
                 if (i == _elected_precious_type) {
-                    _precious_score += _balance_of_type[i] * 3;
+                    _precious_score += _balance_of_type[i] * 2;
                 }
             }
         }
-        //nui
+        //nui, fluffy * 60
         if (_balance_of_type[197] > 0) {
-            _precious_score += _balance_of_type[197] * 3*64;
+            _precious_score += _balance_of_type[197] * 2*60 +30 +2;
         }
         //level cap, 800/Lv20 = 40/Lv
         uint _lv = ms.level(_summoner);
@@ -3113,6 +3162,27 @@ contract Murasaki_Function_Crafting2 is Ownable, ReentrancyGuard {
         mc.burn(_item);
     }
 
+    function toString(uint256 value) internal pure returns (string memory) {
+        // Inspired by OraclizeAPI's implementation - MIT licence
+        // https://github.com/oraclize/ethereum-api/blob/b42146b063c7d6ee1358846c198246239e9360e8/oraclizeAPI_0.4.25.sol
+        if (value == 0) {
+            return "0";
+        }
+        uint256 temp = value;
+        uint256 digits;
+        while (temp != 0) {
+            digits++;
+            temp /= 10;
+        }
+        bytes memory buffer = new bytes(digits);
+        while (value != 0) {
+            digits -= 1;
+            buffer[digits] = bytes1(uint8(48 + uint256(value % 10)));
+            value /= 10;
+        }
+        return string(buffer);
+    }
+
     //upgrade item
     event Upgrade(uint indexed _summoner, uint _item_type, uint _item);
     function upgrade_item(
@@ -3136,24 +3206,14 @@ contract Murasaki_Function_Crafting2 is Ownable, ReentrancyGuard {
         (uint _item_type1, , , ,) = mc.items(_item1);
         (uint _item_type2, , , ,) = mc.items(_item2);
         (uint _item_type3, , , ,) = mc.items(_item3);
-        //require(_item_type1 <= 128 || (_item_type1 >= 201 && _item_type1 <= 224) );
-        require(_item_type1 <= 128 || (_item_type1 >= 201 && _item_type1 <= 236) );
+        require(_item_type1 <= 128);
         require(
             _item_type2 == _item_type1
             && _item_type3 == _item_type1
         );
         
         //determine target item_type
-        uint _target_item_type;
-        if (_item_type1 <= 128) {
-            _target_item_type = _item_type1 +64;
-        // when fluffy or fluffier, +12
-        } else if (_item_type1 >= 201 && _item_type1 <= 224) {
-            _target_item_type = _item_type1 +12;
-        // when fluffiest, -> nui-chan
-        } else if (_item_type1 >=225 && _item_type1 <= 236) {
-            _target_item_type = 197;
-        }
+        uint _target_item_type = _item_type1 +64;
         
         //pay cost, avoid too deep stack error
         _pay_cost(_summoner, _target_item_type);
@@ -3166,12 +3226,8 @@ contract Murasaki_Function_Crafting2 is Ownable, ReentrancyGuard {
         uint _seed = mfs.seed(_summoner);
         string memory _memo = "";
         mc.craft(_target_item_type, _summoner, msg.sender, _seed, _memo);
-        //when nui-chan, update nuichna score
-        if (_target_item_type == 197) {
-            _update_storage_nui(_summoner, mc.next_item()-1);
-        }
         //event
-        emit Upgrade(_summoner, _item_type1, mc.next_item());
+        emit Upgrade(_summoner, _item_type1, mc.next_item()-1);
     }
     function _pay_cost(uint _summoner, uint _target_item_type) internal {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
@@ -3186,6 +3242,130 @@ contract Murasaki_Function_Crafting2 is Ownable, ReentrancyGuard {
         //pay coin, material
         ms.set_coin(_summoner, ms.coin(_summoner) - _coin);
         ms.set_material(_summoner, ms.material(_summoner) - _material);
+    }
+
+    //upgrade fluffy
+    event Upgrade_Fluffy(uint indexed _summoner, uint _item_type, uint _item);
+    function upgrade_fluffy(
+        uint _summoner,
+        uint _item1,
+        uint _item2,
+        uint _item3,
+        uint _item4,
+        uint _item5
+    ) external nonReentrant {
+        _check_summoner(_summoner);
+        _check_items(_item1, _item2, _item3, _item4, _item5);
+        uint _sourceItemType = _get_sourceItemType(_item1);
+        uint _targetItemType = _get_targetItemType(_item1);
+        _burn_sourceItems(_item1, _item2, _item3, _item4, _item5);
+        _mint_item(_summoner, _targetItemType, _sourceItemType);
+        uint _present_itemNo = _get_present_itemNo();
+        if (_targetItemType == 197) {
+            _update_storage_nui(_summoner, _present_itemNo);
+        }
+        emit Upgrade_Fluffy(_summoner, _targetItemType, _present_itemNo);        
+    }
+    function _check_summoner(uint _summoner) internal view returns (bool) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
+        return mfs.check_owner(_summoner, msg.sender);
+    }
+    function _check_items(
+        uint _item1, 
+        uint _item2, 
+        uint _item3, 
+        uint _item4, 
+        uint _item5
+    ) internal view returns (bool) {
+        uint _sourceItemType = _get_sourceItemType(_item1);
+        uint _targetItemType = _get_targetItemType(_item1);
+        //check source item type
+        require(201 <= _sourceItemType && _sourceItemType <= 236);
+        //when fluffy x5 -> fluffier, require 5 items
+        if (213 <= _targetItemType && _targetItemType <= 224) {
+            require(_check_item(_item1, _sourceItemType));
+            require(_check_item(_item2, _sourceItemType));
+            require(_check_item(_item3, _sourceItemType));
+            require(_check_item(_item4, _sourceItemType));
+            require(_check_item(_item5, _sourceItemType));
+        //when fluffier x4 -> fluffiest, require 4 items
+        } else if (224 <= _targetItemType && _targetItemType <= 236) {
+            require(_check_item(_item1, _sourceItemType));
+            require(_check_item(_item2, _sourceItemType));
+            require(_check_item(_item3, _sourceItemType));
+            require(_check_item(_item4, _sourceItemType));
+            require(_item5 == 0);
+        //when fluffiest x3 -> nuichan, require 3 items
+        } else if (_targetItemType == 197) {
+            require(_check_item(_item1, _sourceItemType));
+            require(_check_item(_item2, _sourceItemType));
+            require(_check_item(_item3, _sourceItemType));
+            require(_item4 == 0);
+            require(_item5 == 0);
+        }
+        return true;
+    }
+    function _check_item(uint _item, uint _sourceItemType) internal view returns (bool) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
+        Murasaki_Craft mc = Murasaki_Craft(ma.address_Murasaki_Craft());
+        (uint _itemType, , , ,) = mc.items(_item);
+        require(_itemType == _sourceItemType);
+        require(mfs.check_owner_ofItem(_item, msg.sender));
+        return true;
+    }
+    function _get_sourceItemType(uint _sourceItem) internal view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Craft mc = Murasaki_Craft(ma.address_Murasaki_Craft());
+        (uint _sourceItemType, , , ,) = mc.items(_sourceItem);
+        return _sourceItemType;
+    }
+    function _get_targetItemType(uint _sourceItem) internal view returns (uint) {
+        uint _sourceItemType = _get_sourceItemType(_sourceItem);
+        uint _targetItemType;
+        // when fluffy or fluffier, +12
+        if (201 <= _sourceItemType && _sourceItemType <= 224) {
+            _targetItemType = _sourceItemType +12;
+        // when fluffiest, -> nui-chan
+        } else if (225 <= _sourceItemType && _sourceItemType <= 236) {
+            _targetItemType = 197;
+        }
+        return _targetItemType;
+    }
+    function _burn_sourceItems(
+        uint _item1, 
+        uint _item2, 
+        uint _item3,
+        uint _item4,
+        uint _item5
+    ) internal {
+        _burn(_item1);
+        _burn(_item2);
+        _burn(_item3);
+        if (_item4 != 0) {
+            _burn(_item4);
+        }
+        if (_item5 != 0) {
+            _burn(_item5);
+        }
+    }
+    function _mint_item(
+        uint _summoner,
+        uint _targetItemType,
+        uint _sourceItemType
+    ) internal {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
+        Murasaki_Craft mc = Murasaki_Craft(ma.address_Murasaki_Craft());
+        uint _seed = mfs.seed(_summoner);
+        string memory _memo = toString(_sourceItemType);    //memo source fluffy type
+        mc.craft(_targetItemType, _summoner, msg.sender, _seed, _memo);
+    }
+    function _get_present_itemNo() internal view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Craft mc = Murasaki_Craft(ma.address_Murasaki_Craft());
+        return mc.next_item() - 1;
     }
     function _update_storage_nui(uint _summoner, uint _item_nui) internal {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
@@ -3754,14 +3934,14 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
         5400,
         5850,
         6300,
-        6750,
-        7200,
-        7650,
-        8100,
-        8550,
-        9000,
-        9450,
-        9900,
+        6750 * 4/3,
+        7200 * 4/3,
+        7650 * 4/3,
+        8100 * 4/3,
+        8550 * 5/3,
+        9000 * 5/3,
+        9450 * 6/3,
+        9900 * 7/3,
         //17-32: farming item
         300,
         360,
@@ -3771,14 +3951,14 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
         540,
         585,
         630,
-        675,
-        720,
-        765,
-        810,
-        855,
-        900,
-        945,
-        990,
+        675 * 4/3,
+        720 * 4/3,
+        765 * 4/3,
+        810 * 4/3,
+        855 * 5/3,
+        900 * 5/3,
+        945 * 6/3,
+        990 * 7/3,
         //33-48: crafting item
         1500,
         1800,
@@ -3788,14 +3968,14 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
         2700,
         2925,
         3150,
-        3375,
-        3600,
-        3825,
-        4050,
-        4275,
-        4500,
-        4725,
-        4950,
+        3375 * 4/3,
+        3600 * 4/3,
+        3825 * 4/3,
+        4050 * 4/3,
+        4275 * 5/3,
+        4500 * 5/3,
+        4725 * 6/3,
+        4950 * 7/3,
         //49-63: unreserved
         99999,
         99999,
@@ -3827,14 +4007,14 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
         540,
         585,
         630,
-        675,
-        720,
-        765,
-        810,
-        855,
-        900,
-        945,
-        990,
+        675 * 4/3,
+        720 * 4/3,
+        765 * 4/3,
+        810 * 4/3,
+        855 * 5/3,
+        900 * 5/3,
+        945 * 6/3,
+        990 * 7/3,
         //17-32: farming item
         3000,
         3600,
@@ -3844,14 +4024,14 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
         5400,
         5850,
         6300,
-        6750,
-        7200,
-        7650,
-        8100,
-        8550,
-        9000,
-        9450,
-        9900,
+        6750 * 4/3,
+        7200 * 4/3,
+        7650 * 4/3,
+        8100 * 4/3,
+        8550 * 5/3,
+        9000 * 5/3,
+        9450 * 6/3,
+        9900 * 7/3,
         //33-48: crafting item
         1500,
         1800,
@@ -3861,14 +4041,14 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
         2700,
         2925,
         3150,
-        3375,
-        3600,
-        3825,
-        4050,
-        4275,
-        4500,
-        4725,
-        4950,
+        3375 * 4/3,
+        3600 * 4/3,
+        3825 * 4/3,
+        4050 * 4/3,
+        4275 * 5/3,
+        4500 * 5/3,
+        4725 * 6/3,
+        4950 * 7/3,
         //49-63: unreserved
         99999,
         99999,
@@ -6386,11 +6566,11 @@ contract Murasaki_tokenURI is Ownable {
 //===Treasury======================================================================================================
 
 
-//---bufferVault
+//---BufferVault
 
 
 //trading fee, dapps staking reward, other fees
-contract bufferVault is Ownable, ReentrancyGuard {
+contract BufferVault is Ownable, ReentrancyGuard {
 
     //receivable
     receive() external payable {
@@ -6503,7 +6683,7 @@ contract bufferVault is Ownable, ReentrancyGuard {
 }
 
 
-//---buybackTreasury
+//---BuybackTreasury
 
 
 //for buyback items
@@ -6783,6 +6963,29 @@ contract Admin_Convert is Ownable {
         mssNew.set_total_material_farmed(_summoner, mssOld.total_material_farmed(_summoner));
         mssNew.set_total_item_crafted(_summoner, mssOld.total_item_crafted(_summoner));
         mssNew.set_total_precious_received(_summoner, mssOld.total_precious_received(_summoner));
+    }
+
+    function msn_convert (
+        address _old_address,
+        address _new_address,
+        uint _nuiId
+    ) external onlyOwner {
+        Murasaki_Storage_Nui msnOld = Murasaki_Storage_Nui(_old_address);
+        Murasaki_Storage_Nui msnNew = Murasaki_Storage_Nui(_new_address);
+        msnNew.set_mint_time(_nuiId, msnOld.mint_time(_nuiId));
+        msnNew.set_summoner(_nuiId, msnOld.summoner(_nuiId));
+        msnNew.set_class(_nuiId, msnOld.class(_nuiId));
+        msnNew.set_level(_nuiId, msnOld.level(_nuiId));
+        msnNew.set_strength(_nuiId, msnOld.strength(_nuiId));
+        msnNew.set_dexterity(_nuiId, msnOld.dexterity(_nuiId));
+        msnNew.set_intelligence(_nuiId, msnOld.intelligence(_nuiId));
+        msnNew.set_luck(_nuiId, msnOld.luck(_nuiId));
+        msnNew.set_total_exp_gained(_nuiId, msnOld.total_exp_gained(_nuiId));
+        msnNew.set_total_coin_mined(_nuiId, msnOld.total_coin_mined(_nuiId));
+        msnNew.set_total_material_farmed(_nuiId, msnOld.total_material_farmed(_nuiId));
+        msnNew.set_total_item_crafted(_nuiId, msnOld.total_item_crafted(_nuiId));
+        msnNew.set_total_precious_received(_nuiId, msnOld.total_precious_received(_nuiId));
+        msnNew.set_score(_nuiId, msnOld.score(_nuiId));
     }
 
     function mc_convert (

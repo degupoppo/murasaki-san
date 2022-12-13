@@ -716,12 +716,15 @@ interface RandomDataGuard {
 
 
 
+interface Murasaki_Address {
+    function address_Murasaki_Function_Share() external view returns (address);
+    function address_Murasaki_Craft() external view returns (address);
+    function address_Murasaki_Main() external view returns (address);
+    function address_Murasaki_Storage() external view returns (address);
+    function address_BufferVault() external view returns (address);
+}
 interface Murasaki_Function_Share {
-    function murasaki_craft_address() external view returns (address);
-    function murasaki_main_address() external view returns (address);
-    function murasaki_storage_address() external view returns (address);
     function not_petrified(uint) external view returns (bool);
-    function bufferTreasury_address() external view returns (address);
 }
 interface Murasaki_Craft {
     function safeTransferFrom(
@@ -746,9 +749,9 @@ interface Murasaki_Storage {
 contract Murasaki_Market_Item is Initializable, ERC721Holder {
 
     //address
-    address public murasaki_function_share_address;
-    function _set1_murasaki_function_share_address(address _address) external onlyOwner {
-        murasaki_function_share_address = _address;
+    address public address_Murasaki_Address;
+    function _set_Murasaki_Address(address _address) external onlyOwner {
+        address_Murasaki_Address = _address;
     }
 
     using EnumerableSet for EnumerableSet.UintSet;
@@ -812,13 +815,13 @@ contract Murasaki_Market_Item is Initializable, ERC721Holder {
 
     /// @dev Lists the given summoner. This contract will take custody until bought / unlisted.
     function list(uint _item, uint price) external nonReentrant {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Craft mc = Murasaki_Craft(ma.address_Murasaki_Craft());
         _check_wallet(msg.sender);
         require(price > 0, 'bad price');
         require(prices[_item] == 0, 'already listed');
         require(price >= lowestPrice * 10**18 /1000, 'under the lowest price');
         //rarity.safeTransferFrom(msg.sender, address(this), summonerId);
-        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
-        Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
         mc.safeTransferFrom(msg.sender, address(this), _item);
         prices[_item] = price;
         listers[_item] = msg.sender;
@@ -829,14 +832,14 @@ contract Murasaki_Market_Item is Initializable, ERC721Holder {
 
     /// @dev Unlists the given summoner. Must be the lister.
     function unlist(uint _item) external nonReentrant {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Craft mc = Murasaki_Craft(ma.address_Murasaki_Craft());
         _check_wallet(msg.sender);
         require(prices[_item] > 0, 'not listed');
         require(listers[_item] == msg.sender, 'not lister');
         prices[_item] = 0;
         listers[_item] = address(0);
         //rarity.safeTransferFrom(address(this), msg.sender, summonerId);
-        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
-        Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
         mc.safeTransferFrom(address(this), msg.sender, _item);
         set.remove(_item);
         mySet[msg.sender].remove(_item);
@@ -845,6 +848,8 @@ contract Murasaki_Market_Item is Initializable, ERC721Holder {
 
     /// @dev Buys the given summoner. Must pay the exact correct prirce.
     function buy(uint _item) external payable nonReentrant {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Craft mc = Murasaki_Craft(ma.address_Murasaki_Craft());
         _check_wallet(msg.sender);
         uint price = prices[_item];
         require(price > 0, 'not listed');
@@ -855,26 +860,25 @@ contract Murasaki_Market_Item is Initializable, ERC721Holder {
         prices[_item] = 0;
         listers[_item] = address(0);
         //rarity.safeTransferFrom(address(this), msg.sender, summonerId);
-        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
-        Murasaki_Craft mc = Murasaki_Craft(mfs.murasaki_craft_address());
         mc.safeTransferFrom(address(this), msg.sender, _item);
         payable(lister).transfer(get);
         set.remove(_item);
         mySet[lister].remove(_item);
         //fee transfer
-        payable(mfs.bufferTreasury_address()).transfer(address(this).balance);
+        payable(ma.address_BufferVault()).transfer(address(this).balance);
         emit Buy(_item, lister, msg.sender, price, fee);
     }
 
     //check wallet
     function _check_wallet(address _wallet) public view returns (bool) {
-        Murasaki_Function_Share mfs = Murasaki_Function_Share(murasaki_function_share_address);
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
+        Murasaki_Main mm = Murasaki_Main(ma.address_Murasaki_Main());
+        Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
         //check summoner possession
-        Murasaki_Main mm = Murasaki_Main(mfs.murasaki_main_address());
         uint _summoner = mm.tokenOf(_wallet);
         require(_summoner > 0);
         //check summoner activation
-        Murasaki_Storage ms = Murasaki_Storage(mfs.murasaki_storage_address());
         require(ms.isActive(_summoner));
         //check summoner petrification
         require(mfs.not_petrified(_summoner));
@@ -931,6 +935,8 @@ contract Murasaki_Market_Item is Initializable, ERC721Holder {
 }
 
 
+/*
+//batch call
 contract Murasaki_Function_Market is Ownable {
 
     //address
@@ -947,3 +953,4 @@ contract Murasaki_Function_Market is Ownable {
 
     
 }
+*/

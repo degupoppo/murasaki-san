@@ -68,7 +68,7 @@ async function _show_icon() {
     let wallet = _wallets[0];
     // prepare contract
     let _abi = [{'inputs': [{'internalType': 'address', 'name': '_wallet', 'type': 'address'}], 'name': 'tokenURI_fromWallet', 'outputs': [{'internalType': 'string', 'name': '', 'type': 'string'}], 'stateMutability': 'view', 'type': 'function'}];
-    let _address = "0x96922A290330773BB62A0559E6f93b12a8Ff42EE";
+    let _address = "0xcdA558BE0717D4F34b1f288c79a60d007daA11bf";
     let contract = new web3.eth.Contract(_abi, _address);
     // get tokenURI
     let _res = await contract.methods.tokenURI_fromWallet(wallet).call();

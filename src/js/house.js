@@ -82,16 +82,26 @@ contract ERC721 is IERC721 {
 
 //### 1st
 
-    priceの係数計算
+    nuiちゃんにclassパラメータを実装する
+        mcのmemoを使うか、storage_nuiに追加するか。
+        class値は合成元のfluffyのtypeを継承する
+        → memoを実装
+        classパラメータに応じてリボンの色を変える
+
+ ok marketコントラクトの修正
+        新maに対応させる
+
+ ok priceの係数計算
         10**18で取得されるので整数化する
 
-    tokenURIの再実装
+ ok tokenURIの再実装
         mcのuriにpngへのURLを返すように設定する
 
-    Treajuryシステムの刷新
+ ok Treasuryシステムの刷新
         mint feeの取り扱いと脱ポンジ
             old userのbuybackTreajury分をnew userのmint feeで賄う構図は避ける
-            mint fee
+            mint feeはbufferVaultへは入れない
+            即座にdev wallet, staking wallet, buybackTreasuryへ分割送金する
         資金場所
             BufferVault：コントラクト
                 全ての資金は一旦ここに集められる
@@ -130,7 +140,7 @@ contract ERC721 is IERC721 {
                 not active userを設定した直後はbuyback価格が上昇してしまうので、
                 このタイミングでbuybackされない機構を考える。
 
-   *buybackTreajuryの改善
+ ok buybackTreajuryの改善
         active userの増減によってはbuyback -> bufferへと移動させることも必要になる
         active user数を取得した上でインフレ率を計算するよう修正する
         手順としては：
@@ -150,25 +160,30 @@ contract ERC721 is IERC721 {
         旅報酬のユースケースは？
             移動効率アップ
 
-    動作軽量化対策
+ ok 動作軽量化対策
         fpsを120などに上昇させ、何が重いのか調査する
             全画面画像は重い？
             透過処理画像が重い？
+        → 全画面画像が重かった
+            phaser3をupdateし、
+            かつachvをアイコン化した
 
     バランス調整
      ok item_dcテーブルの調整
             後半のアイテムほど最低dcを大きくする
      ok catインターバルの調整
             5日 → 7日
-        fluffy必要量の調整
+     ok fluffy必要量の調整
             3個, 4個, 5個？
-        coin/materialの必要量の調整
+     ok coin/materialの必要量の調整
             後半のアイテムは3日分→5日分程度へ計算して調整
      ng ffの補正修正
             x2ではなくx1.5程度にする
             → 割り算が困難なため保留
-        fluffy供給量の調整
+     ok fluffy供給量の調整
             現在のバランスだと0.5日に1個で多すぎるか
+            → cat-mailを7dに変更、stakingはmaxは出ないので大丈夫だろうか
+            また、fluffy合成コストを上昇、estができにくくなった。
 
     coin/material per dayの正確な計算
         拡大再生産を実感できるように
@@ -176,8 +191,10 @@ contract ERC721 is IERC721 {
     wallet反映アイテムの実装
         age反映アイテム：
             なに？
+            → 金魚鉢
         nonce反映アイテム：
             時計の針を進める？
+            → 時計
 
     NFTの希少性の深慮
         NFTの希少性について考える
@@ -188,7 +205,7 @@ contract ERC721 is IERC721 {
         alchemyのpp：
             https://www.alchemy.com/policies/privacy-policy
 
-    実績システムのUI検討
+ ok 実績システムのUI検討
         一旦ボツにしたが、称号や勲章の様にあっても良いだろうか。
         実績によって増える小さななにかを考える。
             ちょうちょ？
@@ -235,6 +252,9 @@ contract ERC721 is IERC721 {
             基本＝100とし、Lvやscoreで+aする
         feeding/grooming時はアニメーションが終わってからworkingを開始させる
         fluffyの移動ラインとon_click時のラインが異なるので修正する
+        位置保存時、他人のsummonerと混線するバグ
+            他人のsummoner時は位置保存させない
+            初期位置の吟味
 
     Web3文化の改善
         せっかくブロックチェーン上で作るので、web3の哲学を組み込みたい
@@ -302,7 +322,7 @@ contract ERC721 is IERC721 {
         さて、どうするか。
             もぐらさんを使うか？
             
-    fluffyシステムの個数調整
+ ok fluffyシステムの個数調整
         upgradeの個数調整
             x3 -> x1は安すぎるか？
             fluffy dollがあまりに量産されすぎるのも良くない
@@ -317,7 +337,7 @@ contract ERC721 is IERC721 {
     訪問時のUI修正
         他のsummonerを表示した時にfeedingボタンしか表示させないように修正する
 
-    walletの状態を反映するギミックをもう少し実装する
+ ok walletの状態を反映するギミックをもう少し実装する
         所持NFT：photo frame内に表示される
         所持token：tokenChestから出てくる
         nonce：nonceが多いほど変化する何かを考える
@@ -1150,6 +1170,7 @@ async function init_global_variants() {
     local_crafting_resume_item_type = 0;
     local_crafting_resume_item_dc = 0;   
     local_total_staking_reward_counter = 0;
+    local_achv = new Array(32).fill(false);
 
     //---local festival
     local_ff_each_voting_count = new Array(256).fill(0);
@@ -1193,6 +1214,7 @@ async function init_global_variants() {
     last_local_calc_feeding = 0;
     last_local_calc_grooming = 0;
     previous_local_fluffy_count = 0;
+    li_achv = [0];
     
     //---local etc
     turn = 0;
@@ -1442,6 +1464,7 @@ function get_itemIds(_myListsAt_withItemType) {
 
 //generate upgradable item ids list
 //return: [ [fromItemType, toItemType, [itemId1, 2, 3]], []...]
+/*
 function get_upgradable_itemIds(_myListsAt_withItemType) {
     //totalling itemType
     //{_itemType:[_itemId1, 2, 3], ...}
@@ -1468,7 +1491,35 @@ function get_upgradable_itemIds(_myListsAt_withItemType) {
     });
     return _res;
 }
-
+*/
+function get_upgradable_itemIds2(_myListsAt_withItemType) {
+    //totalling itemType
+    //{_itemType:[_itemId1, 2, 3], ...}
+    let _dict = {};
+    for (i = 0; i < _myListsAt_withItemType.length; i += 2) {
+        let _itemId = Number(_myListsAt_withItemType[i]);
+        let _itemType = Number(_myListsAt_withItemType[i+1]);
+        try {
+            _dict[_itemType].push(_itemId);
+        } catch(error) {
+            _dict[_itemType] = [_itemId];
+        }
+    }
+    //extract itemType in ids >= 3
+    //or when fluffy, ids >= 5, when fluffier, >=4, when fluffiest, >=3
+    let _res = {};
+    Object.keys(_dict).forEach(__itemType => {
+        if (
+            (__itemType <= 128 && _dict[__itemType].length >= 3)
+            || (201 <= __itemType && __itemType <= 212 && _dict[__itemType].length >= 5)
+            || (213 <= __itemType && __itemType <= 224 && _dict[__itemType].length >= 4)
+            || (225 <= __itemType && __itemType <= 236 && _dict[__itemType].length >= 3)
+        ) {
+            _res[__itemType] = _dict[__itemType];
+        }
+    });
+    return _res;
+}
 //### static
 async function contract_update_static_status(_summoner) {
 
@@ -1608,6 +1659,9 @@ async function contract_update_dynamic_status(_summoner) {
         console.log("***ERROR***: _all_dynamic_status == 0")
         return 0;
     }
+    
+    //call achievement
+    local_achv = await call_achv(_summoner);
     
     //update local status
 
@@ -1960,7 +2014,9 @@ async function contract_get_item_nui(_item) {
     let _class = await contract_msn_wss.methods.class(_item).call();
     let _score = await contract_msn_wss.methods.score(_item).call();
     let _exp_rate = await contract_mfs_wss.methods.calc_exp_addition_rate(summoner, _item).call();
-    return [_summoner_of_nui, _class, _score, _exp_rate];
+    let __item = await contract_mc_wss.methods.items(_item).call();
+    let _memo = __item.memo;
+    return [_summoner_of_nui, _class, _score, _exp_rate, _memo];
 }
 
 //call name from summoner id
@@ -2087,6 +2143,20 @@ async function call_item_info(_itemId) {
     return _item;   //object
 }
 
+//call achievement
+async function call_achv(_summoner) {
+    let _achv = await contract_mfa_wss.methods.get_achievement(_summoner).call();
+    return _achv;
+}
+
+//update achievement
+async function update_achv() {
+    for (i=1; i<=20; i++) {
+        if(local_achv[i] == true) {
+            li_achv[i].visible = true;
+        }
+    }
+};
 
 
 
@@ -2131,7 +2201,7 @@ async function contract_feeding(_summoner) {
     if (_summoner == 0) {
         return 0;
     }
-    contract_mffg_wss.methods.feeding(_summoner, active_nui_id).send({from:wallet})
+    contract_mffg.methods.feeding(_summoner, active_nui_id).send({from:wallet})
         .on("transactionHash", (transactionHash) => update_tx_text("sending", transactionHash))
         .on("receipt", (receipt) => {
             update_tx_text("done", receipt.transactionHash);
@@ -2275,28 +2345,35 @@ async function contract_burn_name(_summoner) {
 
 //unpack_bag
 async function unpack_bag(_summoner, _item) {
-    contract_mfc.methods.unpack_bag(_summoner, _item).send({from:wallet})
+    contract_mfc2.methods.unpack_bag(_summoner, _item).send({from:wallet})
         .on("transactionHash", (transactionHash) => update_tx_text("sending", transactionHash))
         .on("receipt", (receipt) => update_tx_text("done", receipt.transactionHash));
 }
 
 //dice_roll
 async function dice_roll(_summoner) {
-    contract_wd.methods.dice_roll(_summoner).send({from:wallet})
+    contract_md.methods.dice_roll(_summoner).send({from:wallet})
         .on("transactionHash", (transactionHash) => update_tx_text("sending", transactionHash))
         .on("receipt", (receipt) => update_tx_text("done", receipt.transactionHash));
 }
 
 //upgrade
 async function upgrade_item(_summoner, _itemId1, _itemId2, _itemId3) {
-    contract_mfc.methods.upgrade_item(_summoner, _itemId1, _itemId2, _itemId3).send({from:wallet})
+    contract_mfc2.methods.upgrade_item(_summoner, _itemId1, _itemId2, _itemId3).send({from:wallet})
+        .on("transactionHash", (transactionHash) => update_tx_text("sending", transactionHash))
+        .on("receipt", (receipt) => update_tx_text("done", receipt.transactionHash));
+}
+
+//upgrade_to_fluffier
+async function upgrade_fluffy(_summoner, _itemId1, _itemId2, _itemId3, _itemId4, _itemId5) {
+    contract_mfc2.methods.upgrade_fluffy(_summoner, _itemId1, _itemId2, _itemId3, _itemId4, _itemId5).send({from:wallet})
         .on("transactionHash", (transactionHash) => update_tx_text("sending", transactionHash))
         .on("receipt", (receipt) => update_tx_text("done", receipt.transactionHash));
 }
 
 //open presentbox
 async function open_presentbox(_summoner, _itemId) {
-    contract_mfc.methods.open_presentbox(_summoner, _itemId).send({from:wallet})
+    contract_mfc2.methods.open_presentbox(_summoner, _itemId).send({from:wallet})
         .on("transactionHash", (transactionHash) => update_tx_text("sending", transactionHash))
         .on("receipt", (receipt) => update_tx_text("done", receipt.transactionHash));
 }
@@ -6009,7 +6086,7 @@ function open_window_upgrade(scene) {
     group_window_upgrade.add(msg_upgrade);
     
     //get upgradable items
-    let upgradable_itemIds = get_upgradable_itemIds(local_myListsAt_withItemType);
+    let upgradable_itemIds = get_upgradable_itemIds2(local_myListsAt_withItemType);
     
     //showing upgradable items
     let _num = 0;
@@ -6061,9 +6138,10 @@ function open_window_upgrade(scene) {
         let _txt = "";
         _txt += _rarity_to + _item_name_to;
         _txt += " (burning item_id: ";
-        _txt += upgradable_itemIds[_itemId][0] + ", ";
-        _txt += upgradable_itemIds[_itemId][1] + ", ";
-        _txt += upgradable_itemIds[_itemId][2] + ")";
+        for (i=0; i<=upgradable_itemIds[_itemId].length; i++) {
+            _txt += upgradable_itemIds[_itemId][i] + ", ";
+        }
+        _txt += ")";
         _txt += "\n";
         let _msg = scene.add.text(200, 220 + 70*_num, _txt)
             .setFontSize(30)
@@ -7156,26 +7234,49 @@ function create(scene) {
     
     //---achievement
     let _achv_alpha = 0.7;
-    achv_01 = scene.add.image(1155, 568, "achv_01").setAlpha(_achv_alpha);
-    achv_02 = scene.add.image(1190, 595, "achv_02").setAlpha(_achv_alpha);
-    achv_03 = scene.add.image(1248, 660, "achv_03").setAlpha(_achv_alpha);
-    //achv_04 = scene.add.image(600, 480, "achv_04").setAlpha(_achv_alpha);
-    //achv_05 = scene.add.image(632, 489, "achv_05").setAlpha(_achv_alpha);
-    achv_06 = scene.add.image(330, 472, "achv_06").setAlpha(_achv_alpha);
-    achv_07 = scene.add.image(285, 472, "achv_07").setAlpha(_achv_alpha);
-    achv_08 = scene.add.image(240, 474, "achv_08").setAlpha(_achv_alpha);
-    //achv_09 = scene.add.image(310, 420, "achv_09").setAlpha(_achv_alpha);
-    //achv_10 = scene.add.image(255, 420, "achv_10").setAlpha(_achv_alpha);
-    achv_11 = scene.add.image(1255, 619, "achv_11").setAlpha(_achv_alpha);
-    achv_12 = scene.add.image(1263, 683, "achv_12").setAlpha(_achv_alpha);
-    achv_13 = scene.add.image(1140, 533, "achv_13").setAlpha(_achv_alpha);
-    //achv_14 = scene.add.image(1190, 540, "achv_14").setAlpha(_achv_alpha);
-    //achv_15 = scene.add.image(365, 408, "achv_15").setAlpha(_achv_alpha);
-    achv_16 = scene.add.image(825, 480, "achv_16").setAlpha(_achv_alpha);
-    achv_17 = scene.add.image(1215, 633, "achv_17").setAlpha(_achv_alpha);
-    achv_18 = scene.add.image(836, 448, "achv_18").setAlpha(_achv_alpha);
-    //achv_19 = scene.add.image(1232, 580, "achv_19").setAlpha(_achv_alpha);
-    //achv_20 = scene.add.image(365, 470, "achv_20").setAlpha(_achv_alpha);
+    achv_01 = scene.add.image(1155, 568, "achv_01").setAlpha(_achv_alpha).setVisible(false);
+    achv_02 = scene.add.image(1190, 595, "achv_02").setAlpha(_achv_alpha).setVisible(false);
+    achv_03 = scene.add.image(1248, 660, "achv_03").setAlpha(_achv_alpha).setVisible(false);
+    achv_04 = scene.add.image(600, 480, "achv_04").setAlpha(_achv_alpha).setVisible(false);
+    achv_05 = scene.add.image(632, 489, "achv_05").setAlpha(_achv_alpha).setVisible(false);
+    achv_06 = scene.add.image(330, 472, "achv_06").setAlpha(_achv_alpha).setVisible(false);
+    achv_07 = scene.add.image(285, 472, "achv_07").setAlpha(_achv_alpha).setVisible(false);
+    achv_08 = scene.add.image(240, 474, "achv_08").setAlpha(_achv_alpha).setVisible(false);
+    achv_09 = scene.add.image(310, 420, "achv_09").setAlpha(_achv_alpha).setVisible(false);
+    achv_10 = scene.add.image(255, 420, "achv_10").setAlpha(_achv_alpha).setVisible(false);
+    achv_11 = scene.add.image(1255, 619, "achv_11").setAlpha(_achv_alpha).setVisible(false);
+    achv_12 = scene.add.image(1263, 683, "achv_12").setAlpha(_achv_alpha).setVisible(false);
+    achv_13 = scene.add.image(1140, 533, "achv_13").setAlpha(_achv_alpha).setVisible(false);
+    achv_14 = scene.add.image(1190, 540, "achv_14").setAlpha(_achv_alpha).setVisible(false);
+    achv_15 = scene.add.image(365, 408, "achv_15").setAlpha(_achv_alpha).setVisible(false);
+    achv_16 = scene.add.image(825, 480, "achv_16").setAlpha(_achv_alpha).setVisible(false);
+    achv_17 = scene.add.image(1215, 633, "achv_17").setAlpha(_achv_alpha).setVisible(false);
+    achv_18 = scene.add.image(836, 448, "achv_18").setAlpha(_achv_alpha).setVisible(false);
+    achv_19 = scene.add.image(1232, 580, "achv_19").setAlpha(_achv_alpha).setVisible(false);
+    achv_20 = scene.add.image(365, 470, "achv_20").setAlpha(_achv_alpha).setVisible(false);
+    li_achv = [
+        0,
+        achv_01,
+        achv_02,
+        achv_03,
+        achv_04,
+        achv_05,
+        achv_06,
+        achv_07,
+        achv_08,
+        achv_09,
+        achv_10,
+        achv_11,
+        achv_12,
+        achv_13,
+        achv_14,
+        achv_15,
+        achv_16,
+        achv_17,
+        achv_18,
+        achv_19,
+        achv_20,
+    ];
 
     //---animation wall sticker
     scene.anims.create({
@@ -9037,6 +9138,7 @@ function update_checkModeChange(this_scene) {
             button_farming.on('pointerout', () => button_farming.setTexture("button_farming_enable"));
             button_farming.setInteractive();
         }
+        /*
         if (local_level == 3) {
             //enable crafting button
             //button_crafting.setTexture("button_crafting_enable");
@@ -9045,6 +9147,7 @@ function update_checkModeChange(this_scene) {
             button_crafting.on('pointerout', () => button_crafting.setTexture("button_crafting_start_off"));
             button_crafting.setInteractive();
         }
+        */
 
     //feeding check, continue
     } else if (local_last_feeding_time > previous_local_last_feeding_time){
@@ -9333,6 +9436,9 @@ function update_checkButtonActivation(this_scene) {
 
 //---items
 function update_checkItem(this_scene) {
+
+    //***TODO*** crayyon
+    update_achv();
 
     //calc sum of local_items and compare previous one
     let res1 = local_items.reduce((sum, element) => sum + element, 0);
