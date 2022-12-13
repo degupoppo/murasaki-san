@@ -82,6 +82,21 @@ contract ERC721 is IERC721 {
 
 //### 1st
 
+    fluffy houseの実装
+        fluffyとの接触処理
+        クリックでfluffyが飛び出してくる演出
+        くっついているfluffyの数に応じた段階絵
+
+    時計の実装
+        nonceの数に応じて長針と短針を動かす
+        長針・短針をプログラムで動かす機構を実装する
+    
+ ok fishbowlの実装
+        wallet ageに応じて成長させる
+
+    fluffyのupgradeの実装
+        5アイテムのupgradeの実装
+
     集計情報
         ユーザー数
         石化ユーザー数
@@ -6162,12 +6177,41 @@ function open_window_upgrade(scene) {
             .setFill(_fontColor)
             .setInteractive({useHandCursor: true})
             .on("pointerdown", () => {
-                upgrade_item(
-                    summoner, 
-                    upgradable_itemIds[_itemId][0], 
-                    upgradable_itemIds[_itemId][1], 
-                    upgradable_itemIds[_itemId][2]
-                );
+                if (_itemId <= 128){
+                    upgrade_item(
+                        summoner, 
+                        upgradable_itemIds[_itemId][0], 
+                        upgradable_itemIds[_itemId][1], 
+                        upgradable_itemIds[_itemId][2]
+                    );
+                } else if (_itemId <= 212) {
+                    upgrade_fluffy(
+                        summoner, 
+                        upgradable_itemIds[_itemId][0], 
+                        upgradable_itemIds[_itemId][1], 
+                        upgradable_itemIds[_itemId][2],
+                        upgradable_itemIds[_itemId][3],
+                        upgradable_itemIds[_itemId][4]
+                    );
+                } else if (_itemId <= 224) {
+                    upgrade_fluffy(
+                        summoner, 
+                        upgradable_itemIds[_itemId][0], 
+                        upgradable_itemIds[_itemId][1], 
+                        upgradable_itemIds[_itemId][2],
+                        upgradable_itemIds[_itemId][3],
+                        //upgradable_itemIds[_itemId][4]
+                    );
+                } else if (_itemId <= 236) {
+                    upgrade_fluffy(
+                        summoner, 
+                        upgradable_itemIds[_itemId][0], 
+                        upgradable_itemIds[_itemId][1], 
+                        upgradable_itemIds[_itemId][2],
+                        //upgradable_itemIds[_itemId][3],
+                        //upgradable_itemIds[_itemId][4]
+                    );
+                }
                 close_window_upgrade(); 
             })
             .on("pointerdown", () => sound_window_select.play() )
@@ -10137,7 +10181,7 @@ function update_checkItem(this_scene) {
         group_update.add(cat);
         
         //mail
-        mail = this_scene.add.sprite(75, 675, "item_mail")
+        mail = this_scene.add.sprite(75, 655, "item_mail")
             .setScale(0.6)
             .setOrigin(0.5)
             .setDepth(item_cushion.y -50 +2)
@@ -11239,6 +11283,20 @@ function update_checkItem(this_scene) {
     ) {
         item_fishbowl.destroy(true);
         local_items_flag[_item_id] = false;
+    }
+    //when possess cushion
+    if (local_items_flag[_item_id] == true) {
+        if (local_wallet_score >= 3300) {
+            item_fishbowl.anims.play("item_fishbowl_5", true);
+        } else if (local_wallet_score >= 2250) {
+            item_fishbowl.anims.play("item_fishbowl_4", true);
+        } else if (local_wallet_score >= 1500) {
+            item_fishbowl.anims.play("item_fishbowl_3", true);
+        } else if (local_wallet_score >= 750) {
+            item_fishbowl.anims.play("item_fishbowl_2", true);
+        } else {
+            item_fishbowl.anims.play("item_fishbowl_1", true);
+        }
     }
 
     //###44:Cuckoo Clock

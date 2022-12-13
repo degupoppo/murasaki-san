@@ -77,7 +77,7 @@ async function init_web3(){
     address_Murasaki_Function_Achievement = '0x162e40C439Bc912E60D81F780C8b2dDDDfa7E46d';
     address_Murasaki_Function_Crafting = '0x998b65D1B5B18BA5fAeC2aA69c0B0C88ec73a7A4';
     address_Murasaki_Function_Crafting2 = '0x7e0219d6843aeFdcf38De1a64b38733019513Dd9';
-    address_Murasaki_Function_Crafting_Codex = '0xA4476a2D9880dD2Cc16698f2a0e26fCaFc4bb41d';
+    address_Murasaki_Function_Crafting_Codex = '0xEFbf92Fb36639e14A95fd751f7cc179912562d7D';
     address_Murasaki_Function_Feeding_and_Grooming = '0xaf2FbB265c24b00Cf5DD6fA500e75d5aff63eC07';
     address_Murasaki_Function_Mining_and_Farming = '0x32691E0D3deC5b41F7388B7Afe72C788d2d24E82';
     address_Murasaki_Function_Name = '0xc482A3190A2fee15CBcbB5a54f0430923629bcaC';

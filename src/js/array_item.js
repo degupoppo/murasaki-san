@@ -63,7 +63,7 @@ let _dic_items = {
         "item_id":9,
         "item_id_uncommon":9+64,
         "item_id_rare":9+128,
-        "img_name":"item_fishbowl",
+        "img_name":"item_fishbowl_list",
         "icon_png":"png/item_fishbowl.png",
     },
     "Sleeping Bed":{
