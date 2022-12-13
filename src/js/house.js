@@ -88,106 +88,6 @@ contract ERC721 is IERC721 {
         → memoを実装
         classパラメータに応じてリボンの色を変える
 
- ok marketコントラクトの修正
-        新maに対応させる
-
- ok priceの係数計算
-        10**18で取得されるので整数化する
-
- ok tokenURIの再実装
-        mcのuriにpngへのURLを返すように設定する
-
- ok Treasuryシステムの刷新
-        mint feeの取り扱いと脱ポンジ
-            old userのbuybackTreajury分をnew userのmint feeで賄う構図は避ける
-            mint feeはbufferVaultへは入れない
-            即座にdev wallet, staking wallet, buybackTreasuryへ分割送金する
-        資金場所
-            BufferVault：コントラクト
-                全ての資金は一旦ここに集められる
-                Mint feeもここに入れることとする
-            BuybackTreajury：コントラクト
-                月に1回、資金量を増減させて調整する
-                常にactive user数 * amount per user量を確保する
-            StakingWallet：EOA
-                残りの資金はここに格納される
-                dApps stakingへ全額ステークする
-                余計なtxは飛ばさないように注意する
-            Administrator Wallet：EOA
-                全コントラクトの所有権を有する
-                必要な時だけ、コントラクトのメンテナンスを行う
-                余計なtxは飛ばさないように注意する
-            Developer wallet：EOA
-                BufferVaultから5% * 2を2つのプライベートwalletへ移動する            
-        BufferVaultからの資金移動を関数化する
-            Staking wallet -> BufferVaultは事前に手動で行う
-            BufferVault <-> BuybackTreajury, 相互移動
-            BufferVault -> Developer wallets, 5% x 2
-            BufferVault -> Staking Wallet, 残った資金全部, bufferをカラにする
-        手順：
-            手動でbuybackTreajuryにnot active user数を設定する
-                all user - not active user = active user数を算出する
-            手動でbufferTreajuryにインフレ率を設定する
-                関数でそのインフレ率を達成するために必要なamountを算出する
-            手動で不足amount分をstaking walletからbufferTreajuryへ送金する
-                不足しないようにインフレ率を設定したいところ
-                あるいはインフレ率を達成するamountがbufferに貯まるまで待つ
-            コントラで、buffer -> buyback, dev wallets, staking walletへの送金を一度に行う。
-                dev wallet: 5%
-                buyback: インフレ率を達成する分
-                staking: 残り全て
-            buybackに余剰資金がある場合は資金を逆流させる
-                not active userを設定した直後はbuyback価格が上昇してしまうので、
-                このタイミングでbuybackされない機構を考える。
-
- ok buybackTreajuryの改善
-        active userの増減によってはbuyback -> bufferへと移動させることも必要になる
-        active user数を取得した上でインフレ率を計算するよう修正する
-        手順としては：
-            インフレ率を手動で設定
-            脱落ユーザー数を手動で集計して設定
-            インフレ率に基づいて、buybackTreajury <-> BufferTreajuryの資金移動を行う
-                これはコントラクトコードで実装する
-            続く処理でbufferTreajuryに残った資金はteamTreajuryへと移動する
-
-    Travel of Murasaki-Sanの構想案
-        旅の目的は？
-            宝物SBTもしくはNFTの取得
-            どこに行ったかのスタンプのようなものなので、SBTのほうが良いだろうか
-        旅報酬を受け取る条件は？
-            特定の座標？
-            移動距離に応じて確率が上がるランダム取得？
-        旅報酬のユースケースは？
-            移動効率アップ
-
- ok 動作軽量化対策
-        fpsを120などに上昇させ、何が重いのか調査する
-            全画面画像は重い？
-            透過処理画像が重い？
-        → 全画面画像が重かった
-            phaser3をupdateし、
-            かつachvをアイコン化した
-
-    バランス調整
-     ok item_dcテーブルの調整
-            後半のアイテムほど最低dcを大きくする
-     ok catインターバルの調整
-            5日 → 7日
-     ok fluffy必要量の調整
-            3個, 4個, 5個？
-     ok coin/materialの必要量の調整
-            後半のアイテムは3日分→5日分程度へ計算して調整
-     ng ffの補正修正
-            x2ではなくx1.5程度にする
-            → 割り算が困難なため保留
-     ok fluffy供給量の調整
-            現在のバランスだと0.5日に1個で多すぎるか
-            → cat-mailを7dに変更、stakingはmaxは出ないので大丈夫だろうか
-            また、fluffy合成コストを上昇、estができにくくなった。
-
-    coin/material per dayの正確な計算
-        拡大再生産を実感できるように
-    
     wallet反映アイテムの実装
         age反映アイテム：
             なに？
@@ -195,52 +95,6 @@ contract ERC721 is IERC721 {
         nonce反映アイテム：
             時計の針を進める？
             → 時計
-
-    NFTの希少性の深慮
-        NFTの希少性について考える
-            BCGのインフレし続けるNFTは価値が希釈され続けていく
-            何かしらの希少価値はメカニズムとして組み込みたい
-
-    privacy policyの整備
-        alchemyのpp：
-            https://www.alchemy.com/policies/privacy-policy
-
- ok 実績システムのUI検討
-        一旦ボツにしたが、称号や勲章の様にあっても良いだろうか。
-        実績によって増える小さななにかを考える。
-            ちょうちょ？
-            お花？
-            小さな宝石？
-            壁にくっつくなにか？
-        これを見ることでゲームの進捗がすぐわかるように。
-            
- ok 実績コントラクトの設計
-        実績達成をtrue/falseで判定するfunction
-            1つの実績につき1 function
-        達成済み実績をtrue/falseで記憶するstorage
-            achievement uint32[256]のようなarray
-        新たに達成した実績の数をuint32でreturnするfunction
-            もしくはarrayでreturnする
-            達成時は項目を表示させたいため
-        実績判定のタイミングをどうするか
-            mining/farmin時などにいちいち行っていたらgas代かさむか
-            level-up時にまとめて行うか
-        実績案
-            coin/material:max 500,000
-                gain 1,000
-                gain 10,000
-                gain 100,000...
-            craft:0-48
-                4,8,12,16,20,24
-                craft 10
-                craft 30
-                craft 100...
-            heart
-                received 10
-                received 30
-                received 100...
-            level-up:1-20
-                3,6,9,12,15,18
 
     バグ・仕様修正
      ok fluffyが空を飛ぶバグ
@@ -255,6 +109,57 @@ contract ERC721 is IERC721 {
         位置保存時、他人のsummonerと混線するバグ
             他人のsummoner時は位置保存させない
             初期位置の吟味
+
+    fluffy修正
+        まばたきが全員同期しているのでずらす
+            アニメーション開始時間をずらすのだが、さてどうするか。
+
+    fluffy festivalのUI改善
+        問題点：
+            festival後に結果がわからない
+            現在のfluffy所持数がわかりにくい
+        さて、どうするか。
+            もぐらさんを使うか？
+            
+    訪問時のUI修正
+        他のsummonerを表示した時にfeedingボタンしか表示させないように修正する
+
+    細かなUIの修正
+        working textがiPad OFFで表示されることの修正
+        crafting windowのflower 位置、nyuinyuiのy軸、説明文位置の修正
+
+    Travel of Murasaki-Sanの構想案
+        旅の目的は？
+            宝物SBTもしくはNFTの取得
+            どこに行ったかのスタンプのようなものなので、SBTのほうが良いだろうか
+        旅報酬を受け取る条件は？
+            特定の座標？
+            移動距離に応じて確率が上がるランダム取得？
+        旅報酬のユースケースは？
+            移動効率アップ
+
+    coin/material per dayの正確な計算
+        拡大再生産を実感できるように
+    
+   *細かなUIの改善
+        投票がhappy<10でできなくしてmsgを表示する
+     ok crafting windowの情報説明msgを表示する
+     ok mining, farmingがhappy<10, satiety<10でできないことを表示する
+        crafting中に音符を表示させる
+        crafting絵の修正、少しずれている
+     ok crafting window開いている時にitem更新されるとバグる点の修正
+     ok crafting中にリロードするとアイテム名が表示されないバグの修正
+            summoner modeを先にcraftingに設定しているのでsetTextが読み込まれていない
+            構造修正が多少必要
+
+    NFTの希少性の深慮
+        NFTの希少性について考える
+            BCGのインフレし続けるNFTは価値が希釈され続けていく
+            何かしらの希少価値はメカニズムとして組み込みたい
+
+    privacy policyの整備
+        alchemyのpp：
+            https://www.alchemy.com/policies/privacy-policy
 
     Web3文化の改善
         せっかくブロックチェーン上で作るので、web3の哲学を組み込みたい
@@ -273,35 +178,6 @@ contract ERC721 is IERC721 {
                 mint上限の決まっている限定NFT
                 作成に労力のかかるNFT：ぬいちゃん
 
-    fluffy修正
-        まばたきが全員同期しているのでずらす
-            アニメーション開始時間をずらすのだが、さてどうするか。
-
- ok tokenURIの実装
-        svg型tokenURIの解説：
-            https://qiita.com/hakumai-iida/items/c96d7c053379f42ba9b8
-        svg形式で絵を表示する方法を調べる
-        パラメータなどを表示したいが、クラスなどがせいぜいだろうか。
-        pngからsvgへの変換、カラー可能
-            https://onlineconvertfree.com/ja/convert/png/
-        むらさきさんの背景に、Lvやflowerなどを表示させる
-            アイコン絵をtokenURIで実装してみたい。
-            フルオンチェーンのSBT絵となる。
-        jsでwebでそのまま使用可能なコードも併せて用意する。
-        2パターン用意する
-         ok 1: mmのみで完結するtokenURI
-                むらさきさんのsvgにオーバーラップさせて最低限の情報を表示する
-                summoner ID, classのみを表示させる
-                classはflower名に置換するか
-                背景をflower colorにしても良いかもしれない
-            2: infoを反映した専用コントラのtokenURI
-                成長度を反映させたtokenURI
-                パット見てむらさきさんの成長度を視認できる情報はなんであろうか
-                    Name, Lv, age, scoreあたりだろうか。
-        svg化の手順を把握する：
-            https://qiita.com/hakumai-iida/items/c96d7c053379f42ba9b8
-            too deep stackをどうやって回避するか。
-
     給食botの実装
         1日1 $ASTRなどの手数料を支払ってfeedingを一括で行うbot
             onlyOwnerでオフチェーンから11時間ごとなどに叩く。
@@ -315,37 +191,10 @@ contract ERC721 is IERC721 {
             キャンセルも可能とする
             キャンセルすると、残り日数に応じたASTRが返金される
 
-    fluffy festivalのUI改善
-        問題点：
-            festival後に結果がわからない
-            現在のfluffy所持数がわかりにくい
-        さて、どうするか。
-            もぐらさんを使うか？
-            
- ok fluffyシステムの個数調整
-        upgradeの個数調整
-            x3 -> x1は安すぎるか？
-            fluffy dollがあまりに量産されすぎるのも良くない
-            x3 , x4, x5と段階的に上げていっても良いか。
-        いずれにしても、要調整だろうか
-
     Offeringオーダーの実装
         予めほしいアイテムに値段を決めてofferingを出しておき、
             それ以下の値段でlistされたときは即座に売買を成立させる
         UIの改善、bot対策、マーケットを利用したtransferの抑制に有用だろう
-
-    訪問時のUI修正
-        他のsummonerを表示した時にfeedingボタンしか表示させないように修正する
-
- ok walletの状態を反映するギミックをもう少し実装する
-        所持NFT：photo frame内に表示される
-        所持token：tokenChestから出てくる
-        nonce：nonceが多いほど変化する何かを考える
-            wall stickerはやはりnonceを参照させるか。
-
-    細かなUIの修正
-        working textがiPad OFFで表示されることの修正
-        crafting windowのflower 位置、nyuinyuiのy軸、説明文位置の修正
 
     アイテムNFTのユニーク性の深慮
         画一的ではなく、作ったitemに何かしらの記号をもたせたい
@@ -476,35 +325,6 @@ contract ERC721 is IERC721 {
                 様子を見ながら調整する。
                 理想はdapps stakingで利益をとった上での定常状態化
                 アクティブユーザー数が多すぎるとインフレしにくいだろうか。
-
-   *細かなUIの改善
-        投票がhappy<10でできなくしてmsgを表示する
-     ok crafting windowの情報説明msgを表示する
-     ok mining, farmingがhappy<10, satiety<10でできないことを表示する
-        crafting中に音符を表示させる
-        crafting絵の修正、少しずれている
-     ok crafting window開いている時にitem更新されるとバグる点の修正
-     ok crafting中にリロードするとアイテム名が表示されないバグの修正
-            summoner modeを先にcraftingに設定しているのでsetTextが読み込まれていない
-            構造修正が多少必要
-
-    記念撮影用小物
-        むらさきさん本体
-        おにぎり
-       *さつまいも
-        ダイス
-        バイオリンバッグチャーム
-        小さなお花たくさん
-        くまさん
-        フローリングの床
-        ピンクのラグ
-        ビットコイン、イーサリアムのレプリカ
-        折り紙の本
-        アスタートークン
-        wallet
-        fluffys
-        ないないさん
-        プレゼントボックス
 
    *ステーキング量反映アイテムの修正
         以下のアイテムは現在のステーキング量を反映するものとする
@@ -673,6 +493,185 @@ contract ERC721 is IERC721 {
 
 //### 2nd
 
+ ok 記念撮影用小物
+        むらさきさん本体
+        おにぎり
+       *さつまいも
+        ダイス
+        バイオリンバッグチャーム
+        小さなお花たくさん
+        くまさん
+        フローリングの床
+        ピンクのラグ
+        ビットコイン、イーサリアムのレプリカ
+        折り紙の本
+        アスタートークン
+        wallet
+        fluffys
+        ないないさん
+        プレゼントボックス
+
+ ok walletの状態を反映するギミックをもう少し実装する
+        所持NFT：photo frame内に表示される
+        所持token：tokenChestから出てくる
+        nonce：nonceが多いほど変化する何かを考える
+            wall stickerはやはりnonceを参照させるか。
+
+ ok fluffyシステムの個数調整
+        upgradeの個数調整
+            x3 -> x1は安すぎるか？
+            fluffy dollがあまりに量産されすぎるのも良くない
+            x3 , x4, x5と段階的に上げていっても良いか。
+        いずれにしても、要調整だろうか
+
+ ok tokenURIの実装
+        svg型tokenURIの解説：
+            https://qiita.com/hakumai-iida/items/c96d7c053379f42ba9b8
+        svg形式で絵を表示する方法を調べる
+        パラメータなどを表示したいが、クラスなどがせいぜいだろうか。
+        pngからsvgへの変換、カラー可能
+            https://onlineconvertfree.com/ja/convert/png/
+        むらさきさんの背景に、Lvやflowerなどを表示させる
+            アイコン絵をtokenURIで実装してみたい。
+            フルオンチェーンのSBT絵となる。
+        jsでwebでそのまま使用可能なコードも併せて用意する。
+        2パターン用意する
+         ok 1: mmのみで完結するtokenURI
+                むらさきさんのsvgにオーバーラップさせて最低限の情報を表示する
+                summoner ID, classのみを表示させる
+                classはflower名に置換するか
+                背景をflower colorにしても良いかもしれない
+            2: infoを反映した専用コントラのtokenURI
+                成長度を反映させたtokenURI
+                パット見てむらさきさんの成長度を視認できる情報はなんであろうか
+                    Name, Lv, age, scoreあたりだろうか。
+        svg化の手順を把握する：
+            https://qiita.com/hakumai-iida/items/c96d7c053379f42ba9b8
+            too deep stackをどうやって回避するか。
+
+ ok 実績システムのUI検討
+        一旦ボツにしたが、称号や勲章の様にあっても良いだろうか。
+        実績によって増える小さななにかを考える。
+            ちょうちょ？
+            お花？
+            小さな宝石？
+            壁にくっつくなにか？
+        これを見ることでゲームの進捗がすぐわかるように。
+            
+ ok 実績コントラクトの設計
+        実績達成をtrue/falseで判定するfunction
+            1つの実績につき1 function
+        達成済み実績をtrue/falseで記憶するstorage
+            achievement uint32[256]のようなarray
+        新たに達成した実績の数をuint32でreturnするfunction
+            もしくはarrayでreturnする
+            達成時は項目を表示させたいため
+        実績判定のタイミングをどうするか
+            mining/farmin時などにいちいち行っていたらgas代かさむか
+            level-up時にまとめて行うか
+        実績案
+            coin/material:max 500,000
+                gain 1,000
+                gain 10,000
+                gain 100,000...
+            craft:0-48
+                4,8,12,16,20,24
+                craft 10
+                craft 30
+                craft 100...
+            heart
+                received 10
+                received 30
+                received 100...
+            level-up:1-20
+                3,6,9,12,15,18
+
+ ok 動作軽量化対策
+        fpsを120などに上昇させ、何が重いのか調査する
+            全画面画像は重い？
+            透過処理画像が重い？
+        → 全画面画像が重かった
+            phaser3をupdateし、
+            かつachvをアイコン化した
+
+ ok バランス調整
+     ok item_dcテーブルの調整
+            後半のアイテムほど最低dcを大きくする
+     ok catインターバルの調整
+            5日 → 7日
+     ok fluffy必要量の調整
+            3個, 4個, 5個？
+     ok coin/materialの必要量の調整
+            後半のアイテムは3日分→5日分程度へ計算して調整
+     ng ffの補正修正
+            x2ではなくx1.5程度にする
+            → 割り算が困難なため保留
+     ok fluffy供給量の調整
+            現在のバランスだと0.5日に1個で多すぎるか
+            → cat-mailを7dに変更、stakingはmaxは出ないので大丈夫だろうか
+            また、fluffy合成コストを上昇、estができにくくなった。
+
+ ok marketコントラクトの修正
+        新maに対応させる
+
+ ok priceの係数計算
+        10**18で取得されるので整数化する
+
+ ok tokenURIの再実装
+        mcのuriにpngへのURLを返すように設定する
+
+ ok Treasuryシステムの刷新
+        mint feeの取り扱いと脱ポンジ
+            old userのbuybackTreajury分をnew userのmint feeで賄う構図は避ける
+            mint feeはbufferVaultへは入れない
+            即座にdev wallet, staking wallet, buybackTreasuryへ分割送金する
+        資金場所
+            BufferVault：コントラクト
+                全ての資金は一旦ここに集められる
+                Mint feeもここに入れることとする
+            BuybackTreajury：コントラクト
+                月に1回、資金量を増減させて調整する
+                常にactive user数 * amount per user量を確保する
+            StakingWallet：EOA
+                残りの資金はここに格納される
+                dApps stakingへ全額ステークする
+                余計なtxは飛ばさないように注意する
+            Administrator Wallet：EOA
+                全コントラクトの所有権を有する
+                必要な時だけ、コントラクトのメンテナンスを行う
+                余計なtxは飛ばさないように注意する
+            Developer wallet：EOA
+                BufferVaultから5% * 2を2つのプライベートwalletへ移動する            
+        BufferVaultからの資金移動を関数化する
+            Staking wallet -> BufferVaultは事前に手動で行う
+            BufferVault <-> BuybackTreajury, 相互移動
+            BufferVault -> Developer wallets, 5% x 2
+            BufferVault -> Staking Wallet, 残った資金全部, bufferをカラにする
+        手順：
+            手動でbuybackTreajuryにnot active user数を設定する
+                all user - not active user = active user数を算出する
+            手動でbufferTreajuryにインフレ率を設定する
+                関数でそのインフレ率を達成するために必要なamountを算出する
+            手動で不足amount分をstaking walletからbufferTreajuryへ送金する
+                不足しないようにインフレ率を設定したいところ
+                あるいはインフレ率を達成するamountがbufferに貯まるまで待つ
+            コントラで、buffer -> buyback, dev wallets, staking walletへの送金を一度に行う。
+                dev wallet: 5%
+                buyback: インフレ率を達成する分
+                staking: 残り全て
+            buybackに余剰資金がある場合は資金を逆流させる
+                not active userを設定した直後はbuyback価格が上昇してしまうので、
+                このタイミングでbuybackされない機構を考える。
+
+ ok buybackTreajuryの改善
+        active userの増減によってはbuyback -> bufferへと移動させることも必要になる
+        active user数を取得した上でインフレ率を計算するよう修正する
+        手順としては：
+            インフレ率を手動で設定
+            脱落ユーザー数を手動で集計して設定
+            インフレ率に基づいて、buybackTreajury <-> BufferTreajuryの資金移動を行う
+                これはコントラクトコードで実装する
+            続く処理でbufferTreajuryに残った資金はteamTreajuryへと移動する
 
  ok コントラクトのuint32修正
         エラーのもとで煩わしいので、全てuintへ置換する

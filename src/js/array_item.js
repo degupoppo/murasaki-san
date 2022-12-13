@@ -366,7 +366,7 @@ let _dic_items = {
         "img_name":"item_mail",
         "icon_png":"icon/mail.png",
     },
-    "Fluffy Murasaki-San":{
+    "Fluffy Doll":{
         "item_id":197,
         "item_id_uncommon":0,
         "item_id_rare":0,
