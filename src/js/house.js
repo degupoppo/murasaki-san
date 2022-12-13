@@ -82,6 +82,17 @@ contract ERC721 is IERC721 {
 
 //### 1st
 
+    集計情報
+        ユーザー数
+        石化ユーザー数
+        await web3.eth.getBalance(contract_bt.options.address) 
+        await web3.eth.getBalance(contract_bv.options.address) 
+        await web3.eth.getBalance(address_Staking_Wallet) 
+
+    バイバックコントラクトのテスト
+        バイバックのテスト
+        bufferVaultの挙動テスト
+
     nuiちゃんにclassパラメータを実装する
         mcのmemoを使うか、storage_nuiに追加するか。
         class値は合成元のfluffyのtypeを継承する
@@ -95,6 +106,9 @@ contract ERC721 is IERC721 {
         nonce反映アイテム：
             時計の針を進める？
             → 時計
+
+    クレヨンの実装
+        クレヨンクラフト後に実績落書きが表示される
 
     バグ・仕様修正
      ok fluffyが空を飛ぶバグ
@@ -382,21 +396,6 @@ contract ERC721 is IERC721 {
     ニュースボードの修正
         ウェルカムボードへ変更する
     
-   *バイバックコントラの洗練
-       *アクティブユーザーのカウント方法の深慮
-            mm.next_summoner() - 1ではなく、not petrified summonersを
-                amount per summonerの分母に使用する
-            しかし、petrifiedは受動的な状態変化なので、
-                例えばpetrified時にカウントアップさせることはできない。
-            別でlast feeding timeを集計するバッチコントラを用意して、
-                adminコントラとして用意し、定期的に実行させるか。
-            last feedingよりpetrified summonerを割り出し、
-                msかmpのactive_summonersに有効summoner数を代入する関数。
-            これをbufferTreajuryのtransfer関数に組み込めればベストだが。
-            for関数のリミットはいくつだろうか。
-        あるいは, feeding時にpetrified summonerをカウント可能な機構を組み入れる
-            ある時間においてnow_time - last_feeding_time > 30dのsummonerをカウントしたい
-
     エコノミクス
         独自トークンは使用しない
             経済のメイントークンとしてASTRを使用する
@@ -492,6 +491,21 @@ contract ERC721 is IERC721 {
 
 
 //### 2nd
+
+ ok バイバックコントラの洗練
+       *アクティブユーザーのカウント方法の深慮
+            mm.next_summoner() - 1ではなく、not petrified summonersを
+                amount per summonerの分母に使用する
+            しかし、petrifiedは受動的な状態変化なので、
+                例えばpetrified時にカウントアップさせることはできない。
+            別でlast feeding timeを集計するバッチコントラを用意して、
+                adminコントラとして用意し、定期的に実行させるか。
+            last feedingよりpetrified summonerを割り出し、
+                msかmpのactive_summonersに有効summoner数を代入する関数。
+            これをbufferTreajuryのtransfer関数に組み込めればベストだが。
+            for関数のリミットはいくつだろうか。
+        あるいは, feeding時にpetrified summonerをカウント可能な機構を組み入れる
+            ある時間においてnow_time - last_feeding_time > 30dのsummonerをカウントしたい
 
  ok 記念撮影用小物
         むらさきさん本体
@@ -3473,8 +3487,8 @@ class HomeCat extends Phaser.GameObjects.Sprite{
             this.disableInteractive();
             this.x = 1300;
             this.y = 800 + Math.random() * 200; 
-            this.target_x = 90;
-            this.target_y = 610;
+            this.target_x = 100;
+            this.target_y = 590;
             sound_cat2.play();
             this.submode += 1;
         } else {
@@ -3499,8 +3513,8 @@ class HomeCat extends Phaser.GameObjects.Sprite{
     //check mailInterval, change to mode:standing
     sleeping(){
         if (this.submode == 0){
-            this.x = 90;
-            this.y = 610;
+            this.x = 100;
+            this.y = 590;
             this.disableInteractive();
             this.anims.play("cat_sleeping", true);
             this.submode += 1;
@@ -10072,7 +10086,8 @@ function update_checkItem(this_scene) {
         local_items_flag[_item_id] = true;
 
         //cushion
-        item_cushion = this_scene.add.sprite(90, 620, "item_cushion").setScale(0.25).setOrigin(0.5);
+        //item_cushion = this_scene.add.sprite(90, 620, "item_cushion").setScale(0.25).setOrigin(0.5);
+        item_cushion = this_scene.add.sprite(90, 620, "item_cushion").setScale(0.5).setOrigin(0.5);
         item_cushion.depth = item_cushion.y - 50;
         //uncommon
         if (local_items[_item_id+64] != 0) {
@@ -10080,7 +10095,8 @@ function update_checkItem(this_scene) {
         }
         
         //text_sending_interval
-        text_sending_interval = this_scene.add.text(70, 640, "00h:00m", {font: "15px Arial", fill: "#ffffff"})
+        //text_sending_interval = this_scene.add.text(70, 640, "00h:00m", {font: "15px Arial", fill: "#ffffff"})
+        text_sending_interval = this_scene.add.text(52, 660, "00h:00m", {font: "15px Arial", fill: "#222222"})
             .setDepth(item_cushion.depth + 1);
 
         //cat
@@ -10125,7 +10141,8 @@ function update_checkItem(this_scene) {
                 let _hr = Math.floor(local_mail_sending_interval % 86400 / 3600);
                 let _min = Math.floor(local_mail_sending_interval % 3600 / 60);
                 let _text = _d + "d:" + _hr + "h:" + _min + "m";
-                text_sending_interval.setText(_text).setFill("#ffffff");
+                //text_sending_interval.setText(_text).setFill("#ffffff");
+                text_sending_interval.setText(_text).setFill("#222222");
                 //cat.visible = false;
             }
         }
