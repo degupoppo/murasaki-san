@@ -1600,7 +1600,7 @@ async function contract_update_static_status(_summoner) {
     ELECTED_FLUFFY_TYPE = Number(_all_static_status[7]);
     
     //calc wallet score
-    //update_local_wallet_score();
+    update_local_wallet_score();
 }
 
 
@@ -7042,7 +7042,8 @@ function preload(scene) {
     scene.load.image("item_presentbox_06", "src/png/item_presentbox_06.png");
     scene.load.image("item_presentbox_07", "src/png/item_presentbox_07.png");
     scene.load.image("item_presentbox_08", "src/png/item_presentbox_08.png");
-    scene.load.image("item_fishbowl", "src/png/item_fishbowl.png");
+    //scene.load.image("item_fishbowl", "src/png/item_fishbowl.png");
+    scene.load.spritesheet("item_fishbowl_list", "src/png/item_fishbowl_list.png", {frameWidth: 370, frameHeight: 320});
     //scene.load.image("item_onigiri", "src/png/item_onigiri.png");
     
     //---ff
@@ -7519,6 +7520,36 @@ function create(scene) {
         frames: scene.anims.generateFrameNumbers("item_clock_anim", {start:1, end:0}),
         frameRate: 1,
         repeat: 2
+    });
+    scene.anims.create({
+        key: "item_fishbowl_1",
+        frames: scene.anims.generateFrameNumbers("item_fishbowl_list", {start:0, end:1}),
+        frameRate: 1,
+        repeat: -1
+    });
+    scene.anims.create({
+        key: "item_fishbowl_2",
+        frames: scene.anims.generateFrameNumbers("item_fishbowl_list", {start:2, end:3}),
+        frameRate: 1,
+        repeat: -1
+    });
+    scene.anims.create({
+        key: "item_fishbowl_3",
+        frames: scene.anims.generateFrameNumbers("item_fishbowl_list", {start:4, end:5}),
+        frameRate: 1,
+        repeat: -1
+    });
+    scene.anims.create({
+        key: "item_fishbowl_4",
+        frames: scene.anims.generateFrameNumbers("item_fishbowl_list", {start:6, end:7}),
+        frameRate: 1,
+        repeat: -1
+    });
+    scene.anims.create({
+        key: "item_fishbowl_5",
+        frames: scene.anims.generateFrameNumbers("item_fishbowl_list", {start:8, end:9}),
+        frameRate: 1,
+        repeat: -1
     });
     
     //---animation cat
@@ -11171,6 +11202,7 @@ function update_checkItem(this_scene) {
             _y,
             "item_fishbowl",
         ).setOrigin(0.5).setScale(0.3).setDepth(_y)
+            .anims.play("item_fishbowl_1", true)
             .setInteractive({ draggable: true, useHandCursor: true })
             .on("drag", () => {
                 if (this_scene.sys.game.scale.gameSize._width == 1280) {
