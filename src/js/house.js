@@ -82,19 +82,29 @@ contract ERC721 is IERC721 {
 
 //### 1st
 
-    fluffy houseの実装
+    時計の実装
+        nonceの数に応じて長針と短針を動かす
+        長針・短針をプログラムで動かす機構を実装する
+        
+    nuichanのitemIdの再実装検討
+        12種類の種類が設けられる場合、237-248を使用して別々のitemIdを当てたほうが良いか
+        あるいは, msnにtypeOfSourceパラメータを実装するか
+
+    nuiちゃんにclassパラメータを実装する
+        mcのmemoを使うか、storage_nuiに追加するか。
+        class値は合成元のfluffyのtypeを継承する
+        → memoを実装
+        classパラメータに応じてリボンの色を変える
+    
+ ok fluffy houseの実装
         fluffyとの接触処理
         クリックでfluffyが飛び出してくる演出
         くっついているfluffyの数に応じた段階絵
 
-    時計の実装
-        nonceの数に応じて長針と短針を動かす
-        長針・短針をプログラムで動かす機構を実装する
-    
  ok fishbowlの実装
         wallet ageに応じて成長させる
 
-    fluffyのupgradeの実装
+ ok fluffyのupgradeの実装
         5アイテムのupgradeの実装
 
     集計情報
@@ -108,12 +118,6 @@ contract ERC721 is IERC721 {
         バイバックのテスト
         bufferVaultの挙動テスト
 
-    nuiちゃんにclassパラメータを実装する
-        mcのmemoを使うか、storage_nuiに追加するか。
-        class値は合成元のfluffyのtypeを継承する
-        → memoを実装
-        classパラメータに応じてリボンの色を変える
-
     wallet反映アイテムの実装
         age反映アイテム：
             なに？
@@ -123,7 +127,7 @@ contract ERC721 is IERC721 {
             → 時計
 
     クレヨンの実装
-        クレヨンクラフト後に実績落書きが表示される
+        クレヨンクラフト後に実績落書きが表示されるように実装する
 
     バグ・仕様修正
      ok fluffyが空を飛ぶバグ
@@ -1301,6 +1305,7 @@ async function init_global_variants() {
     flag_debug = 0;
     flag_info = 1;
     flag_syncNow = 0;
+    flag_fluffy_house_click = 0;
     
     //---pointer
     pointer_x = 0;
@@ -4623,6 +4628,36 @@ class Fluffy2 extends Phaser.GameObjects.Sprite{
         }
     }
 
+    //### on_click_fromHouse
+    on_click_fromHouse() {
+        this.speed_x = 6 + Math.random() * 8;
+        /*
+        if (pointer_x > this.x) {
+            this.speed_x *= -1;
+        }
+        if (Math.random() > 0.5) {
+            this.speed_x *= -1;
+        }
+        */
+        this.speed_y = 6 + Math.random() * 8;
+        //define constant of y = b - a * x
+        this.a = Math.random() * 0.8 - 0.4;
+        this.b = this.y + this.a * this.x;
+        //sound
+        let _li = [
+            sound_fluffy2,
+            sound_fluffy3,
+            sound_fluffy4,
+            sound_fluffy5
+        ]
+        _li[Math.floor(Math.random()*_li.length)].play();
+        this.mode = "rolling";
+        if (this.rarity == "rare") {
+            this.anims.stop();
+        }
+        this.visible = true;
+    }
+
     //### on_kick
     on_kick() {
         this.speed_x = 4 + Math.random() * 3;
@@ -4695,6 +4730,15 @@ class Fluffy2 extends Phaser.GameObjects.Sprite{
     }
     
     //### rolling
+    _checkOverlap(spriteA, spriteB) {
+        var boundsA = spriteA.getBounds();
+        boundsA.x += boundsA.width/4;
+        boundsA.y += boundsA.height/4;
+        boundsA.width /= 2;
+        boundsA.height /= 2;
+        var boundsB = spriteB.getBounds();
+        return Phaser.Geom.Intersects.RectangleToRectangle(boundsA, boundsB);
+    }
     rolling(){
         //define line_y
         this.line_y = this.b - this.a * this.x;
@@ -4766,6 +4810,23 @@ class Fluffy2 extends Phaser.GameObjects.Sprite{
             this.mode = "resting";
             //this.submode = 0;
             this.submode = -100;
+        }
+        
+        //check fluffy house
+        if (
+            typeof(item_fluffy_house) != "undefined" 
+            && this._checkOverlap(item_fluffy_house, this)
+            && flag_fluffy_house_click != 1
+        ) {
+            this.x = item_fluffy_house.x;
+            this.y = item_fluffy_house.y;
+            this.speed_x = 0;
+            this.speed_y = 0;
+            this.mode = "resting";
+            this.submode = -10000;
+            local_fluffy_house_count += 1;
+            group_fluffy_house_in.add(this);
+            this.visible = false;
         }
     }
     
@@ -6129,7 +6190,7 @@ function open_window_upgrade(scene) {
             _item_name_to = dic_items_reverse[Number(_itemId)+12];
             //_item_name_to = array_item_name[Number(_itemId)+12];
         } else if (_itemId <= 236) {
-            _item_name_to = "Fluffy Murasaki-San";
+            _item_name_to = dic_items_reverse[197];
         }
         let _rarity = "";
         let _rarity_to = "";
@@ -7046,6 +7107,11 @@ function preload(scene) {
     scene.load.image("item_wall_sticker_12", "src/png/item_wall_sticker_12.png");
     scene.load.image("item_wall_sticker_icon", "src/icon/wall_sticker.png");
     scene.load.spritesheet("item_wall_sticker_neon", "src/png/item_wall_sticker_neon.png", {frameWidth: 1280, frameHeight: 960});
+    scene.load.image("item_fluffy_house_1", "src/png/item_fluffy_house_1.png");
+    scene.load.image("item_fluffy_house_2", "src/png/item_fluffy_house_2.png");
+    scene.load.image("item_fluffy_house_3", "src/png/item_fluffy_house_3.png");
+    scene.load.image("item_fluffy_house_4", "src/png/item_fluffy_house_4.png");
+    scene.load.image("item_fluffy_house_5", "src/png/item_fluffy_house_5.png");
     /*
     scene.load.image("item_floor_sticker_01", "src/png/item_floor_sticker_01.png");
     scene.load.image("item_floor_sticker_02", "src/png/item_floor_sticker_02.png");
@@ -7086,6 +7152,7 @@ function preload(scene) {
     scene.load.image("item_presentbox_06", "src/png/item_presentbox_06.png");
     scene.load.image("item_presentbox_07", "src/png/item_presentbox_07.png");
     scene.load.image("item_presentbox_08", "src/png/item_presentbox_08.png");
+    scene.load.image("item_crayon", "src/png/item_crayon.png");
     //scene.load.image("item_fishbowl", "src/png/item_fishbowl.png");
     scene.load.spritesheet("item_fishbowl_list", "src/png/item_fishbowl_list.png", {frameWidth: 370, frameHeight: 320});
     //scene.load.image("item_onigiri", "src/png/item_onigiri.png");
@@ -9527,7 +9594,7 @@ function update_checkItem(this_scene) {
 
     //***TODO*** crayyon
     update_achv();
-
+    
     //calc sum of local_items and compare previous one
     let res1 = local_items.reduce((sum, element) => sum + element, 0);
     let res2 = previous_local_items.reduce((sum, element) => sum + element, 0);
@@ -11315,17 +11382,16 @@ function update_checkItem(this_scene) {
             .setDepth(2)
             .setInteractive({useHandCursor: true})
             .on('pointerdown', () => {
-                /*
                 //1 times
                 item_clock.anims.play("item_clock_anim_1");
                 sound_clock.play();
+                /*
                 //2 times
                 item_clock.anims.play("item_clock_anim_3");
                 sound_clock.play();
                 setTimeout( () => {
                     sound_clock.play();
                 }, 2000);
-                */
                 //3 times
                 item_clock.anims.play("item_clock_anim_3");
                 sound_clock.play();
@@ -11335,6 +11401,7 @@ function update_checkItem(this_scene) {
                 setTimeout( () => {
                     sound_clock.play();
                 }, 4000);
+                */
             });
         //uncommon
         if (local_items[_item_id+64] != 0) {
@@ -11350,6 +11417,132 @@ function update_checkItem(this_scene) {
         local_items_flag[_item_id] = false;
     }
     
+    //###24:Fluffy House
+    _item_name = "Fluffy House";
+    _item_id = dic_items[_item_name]["item_id"];
+    _x = 250;
+    _y = 700;
+    if (
+        (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+        && local_items_flag[_item_id] != true
+    ) {
+        local_items_flag[_item_id] = true;
+        local_fluffy_house_count = 0;
+        group_fluffy_house_in = this_scene.add.group();
+        item_fluffy_house = this_scene.add.sprite(_x, _y, "item_fluffy_house_1")
+            .setScale(0.4)
+            .setOrigin(0.5)
+            .setDepth(2)
+            .setInteractive({useHandCursor: true})
+            .on('pointerdown', () => {
+                if (flag_fluffy_house_click == 0 && local_fluffy_house_count > 0) {
+                    flag_fluffy_house_click = 1;
+                    let _timeout = 0;
+                    for (i=0; i<group_fluffy_house_in.getLength(); i++) {
+                        let _sprite = group_fluffy_house_in.getChildren()[i];
+                        setTimeout( () => {
+                            _sprite.on_click_fromHouse();
+                        }, _timeout);
+                        _timeout += 100;
+                    }
+                    group_fluffy_house_in.clear();
+                    local_fluffy_house_count = 0;
+                    setTimeout( () => {
+                        flag_fluffy_house_click = 0;
+                    }, 3000);
+                    murasakisan.on_click();
+                    item_fluffy_house.setTexture("item_fluffy_house_1");
+                }
+            });
+        //uncommon
+        if (local_items[_item_id+64] != 0) {
+            draw_glitter(this_scene, item_fluffy_house);
+        }
+    } else if (
+        local_items[_item_id] == 0 
+        && local_items[_item_id+64] == 0 
+        && local_items[_item_id+128] == 0
+    ) {
+        local_items_flag[_item_id] = false;
+        item_fluffy_house.destroy(true);
+    }
+    //after craft
+    if (local_items_flag[_item_id] == true) {
+        if (local_fluffy_house_count >= 16) {
+            item_fluffy_house.setTexture("item_fluffy_house_5");
+        } else if (local_fluffy_house_count >= 11) {
+            item_fluffy_house.setTexture("item_fluffy_house_4");
+        } else if (local_fluffy_house_count >= 6) {
+            item_fluffy_house.setTexture("item_fluffy_house_3");
+        } else if (local_fluffy_house_count >= 1) {
+            item_fluffy_house.setTexture("item_fluffy_house_2");
+        } else {
+            item_fluffy_house.setTexture("item_fluffy_house_1");
+        }
+    }
+
+    //###45:Crayon
+    _item_name = "Crayon";
+    _item_id = dic_items[_item_name]["item_id"];
+    if (
+        (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+        && local_items_flag[_item_id] != true
+    ) {
+        local_items_flag[_item_id] = true;
+        let _x = 1200;
+        let _y = 750;
+        let _pos_local = "pos_item_crayon"
+        //recover position from localStorage
+        if (localStorage.getItem(_pos_local) != null && local_owner == local_wallet) {
+            let _json = localStorage.getItem(_pos_local);
+            _pos = JSON.parse(_json);
+            _x = _pos[0];
+            _y = _pos[1];
+        }
+        item_crayon = this_scene.add.sprite(_x, _y, "item_crayon")
+            .setScale(0.2)
+            .setOrigin(0.5)
+            .setDepth(_y)
+            .setInteractive({ draggable: true, useHandCursor: true })
+            .on("drag", () => {
+                if (this_scene.sys.game.scale.gameSize._width == 1280) {
+                    item_crayon.x = game.input.activePointer.x;
+                    item_crayon.y = game.input.activePointer.y;
+                } else {
+                    item_crayon.x = game.input.activePointer.y;
+                    item_crayon.y = 960 - game.input.activePointer.x;
+                }
+                item_crayon.depth = item_crayon.y;
+            })
+            .on("dragend", () => {
+                let _pos = [item_crayon.x, item_crayon.y];
+                localStorage.setItem(_pos_local, JSON.stringify(_pos));
+                /*
+                if (
+                    item_crayon.x >= 100
+                    && item_crayon.x <= 1100
+                    && item_crayon.y >= 500
+                    && item_crayon.y <= 800
+                ){
+                    sound_hat.play();
+                    murasakisan.try_attenting(item_crayon.x, item_crayon.y);
+                }
+                */
+            });
+        //uncommon
+        if (local_items[_item_id+64] != 0) {
+            draw_glitter(this_scene, item_crayon);
+        }
+    } else if (
+        local_items[_item_id] == 0 
+        && local_items[_item_id+64] == 0 
+        && local_items[_item_id+128] == 0
+        && typeof item_crayon != "undefined"
+    ) {
+        item_crayon.destroy(true);
+        local_items_flag[_item_id] = false;
+    }
+
     //###194:Ohana Bank
     if (local_items[194] != previous_local_item194) {
         // define async function

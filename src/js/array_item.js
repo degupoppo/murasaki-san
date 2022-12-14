@@ -170,8 +170,8 @@ let _dic_items = {
         "item_id":24,
         "item_id_uncommon":24+64,
         "item_id_rare":24+128,
-        "img_name":"icon_clock",
-        "icon_png":"icon/icon_clock.png",
+        "img_name":"item_fluffy_house_1",
+        "icon_png":"png/item_fluffy_house_1.png",
     },
     "Picture Frame":{
         "item_id":25,
