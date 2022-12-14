@@ -82,6 +82,30 @@ contract ERC721 is IERC721 {
 
 //### 1st
 
+    ステーキング量反映アイテムの修正
+        以下のアイテムは現在のステーキング量を反映するものとする
+            鳩時計
+            金魚鉢
+            ネオンちゃん
+                ねおんふるっふぃーが必要
+            花瓶
+        それぞれ３～５段階とする
+        → *ネオンちゃんの画面を充実させる
+
+    砂時計アイテムの再実装
+        条件
+            staking=0でも表示される
+            staking=0だと少し寂しい感じ
+            何かが溜まってゆくor成長してゆくのが楽しい要素
+            100%になったときになにかhappyな演出が可能
+        絵の深慮
+            砂時計で良いか？
+        ステーキング量>0でのみ表示させる
+        あるいはステーキング量=0では非アクティブを表す絵とする
+            ステーキングしてアクティブ化したくなるような楽しい絵にしたい。
+        ステーキング量が多いほど豪華になり、
+            カウンターが進むと何かが溜まってゆく・成長してゆく絵を考える。
+
     バグ・仕様修正
      ok fluffyが空を飛ぶバグ
         crafting pause中にminingすると表示が変になるバグ
@@ -95,29 +119,14 @@ contract ERC721 is IERC721 {
         位置保存時、他人のsummonerと混線するバグ
             他人のsummoner時は位置保存させない
             初期位置の吟味
-
-    fluffy修正
-        まばたきが全員同期しているのでずらす
+        fluffierのまばたきが全員同期しているのでずらす
             アニメーション開始時間をずらすのだが、さてどうするか。
-
-    fluffy festivalのUI改善
-        問題点：
-            festival後に結果がわからない
-            現在のfluffy所持数がわかりにくい
-        さて、どうするか。
-            もぐらさんを使うか？
-            
-    訪問時のUI修正
-        他のsummonerを表示した時にfeedingボタンしか表示させないように修正する
-
-    細かなUIの修正
+        訪問時のUI修正
+            他のsummonerを表示した時にfeedingボタンしか表示させないように修正する
         working textがiPad OFFで表示されることの修正
         crafting windowのflower 位置、nyuinyuiのy軸、説明文位置の修正
-
-    coin/material per dayの正確な計算
-        拡大再生産を実感できるように
-    
-   *細かなUIの改善
+        coin/material per dayの正確な計算
+            拡大再生産を実感できるように
         投票がhappy<10でできなくしてmsgを表示する
      ok crafting windowの情報説明msgを表示する
      ok mining, farmingがhappy<10, satiety<10でできないことを表示する
@@ -127,7 +136,13 @@ contract ERC721 is IERC721 {
      ok crafting中にリロードするとアイテム名が表示されないバグの修正
             summoner modeを先にcraftingに設定しているのでsetTextが読み込まれていない
             構造修正が多少必要
-
+    
+    fluffy festivalのUI改善
+        問題点：
+            festival後に結果がわからない
+            現在のfluffy所持数がわかりにくい
+        さて、どうするか。
+            もぐらさんを使うか？            
 
     nuichanのitemIdの再実装検討
         12種類の種類が設けられる場合、237-248を使用して別々のitemIdを当てたほうが良いか
@@ -145,6 +160,21 @@ contract ERC721 is IERC721 {
         await web3.eth.getBalance(contract_bt.options.address) 
         await web3.eth.getBalance(contract_bv.options.address) 
         await web3.eth.getBalance(address_Staking_Wallet) 
+
+   *イベント監視システムを構築する
+        眺めるようと、bot監視ように。
+        event垂れ流しを一般公開するかどうかは難しいところ。
+            テキストのストリーミング公開が難しそう
+            アクティビティが如実にわかるので冷めそうであるし
+        監視対象のコントラクト
+            mfsl
+            mffg
+            mfmf
+            mfc
+            mfn
+            mml
+            wd
+            (ff)
 
     バイバックコントラクトのテスト
         バイバックのテスト
@@ -216,21 +246,6 @@ contract ERC721 is IERC721 {
             無価値な言葉遊びだが、だからこそ作り込みたい。
         しかし、表示させるタイミングがない。
 
-   *イベント監視システムを構築する
-        眺めるようと、bot監視ように。
-        event垂れ流しを一般公開するかどうかは難しいところ。
-            テキストのストリーミング公開が難しそう
-            アクティビティが如実にわかるので冷めそうであるし
-        監視対象のコントラクト
-            mfsl
-            mffg
-            mfmf
-            mfc
-            mfn
-            mml
-            wd
-            (ff)
-
     複アカ対策の意味論と深慮
         インフレを低く抑え、時間をリソースの中心に据えているため、
             複アカによる時間リソースの倍増は単純に有利になる。
@@ -297,16 +312,7 @@ contract ERC721 is IERC721 {
             やりすぎるとまともなユーザー間の相互作用まで阻害される。
             放置するとbotの温床となる。
 
-   *砂時計アイテムの再実装
-        絵の深慮
-            砂時計で良いか？
-        ステーキング量>0でのみ表示させる
-        あるいはステーキング量=0では非アクティブを表す絵とする
-            ステーキングしてアクティブ化したくなるような楽しい絵にしたい。
-        ステーキング量が多いほど豪華になり、
-            カウンターが進むと何かが溜まってゆく・成長してゆく絵を考える。
-
-   *マーケットページの改善
+    マーケットページの改善
         → 実際の実装はdapps stakingの目処が立った後、かつローンチ後1ヶ月程度
             よって、現時点で公開はできない。
         情報取得のバッチ処理化
@@ -337,15 +343,6 @@ contract ERC721 is IERC721 {
                 様子を見ながら調整する。
                 理想はdapps stakingで利益をとった上での定常状態化
                 アクティブユーザー数が多すぎるとインフレしにくいだろうか。
-
-   *ステーキング量反映アイテムの修正
-        以下のアイテムは現在のステーキング量を反映するものとする
-            鳩時計
-            金魚鉢
-            ネオンちゃん
-                ねおんふるっふぃーが必要
-            花瓶
-        それぞれ３～５段階とする
 
    *必要な絵
         猫の立ち絵のアニメーション
@@ -3458,6 +3455,8 @@ class HomeCat extends Phaser.GameObjects.Sprite{
     //check click, check interval, change to mode:mailSending
     standing(){
         if (this.submode == 0) {
+            this.x = 90;
+            this.y = 575;
             this.anims.play("cat_standing", true);
             this.setInteractive({ useHandCursor: true });
             this.submode += 1;
@@ -4642,6 +4641,8 @@ class Fluffy2 extends Phaser.GameObjects.Sprite{
 
     //### on_click_fromHouse
     on_click_fromHouse() {
+        this.x = item_fluffy_house.x;
+        this.y = item_fluffy_house.y;
         this.speed_x = 6 + Math.random() * 8;
         /*
         if (pointer_x > this.x) {
