@@ -82,53 +82,6 @@ contract ERC721 is IERC721 {
 
 //### 1st
 
-    時計の実装
-        nonceの数に応じて長針と短針を動かす
-        長針・短針をプログラムで動かす機構を実装する
-        
-    nuichanのitemIdの再実装検討
-        12種類の種類が設けられる場合、237-248を使用して別々のitemIdを当てたほうが良いか
-        あるいは, msnにtypeOfSourceパラメータを実装するか
-
-    nuiちゃんにclassパラメータを実装する
-        mcのmemoを使うか、storage_nuiに追加するか。
-        class値は合成元のfluffyのtypeを継承する
-        → memoを実装
-        classパラメータに応じてリボンの色を変える
-    
- ok fluffy houseの実装
-        fluffyとの接触処理
-        クリックでfluffyが飛び出してくる演出
-        くっついているfluffyの数に応じた段階絵
-
- ok fishbowlの実装
-        wallet ageに応じて成長させる
-
- ok fluffyのupgradeの実装
-        5アイテムのupgradeの実装
-
-    集計情報
-        ユーザー数
-        石化ユーザー数
-        await web3.eth.getBalance(contract_bt.options.address) 
-        await web3.eth.getBalance(contract_bv.options.address) 
-        await web3.eth.getBalance(address_Staking_Wallet) 
-
-    バイバックコントラクトのテスト
-        バイバックのテスト
-        bufferVaultの挙動テスト
-
-    wallet反映アイテムの実装
-        age反映アイテム：
-            なに？
-            → 金魚鉢
-        nonce反映アイテム：
-            時計の針を進める？
-            → 時計
-
-    クレヨンの実装
-        クレヨンクラフト後に実績落書きが表示されるように実装する
-
     バグ・仕様修正
      ok fluffyが空を飛ぶバグ
         crafting pause中にminingすると表示が変になるバグ
@@ -161,16 +114,6 @@ contract ERC721 is IERC721 {
         working textがiPad OFFで表示されることの修正
         crafting windowのflower 位置、nyuinyuiのy軸、説明文位置の修正
 
-    Travel of Murasaki-Sanの構想案
-        旅の目的は？
-            宝物SBTもしくはNFTの取得
-            どこに行ったかのスタンプのようなものなので、SBTのほうが良いだろうか
-        旅報酬を受け取る条件は？
-            特定の座標？
-            移動距離に応じて確率が上がるランダム取得？
-        旅報酬のユースケースは？
-            移動効率アップ
-
     coin/material per dayの正確な計算
         拡大再生産を実感できるように
     
@@ -184,6 +127,42 @@ contract ERC721 is IERC721 {
      ok crafting中にリロードするとアイテム名が表示されないバグの修正
             summoner modeを先にcraftingに設定しているのでsetTextが読み込まれていない
             構造修正が多少必要
+
+
+    nuichanのitemIdの再実装検討
+        12種類の種類が設けられる場合、237-248を使用して別々のitemIdを当てたほうが良いか
+        あるいは, msnにtypeOfSourceパラメータを実装するか
+
+    nuiちゃんにclassパラメータを実装する
+        mcのmemoを使うか、storage_nuiに追加するか。
+        class値は合成元のfluffyのtypeを継承する
+        → memoを実装
+        classパラメータに応じてリボンの色を変える
+    
+    集計情報
+        ユーザー数
+        石化ユーザー数
+        await web3.eth.getBalance(contract_bt.options.address) 
+        await web3.eth.getBalance(contract_bv.options.address) 
+        await web3.eth.getBalance(address_Staking_Wallet) 
+
+    バイバックコントラクトのテスト
+        バイバックのテスト
+        bufferVaultの挙動テスト
+
+    クレヨンの実装
+        クレヨンクラフト後に実績落書きが表示されるように実装する
+        アイテム順を再考する
+
+    Travel of Murasaki-Sanの構想案
+        旅の目的は？
+            宝物SBTもしくはNFTの取得
+            どこに行ったかのスタンプのようなものなので、SBTのほうが良いだろうか
+        旅報酬を受け取る条件は？
+            特定の座標？
+            移動距離に応じて確率が上がるランダム取得？
+        旅報酬のユースケースは？
+            移動効率アップ
 
     NFTの希少性の深慮
         NFTの希少性について考える
@@ -510,6 +489,29 @@ contract ERC721 is IERC721 {
 
 
 //### 2nd
+
+ ok wallet反映アイテムの実装
+        age反映アイテム：
+            なに？
+            → 金魚鉢
+        nonce反映アイテム：
+            時計の針を進める？
+            → 時計
+
+ ok 時計の実装
+        nonceの数に応じて長針と短針を動かす
+        長針・短針をプログラムで動かす機構を実装する
+        
+ ok fluffy houseの実装
+        fluffyとの接触処理
+        クリックでfluffyが飛び出してくる演出
+        くっついているfluffyの数に応じた段階絵
+
+ ok fishbowlの実装
+        wallet ageに応じて成長させる
+
+ ok fluffyのupgradeの実装
+        5アイテムのupgradeの実装
 
  ok バイバックコントラの洗練
        *アクティブユーザーのカウント方法の深慮
@@ -1203,6 +1205,7 @@ async function init_global_variants() {
     local_crafting_resume_item_dc = 0;   
     local_total_staking_reward_counter = 0;
     local_achv = new Array(32).fill(false);
+    local_nonce = 0;
 
     //---local festival
     local_ff_each_voting_count = new Array(256).fill(0);
@@ -1700,7 +1703,10 @@ async function contract_update_dynamic_status(_summoner) {
 
     //wallet
     local_wallet = wallet;
-    
+
+    //call and update nonce
+    update_nonce(local_wallet);
+        
     //blocknumber
     local_blockNumber = Number(_all_dynamic_status[0]);
     
@@ -2100,7 +2106,12 @@ async function contract_update_summoner_of_wallet() {
 async function contract_get_nonce(_wallet_address) {
     //let _nonce = await web3.eth.getTransactionCount(_wallet_address);
     let _nonce = await web3wss.eth.getTransactionCount(_wallet_address);
-    return _nonce;
+    return Number(_nonce);
+}
+
+//update nonce
+async function update_nonce(wallet_address) {
+    local_nonce = await contract_get_nonce(wallet_address);
 }
 
 //get wallet month age
@@ -2133,6 +2144,7 @@ async function contract_get_age(_wallet_address) {
 //12step = <300, <600, <900, <1200, <1500, <1800, <2100, <2400, <2700, <3000, <3300, 3300<=
 async function calc_wallet_score(wallet_address) {
     let _nonce = await contract_get_nonce(wallet_address);
+    local_nonce = _nonce;
     let _age = await contract_get_age(wallet_address); //mo
     let _scoreMax = _age * 150; // 5tx/day, 150tx/mo
     let _score = _nonce;
@@ -7134,8 +7146,8 @@ function preload(scene) {
     scene.load.image("item_rugg", "src/png/item_rugg.png");
     scene.load.image("item_piano", "src/png/item_piano.png");
     scene.load.image("item_piano_opened", "src/png/item_piano_opened.png");
-    scene.load.image("item_clock", "src/png/item_clock.png");
-    scene.load.image("item_clock_opened", "src/png/item_clock_opened.png");
+    //scene.load.image("item_clock", "src/png/item_clock.png");
+    //scene.load.image("item_clock_opened", "src/png/item_clock_opened.png");
     scene.load.spritesheet("item_clock_anim", "src/png/item_clock_anim.png", {frameWidth: 370, frameHeight: 320});
     scene.load.image("item_window_day", "src/png/item_window_day.png");
     scene.load.image("item_window_day_closed", "src/png/item_window_day_closed.png");
@@ -7171,6 +7183,7 @@ function preload(scene) {
     //scene.load.image("ff_report", "src/png/ff_report.png");
     //scene.load.image("ff_report_final", "src/png/ff_report.png");
     scene.load.spritesheet("ff_reports", "src/png/ff_reports.png", {frameWidth: 615, frameHeight: 693});
+    scene.load.spritesheet("item_clock", "src/png/item_clock_list.png", {frameWidth: 370, frameHeight: 320});
 
     //---nyui
     scene.load.spritesheet("nyui_moving", "src/png/nyui_moving.png", {frameWidth: 370, frameHeight: 320});
@@ -7616,10 +7629,11 @@ function create(scene) {
     });
     scene.anims.create({
         key: "item_clock_anim_1",
-        frames: scene.anims.generateFrameNumbers("item_clock_anim", {start:1, end:0}),
+        frames: scene.anims.generateFrameNumbers("item_clock", {frames:[4, 3, 4, 3, 2]}),
         frameRate: 1,
         repeat: 0
     });
+    /*
     scene.anims.create({
         key: "item_clock_anim_2",
         frames: scene.anims.generateFrameNumbers("item_clock_anim", {start:1, end:0}),
@@ -7632,6 +7646,7 @@ function create(scene) {
         frameRate: 1,
         repeat: 2
     });
+    */
     scene.anims.create({
         key: "item_fishbowl_1",
         frames: scene.anims.generateFrameNumbers("item_fishbowl_list", {start:0, end:1}),
@@ -11377,21 +11392,24 @@ function update_checkItem(this_scene) {
         let _x = 990;
         let _y = 180;
         item_clock = this_scene.add.sprite(_x, _y, "item_clock")
+            .setFrame(2)
             .setScale(0.45)
             .setOrigin(0.5)
             .setDepth(2)
             .setInteractive({useHandCursor: true})
             .on('pointerdown', () => {
+                /*
                 //1 times
                 item_clock.anims.play("item_clock_anim_1");
                 sound_clock.play();
-                /*
+                */
                 //2 times
-                item_clock.anims.play("item_clock_anim_3");
+                item_clock.anims.play("item_clock_anim_1");
                 sound_clock.play();
                 setTimeout( () => {
                     sound_clock.play();
                 }, 2000);
+                /*
                 //3 times
                 item_clock.anims.play("item_clock_anim_3");
                 sound_clock.play();
@@ -11407,6 +11425,16 @@ function update_checkItem(this_scene) {
         if (local_items[_item_id+64] != 0) {
             draw_glitter(this_scene, item_clock);
         }
+        item_clock_short = this_scene.add.sprite(_x, _y, "item_clock")
+            .setFrame(1)
+            .setScale(0.45)
+            .setOrigin(0.5)
+            .setDepth(2);
+        item_clock_long = this_scene.add.sprite(_x, _y, "item_clock")
+            .setFrame(0)
+            .setScale(0.45)
+            .setOrigin(0.5)
+            .setDepth(2);
     } else if (
         local_items[_item_id] == 0 
         && local_items[_item_id+64] == 0 
@@ -11414,7 +11442,15 @@ function update_checkItem(this_scene) {
         && typeof item_clock != "undefined"
     ) {
         item_clock.destroy(true);
+        item_clock_long.destroy(true);
+        item_clock_short.destroy(true);
         local_items_flag[_item_id] = false;
+    }
+    //after craft
+    if (local_items_flag[_item_id] == true) {
+        let _min = local_nonce % 1440;
+        item_clock_short.setAngle(_min *0.5);
+        item_clock_long.setAngle(_min *6);
     }
     
     //###24:Fluffy House
