@@ -82,9 +82,24 @@ contract ERC721 is IERC721 {
 
 //### 1st
 
-    NFT絵の表示の実装
+    nuichanのitemIdの再実装検討
+        12種類の種類が設けられる場合、237-248を使用して別々のitemIdを当てたほうが良いか
+        あるいは, msnにtypeOfSourceパラメータを実装するか
+
+    nuiちゃんにclassパラメータを実装する
+        mcのmemoを使うか、storage_nuiに追加するか。
+        class値は合成元のfluffyのtypeを継承する
+        → memoを実装
+        classパラメータに応じてリボンの色を変える
+    
+ ig NFT絵の表示の実装
         walletからnftの取得
+            PJごとにコントラから取得する
+            balanceOfでNFT数を取得し、
+            tokenOfOwnerByIndexでNFT IDのリストを取得する
+            AstarCats, AstarDegensはこのmethodで取得できそう
         nftからtokenURLの取得
+            json取得→image URL取得
         URLからpngを取得してloadする機構の実装
             ipfsからだと遅いか？
             tofuNFTなどから取得したいが、可能だろうか
@@ -92,15 +107,8 @@ contract ERC721 is IERC721 {
             NFTのダウンロードは時間がかかると思われるので
             Loading..の文字と何かしらの宛絵を用意する
 
-    ステーキング量反映アイテムの修正
-        以下のアイテムは現在のステーキング量を反映するものとする
-            鳩時計
-            金魚鉢
-            ネオンちゃん
-                ねおんふるっふぃーが必要
-            花瓶
-        それぞれ３～５段階とする
-        → *ネオンちゃんの画面を充実させる
+    ネオンちゃんの段階実装
+        ステーキング量に応じてにぎやかにする
 
     砂時計アイテムの再実装
         条件
@@ -127,7 +135,7 @@ contract ERC721 is IERC721 {
         festivalのvoteにLvやscoreの重み付けをする
             基本＝100とし、Lvやscoreで+aする
             結構なコード修正が必要
-        coin/material per dayの正確な計算
+     ng coin/material per dayの正確な計算
             拡大再生産を実感できるように
         投票がhappy<10でできなくしてmsgを表示する
         crafting中に音符を表示させる
@@ -161,16 +169,6 @@ contract ERC721 is IERC721 {
         さて、どうするか。
             もぐらさんを使うか？            
 
-    nuichanのitemIdの再実装検討
-        12種類の種類が設けられる場合、237-248を使用して別々のitemIdを当てたほうが良いか
-        あるいは, msnにtypeOfSourceパラメータを実装するか
-
-    nuiちゃんにclassパラメータを実装する
-        mcのmemoを使うか、storage_nuiに追加するか。
-        class値は合成元のfluffyのtypeを継承する
-        → memoを実装
-        classパラメータに応じてリボンの色を変える
-    
     集計情報
         ユーザー数
         石化ユーザー数
@@ -493,6 +491,16 @@ contract ERC721 is IERC721 {
 
 
 //### 2nd
+
+ ok ステーキング量反映アイテムの修正
+        以下のアイテムは現在のステーキング量を反映するものとする
+            鳩時計
+            金魚鉢
+            ネオンちゃん
+                ねおんふるっふぃーが必要
+            花瓶
+        それぞれ３～５段階とする
+        → *ネオンちゃんの画面を充実させる
 
  ok wallet反映アイテムの実装
         age反映アイテム：
@@ -2221,20 +2229,63 @@ async function update_achv() {
 async function call_AstarCats() {
     let _tokenID = 1000 + Math.floor(Math.random() * 6777);
     let _tokenURI = await contract_AstarCats.methods.tokenURI(_tokenID).call();
-    let _json
+    let _json;
     await fetch(_tokenURI)
         .then(response => {
            return response.json();
         })
         .then(jsondata => {_json = jsondata});
     let _imageURI = _json.image;
-    //console.log(_tokenID, _imageURI);
-    //let _url = "https://cf-ipfs.com/ipfs/" + _imageURI.replace("ipfs://","");
     return _imageURI;
 }
 
+/*
+//call AstarDegens
+async function call_AstarDegens() {
+    let _tokenID = 1000 + Math.floor(Math.random() * 10000);
+    let _tokenURI = await contract_AstarDegens.methods.tokenURI(_tokenID).call();
+    console.log(_tokenURI);
+    let _json;
+    await fetch(_tokenURI)
+        .then(response => {
+           return response.json();
+        })
+        .then(jsondata => {_json = jsondata});
+    let _imageURI = _json.image;
+    return _imageURI;
+}
+
+//call AstarSignWitch
+async function call_AstarSignWitch() {
+    let _tokenID = 1000 + Math.floor(Math.random() * 10000);
+    let _tokenURI = await contract_AstarSignWitch.methods.tokenURI(_tokenID).call();
+    console.log(_tokenURI);
+    let _json;
+    await fetch(_tokenURI)
+        .then(response => {
+           return response.json();
+        })
+        .then(jsondata => {_json = jsondata});
+    let _imageURI = _json.image;
+    return _imageURI;
+}
+*/
+
 //get nft url
 async function get_nft_url() {
+    /*
+    let _rd = Math.floor(Math.random() * 3);
+    let _url;
+    if (_rd == 0) {
+        _url = await call_AstarCats();
+    } else if (_rd == 1) {
+        _url = await call_AstarDegens();
+    } else {
+        _url = await call_AstarSignWitch();
+    }
+    console.log(_rd, _url);
+    return _url;
+    */
     let _url = await call_AstarCats();
     return _url;
 }
