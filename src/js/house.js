@@ -123,7 +123,6 @@ contract ERC721 is IERC721 {
 
     バグ・仕様修正
         fluffy houseのサウンド設定, inとout時
-        crafting pause中にminingすると表示が変になるバグ
         happyが0になったらcraftingのdcが減らないようにしたい
         festivalのvoteにLvやscoreの重み付けをする
             基本＝100とし、Lvやscoreで+aする
@@ -133,6 +132,7 @@ contract ERC721 is IERC721 {
         投票がhappy<10でできなくしてmsgを表示する
         crafting中に音符を表示させる
         crafting絵の修正、少しずれている
+     ok crafting pause中にminingすると表示が変になるバグ
      ok fluffyが空を飛ぶバグ
      ok tabletをoffにするとresume, cancelボタンが表示されるバグ
      ok catが2匹になるバグ
@@ -5955,7 +5955,11 @@ function open_window_craft (scene) {
         //group_window_crafting.destroy(true);
         group_window_crafting.setVisible(false);
         //during crafting, return 0
-        if (local_crafting_status == 1 || button_crafting_resume.visible == true) {
+        if (
+            local_crafting_status == 1 
+            || button_crafting_resume.visible == true 
+            || local_crafting_resume_flag == 1
+        ) {
             return 0;
         }
         //update selected item
@@ -7258,6 +7262,7 @@ function preload(scene) {
     //scene.load.image("item_fishbowl", "src/png/item_fishbowl.png");
     scene.load.spritesheet("item_fishbowl_list", "src/png/item_fishbowl_list.png", {frameWidth: 370, frameHeight: 320});
     //scene.load.image("item_onigiri", "src/png/item_onigiri.png");
+    scene.load.image("item_bed", "src/png/item_bed.png");
     
     //---ff
     scene.load.image("ff_preFestival_left", "src/png/ff_preFestival_left.png");
@@ -11772,6 +11777,59 @@ function update_checkItem(this_scene) {
         && typeof item_crayon != "undefined"
     ) {
         item_crayon.destroy(true);
+        local_items_flag[_item_id] = false;
+    }
+
+    //###10:Bed
+    _item_name = "Sleeping Bed";
+    _item_id = dic_items[_item_name]["item_id"];
+    if (
+        (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+        && local_items_flag[_item_id] != true
+    ) {
+        local_items_flag[_item_id] = true;
+        let _x = 370;
+        let _y = 760;
+        let _pos_local = "pos_item_bed"
+        //recover position from localStorage
+        if (localStorage.getItem(_pos_local) != null && local_owner == local_wallet) {
+            let _json = localStorage.getItem(_pos_local);
+            _pos = JSON.parse(_json);
+            _x = _pos[0];
+            _y = _pos[1];
+        }
+        item_bed = this_scene.add.sprite(_x, _y, "item_bed")
+            .setScale(0.7)
+            .setOrigin(0.5)
+            .setDepth(_y)
+            .setInteractive({ draggable: true, useHandCursor: true })
+            .on("drag", () => {
+                if (this_scene.sys.game.scale.gameSize._width == 1280) {
+                    item_bed.x = game.input.activePointer.x;
+                    item_bed.y = game.input.activePointer.y;
+                } else {
+                    item_bed.x = game.input.activePointer.y;
+                    item_bed.y = 960 - game.input.activePointer.x;
+                }
+                item_bed.depth = item_bed.y;
+            })
+            .on("dragend", () => {
+                let _pos = [item_bed.x, item_bed.y];
+                if (local_owner == local_wallet) {
+                    localStorage.setItem(_pos_local, JSON.stringify(_pos));
+                }
+            });
+        //uncommon
+        if (local_items[_item_id+64] != 0) {
+            draw_glitter(this_scene, item_bed);
+        }
+    } else if (
+        local_items[_item_id] == 0 
+        && local_items[_item_id+64] == 0 
+        && local_items[_item_id+128] == 0
+        && typeof item_bed != "undefined"
+    ) {
+        item_bed.destroy(true);
         local_items_flag[_item_id] = false;
     }
 

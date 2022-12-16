@@ -70,8 +70,8 @@ let _dic_items = {
         "item_id":10,
         "item_id_uncommon":10+64,
         "item_id_rare":10+128,
-        "img_name":"icon_clock",
-        "icon_png":"icon/icon_clock.png",
+        "img_name":"item_bed",
+        "icon_png":"png/item_bed.png",
     },
     "Crown":{
         "item_id":11,
