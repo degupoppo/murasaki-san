@@ -2233,6 +2233,12 @@ async function call_AstarCats() {
     return _imageURI;
 }
 
+//get nft url
+async function get_nft_url() {
+    let _url = await call_AstarCats();
+    return _url;
+}
+
 
 //---send
 
@@ -6333,9 +6339,10 @@ function open_window_upgrade(scene) {
         let _txt = "";
         _txt += _rarity_to + _item_name_to;
         _txt += " (burning item_id: ";
-        for (i=0; i<=upgradable_itemIds[_itemId].length; i++) {
+        for (i=0; i<upgradable_itemIds[_itemId].length; i++) {
             _txt += upgradable_itemIds[_itemId][i] + ", ";
         }
+        _txt = _txt.slice(0,-2);
         _txt += ")";
         _txt += "\n";
         let _msg = scene.add.text(200, 220 + 70*_num, _txt)
@@ -7263,6 +7270,7 @@ function preload(scene) {
     scene.load.spritesheet("item_fishbowl_list", "src/png/item_fishbowl_list.png", {frameWidth: 370, frameHeight: 320});
     //scene.load.image("item_onigiri", "src/png/item_onigiri.png");
     scene.load.image("item_bed", "src/png/item_bed.png");
+    scene.load.image("item_frame_inside_loading", "src/png/item_frame_inside_loading.png");
     
     //---ff
     scene.load.image("ff_preFestival_left", "src/png/ff_preFestival_left.png");
@@ -10102,8 +10110,53 @@ function update_checkItem(this_scene) {
         && local_items_flag[_item_id] != true
     ) {
         local_items_flag[_item_id] = true;
+        let _x2 = 890;
+        let _y2 = 300;
+        item_frame = this_scene.add.image(_x2, _y2, "item_frame")
+            .setOrigin(0.5)
+            .setScale(0.25)
+            .setDepth(_y2);
+        item_frame_inside = this_scene.add.sprite(_x2, _y2, "item_frame_inside_loading")
+            .setOrigin(0.5)
+            .setScale(0.25)
+            .setDepth(_y2)
+            //.setDisplaySize(67, 82)
+            .setInteractive({useHandCursor: true})
+            .on("pointerdown", async () => {
+                sound_hat.play();
+                this_scene.textures.remove("pic_nft");
+                item_frame_inside.setTexture("item_frame_inside_loading");
+                item_frame_inside.setScale(0.25);
+                //item_frame_inside.setDisplaySize(67, 82);
+                let _url = await get_nft_url();
+                this_scene.load.image("pic_nft", _url);
+                this_scene.load.start()
+                this_scene.load.on(
+                    "complete", 
+                    () => {
+                        item_frame_inside.setTexture("pic_nft");
+                        item_frame_inside.setDisplaySize(67, 82);
+                    });
+            });
+        async function _do() {
+            let _url = await get_nft_url();
+            this_scene.load.image("pic_nft", _url);
+            this_scene.load.start()
+            this_scene.load.on(
+                "complete", 
+                () => {
+                    item_frame_inside.setTexture("pic_nft");
+                    item_frame_inside.setDisplaySize(67, 82);
+                });
+        }
+        _do();
+        //uncommon
+        if (local_items[_item_id+64] != 0) {
+            draw_glitter(this_scene, item_frame);
+        }
+        /*
         function _get_nft_url() {
-            /*
+            
             let _array = [
                 "ex_nft1.png",
                 "ex_nft2.png",
@@ -10113,7 +10166,6 @@ function update_checkItem(this_scene) {
                 //"ipfs://QmQptLUg6Vakr2p3BCccmm2cs7M9hhEGvi4AoZMvMv3DJt/3945.png",
             ];
             let _url = _array[Math.floor(Math.random() * _array.length)];
-            */
             //let _url = await call_AstarCats();
             //console.log(_url);
             let _url = "ex_nft1.png";
@@ -10157,6 +10209,7 @@ function update_checkItem(this_scene) {
                     draw_glitter(this_scene, item_frame);
                 }
             });
+        */
     } else if (
         local_items[_item_id] == 0 
         && local_items[_item_id+64] == 0 
