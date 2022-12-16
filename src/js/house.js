@@ -3227,7 +3227,7 @@ class Pet extends Phaser.GameObjects.Sprite{
         this.dist = "right";
         this.target_x = 0;
         this.target_y = 0;
-        this.setInteractive()
+        //this.setInteractive()
         this.on("pointerdown", function (pointer) {
             this.on_click();
         }, this);
