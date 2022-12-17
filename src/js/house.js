@@ -85,8 +85,7 @@ contract ERC721 is IERC721 {
     nuichanのitemIdの再実装検討
         12種類の種類が設けられる場合、237-248を使用して別々のitemIdを当てたほうが良いか
         あるいは, msnにtypeOfSourceパラメータを実装するか
-
-    nuiちゃんにclassパラメータを実装する
+    nuiちゃんにclassパラメータを実装する？
         mcのmemoを使うか、storage_nuiに追加するか。
         class値は合成元のfluffyのtypeを継承する
         → memoを実装
@@ -106,6 +105,7 @@ contract ERC721 is IERC721 {
         ローディング絵の実装
             NFTのダウンロードは時間がかかると思われるので
             Loading..の文字と何かしらの宛絵を用意する
+        ローディング中が重いので対策可能なら考える
 
     ネオンちゃんの段階実装
         ステーキング量に応じてにぎやかにする
@@ -130,11 +130,12 @@ contract ERC721 is IERC721 {
             カウンターが進むと何かが溜まってゆく・成長してゆく絵を考える。
 
     バグ・仕様修正
-        fluffy houseのサウンド設定, inとout時
         happyが0になったらcraftingのdcが減らないようにしたい
         festivalのvoteにLvやscoreの重み付けをする
             基本＝100とし、Lvやscoreで+aする
             結構なコード修正が必要
+     ok fluffy, tokenBallの壁跳ね返り位置の修正, diceと同じ挙動に
+     ok fluffy houseのサウンド設定, inとout時
      ng coin/material per dayの正確な計算
             拡大再生産を実感できるように
         投票がhappy<10でできなくしてmsgを表示する
@@ -4180,6 +4181,11 @@ class tokenBall extends Phaser.GameObjects.Sprite{
                 }
             }
             //refrection x
+            if (this.y > 500) {
+                this.line_x_r = (this.y + 115746/205)/(208/205);
+            } else {
+                this.line_x_r = 1060;
+            }
             if (this.x >= this.line_x_r) {
                 this.x = this.line_x_r;
                 this.speed_x *= -0.9;   //bounce coefficient
@@ -4189,6 +4195,17 @@ class tokenBall extends Phaser.GameObjects.Sprite{
                 this.speed_x *= -0.9;
                 sound_dice_impact.play();
             }
+            /*
+            if (this.x >= this.line_x_r) {
+                this.x = this.line_x_r;
+                this.speed_x *= -0.9;   //bounce coefficient
+                sound_dice_impact.play();
+            } else if (this.x <= this.line_x_l) {
+                this.x = this.line_x_l;
+                this.speed_x *= -0.9;
+                sound_dice_impact.play();
+            }
+            */
         }
     }
 }
@@ -4753,7 +4770,7 @@ class Fluffy2 extends Phaser.GameObjects.Sprite{
     on_click_fromHouse() {
         this.x = item_fluffy_house.x;
         this.y = item_fluffy_house.y;
-        this.speed_x = 6 + Math.random() * 8;
+        this.speed_x = 4 + Math.random() * 10;
         /*
         if (pointer_x > this.x) {
             this.speed_x *= -1;
@@ -4762,11 +4779,12 @@ class Fluffy2 extends Phaser.GameObjects.Sprite{
             this.speed_x *= -1;
         }
         */
-        this.speed_y = 6 + Math.random() * 8;
+        this.speed_y = 4 + Math.random() * 10;
         //define constant of y = b - a * x
         this.a = Math.random() * 0.8 - 0.4;
         this.b = this.y + this.a * this.x;
         //sound
+        /*
         let _li = [
             sound_fluffy2,
             sound_fluffy3,
@@ -4774,6 +4792,7 @@ class Fluffy2 extends Phaser.GameObjects.Sprite{
             sound_fluffy5
         ]
         _li[Math.floor(Math.random()*_li.length)].play();
+        */
         this.mode = "rolling";
         if (this.rarity == "rare") {
             this.anims.stop();
@@ -4950,6 +4969,7 @@ class Fluffy2 extends Phaser.GameObjects.Sprite{
             //local_fluffy_house_count += 1;
             group_fluffy_house_in.add(this);
             this.visible = false;
+            sound_fluiffy_house.play();
         }
     }
     
@@ -7204,6 +7224,7 @@ function preload(scene) {
     scene.load.audio("star", "src/sound/star.mp3");
     scene.load.audio("nyui", "src/sound/nyui.mp3");
     scene.load.audio("nyui2", "src/sound/nyui2.mp3");
+    scene.load.audio("fluffy_house", "src/sound/fluffy_house.mp3");
 
     //---item_basic
     scene.load.image("item_table", "src/png/item_basic_table.png");
@@ -8468,6 +8489,7 @@ function create(scene) {
     sound_star = scene.sound.add("star", {volume:0.1});
     sound_nyui = scene.sound.add("nyui", {volume:0.1});
     sound_nyui2 = scene.sound.add("nyui2", {volume:0.1});
+    sound_fluiffy_house = scene.sound.add("fluffy_house", {volume:0.1});
 
     //---system message
     //system message
@@ -10171,15 +10193,13 @@ function update_checkItem(this_scene) {
             .setOrigin(0.5)
             .setScale(0.25)
             .setDepth(_y2)
-            //.setDisplaySize(67, 82)
             .setInteractive({useHandCursor: true})
             .on("pointerdown", async () => {
                 sound_hat.play();
-                this_scene.textures.remove("pic_nft");
                 item_frame_inside.setTexture("item_frame_inside_loading");
                 item_frame_inside.setScale(0.25);
-                //item_frame_inside.setDisplaySize(67, 82);
                 let _url = await get_nft_url();
+                this_scene.textures.remove("pic_nft");
                 this_scene.load.image("pic_nft", _url);
                 this_scene.load.start()
                 this_scene.load.on(
@@ -10996,8 +11016,8 @@ function update_checkItem(this_scene) {
         local_items_flag[_item_id] = true;
         //_x = 700;
         //_y = 380;
-        _x = 610;
-        _y = 260;
+        let _x = 610;
+        let _y = 260;
         item_hat_mortarboard = this_scene.add.sprite(_x, _y, "item_hat_mortarboard")
             .setOrigin(0.5)
             .setScale(0.20)
@@ -11759,14 +11779,14 @@ function update_checkItem(this_scene) {
     //###24:Fluffy House
     _item_name = "Fluffy House";
     _item_id = dic_items[_item_name]["item_id"];
-    _x = 250;
-    _y = 700;
     if (
         (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
         && local_items_flag[_item_id] != true
     ) {
         local_items_flag[_item_id] = true;
         //local_fluffy_house_count = 0;
+        let _x = 250;
+        let _y = 700;
         group_fluffy_house_in = this_scene.add.group();
         item_fluffy_house = this_scene.add.sprite(_x, _y, "item_fluffy_house_1")
             .setScale(0.4)
@@ -11791,6 +11811,7 @@ function update_checkItem(this_scene) {
                     }, 3000);
                     murasakisan.on_click();
                     item_fluffy_house.setTexture("item_fluffy_house_1");
+                    sound_fluffy.play();
                 }
             });
         //uncommon
@@ -11807,11 +11828,11 @@ function update_checkItem(this_scene) {
     }
     //after craft
     if (local_items_flag[_item_id] == true) {
-        if (group_fluffy_house_in.getChildren().length >= 16) {
+        if (group_fluffy_house_in.getChildren().length >= 10) {
             item_fluffy_house.setTexture("item_fluffy_house_5");
-        } else if (group_fluffy_house_in.getChildren().length >= 11) {
+        } else if (group_fluffy_house_in.getChildren().length >= 7) {
             item_fluffy_house.setTexture("item_fluffy_house_4");
-        } else if (group_fluffy_house_in.getChildren().length >= 6) {
+        } else if (group_fluffy_house_in.getChildren().length >= 4) {
             item_fluffy_house.setTexture("item_fluffy_house_3");
         } else if (group_fluffy_house_in.getChildren().length >= 1) {
             item_fluffy_house.setTexture("item_fluffy_house_2");
