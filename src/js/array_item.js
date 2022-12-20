@@ -66,12 +66,12 @@ let _dic_items = {
         "img_name":"item_fishbowl_list",
         "icon_png":"png/item_fishbowl.png",
     },
-    "Sleeping Bed":{
+    "Hammock":{
         "item_id":10,
         "item_id_uncommon":10+64,
         "item_id_rare":10+128,
-        "img_name":"item_bed",
-        "icon_png":"png/item_bed.png",
+        "img_name":"item_hammock_list",
+        "icon_png":"icon/item_hammock.png",
     },
     "Crown":{
         "item_id":11,

@@ -35,6 +35,30 @@ async function donate(_value) {
     }
 }
 
+
+//get info
+async function total_summoned() {
+    let _res = await contract_mm_wss.methods.next_token().call();
+    return Number(_res) - 1;
+}
+async function totalItemMinted() {
+    let _res = await contract_mc_wss.methods.next_item().call();
+    return Number(_res) - 1;
+}
+async function getPrice() {
+    let _res = await contract_mp_wss.methods.PRICE().call();
+    return Number(_res) / (10**18);
+}
+async function balanceOfbv() {
+    let _res = await web3.eth.getBalance(contract_bv.options.address);
+    return Math.floor( Number(_res) / (10**18) * 100 )/100;
+}
+async function balanceOfbt() {
+    let _res = await web3.eth.getBalance(contract_bt.options.address);
+    return Math.floor( Number(_res) / (10**18) * 100 )/100;
+}
+
+
 //write donation icon
 function write_icon(_value) {
     let _icon;

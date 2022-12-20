@@ -82,11 +82,28 @@ contract ERC721 is IERC721 {
 
 //### 1st
 
+    Astar Walletを所有する意味論の付加
+        Walletのパラメータによってin-gameインセンティブを付与する
+            保有tokenの種類, 上限1%, 0.1%/PJ
+                SDN, DOT, LAY, BAI, ARSW, ACA, MATIC, GLMR, JPYC, WETH, WBTC, aUSD, 
+            保有NFTの種類, 上限1%, 0.2%/PJ
+                CANDYGIRL, DGENE, ANAUT, ASTRJP, CAT, WITCH, Punks
+            dapps staking量, 上限1%, 0.1%/step
+                1, 500, 1000, 2000, 4000, 8000, 16000, 32000, 64000, 128000, 
+            オリジナルNFT, 上限1%, 0.1%/個
+                1-10個
+        すべてmaxとして+5%程度のEXP補正をかける
+            1項目100点で、4項目400点、+4%程度か
+            最後の1項目は、オリジナルな運営が発行するNFTとするか。
+                1日1枚発行されるAoAのむらさきさんやAstarなど。
+        現在のExp補正値を表示させる
+            クリックで補正値内訳を表示させる
+        また、Exp補正値を反映するアイテムか、落書きを表示させる        
+
     nuichanのitemIdの再実装検討
         12種類の種類が設けられる場合、237-248を使用して別々のitemIdを当てたほうが良いか
         あるいは, msnにtypeOfSourceパラメータを実装するか
-
-    nuiちゃんにclassパラメータを実装する
+    nuiちゃんにclassパラメータを実装する？
         mcのmemoを使うか、storage_nuiに追加するか。
         class値は合成元のfluffyのtypeを継承する
         → memoを実装
@@ -106,6 +123,7 @@ contract ERC721 is IERC721 {
         ローディング絵の実装
             NFTのダウンロードは時間がかかると思われるので
             Loading..の文字と何かしらの宛絵を用意する
+        ローディング中が重いので対策可能なら考える
 
     ネオンちゃんの段階実装
         ステーキング量に応じてにぎやかにする
@@ -130,11 +148,13 @@ contract ERC721 is IERC721 {
             カウンターが進むと何かが溜まってゆく・成長してゆく絵を考える。
 
     バグ・仕様修正
-        fluffy houseのサウンド設定, inとout時
         happyが0になったらcraftingのdcが減らないようにしたい
         festivalのvoteにLvやscoreの重み付けをする
             基本＝100とし、Lvやscoreで+aする
             結構なコード修正が必要
+     ok festival中にvote前に残り時間を表示させる
+     ok fluffy, tokenBallの壁跳ね返り位置の修正, diceと同じ挙動に
+     ok fluffy houseのサウンド設定, inとout時
      ng coin/material per dayの正確な計算
             拡大再生産を実感できるように
         投票がhappy<10でできなくしてmsgを表示する
@@ -1999,9 +2019,9 @@ async function contract_update_event_random() {
             if (_summoner_from_name == "") {
                 _summoner_from_name = "#" + _value;
             }
-            _content1 = "Opened Mail from";
+            _content1 = "Got Mail from";
             _content2 = _summoner_from_name;
-            _content2 += " !!";
+            _content2 += " !";
         }
         _resText[2] = _content1;
         _resText[3] = _content2;
@@ -2595,10 +2615,17 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             }
             this.resting_count = 70 + Math.random() * 30;
 	    }else if (this.count >= this.resting_count){
+	        //check sleeping with hammock
             let tmp = Math.random() * 100;
             if (tmp <= 5) {
-                this.mode = "sleeping";
-                this.count = 0;
+    	        if (this.check_hammock()){
+    	            this.mode = "hammock";
+    	            this.count = 0;
+    	            this.submode = 0;
+    	        } else {
+                    this.mode = "sleeping";
+                    this.count = 0;
+                }
             }else if (tmp <= 20 && satiety <= 10 && count_sync > 3) {
                 this.mode = "hungry";
                 this.count = 0;
@@ -2823,7 +2850,80 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             this.count = 0;
         }
     }
-    
+
+
+    //### sleeping with Hammock
+    check_hammock() {
+        if (
+            typeof(item_bed) != "undefined"
+            && item_bed.x >= 100
+            && item_bed.x <= 1100
+            && item_bed.y >= 500
+            && item_bed.y <= 800
+            && flag_onLight == false
+        ){
+            return true;
+        }
+        return false;
+    }
+    sleeping_withHammock() {
+        this.count += 1;
+        if (this.submode == 0) {
+            //set target pos
+            this.target_x = item_bed.x;
+            this.target_y = item_bed.y;
+            //disable bed click
+            item_bed.disableInteractive();
+            let delta_x = this.target_x - this.x;
+            if (delta_x >0) {
+                this.dist = "right";
+                this.anims.play("murasaki_right", true);
+            }else {
+                this.dist = "left";
+                this.anims.play("murasaki_left", true);
+            }
+            this.submode = 1;
+        }else if (this.submode == 1) {
+            let delta_x = this.target_x - this.x;
+            let delta_y = this.target_y - this.y;
+            let delta_x2 = delta_x / (Math.abs(delta_x) + Math.abs(delta_y)) * 1.5;
+            let delta_y2 = delta_y / (Math.abs(delta_x) + Math.abs(delta_y)) * 1.5;
+            this.x += delta_x2;
+            this.y += delta_y2;
+            if (this.x > this.target_x-10 
+              && this.x < this.target_x+10 
+              && this.y > this.target_y-10 
+              && this.y < this.target_y+10) {
+                this.submode = 2;
+            }
+        }else if (this.submode == 2) {
+            this.x = this.target_x;
+            this.y = this.target_y;
+            this.setScale(0.8);
+            this.anims.play("item_hammock", true);
+            //this.count_limit = this.count + 1500;
+            this.submode = 3;
+            item_bed.visible = false;
+        }else if (this.submode == 3) {
+            if (flag_onLight == true && turn % 100 == 0) {
+                let tmp = Math.random() * 100;
+                if (tmp <= 10) {
+                    this.setScale(0.45);
+                    this.y += 50;
+                    item_bed.visible = true;
+                    item_bed.setInteractive();
+                    if (this.dist == "right"){
+                        this.anims.play("murasaki_right", true);
+                    }else if (this.dist == "left") {
+                        this.anims.play("murasaki_left", true);
+                    }
+                    this.mode = "resting";
+                    this.count = 0;
+                }
+            }
+        }
+    }    
+
     //### listning
     listning() {
         this.count += 1;
@@ -3149,6 +3249,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             else if (this.mode == "petrified") {this.petrified();}
             else if (this.mode == "listning") {this.listning();}
             else if (this.mode == "attenting") {this.attenting();}
+            else if (this.mode == "hammock") {this.sleeping_withHammock();}
             //draw item_wearing_hat
             if (item_wearing_hat != 0) {
                 this.update_item_wearing_hat();
@@ -3223,7 +3324,7 @@ class Neon extends Phaser.GameObjects.Sprite{
             //out of area check, y
             if (this.y > 450 && this.moving_degree > 180) {
                 this.moving_degree = 360 - this.moving_degree;
-            }else if (this.y < 50 && this.moving_degree < 180) {
+            }else if (this.y < 100 && this.moving_degree < 180) {
                 this.moving_degree = 360 - this.moving_degree;
             }
             //minus check
@@ -4180,6 +4281,11 @@ class tokenBall extends Phaser.GameObjects.Sprite{
                 }
             }
             //refrection x
+            if (this.y > 500) {
+                this.line_x_r = (this.y + 115746/205)/(208/205);
+            } else {
+                this.line_x_r = 1060;
+            }
             if (this.x >= this.line_x_r) {
                 this.x = this.line_x_r;
                 this.speed_x *= -0.9;   //bounce coefficient
@@ -4189,6 +4295,17 @@ class tokenBall extends Phaser.GameObjects.Sprite{
                 this.speed_x *= -0.9;
                 sound_dice_impact.play();
             }
+            /*
+            if (this.x >= this.line_x_r) {
+                this.x = this.line_x_r;
+                this.speed_x *= -0.9;   //bounce coefficient
+                sound_dice_impact.play();
+            } else if (this.x <= this.line_x_l) {
+                this.x = this.line_x_l;
+                this.speed_x *= -0.9;
+                sound_dice_impact.play();
+            }
+            */
         }
     }
 }
@@ -4753,7 +4870,7 @@ class Fluffy2 extends Phaser.GameObjects.Sprite{
     on_click_fromHouse() {
         this.x = item_fluffy_house.x;
         this.y = item_fluffy_house.y;
-        this.speed_x = 6 + Math.random() * 8;
+        this.speed_x = 4 + Math.random() * 10;
         /*
         if (pointer_x > this.x) {
             this.speed_x *= -1;
@@ -4762,11 +4879,12 @@ class Fluffy2 extends Phaser.GameObjects.Sprite{
             this.speed_x *= -1;
         }
         */
-        this.speed_y = 6 + Math.random() * 8;
+        this.speed_y = 4 + Math.random() * 10;
         //define constant of y = b - a * x
         this.a = Math.random() * 0.8 - 0.4;
         this.b = this.y + this.a * this.x;
         //sound
+        /*
         let _li = [
             sound_fluffy2,
             sound_fluffy3,
@@ -4774,6 +4892,7 @@ class Fluffy2 extends Phaser.GameObjects.Sprite{
             sound_fluffy5
         ]
         _li[Math.floor(Math.random()*_li.length)].play();
+        */
         this.mode = "rolling";
         if (this.rarity == "rare") {
             this.anims.stop();
@@ -4950,6 +5069,7 @@ class Fluffy2 extends Phaser.GameObjects.Sprite{
             //local_fluffy_house_count += 1;
             group_fluffy_house_in.add(this);
             this.visible = false;
+            sound_fluiffy_house.play();
         }
     }
     
@@ -6498,10 +6618,14 @@ function open_window_upgrade(scene) {
 //---window:voting
 function open_window_voting(scene) {
 
+    sound_window_open.play();
+    if (local_owner != local_wallet) {
+        return 0;
+    }
+
     //create group
     group_window_voting = scene.add.group();
 
-    sound_window_open.play();
     //close window and summon
     function close_window(_summoner, _type) {
         group_window_voting.destroy(true);
@@ -6624,9 +6748,21 @@ function open_window_voting(scene) {
     let _bar2_y = eval("_icon" + local_ff_elected_type).y;
     _bar2.fillRect(_bar2_x-30, _bar2_y, 350, 5);
     */
+    //present info
+    let _text_msg3;
+    if (local_ff_next_festival_block - local_blockNumber < 0) {
+        _text_msg3 = "The festival is about to start.\nYou can get the First Voting Bonus now!";
+    } else if (local_ff_isEndable) {
+        _text_msg3 = "The festival is almost over.\nYou can get the Final Voting Bonus now!";
+    } else {
+        _text_msg3 = "The festival is underway!\n" + _counter + " blocks remaining.";
+    }
+    let msg3 = scene.add.text(750, 730, _text_msg3)
+            .setFontSize(24).setFontFamily("Arial").setFill("blue");
     group_window_voting.add(window_voting);
     group_window_voting.add(msg1);
     group_window_voting.add(msg2);
+    group_window_voting.add(msg3);
     group_window_voting.add(_button201);
     group_window_voting.add(_button202);
     group_window_voting.add(_button203);
@@ -6873,7 +7009,7 @@ function summon_fluffy2(scene, _type, _itemId) {
     //_fluffy.on_summon();
     group_star.add(_fluffy);
     group_update.add(_fluffy);
-    if (count_sync > 10) {
+    if (count_sync > 3) {
         murasakisan.on_click();
         sound_fluffy.play();
     }
@@ -7204,6 +7340,7 @@ function preload(scene) {
     scene.load.audio("star", "src/sound/star.mp3");
     scene.load.audio("nyui", "src/sound/nyui.mp3");
     scene.load.audio("nyui2", "src/sound/nyui2.mp3");
+    scene.load.audio("fluffy_house", "src/sound/fluffy_house.mp3");
 
     //---item_basic
     scene.load.image("item_table", "src/png/item_basic_table.png");
@@ -7322,6 +7459,7 @@ function preload(scene) {
     //scene.load.image("item_onigiri", "src/png/item_onigiri.png");
     scene.load.image("item_bed", "src/png/item_bed.png");
     scene.load.image("item_frame_inside_loading", "src/png/item_frame_inside_loading.png");
+    scene.load.spritesheet("item_hammock_list", "src/png/item_hammock_list.png", {frameWidth: 230, frameHeight: 320});
     
     //---ff
     scene.load.image("ff_preFestival_left", "src/png/ff_preFestival_left.png");
@@ -7829,6 +7967,12 @@ function create(scene) {
     scene.anims.create({
         key: "item_fishbowl_5",
         frames: scene.anims.generateFrameNumbers("item_fishbowl_list", {start:8, end:9}),
+        frameRate: 1,
+        repeat: -1
+    });
+    scene.anims.create({
+        key: "item_hammock",
+        frames: scene.anims.generateFrameNumbers("item_hammock_list", {start:1, end:2}),
         frameRate: 1,
         repeat: -1
     });
@@ -8468,6 +8612,7 @@ function create(scene) {
     sound_star = scene.sound.add("star", {volume:0.1});
     sound_nyui = scene.sound.add("nyui", {volume:0.1});
     sound_nyui2 = scene.sound.add("nyui2", {volume:0.1});
+    sound_fluiffy_house = scene.sound.add("fluffy_house", {volume:0.1});
 
     //---system message
     //system message
@@ -10171,15 +10316,13 @@ function update_checkItem(this_scene) {
             .setOrigin(0.5)
             .setScale(0.25)
             .setDepth(_y2)
-            //.setDisplaySize(67, 82)
             .setInteractive({useHandCursor: true})
             .on("pointerdown", async () => {
                 sound_hat.play();
-                this_scene.textures.remove("pic_nft");
                 item_frame_inside.setTexture("item_frame_inside_loading");
                 item_frame_inside.setScale(0.25);
-                //item_frame_inside.setDisplaySize(67, 82);
                 let _url = await get_nft_url();
+                this_scene.textures.remove("pic_nft");
                 this_scene.load.image("pic_nft", _url);
                 this_scene.load.start()
                 this_scene.load.on(
@@ -10996,8 +11139,8 @@ function update_checkItem(this_scene) {
         local_items_flag[_item_id] = true;
         //_x = 700;
         //_y = 380;
-        _x = 610;
-        _y = 260;
+        let _x = 610;
+        let _y = 260;
         item_hat_mortarboard = this_scene.add.sprite(_x, _y, "item_hat_mortarboard")
             .setOrigin(0.5)
             .setScale(0.20)
@@ -11759,14 +11902,14 @@ function update_checkItem(this_scene) {
     //###24:Fluffy House
     _item_name = "Fluffy House";
     _item_id = dic_items[_item_name]["item_id"];
-    _x = 250;
-    _y = 700;
     if (
         (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
         && local_items_flag[_item_id] != true
     ) {
         local_items_flag[_item_id] = true;
         //local_fluffy_house_count = 0;
+        let _x = 250;
+        let _y = 700;
         group_fluffy_house_in = this_scene.add.group();
         item_fluffy_house = this_scene.add.sprite(_x, _y, "item_fluffy_house_1")
             .setScale(0.4)
@@ -11791,6 +11934,7 @@ function update_checkItem(this_scene) {
                     }, 3000);
                     murasakisan.on_click();
                     item_fluffy_house.setTexture("item_fluffy_house_1");
+                    sound_fluffy.play();
                 }
             });
         //uncommon
@@ -11807,11 +11951,11 @@ function update_checkItem(this_scene) {
     }
     //after craft
     if (local_items_flag[_item_id] == true) {
-        if (group_fluffy_house_in.getChildren().length >= 16) {
+        if (group_fluffy_house_in.getChildren().length >= 10) {
             item_fluffy_house.setTexture("item_fluffy_house_5");
-        } else if (group_fluffy_house_in.getChildren().length >= 11) {
+        } else if (group_fluffy_house_in.getChildren().length >= 7) {
             item_fluffy_house.setTexture("item_fluffy_house_4");
-        } else if (group_fluffy_house_in.getChildren().length >= 6) {
+        } else if (group_fluffy_house_in.getChildren().length >= 4) {
             item_fluffy_house.setTexture("item_fluffy_house_3");
         } else if (group_fluffy_house_in.getChildren().length >= 1) {
             item_fluffy_house.setTexture("item_fluffy_house_2");
@@ -11885,7 +12029,7 @@ function update_checkItem(this_scene) {
     }
 
     //###10:Bed
-    _item_name = "Sleeping Bed";
+    _item_name = "Hammock";
     _item_id = dic_items[_item_name]["item_id"];
     if (
         (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
@@ -11902,8 +12046,8 @@ function update_checkItem(this_scene) {
             _x = _pos[0];
             _y = _pos[1];
         }
-        item_bed = this_scene.add.sprite(_x, _y, "item_bed")
-            .setScale(0.7)
+        item_bed = this_scene.add.sprite(_x, _y, "item_hammock_list")
+            .setScale(0.8)
             .setOrigin(0.5)
             .setDepth(_y)
             .setInteractive({ draggable: true, useHandCursor: true })
