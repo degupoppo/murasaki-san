@@ -152,10 +152,7 @@ contract ERC721 is IERC721 {
         festivalのvoteにLvやscoreの重み付けをする
             基本＝100とし、Lvやscoreで+aする
             結構なコード修正が必要
-<<<<<<< HEAD
      ok festival中にvote前に残り時間を表示させる
-=======
->>>>>>> 3d62f440630d2e340705d2cf5f0bb5087736052f
      ok fluffy, tokenBallの壁跳ね返り位置の修正, diceと同じ挙動に
      ok fluffy houseのサウンド設定, inとout時
      ng coin/material per dayの正確な計算
