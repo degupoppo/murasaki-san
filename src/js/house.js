@@ -2615,9 +2615,9 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             }
             this.resting_count = 70 + Math.random() * 30;
 	    }else if (this.count >= this.resting_count){
-	        //check sleeping with hammock
             let tmp = Math.random() * 100;
             if (tmp <= 5) {
+    	        //check sleeping with hammock
     	        if (this.check_hammock()){
     	            this.mode = "hammock";
     	            this.count = 0;
@@ -2858,7 +2858,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             typeof(item_bed) != "undefined"
             && item_bed.x >= 100
             && item_bed.x <= 1100
-            && item_bed.y >= 500
+            && item_bed.y >= 420
             && item_bed.y <= 800
             && flag_onLight == false
         ){
@@ -3174,6 +3174,14 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         }else if (this.mode == "sleeping") {
             item_wearing_hat.x = this.x - 26;
             item_wearing_hat.y = this.y - 22;
+        }else if (this.mode == "hammock") {
+            if (this.submode < 2) {
+                item_wearing_hat.x = this.x;
+                item_wearing_hat.y = this.y - 65;
+            } else {
+                item_wearing_hat.x = this.x;
+                item_wearing_hat.y = this.y - 135;
+            }
         }else if (this.mode == "mining" && this.submode == 1 && this.dist == "left") {
             item_wearing_hat.x = this.x - 5;
             item_wearing_hat.y = this.y - 50;
@@ -5103,7 +5111,7 @@ class Fluffy2 extends Phaser.GameObjects.Sprite{
     moving() {
         if (this.submode == 0){
             let _distance = this.calc_distance(murasakisan.x, murasakisan.y);
-            if (_distance > 400) {
+            if (_distance > 300) {
                 this.moving_degree = this.get_degree(murasakisan.x, murasakisan.y);
             } else {
                 //determine degree, 0-30, 150-210, 330-360
