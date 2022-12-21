@@ -2857,7 +2857,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         if (
             typeof(item_bed) != "undefined"
             && item_bed.x >= 100
-            && item_bed.x <= 1100
+            && item_bed.x <= 1180
             && item_bed.y >= 420
             && item_bed.y <= 800
             && flag_onLight == false
@@ -3109,6 +3109,10 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             this.anims.play("murasaki_crafting", true);
             if (this.count % 500 == 10) {
                 sound_crafting_during.play();
+            }
+            if (happy <= 0) {
+                this.anims.play("murasaki_sleeping", true);
+                this.submode = 3;
             }
         }
     }
