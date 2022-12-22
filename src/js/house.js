@@ -512,6 +512,9 @@ contract ERC721 is IERC721 {
 
 //### 2nd
 
+ ok bed中に行動させるとでっかくなるバグの修正
+        bedも消えてしまう
+        
  ok ステーキング量反映アイテムの修正
         以下のアイテムは現在のステーキング量を反映するものとする
             鳩時計
@@ -5115,7 +5118,7 @@ class Fluffy2 extends Phaser.GameObjects.Sprite{
     moving() {
         if (this.submode == 0){
             let _distance = this.calc_distance(murasakisan.x, murasakisan.y);
-            if (_distance > 300) {
+            if (_distance > 400) {
                 this.moving_degree = this.get_degree(murasakisan.x, murasakisan.y);
             } else {
                 //determine degree, 0-30, 150-210, 330-360
@@ -9655,6 +9658,7 @@ function update_checkModeChange(this_scene) {
     //feeding check, continue
     } else if (local_last_feeding_time > previous_local_last_feeding_time){
         murasakisan.set_mode = "feeding";
+        murasakisan.setScale(0.45);
         murasakisan.submode = 0;
         murasakisan.count = 0;
         murasakisan.target_x = 600;
@@ -9712,6 +9716,7 @@ function update_checkModeChange(this_scene) {
     //grooming check, continue
     } else if (local_last_grooming_time > previous_local_last_grooming_time){
         murasakisan.set_mode = "grooming";
+        murasakisan.setScale(0.45);
         murasakisan.submode = 0;
         murasakisan.count = 0;
         murasakisan.target_x = 1000;
@@ -9725,8 +9730,11 @@ function update_checkModeChange(this_scene) {
         && murasakisan.mode != "mining" 
         && murasakisan.mode != "feeding"
         && murasakisan.mode != "grooming"
+        && murasakisan.mode != "sleeping"
+        && murasakisan.mode != "hammock"
     ){
         murasakisan.set_mode = "mining";
+        murasakisan.setScale(0.45);
         murasakisan.submode = 0;
         murasakisan.count = 0;
         murasakisan.target_x = 100;
@@ -9748,8 +9756,11 @@ function update_checkModeChange(this_scene) {
         && murasakisan.mode != "farming" 
         && murasakisan.mode != "feeding"
         && murasakisan.mode != "grooming"
+        && murasakisan.mode != "sleeping"
+        && murasakisan.mode != "hammock"
     ){
         murasakisan.set_mode = "farming";
+        murasakisan.setScale(0.45);
         murasakisan.submode = 0;
         murasakisan.count = 0;
         murasakisan.target_x = 180;
@@ -9771,8 +9782,11 @@ function update_checkModeChange(this_scene) {
         && murasakisan.mode != "crafting" 
         && murasakisan.mode != "feeding"
         && murasakisan.mode != "grooming"
+        && murasakisan.mode != "sleeping"
+        && murasakisan.mode != "hammock"
     ){
         murasakisan.set_mode = "crafting";
+        murasakisan.setScale(0.45);
         murasakisan.submode = 0;
         murasakisan.count = 0;
         murasakisan.target_x = 950;

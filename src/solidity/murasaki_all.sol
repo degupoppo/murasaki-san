@@ -4595,6 +4595,136 @@ contract Murasaki_Function_Achievement is Ownable {
 }
 
 
+//---Achievement
+
+
+contract Murasaki_Function_Achievement is Ownable {
+
+    //address
+    address public address_Murasaki_Address;
+    function _set_Murasaki_Address(address _address) external onlyOwner {
+        address_Murasaki_Address = _address;
+    }
+
+    //get_achv
+    function get_achievement (uint _summoner) external view returns (bool[32] memory) {
+        bool[32] memory _achievements;
+        for (uint _achv_id=1; _achv_id<32; _achv_id++) {
+            _achievements[_achv_id] = _check_achievement(_summoner, _achv_id);
+        }
+        return _achievements;
+    }
+
+    //internal, check_achv
+    function _check_achievement(uint _summoner, uint _achievement_id) internal view returns (bool) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage_Score mss = Murasaki_Storage_Score(ma.address_Murasaki_Storage_Score());
+        //1: total_coin > 10000
+        if (_achievement_id == 1) {
+            if (mss.total_coin_mined(_summoner) >= 10000) {
+                return true;
+            }
+        //2: total_coin > 30000
+        } else if (_achievement_id == 2) {
+            if (mss.total_coin_mined(_summoner) >= 30000) {
+                return true;
+            }
+        //3: total_coin > 100000
+        } else if (_achievement_id == 3) {
+            if (mss.total_coin_mined(_summoner) >= 100000) {
+                return true;
+            }
+        //4: total_coin > 300000
+        } else if (_achievement_id == 4) {
+            if (mss.total_coin_mined(_summoner) >= 300000) {
+                return true;
+            }
+        //5: total_coin > 1000000
+        } else if (_achievement_id == 5) {
+            if (mss.total_coin_mined(_summoner) >= 1000000) {
+                return true;
+            }
+        //6: total_material > 10000
+        } else if (_achievement_id == 6) {
+            if (mss.total_material_farmed(_summoner) >= 10000) {
+                return true;
+            }
+        //7: total_material > 30000
+        } else if (_achievement_id == 7) {
+            if (mss.total_material_farmed(_summoner) >= 30000) {
+                return true;
+            }
+        //8: total_material > 100000
+        } else if (_achievement_id == 8) {
+            if (mss.total_material_farmed(_summoner) >= 100000) {
+                return true;
+            }
+        //9: total_material > 300000
+        } else if (_achievement_id == 9) {
+            if (mss.total_material_farmed(_summoner) >= 300000) {
+                return true;
+            }
+        //10: total_material > 1000000
+        } else if (_achievement_id == 10) {
+            if (mss.total_material_farmed(_summoner) >= 1000000) {
+                return true;
+            }
+        //11: total_item > 5
+        } else if (_achievement_id == 11) {
+            if (mss.total_item_crafted(_summoner) >= 5) {
+                return true;
+            }
+        //12: total_item > 10
+        } else if (_achievement_id == 12) {
+            if (mss.total_item_crafted(_summoner) >= 10) {
+                return true;
+            }
+        //13: total_item > 20
+        } else if (_achievement_id == 13) {
+            if (mss.total_item_crafted(_summoner) >= 20) {
+                return true;
+            }
+        //14: total_item > 40
+        } else if (_achievement_id == 14) {
+            if (mss.total_item_crafted(_summoner) >= 40) {
+                return true;
+            }
+        //15: total_item > 80
+        } else if (_achievement_id == 15) {
+            if (mss.total_item_crafted(_summoner) >= 80) {
+                return true;
+            }
+        //16: total_fluffy > 30
+        } else if (_achievement_id == 16) {
+            if (mss.total_precious_received(_summoner) >= 30) {
+                return true;
+            }
+        //17: total_fluffy > 60
+        } else if (_achievement_id == 17) {
+            if (mss.total_precious_received(_summoner) >= 60) {
+                return true;
+            }
+        //18: total_fluffy > 120
+        } else if (_achievement_id == 18) {
+            if (mss.total_precious_received(_summoner) >= 120) {
+                return true;
+            }
+        //19: total_fluffy > 240
+        } else if (_achievement_id == 19) {
+            if (mss.total_precious_received(_summoner) >= 240) {
+                return true;
+            }
+        //20: total_fluffy > 480
+        } else if (_achievement_id == 20) {
+            if (mss.total_precious_received(_summoner) >= 480) {
+                return true;
+            }
+        }
+        return false;
+    }
+}
+
+
 //===Independent==================================================================================================================
 
 
