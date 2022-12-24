@@ -2856,6 +2856,16 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
 
 
     //### sleeping with Hammock
+    try_hammock() {
+        if (
+            (this.mode == "resting" || this.mode == "moving")
+            && this.check_hammock()
+        ) {
+            this.mode = "hammock";
+            this.count = 0;
+            this.submode = 0;
+        }
+    }
     check_hammock() {
         if (
             typeof(item_bed) != "undefined"
@@ -7475,6 +7485,7 @@ function preload(scene) {
     scene.load.image("item_bed", "src/png/item_bed.png");
     scene.load.image("item_frame_inside_loading", "src/png/item_frame_inside_loading.png");
     scene.load.spritesheet("item_hammock_list", "src/png/item_hammock_list.png", {frameWidth: 230, frameHeight: 320});
+    scene.load.image("item_ukrere", "src/png/item_ukrere.png");
     
     //---ff
     scene.load.image("ff_preFestival_left", "src/png/ff_preFestival_left.png");
@@ -12092,6 +12103,12 @@ function update_checkItem(this_scene) {
                 if (local_owner == local_wallet) {
                     localStorage.setItem(_pos_local, JSON.stringify(_pos));
                 }
+                if (
+                    murasakisan.check_hammock()
+                ){
+                    sound_hat.play();
+                    murasakisan.try_hammock();
+                }
             });
         //uncommon
         if (local_items[_item_id+64] != 0) {
@@ -12104,6 +12121,68 @@ function update_checkItem(this_scene) {
         && typeof item_bed != "undefined"
     ) {
         item_bed.destroy(true);
+        local_items_flag[_item_id] = false;
+    }
+
+    //###38:Ukrere
+    _item_name = "Ukrere";
+    _item_id = dic_items[_item_name]["item_id"];
+    if (
+        (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+        && local_items_flag[_item_id] != true
+    ) {
+        local_items_flag[_item_id] = true;
+        let _x = 950;
+        let _y = 750;
+        let _pos_local = "pos_item_ukrere"
+        //recover position from localStorage
+        if (localStorage.getItem(_pos_local) != null && local_owner == local_wallet) {
+            let _json = localStorage.getItem(_pos_local);
+            _pos = JSON.parse(_json);
+            _x = _pos[0];
+            _y = _pos[1];
+        }
+        item_ukrere = this_scene.add.sprite(_x, _y, "item_ukrere")
+            .setScale(0.3)
+            .setOrigin(0.5)
+            .setDepth(_y)
+            .setInteractive({ draggable: true, useHandCursor: true })
+            .on("drag", () => {
+                if (this_scene.sys.game.scale.gameSize._width == 1280) {
+                    item_ukrere.x = game.input.activePointer.x;
+                    item_ukrere.y = game.input.activePointer.y;
+                } else {
+                    item_ukrere.x = game.input.activePointer.y;
+                    item_ukrere.y = 960 - game.input.activePointer.x;
+                }
+                item_ukrere.depth = item_ukrere.y;
+            })
+            .on("dragend", () => {
+                let _pos = [item_ukrere.x, item_ukrere.y];
+                if (local_owner == local_wallet) {
+                    localStorage.setItem(_pos_local, JSON.stringify(_pos));
+                }
+                if (
+                    item_ukrere.x >= 100
+                    && item_ukrere.x <= 1100
+                    && item_ukrere.y >= 500
+                    && item_ukrere.y <= 800
+                ){
+                    sound_hat.play();
+                    murasakisan.try_attenting(item_ukrere.x, item_ukrere.y);
+                }
+            });
+        //uncommon
+        if (local_items[_item_id+64] != 0) {
+            draw_glitter(this_scene, item_ukrere);
+        }
+    } else if (
+        local_items[_item_id] == 0 
+        && local_items[_item_id+64] == 0 
+        && local_items[_item_id+128] == 0
+        && typeof item_violin != "undefined"
+    ) {
+        item_ukrere.destroy(true);
         local_items_flag[_item_id] = false;
     }
 
