@@ -13014,6 +13014,7 @@ class Loading_overlap extends Phaser.Scene {
     constructor() {
         super({ key:"Loading_overlap", active:false });
         this.turn = 0;
+        /*
         try {
             //let _json = localStorage.getItem("flowerCount");
             let _json = localStorage.getItem("flowerCount_inGame");
@@ -13021,6 +13022,7 @@ class Loading_overlap extends Phaser.Scene {
         } catch (err) {
             this.flowerCount = 0;
         }
+        */
         this.flowerCount_present = 0;
     }
     
@@ -13055,10 +13057,12 @@ class Loading_overlap extends Phaser.Scene {
             .setDepth(9999)
             .setInteractive({useHandCursor: true })
             .on("pointerdown", () => {
-                this.flowerCount += 1;
+                //this.flowerCount += 1;
                 this.flowerCount_present += 1;
+                localStorage_flowerCount += 1;
                 //this.nyui_text.setText(this.flowerCount + " stars");
-                this.nyui_text.setText(this.flowerCount + " flowers");
+                //this.nyui_text.setText(this.flowerCount + " flowers");
+                this.nyui_text.setText(localStorage_flowerCount + " flowers");
                 this.nyui_text.setVisible(true);
                 this.nyui_text2.setVisible(true);
                 let _ohana = this.add.image(
@@ -13073,7 +13077,7 @@ class Loading_overlap extends Phaser.Scene {
                     .setDepth(9999-1);
                 //sound_nyui_loading.play();
                 //localStorage.setItem("flowerCount", JSON.stringify(this.flowerCount));
-                localStorage.setItem("flowerCount_inGame", JSON.stringify(this.flowerCount));
+                localStorage.setItem("flowerCount_inGame", JSON.stringify(localStorage_flowerCount));
             });
     }
     
