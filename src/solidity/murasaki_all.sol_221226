@@ -4595,10 +4595,10 @@ contract Murasaki_Function_Achievement is Ownable {
 }
 
 
-//---ExpBoost
+//---Achievement
 
 
-contract Murasaki_Function_ExpBoost is Ownable {
+contract Murasaki_Function_Achievement is Ownable {
 
     //address
     address public address_Murasaki_Address;

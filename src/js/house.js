@@ -82,7 +82,7 @@ contract ERC721 is IERC721 {
 
 //### 1st
 
-    nyuinyuiさんのカウンターの統合
+ ok nyuinyuiさんのカウンターの統合
         ロード画面とクラフト画面でカウンターを同じにする
 
     Astar Walletを所有する意味論の付加
@@ -11538,7 +11538,7 @@ function update_checkItem(this_scene) {
         }
         item_lantern = this_scene.add.sprite(_x, _y, "item_lantern_list")
             .setFrame(0)
-            .setScale(0.3)
+            .setScale(0.275)
             .setOrigin(0.5)
             .setDepth(2)
             .setInteractive({ draggable: true, useHandCursor: true })
