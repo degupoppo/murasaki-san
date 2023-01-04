@@ -82,6 +82,14 @@ contract ERC721 is IERC721 {
 
 //### 1st
 
+	Philandライクな戦略の検討
+		オンチェーンアクティビティに応じたオブジェクトを得る
+			onChainAchievementコントラクト
+		NFTではなくとも、落書きなど何かしらの表現を行いたい
+		落書きはin-gameアクティビティの表現で実装済みなので、バッティングするだろうか
+		また、インセンティブとしてはExp Boostボーナスを導入する
+		各PJのトレースデフォルメアイコンを用意するか
+
  ok nyuinyuiさんのカウンターの統合
         ロード画面とクラフト画面でカウンターを同じにする
 
@@ -5890,6 +5898,52 @@ class FallingFlower extends Phaser.GameObjects.Sprite{
 }
 
 
+//---FallingFlower
+class Alphabet extends Phaser.GameObjects.Sprite{
+    constructor(scene, x, y, img, symbol){
+        super(scene, x, y, img);
+        this.scene.add.existing(this);
+        this.speed_x = 0;
+        this.speed_y = 0;
+        this.count = 0;
+        this.line_y_limit = 1000;
+        this.depth = 9999+999;
+        this.setOrigin(0.5);
+        this.setAlpha(0.9);
+				this.setScale(0.01);
+        this.count = 0;
+				this.alp = this.scene.add.text(x, y, symbol);
+        //this.on_summon();
+    }
+    
+    //### on_summon
+    on_summon() {
+        this.x = Math.random() * (1280+200);
+        this.y = -50 - Math.random()*500;
+        this.speed_x = -0.1 -Math.random()*1.5;
+        this.speed_y = 2 + Math.random()*4;
+        this.setScale(0.1 + Math.random()*0.1);
+        this.setAngle(Math.random()*360);
+        this.setFrame(Math.floor(Math.random()*5));
+        this.count_update = Math.floor(Math.random()*40);
+    }
+    
+    //### update()
+    update(){
+        this.count += 1;
+        this.x += this.speed_x;
+        this.y += this.speed_y;
+        if (this.count % 50 == this.count_update) {
+            //this.setAngle(Math.random()*360);
+            this.angle += 30;
+        }
+        if (this.y >= this.line_y_limit) {
+            this.destroy(true);
+        }
+    }
+}
+
+
 //===[ FUNCTION ]========================================================
 
 
@@ -7490,6 +7544,16 @@ function preload(scene) {
     scene.load.spritesheet("item_hammock_list", "src/png/item_hammock_list.png", {frameWidth: 230, frameHeight: 320});
     scene.load.image("item_ukrere", "src/png/item_ukrere.png");
     scene.load.spritesheet("item_lantern_list", "src/png/item_lantern_list.png", {frameWidth: 370, frameHeight: 320});
+
+    //---alphabed
+    scene.load.image("alp_h", "src/png/alp_h.png");
+    scene.load.image("alp_a", "src/png/alp_a.png");
+    scene.load.image("alp_p", "src/png/alp_p.png");
+    scene.load.image("alp_y", "src/png/alp_y.png");
+    scene.load.image("alp_n", "src/png/alp_n.png");
+    scene.load.image("alp_e", "src/png/alp_e.png");
+    scene.load.image("alp_w", "src/png/alp_w.png");
+    scene.load.image("alp_r", "src/png/alp_r.png");
     
     //---ff
     scene.load.image("ff_preFestival_left", "src/png/ff_preFestival_left.png");
@@ -9096,6 +9160,24 @@ function create(scene) {
             .setVisible(false);
         group_update.add(nyuinyui);
     }
+    
+    //---happy_new_year
+		/*
+    alp_1 = scene.add.sprite(200, 100, "alp_h").setScale(0.5).setOrigin(0.5).setDepth(900);
+    alp_2 = scene.add.sprite(300, 100, "alp_a").setScale(0.5).setOrigin(0.5).setDepth(900);
+    alp_3 = scene.add.sprite(400, 100, "alp_p").setScale(0.5).setOrigin(0.5).setDepth(900);
+    alp_4 = scene.add.sprite(500, 100, "alp_p").setScale(0.5).setOrigin(0.5).setDepth(900);
+    alp_5 = scene.add.sprite(600, 100, "alp_y").setScale(0.5).setOrigin(0.5).setDepth(900);
+
+    alp_6 = scene.add.sprite(250, 200, "alp_n").setScale(0.5).setOrigin(0.5).setDepth(900);
+    alp_7 = scene.add.sprite(350, 200, "alp_e").setScale(0.5).setOrigin(0.5).setDepth(900);
+    alp_8 = scene.add.sprite(450, 200, "alp_w").setScale(0.5).setOrigin(0.5).setDepth(900);
+
+    alp_9 = scene.add.sprite(300, 300, "alp_y").setScale(0.5).setOrigin(0.5).setDepth(900);
+    alp_10 = scene.add.sprite(400, 300, "alp_e").setScale(0.5).setOrigin(0.5).setDepth(900);
+    alp_11 = scene.add.sprite(500, 300, "alp_a").setScale(0.5).setOrigin(0.5).setDepth(900);
+    alp_12 = scene.add.sprite(600, 300, "alp_r").setScale(0.5).setOrigin(0.5).setDepth(900);    
+		*/
 }
 
 
@@ -12219,7 +12301,7 @@ function update_checkItem(this_scene) {
         local_items[_item_id] == 0 
         && local_items[_item_id+64] == 0 
         && local_items[_item_id+128] == 0
-        && typeof item_violin != "undefined"
+        && typeof item_ukrere != "undefined"
     ) {
         item_ukrere.destroy(true);
         local_items_flag[_item_id] = false;
@@ -12584,6 +12666,7 @@ function update_checkItem(this_scene) {
                 .setScale(0.4);
             */
             group_update.add(cat_visitor);
+            murasakisan.on_click();
         }
         _run(this_scene);
     }
