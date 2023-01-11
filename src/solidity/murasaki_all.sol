@@ -4596,157 +4596,6 @@ contract Murasaki_Function_Achievement is Ownable {
 }
 
 
-//---Achievement_onChain
-
-
-contract Murasaki_Function_Achievement_onChain is Ownable {
-
-    //address
-    address public address_Murasaki_Address;
-    function _set_Murasaki_Address(address _address) external onlyOwner {
-        address_Murasaki_Address = _address;
-    }
-    
-    //token address
-    
-    address public address_token_01
-    
-    //get_score
-    function get_score (uint _summoner) external view returns (uint) {
-        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
-        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
-        address _owner = mfs.get_owner(_summoner);
-        uint _score_token = _get_score_token(_owner);
-        uint _score_nft = _get_score_nft(_owner);
-        uint _score_staking = _get_score_staking(_owner);
-        uint _score_murasaki_nft = _get_score_murasaki_nft(_owner);
-        uint _score = _score_token + _score_nft + _score_staking + _score_murasaki_nft;
-        return _score;
-    }
-    function _get_score_token(address _address) view returns (uint) {
-        uint _score = 0;
-        _score += 
-    }
-    
-    //get_achv
-    function get_achievement (uint _summoner) external view returns (bool[32] memory) {
-        bool[32] memory _achievements;
-        for (uint _achv_id=1; _achv_id<32; _achv_id++) {
-            _achievements[_achv_id] = _check_achievement(_summoner, _achv_id);
-        }
-        return _achievements;
-    }
-
-    //internal, check_achv
-    function _check_achievement(uint _summoner, uint _achievement_id) internal view returns (bool) {
-        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
-        Murasaki_Storage_Score mss = Murasaki_Storage_Score(ma.address_Murasaki_Storage_Score());
-        //1: total_coin > 10000
-        if (_achievement_id == 1) {
-            if (mss.total_coin_mined(_summoner) >= 10000) {
-                return true;
-            }
-        //2: total_coin > 30000
-        } else if (_achievement_id == 2) {
-            if (mss.total_coin_mined(_summoner) >= 30000) {
-                return true;
-            }
-        //3: total_coin > 100000
-        } else if (_achievement_id == 3) {
-            if (mss.total_coin_mined(_summoner) >= 100000) {
-                return true;
-            }
-        //4: total_coin > 300000
-        } else if (_achievement_id == 4) {
-            if (mss.total_coin_mined(_summoner) >= 300000) {
-                return true;
-            }
-        //5: total_coin > 1000000
-        } else if (_achievement_id == 5) {
-            if (mss.total_coin_mined(_summoner) >= 1000000) {
-                return true;
-            }
-        //6: total_material > 10000
-        } else if (_achievement_id == 6) {
-            if (mss.total_material_farmed(_summoner) >= 10000) {
-                return true;
-            }
-        //7: total_material > 30000
-        } else if (_achievement_id == 7) {
-            if (mss.total_material_farmed(_summoner) >= 30000) {
-                return true;
-            }
-        //8: total_material > 100000
-        } else if (_achievement_id == 8) {
-            if (mss.total_material_farmed(_summoner) >= 100000) {
-                return true;
-            }
-        //9: total_material > 300000
-        } else if (_achievement_id == 9) {
-            if (mss.total_material_farmed(_summoner) >= 300000) {
-                return true;
-            }
-        //10: total_material > 1000000
-        } else if (_achievement_id == 10) {
-            if (mss.total_material_farmed(_summoner) >= 1000000) {
-                return true;
-            }
-        //11: total_item > 5
-        } else if (_achievement_id == 11) {
-            if (mss.total_item_crafted(_summoner) >= 5) {
-                return true;
-            }
-        //12: total_item > 10
-        } else if (_achievement_id == 12) {
-            if (mss.total_item_crafted(_summoner) >= 10) {
-                return true;
-            }
-        //13: total_item > 20
-        } else if (_achievement_id == 13) {
-            if (mss.total_item_crafted(_summoner) >= 20) {
-                return true;
-            }
-        //14: total_item > 40
-        } else if (_achievement_id == 14) {
-            if (mss.total_item_crafted(_summoner) >= 40) {
-                return true;
-            }
-        //15: total_item > 80
-        } else if (_achievement_id == 15) {
-            if (mss.total_item_crafted(_summoner) >= 80) {
-                return true;
-            }
-        //16: total_fluffy > 30
-        } else if (_achievement_id == 16) {
-            if (mss.total_precious_received(_summoner) >= 30) {
-                return true;
-            }
-        //17: total_fluffy > 60
-        } else if (_achievement_id == 17) {
-            if (mss.total_precious_received(_summoner) >= 60) {
-                return true;
-            }
-        //18: total_fluffy > 120
-        } else if (_achievement_id == 18) {
-            if (mss.total_precious_received(_summoner) >= 120) {
-                return true;
-            }
-        //19: total_fluffy > 240
-        } else if (_achievement_id == 19) {
-            if (mss.total_precious_received(_summoner) >= 240) {
-                return true;
-            }
-        //20: total_fluffy > 480
-        } else if (_achievement_id == 20) {
-            if (mss.total_precious_received(_summoner) >= 480) {
-                return true;
-            }
-        }
-        return false;
-    }
-}
-
-
 //===Independent==================================================================================================================
 
 
@@ -5502,6 +5351,213 @@ contract Fluffy_Festival is Ownable, ReentrancyGuard {
     }
 }
 
+
+
+//---Achievement_onChain
+
+
+contract Murasaki_Function_Achievement_onChain is Ownable {
+
+    //address
+    address public address_Murasaki_Address;
+    function _set_Murasaki_Address(address _address) external onlyOwner {
+        address_Murasaki_Address = _address;
+    }
+    
+    //token/nft address
+    mapping(uint => address) public tokens;
+    mapping(uint => address) public nfts;
+    uint public token_number;
+    uint public nft_number;
+    
+    //astarbase address
+    address public address_AstarBase;
+    
+    //murasaki nft address
+    address public address_Murasaki_NFT;
+    
+    //admin, set address
+    function _set_AstarBase(address _address) external onlyOwner {
+        address_AstarBase = _address;
+    }
+    function _set_Murasaki_NFT(address _address) external onlyOwner {
+        address_Murasaki_NFT = _address;
+    }
+    
+    //admin, set token/nft address
+    function _set_tokens(uint _number, address _address) external onlyOwner {
+        tokens[_number] = _address;
+    }
+    function _set_nfts(uint _number, address _address) external onlyOwner {
+        nfts[_number] = _address;
+    }
+    
+    //admin, set toke/nft number
+    function _set_token_number(uint _value) external onlyOwner {
+        token_number = _value;
+    }
+    function _set_nft_number(uint _value) external onlyOwner {
+        nft_number = _value;
+    }
+    
+    //get_score
+    function get_score (uint _summoner) external view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
+        address _owner = mfs.get_owner(_summoner);
+        uint _score_token = _get_score_token(_owner);
+        uint _score_nft = _get_score_nft(_owner);
+        uint _score_staking = _get_score_staking(_owner);
+        uint _score_murasaki_nft = _get_score_murasaki_nft(_owner);
+        uint _score = _score_token + _score_nft + _score_staking + _score_murasaki_nft;
+        return _score;
+    }
+    function _get_score_token(address _owner) view returns (uint) {
+        uint _score = 0;
+        for (uint i = 1; i <= token_number; i++) {
+            ERC20 _token = ERC20(tokens[i]);
+            uint _balance = _token.balanceOf(_owner);
+            if (_balance > 0) {
+                _score += 1;
+            }
+        }
+        return _score;
+    }
+    function _get_score_nft(address _owner) view returns (uint) {
+        uint _score = 0;
+        for (uint i = 1; i <= token_number; i++) {
+            ERC721 _nft = ERC721(nfts[i]);
+            uint _balance = _nft.balanceOf(_owner);
+            if (_balance > 0) {
+                _score += 1;
+            }
+        }
+        return _score;
+    }
+    function _get_score_staking(address _owner) view returns (uint) {
+        returns 0;
+    }
+    function _get_score_murasaki_nft(address _owner) view returns (uint) {
+        returns 0;
+    }
+    
+    //get_achv
+    function get_achievement (uint _summoner) external view returns (bool[32] memory) {
+        bool[32] memory _achievements;
+        for (uint _achv_id=1; _achv_id<32; _achv_id++) {
+            _achievements[_achv_id] = _check_achievement(_summoner, _achv_id);
+        }
+        return _achievements;
+    }
+
+    //internal, check_achv
+    function _check_achievement(uint _summoner, uint _achievement_id) internal view returns (bool) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage_Score mss = Murasaki_Storage_Score(ma.address_Murasaki_Storage_Score());
+        //1: total_coin > 10000
+        if (_achievement_id == 1) {
+            if (mss.total_coin_mined(_summoner) >= 10000) {
+                return true;
+            }
+        //2: total_coin > 30000
+        } else if (_achievement_id == 2) {
+            if (mss.total_coin_mined(_summoner) >= 30000) {
+                return true;
+            }
+        //3: total_coin > 100000
+        } else if (_achievement_id == 3) {
+            if (mss.total_coin_mined(_summoner) >= 100000) {
+                return true;
+            }
+        //4: total_coin > 300000
+        } else if (_achievement_id == 4) {
+            if (mss.total_coin_mined(_summoner) >= 300000) {
+                return true;
+            }
+        //5: total_coin > 1000000
+        } else if (_achievement_id == 5) {
+            if (mss.total_coin_mined(_summoner) >= 1000000) {
+                return true;
+            }
+        //6: total_material > 10000
+        } else if (_achievement_id == 6) {
+            if (mss.total_material_farmed(_summoner) >= 10000) {
+                return true;
+            }
+        //7: total_material > 30000
+        } else if (_achievement_id == 7) {
+            if (mss.total_material_farmed(_summoner) >= 30000) {
+                return true;
+            }
+        //8: total_material > 100000
+        } else if (_achievement_id == 8) {
+            if (mss.total_material_farmed(_summoner) >= 100000) {
+                return true;
+            }
+        //9: total_material > 300000
+        } else if (_achievement_id == 9) {
+            if (mss.total_material_farmed(_summoner) >= 300000) {
+                return true;
+            }
+        //10: total_material > 1000000
+        } else if (_achievement_id == 10) {
+            if (mss.total_material_farmed(_summoner) >= 1000000) {
+                return true;
+            }
+        //11: total_item > 5
+        } else if (_achievement_id == 11) {
+            if (mss.total_item_crafted(_summoner) >= 5) {
+                return true;
+            }
+        //12: total_item > 10
+        } else if (_achievement_id == 12) {
+            if (mss.total_item_crafted(_summoner) >= 10) {
+                return true;
+            }
+        //13: total_item > 20
+        } else if (_achievement_id == 13) {
+            if (mss.total_item_crafted(_summoner) >= 20) {
+                return true;
+            }
+        //14: total_item > 40
+        } else if (_achievement_id == 14) {
+            if (mss.total_item_crafted(_summoner) >= 40) {
+                return true;
+            }
+        //15: total_item > 80
+        } else if (_achievement_id == 15) {
+            if (mss.total_item_crafted(_summoner) >= 80) {
+                return true;
+            }
+        //16: total_fluffy > 30
+        } else if (_achievement_id == 16) {
+            if (mss.total_precious_received(_summoner) >= 30) {
+                return true;
+            }
+        //17: total_fluffy > 60
+        } else if (_achievement_id == 17) {
+            if (mss.total_precious_received(_summoner) >= 60) {
+                return true;
+            }
+        //18: total_fluffy > 120
+        } else if (_achievement_id == 18) {
+            if (mss.total_precious_received(_summoner) >= 120) {
+                return true;
+            }
+        //19: total_fluffy > 240
+        } else if (_achievement_id == 19) {
+            if (mss.total_precious_received(_summoner) >= 240) {
+                return true;
+            }
+        //20: total_fluffy > 480
+        } else if (_achievement_id == 20) {
+            if (mss.total_precious_received(_summoner) >= 480) {
+                return true;
+            }
+        }
+        return false;
+    }
+}
 
 
 //===Info==================================================================================================================

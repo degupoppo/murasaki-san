@@ -82,7 +82,7 @@ contract ERC721 is IERC721 {
 
 //### 1st
 
-    fluffy upgradeバグの修正
+ ok fluffy upgradeバグの修正
 
 	Philandライクな戦略の検討
 		オンチェーンアクティビティに応じたオブジェクトを得る
