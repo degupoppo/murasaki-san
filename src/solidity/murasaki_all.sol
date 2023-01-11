@@ -11,6 +11,7 @@ import "github.com/OpenZeppelin/openzeppelin-contracts/contracts/access/Ownable.
 import "github.com/OpenZeppelin/openzeppelin-contracts/contracts/utils/structs/EnumerableSet.sol";
 import "github.com/OpenZeppelin/openzeppelin-contracts/contracts/utils/Base64.sol";
 import "github.com/OpenZeppelin/openzeppelin-contracts/contracts/token/ERC721/ERC721.sol";
+import "github.com/OpenZeppelin/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
 import "github.com/OpenZeppelin/openzeppelin-contracts/contracts/token/ERC721/IERC721Receiver.sol";
 import "github.com/AstarNetwork/astarbase/contract/example/IAstarBase.sol";
 
@@ -4595,17 +4596,38 @@ contract Murasaki_Function_Achievement is Ownable {
 }
 
 
-//---ExpBoost
+//---Achievement_onChain
 
 
-contract Murasaki_Function_ExpBoost is Ownable {
+contract Murasaki_Function_Achievement_onChain is Ownable {
 
     //address
     address public address_Murasaki_Address;
     function _set_Murasaki_Address(address _address) external onlyOwner {
         address_Murasaki_Address = _address;
     }
-
+    
+    //token address
+    
+    address public address_token_01
+    
+    //get_score
+    function get_score (uint _summoner) external view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
+        address _owner = mfs.get_owner(_summoner);
+        uint _score_token = _get_score_token(_owner);
+        uint _score_nft = _get_score_nft(_owner);
+        uint _score_staking = _get_score_staking(_owner);
+        uint _score_murasaki_nft = _get_score_murasaki_nft(_owner);
+        uint _score = _score_token + _score_nft + _score_staking + _score_murasaki_nft;
+        return _score;
+    }
+    function _get_score_token(address _address) view returns (uint) {
+        uint _score = 0;
+        _score += 
+    }
+    
     //get_achv
     function get_achievement (uint _summoner) external view returns (bool[32] memory) {
         bool[32] memory _achievements;

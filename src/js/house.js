@@ -82,16 +82,16 @@ contract ERC721 is IERC721 {
 
 //### 1st
 
+    fluffy upgradeバグの修正
+
 	Philandライクな戦略の検討
 		オンチェーンアクティビティに応じたオブジェクトを得る
 			onChainAchievementコントラクト
 		NFTではなくとも、落書きなど何かしらの表現を行いたい
-		落書きはin-gameアクティビティの表現で実装済みなので、バッティングするだろうか
+		    落書きはin-gameアクティビティの表現で実装済みなので、バッティングするだろうか
+    		各PJのトレースデフォルメアイコンを用意するか
+    		    どこに表示するか
 		また、インセンティブとしてはExp Boostボーナスを導入する
-		各PJのトレースデフォルメアイコンを用意するか
-
- ok nyuinyuiさんのカウンターの統合
-        ロード画面とクラフト画面でカウンターを同じにする
 
     Astar Walletを所有する意味論の付加
         Walletのパラメータによってin-gameインセンティブを付与する
@@ -522,6 +522,9 @@ contract ERC721 is IERC721 {
 
 
 //### 2nd
+
+ ok nyuinyuiさんのカウンターの統合
+        ロード画面とクラフト画面でカウンターを同じにする
 
  ok bed中に行動させるとでっかくなるバグの修正
         bedも消えてしまう
@@ -2540,8 +2543,18 @@ async function upgrade_item(_summoner, _itemId1, _itemId2, _itemId3) {
 }
 
 //upgrade_to_fluffier
-async function upgrade_fluffy(_summoner, _itemId1, _itemId2, _itemId3, _itemId4, _itemId5) {
+async function upgrade_fluffy2fluffier(_summoner, _itemId1, _itemId2, _itemId3, _itemId4, _itemId5) {
     contract_mfc2.methods.upgrade_fluffy(_summoner, _itemId1, _itemId2, _itemId3, _itemId4, _itemId5).send({from:wallet})
+        .on("transactionHash", (transactionHash) => update_tx_text("sending", transactionHash))
+        .on("receipt", (receipt) => update_tx_text("done", receipt.transactionHash));
+}
+async function upgrade_fluffier2fluffiest(_summoner, _itemId1, _itemId2, _itemId3, _itemId4) {
+    contract_mfc2.methods.upgrade_fluffy(_summoner, _itemId1, _itemId2, _itemId3, _itemId4, 0).send({from:wallet})
+        .on("transactionHash", (transactionHash) => update_tx_text("sending", transactionHash))
+        .on("receipt", (receipt) => update_tx_text("done", receipt.transactionHash));
+}
+async function upgrade_fluffiest2doll(_summoner, _itemId1, _itemId2, _itemId3) {
+    contract_mfc2.methods.upgrade_fluffy(_summoner, _itemId1, _itemId2, _itemId3, 0, 0).send({from:wallet})
         .on("transactionHash", (transactionHash) => update_tx_text("sending", transactionHash))
         .on("receipt", (receipt) => update_tx_text("done", receipt.transactionHash));
 }
@@ -6612,7 +6625,7 @@ function open_window_upgrade(scene) {
                         upgradable_itemIds[_itemId][2]
                     );
                 } else if (_itemId <= 212) {
-                    upgrade_fluffy(
+                    upgrade_fluffy2fluffier(
                         summoner, 
                         upgradable_itemIds[_itemId][0], 
                         upgradable_itemIds[_itemId][1], 
@@ -6621,7 +6634,7 @@ function open_window_upgrade(scene) {
                         upgradable_itemIds[_itemId][4]
                     );
                 } else if (_itemId <= 224) {
-                    upgrade_fluffy(
+                    upgrade_fluffier2fluffiest(
                         summoner, 
                         upgradable_itemIds[_itemId][0], 
                         upgradable_itemIds[_itemId][1], 
@@ -6630,7 +6643,7 @@ function open_window_upgrade(scene) {
                         //upgradable_itemIds[_itemId][4]
                     );
                 } else if (_itemId <= 236) {
-                    upgrade_fluffy(
+                    upgrade_fluffiest2doll(
                         summoner, 
                         upgradable_itemIds[_itemId][0], 
                         upgradable_itemIds[_itemId][1], 
