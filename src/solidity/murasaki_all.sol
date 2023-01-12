@@ -1078,6 +1078,7 @@ contract Murasaki_Address is Ownable {
     address public address_Staking_Wallet;
     address public address_Coder_Wallet;
     address public address_Illustrator_Wallet;
+    address public address_Achievement_onChain;
     
     function set_Murasaki_Main(address _address) external onlyOwner {
         address_Murasaki_Main = _address;
@@ -1165,6 +1166,9 @@ contract Murasaki_Address is Ownable {
     }
     function set_Illustrator(address _address) external onlyOwner {
         address_Illustrator_Wallet = _address;
+    }
+    function set_Achievement_onChain(address _address) external onlyOwner {
+        address_Achievement_onChain = _address;
     }
 }
 
@@ -1560,72 +1564,6 @@ contract Murasaki_Function_Share is Ownable {
         _salt = dn(_summoner, 10);
     }
 
-    /*
-    //address
-    address public murasaki_main_address;
-    address public murasaki_storage_address;
-    address public murasaki_craft_address;
-    address public world_dice_address;
-    address public murasaki_name_address;
-    address public murasaki_storage_score_address;
-    address public murasaki_mail_address;
-    address public murasaki_storage_nui_address;
-    address public astarbase_address;
-    address public bufferTreasury_address;
-    address public buybackTreasury_address;
-    address public teamTreasury_address;
-    address public murasaki_lootlike_address;
-    address public murasaki_parameter_address;
-    address public murasaki_storage_achievement_address;
-    
-    //address set, admin
-    function _set1_murasaki_main_address(address _address) external onlyOwner {
-        murasaki_main_address = _address;
-    }
-    function _set2_murasaki_storage_address(address _address) external onlyOwner {
-        murasaki_storage_address = _address;
-    }
-    function _set3_murasaki_craft_address(address _address) external onlyOwner {
-        murasaki_craft_address = _address;
-    }
-    function _set4_world_dice_address(address _address) external onlyOwner {
-        world_dice_address = _address;
-    }
-    function _set5_murasaki_name_address(address _address) external onlyOwner {
-        murasaki_name_address = _address;
-    }
-    function _set6_murasaki_storage_score_address(address _address) external onlyOwner {
-        murasaki_storage_score_address = _address;
-    }
-    function _set7_murasaki_mail_address(address _address) external onlyOwner {
-        murasaki_mail_address = _address;
-    }
-    function _set8_murasaki_storage_nui_address(address _address) external onlyOwner {
-        murasaki_storage_nui_address = _address;
-    }
-    function _set9_astarbase_address(address _address) external onlyOwner {
-        astarbase_address = _address;
-    }
-    function _setA_bufferTreqsury_address(address _address) external onlyOwner {
-        bufferTreasury_address = _address;
-    }
-    function _setB_buybackTreasury_address(address _address) external onlyOwner {
-        buybackTreasury_address = _address;
-    }
-    function _setC_teamTreasury_address(address _address) external onlyOwner {
-        teamTreasury_address = _address;
-    }
-    function _setD_murasaki_lootlike_address(address _address) external onlyOwner {
-        murasaki_lootlike_address = _address;
-    }
-    function _setE_murasaki_parameter_address(address _address) external onlyOwner {
-        murasaki_parameter_address = _address;
-    }
-    function _setF_murasaki_storage_achievement_address(address _address) external onlyOwner {
-        murasaki_storage_achievement_address = _address;
-    }
-    */
-
     //check owner of summoner
     function check_owner(uint _summoner, address _wallet) external view returns (bool) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
@@ -1729,6 +1667,14 @@ contract Murasaki_Function_Share is Ownable {
         //fluffy
         uint _elected_precious_type = mp.ELECTED_FLUFFY_TYPE();
         for (uint i = 201; i <= 212; i++) {
+            //doll, fluffy * 60
+            if (_balance_of_type[i+36] > 0) {
+                _precious_score += _balance_of_type[i+36] * 2*60 +30 +2;
+                //fluffly festival modification, x2 score
+                if (i == _elected_precious_type) {
+                    _precious_score += _balance_of_type[i+36] * 2*60 +30 +2;
+                }
+            }
             //fluffiest, fluffy * 20
             if (_balance_of_type[i+24] > 0) {
                 _precious_score += _balance_of_type[i+24] * 2*20 +8 +2;
@@ -1752,10 +1698,12 @@ contract Murasaki_Function_Share is Ownable {
                 }
             }
         }
+        /*
         //nui, fluffy * 60
         if (_balance_of_type[197] > 0) {
             _precious_score += _balance_of_type[197] * 2*60 +30 +2;
         }
+        */
         //level cap, 800/Lv20 = 40/Lv
         uint _lv = ms.level(_summoner);
         if (_precious_score > _lv*40) {
@@ -1816,9 +1764,11 @@ contract Murasaki_Function_Share is Ownable {
                 //rare item, x4 of uncommon
                 } else if (i <= 196) {
                     _score += _array[i] * 9600;
+                /*
                 //nui, x4 of fluffiest
                 } else if (i == 197) {
                     _score += _array[i] * 6400;
+                */
                 //bank, pouch, mail, ignored
                 } else if (i <= 200) {
                     _score += 0;
@@ -1831,6 +1781,9 @@ contract Murasaki_Function_Share is Ownable {
                 //fluffiest, x4 of fluffier
                 } else if (i <= 236) {
                     _score += _array[i] * 1600;
+                //nui, x4 of fluffiest
+                } else if (i <= 248) {
+                    _score += _array[i] * 6400;
                 }
             }
         }
@@ -2896,140 +2849,6 @@ contract Murasaki_Function_Crafting is Ownable, ReentrancyGuard {
         //event
         emit Crafting(_summoner, _item_type, mc.next_item()-1, _critical);
     }
-
-    /*
-    function _update_storage_nui(uint _summoner, uint _item_nui) internal {
-        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
-        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
-        Murasaki_Main mm = Murasaki_Main(ma.address_Murasaki_Main());
-        Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
-        Murasaki_Storage_Score mss = Murasaki_Storage_Score(ma.address_Murasaki_Storage_Score());
-        Murasaki_Storage_Nui msn = Murasaki_Storage_Nui(ma.address_Murasaki_Storage_Nui());
-        uint _now = block.timestamp;
-        //set status
-        msn.set_mint_time(_item_nui, _now);
-        msn.set_summoner(_item_nui, _summoner);
-        msn.set_class(_item_nui, mm.class(_summoner));
-        msn.set_level(_item_nui, ms.level(_summoner));
-        msn.set_strength(_item_nui, ms.strength(_summoner));
-        msn.set_dexterity(_item_nui, ms.dexterity(_summoner));
-        msn.set_intelligence(_item_nui, ms.intelligence(_summoner));
-        msn.set_luck(_item_nui, ms.luck(_summoner));
-        msn.set_total_exp_gained(_item_nui, mss.total_exp_gained(_summoner));
-        msn.set_total_coin_mined(_item_nui, mss.total_coin_mined(_summoner));
-        msn.set_total_material_farmed(_item_nui, mss.total_material_farmed(_summoner));
-        msn.set_total_item_crafted(_item_nui, mss.total_item_crafted(_summoner));
-        msn.set_total_precious_received(_item_nui, mss.total_precious_received(_summoner));
-        msn.set_score(_item_nui, mfs.calc_score(_summoner));
-    }
-    */
-    
-
-    /*
-    //upgrade item
-    event Upgrade(uint indexed _summoner, uint _item_type, uint _item);
-    function upgrade_item(
-        uint _summoner, 
-        uint _item1, 
-        uint _item2, 
-        uint _item3
-    ) external nonReentrant {
-        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
-        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
-        Murasaki_Craft mc = Murasaki_Craft(ma.address_Murasaki_Craft());
-        //check summoner owner
-        require(mfs.check_owner(_summoner, msg.sender));
-        //check item owner
-        require(
-            mc.ownerOf(_item1) == msg.sender
-            && mc.ownerOf(_item2) == msg.sender
-            && mc.ownerOf(_item3) == msg.sender
-        );
-        //check item_type
-        (uint _item_type1, , , ,) = mc.items(_item1);
-        (uint _item_type2, , , ,) = mc.items(_item2);
-        (uint _item_type3, , , ,) = mc.items(_item3);
-        //require(_item_type1 <= 128 || (_item_type1 >= 201 && _item_type1 <= 224) );
-        require(_item_type1 <= 128 || (_item_type1 >= 201 && _item_type1 <= 236) );
-        require(
-            _item_type2 == _item_type1
-            && _item_type3 == _item_type1
-        );
-        
-        //determine target item_type
-        uint _target_item_type;
-        if (_item_type1 <= 128) {
-            _target_item_type = _item_type1 +64;
-        // when fluffy or fluffier, +12
-        } else if (_item_type1 >= 201 && _item_type1 <= 224) {
-            _target_item_type = _item_type1 +12;
-        // when fluffiest, -> nui-chan
-        } else if (_item_type1 >=225 && _item_type1 <= 236) {
-            _target_item_type = 197;
-        }
-        
-        //pay cost, avoid too deep stack error
-        _pay_cost(_summoner, _target_item_type);
-        
-        //burn (transfer) lower rank items
-        _burn(_item1);
-        _burn(_item2);
-        _burn(_item3);
-        //mint upper rank item
-        uint _seed = mfs.seed(_summoner);
-        string memory _memo = "";
-        mc.craft(_target_item_type, _summoner, msg.sender, _seed, _memo);
-        //when nui-chan, update nuichna score
-        if (_target_item_type == 197) {
-            _update_storage_nui(_summoner, mc.next_item()-1);
-        }
-        //event
-        emit Upgrade(_summoner, _item_type1, mc.next_item());
-    }
-    function _pay_cost(uint _summoner, uint _target_item_type) internal {
-        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
-        Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
-        //get dc, cost
-        uint[4] memory _dc_table = get_item_dc(_target_item_type);
-        uint _coin = _dc_table[2];
-        uint _material = _dc_table[3];
-        //check coin, material
-        require(ms.coin(_summoner) >= _coin);
-        require(ms.material(_summoner) >= _material);
-        //pay coin, material
-        ms.set_coin(_summoner, ms.coin(_summoner) - _coin);
-        ms.set_material(_summoner, ms.material(_summoner) - _material);
-    }
-    */
-    
-    /*
-    //unpack coin/material
-    event Unpack(uint indexed _summoner, uint _item_type, uint _item);
-    function unpack_bag(uint _summoner, uint _item) external nonReentrant {
-        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
-        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
-        Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
-        Murasaki_Craft mc = Murasaki_Craft(ma.address_Murasaki_Craft());
-        //check owner
-        require(mfs.check_owner(_summoner, msg.sender));
-        require(mc.ownerOf(_item) == msg.sender);
-        //check item_type
-        (uint _item_type, , , ,) = mc.items(_item);
-        require(_item_type == 194 || _item_type == 195);
-        //burn _item
-        //mc.transferFrom(msg.sender, address(this), _item);
-        //_burn(msg.sender, _item);
-        _burn(_item);
-        //unpack coin/material
-        if (_item_type == 194) {
-            ms.set_coin(_summoner, ms.coin(_summoner) + 1000);
-        } else if (_item_type == 195) {
-            ms.set_material(_summoner, ms.material(_summoner) + 1000);
-        }
-        //event
-        emit Unpack(_summoner, _item_type, _item);
-    }
-    */
     
     //internal, send random presentbox, when complete crafting
     event SendPresentbox(uint indexed _summoner_from, uint _summoner_to);
@@ -3064,6 +2883,7 @@ contract Murasaki_Function_Crafting is Ownable, ReentrancyGuard {
         emit SendPresentbox(_summoner_from, _summoner_to);
     
     }
+    
     //internal, mint presentbox
     function _mint_presentbox(uint _summoner_from, address _wallet_to) internal {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
@@ -3074,55 +2894,6 @@ contract Murasaki_Function_Crafting is Ownable, ReentrancyGuard {
         string memory _memo = "item crafting";
         mc.craft(_item_type, _summoner_from, _wallet_to, _seed, _memo);
     }
-    
-    /*
-    //open present box and mint precious
-    //presentbox = 200
-    function open_presentbox(uint _summoner, uint _item) external nonReentrant {
-        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
-        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
-        Murasaki_Craft mc = Murasaki_Craft(ma.address_Murasaki_Craft());
-        Murasaki_Parameter mp = Murasaki_Parameter(ma.address_Murasaki_Parameter());
-        Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
-        Murasaki_Storage_Score mss = Murasaki_Storage_Score(ma.address_Murasaki_Storage_Score());
-        //check owner
-        require(mfs.check_owner(_summoner, msg.sender));
-        require(mc.ownerOf(_item) == msg.sender);
-        //check item_type
-        (uint _item_type, , uint crafted_summoner, ,) = mc.items(_item);
-        require(_item_type == 200);
-        //burn _item
-        _burn(_item);
-        //mint precious
-        //need: summoner_to, summoner_from, to_wallet
-        _mint_precious(_summoner, crafted_summoner, msg.sender);
-        //add some exp
-        uint _exp_add = mp.EXP_FROM_PRESENTBOX();
-        uint _exp = ms.exp(_summoner) + _exp_add;
-        ms.set_exp(_summoner, _exp);
-        //update score
-        uint _total_exp_gained = mss.total_exp_gained(_summoner) + _exp_add;
-        mss.set_total_exp_gained(_summoner, _total_exp_gained);
-    }
-    //mint precious
-    event Precious(uint indexed _summoner_to, uint _summoner_from, uint _item_type);
-    function _mint_precious(uint _summoner_to, uint _summoner_from, address _wallet_to) internal {
-        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
-        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
-        Murasaki_Craft mc = Murasaki_Craft(ma.address_Murasaki_Craft());
-        Murasaki_Storage_Score mss = Murasaki_Storage_Score(ma.address_Murasaki_Storage_Score());
-        //mint precious
-        uint _seed = mfs.seed(_summoner_from);
-        uint _item_type = 200 + mfs.d12(_summoner_from) + 1;   //201-212
-        string memory _memo = "";
-        mc.craft(_item_type, _summoner_from, _wallet_to, _seed, _memo);
-        //update score
-        uint _total_precious_received = mss.total_precious_received(_summoner_to);
-        mss.set_total_precious_received(_summoner_to, _total_precious_received + 1);
-        //event
-        emit Precious(_summoner_to, _summoner_from, _item_type);
-    }
-    */
     
     //get item name
     function get_item_name(uint _item_type) public view returns (string memory) {
@@ -3262,7 +3033,8 @@ contract Murasaki_Function_Crafting2 is Ownable, ReentrancyGuard {
         _burn_sourceItems(_item1, _item2, _item3, _item4, _item5);
         _mint_item(_summoner, _targetItemType, _sourceItemType);
         uint _present_itemNo = _get_present_itemNo();
-        if (_targetItemType == 197) {
+        //if (_targetItemType == 197) {
+        if (_targetItemType >= 237) {
             _update_storage_nui(_summoner, _present_itemNo);
         }
         emit Upgrade_Fluffy(_summoner, _targetItemType, _present_itemNo);        
@@ -3298,7 +3070,8 @@ contract Murasaki_Function_Crafting2 is Ownable, ReentrancyGuard {
             require(_check_item(_item4, _sourceItemType));
             require(_item5 == 0);
         //when fluffiest x3 -> nuichan, require 3 items
-        } else if (_targetItemType == 197) {
+        //} else if (_targetItemType == 197) {
+        } else if (_targetItemType >= 237) {
             require(_check_item(_item1, _sourceItemType));
             require(_check_item(_item2, _sourceItemType));
             require(_check_item(_item3, _sourceItemType));
@@ -3330,7 +3103,8 @@ contract Murasaki_Function_Crafting2 is Ownable, ReentrancyGuard {
             _targetItemType = _sourceItemType +12;
         // when fluffiest, -> nui-chan
         } else if (225 <= _sourceItemType && _sourceItemType <= 236) {
-            _targetItemType = 197;
+            //_targetItemType = 197;
+            _targetItemType = _sourceItemType +12;
         }
         return _targetItemType;
     }
@@ -3690,8 +3464,15 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
         } else if (_item_type >= 225 && _item_type <= 236) {
             _coin = 400;
             _material = 400;
+        /*
         //197: fluffiest -> nui
         } else if (_item_type == 197) {
+            _coin = 600;
+            _material = 600;
+        }
+        */
+        //237-248: fluffiest -> nui
+        } else if (_item_type >= 237 && _item_type <= 248) {
             _coin = 600;
             _material = 600;
         }
@@ -4297,7 +4078,8 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
         //196
         "Cat Mail",
         //197
-        "Fluffy Murasaki-San",
+        //"Fluffy Murasaki-San",
+        "",
         //198
         "",
         //199
@@ -4346,6 +4128,20 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
         "Pink Fluffiest",
         "Yellow Fluffiest",
         "White Fluffiest"
+
+        //237-248
+        "Gray Doll",
+        "Beige Doll",
+        "Limegreen Doll",
+        "Lightblue Doll",
+        "Blue Doll",
+        "Purple Doll",
+        "Redpurple Doll",
+        "Red Doll",
+        "Orange Doll",
+        "Pink Doll",
+        "Yellow Doll",
+        "White Doll"
     ];
 }
 
@@ -5356,7 +5152,7 @@ contract Fluffy_Festival is Ownable, ReentrancyGuard {
 //---Achievement_onChain
 
 
-contract Murasaki_Function_Achievement_onChain is Ownable {
+contract Achievement_onChain is Ownable {
 
     //address
     address public address_Murasaki_Address;
@@ -5371,15 +5167,15 @@ contract Murasaki_Function_Achievement_onChain is Ownable {
     uint public nft_number;
     
     //astarbase address
-    address public address_AstarBase;
+    //address public address_AstarBase;
     
     //murasaki nft address
     address public address_Murasaki_NFT;
     
     //admin, set address
-    function _set_AstarBase(address _address) external onlyOwner {
-        address_AstarBase = _address;
-    }
+    //function _set_AstarBase(address _address) external onlyOwner {
+    //    address_AstarBase = _address;
+   // }
     function _set_Murasaki_NFT(address _address) external onlyOwner {
         address_Murasaki_NFT = _address;
     }
@@ -5412,7 +5208,29 @@ contract Murasaki_Function_Achievement_onChain is Ownable {
         uint _score = _score_token + _score_nft + _score_staking + _score_murasaki_nft;
         return _score;
     }
-    function _get_score_token(address _owner) view returns (uint) {
+    
+    //get_scores as array
+    function get_scores (uint _summoner) external view returns (uint[5] memory) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
+        address _owner = mfs.get_owner(_summoner);
+        uint _score_token = _get_score_token(_owner);
+        uint _score_nft = _get_score_nft(_owner);
+        uint _score_staking = _get_score_staking(_owner);
+        uint _score_murasaki_nft = _get_score_murasaki_nft(_owner);
+        uint _score = _score_token + _score_nft + _score_staking + _score_murasaki_nft;
+        uint[5] memory _scores = [
+            _score, 
+            _score_token, 
+            _score_nft, 
+            _score_staking, 
+            _score_murasaki_nft
+        ];
+        return _scores;
+    }
+    
+    //internal, calc each score, min:0, max:10
+    function _get_score_token(address _owner) internal view returns (uint) {
         uint _score = 0;
         for (uint i = 1; i <= token_number; i++) {
             ERC20 _token = ERC20(tokens[i]);
@@ -5423,9 +5241,9 @@ contract Murasaki_Function_Achievement_onChain is Ownable {
         }
         return _score;
     }
-    function _get_score_nft(address _owner) view returns (uint) {
+    function _get_score_nft(address _owner) internal view returns (uint) {
         uint _score = 0;
-        for (uint i = 1; i <= token_number; i++) {
+        for (uint i = 1; i <= nft_number; i++) {
             ERC721 _nft = ERC721(nfts[i]);
             uint _balance = _nft.balanceOf(_owner);
             if (_balance > 0) {
@@ -5434,128 +5252,43 @@ contract Murasaki_Function_Achievement_onChain is Ownable {
         }
         return _score;
     }
-    function _get_score_staking(address _owner) view returns (uint) {
-        returns 0;
-    }
-    function _get_score_murasaki_nft(address _owner) view returns (uint) {
-        returns 0;
-    }
-    
-    //get_achv
-    function get_achievement (uint _summoner) external view returns (bool[32] memory) {
-        bool[32] memory _achievements;
-        for (uint _achv_id=1; _achv_id<32; _achv_id++) {
-            _achievements[_achv_id] = _check_achievement(_summoner, _achv_id);
-        }
-        return _achievements;
-    }
-
-    //internal, check_achv
-    function _check_achievement(uint _summoner, uint _achievement_id) internal view returns (bool) {
+    function _get_score_staking(address _owner) internal view returns (uint) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
-        Murasaki_Storage_Score mss = Murasaki_Storage_Score(ma.address_Murasaki_Storage_Score());
-        //1: total_coin > 10000
-        if (_achievement_id == 1) {
-            if (mss.total_coin_mined(_summoner) >= 10000) {
-                return true;
-            }
-        //2: total_coin > 30000
-        } else if (_achievement_id == 2) {
-            if (mss.total_coin_mined(_summoner) >= 30000) {
-                return true;
-            }
-        //3: total_coin > 100000
-        } else if (_achievement_id == 3) {
-            if (mss.total_coin_mined(_summoner) >= 100000) {
-                return true;
-            }
-        //4: total_coin > 300000
-        } else if (_achievement_id == 4) {
-            if (mss.total_coin_mined(_summoner) >= 300000) {
-                return true;
-            }
-        //5: total_coin > 1000000
-        } else if (_achievement_id == 5) {
-            if (mss.total_coin_mined(_summoner) >= 1000000) {
-                return true;
-            }
-        //6: total_material > 10000
-        } else if (_achievement_id == 6) {
-            if (mss.total_material_farmed(_summoner) >= 10000) {
-                return true;
-            }
-        //7: total_material > 30000
-        } else if (_achievement_id == 7) {
-            if (mss.total_material_farmed(_summoner) >= 30000) {
-                return true;
-            }
-        //8: total_material > 100000
-        } else if (_achievement_id == 8) {
-            if (mss.total_material_farmed(_summoner) >= 100000) {
-                return true;
-            }
-        //9: total_material > 300000
-        } else if (_achievement_id == 9) {
-            if (mss.total_material_farmed(_summoner) >= 300000) {
-                return true;
-            }
-        //10: total_material > 1000000
-        } else if (_achievement_id == 10) {
-            if (mss.total_material_farmed(_summoner) >= 1000000) {
-                return true;
-            }
-        //11: total_item > 5
-        } else if (_achievement_id == 11) {
-            if (mss.total_item_crafted(_summoner) >= 5) {
-                return true;
-            }
-        //12: total_item > 10
-        } else if (_achievement_id == 12) {
-            if (mss.total_item_crafted(_summoner) >= 10) {
-                return true;
-            }
-        //13: total_item > 20
-        } else if (_achievement_id == 13) {
-            if (mss.total_item_crafted(_summoner) >= 20) {
-                return true;
-            }
-        //14: total_item > 40
-        } else if (_achievement_id == 14) {
-            if (mss.total_item_crafted(_summoner) >= 40) {
-                return true;
-            }
-        //15: total_item > 80
-        } else if (_achievement_id == 15) {
-            if (mss.total_item_crafted(_summoner) >= 80) {
-                return true;
-            }
-        //16: total_fluffy > 30
-        } else if (_achievement_id == 16) {
-            if (mss.total_precious_received(_summoner) >= 30) {
-                return true;
-            }
-        //17: total_fluffy > 60
-        } else if (_achievement_id == 17) {
-            if (mss.total_precious_received(_summoner) >= 60) {
-                return true;
-            }
-        //18: total_fluffy > 120
-        } else if (_achievement_id == 18) {
-            if (mss.total_precious_received(_summoner) >= 120) {
-                return true;
-            }
-        //19: total_fluffy > 240
-        } else if (_achievement_id == 19) {
-            if (mss.total_precious_received(_summoner) >= 240) {
-                return true;
-            }
-        //20: total_fluffy > 480
-        } else if (_achievement_id == 20) {
-            if (mss.total_precious_received(_summoner) >= 480) {
-                return true;
-            }
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
+        uint _staker = mfs.calc_dapps_staking_amount(_owner);
+        uint _score;
+        if (_staker == 0) {
+            _score = 0;
+        } else if (_staker < 500) {
+            _score = 1;
+        } else if (_staker < 1000) {
+            _score = 2;
+        } else if (_staker < 2000) {
+            _score = 3;
+        } else if (_staker < 4000) {
+            _score = 4;
+        } else if (_staker < 8000) {
+            _score = 5;
+        } else if (_staker < 16000) {
+            _score = 6;
+        } else if (_staker < 32000) {
+            _score = 7;
+        } else if (_staker < 64000) {
+            _score = 8;
+        } else if (_staker < 128000) {
+            _score = 9;
+        } else if (_staker >= 128000) {
+            _score = 10;
         }
-        return false;
+        return _score;
+    }
+    function _get_score_murasaki_nft(address _owner) internal view returns (uint) {
+        ERC721 _nft = ERC721(address_Murasaki_NFT);
+        uint _score = _nft.balanceOf(_owner);
+        if (_score > 10) {
+            _score = 10;
+        }
+        return _score;
     }
 }
 
@@ -7213,6 +6946,10 @@ contract Admin_Convert is Ownable {
                 address _crafted_wallet, 
                 //string memory _memo
             ) = mcOld.items(uint32(_item_id_256));
+            //conver nuichan id, random type
+            if (_item_type == 197) {
+                _item_type = _crafted_time % 12 + 236;
+            }
             //uint32 _seed = mcOld.seed(_item_id);
             address _wallet_to = mcOld.ownerOf(_item_id);
             //craft_convert in new contract
