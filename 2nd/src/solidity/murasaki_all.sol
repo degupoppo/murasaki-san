@@ -2160,7 +2160,7 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable, ReentrancyGuard {
         uint _delta_sec = ( _now - ms.last_feeding_time(_summoner) ) * mp.SPEED()/100;
         //achv onChain boost
         _exp_add = _get_exp_add_from_achv_onChain(_summoner, _exp_add);
-        //nui boost
+        //nui boost, multiplication with onChain boost
         if (_item_nui > 0) {
             _exp_add = _get_exp_add_from_nui(_summoner, _item_nui, _exp_add);
         }
@@ -2190,7 +2190,9 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable, ReentrancyGuard {
     function _get_exp_add_from_achv_onChain(uint _summoner, uint _exp_add) internal view returns (uint) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Achievement_onChain ac = Achievement_onChain(ma.address_Achievement_onChain());
-        uint 
+        uint _percentx100 = ac.get_score(_summoner);
+        _exp_add += _exp_add * _percentx100 / 10000;
+        return _exp_add;
     }
     function _get_exp_add_from_nui(uint _summoner, uint _item_nui, uint _exp_add) internal view returns (uint) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
@@ -2296,6 +2298,8 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable, ReentrancyGuard {
         uint _now = block.timestamp;
         uint _happy = _calc_happy_real(_summoner);
         uint _exp_add = 3000 * (100 - _happy) / 100;
+        //achv onChain boost
+        _exp_add = _get_exp_add_from_achv_onChain(_summoner, _exp_add);
         //nui boost
         if (_item_nui > 0) {
             address _owner = mfs.get_owner(_summoner);
@@ -5236,15 +5240,18 @@ contract Achievement_onChain is Ownable {
         return _scores;
     }
     
-    //internal, calc each score, min:0, max:10
+    //internal, calc each score, min:0, max:100, 100=1%
     function _get_score_token(address _owner) internal view returns (uint) {
         uint _score = 0;
         for (uint i = 1; i <= token_number; i++) {
             ERC20 _token = ERC20(tokens[i]);
             uint _balance = _token.balanceOf(_owner);
             if (_balance > 0) {
-                _score += 1;
+                _score += 10;
             }
+        }
+        if (_score > 100) {
+            _score = 100;
         }
         return _score;
     }
@@ -5257,6 +5264,9 @@ contract Achievement_onChain is Ownable {
                 _score += 1;
             }
         }
+        if (_score > 100) {
+            _score = 100;
+        }
         return _score;
     }
     function _get_score_staking(address _owner) internal view returns (uint) {
@@ -5267,33 +5277,33 @@ contract Achievement_onChain is Ownable {
         if (_staker == 0) {
             _score = 0;
         } else if (_staker < 500) {
-            _score = 1;
-        } else if (_staker < 1000) {
-            _score = 2;
-        } else if (_staker < 2000) {
-            _score = 3;
-        } else if (_staker < 4000) {
-            _score = 4;
-        } else if (_staker < 8000) {
-            _score = 5;
-        } else if (_staker < 16000) {
-            _score = 6;
-        } else if (_staker < 32000) {
-            _score = 7;
-        } else if (_staker < 64000) {
-            _score = 8;
-        } else if (_staker < 128000) {
-            _score = 9;
-        } else if (_staker >= 128000) {
             _score = 10;
+        } else if (_staker < 1000) {
+            _score = 20;
+        } else if (_staker < 2000) {
+            _score = 30;
+        } else if (_staker < 4000) {
+            _score = 40;
+        } else if (_staker < 8000) {
+            _score = 50;
+        } else if (_staker < 16000) {
+            _score = 60;
+        } else if (_staker < 32000) {
+            _score = 70;
+        } else if (_staker < 64000) {
+            _score = 80;
+        } else if (_staker < 128000) {
+            _score = 90;
+        } else if (_staker >= 128000) {
+            _score = 100;
         }
         return _score;
     }
     function _get_score_murasaki_nft(address _owner) internal view returns (uint) {
         ERC721 _nft = ERC721(address_Murasaki_NFT);
-        uint _score = _nft.balanceOf(_owner);
-        if (_score > 10) {
-            _score = 10;
+        uint _score = _nft.balanceOf(_owner) * 10;
+        if (_score > 100) {
+            _score = 100;
         }
         return _score;
     }
