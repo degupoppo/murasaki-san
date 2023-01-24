@@ -6850,6 +6850,7 @@ function open_window_voting(scene) {
     } else if (local_ff_isEndable) {
         _text_msg3 = "The festival is almost over.\nYou can get the Final Voting Bonus now!";
     } else {
+        let _counter = local_ff_subject_end_block - local_blockNumber;
         _text_msg3 = "The festival is underway!\n" + _counter + " blocks remaining.";
     }
     let msg3 = scene.add.text(750, 730, _text_msg3)

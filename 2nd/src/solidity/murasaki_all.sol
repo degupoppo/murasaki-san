@@ -22,6 +22,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@openzeppelin/contracts/utils/Base64.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@astarbase/contract/example/IAstarBase.sol";
 */
@@ -6965,7 +6966,7 @@ contract Admin_Convert is Ownable {
             ) = mcOld.items(uint32(_item_id_256));
             //conver nuichan id, random type
             if (_item_type == 197) {
-                _item_type = _crafted_time % 12 + 236;
+                _item_type = _crafted_time % 12 + 237;
             }
             //uint32 _seed = mcOld.seed(_item_id);
             address _wallet_to = mcOld.ownerOf(_item_id);
