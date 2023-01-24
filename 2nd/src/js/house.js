@@ -82,6 +82,10 @@ contract ERC721 is IERC721 {
 
 //### 1st
 
+ ok Murasaki_info_fromWalletの更新
+        achievementの実装
+            必要ない？
+
     演奏会の実装検討
         他プレイヤーとの協力or勝負メカニズム
             1vs1の勝ち抜き戦？
@@ -163,15 +167,6 @@ contract ERC721 is IERC721 {
             クリックで補正値内訳を表示させる
         また、Exp補正値を反映するアイテムか、落書きを表示させる        
 
-    nuichanのitemIdの再実装検討
-        12種類の種類が設けられる場合、237-248を使用して別々のitemIdを当てたほうが良いか
-        あるいは, msnにtypeOfSourceパラメータを実装するか
-    nuiちゃんにclassパラメータを実装する？
-        mcのmemoを使うか、storage_nuiに追加するか。
-        class値は合成元のfluffyのtypeを継承する
-        → memoを実装
-        classパラメータに応じてリボンの色を変える
-    
  ig NFT絵の表示の実装
         walletからnftの取得
             PJごとにコントラから取得する
@@ -575,6 +570,15 @@ contract ERC721 is IERC721 {
 
 //### 2nd
 
+ ok nuichanのitemIdの再実装検討
+        12種類の種類が設けられる場合、237-248を使用して別々のitemIdを当てたほうが良いか
+        あるいは, msnにtypeOfSourceパラメータを実装するか
+ ok nuiちゃんにclassパラメータを実装する？
+        mcのmemoを使うか、storage_nuiに追加するか。
+        class値は合成元のfluffyのtypeを継承する
+        → memoを実装
+        classパラメータに応じてリボンの色を変える
+    
  ok ぬいちゃんの再実装
         item id 197から240番台への修正
 
@@ -1313,6 +1317,11 @@ async function init_global_variants() {
     local_achv = new Array(32).fill(false);
     local_nonce = 0;
     local_wallet_age = 0;
+    local_achv_onChain_score = 0;
+    local_achv_onChain_score_token = 0;
+    local_achv_onChain_score_nft = 0;
+    local_achv_onChain_score_staking = 0;
+    local_achv_onChain_score_murasaki_nft = 0;
 
     //---local festival
     local_ff_each_voting_count = new Array(256).fill(0);
@@ -1917,7 +1926,21 @@ async function contract_update_dynamic_status(_summoner) {
     //crafting resume
     local_crafting_resume_flag = Number(_all_dynamic_status[61]);
     local_crafting_resume_item_type = Number(_all_dynamic_status[62]);
-    local_crafting_resume_item_dc = Number(_all_dynamic_status[63]);    
+    local_crafting_resume_item_dc = Number(_all_dynamic_status[63]);
+    
+    //achievement_onChain
+    /*
+    local_achv_onChain_score = Number(_all_dynamic_status[64]);
+    local_achv_onChain_score_token = Number(_all_dynamic_status[65]);
+    local_achv_onChain_score_nft = Number(_all_dynamic_status[66]);
+    local_achv_onChain_score_staking = Number(_all_dynamic_status[67]);
+    local_achv_onChain_score_murasaki_nft = Number(_all_dynamic_status[68]);
+    */
+    local_achv_onChain_score = 400;
+    local_achv_onChain_score_token = 100;
+    local_achv_onChain_score_nft = 100;
+    local_achv_onChain_score_staking = 100;
+    local_achv_onChain_score_murasaki_nft = 100;
     
     //update last_sync_time
     last_sync_time = Date.now();
@@ -6248,6 +6271,31 @@ function radarchart2(
     group_chart.add(scene.add.sprite(x0-15-12, y0+r-5+14, "icon_luk").setOrigin(0.5).setScale(0.10));
     group_chart.add(scene.add.sprite(x0-r-20+16, y0-10-16, "icon_int").setOrigin(0.5).setScale(0.10));
 }
+function achv_onChain(scene, _x, _y) {
+    let _text = "";
+    _text += " Score: " + local_achv_onChain_score + "\n";
+    _text += " Tokens: " + local_achv_onChain_score_token + "\n";
+    _text += " NFTs: " + local_achv_onChain_score_nft + "\n";
+    _text += " Staking: " + local_achv_onChain_score_staking + "\n";
+    _text += " Special: " + local_achv_onChain_score_murasaki_nft + "\n";
+    let _msg = scene.add.text(
+        _x, 
+        _y+20, 
+        _text, 
+        {font: "20px Arial", fill: "#000000", backgroundColor: "#ffffff"}
+    ).setOrigin(0.5).setVisible(false);
+    let _sprite = scene.add.sprite(_x, _y, "icon_counter")
+        .setOrigin(0.5)
+        .setScale(0.1)
+        .setInteractive({ useHandCursor: true })
+        .on("pointerover", () => {
+            _msg.setVisible(true);
+        })
+        .on("pointerout", () => {
+            _msg.setVisible(false);
+        });
+    group_chart.add(_sprite); 
+}
 async function draw_radarchart(scene) {
     let _x = 1160;
     let _y = 115;
@@ -6269,6 +6317,7 @@ async function draw_radarchart(scene) {
         //local_luck_withItems_withStaking_withDice
         local_luck_withItems_withDice
     );
+    achv_onChain(scene, 1200, 180);
 }
 
 
