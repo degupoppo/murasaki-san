@@ -101,7 +101,7 @@ async function _show_info() {
         let _city = await contract.methods.city(wallet).call();
         let _personality = await contract.methods.personality(wallet).call();
         _text += "&nbsp;&nbsp;&nbsp;";
-        _text += "You are the owner of <b>";
+        _text += "Hello, the owner of <b>";
         _text += _personality;
         _text += " ";
         _text += _name;
