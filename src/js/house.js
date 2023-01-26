@@ -80,9 +80,13 @@ contract ERC721 is IERC721 {
 
 /*
 
-//### 1st
+772
+1450
+847
+796
+724
 
- ok fluffy upgradeバグの修正
+//### 1st
 
 	Philandライクな戦略の検討
 		オンチェーンアクティビティに応じたオブジェクトを得る
@@ -92,49 +96,20 @@ contract ERC721 is IERC721 {
     		各PJのトレースデフォルメアイコンを用意するか
     		    どこに表示するか
 		また、インセンティブとしてはExp Boostボーナスを導入する
+	    *よつば案：
+		    1つ, 2つ, 3つ, 4つ葉の4段階
+		    葉っぱが薄いor透明で現在の段階を表すか
+		    もしくは、4つの別のイラストとするか
+    		    0-1%: 1つ葉
+    		    1-2%: 2つ葉
+    		    2-3%: 3つ葉
+    		    3-4%: 4つ葉
+    		    4%max: 4つ葉＋てんとう虫
+    		マウスオーバーラップでスコア内訳を表示させる
 
-    Astar Walletを所有する意味論の付加
-        Walletのパラメータによってin-gameインセンティブを付与する
-            保有tokenの種類, 上限1%, 0.1%/PJ
-                SDN, DOT, LAY, BAI, ARSW, ACA, MATIC, GLMR, JPYC, WETH, WBTC, aUSD, 
-            保有NFTの種類, 上限1%, 0.2%/PJ
-                CANDYGIRL, DGENE, ANAUT, ASTRJP, CAT, WITCH, Punks
-            dapps staking量, 上限1%, 0.1%/step
-                1, 500, 1000, 2000, 4000, 8000, 16000, 32000, 64000, 128000, 
-            オリジナルNFT, 上限1%, 0.1%/個
-                1-10個
-        すべてmaxとして+5%程度のEXP補正をかける
-            1項目100点で、4項目400点、+4%程度か
-            最後の1項目は、オリジナルな運営が発行するNFTとするか。
-                1日1枚発行されるAoAのむらさきさんやAstarなど。
-        現在のExp補正値を表示させる
-            クリックで補正値内訳を表示させる
-        また、Exp補正値を反映するアイテムか、落書きを表示させる        
-
-    nuichanのitemIdの再実装検討
-        12種類の種類が設けられる場合、237-248を使用して別々のitemIdを当てたほうが良いか
-        あるいは, msnにtypeOfSourceパラメータを実装するか
-    nuiちゃんにclassパラメータを実装する？
-        mcのmemoを使うか、storage_nuiに追加するか。
-        class値は合成元のfluffyのtypeを継承する
-        → memoを実装
-        classパラメータに応じてリボンの色を変える
-    
- ig NFT絵の表示の実装
-        walletからnftの取得
-            PJごとにコントラから取得する
-            balanceOfでNFT数を取得し、
-            tokenOfOwnerByIndexでNFT IDのリストを取得する
-            AstarCats, AstarDegensはこのmethodで取得できそう
-        nftからtokenURLの取得
-            json取得→image URL取得
-        URLからpngを取得してloadする機構の実装
-            ipfsからだと遅いか？
-            tofuNFTなどから取得したいが、可能だろうか
-        ローディング絵の実装
-            NFTのダウンロードは時間がかかると思われるので
-            Loading..の文字と何かしらの宛絵を用意する
-        ローディング中が重いので対策可能なら考える
+    アイテム順の再考
+        クレヨンの位置
+        楽器の位置
 
     ネオンちゃんの段階実装
         ステーキング量に応じてにぎやかにする
@@ -157,6 +132,66 @@ contract ERC721 is IERC721 {
             ステーキングしてアクティブ化したくなるような楽しい絵にしたい。
         ステーキング量が多いほど豪華になり、
             カウンターが進むと何かが溜まってゆく・成長してゆく絵を考える。
+
+    演奏会の実装検討
+        他プレイヤーとの協力or勝負メカニズム
+            1vs1の勝ち抜き戦？
+            3vs3のチーム戦？
+            参加者全員のforAll？
+            参加者全員でスコアを合算し、寄与率？に応じてリターンを計算する、など
+        ピアノ, バイオリン, ウクレレ？のうちどれかを選んで出演する
+            楽器ごとにSTR, DEX, INTに対応させるか
+            該当する楽器を所持してないと出演できない
+            該当ステータスに、レベルやその他の補正値を加えて演奏力を算出する
+            各アイテムのシードを参照するなど、その時々で有利な条件を変化させる
+            かつ、運の要素も何割か入れて結果を不確定にする
+        「れんしゅう」という行動の導入を検討する
+            workingの別バージョン
+            3つの楽器ごとに練習時間に応じてレベルが上がってゆく
+            習熟に王道なし。単純にれんしゅう秒のみに依存させる
+            時間効率はかなり厳しく設定する。
+            簡単にはレベルが上がらないバランスで調整する。
+        意味論
+            月に1回のお出かけ日
+            あまり勝負やガチャ/ギャンブルな印象にはしたくない
+                参加費を掛け金とした勝者総取り、は法律的にも好ましくないだろう
+                一方で、参加に何かしらのインセンティブは必要だろう
+                    ゲーム内資産：fluffyを報酬とするか
+                    あるいは、この行動でしか手に入らないトロフィーなど
+                        トロフィーはNFTではなくSBTで実装する
+    
+    ぬいちゃん貸し出しシステムの実装検討
+        ぬいちゃんは他の人が所持した際の効果が大きい
+            しかし、売りに出すのは愛着が湧くため、なかなかにハードルが高い
+            そのため、売りに出す以外に他のむらさきさんに期間限定で貸与する機構を考える
+            ぬいちゃんのお泊り会なイメージ
+        構想
+            ステータス・期間・料金を提示してlistする
+                コストを一括で支払ってrentする
+            あるいは、コスト/日と、最大日数を提示してlistする
+                rent側はいつでも返却できる
+                    使用時（feeding/grooming時）に料金を支払う
+                    もしくは返却時に返金される
+                最大日数が残っている間はlistに表示される
+            rentされていたぬいちゃんには、経過時間に応じて専用のパラメータが積算する
+            また、ぬいちゃんの作成コストは、累積クラフト数か、
+                その時のスコアに応じて引き上げる
+
+ ig NFT絵の表示の実装
+        walletからnftの取得
+            PJごとにコントラから取得する
+            balanceOfでNFT数を取得し、
+            tokenOfOwnerByIndexでNFT IDのリストを取得する
+            AstarCats, AstarDegensはこのmethodで取得できそう
+        nftからtokenURLの取得
+            json取得→image URL取得
+        URLからpngを取得してloadする機構の実装
+            ipfsからだと遅いか？
+            tofuNFTなどから取得したいが、可能だろうか
+        ローディング絵の実装
+            NFTのダウンロードは時間がかかると思われるので
+            Loading..の文字と何かしらの宛絵を用意する
+        ローディング中が重いので対策可能なら考える
 
     バグ・仕様修正
         happyが0になったらcraftingのdcが減らないようにしたい
@@ -193,42 +228,9 @@ contract ERC721 is IERC721 {
             summoner modeを先にcraftingに設定しているのでsetTextが読み込まれていない
             構造修正が多少必要
     
-    fluffy festivalのUI改善
-        問題点：
-            festival後に結果がわからない
-            現在のfluffy所持数がわかりにくい
-        さて、どうするか。
-            もぐらさんを使うか？            
-
-    集計情報
-        ユーザー数
-        石化ユーザー数
-        await web3.eth.getBalance(contract_bt.options.address) 
-        await web3.eth.getBalance(contract_bv.options.address) 
-        await web3.eth.getBalance(address_Staking_Wallet) 
-
-   *イベント監視システムを構築する
-        眺めるようと、bot監視ように。
-        event垂れ流しを一般公開するかどうかは難しいところ。
-            テキストのストリーミング公開が難しそう
-            アクティビティが如実にわかるので冷めそうであるし
-        監視対象のコントラクト
-            mfsl
-            mffg
-            mfmf
-            mfc
-            mfn
-            mml
-            wd
-            (ff)
-
     バイバックコントラクトのテスト
         バイバックのテスト
         bufferVaultの挙動テスト
-
-    クレヨンの実装
-        クレヨンクラフト後に実績落書きが表示されるように実装する
-        アイテム順を再考する
 
     Travel of Murasaki-Sanの構想案
         旅の目的は？
@@ -522,6 +524,75 @@ contract ERC721 is IERC721 {
 
 
 //### 2nd
+
+ ok fluffy festivalのUI改善
+        問題点：
+            festival後に結果がわからない
+            現在のfluffy所持数がわかりにくい
+        さて、どうするか。
+            もぐらさんを使うか？            
+
+ ok Astar Walletを所有する意味論の付加
+        Walletのパラメータによってin-gameインセンティブを付与する
+            保有tokenの種類, 上限1%, 0.1%/PJ
+                SDN, DOT, LAY, BAI, ARSW, ACA, MATIC, GLMR, JPYC, WETH, WBTC, aUSD, 
+            保有NFTの種類, 上限1%, 0.2%/PJ
+                CANDYGIRL, DGENE, ANAUT, ASTRJP, CAT, WITCH, Punks
+            dapps staking量, 上限1%, 0.1%/step
+                1, 500, 1000, 2000, 4000, 8000, 16000, 32000, 64000, 128000, 
+            オリジナルNFT, 上限1%, 0.1%/個
+                1-10個
+        すべてmaxとして+5%程度のEXP補正をかける
+            1項目100点で、4項目400点、+4%程度か
+            最後の1項目は、オリジナルな運営が発行するNFTとするか。
+                1日1枚発行されるAoAのむらさきさんやAstarなど。
+        現在のExp補正値を表示させる
+            クリックで補正値内訳を表示させる
+        また、Exp補正値を反映するアイテムか、落書きを表示させる        
+
+ ok クレヨンの実装
+        クレヨンクラフト後に実績落書きが表示されるように実装する
+        アイテム順を再考する
+
+ ok Murasaki_info_fromWalletの更新
+        achievementの実装
+            必要ない？
+
+ ok 集計情報
+        ユーザー数
+        石化ユーザー数
+        await web3.eth.getBalance(contract_bt.options.address) 
+        await web3.eth.getBalance(contract_bv.options.address) 
+        await web3.eth.getBalance(address_Staking_Wallet) 
+
+ ok イベント監視システムを構築する
+        眺めるようと、bot監視ように。
+        event垂れ流しを一般公開するかどうかは難しいところ。
+            テキストのストリーミング公開が難しそう
+            アクティビティが如実にわかるので冷めそうであるし
+        監視対象のコントラクト
+            mfsl
+            mffg
+            mfmf
+            mfc
+            mfn
+            mml
+            wd
+            (ff)
+
+ ok nuichanのitemIdの再実装検討
+        12種類の種類が設けられる場合、237-248を使用して別々のitemIdを当てたほうが良いか
+        あるいは, msnにtypeOfSourceパラメータを実装するか
+ ok nuiちゃんにclassパラメータを実装する？
+        mcのmemoを使うか、storage_nuiに追加するか。
+        class値は合成元のfluffyのtypeを継承する
+        → memoを実装
+        classパラメータに応じてリボンの色を変える
+    
+ ok ぬいちゃんの再実装
+        item id 197から240番台への修正
+
+ ok fluffy upgradeバグの修正
 
  ok nyuinyuiさんのカウンターの統合
         ロード画面とクラフト画面でカウンターを同じにする
@@ -1256,6 +1327,11 @@ async function init_global_variants() {
     local_achv = new Array(32).fill(false);
     local_nonce = 0;
     local_wallet_age = 0;
+    local_achv_onChain_score = 0;
+    local_achv_onChain_score_token = 0;
+    local_achv_onChain_score_nft = 0;
+    local_achv_onChain_score_staking = 0;
+    local_achv_onChain_score_murasaki_nft = 0;
 
     //---local festival
     local_ff_each_voting_count = new Array(256).fill(0);
@@ -1328,6 +1404,7 @@ async function init_global_variants() {
     screen_satiety_delta = 0;
     item_wearing_hat = 0;
     active_nui_id = 0;
+    active_nui_score = 0;
     //text_event_heart = "";
     text_event_random = "[Murasaki news]";
     text_event_random = text_event_random.padStart(116, " ");
@@ -1713,7 +1790,7 @@ async function contract_update_dynamic_status(_summoner) {
 
     //update fluffy count, not score
     let _count = 0;
-    for (i=201; i<=236; i++) {
+    for (i=201; i<=248; i++) {
         _count += local_items[i];
     }
     local_fluffy_count = _count;
@@ -1859,7 +1936,14 @@ async function contract_update_dynamic_status(_summoner) {
     //crafting resume
     local_crafting_resume_flag = Number(_all_dynamic_status[61]);
     local_crafting_resume_item_type = Number(_all_dynamic_status[62]);
-    local_crafting_resume_item_dc = Number(_all_dynamic_status[63]);    
+    local_crafting_resume_item_dc = Number(_all_dynamic_status[63]);
+    
+    //achievement_onChain
+    local_achv_onChain_score = Number(_all_dynamic_status[64]);
+    local_achv_onChain_score_token = Number(_all_dynamic_status[65]);
+    local_achv_onChain_score_nft = Number(_all_dynamic_status[66]);
+    local_achv_onChain_score_staking = Number(_all_dynamic_status[67]);
+    local_achv_onChain_score_murasaki_nft = Number(_all_dynamic_status[68]);
     
     //update last_sync_time
     last_sync_time = Date.now();
@@ -2586,6 +2670,43 @@ async function contract_end_voting(_summoner) {
     }
 }
 
+
+//---eventMonitor
+
+async function eventMonitor(_contract, li_eventLog) {
+    (async () => {
+        _contract.events.allEvents({}, (err, event) => {
+            let _json_string = JSON.stringify(event, null, "    ");
+            let _json = JSON.parse(_json_string);
+            let _event = _json.event;
+            let _hash = _json.transactionHash;
+            let _res = [_event, _hash];
+            for (let i=0; i<=5; i++) {
+                let _eventRaw = _json.returnValues[i]
+                if (typeof(_eventRaw) != "undefined") {
+                    _res.push(_eventRaw);
+                }
+            }
+            console.log(_res);
+            li_eventLog.push(_res);
+        });
+    })();
+}
+
+function start_eventMonitor() {
+    //global variant
+    li_eventLog = [];
+    eventMonitor(contract_mfsl_wss, li_eventLog);
+    eventMonitor(contract_mffg_wss, li_eventLog);
+    eventMonitor(contract_mfmf_wss, li_eventLog);
+    eventMonitor(contract_mfc_wss, li_eventLog);
+    eventMonitor(contract_mfc2_wss, li_eventLog);
+    eventMonitor(contract_mfn_wss, li_eventLog);
+    eventMonitor(contract_md_wss, li_eventLog);
+    eventMonitor(contract_mml_wss, li_eventLog);
+    eventMonitor(contract_ff_wss, li_eventLog);
+    eventMonitor(contract_bt_wss, li_eventLog);
+}
 
 //===class========================================================
 
@@ -5241,6 +5362,112 @@ class Fluffy2 extends Phaser.GameObjects.Sprite{
 }
 
 
+//---Nuichan
+
+class Nuichan extends Phaser.GameObjects.Sprite{
+    constructor(scene, x, y, img, _type, _itemId, _summoner_name, _score, _exp_rate){
+        super(scene, x, y, img);
+        let _pos_local = "pos_item_nui_" + _itemId;
+        this._pos_local = _pos_local;
+        if (localStorage.getItem(_pos_local) != null && local_owner == local_wallet) {
+            let _json = localStorage.getItem(_pos_local);
+            let _pos = JSON.parse(_json);
+            this.x = _pos[0];
+            this.y = _pos[1];
+        }
+        this.type = _type;
+        this.itemId = _itemId;
+        this.scene.add.existing(this);
+        this.setInteractive({ draggable: true, useHandCursor: true });
+        let _text = "";
+        _text += " id: " + "#" + _itemId + " \n";
+        _text +=" crafter: " + _summoner_name + " \n";
+        _text += " score: " + _score + " \n";
+        _text += " exp: +" + _exp_rate + "% ";
+        this.msg = this.scene.add.text(
+            this.x,
+            this.y+68,
+            _text,
+            {font: "15px Arial", fill: "#000000", backgroundColor: "#ffffff"}
+        ).setOrigin(0.5).setDepth(9999).setVisible(false);
+        this.on("drag", () => {
+            if (this.scene.sys.game.scale.gameSize._width == 1280) {
+                this.x = game.input.activePointer.x;
+                this.y = game.input.activePointer.y;
+            } else {
+                this.x = game.input.activePointer.y;
+                this.y = 960 - game.input.activePointer.x;
+            }
+            this.depth = this.y;
+            this.msg.visible = false;
+        })
+        this.on("dragend", () => {
+            //grand, sound, depth
+            this.msg.x = this.x;
+            this.msg.y = this.y+68;
+            if (flag_info == 1) {
+                this.msg.visible = true;
+            }
+            sound_nui.play();
+            if (local_owner == local_wallet) {
+                let _pos = [this.x, this.y];
+                localStorage.setItem(this._pos_local, JSON.stringify(_pos));
+            }
+            //attenting
+            if (
+                this.x >= 100
+                && this.x <= 1100
+                && this.y >= 500
+                && this.y <= 800
+            ){
+                murasakisan.try_attenting(this.x, this.y);
+            }
+        })
+        this.on("pointerover", () => {
+            if (flag_info == 1) {
+                this.msg.visible = true;
+            }
+        })
+        this.on("pointerout", () => {
+            setTimeout( () => {
+                this.msg.visible = false;
+            }, 2000);
+        });
+        //image
+        if (this.type == 237) {
+            this.setFrame(0);
+        } else if (this.type == 238) {
+            this.setFrame(1);
+        } else if (this.type == 239) {
+            this.setFrame(2);
+        } else if (this.type == 240) {
+            this.setFrame(3);
+        } else if (this.type == 241) {
+            this.setFrame(4);
+        } else if (this.type == 242) {
+            this.setFrame(5);
+        } else if (this.type == 243) {
+            this.setFrame(6);
+        } else if (this.type == 244) {
+            this.setFrame(7);
+        } else if (this.type == 245) {
+            this.setFrame(8);
+        } else if (this.type == 246) {
+            this.setFrame(9);
+        } else if (this.type == 247) {
+            this.setFrame(10);
+        } else if (this.type == 248) {
+            this.setFrame(11);
+        }
+        this.setOrigin(0.5).setScale(0.38);
+    }
+        
+    //### update()
+    update() {
+    }
+}
+
+
 //---PresentBox
 //***TODO***
 
@@ -6086,6 +6313,47 @@ function radarchart2(
     group_chart.add(scene.add.sprite(x0-15-12, y0+r-5+14, "icon_luk").setOrigin(0.5).setScale(0.10));
     group_chart.add(scene.add.sprite(x0-r-20+16, y0-10-16, "icon_int").setOrigin(0.5).setScale(0.10));
 }
+function achv_onChain(scene, _x, _y) {
+    let _text = "";
+    _text += " Score \n";
+    _text += " Tokens \n";
+    _text += " NFTs \n";
+    _text += " Staking \n";
+    _text += " Special           ";
+    let _msg = scene.add.text(
+        _x-50, 
+        _y+75, 
+        _text, 
+        {font: "17px Arial", fill: "#000000", backgroundColor: "#ffffff"}
+    ).setOrigin(0.4).setVisible(false).setDepth(9999);
+    _text = "";
+    _text += "           : " + local_achv_onChain_score + " \n";
+    _text += "           : " + local_achv_onChain_score_token + " \n";
+    _text += "           : " + local_achv_onChain_score_nft + " \n";
+    _text += "           : " + local_achv_onChain_score_staking + " \n";
+    _text += "           : " + local_achv_onChain_score_murasaki_nft + " ";
+    let _msg2 = scene.add.text(
+        _x-50, 
+        _y+75, 
+        _text, 
+        {font: "17px Arial", fill: "#E5004F"}
+    ).setOrigin(0.4).setVisible(false).setDepth(9999);
+    let _sprite = scene.add.sprite(_x, _y, "icon_counter")
+        .setOrigin(0.5)
+        .setScale(0.1)
+        .setInteractive({ useHandCursor: true })
+        .on("pointerover", () => {
+            _msg.setVisible(true);
+            _msg2.setVisible(true);
+        })
+        .on("pointerout", () => {
+            setTimeout( () => {
+                _msg.setVisible(false);
+                _msg2.setVisible(false);
+            }, 2000)
+        });
+    group_chart.add(_sprite); 
+}
 async function draw_radarchart(scene) {
     let _x = 1160;
     let _y = 115;
@@ -6107,6 +6375,7 @@ async function draw_radarchart(scene) {
         //local_luck_withItems_withStaking_withDice
         local_luck_withItems_withDice
     );
+    achv_onChain(scene, 1225, 180);
 }
 
 
@@ -6564,11 +6833,12 @@ function open_window_upgrade(scene) {
         if (_itemId <= 128) {
             //_item_name_to = array_item_name[Number(_itemId)+64];
             _item_name_to = dic_items_reverse[Number(_itemId)+64];
-        } else if (_itemId <= 224) {
+        //} else if (_itemId <= 224) {
+        } else if (_itemId <= 236) {
             _item_name_to = dic_items_reverse[Number(_itemId)+12];
             //_item_name_to = array_item_name[Number(_itemId)+12];
-        } else if (_itemId <= 236) {
-            _item_name_to = dic_items_reverse[197];
+        //} else if (_itemId <= 236) {
+        //    _item_name_to = dic_items_reverse[197];
         }
         let _rarity = "";
         let _rarity_to = "";
@@ -7187,6 +7457,38 @@ function summon_fluffy(scene, _type, rarity, itemId) {
 }
 
 
+//---summon_nuichan
+async function summon_nuichan(scene, _item_id, _type, _count_nui) {
+    let _x = 1070 + _count_nui*30;
+    let _y = 520 + _count_nui*30;
+    let _item_nui = await contract_get_item_nui(_item_id);
+    let _summoner = _item_nui[0];
+    let _class = _item_nui[1];
+    let _score = _item_nui[2];
+    //update active nui_id
+    if (_score >= active_nui_score) {
+        active_nui_id = _item_id;
+        active_nui_score = _score;
+    }
+    let _exp_rate = _item_nui[3] - 100;
+    let _summoner_name = await call_name_from_summoner(_summoner);
+    if (_summoner_name == "") {
+        _summoner_name = "#" + _summoner;
+    }
+    new Nuichan(
+        scene, 
+        _x, 
+        _y, 
+        "item_nui_list", 
+        _type, 
+        _item_id, 
+        _summoner_name, 
+        _score, 
+        _exp_rate
+    ).setDepth(_y);
+}
+
+
 //---summon_fallingFlower
 function summon_fallingFlower(scene) {
     let _flower = new FallingFlower(scene, 0, 0, "par_flowers");
@@ -7558,6 +7860,9 @@ function preload(scene) {
     scene.load.spritesheet("item_hammock_list", "src/png/item_hammock_list.png", {frameWidth: 230, frameHeight: 320});
     scene.load.image("item_ukrere", "src/png/item_ukrere.png");
     scene.load.spritesheet("item_lantern_list", "src/png/item_lantern_list.png", {frameWidth: 370, frameHeight: 320});
+
+    //---nui
+    scene.load.spritesheet("item_nui_list", "src/png/item_nui_list.png", {frameWidth: 370, frameHeight: 320});
 
     //---alphabed
     scene.load.image("alp_h", "src/png/alp_h.png");
@@ -10110,9 +10415,6 @@ function update_checkButtonActivation(this_scene) {
 //---items
 function update_checkItem(this_scene) {
 
-    //***TODO*** crayyon
-    update_achv();
-    
     //calc sum of local_items and compare previous one
     let res1 = local_items.reduce((sum, element) => sum + element, 0);
     let res2 = previous_local_items.reduce((sum, element) => sum + element, 0);
@@ -11545,9 +11847,11 @@ function update_checkItem(this_scene) {
                     item_nui.anims.play("item_nui_alive", true);
                 }
                 */
+                /*
                 if (typeof group_item197 != "undefined") {
                     group_item197.children.entries[0].anims.play("item_nui_alive", true);
                 }
+                */
                 if (typeof item_lantern != "undefined") {
                     item_lantern.anims.play("item_lantern");
                     item_lantern.setDepth(9999+10);
@@ -11577,9 +11881,11 @@ function update_checkItem(this_scene) {
                     item_nui.anims.play("item_nui", true);
                 }
                 */
+                /*
                 if (typeof group_item197 != "undefined") {
                     group_item197.children.entries[0].anims.play("item_nui", true);
                 }
+                */
                 if (typeof item_lantern != "undefined") {
                     item_lantern.anims.stop();
                     item_lantern.setFrame(0);
@@ -12200,6 +12506,12 @@ function update_checkItem(this_scene) {
         item_crayon.destroy(true);
         local_items_flag[_item_id] = false;
     }
+    
+    //when possess crayon, update achevement
+    if (local_items_flag[_item_id] == true) {
+        update_achv();
+    }
+    
 
     //###10:Bed
     _item_name = "Hammock";
@@ -12425,6 +12737,7 @@ function update_checkItem(this_scene) {
     }
 
     //###197:Nuichan
+    /*
     if (local_items[197] != previous_local_item197) {
         // define async function
         async function _do(scene) {
@@ -12541,6 +12854,7 @@ function update_checkItem(this_scene) {
         }
         _do(this_scene);
     }
+    */
 
     //###200:Presentbox
     //***TODO***
@@ -12594,6 +12908,7 @@ function update_checkItem(this_scene) {
         let _count_fluffy = 0;
         let _count_fluffier = 0;
         let _count_fluffiest = 0;
+        let _count_nui = 0;
         //fluffy
         for (let i = 201; i <= 212; i++) {
             let _count = local_items[i];
@@ -12636,7 +12951,7 @@ function update_checkItem(this_scene) {
         for (let i = 225; i <= 236; i++) {
             let _count = local_items[i];
             if (_count > 0) {
-                let _itemIds = get_itemIds_from_itemType(local_myListsAt_withItemType, i)
+                let _itemIds = get_itemIds_from_itemType(local_myListsAt_withItemType, i);
                 _itemIds.forEach(_itemId => {
                     if (!summoned_fluffies.includes(_itemId)){
                         setTimeout( () => {
@@ -12651,9 +12966,142 @@ function update_checkItem(this_scene) {
                 _count_fluffiest += _count;
             }
         }
+        //nuichan
+        for (let i = 237; i <= 248; i++) {
+            let _count = local_items[i];
+            if (_count > 0) {
+                let _itemIds = get_itemIds_from_itemType(local_myListsAt_withItemType, i);
+                _itemIds.forEach(_itemId => {
+                    _count_nui += 1;
+                    if (!summoned_fluffies.includes(_itemId)){
+                        summon_nuichan(this_scene, _itemId, i, _count_nui);
+                        summoned_fluffies.push(_itemId);
+                    }
+                });
+            }
+            /*
+            // define async function
+            async function _do(scene, _item_type) {
+                // get item194 list, need to wait
+                //let _array_item197 = await get_userItems(summoner, 197);
+                let _array_item197 = await get_userItems(summoner, _item_type);
+                // recreate sprite group
+                try {
+                    group_item197.destroy(true);
+                } catch (error) {
+                }
+                group_item197 = scene.add.group();
+                // create sprite, add group, using array for independency
+                let _array_nui = [];
+                let _array_nui_text = [];
+                let _array_nui_ribbon = [];
+                let _score_max = 0;
+                for (let i = 0; i < _array_item197.length; i++) {
+                    //let _x = 1070 + i*30;
+                    //let _y = 520 + i*30;
+                    let _x = 880 + Math.random()*50;
+                    let _y = 500 + Math.random()*50;
+                    let _item_id = _array_item197[i];
+                    let _pos_local = "pos_item_nui_" + _item_id;
+                    //recover position from localStorage
+                    if (localStorage.getItem(_pos_local) != null && local_owner == local_wallet) {
+                        let _json = localStorage.getItem(_pos_local);
+                        _pos = JSON.parse(_json);
+                        _x = _pos[0];
+                        _y = _pos[1];
+                    }
+                    let _item_nui = await contract_get_item_nui(_item_id);
+                    let _summoner = _item_nui[0];
+                    let _class = _item_nui[1];
+                    let _score = _item_nui[2];
+                    //update active nui_id
+                    if (_score >= _score_max) {
+                        active_nui_id = _item_id;
+                        _score_max = _score;
+                    }
+                    let _exp_rate = _item_nui[3] - 100;
+                    let _summoner_name = await call_name_from_summoner(_summoner);
+                    if (_summoner_name == "") {
+                        _summoner_name = "#" + _summoner;
+                    }
+                    let _text = "";
+                    _text += " id: " + "#" + _array_item197[i] + " \n";
+                    _text +=" crafter: " + _summoner_name + " \n";
+                    _text += " score: " + _score + " \n";
+                    _text += " exp: +" + _exp_rate + "% ";
+                    _array_nui_text[i] = scene.add.text(
+                        _x,
+                        _y+68,
+                        _text,
+                        {font: "15px Arial", fill: "#000000", backgroundColor: "#ffffff"}
+                    ).setOrigin(0.5).setDepth(9999);
+                    _array_nui_text[i].visible = false;
+                    _array_nui[i] = scene.add.sprite(_x, _y, "item_nui")
+                        .setOrigin(0.5)
+                        .setScale(0.38)
+                        .setInteractive({ draggable: true, useHandCursor: true })
+                        .setDepth(_y)
+                        .on("dragstart", () => {
+                            //sound, depth
+                        })
+                        .on("drag", () => {
+                            if (scene.sys.game.scale.gameSize._width == 1280) {
+                                _array_nui[i].x = game.input.activePointer.x;
+                                _array_nui[i].y = game.input.activePointer.y;
+                            } else {
+                                _array_nui[i].x = game.input.activePointer.y;
+                                _array_nui[i].y = 960 - game.input.activePointer.x;
+                            }
+                            _array_nui[i].depth = _array_nui[i].y;
+                            _array_nui_text[i].visible = false;
+                            _array_nui_ribbon[i].x = _array_nui[i].x;
+                            _array_nui_ribbon[i].y = _array_nui[i].y;
+                            _array_nui_ribbon[i].depth = _array_nui[i].depth+1;
+                        })
+                        .on("dragend", () => {
+                            //grand, sound, depth
+                            _array_nui_text[i].x = _array_nui[i].x;
+                            _array_nui_text[i].y = _array_nui[i].y+68;
+                            if (flag_info == 1) {
+                                _array_nui_text[i].visible = true;
+                            }
+                            sound_nui.play();
+                            let _pos = [_array_nui[i].x, _array_nui[i].y];
+                            if (local_owner == local_wallet) {
+                                localStorage.setItem(_pos_local, JSON.stringify(_pos));
+                            }
+                            //attenting
+                            if (
+                                _array_nui[i].x >= 100
+                                && _array_nui[i].x <= 1100
+                                && _array_nui[i].y >= 500
+                                && _array_nui[i].y <= 800
+                            ){
+                                murasakisan.try_attenting(_array_nui[i].x, _array_nui[i].y);
+                            }
+                        })
+                        .on("pointerover", () => {
+                            if (flag_info == 1) {
+                                _array_nui_text[i].visible = true;
+                            }
+                        })
+                        .on("pointerout", () => {
+                            _array_nui_text[i].visible = false;
+                        });
+                    _array_nui_ribbon[i] = scene.add.sprite(_x,_y, "item_nui_ribbon").setOrigin(0.5).setScale(0.38);
+                    _array_nui_ribbon[i].depth = _array_nui[i].y + 1;
+                    //add group
+                    group_item197.add(_array_nui[i]);
+                    group_item197.add(_array_nui_text[i]);
+                    group_item197.add(_array_nui_ribbon[i]);
+                }
+            }
+            _do(this_scene, i);
+            */
+        }
 
         //update fluffy text
-        let _count_nui = local_items[197];        
+        //let _count_nui = local_items[197];        
         let _text = "";
         _text += " fluffy x " + _count_fluffy + "\n";
         _text += " fluffier x " + _count_fluffier + "\n";
@@ -12790,7 +13238,7 @@ function update_checkItem(this_scene) {
     previous_local_item194 = local_items[194];
     previous_local_item195 = local_items[195];
     previous_local_item196 = local_items[196];
-    previous_local_item197 = local_items[197];
+    //previous_local_item197 = local_items[197];
     previous_local_item200 = local_items[200];
     previous_local_rolled_dice = local_rolled_dice;
     previous_local_name_str = local_name_str;

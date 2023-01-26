@@ -22,6 +22,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@openzeppelin/contracts/utils/Base64.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@astarbase/contract/example/IAstarBase.sol";
 */
@@ -2158,7 +2159,9 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable, ReentrancyGuard {
         uint _exp_add = 500 * (100 - _satiety) / 100;
         //for staking counter, sec before boost
         uint _delta_sec = ( _now - ms.last_feeding_time(_summoner) ) * mp.SPEED()/100;
-        //nui boost
+        //achv onChain boost
+        _exp_add = _get_exp_add_from_achv_onChain(_summoner, _exp_add);
+        //nui boost, multiplication with onChain boost
         if (_item_nui > 0) {
             _exp_add = _get_exp_add_from_nui(_summoner, _item_nui, _exp_add);
         }
@@ -2184,6 +2187,13 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable, ReentrancyGuard {
         _update_staking_reward_counter(_summoner, _delta_sec);
         //event
         emit Feeding(_summoner, _exp_add, _critical);
+    }
+    function _get_exp_add_from_achv_onChain(uint _summoner, uint _exp_add) internal view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Achievement_onChain ac = Achievement_onChain(ma.address_Achievement_onChain());
+        uint _percentx100 = ac.get_score(_summoner);
+        _exp_add += _exp_add * _percentx100 / 10000;
+        return _exp_add;
     }
     function _get_exp_add_from_nui(uint _summoner, uint _item_nui, uint _exp_add) internal view returns (uint) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
@@ -2289,6 +2299,8 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable, ReentrancyGuard {
         uint _now = block.timestamp;
         uint _happy = _calc_happy_real(_summoner);
         uint _exp_add = 3000 * (100 - _happy) / 100;
+        //achv onChain boost
+        _exp_add = _get_exp_add_from_achv_onChain(_summoner, _exp_add);
         //nui boost
         if (_item_nui > 0) {
             address _owner = mfs.get_owner(_summoner);
@@ -4281,6 +4293,19 @@ contract Murasaki_Function_Achievement is Ownable {
         }
         return _achievements;
     }
+    
+    //get count of achv
+    function get_countOf_achievement (uint _summoner) external view returns (uint) {
+        uint _count = 0;
+        bool _res;
+        for (uint _achv_id=1; _achv_id<32; _achv_id++) {
+            _res = _check_achievement(_summoner, _achv_id);
+            if (_res == true) {
+                _count += 1;
+            }
+        }
+        return _count;
+    }
 
     //internal, check_achv
     function _check_achievement(uint _summoner, uint _achievement_id) internal view returns (bool) {
@@ -5201,10 +5226,10 @@ contract Achievement_onChain is Ownable {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         address _owner = mfs.get_owner(_summoner);
-        uint _score_token = _get_score_token(_owner);
-        uint _score_nft = _get_score_nft(_owner);
-        uint _score_staking = _get_score_staking(_owner);
-        uint _score_murasaki_nft = _get_score_murasaki_nft(_owner);
+        uint _score_token = get_score_token(_owner);
+        uint _score_nft = get_score_nft(_owner);
+        uint _score_staking = get_score_staking(_owner);
+        uint _score_murasaki_nft = get_score_murasaki_nft(_owner);
         uint _score = _score_token + _score_nft + _score_staking + _score_murasaki_nft;
         return _score;
     }
@@ -5214,10 +5239,10 @@ contract Achievement_onChain is Ownable {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         address _owner = mfs.get_owner(_summoner);
-        uint _score_token = _get_score_token(_owner);
-        uint _score_nft = _get_score_nft(_owner);
-        uint _score_staking = _get_score_staking(_owner);
-        uint _score_murasaki_nft = _get_score_murasaki_nft(_owner);
+        uint _score_token = get_score_token(_owner);
+        uint _score_nft = get_score_nft(_owner);
+        uint _score_staking = get_score_staking(_owner);
+        uint _score_murasaki_nft = get_score_murasaki_nft(_owner);
         uint _score = _score_token + _score_nft + _score_staking + _score_murasaki_nft;
         uint[5] memory _scores = [
             _score, 
@@ -5229,19 +5254,22 @@ contract Achievement_onChain is Ownable {
         return _scores;
     }
     
-    //internal, calc each score, min:0, max:10
-    function _get_score_token(address _owner) internal view returns (uint) {
+    //internal, calc each score, min:0, max:100, 100=1%
+    function get_score_token(address _owner) public view returns (uint) {
         uint _score = 0;
         for (uint i = 1; i <= token_number; i++) {
             ERC20 _token = ERC20(tokens[i]);
             uint _balance = _token.balanceOf(_owner);
             if (_balance > 0) {
-                _score += 1;
+                _score += 10;
             }
+        }
+        if (_score > 100) {
+            _score = 100;
         }
         return _score;
     }
-    function _get_score_nft(address _owner) internal view returns (uint) {
+    function get_score_nft(address _owner) public view returns (uint) {
         uint _score = 0;
         for (uint i = 1; i <= nft_number; i++) {
             ERC721 _nft = ERC721(nfts[i]);
@@ -5250,9 +5278,12 @@ contract Achievement_onChain is Ownable {
                 _score += 1;
             }
         }
+        if (_score > 100) {
+            _score = 100;
+        }
         return _score;
     }
-    function _get_score_staking(address _owner) internal view returns (uint) {
+    function get_score_staking(address _owner) public view returns (uint) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         uint _staker = mfs.calc_dapps_staking_amount(_owner);
@@ -5260,33 +5291,33 @@ contract Achievement_onChain is Ownable {
         if (_staker == 0) {
             _score = 0;
         } else if (_staker < 500) {
-            _score = 1;
-        } else if (_staker < 1000) {
-            _score = 2;
-        } else if (_staker < 2000) {
-            _score = 3;
-        } else if (_staker < 4000) {
-            _score = 4;
-        } else if (_staker < 8000) {
-            _score = 5;
-        } else if (_staker < 16000) {
-            _score = 6;
-        } else if (_staker < 32000) {
-            _score = 7;
-        } else if (_staker < 64000) {
-            _score = 8;
-        } else if (_staker < 128000) {
-            _score = 9;
-        } else if (_staker >= 128000) {
             _score = 10;
+        } else if (_staker < 1000) {
+            _score = 20;
+        } else if (_staker < 2000) {
+            _score = 30;
+        } else if (_staker < 4000) {
+            _score = 40;
+        } else if (_staker < 8000) {
+            _score = 50;
+        } else if (_staker < 16000) {
+            _score = 60;
+        } else if (_staker < 32000) {
+            _score = 70;
+        } else if (_staker < 64000) {
+            _score = 80;
+        } else if (_staker < 128000) {
+            _score = 90;
+        } else if (_staker >= 128000) {
+            _score = 100;
         }
         return _score;
     }
-    function _get_score_murasaki_nft(address _owner) internal view returns (uint) {
+    function get_score_murasaki_nft(address _owner) public view returns (uint) {
         ERC721 _nft = ERC721(address_Murasaki_NFT);
-        uint _score = _nft.balanceOf(_owner);
-        if (_score > 10) {
-            _score = 10;
+        uint _score = _nft.balanceOf(_owner) * 10;
+        if (_score > 100) {
+            _score = 100;
         }
         return _score;
     }
@@ -5732,9 +5763,44 @@ contract Murasaki_Info is Ownable {
         return mp.ELECTED_FLUFFY_TYPE();
     }
     
+    //Achievement_onChain
+    function get_score(uint _summoner) public view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Achievement_onChain ac = Achievement_onChain(ma.address_Achievement_onChain());
+        return ac.get_score(_summoner);
+    }
+    function get_score_token(uint _summoner) public view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Achievement_onChain ac = Achievement_onChain(ma.address_Achievement_onChain());
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
+        address _owner = mfs.get_owner(_summoner);
+        return ac.get_score_token(_owner);
+    }
+    function get_score_nft(uint _summoner) public view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Achievement_onChain ac = Achievement_onChain(ma.address_Achievement_onChain());
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
+        address _owner = mfs.get_owner(_summoner);
+        return ac.get_score_nft(_owner);
+    }
+    function get_score_staking(uint _summoner) public view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Achievement_onChain ac = Achievement_onChain(ma.address_Achievement_onChain());
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
+        address _owner = mfs.get_owner(_summoner);
+        return ac.get_score_staking(_owner);
+    }
+    function get_score_murasaki_nft(uint _summoner) public view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Achievement_onChain ac = Achievement_onChain(ma.address_Achievement_onChain());
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
+        address _owner = mfs.get_owner(_summoner);
+        return ac.get_score_murasaki_nft(_owner);
+    }
+    
     //###dynamic
-    function allDynamicStatus(uint _summoner) external view returns (uint[64] memory) {
-        uint[64] memory _res;
+    function allDynamicStatus(uint _summoner) external view returns (uint[72] memory) {
+        uint[72] memory _res;
         _res[0] = block.number;
         _res[1] = age(_summoner);
         _res[2] = level(_summoner);
@@ -5800,6 +5866,11 @@ contract Murasaki_Info is Ownable {
         _res[61] = crafting_resume_flag(_summoner);
         _res[62] = crafting_resume_item_type(_summoner);
         _res[63] = crafting_resume_item_dc(_summoner);
+        _res[64] = get_score(_summoner);
+        _res[65] = get_score_token(_summoner);
+        _res[66] = get_score_nft(_summoner);
+        _res[67] = get_score_staking(_summoner);
+        _res[68] = get_score_murasaki_nft(_summoner);
         return _res;
     }
     
@@ -5907,6 +5978,11 @@ interface IMurasaki_Info_fromWallet {
     function not_petrified  (address _wallet) external view returns (uint);
     function isActive       (address _wallet) external view returns (uint);
     function inHouse        (address _wallet) external view returns (uint);
+    
+    // Achievement
+    function countOf_achievement (address _wallet) external view returns (uint);
+    // Achievement_onChain
+    function scoreOf_achievement_onChain (address _wallet) external view returns (uint);
 }
 
 
@@ -6120,6 +6196,22 @@ contract Murasaki_Info_fromWallet is Ownable, IMurasaki_Info_fromWallet {
     function city(address _wallet) external view returns (string memory) {
         Murasaki_Info mi = Murasaki_Info(_get_info_address());
         return mi.allStatus(summoner(_wallet))[7];
+    }
+    
+    //achievement
+    function countOf_achievement (address _wallet) external view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Main mm = Murasaki_Main(ma.address_Murasaki_Main());
+        Murasaki_Function_Achievement mfa = Murasaki_Function_Achievement(ma.address_Murasaki_Function_Achievement());
+        uint _summoner = mm.tokenOf(_wallet);
+        return mfa.get_countOf_achievement(_summoner);
+    }
+    function scoreOf_achievement_onChain (address _wallet) external view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Main mm = Murasaki_Main(ma.address_Murasaki_Main());
+        Achievement_onChain ac = Achievement_onChain(ma.address_Achievement_onChain());
+        uint _summoner = mm.tokenOf(_wallet);
+        return ac.get_score(_summoner);
     }
 }
 
@@ -6948,7 +7040,7 @@ contract Admin_Convert is Ownable {
             ) = mcOld.items(uint32(_item_id_256));
             //conver nuichan id, random type
             if (_item_type == 197) {
-                _item_type = _crafted_time % 12 + 236;
+                _item_type = _crafted_time % 12 + 237;
             }
             //uint32 _seed = mcOld.seed(_item_id);
             address _wallet_to = mcOld.ownerOf(_item_id);

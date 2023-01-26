@@ -42,6 +42,7 @@ async function initialize_contract() {
     contract_ma.methods.set_Staking(address_Staking_Wallet).send({from:wallet});
     contract_ma.methods.set_Coder(address_Coder_Wallet).send({from:wallet});
     contract_ma.methods.set_Illustrator(address_Illustrator_Wallet).send({from:wallet});
+    contract_ma.methods.set_Achievement_onChain(address_Achievement_onChain).send({from:wallet});
     contract_mp.methods._add_permitted_address(wallet).send({from:wallet});
     contract_mp.methods._add_permitted_address(address_Fluffy_Festival).send({from:wallet});
     contract_mp.methods._add_permitted_address(address_BufferVault).send({from:wallet});
@@ -79,6 +80,7 @@ async function initialize_contract() {
     contract_mml.methods._set_Murasaki_Address(address_Murasaki_Address).send({from:wallet});
     contract_mll.methods._set_Murasaki_Address(address_Murasaki_Address).send({from:wallet});
     contract_ff.methods._set_Murasaki_Address(address_Murasaki_Address).send({from:wallet});
+    contract_ac.methods._set_Murasaki_Address(address_Murasaki_Address).send({from:wallet});
     
     //Info
     contract_info.methods._set_Murasaki_Address(address_Murasaki_Address).send({from:wallet});
@@ -97,12 +99,37 @@ async function initialize_contract() {
     contract_msn.methods._add_permitted_address(address_Admin_Convert).send({from:wallet});
     contract_mc.methods._add_permitted_address(address_Admin_Convert).send({from:wallet});
     
-    //activate
-    contract_mp.methods._set_isPaused(false).send({from:wallet});
-
     //market
     contract_mmt.methods._set_Murasaki_Address(address_Murasaki_Address).send({from:wallet});
     contract_mc.methods._add_noFee_address(address_Murasaki_Item_Market).send({from:wallet});
+    
+    //achievement_onChain, with dummy address
+    contract_ac.methods._set_tokens(1, "0xF458Fd09b0ceFd288B98A43D987B8F1A1C3a7BBF").send({from:wallet});
+    contract_ac.methods._set_tokens(2, "0xF458Fd09b0ceFd288B98A43D987B8F1A1C3a7BBF").send({from:wallet});
+    contract_ac.methods._set_tokens(3, "0xF458Fd09b0ceFd288B98A43D987B8F1A1C3a7BBF").send({from:wallet});
+    contract_ac.methods._set_tokens(4, "0xF458Fd09b0ceFd288B98A43D987B8F1A1C3a7BBF").send({from:wallet});
+    contract_ac.methods._set_tokens(5, "0xF458Fd09b0ceFd288B98A43D987B8F1A1C3a7BBF").send({from:wallet});
+    contract_ac.methods._set_tokens(6, "0xF458Fd09b0ceFd288B98A43D987B8F1A1C3a7BBF").send({from:wallet});
+    contract_ac.methods._set_tokens(7, "0xF458Fd09b0ceFd288B98A43D987B8F1A1C3a7BBF").send({from:wallet});
+    contract_ac.methods._set_tokens(8, "0xF458Fd09b0ceFd288B98A43D987B8F1A1C3a7BBF").send({from:wallet});
+    contract_ac.methods._set_tokens(9, "0xF458Fd09b0ceFd288B98A43D987B8F1A1C3a7BBF").send({from:wallet});
+    contract_ac.methods._set_tokens(10, "0xF458Fd09b0ceFd288B98A43D987B8F1A1C3a7BBF").send({from:wallet});
+    contract_ac.methods._set_token_number(10).send({from:wallet});    
+    contract_ac.methods._set_nfts(1, "0xF458Fd09b0ceFd288B98A43D987B8F1A1C3a7BBF").send({from:wallet});
+    contract_ac.methods._set_nfts(2, "0xF458Fd09b0ceFd288B98A43D987B8F1A1C3a7BBF").send({from:wallet});
+    contract_ac.methods._set_nfts(3, "0xF458Fd09b0ceFd288B98A43D987B8F1A1C3a7BBF").send({from:wallet});
+    contract_ac.methods._set_nfts(4, "0xF458Fd09b0ceFd288B98A43D987B8F1A1C3a7BBF").send({from:wallet});
+    contract_ac.methods._set_nfts(5, "0xF458Fd09b0ceFd288B98A43D987B8F1A1C3a7BBF").send({from:wallet});
+    contract_ac.methods._set_nfts(6, "0xF458Fd09b0ceFd288B98A43D987B8F1A1C3a7BBF").send({from:wallet});
+    contract_ac.methods._set_nfts(7, "0xF458Fd09b0ceFd288B98A43D987B8F1A1C3a7BBF").send({from:wallet});
+    contract_ac.methods._set_nfts(8, "0xF458Fd09b0ceFd288B98A43D987B8F1A1C3a7BBF").send({from:wallet});
+    contract_ac.methods._set_nfts(9, "0xF458Fd09b0ceFd288B98A43D987B8F1A1C3a7BBF").send({from:wallet});
+    contract_ac.methods._set_nfts(10, "0xF458Fd09b0ceFd288B98A43D987B8F1A1C3a7BBF").send({from:wallet});
+    contract_ac.methods._set_nft_number(10).send({from:wallet});    
+    contract_ac.methods._set_Murasaki_NFT("0xF458Fd09b0ceFd288B98A43D987B8F1A1C3a7BBF").send({from:wallet});    
+
+    //activate
+    contract_mp.methods._set_isPaused(false).send({from:wallet});
 }
 
 
