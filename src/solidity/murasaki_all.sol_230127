@@ -2119,8 +2119,6 @@ contract Murasaki_Function_Summon_and_LevelUp is Ownable, ReentrancyGuard {
             ms.set_next_exp_required(_summoner, 171000);
         }else if (_next_level == 19) {
             ms.set_next_exp_required(_summoner, 190000);
-        }else if (_next_level == 20) {
-            ms.set_next_exp_required(_summoner, 9999999);
         }
         //event
         emit Level_up(_summoner, _next_level);
@@ -5322,84 +5320,6 @@ contract Achievement_onChain is Ownable {
             _score = 100;
         }
         return _score;
-    }
-}
-
-
-//---Murasaki_Music
-
-contract Murasaki_Music is Ownable, ReentrancyGuard {
-
-    //address
-    address public address_Murasaki_Address;
-    function _set_Murasaki_Address(address _address) external onlyOwner {
-        address_Murasaki_Address = _address;
-    }
-
-    //storage
-    mapping(uint => uint) public exp_clarinet;
-    mapping(uint => uint) public exp_piano;
-    mapping(uint => uint) public exp_violin;
-    mapping(uint => uint) public practice_status;
-    mapping(uint => uint) public practice_item_id;
-    mapping(uint => uint) public practice_start_time;
-    
-    //start practice
-    function start_practice(uint _summoner, uint _item_id) external nonReentrant {
-        require(_check_summoner(_summoner));
-        require(_check_item(_item_id));
-        require(practice_status[_summoner] == 0);
-        practice_status[_summoner] = 1;
-        practice_item_id[_summoner] = _item_id;
-        practice_start_time[_summoner] = block.timestamp;
-    }
-    
-    //stop practice
-    function stop_practice(uint _summoner) external nonReentrant {
-        require(check_summoner(_summoner));
-        require(practice_status[_summoner] == 1);
-        practice_status[_summoner] = 0;
-        uint _delta_sec = block.timestamp - practice_start_time[_summoner];
-        _delta_sec = _get_modified_delta_sec(_summoner, _delta_sec);
-        uint _item_type = _get_item_type(practice_item_id[_summoner]);
-        if (_item_type == 1) {
-            exp_clarinet[_summoner] += _delta_sec;
-        } else if (_item_type == 2) {
-            exp_piano[_summoner] += _delta_sec;
-        } else if (_item_type == 3) {
-            exp_violin[_summoner] += _delta_sec;
-        }
-        //reset parameters
-        practice_item_id[_summoner] = 0;
-        practice_start_time[_summoner] = 0;
-    }
-    
-    //internal: check summoner/item, calc modified delta_sec
-    function _check_summoner(uint _summoner) internal view returns (bool) {
-        //wallet owner
-        //not working
-        //happy, satiety
-        return true;
-    }
-    function _check_item(uint _item_id) internal view returns (bool) {
-        //item_type
-        //item owner
-        return true;
-    }
-    function _get_modified_delta_sec(uint _summoner, uint _delta_sec) internal view returns (uint) {
-        // STR/DEX/INT?
-        // fluffy?
-        return _delta_sec;
-    }
-    
-    //get practice level
-    function get_practiceLevel_clarinet (uint _summoner) external view returns (uint) {
-        return _calc_level_from_exp(exp_clarinet[_summoner]);
-    }
-    
-    //internal: calc level from exp
-    function _calc_level_from_exp(uint _exp) internal view returns (uint) {
-        
     }
 }
 

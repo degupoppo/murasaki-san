@@ -1,4 +1,73 @@
 
+//eventMonitor
+async function eventMonitor(_contract, li_eventLog) {
+    (async () => {
+        _contract.events.allEvents({}, (err, event) => {
+            let _json_string = JSON.stringify(event, null, "    ");
+            let _json = JSON.parse(_json_string);
+            //console.log(_json);
+            let _blockNumber = _json.blockNumber;
+            let _event = _json.event;
+            let _hash = _json.transactionHash;
+            let _res = [_blockNumber, _event, _hash];
+            for (let i=0; i<=5; i++) {
+                let _eventRaw = _json.returnValues[i]
+                if (typeof(_eventRaw) != "undefined") {
+                    _res.push(_eventRaw);
+                }
+            }
+            console.log(_res);
+            li_eventLog.push(_res);
+        });
+    })();
+}
+function start_eventMonitor() {
+    //global variant
+    li_eventLog = [];
+    eventMonitor(contract_mfsl_wss, li_eventLog);
+    eventMonitor(contract_mffg_wss, li_eventLog);
+    eventMonitor(contract_mfmf_wss, li_eventLog);
+    eventMonitor(contract_mfc_wss, li_eventLog);
+    eventMonitor(contract_mfc2_wss, li_eventLog);
+    eventMonitor(contract_mfn_wss, li_eventLog);
+    eventMonitor(contract_md_wss, li_eventLog);
+    eventMonitor(contract_mml_wss, li_eventLog);
+    eventMonitor(contract_ff_wss, li_eventLog);
+    eventMonitor(contract_bt_wss, li_eventLog);
+}
+function _show_realtimeLog() {
+    //override text
+    let _target = document.getElementById("realtimeLog");
+    let _text_pre = "";
+    _text_pre += '<code><font color="gray">';
+    _text_pre += "&nbsp;&nbsp;&nbsp;&nbsp;Now monitoring (no events yet)...";
+    _text_pre += "</font></code>";
+    _target.innerHTML = _text_pre;
+    start_eventMonitor();
+    function _do() {
+        let _text = '<code><font color="gray">';
+        let _target = document.getElementById("realtimeLog");
+        if (li_eventLog.length > 0) {
+            _text += "";
+            for (let i=0; i<li_eventLog.length && i<=10; i++) {
+                let _eventLog = li_eventLog[li_eventLog.length - 1 - i];
+                let _blockNumber = _eventLog[0];
+                let _event = _eventLog[1];
+                let _summoner = _eventLog[3];
+                let __text = "";
+                __text += "&nbsp;&nbsp;&nbsp;&nbsp;";
+                __text += 'block_no:<b><font color="blue">' + _blockNumber + "</font></b>, ";
+                __text += 'murasaki_id:<b><font color="blue">#' + _summoner + "</font></b>, ";
+                __text += 'action:<b><font color="blue">' + _event + "</font></b><br>";
+                _text += __text;
+            }
+            _text += "</font></code>";
+            _target.innerHTML = _text;
+        }
+    }
+    setInterval(_do, 5000);
+}
+
 
 //get info
 async function total_summoned() {
