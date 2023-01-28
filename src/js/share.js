@@ -84,7 +84,7 @@ async function init_web3(){
     address_Murasaki_Function_Mining_and_Farming = '0x8fc8474B2eCA6CA56100aFD3ab09512cc9D7EC13';
     address_Murasaki_Function_Name = '0x62790e6dd1FbF2CdA6e71171e36963e0b0A5bd0A';
     address_Murasaki_Function_Share = '0xBBb6B50702dB7361d56e84b5b30D77Bb7F3D7770';
-    address_Murasaki_Function_Summon_and_LevelUp = '0x2c69383C28dd1fb5A68E300333d3ceae354c345C';
+    address_Murasaki_Function_Summon_and_LevelUp = '0xFd7E3D3b26bE0B69Cdd51CF21B2f5180316e31C3';
     address_Murasaki_Info = '0xEe563128df8Ec10Cda2b700A318f83d276623F29';
     address_Murasaki_Info_fromWallet = '0x78D942E7C8Cca4C8ae6622b6AAbb3b4CaCBB8012';
     address_Murasaki_Lootlike = '0x0E5fC80852B61Dac716d8d6a3668BC57cCB9F4fb';
