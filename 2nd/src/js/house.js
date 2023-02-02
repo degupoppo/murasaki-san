@@ -2889,7 +2889,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
                 this.moving_degree = 360 - this.moving_degree;
             }
             //determine speed, count
-            this.moving_speed = 0.6 + Math.random() * 0.4;  //0.5-0.8
+            this.moving_speed = 0.5 + Math.random() * 0.4;  //0.5-0.8
             this.moving_count = 70 + Math.random() * 30;    //70-100
             //determine left or right
             if (this.moving_degree > 90 && this.moving_degree <= 270) {
