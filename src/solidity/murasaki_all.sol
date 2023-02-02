@@ -1080,6 +1080,7 @@ contract Murasaki_Address is Ownable {
     address public address_Coder_Wallet;
     address public address_Illustrator_Wallet;
     address public address_Achievement_onChain;
+    address public address_Murasaki_Function_Music_Practice;
     
     function set_Murasaki_Main(address _address) external onlyOwner {
         address_Murasaki_Main = _address;
@@ -1170,6 +1171,9 @@ contract Murasaki_Address is Ownable {
     }
     function set_Achievement_onChain(address _address) external onlyOwner {
         address_Achievement_onChain = _address;
+    }
+    function set_Murasaki_Function_Music_Practice(address _address) external onlyOwner {
+        address_Murasaki_Function_Music_Practice = _address;
     }
 }
 
@@ -1303,6 +1307,14 @@ contract Murasaki_Storage is Ownable {
     mapping(uint => uint) public crafting_resume_flag;
     mapping(uint => uint) public crafting_resume_item_type;
     mapping(uint => uint) public crafting_resume_item_dc;
+    
+    //music
+    mapping(uint => uint) public exp_clarinet;
+    mapping(uint => uint) public exp_piano;
+    mapping(uint => uint) public exp_violin;
+    mapping(uint => uint) public practice_status;
+    mapping(uint => uint) public practice_item_id;
+    mapping(uint => uint) public practice_start_time;
 
     //modifier
     modifier onlyPermitted {
@@ -1409,6 +1421,24 @@ contract Murasaki_Storage is Ownable {
     }
     function set_crafting_resume_item_dc(uint _summoner, uint _value) external onlyPermitted {
         crafting_resume_item_dc[_summoner] = _value;
+    }
+    function set_exp_clarinet(uint _summoner, uint _value) external onlyPermitted {
+        exp_clarinet[_summoner] = _value;
+    }
+    function set_exp_piano(uint _summoner, uint _value) external onlyPermitted {
+        exp_piano[_summoner] = _value;
+    }
+    function set_exp_violin(uint _summoner, uint _value) external onlyPermitted {
+        exp_violin[_summoner] = _value;
+    }
+    function set_practice_status(uint _summoner, uint _value) external onlyPermitted {
+        practice_status[_summoner] = _value;
+    }
+    function set_practice_item_id(uint _summoner, uint _value) external onlyPermitted {
+        practice_item_id[_summoner] = _value;
+    }
+    function set_practice_start_time(uint _summoner, uint _value) external onlyPermitted {
+        practice_start_time[_summoner] = _value;
     }
 }
 
@@ -2297,7 +2327,12 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable, ReentrancyGuard {
         require(ms.inHouse(_summoner));
         require(mfs.check_owner(_summoner, msg.sender));
         require(not_petrified(_summoner));
-        require(ms.mining_status(_summoner) == 0 && ms.farming_status(_summoner) == 0 && ms.crafting_status(_summoner) == 0);
+        require(
+            ms.mining_status(_summoner) == 0 
+            && ms.farming_status(_summoner) == 0 
+            && ms.crafting_status(_summoner) == 0
+            && ms.practice_status(_summoner) == 0
+        );
         uint _now = block.timestamp;
         uint _happy = _calc_happy_real(_summoner);
         uint _exp_add = 3000 * (100 - _happy) / 100;
@@ -2386,7 +2421,12 @@ contract Murasaki_Function_Mining_and_Farming is Ownable, ReentrancyGuard {
         require(mp.isPaused() == false);
         require(ms.inHouse(_summoner));
         require(mfs.check_owner(_summoner, msg.sender));
-        require(ms.mining_status(_summoner) == 0 && ms.farming_status(_summoner) == 0 && ms.crafting_status(_summoner) == 0);
+        require(
+            ms.mining_status(_summoner) == 0 
+            && ms.farming_status(_summoner) == 0 
+            && ms.crafting_status(_summoner) == 0
+            && ms.practice_status(_summoner) == 0
+        );
         require(mfs.calc_satiety(_summoner) >= 10 && mfs.calc_happy(_summoner) >= 10);
         require(ms.level(_summoner) >= 2);
         uint _now = block.timestamp;
@@ -2500,7 +2540,12 @@ contract Murasaki_Function_Mining_and_Farming is Ownable, ReentrancyGuard {
         require(mp.isPaused() == false);
         require(ms.inHouse(_summoner));
         require(mfs.check_owner(_summoner, msg.sender));
-        require(ms.mining_status(_summoner) == 0 && ms.farming_status(_summoner) == 0 && ms.crafting_status(_summoner) == 0);
+        require(
+            ms.mining_status(_summoner) == 0 
+            && ms.farming_status(_summoner) == 0 
+            && ms.crafting_status(_summoner) == 0
+            && ms.practice_status(_summoner) == 0
+        );
         require(mfs.calc_satiety(_summoner) >= 10 && mfs.calc_happy(_summoner) >= 10);
         require(ms.level(_summoner) >= 2);
         uint _now = block.timestamp;
@@ -2699,8 +2744,12 @@ contract Murasaki_Function_Crafting is Ownable, ReentrancyGuard {
         require(mfs.check_owner(_summoner, msg.sender));
         require(ms.level(_summoner) >= 3);
         require(mfs.calc_satiety(_summoner) >= 10 && mfs.calc_happy(_summoner) >= 10);
-        require(ms.mining_status(_summoner) == 0 && ms.farming_status(_summoner) == 0);
-        require(ms.crafting_status(_summoner) == 0);
+        require(
+            ms.mining_status(_summoner) == 0 
+            && ms.farming_status(_summoner) == 0 
+            && ms.crafting_status(_summoner) == 0
+            && ms.practice_status(_summoner) == 0
+        );
         require(ms.crafting_resume_flag(_summoner) == 0);        
         //check item_type
         require(_item_type > 0);
@@ -3040,12 +3089,12 @@ contract Murasaki_Function_Crafting2 is Ownable, ReentrancyGuard {
         uint _item4,
         uint _item5
     ) external nonReentrant {
-        _check_summoner(_summoner);
-        _check_items(_item1, _item2, _item3, _item4, _item5);
+        _check_summoner(_summoner, msg.sender);
+        _check_items(_item1, _item2, _item3, _item4, _item5, msg.sender);
         uint _sourceItemType = _get_sourceItemType(_item1);
         uint _targetItemType = _get_targetItemType(_item1);
         _burn_sourceItems(_item1, _item2, _item3, _item4, _item5);
-        _mint_item(_summoner, _targetItemType, _sourceItemType);
+        _mint_item(_summoner, _targetItemType, _sourceItemType, msg.sender);
         uint _present_itemNo = _get_present_itemNo();
         //if (_targetItemType == 197) {
         if (_targetItemType >= 237) {
@@ -3053,17 +3102,18 @@ contract Murasaki_Function_Crafting2 is Ownable, ReentrancyGuard {
         }
         emit Upgrade_Fluffy(_summoner, _targetItemType, _present_itemNo);        
     }
-    function _check_summoner(uint _summoner) internal view returns (bool) {
+    function _check_summoner(uint _summoner, address _wallet) internal view returns (bool) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
-        return mfs.check_owner(_summoner, msg.sender);
+        return mfs.check_owner(_summoner, _wallet);
     }
     function _check_items(
         uint _item1, 
         uint _item2, 
         uint _item3, 
         uint _item4, 
-        uint _item5
+        uint _item5,
+        address _wallet
     ) internal view returns (bool) {
         uint _sourceItemType = _get_sourceItemType(_item1);
         uint _targetItemType = _get_targetItemType(_item1);
@@ -3071,36 +3121,36 @@ contract Murasaki_Function_Crafting2 is Ownable, ReentrancyGuard {
         require(201 <= _sourceItemType && _sourceItemType <= 236);
         //when fluffy x5 -> fluffier, require 5 items
         if (213 <= _targetItemType && _targetItemType <= 224) {
-            require(_check_item(_item1, _sourceItemType));
-            require(_check_item(_item2, _sourceItemType));
-            require(_check_item(_item3, _sourceItemType));
-            require(_check_item(_item4, _sourceItemType));
-            require(_check_item(_item5, _sourceItemType));
+            require(_check_item(_item1, _sourceItemType, _wallet));
+            require(_check_item(_item2, _sourceItemType, _wallet));
+            require(_check_item(_item3, _sourceItemType, _wallet));
+            require(_check_item(_item4, _sourceItemType, _wallet));
+            require(_check_item(_item5, _sourceItemType, _wallet));
         //when fluffier x4 -> fluffiest, require 4 items
         } else if (224 <= _targetItemType && _targetItemType <= 236) {
-            require(_check_item(_item1, _sourceItemType));
-            require(_check_item(_item2, _sourceItemType));
-            require(_check_item(_item3, _sourceItemType));
-            require(_check_item(_item4, _sourceItemType));
+            require(_check_item(_item1, _sourceItemType, _wallet));
+            require(_check_item(_item2, _sourceItemType, _wallet));
+            require(_check_item(_item3, _sourceItemType, _wallet));
+            require(_check_item(_item4, _sourceItemType, _wallet));
             require(_item5 == 0);
         //when fluffiest x3 -> nuichan, require 3 items
         //} else if (_targetItemType == 197) {
         } else if (_targetItemType >= 237) {
-            require(_check_item(_item1, _sourceItemType));
-            require(_check_item(_item2, _sourceItemType));
-            require(_check_item(_item3, _sourceItemType));
+            require(_check_item(_item1, _sourceItemType, _wallet));
+            require(_check_item(_item2, _sourceItemType, _wallet));
+            require(_check_item(_item3, _sourceItemType, _wallet));
             require(_item4 == 0);
             require(_item5 == 0);
         }
         return true;
     }
-    function _check_item(uint _item, uint _sourceItemType) internal view returns (bool) {
+    function _check_item(uint _item, uint _sourceItemType, address _wallet) internal view returns (bool) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         Murasaki_Craft mc = Murasaki_Craft(ma.address_Murasaki_Craft());
         (uint _itemType, , , ,) = mc.items(_item);
         require(_itemType == _sourceItemType);
-        require(mfs.check_owner_ofItem(_item, msg.sender));
+        require(mfs.check_owner_ofItem(_item, _wallet));
         return true;
     }
     function _get_sourceItemType(uint _sourceItem) internal view returns (uint) {
@@ -3142,14 +3192,15 @@ contract Murasaki_Function_Crafting2 is Ownable, ReentrancyGuard {
     function _mint_item(
         uint _summoner,
         uint _targetItemType,
-        uint _sourceItemType
+        uint _sourceItemType,
+        address _wallet
     ) internal {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         Murasaki_Craft mc = Murasaki_Craft(ma.address_Murasaki_Craft());
         uint _seed = mfs.seed(_summoner);
         string memory _memo = toString(_sourceItemType);    //memo source fluffy type
-        mc.craft(_targetItemType, _summoner, msg.sender, _seed, _memo);
+        mc.craft(_targetItemType, _summoner, _wallet, _seed, _memo);
     }
     function _get_present_itemNo() internal view returns (uint) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
@@ -3237,7 +3288,7 @@ contract Murasaki_Function_Crafting2 is Ownable, ReentrancyGuard {
         mss.set_total_exp_gained(_summoner, _total_exp_gained);
     }
     //mint precious
-    event Precious(uint indexed _summoner_to, uint _summoner_from, uint _item_type);
+    event Fluffy(uint indexed _summoner_to, uint _summoner_from, uint _item_type);
     function _mint_precious(uint _summoner_to, uint _summoner_from, address _wallet_to) internal {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
@@ -3252,7 +3303,7 @@ contract Murasaki_Function_Crafting2 is Ownable, ReentrancyGuard {
         uint _total_precious_received = mss.total_precious_received(_summoner_to);
         mss.set_total_precious_received(_summoner_to, _total_precious_received + 1);
         //event
-        emit Precious(_summoner_to, _summoner_from, _item_type);
+        emit Fluffy(_summoner_to, _summoner_from, _item_type);
     }
 }
 
@@ -4419,6 +4470,148 @@ contract Murasaki_Function_Achievement is Ownable {
 }
 
 
+//---Music_Practice
+contract Murasaki_Function_Music_Practice is Ownable, ReentrancyGuard {
+
+    //address
+    address public address_Murasaki_Address;
+    function _set_Murasaki_Address(address _address) external onlyOwner {
+        address_Murasaki_Address = _address;
+    }
+    
+    //item types
+    //***TODO*** item_type
+    uint item_type_clarinet = 1;
+    uint item_type_piano = 2;
+    uint item_type_violin = 3;
+    uint required_level = 5;
+    
+    //admin modify item types
+    function _set_item_type_clarinet(uint _value) external onlyOwner {
+        item_type_clarinet = _value;
+    }
+    function _set_item_type_piano(uint _value) external onlyOwner {
+        item_type_piano = _value;
+    }
+    function _set_item_type_violin(uint _value) external onlyOwner {
+        item_type_violin = _value;
+    }
+    function _set_required_level(uint _value) external onlyOwner {
+        required_level = _value;
+    }
+
+    //start practice
+    function start_practice(uint _summoner, uint _item_id) external nonReentrant {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
+        Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
+        require(_check_summoner(_summoner, msg.sender));
+        require(_check_item(_item_id, msg.sender));
+        require(
+            ms.mining_status(_summoner) == 0 
+            && ms.farming_status(_summoner) == 0 
+            && ms.crafting_status(_summoner) == 0
+            && ms.practice_status(_summoner) == 0
+        );
+        require(mfs.calc_satiety(_summoner) >= 10 && mfs.calc_happy(_summoner) >= 10);
+        require(ms.level(_summoner) >= required_level);
+        ms.set_practice_status(_summoner, 1);
+        ms.set_practice_item_id(_summoner, _item_id);
+        ms.set_practice_start_time(_summoner, block.timestamp);
+    }
+    
+    //stop practice
+    function stop_practice(uint _summoner) external nonReentrant {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
+        require(_check_summoner(_summoner, msg.sender));
+        require(ms.practice_status(_summoner) == 1);
+        ms.set_practice_status(_summoner, 0);
+        uint _delta_sec = block.timestamp - ms.practice_start_time(_summoner);
+        _delta_sec = _get_modified_delta_sec(_summoner, _delta_sec);
+        uint _item_type = _get_item_type(ms.practice_item_id(_summoner));
+        if (_item_type == item_type_clarinet) {
+            ms.set_exp_clarinet(_summoner, ms.exp_clarinet(_summoner) + _delta_sec);
+        } else if (_item_type == item_type_piano) {
+            ms.set_exp_piano(_summoner, ms.exp_piano(_summoner) + _delta_sec);
+        } else if (_item_type == item_type_violin) {
+            ms.set_exp_violin(_summoner, ms.exp_violin(_summoner) + _delta_sec);
+        }
+        //reset parameters
+        ms.set_practice_item_id(_summoner, 0);
+        ms.set_practice_start_time(_summoner, 0);
+    }
+    
+    //internal: get item_type
+    function _get_item_type(uint _item_id) internal view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Craft mc = Murasaki_Craft(ma.address_Murasaki_Craft());
+        (uint _item_type, , , ,) = mc.items(_item_id);
+        return _item_type;
+    }
+    
+    //internal: check summoner
+    function _check_summoner(uint _summoner, address _wallet) internal view returns (bool) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
+        Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
+        Murasaki_Parameter mp = Murasaki_Parameter(ma.address_Murasaki_Parameter());
+        require(mp.isPaused() == false);
+        require(ms.inHouse(_summoner));
+        require(mfs.check_owner(_summoner, _wallet));
+        require(mfs.not_petrified(_summoner));
+        return true;
+    }
+    
+    //internal: check item
+    function _check_item(uint _item_id, address _wallet) internal view returns (bool) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
+        Murasaki_Craft mc = Murasaki_Craft(ma.address_Murasaki_Craft());
+        require(mfs.check_owner_ofItem(_item_id, _wallet));
+        (uint _item_type, , , ,) = mc.items(_item_id);
+        require(
+            _item_type == item_type_clarinet
+            || _item_type == item_type_piano
+            || _item_type == item_type_violin
+        );
+        return true;
+    }
+    
+    //internal: get modified delta_sec
+    function _get_modified_delta_sec(uint _summoner, uint _delta_sec) internal view returns (uint) {
+        //***TODO*** modify of delta_sec
+        // STR/DEX/INT?
+        // fluffy?
+        return _delta_sec;
+    }
+    
+    //get practice level of each instrument
+    function get_practiceLevel_clarinet (uint _summoner) external view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
+        return _calc_level_from_exp(ms.exp_clarinet(_summoner));
+    }
+    function get_practiceLevel_piano (uint _summoner) external view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
+        return _calc_level_from_exp(ms.exp_piano(_summoner));
+    }
+    function get_practiceLevel_violin (uint _summoner) external view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
+        return _calc_level_from_exp(ms.exp_violin(_summoner));
+    }
+    
+    //internal: calc level from exp
+    function _calc_level_from_exp(uint _exp) internal view returns (uint) {
+        //***TODO*** calc level
+        uint _level = 1 + _exp / 1000;
+        return _level;
+    }
+}
+
+
 //===Independent==================================================================================================================
 
 
@@ -5324,85 +5517,6 @@ contract Achievement_onChain is Ownable {
         return _score;
     }
 }
-
-
-//---Murasaki_Music
-/*
-contract Murasaki_Music is Ownable, ReentrancyGuard {
-
-    //address
-    address public address_Murasaki_Address;
-    function _set_Murasaki_Address(address _address) external onlyOwner {
-        address_Murasaki_Address = _address;
-    }
-
-    //storage
-    mapping(uint => uint) public exp_clarinet;
-    mapping(uint => uint) public exp_piano;
-    mapping(uint => uint) public exp_violin;
-    mapping(uint => uint) public practice_status;
-    mapping(uint => uint) public practice_item_id;
-    mapping(uint => uint) public practice_start_time;
-    
-    //start practice
-    function start_practice(uint _summoner, uint _item_id) external nonReentrant {
-        require(_check_summoner(_summoner));
-        require(_check_item(_item_id));
-        require(practice_status[_summoner] == 0);
-        practice_status[_summoner] = 1;
-        practice_item_id[_summoner] = _item_id;
-        practice_start_time[_summoner] = block.timestamp;
-    }
-    
-    //stop practice
-    function stop_practice(uint _summoner) external nonReentrant {
-        require(check_summoner(_summoner));
-        require(practice_status[_summoner] == 1);
-        practice_status[_summoner] = 0;
-        uint _delta_sec = block.timestamp - practice_start_time[_summoner];
-        _delta_sec = _get_modified_delta_sec(_summoner, _delta_sec);
-        uint _item_type = _get_item_type(practice_item_id[_summoner]);
-        if (_item_type == 1) {
-            exp_clarinet[_summoner] += _delta_sec;
-        } else if (_item_type == 2) {
-            exp_piano[_summoner] += _delta_sec;
-        } else if (_item_type == 3) {
-            exp_violin[_summoner] += _delta_sec;
-        }
-        //reset parameters
-        practice_item_id[_summoner] = 0;
-        practice_start_time[_summoner] = 0;
-    }
-    
-    //internal: check summoner/item, calc modified delta_sec
-    function _check_summoner(uint _summoner) internal view returns (bool) {
-        //wallet owner
-        //not working
-        //happy, satiety
-        return true;
-    }
-    function _check_item(uint _item_id) internal view returns (bool) {
-        //item_type
-        //item owner
-        return true;
-    }
-    function _get_modified_delta_sec(uint _summoner, uint _delta_sec) internal view returns (uint) {
-        // STR/DEX/INT?
-        // fluffy?
-        return _delta_sec;
-    }
-    
-    //get practice level
-    function get_practiceLevel_clarinet (uint _summoner) external view returns (uint) {
-        return _calc_level_from_exp(exp_clarinet[_summoner]);
-    }
-    
-    //internal: calc level from exp
-    function _calc_level_from_exp(uint _exp) internal view returns (uint) {
-        
-    }
-}
-*/
 
 
 //===Info==================================================================================================================

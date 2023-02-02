@@ -93,7 +93,7 @@ contract ERC721 is IERC721 {
             むらさきさんの一人遊び用趣味
             3種類の楽器ごとに異なる習熟レベルを設定する
             楽器を指定した「れんしゅう」で習熟レベルを上げられる
-                習熟レベルの増加は遅くするか、MAXレベルを大きくする
+                習熟レベルの増加は遅くするか、MAXレベルをかなり大きくする
             「れんしゅう」中の経験値はすべて楽器経験値へ転換される
                 れんしゅうした分は本体のExpが全く増えない仕様とする
                 Feedingはどうするか
@@ -13823,7 +13823,7 @@ let config = {
     scene: [FirstCheck, Loading, Loading_overlap, Opeaning, SomethingWrong, Main],
     fps: {
         target: 50,
-        forceSetTimeOut: true
+        //forceSetTimeOut: true
     },
     //nedd for rexUI plugin
     dom: {
