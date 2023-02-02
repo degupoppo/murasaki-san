@@ -88,7 +88,11 @@ contract ERC721 is IERC721 {
 
 //### 1st
 
-    バグ修正
+    Practice expの加算修正
+        practice sec分はfeeding, groomingのsecとして加算しない
+        コードの実装が大変か
+
+ ok バグ修正
         ぬいちゃんクラフトのアイコン修正
 
     楽器練習の実装
