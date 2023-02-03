@@ -88,12 +88,19 @@ contract ERC721 is IERC721 {
 
 //### 1st
 
-    Practice expの加算修正
+ ok Practice expの加算修正
         practice sec分はfeeding, groomingのsecとして加算しない
         コードの実装が大変か
+        → 他のworkingと同様に、groomingのみ加算させない
+            Feedingは影響を与えない
 
  ok バグ修正
         ぬいちゃんクラフトのアイコン修正
+
+    楽器練習のUI実装
+        専用ボタンの実装
+        summonerクラスにモード実装
+        楽器選択のUIをどうするか。
 
     楽器練習の実装
         意味論
@@ -12653,7 +12660,7 @@ function update_checkItem(this_scene) {
     }
 
     //###38:Ukrere
-    _item_name = "Ukrere";
+    _item_name = "Clarinet";
     _item_id = dic_items[_item_name]["item_id"];
     if (
         (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)

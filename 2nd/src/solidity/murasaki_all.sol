@@ -1312,6 +1312,9 @@ contract Murasaki_Storage is Ownable {
     mapping(uint => uint) public exp_clarinet;
     mapping(uint => uint) public exp_piano;
     mapping(uint => uint) public exp_violin;
+    mapping(uint => uint) public exp_horn;
+    mapping(uint => uint) public exp_timpani;
+    mapping(uint => uint) public exp_cello;
     mapping(uint => uint) public practice_status;
     mapping(uint => uint) public practice_item_id;
     mapping(uint => uint) public practice_start_time;
@@ -1430,6 +1433,15 @@ contract Murasaki_Storage is Ownable {
     }
     function set_exp_violin(uint _summoner, uint _value) external onlyPermitted {
         exp_violin[_summoner] = _value;
+    }
+    function set_exp_horn(uint _summoner, uint _value) external onlyPermitted {
+        exp_horn[_summoner] = _value;
+    }
+    function set_exp_timpani(uint _summoner, uint _value) external onlyPermitted {
+        exp_timpani[_summoner] = _value;
+    }
+    function set_exp_cello(uint _summoner, uint _value) external onlyPermitted {
+        exp_cello[_summoner] = _value;
     }
     function set_practice_status(uint _summoner, uint _value) external onlyPermitted {
         practice_status[_summoner] = _value;
@@ -3089,10 +3101,11 @@ contract Murasaki_Function_Crafting2 is Ownable, ReentrancyGuard {
         uint _item4,
         uint _item5
     ) external nonReentrant {
-        _check_summoner(_summoner, msg.sender);
-        _check_items(_item1, _item2, _item3, _item4, _item5, msg.sender);
+        require(_check_summoner(_summoner, msg.sender));
+        require(_check_items(_item1, _item2, _item3, _item4, _item5, msg.sender));
         uint _sourceItemType = _get_sourceItemType(_item1);
         uint _targetItemType = _get_targetItemType(_item1);
+        _pay_cost(_summoner, _targetItemType);
         _burn_sourceItems(_item1, _item2, _item3, _item4, _item5);
         _mint_item(_summoner, _targetItemType, _sourceItemType, msg.sender);
         uint _present_itemNo = _get_present_itemNo();
@@ -3917,6 +3930,8 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
 
     //item name
     string[256] public item_name_table = [
+    
+        //***TODO*** need mod
 
         //1-16
         "Nameplate",
@@ -4484,6 +4499,9 @@ contract Murasaki_Function_Music_Practice is Ownable, ReentrancyGuard {
     uint item_type_clarinet = 1;
     uint item_type_piano = 2;
     uint item_type_violin = 3;
+    uint item_type_horn = 1;
+    uint item_type_timpani = 2;
+    uint item_type_cello = 3;
     uint required_level = 5;
     
     //admin modify item types
@@ -4495,6 +4513,15 @@ contract Murasaki_Function_Music_Practice is Ownable, ReentrancyGuard {
     }
     function _set_item_type_violin(uint _value) external onlyOwner {
         item_type_violin = _value;
+    }
+    function _set_item_type_horn(uint _value) external onlyOwner {
+        item_type_horn = _value;
+    }
+    function _set_item_type_timpani(uint _value) external onlyOwner {
+        item_type_timpani = _value;
+    }
+    function _set_item_type_cello(uint _value) external onlyOwner {
+        item_type_cello = _value;
     }
     function _set_required_level(uint _value) external onlyOwner {
         required_level = _value;
@@ -4527,18 +4554,38 @@ contract Murasaki_Function_Music_Practice is Ownable, ReentrancyGuard {
         require(_check_summoner(_summoner, msg.sender));
         require(ms.practice_status(_summoner) == 1);
         ms.set_practice_status(_summoner, 0);
-        uint _delta_sec = block.timestamp - ms.practice_start_time(_summoner);
+        //get item_type used in practice
         uint _item_type = _get_item_type(ms.practice_item_id(_summoner));
+        //calc delta_sec
+        uint _delta_sec = block.timestamp - ms.practice_start_time(_summoner);
+        //calc modified delta_sec & add exp
+        uint _delta_sec_modified = 0;
         if (_item_type == item_type_clarinet) {
-            _delta_sec = _get_modified_delta_sec_ofClarinet(_summoner, _delta_sec);
-            ms.set_exp_clarinet(_summoner, ms.exp_clarinet(_summoner) + _delta_sec);
+            _delta_sec_modified = _get_modified_delta_sec_ofClarinet(_summoner, _delta_sec);
+            ms.set_exp_clarinet(_summoner, ms.exp_clarinet(_summoner) + _delta_sec_modified);
         } else if (_item_type == item_type_piano) {
-            _delta_sec = _get_modified_delta_sec_ofPiano(_summoner, _delta_sec);
-            ms.set_exp_piano(_summoner, ms.exp_piano(_summoner) + _delta_sec);
+            _delta_sec_modified = _get_modified_delta_sec_ofPiano(_summoner, _delta_sec);
+            ms.set_exp_piano(_summoner, ms.exp_piano(_summoner) + _delta_sec_modified);
         } else if (_item_type == item_type_violin) {
-            _delta_sec = _get_modified_delta_sec_ofViolin(_summoner, _delta_sec);
-            ms.set_exp_violin(_summoner, ms.exp_violin(_summoner) + _delta_sec);
+            _delta_sec_modified = _get_modified_delta_sec_ofViolin(_summoner, _delta_sec);
+            ms.set_exp_violin(_summoner, ms.exp_violin(_summoner) + _delta_sec_modified);
+        } else if (_item_type == item_type_horn) {
+            _delta_sec_modified = _get_modified_delta_sec_ofHorn(_summoner, _delta_sec);
+            ms.set_exp_horn(_summoner, ms.exp_horn(_summoner) + _delta_sec_modified);
+        } else if (_item_type == item_type_timpani) {
+            _delta_sec_modified = _get_modified_delta_sec_ofTimpani(_summoner, _delta_sec);
+            ms.set_exp_timpani(_summoner, ms.exp_timpani(_summoner) + _delta_sec_modified);
+        } else if (_item_type == item_type_cello) {
+            _delta_sec_modified = _get_modified_delta_sec_ofCello(_summoner, _delta_sec);
+            ms.set_exp_cello(_summoner, ms.exp_cello(_summoner) + _delta_sec_modified);
         }
+        //update last_grooming_time_plus_working_time
+        uint _last_grooming_time_plus_working_time = 
+            ms.last_grooming_time_plus_working_time(_summoner) + _delta_sec;
+        ms.set_last_grooming_time_plus_working_time(
+            _summoner, 
+            _last_grooming_time_plus_working_time
+        );
         //reset parameters
         ms.set_practice_item_id(_summoner, 0);
         ms.set_practice_start_time(_summoner, 0);
@@ -4576,6 +4623,9 @@ contract Murasaki_Function_Music_Practice is Ownable, ReentrancyGuard {
             _item_type == item_type_clarinet
             || _item_type == item_type_piano
             || _item_type == item_type_violin
+            || _item_type == item_type_horn
+            || _item_type == item_type_timpani
+            || _item_type == item_type_cello
         );
         return true;
     }
@@ -4599,6 +4649,24 @@ contract Murasaki_Function_Music_Practice is Ownable, ReentrancyGuard {
         _delta_sec += _delta_sec * mi.intelligence_withItems(_summoner) / 10000;
         return _delta_sec;
     }
+    function _get_modified_delta_sec_ofHorn(uint _summoner, uint _delta_sec) internal view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Info mi = Murasaki_Info(ma.address_Murasaki_Info());
+        _delta_sec += _delta_sec * mi.strength_withItems(_summoner) / 10000;
+        return _delta_sec;
+    }
+    function _get_modified_delta_sec_ofTimpani(uint _summoner, uint _delta_sec) internal view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Info mi = Murasaki_Info(ma.address_Murasaki_Info());
+        _delta_sec += _delta_sec * mi.dexterity_withItems(_summoner) / 10000;
+        return _delta_sec;
+    }
+    function _get_modified_delta_sec_ofCello(uint _summoner, uint _delta_sec) internal view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Info mi = Murasaki_Info(ma.address_Murasaki_Info());
+        _delta_sec += _delta_sec * mi.intelligence_withItems(_summoner) / 10000;
+        return _delta_sec;
+    }
     
     //get practice level of each instrument
     function get_practiceLevel_clarinet (uint _summoner) external view returns (uint) {
@@ -4615,6 +4683,21 @@ contract Murasaki_Function_Music_Practice is Ownable, ReentrancyGuard {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
         return _calc_level_from_exp(ms.exp_violin(_summoner));
+    }
+    function get_practiceLevel_horn (uint _summoner) external view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
+        return _calc_level_from_exp(ms.exp_horn(_summoner));
+    }
+    function get_practiceLevel_timpani (uint _summoner) external view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
+        return _calc_level_from_exp(ms.exp_timpani(_summoner));
+    }
+    function get_practiceLevel_cello (uint _summoner) external view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
+        return _calc_level_from_exp(ms.exp_cello(_summoner));
     }
     
     //internal: calc level from exp

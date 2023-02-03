@@ -94,14 +94,14 @@ let _dic_items = {
         "img_name":"item_food_cake",
         "icon_png":"png/item_food_cake.png",
     },
-    "Ukrere":{
+    "Clarinet":{
         "item_id":14,
         "item_id_uncommon":14+64,
         "item_id_rare":14+128,
         "img_name":"item_ukrere",
         "icon_png":"png/item_ukrere.png",
     },
-    "(Item15)":{
+    "Horn":{
         "item_id":15,
         "item_id_uncommon":15+64,
         "item_id_rare":15+128,
@@ -208,7 +208,7 @@ let _dic_items = {
         "img_name":"icon_clock",
         "icon_png":"icon/icon_clock.png",
     },
-    "(Item30)":{
+    "Timpani":{
         "item_id":30,
         "item_id_uncommon":30+64,
         "item_id_rare":30+128,
@@ -322,7 +322,7 @@ let _dic_items = {
         "img_name":"icon_clock",
         "icon_png":"icon/icon_clock.png",
     },
-    "(Item46)":{
+    "Cello":{
         "item_id":46,
         "item_id_uncommon":46+64,
         "item_id_rare":46+128,
