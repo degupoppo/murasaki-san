@@ -77,6 +77,7 @@ async function initialize_contract() {
     contract_mfcc.methods._set_Murasaki_Address(address_Murasaki_Address).send({from:wallet});
     contract_mfn.methods._set_Murasaki_Address(address_Murasaki_Address).send({from:wallet});
     contract_mfa.methods._set_Murasaki_Address(address_Murasaki_Address).send({from:wallet});
+    contract_mfp.methods._set_Murasaki_Address(address_Murasaki_Address).send({from:wallet});
 
     //Independent
     contract_md.methods._set_Murasaki_Address(address_Murasaki_Address).send({from:wallet});
@@ -106,6 +107,7 @@ async function initialize_contract() {
     //market
     contract_mmt.methods._set_Murasaki_Address(address_Murasaki_Address).send({from:wallet});
     contract_mc.methods._add_noFee_address(address_Murasaki_Item_Market).send({from:wallet});
+    contract_mc.methods._add_noFee_address(address_BuybackTreasury).send({from:wallet});
     
     //achievement_onChain, with dummy address
     contract_ac.methods._set_tokens(1, "0xF458Fd09b0ceFd288B98A43D987B8F1A1C3a7BBF").send({from:wallet});

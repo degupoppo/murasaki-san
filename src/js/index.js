@@ -34,6 +34,7 @@ function start_eventMonitor() {
     eventMonitor(contract_mml_wss, li_eventLog);
     eventMonitor(contract_ff_wss, li_eventLog);
     eventMonitor(contract_bt_wss, li_eventLog);
+    eventMonitor(contract_mfp_wss, li_eventLog);
 }
 function _show_realtimeLog() {
     //override text

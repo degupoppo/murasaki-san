@@ -85,32 +85,125 @@ contract ERC721 is IERC721 {
 847
 796
 724
+1774
 
 //### 1st
 
-    楽器練習の実装
-        意味論
-            むらさきさんの一人遊び用趣味
-            3種類の楽器ごとに異なる習熟レベルを設定する
-            楽器を指定した「れんしゅう」で習熟レベルを上げられる
-                習熟レベルの増加は遅くするか、MAXレベルをかなり大きくする
-            「れんしゅう」中の経験値はすべて楽器経験値へ転換される
-                れんしゅうした分は本体のExpが全く増えない仕様とする
-                Feedingはどうするか
-                → Feeding時はExpは増えず、れんしゅうが終わったら楽器経験値に加算する
-            Happy, Satietyが10以上でないと寝るようにする
-                寝てる間の練習時間は何も生じない
-                楽器expも本体expも加算されない
-            STR, DEX, INTの値ごとに楽器exp取得量に係数をかける
-                ステータスが小さいときはあまり楽器expが入らない
-                比例ではなくlogXグラフ
-                    ステータスが大きいほど寄与率が小さくなるモデル
-                しかし、「時間」が最も大きい資源となるバランスに設定する
-        練習実装
-            練習中のFeedingのexpは楽器expへ加算する
-            luck補正はなし
-            fluffyスコアとSTR/DEX/INT値でわずかに補正する？
+    Practiceバグ修正
+        practice中にfeedingするとinstrumentが増殖するバグの修正
+
+    +expアイテムの構想
+        発表会、お散歩報酬、おもちゃのカンヅメ報酬などに使用する
+        一つ一つは+0.1%exp程度と小さな上昇率に留める
+        solidity実装案
+            種類ごとに別のitem_typeを用意するか？
+            countが大変なので、exp上昇率ごとに1種類にしたいところであるが
             
+
+    補正の種類の深慮
+        Luck
+            Fluffyで上昇
+        +exp
+            ぬいちゃんで加算
+            Astarスコアで加算
+            お散歩の宝物で加算
+                item_typeは一定で、seed値で内容を変化させるか
+                もしくは、itemsを512まで拡張させるか
+            発表会のトロフィーで加算
+        farming/mining/crafting効率
+            それぞれのステータス値で上昇
+            それぞれのアイテム所持で上昇
+        staking
+            なにか特別な加算を考えるか
+            いろいろなものが出現する専用のプレゼント箱など
+            進捗に応じて少しずつ作られるようにするか
+                むらさきさん型の貯金箱など？
+                おもちゃのカンヅメのような位置づけ
+            中身案：
+                fluffy
+                fluffier
+                貯金箱
+                がま口お財布
+                散歩の宝物
+                発表会のトロフィー
+
+    NFTの希少性の深慮
+        NFTの希少性について考える
+            BCGのインフレし続けるNFTは価値が希釈され続けていく
+            何かしらの希少価値はメカニズムとして組み込みたい
+        バイバックシステムにより最小の金額は担保されている
+            無限希釈による無価値化は防がれている
+
+    バイバックシステムのUIの実装
+        専用ページとするか、マーケットページに統合するか
+        マーケット売値はバイバック価格を下回れないよう修正する
+
+ ok バイバックコントラクトのテスト
+        バイバックのテスト
+        bufferVaultの挙動テスト
+        バイバックボタンの実装
+        マーケットでバイバック価格以下で売れないよう設定
+        バイバックコントラへのapproveボタンの実装
+       *必要なアマウント量で、ばいばっく済み量を考慮するよう修正する
+        コントラ内の必要量に関する考察：
+            btコントラには、active_summoner * amountPerSummoner - total_paied_amountがあれば良い
+            しかし、deactiveされたsummonerのpaied_amountを合算することが困難なため、
+            total_paied_amountを計算することができない
+            そのため、厳密には多いが、active_summoner * 現在のamountPerSummoner分だけ
+                常に入っているように計算してbufferからtransferさせる
+            active_summonerがbuyback済みであるほど、過剰量がbtに格納されることになる
+            また、各summonerはamountPerSummoner x2までbuybackすることができる
+                x2にする意味もあまりないので、ハッキング対策としてx1とする
+            bt内の量としては、active_summoner全員がamountPerSummoner x1売れるだけの量に相当する
+            もう少し減らしてstakingへ回しても良いかもしれないが、
+                蓄積金が多いのもそれはそれで良いだろうか
+            50%程度の量でも良いかもしれない。要検討。
+                しかし、ユーザーからの預り金という位置づけなので、十分量を公開する意味はあるか。
+
+    散歩システムの実装検討
+        feedingは基本的な+exp手段だが、
+            +aの時間を消費する選択肢のひとつ
+        時間というコストの別の消費方法
+            resting: +追加exp
+            mining/farming: +coin/leaf
+            crafting: +item
+            practice: +楽器exp
+            旅: 何？
+        意味論
+            お弁当を持って、お供を連れて外に遊びにゆく
+            外出中は全く操作ができず、expも得られない
+            お腹が減ったり、happyが少なくなったら帰ってくる
+                外出中のhappy減少分はworkingと同様にexpには変換されない
+            他のプレイヤーとの相互作用システムを持たせたい
+                同じタイミングで外出中のsummonerと相互作用できる
+            旅ではなく、「散歩」ぐらいの気軽さで設定するか
+                窓かドアなど、何かしらの条件が必要とする
+        ゲーム要素
+            ゆけ勇者のように、試行錯誤が必要なメカニズムを考えたい
+            お花、石、あとなにかが手に入る
+                お花はfarming, 石はmining, なにかはcraftingが補正される
+            手に入ったアイテムを持ってお散歩に出れば、次のアイテムが手に入る
+            変数はprivateにして見えなくする
+            計算式のコードはcodexとして別コントラにする
+                未公開のルールに従い定数を返すコントラで十分か
+        目的・報酬
+            この行動でしか手に入らない報酬を深慮する
+            お花NFTなど？用途はどうするか
+            シーズンを決めて、シーズン限定のお花NFTを発行するか
+
+    楽器練習UIの改善
+        練習中のSEの用意
+        練習終了時の演出の実装
+            +expを表示させるか
+            Lv up時はどうするか
+        各楽器のマスコット化アニメーションの用意
+        練習ボタンの改装
+        楽器の種類の決定
+            ホルン、ティンパニでよいだろうか
+        練習中の演出の追加
+            fluffyやpetがよってくる
+            みんなで聴く or 音符を出して歌う
+
     演奏会の実装
         楽器習熟レベルを発揮する場
             習熟レベルの蓄積にステータス補正をかけるのか、
@@ -132,8 +225,11 @@ contract ERC721 is IERC721 {
                 楽器Lvにのみ依存する
                     本体Lvは依存しない
                 実力7割, 運3割程度の寄与率で調整したい。
+            演奏会の計算式にはfluffyを加味させる
+                練習にはfluffy=運は絡まない
         参加インセンティブ
             ASTRか、fluffyか、特別のトロフィーNFT/SBTか、どれが良いだろうか
+            追加のpractice expも得られる
 
     演奏会の実装検討
         他プレイヤーとの協力or勝負メカニズム
@@ -224,6 +320,40 @@ contract ERC721 is IERC721 {
             また、ぬいちゃんの作成コストは、累積クラフト数か、
                 その時のスコアに応じて引き上げる
 
+    マーケットページの改善
+        → 実際の実装はdapps stakingの目処が立った後、かつローンチ後1ヶ月程度
+            よって、現時点で公開はできない。
+        情報取得のバッチ処理化
+       *バイバックシステムの組み込み
+            市場で売りに出すかバイバックするかを選択できるように
+            バイバックは気軽にはできないようにする
+        upgradeボタンの廃止
+        transfer機能はどうしようか。
+            present機能として残す。
+        transferに警告文を表示しておく。
+            「友人とのアイテムのやり取りに使用できます」
+            「present eventは監視されています」
+            「明らかにbotと思われるmulti-walletを用いたtransferは即座にbanされます」
+
+    バイバックシステムのUI実装
+        専用ページの用意
+            現在のバイバック価格の表示
+            バイバックボタンの実装
+            マーケットlistページと統合する？
+        意味論
+            アクティブユーザーが増えればインフレしにくくなる
+            ユーザー数に対してステーキング量が大きければインフレしやすくなる
+            脱落ユーザーはアクティブユーザーにカウントせず、
+                その分アクティブユーザー用のインフレに資金を回す
+                ただし、いきなりアクティブユーザー数で割らずに、
+                あくまで月ごとのインフレ率は小さく保つ
+            月ごとは3%-6%程度。
+                様子を見ながら調整する。
+                理想はdapps stakingで利益をとった上での定常状態化
+                アクティブユーザー数が多すぎるとインフレしにくいだろうか。
+
+//### 2nd
+
  ig NFT絵の表示の実装
         walletからnftの取得
             PJごとにコントラから取得する
@@ -275,10 +405,6 @@ contract ERC721 is IERC721 {
             summoner modeを先にcraftingに設定しているのでsetTextが読み込まれていない
             構造修正が多少必要
     
-    バイバックコントラクトのテスト
-        バイバックのテスト
-        bufferVaultの挙動テスト
-
     Travel of Murasaki-Sanの構想案
         旅の目的は？
             宝物SBTもしくはNFTの取得
@@ -288,11 +414,6 @@ contract ERC721 is IERC721 {
             移動距離に応じて確率が上がるランダム取得？
         旅報酬のユースケースは？
             移動効率アップ
-
-    NFTの希少性の深慮
-        NFTの希少性について考える
-            BCGのインフレし続けるNFTは価値が希釈され続けていく
-            何かしらの希少価値はメカニズムとして組み込みたい
 
     privacy policyの整備
         alchemyのpp：
@@ -406,38 +527,6 @@ contract ERC721 is IERC721 {
             この複アカプレイをどこまで許可するか、どの様に制限するか。
             やりすぎるとまともなユーザー間の相互作用まで阻害される。
             放置するとbotの温床となる。
-
-    マーケットページの改善
-        → 実際の実装はdapps stakingの目処が立った後、かつローンチ後1ヶ月程度
-            よって、現時点で公開はできない。
-        情報取得のバッチ処理化
-       *バイバックシステムの組み込み
-            市場で売りに出すかバイバックするかを選択できるように
-            バイバックは気軽にはできないようにする
-        upgradeボタンの廃止
-        transfer機能はどうしようか。
-            present機能として残す。
-        transferに警告文を表示しておく。
-            「友人とのアイテムのやり取りに使用できます」
-            「present eventは監視されています」
-            「明らかにbotと思われるmulti-walletを用いたtransferは即座にbanされます」
-
-    バイバックシステムのUI実装
-        専用ページの用意
-            現在のバイバック価格の表示
-            バイバックボタンの実装
-            マーケットlistページと統合する？
-        意味論
-            アクティブユーザーが増えればインフレしにくくなる
-            ユーザー数に対してステーキング量が大きければインフレしやすくなる
-            脱落ユーザーはアクティブユーザーにカウントせず、
-                その分アクティブユーザー用のインフレに資金を回す
-                ただし、いきなりアクティブユーザー数で割らずに、
-                あくまで月ごとのインフレ率は小さく保つ
-            月ごとは3%-6%程度。
-                様子を見ながら調整する。
-                理想はdapps stakingで利益をとった上での定常状態化
-                アクティブユーザー数が多すぎるとインフレしにくいだろうか。
 
    *必要な絵
         猫の立ち絵のアニメーション
@@ -570,7 +659,92 @@ contract ERC721 is IERC721 {
             スイッチで夜もしくは20時以降20時前、満腹度80%以上、happy80%以上
 
 
-//### 2nd
+//### 3rd
+
+ ok 楽器rarityを加味する
+        uncommon +10%
+        rare +20%
+
+ ok summonerクラスにpracticeモードを実装する
+        ルールは他のworkingと同様
+        ターゲットは部屋の中心あたり
+        practice中のアニメーションの用意
+            楽器を擬人化して一緒に遊んでいるイメージの絵
+            ランダムで歌いながら寝てしまう、など
+       *practice中のサウンドエフェクトの用意
+            楽器毎に変えずに、共通の明るいSEをあてがう
+       *終わったときの演出の検討
+            +expを表示させるか
+        
+ ok 楽器練習のUI実装
+        専用ボタンの実装
+        楽器選択のUIをどうするか。
+        習熟レベル：
+            beginner
+            talented
+            skilled
+            intermediate
+            skillful
+            seasoned
+            proficient
+            advanced
+            expert
+            master
+
+ ok 楽器練習の実装
+        意味論
+            むらさきさんの一人遊び用趣味
+            3種類の楽器ごとに異なる習熟レベルを設定する
+            楽器を指定した「れんしゅう」で習熟レベルを上げられる
+                習熟レベルの増加は遅くするか、MAXレベルをかなり大きくする
+            「れんしゅう」中の経験値はすべて楽器経験値へ転換される
+                れんしゅうした分は本体のExpが全く増えない仕様とする
+                Feedingはどうするか
+                → Feeding時はExpは増えず、れんしゅうが終わったら楽器経験値に加算する
+            Happy, Satietyが10以上でないと寝るようにする
+                寝てる間の練習時間は何も生じない
+                楽器expも本体expも加算されない
+            STR, DEX, INTの値ごとに楽器exp取得量に係数をかける
+                ステータスが小さいときはあまり楽器expが入らない
+                比例ではなくlogXグラフ
+                    ステータスが大きいほど寄与率が小さくなるモデル
+                しかし、「時間」が最も大きい資源となるバランスに設定する
+        練習実装
+            練習中のFeedingのexpは楽器expへ加算する
+            luck補正はなし
+            fluffyスコアとSTR/DEX/INT値でわずかに補正する？
+        実装未
+            ステータス補正をどこにどのくらいかけるか
+            EXPからLvを計算する計算式の決定
+                シグモイド？
+        init実装
+            init.htmlの修正
+        練習曲線
+            シグモイド曲線とする
+                Bottom	1.762
+                Hillslope	3.491
+                Top	20.46
+                EC50	15597275
+                Y=Bottom + (X^Hillslope)*(Top-Bottom)/(X^HillSlope + EC50^HillSlope)
+        パラメータ補正
+            単純に、対応するパラメータ分だけ+%ととする
+                例：STR 15 = Clarinetのdelta_sec +15%
+        楽器候補
+            ピアノ
+            バイオリン
+            クラリネット
+            トランペット/トロンボーン/チューバ/ホルン/サックス
+            チェロ/ウクレレ
+            小太鼓
+            
+ ok Practice expの加算修正
+        practice sec分はfeeding, groomingのsecとして加算しない
+        コードの実装が大変か
+        → 他のworkingと同様に、groomingのみ加算させない
+            Feedingは影響を与えない
+
+ ok バグ修正
+        ぬいちゃんクラフトのアイコン修正
 
  ok fluffy festivalのUI改善
         問題点：
@@ -1424,6 +1598,24 @@ async function init_global_variants() {
     previous_local_fluffy_count = 0;
     li_achv = [0];
     
+    //---local practice
+    local_practice_exp_clarinet = 0;
+    local_practice_exp_piano = 0;
+    local_practice_exp_violin = 0;
+    local_practice_exp_horn = 0;
+    local_practice_exp_timpani = 0;
+    local_practice_exp_cello = 0;
+    local_practice_status = 0;
+    local_practice_item_id = 0;
+    local_practice_start_time = 0;
+    local_practice_level_clarinet = 0;
+    local_practice_level_piano = 0;
+    local_practice_level_violin = 0;
+    local_practice_level_horn = 0;
+    local_practice_level_timpani = 0;
+    local_practice_level_cello = 0;
+    previous_local_practice_item_id = 0;
+    
     //---local etc
     turn = 0;
     local_coin_calc = 0;
@@ -1670,6 +1862,18 @@ function get_itemIds(_myListsAt_withItemType) {
         _itemIds.push(Number(_itemId));
     }
     return _itemIds;
+}
+
+//get item_type from item_id
+function get_itemType(_myListsAt_withItemType, _itemId_target) {
+    for (i = 0; i < _myListsAt_withItemType.length; i += 2) {
+        let _itemId = _myListsAt_withItemType[i];
+        let _itemType = _myListsAt_withItemType[i+1];
+        if (_itemId == _itemId_target) {
+            return _itemType;
+        }
+    }
+    return 0;
 }
 
 //generate upgradable item ids list
@@ -1991,6 +2195,24 @@ async function contract_update_dynamic_status(_summoner) {
     local_achv_onChain_score_nft = Number(_all_dynamic_status[66]);
     local_achv_onChain_score_staking = Number(_all_dynamic_status[67]);
     local_achv_onChain_score_murasaki_nft = Number(_all_dynamic_status[68]);
+    
+    //practice
+    //***TODO*** practice
+    local_practice_exp_clarinet = Number(_all_dynamic_status[69]);
+    local_practice_exp_piano = Number(_all_dynamic_status[70]);
+    local_practice_exp_violin = Number(_all_dynamic_status[71]);
+    local_practice_exp_horn = Number(_all_dynamic_status[72]);
+    local_practice_exp_timpani = Number(_all_dynamic_status[73]);
+    local_practice_exp_cello = Number(_all_dynamic_status[74]);
+    local_practice_status = Number(_all_dynamic_status[75]);
+    local_practice_item_id = Number(_all_dynamic_status[76]);
+    local_practice_start_time = Number(_all_dynamic_status[77]);
+    local_practice_level_clarinet = Number(_all_dynamic_status[78]);
+    local_practice_level_piano = Number(_all_dynamic_status[79]);
+    local_practice_level_violin = Number(_all_dynamic_status[80]);
+    local_practice_level_horn = Number(_all_dynamic_status[81]);
+    local_practice_level_timpani = Number(_all_dynamic_status[82]);
+    local_practice_level_cello = Number(_all_dynamic_status[83]);
     
     //update last_sync_time
     last_sync_time = Date.now();
@@ -2362,7 +2584,10 @@ async function contract_get_modified_dc(_summoner, _item_type) {
 }
 
 //get_userItems_bag
-async function get_userItems(_summoner, _target_item_type) {
+async function get_userItems(_target_item_type) {
+    return get_itemIds_from_itemType(local_myListsAt_withItemType, _target_item_type);
+}
+function get_userItems_nowait(_target_item_type) {
     return get_itemIds_from_itemType(local_myListsAt_withItemType, _target_item_type);
 }
 
@@ -2715,6 +2940,18 @@ async function contract_end_voting(_summoner) {
             .on("transactionHash", (transactionHash) => update_tx_text("sending", transactionHash))
             .on("receipt", (receipt) => update_tx_text("done", receipt.transactionHash));
     }
+}
+
+//practice
+async function contract_start_practice(_summoner, _item_id) {
+    contract_mfp.methods.start_practice(_summoner, _item_id).send({from:wallet})
+        .on("transactionHash", (transactionHash) => update_tx_text("sending", transactionHash))
+        .on("receipt", (receipt) => update_tx_text("done", receipt.transactionHash));
+}
+async function contract_stop_practice(_summoner) {
+    contract_mfp.methods.stop_practice(_summoner).send({from:wallet})
+        .on("transactionHash", (transactionHash) => update_tx_text("sending", transactionHash))
+        .on("receipt", (receipt) => update_tx_text("done", receipt.transactionHash));
 }
 
 
@@ -3366,6 +3603,67 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         }
     }
     
+    //### practice
+    //***TODO*** practice
+    practice() {
+        this.count += 1;
+        if (this.submode == 0) {
+            let delta_x = this.target_x - this.x;
+            if (delta_x >0) {
+                this.dist = "right";
+                this.anims.play("murasaki_working_right", true);
+            }else {
+                this.dist = "left";
+                this.anims.play("murasaki_working_left", true);
+            }
+            this.submode = 1;
+        } else if (this.submode == 1) {
+            let delta_x = this.target_x - this.x;
+            let delta_y = this.target_y - this.y;
+            let delta_x2 = delta_x / (Math.abs(delta_x) + Math.abs(delta_y)) * 1.5;
+            let delta_y2 = delta_y / (Math.abs(delta_x) + Math.abs(delta_y)) * 1.5;
+            this.x += delta_x2;
+            this.y += delta_y2;
+            if (this.x > this.target_x-5 
+              && this.x < this.target_x+5 
+              && this.y > this.target_y-5 
+              && this.y < this.target_y+5
+            ) {
+                this.submode = 2;
+            }
+        } else if (this.submode == 2) {
+            //determine itemType used in practice
+            let _item_type = get_itemType(local_myListsAt_withItemType, local_practice_item_id);
+            //invisible corresponding room item and visible practice item
+            let _practice_name = "";
+            if (_item_type == dic_items["Clarinet"]["item_id"]) {
+                item_clarinet.visible = false;
+                _practice_name = "practice_clarinet";
+            } else if (_item_type == dic_items["Piano"]["item_id"]) {
+                item_piano.visible = false;
+                _practice_name = "practice_piano";
+            } else if (_item_type == dic_items["Violin"]["item_id"]) {
+                item_violin.visible = false;
+                _practice_name = "practice_violin";
+            }
+            this.item_practice = this.scene.add.sprite(
+                this.target_x - 100,
+                this.target_y,
+                _practice_name,
+            ).setOrigin(0.5).setScale(0.4).setDepth(this.target_y).anims.play(_practice_name, true);
+            this.submode = 3;
+        } else if (this.submode == 3) {
+            this.anims.play("murasaki_listning", true);
+            if (this.count % 500 == 10) {
+                sound_crafting_during.play();
+            }
+            if (happy <= 0) {
+                this.anims.play("murasaki_sleeping", true);
+                this.submode = 4;
+            }
+        }
+    }
+    
     //### update wearing_hat
     update_item_wearing_hat() {
 
@@ -3436,6 +3734,15 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         }else if (this.mode == "grooming" && this.submode == 3) {
             item_wearing_hat.x = this.x - 25;
             item_wearing_hat.y = this.y + 45;
+        }else if (this.mode == "practice" && this.submode == 1 && this.dist == "left") {
+            item_wearing_hat.x = this.x - 5;
+            item_wearing_hat.y = this.y - 50;
+        }else if (this.mode == "practice" && this.submode == 1 && this.dist == "right") {
+            item_wearing_hat.x = this.x + 5;
+            item_wearing_hat.y = this.y - 50;
+        }else if (this.mode == "practice" && this.submode >= 2) {
+            item_wearing_hat.x = this.x;
+            item_wearing_hat.y = this.y - 65;
         }
         //ajustment
         if (typeof item_hat_helmet != "undefined" && item_wearing_hat == item_hat_helmet) {
@@ -3467,6 +3774,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             else if (this.mode == "listning") {this.listning();}
             else if (this.mode == "attenting") {this.attenting();}
             else if (this.mode == "hammock") {this.sleeping_withHammock();}
+            else if (this.mode == "practice") {this.practice();}
             //draw item_wearing_hat
             if (item_wearing_hat != 0) {
                 this.update_item_wearing_hat();
@@ -3842,7 +4150,7 @@ class HomeCat extends Phaser.GameObjects.Sprite{
         this.on("pointerdown", async () => {
             if (local_items[196] > 0) {
                 sound_button_on.play();
-                let _array_item_196 = await get_userItems(summoner, 196);
+                let _array_item_196 = await get_userItems(196);
                 contract_send_mail(summoner, _array_item_196[0]);
             }
         });
@@ -5478,7 +5786,7 @@ class Nuichan extends Phaser.GameObjects.Sprite{
         this.on("pointerout", () => {
             setTimeout( () => {
                 this.msg.visible = false;
-            }, 2000);
+            }, 500);
         });
         //image
         if (this.type == 237) {
@@ -7027,6 +7335,280 @@ function open_window_upgrade(scene) {
 }
 
 
+//---window:practice
+function open_window_practice(scene) {
+
+    sound_window_open.play();
+    if (local_owner != local_wallet) {
+        return 0;
+    }
+
+    //create group
+    group_window_practice = scene.add.group();
+
+    //close window and summon
+    function close_window(_summoner, _item_id) {
+        group_window_practice.destroy(true);
+        if (_item_id > 0) {
+            sound_button_on.play();
+            console.log(_item_id);
+            contract_start_practice(_summoner, _item_id);
+        } else {
+            sound_window_select.play();
+        }
+    }
+
+    //create button with color and class
+    function create_button(_x, _y, _text, _color, _colorb, _item_id, scene, _size) {
+        let obj = scene.add.text(_x, _y, _text)
+            .setFontSize(_size)
+            .setFontFamily("Arial")
+            .setFill(_color)
+            //.setStyle({backgroundColor: _colorb})
+            .setInteractive({useHandCursor: true})
+            .on("pointerdown", () => close_window(summoner, _item_id) )
+            .on("pointerover", () => obj.setStyle({ fontSize: _size, fontFamily: "Arial", fill: '#ffff00' }))
+            .on("pointerout", () => obj.setStyle({ fontSize: _size, fontFamily: "Arial", fill: _color }))
+            //.on("pointerdown", () => sound_window_select.play() )
+            .on("pointerover", () => sound_window_pointerover.play());
+        return obj;
+    }
+    
+    //convert level to expertise
+    function level2expertise (_level) {
+        // green -> blue -> orange -> red -> violet
+        if (_level == 0) {
+            return "«Inexperienced»";
+        } else if (_level <= 2) {
+            return "✿ Beginner ✿";
+        } else if (_level <= 4) {
+            return "★ Talented ★";
+        } else if (_level <= 6) {
+            return "♩ Skilled ♩";
+        } else if (_level <= 8) {
+            return "♪ Intermediate ♪";
+        } else if (_level <= 10) {
+            return "♫ Skillful ♫";
+        } else if (_level <= 12) {
+            return "♦ Seasoned ♦";
+        } else if (_level <= 14) {
+            return "♣ Proficient ♣";
+        } else if (_level <= 16) {
+            return "♠ Advanced ♠";
+        } else if (_level <= 18) {
+            return "♥ Expert ♥";
+        } else if (_level <= 20) {
+            return "＊Master＊";
+        }
+    }
+    
+    //convert level to color
+    function level2color (_level) {
+        // green -> blue -> orange -> red -> violet
+        if (_level == 0) {
+            return "#999999";
+        } else if (_level <= 2) {
+            return "#228b22";
+        } else if (_level <= 4) {
+            return "#006400";
+        } else if (_level <= 6) {
+            return "#0000ff";
+        } else if (_level <= 8) {
+            return "#000080";
+        } else if (_level <= 10) {
+            return "#ff8c00";
+        } else if (_level <= 12) {
+            return "#d2691e";
+        } else if (_level <= 14) {
+            return "#ff0000";
+        } else if (_level <= 16) {
+            return "#ff00ff";
+        } else if (_level <= 18) {
+            return "#8a2be2";
+        } else if (_level <= 20) {
+            return "#800080";
+        }
+    }
+    
+    //get quote word randomly
+    function get_quote() {
+        let _text = "";
+        let _texts = [
+            "Harmony is next to Godliness. - Johann Sebastian Bach -",
+            "It is the special province of music to move the heart. - Johann Sebastian Bach -",
+            "One does not play the piano with one's fingers, one plays the piano with one's mind.\n- Glenn Gould -",
+            "Art is the most beautiful of all lies. - Claude Debussy -",
+            "The shorter way to do many things is to do only one thing at a time.\n- Wolfgang Amadeus Mozart -",
+            "When words can no longer be expressed, music begins.\n- Claude Debussy -",
+            "To Regret the Past, To Hope in the Future, And never to be satisfied with the Present.\n- Peter Ilyich Tchaikovsky -",
+            "There is no top. There are always further heights to reach.\n- Jascha Heifetz -",
+            "Only the sound the ear permits is music.\n- Fryderyk Franciszek Chopin -",
+            "Because I have a dream, a life is brilliant.\n- Wolfgang Amadeus Mozart -",
+            "The music is not in the notes, but in the silence between.\n- Wolfgang Amadeus Mozart -",
+            "The violin sings, but the fiddle dances. - Unknown -",
+            "Music is enough for a lifetime, but a lifetime is not enough for music.\n- Sergei Vasil'evich Rachmaninov -",
+        ];
+        return _texts[Math.floor(Math.random() * _texts.length)];
+    }
+    
+    //get best instrument
+    function get_best_instrument(_item_name) {
+        let _item_type = dic_items[_item_name]["item_id"];
+        let _items_common = get_userItems_nowait(_item_type);
+        let _items_uncommon = get_userItems_nowait(_item_type+64);
+        let _items_rare = get_userItems_nowait(_item_type+127);
+        if (_items_rare.length > 0) {
+            return _items_rare[0];
+        } else if (_items_uncommon.length > 0) {
+            return _items_uncommon[0];
+        } else if (_items_common.length > 0) {
+            return _items_common[0];
+        } else {
+            return 0;
+        }
+    }
+
+    //create window
+    let _window = scene.add.sprite(640, 480, "window").setInteractive();
+
+    //create message
+    let _text = "";
+    _text += "Choose an instrument to start practice.\n";
+    _text += "Mastery speed is slightly increased by the corresponding status value.\n";
+    _text += "(Clarinet & Horn: STR, Piano &Timpani: DEX, Violin & Cello: INT)";
+    let msg1 = scene.add.text(140, 110, _text)
+            .setFontSize(24).setFontFamily("Arial").setFill("#333333");
+    _text = get_quote();
+    let msg2 = scene.add.text(250, 750, _text)
+            .setFontSize(18).setFontFamily("Arial").setFill("#666666");
+
+    //create button, text, icon
+    function create_instrument (_x, _y, _item_name, _level, _exp, _group, _scale) {
+        let _item_type = dic_items[_item_name]["item_id"];
+        let _item_id = get_best_instrument(_item_name);
+        //when possess item_type
+        if (
+            local_items[_item_type] > 0
+            || local_items[_item_type+64] > 0
+            || local_items[_item_type+128] > 0
+        ) {
+            let _color = level2color(_level);
+            let _button = create_button(
+                _x, _y, _item_name, _color, "#000000", _item_id, scene, 36
+                ).setOrigin(0, 0.5);
+            let _text = "expertise: " + level2expertise(_level) + "\n";
+            _text += "(Lv: " + _level + ", exp: " + _exp + ")";
+            let _msg = scene.add.text(_x+0, _y+20, _text)
+                .setFontSize(24)
+                .setFontFamily("Arial")
+                .setFill(_color);
+            let _icon = scene.add.image(_x-45, _y+10, dic_items[_item_name]["img_name"])
+                .setOrigin(0.5).setScale(_scale);
+            _group.add(_button);
+            _group.add(_msg);
+            _group.add(_icon);
+        } else {
+            let _color = level2color(0);
+            let _button = create_button(
+                _x, _y, _item_name, _color, "#000000", _item_type, scene, 36
+                ).setOrigin(0, 0.5).disableInteractive();
+            let _text = "[not possessed]";
+            let _msg = scene.add.text(_x+0, _y+20, _text)
+                .setFontSize(24)
+                .setFontFamily("Arial")
+                .setFill(_color);
+            let _icon = scene.add.image(_x-45, _y+10, dic_items[_item_name]["img_name_inactive"])
+                .setOrigin(0.5).setScale(_scale);
+            _group.add(_button);
+            _group.add(_msg);
+            _group.add(_icon);
+        }
+    }
+    
+    let _x = 280;
+    let _y = 300;
+    let _y_add = 150;
+    let _x_raw_add = 475;
+    
+    //clarinet
+    create_instrument(
+        _x, 
+        _y+_y_add*0, 
+        "Clarinet", 
+        local_practice_level_clarinet,
+        local_practice_exp_clarinet,
+        group_window_practice,
+        0.25
+    );
+
+    //piano
+    create_instrument(
+        _x, 
+        _y+_y_add*1, 
+        "Piano", 
+        local_practice_level_piano,
+        local_practice_exp_piano,
+        group_window_practice,
+        0.25
+    );
+
+    //violin
+    create_instrument(
+        _x, 
+        _y+_y_add*2, 
+        "Violin", 
+        local_practice_level_violin,
+        local_practice_exp_violin,
+        group_window_practice,
+        0.125
+    );
+
+    //Hornm
+    create_instrument(
+        _x+_x_raw_add, 
+        _y+_y_add*0, 
+        "Horn", 
+        local_practice_level_horn,
+        local_practice_exp_horn,
+        group_window_practice,
+        0.25
+    );
+
+    //Timpani
+    create_instrument(
+        _x+_x_raw_add, 
+        _y+_y_add*1, 
+        "Timpani", 
+        local_practice_level_timpani,
+        local_practice_exp_timpani,
+        group_window_practice,
+        0.25
+    );
+
+    //Cello
+    create_instrument(
+        _x+_x_raw_add, 
+        _y+_y_add*2, 
+        "Cello", 
+        local_practice_level_cello,
+        local_practice_exp_cello,
+        group_window_practice,
+        0.25
+    );
+
+    //cancel
+    let _button_cancel = create_button(1070, 840, "Cancel", "#000000", "", -1, scene, 30);
+    
+    group_window_practice.add(_window);
+    group_window_practice.add(msg1);
+    group_window_practice.add(msg2);
+    group_window_practice.add(_button_cancel);
+
+    //depth
+    group_window_practice.setDepth(9999 + 100);
+}
+
+
 //---window:voting
 function open_window_voting(scene) {
 
@@ -7698,14 +8280,6 @@ function preload(scene) {
     scene.load.image("button_farming_pointerover", "src/png/button_farming_pointerover.png");
     scene.load.image("button_farming_working", "src/png/button_farming_working.png");
     scene.load.image("button_farming_pointerover_stop", "src/png/button_farming_pointerover_stop.png");
-    /*
-    scene.load.image("button_crafting_enable", "src/png/button_crafting_enable.png");
-    scene.load.image("button_crafting_unable", "src/png/button_crafting_unable.png");
-    scene.load.image("button_crafting_pointerover", "src/png/button_crafting_pointerover.png");
-    scene.load.image("button_crafting_working", "src/png/button_crafting_working.png");
-    scene.load.image("button_crafting_pointerover_stop", "src/png/button_crafting_pointerover_stop.png");
-    scene.load.image("button_crafting_pointerover_mint", "src/png/button_crafting_pointerover_mint.png");
-    */
     scene.load.image("button_grooming_enable", "src/png/button_grooming_enable.png");
     scene.load.image("button_grooming_unable", "src/png/button_grooming_unable.png");
     scene.load.image("button_grooming_pointerover", "src/png/button_grooming_pointerover.png");
@@ -7713,7 +8287,6 @@ function preload(scene) {
     scene.load.image("button_levelup_unable", "src/png/button_levelup_unable.png");
     scene.load.image("button_levelup_pointerover", "src/png/button_levelup_pointerover.png");
     scene.load.image("back_level", "src/png/button_level.png");
-    //scene.load.image("button_crafting_enable", "src/png/button_crafting_enable.png");
     //crafting new
     scene.load.image("button_crafting_unable", "src/png/button_crafting_unable.png");
     scene.load.image("button_crafting_start_on", "src/png/button_crafting_start_on.png");
@@ -7726,6 +8299,12 @@ function preload(scene) {
     scene.load.image("button_crafting_resume_off", "src/png/button_crafting_resume_off.png");
     scene.load.image("button_crafting_cancel_on", "src/png/button_crafting_cancel_on.png");
     scene.load.image("button_crafting_cancel_off", "src/png/button_crafting_cancel_off.png");
+    //practice
+    scene.load.image("button_practice_enable", "src/png/button_practice_enable.png");
+    scene.load.image("button_practice_unable", "src/png/button_practice_unable.png");
+    scene.load.image("button_practice_pointerover", "src/png/button_practice_pointerover.png");
+    scene.load.image("button_practice_working", "src/png/button_practice_working.png");
+    scene.load.image("button_practice_pointerover_stop", "src/png/button_practice_pointerover_stop.png");
 
     //---pet
     scene.load.spritesheet("mr_astar_right", "src/png/pet_mr_astar_right.png", {frameWidth: 600, frameHeight: 600});
@@ -7810,6 +8389,7 @@ function preload(scene) {
     //---item_craft
     scene.load.spritesheet("item_musicbox", "src/png/item_musicbox.png", {frameWidth: 370, frameHeight: 320});
     scene.load.image("item_violin", "src/png/item_violin.png");
+    scene.load.image("item_violin_inactive", "src/png/item_violin_inactive.png");
     scene.load.image("item_vase", "src/png/item_vase.png");
     scene.load.image("item_kanban", "src/png/item_kanban4.png");
     scene.load.spritesheet("item_crown", "src/png/item_crown.png", {frameWidth: 370, frameHeight: 320});
@@ -7879,6 +8459,7 @@ function preload(scene) {
     //scene.load.image("item_newsbunner", "src/png/item_newsbunner.png");
     scene.load.image("item_rugg", "src/png/item_rugg.png");
     scene.load.image("item_piano", "src/png/item_piano.png");
+    scene.load.image("item_piano_inactive", "src/png/item_piano_inactive.png");
     scene.load.image("item_piano_opened", "src/png/item_piano_opened.png");
     //scene.load.image("item_clock", "src/png/item_clock.png");
     //scene.load.image("item_clock_opened", "src/png/item_clock_opened.png");
@@ -7907,6 +8488,22 @@ function preload(scene) {
     scene.load.spritesheet("item_hammock_list", "src/png/item_hammock_list.png", {frameWidth: 230, frameHeight: 320});
     scene.load.image("item_ukrere", "src/png/item_ukrere.png");
     scene.load.spritesheet("item_lantern_list", "src/png/item_lantern_list.png", {frameWidth: 370, frameHeight: 320});
+    
+    //---item_practice
+    scene.load.image("item_clarinet", "src/png/item_clarinet.png");
+    scene.load.image("item_timpani", "src/png/item_timpani.png");
+    scene.load.image("item_cello", "src/png/item_cello.png");
+    scene.load.image("item_horn", "src/png/item_horn.png");
+    scene.load.image("item_clarinet_inactive", "src/png/item_clarinet_inactive.png");
+    scene.load.image("item_timpani_inactive", "src/png/item_timpani_inactive.png");
+    scene.load.image("item_cello_inactive", "src/png/item_cello_inactive.png");
+    scene.load.image("item_horn_inactive", "src/png/item_horn_inactive.png");
+    scene.load.spritesheet("practice_clarinet", "src/png/practice_piano.png", {frameWidth: 370, frameHeight: 320});
+    scene.load.spritesheet("practice_piano", "src/png/practice_piano.png", {frameWidth: 370, frameHeight: 320});
+    scene.load.spritesheet("practice_violin", "src/png/practice_piano.png", {frameWidth: 370, frameHeight: 320});
+    scene.load.spritesheet("practice_horn", "src/png/practice_piano.png", {frameWidth: 370, frameHeight: 320});
+    scene.load.spritesheet("practice_timpani", "src/png/practice_piano.png", {frameWidth: 370, frameHeight: 320});
+    scene.load.spritesheet("practice_cello", "src/png/practice_piano.png", {frameWidth: 370, frameHeight: 320});
 
     //---nui
     scene.load.spritesheet("item_nui_list", "src/png/item_nui_list.png", {frameWidth: 370, frameHeight: 320});
@@ -8598,6 +9195,44 @@ function create(scene) {
         repeat: -1
     });
     
+    //---animation practice
+    scene.anims.create({
+        key: "practice_clarinet",
+        frames: scene.anims.generateFrameNumbers("practice_piano", {frames:[0,1]}),
+        frameRate: 1,
+        repeat: -1
+    });
+    scene.anims.create({
+        key: "practice_piano",
+        frames: scene.anims.generateFrameNumbers("practice_piano", {frames:[0,1]}),
+        frameRate: 1,
+        repeat: -1
+    });
+    scene.anims.create({
+        key: "practice_violin",
+        frames: scene.anims.generateFrameNumbers("practice_piano", {frames:[0,1]}),
+        frameRate: 1,
+        repeat: -1
+    });
+    scene.anims.create({
+        key: "practice_horn",
+        frames: scene.anims.generateFrameNumbers("practice_piano", {frames:[0,1]}),
+        frameRate: 1,
+        repeat: -1
+    });
+    scene.anims.create({
+        key: "practice_timpani",
+        frames: scene.anims.generateFrameNumbers("practice_piano", {frames:[0,1]}),
+        frameRate: 1,
+        repeat: -1
+    });
+    scene.anims.create({
+        key: "practice_cello",
+        frames: scene.anims.generateFrameNumbers("practice_piano", {frames:[0,1]}),
+        frameRate: 1,
+        repeat: -1
+    });
+    
     //---item_basic
     item_bear = scene.add.sprite(1000,400, "item_bear")
         .setScale(0.45);
@@ -8651,6 +9286,28 @@ function create(scene) {
     let _x;
     let _y;
 
+    //practice
+    //***TODO*** practice
+    _x = 380;
+    _y = 580;
+    button_practice = scene.add.sprite(_x, _y, "button_practice_unable")
+        .setScale(0.16)
+        .setInteractive({useHandCursor: true})
+        .on('pointerover', () => sound_button_select.play())
+        .on('pointerover', () => button_practice.setTexture("button_practice_pointerover"))
+        .on('pointerout', () => button_practice.setTexture("button_practice_enable"))
+        .disableInteractive()
+        .on("pointerdown", () => {
+            if (local_practice_status == 0) {
+                open_window_practice(scene);
+            } else {
+                sound_button_on.play();
+                contract_stop_practice(summoner);
+            }
+        })
+        .setVisible(false);
+    group_info.add(button_practice);
+
     //feeding
     _x = 460;
     _y = 870;
@@ -8678,7 +9335,7 @@ function create(scene) {
         .disableInteractive();
     group_info.add(button_grooming);
 
-    //crafting //***TODO***:crafting
+    //crafting
     _x = 820;
     _y = 870;
     
@@ -10083,7 +10740,7 @@ function update_checkModeChange(this_scene) {
     if (local_notPetrified == 0) {
         murasakisan.set_mode = "petrified";
 
-    //level up
+    //###level up
     } else if (local_level > previous_local_level) {
         //fireworks
         /*
@@ -10124,7 +10781,7 @@ function update_checkModeChange(this_scene) {
         }
         */
 
-    //feeding check, continue
+    //###feeding check
     } else if (local_last_feeding_time > previous_local_last_feeding_time){
         murasakisan.set_mode = "feeding";
         murasakisan.setScale(0.45);
@@ -10182,7 +10839,7 @@ function update_checkModeChange(this_scene) {
         
         sound_feeding.play();
 
-    //grooming check, continue
+    //###grooming check
     } else if (local_last_grooming_time > previous_local_last_grooming_time){
         murasakisan.set_mode = "grooming";
         murasakisan.setScale(0.45);
@@ -10193,7 +10850,7 @@ function update_checkModeChange(this_scene) {
         murasakisan.target_y = 450;
         sound_grooming.play();
 
-    //mining check
+    //###mining check
     } else if (
         local_mining_status == 1 
         && murasakisan.mode != "mining" 
@@ -10219,7 +10876,7 @@ function update_checkModeChange(this_scene) {
         sound_earn.play();
         local_coin_calc = 0;
 
-    //farming check, continue
+    //###farming check
     } else if (
         local_farming_status == 1 
         && murasakisan.mode != "farming" 
@@ -10245,7 +10902,7 @@ function update_checkModeChange(this_scene) {
         sound_earn.play();
         local_material_calc = 0;
 
-    //crafting check, continue
+    //###crafting check
     } else if (
         local_crafting_status == 1 
         && murasakisan.mode != "crafting" 
@@ -10277,21 +10934,54 @@ function update_checkModeChange(this_scene) {
         } else {
             murasakisan.set_mode = "resting";
         }
+    
+    //###practice check
+    }else if (
+        local_practice_status == 1 
+        && murasakisan.mode != "practice" 
+        && murasakisan.mode != "feeding"
+        && murasakisan.mode != "grooming"
+        && murasakisan.mode != "sleeping"
+        && murasakisan.mode != "hammock"
+    ){
+        murasakisan.set_mode = "practice";
+        murasakisan.setScale(0.45);
+        murasakisan.submode = 0;
+        murasakisan.count = 0;
+        murasakisan.target_x = 640;
+        murasakisan.target_y = 650;
+        sound_crafting.play();
+    }else if (
+        local_practice_status == 0 
+        && murasakisan.mode == "practice"
+    ) {
+        let _item_type = get_itemType(local_myListsAt_withItemType, previous_local_practice_item_id);
+        if (_item_type == dic_items["Clarinet"]["item_id"]) {
+            item_clarinet.visible = true;
+        } else if (_item_type == dic_items["Piano"]["item_id"]) {
+            item_piano.visible = true;
+        } else if (_item_type == dic_items["Violin"]["item_id"]) {
+            item_violin.visible = true;
+        }
+        murasakisan.item_practice.destroy();
+        murasakisan.set_mode = "hugging";
     }
 
     previous_local_last_feeding_time = local_last_feeding_time;
     previous_local_last_grooming_time = local_last_grooming_time;
     previous_local_level = local_level;
+    previous_local_practice_item_id = local_practice_item_id;
 }
 
 
 //---button
 function update_checkButtonActivation(this_scene) {
-    //grooming
+    //###grooming
     if (
         local_farming_status == 1 
         || local_crafting_status == 1 
         || local_mining_status == 1 
+        || local_practice_status == 1
         || summoner == 0
         || wallet != local_owner
      ) {
@@ -10304,10 +10994,11 @@ function update_checkButtonActivation(this_scene) {
         button_grooming.setInteractive();
     }
 
-    //mining
+    //###mining
     if (
         local_farming_status == 1 
         || local_crafting_status == 1 
+        || local_practice_status == 1
         || local_level <= 1
         || wallet != local_owner
     ) {
@@ -10325,10 +11016,11 @@ function update_checkButtonActivation(this_scene) {
         button_mining.setInteractive();
     }
 
-    //farming
+    //###farming
     if (
         local_mining_status == 1 
         || local_crafting_status == 1 
+        || local_practice_status == 1
         || local_level <= 1
         || wallet != local_owner
     ) {
@@ -10346,13 +11038,14 @@ function update_checkButtonActivation(this_scene) {
         button_farming.setInteractive();
     }
 
-    //crafting //***TODO***: New button
+    //###crafting
     
     // check level
     if (
         local_level < 3
         || local_mining_status == 1
         || local_farming_status == 1
+        || local_practice_status == 1
         || wallet != local_owner
     ) {
         button_crafting_start.visible = false;
@@ -10399,39 +11092,53 @@ function update_checkButtonActivation(this_scene) {
         }
     }
     
+    //###practice
+    //check level and item possess
+    if (
+        local_level >= 5
+        && wallet == local_owner
+        && (
+            typeof item_clarinet != "undefined"
+            || typeof item_piano != "undefined"
+            || typeof item_violin != "undefined"
+            || typeof item_horn != "undefined"
+            || typeof item_timpani != "undefined"
+            || typeof item_cello != "undefined"
+        )
+    ) {
+        button_practice.visible = true;
+    } else {
+        button_practice.visible = false;
+    }
+    if (
+        local_mining_status == 1 
+        || local_farming_status == 1 
+        || local_crafting_status == 1 
+        || local_level <= 5
+        || wallet != local_owner
+    ) {
+        button_practice.setTexture("button_practice_unable");
+        button_practice.disableInteractive();
+    }else if (local_practice_status == 1) {
+        button_practice.setTexture("button_practice_working");
+        button_practice.on('pointerover', () => button_practice.setTexture("button_practice_pointerover_stop"));
+        button_practice.on('pointerout', () => button_practice.setTexture("button_practice_working"));
+        button_practice.setInteractive();
+    }else {
+        button_practice.setTexture("button_practice_enable");
+        button_practice.on('pointerover', () => button_practice.setTexture("button_practice_pointerover"));
+        button_practice.on('pointerout', () => button_practice.setTexture("button_practice_enable"));
+        button_practice.setInteractive();
+    }
+    
+    //###level
+
     // check level: text
     if (local_level < 3) {
         text_select_item.setVisible(false);
     } else if (flag_info == 1) {
         text_select_item.setVisible(true);
     }
-
-    /*
-    if (local_mining_status == 1 || local_farming_status == 1 || local_level <= 2) {
-        button_crafting.setTexture("button_crafting_unable");
-        button_crafting.disableInteractive();
-    }else if (local_crafting_status == 1 && local_crafting_calc == 0) {
-        button_crafting.setTexture("button_crafting_working");
-        button_crafting.on('pointerover', () => button_crafting.setTexture("button_crafting_pointerover_mint"));
-        button_crafting.on('pointerout', () => button_crafting.setTexture("button_crafting_working"));
-        button_crafting.setInteractive();
-    }else if (local_crafting_status == 1 && local_crafting_calc > 0) {
-        button_crafting.setTexture("button_crafting_working");
-        button_crafting.on('pointerover', () => button_crafting.setTexture("button_crafting_pointerover_stop"));
-        button_crafting.on('pointerout', () => button_crafting.setTexture("button_crafting_working"));
-        button_crafting.setInteractive();
-    }else {
-        button_crafting.setTexture("button_crafting_enable");
-        button_crafting.on('pointerover', () => button_crafting.setTexture("button_crafting_pointerover"));
-        button_crafting.on('pointerout', () => button_crafting.setTexture("button_crafting_enable"));
-        button_crafting.setInteractive();
-    }
-    if (local_level < 3) {
-        text_select_item.setVisible(false);
-    } else {
-        text_select_item.setVisible(true);
-    }
-    */
 
     //level-up button triggered by exp change
     if (
@@ -12620,7 +13327,7 @@ function update_checkItem(this_scene) {
     }
 
     //###38:Ukrere
-    _item_name = "Ukrere";
+    _item_name = "Clarinet";
     _item_id = dic_items[_item_name]["item_id"];
     if (
         (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
@@ -12686,7 +13393,7 @@ function update_checkItem(this_scene) {
         // define async function
         async function _do(scene) {
             // get item194 list, need to wait
-            let _array_item194 = await get_userItems(summoner, 194);
+            let _array_item194 = await get_userItems(194);
             // recreate sprite group
             try {
                 group_item194.destroy(true);
@@ -12737,7 +13444,7 @@ function update_checkItem(this_scene) {
         // define async function
         async function _do(scene) {
             // get item194 list, need to wait
-            let _array_item195 = await get_userItems(summoner, 195);
+            let _array_item195 = await get_userItems(195);
             // recreate sprite group
             try {
                 group_item195.destroy(true);
@@ -13820,9 +14527,16 @@ let config = {
         width: 1280,
         height: 960,
     },
-    scene: [FirstCheck, Loading, Loading_overlap, Opeaning, SomethingWrong, Main],
+    scene: [
+        FirstCheck, 
+        Loading, 
+        Loading_overlap, 
+        Opeaning, 
+        SomethingWrong, 
+        Main
+    ],
     fps: {
-        target: 50,
+        target: 60,
         //forceSetTimeOut: true
     },
     //nedd for rexUI plugin

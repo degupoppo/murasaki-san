@@ -1312,6 +1312,9 @@ contract Murasaki_Storage is Ownable {
     mapping(uint => uint) public exp_clarinet;
     mapping(uint => uint) public exp_piano;
     mapping(uint => uint) public exp_violin;
+    mapping(uint => uint) public exp_horn;
+    mapping(uint => uint) public exp_timpani;
+    mapping(uint => uint) public exp_cello;
     mapping(uint => uint) public practice_status;
     mapping(uint => uint) public practice_item_id;
     mapping(uint => uint) public practice_start_time;
@@ -1430,6 +1433,15 @@ contract Murasaki_Storage is Ownable {
     }
     function set_exp_violin(uint _summoner, uint _value) external onlyPermitted {
         exp_violin[_summoner] = _value;
+    }
+    function set_exp_horn(uint _summoner, uint _value) external onlyPermitted {
+        exp_horn[_summoner] = _value;
+    }
+    function set_exp_timpani(uint _summoner, uint _value) external onlyPermitted {
+        exp_timpani[_summoner] = _value;
+    }
+    function set_exp_cello(uint _summoner, uint _value) external onlyPermitted {
+        exp_cello[_summoner] = _value;
     }
     function set_practice_status(uint _summoner, uint _value) external onlyPermitted {
         practice_status[_summoner] = _value;
@@ -3089,10 +3101,11 @@ contract Murasaki_Function_Crafting2 is Ownable, ReentrancyGuard {
         uint _item4,
         uint _item5
     ) external nonReentrant {
-        _check_summoner(_summoner, msg.sender);
-        _check_items(_item1, _item2, _item3, _item4, _item5, msg.sender);
+        require(_check_summoner(_summoner, msg.sender));
+        require(_check_items(_item1, _item2, _item3, _item4, _item5, msg.sender));
         uint _sourceItemType = _get_sourceItemType(_item1);
         uint _targetItemType = _get_targetItemType(_item1);
+        _pay_cost(_summoner, _targetItemType);
         _burn_sourceItems(_item1, _item2, _item3, _item4, _item5);
         _mint_item(_summoner, _targetItemType, _sourceItemType, msg.sender);
         uint _present_itemNo = _get_present_itemNo();
@@ -3917,6 +3930,8 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
 
     //item name
     string[256] public item_name_table = [
+    
+        //***TODO*** need mod
 
         //1-16
         "Nameplate",
@@ -4481,9 +4496,12 @@ contract Murasaki_Function_Music_Practice is Ownable, ReentrancyGuard {
     
     //item types
     //***TODO*** item_type
-    uint item_type_clarinet = 1;
-    uint item_type_piano = 2;
-    uint item_type_violin = 3;
+    uint item_type_clarinet = 14;
+    uint item_type_piano = 27;
+    uint item_type_violin = 44;
+    uint item_type_horn = 15;
+    uint item_type_timpani = 30;
+    uint item_type_cello = 46;
     uint required_level = 5;
     
     //admin modify item types
@@ -4495,6 +4513,15 @@ contract Murasaki_Function_Music_Practice is Ownable, ReentrancyGuard {
     }
     function _set_item_type_violin(uint _value) external onlyOwner {
         item_type_violin = _value;
+    }
+    function _set_item_type_horn(uint _value) external onlyOwner {
+        item_type_horn = _value;
+    }
+    function _set_item_type_timpani(uint _value) external onlyOwner {
+        item_type_timpani = _value;
+    }
+    function _set_item_type_cello(uint _value) external onlyOwner {
+        item_type_cello = _value;
     }
     function _set_required_level(uint _value) external onlyOwner {
         required_level = _value;
@@ -4521,25 +4548,91 @@ contract Murasaki_Function_Music_Practice is Ownable, ReentrancyGuard {
     }
     
     //stop practice
+    event Practice(uint indexed _summoner, uint _itemType, uint _exp);
     function stop_practice(uint _summoner) external nonReentrant {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
         require(_check_summoner(_summoner, msg.sender));
         require(ms.practice_status(_summoner) == 1);
         ms.set_practice_status(_summoner, 0);
-        uint _delta_sec = block.timestamp - ms.practice_start_time(_summoner);
-        _delta_sec = _get_modified_delta_sec(_summoner, _delta_sec);
-        uint _item_type = _get_item_type(ms.practice_item_id(_summoner));
+        //get item_type used in practice
+        uint _item_id = ms.practice_item_id(_summoner);
+        uint _item_type = _get_item_type(_item_id);
+        //calc exp
+        uint _exp = _calc_exp(_summoner);
+        //boost exp by item rarity
+        _exp = _get_exp_mod_byRarity(_exp, _item_type);
+        //boost exp by status point and update exp
         if (_item_type == item_type_clarinet) {
-            ms.set_exp_clarinet(_summoner, ms.exp_clarinet(_summoner) + _delta_sec);
+            _exp = _get_exp_mod_ofClarinet(_summoner, _exp);
+            ms.set_exp_clarinet(_summoner, ms.exp_clarinet(_summoner) + _exp);
         } else if (_item_type == item_type_piano) {
-            ms.set_exp_piano(_summoner, ms.exp_piano(_summoner) + _delta_sec);
+            _exp = _get_exp_mod_ofPiano(_summoner, _exp);
+            ms.set_exp_piano(_summoner, ms.exp_piano(_summoner) + _exp);
         } else if (_item_type == item_type_violin) {
-            ms.set_exp_violin(_summoner, ms.exp_violin(_summoner) + _delta_sec);
+            _exp = _get_exp_mod_ofViolin(_summoner, _exp);
+            ms.set_exp_violin(_summoner, ms.exp_violin(_summoner) + _exp);
+        } else if (_item_type == item_type_horn) {
+            _exp = _get_exp_mod_ofHorn(_summoner, _exp);
+            ms.set_exp_horn(_summoner, ms.exp_horn(_summoner) + _exp);
+        } else if (_item_type == item_type_timpani) {
+            _exp = _get_exp_mod_ofTimpani(_summoner, _exp);
+            ms.set_exp_timpani(_summoner, ms.exp_timpani(_summoner) + _exp);
+        } else if (_item_type == item_type_cello) {
+            _exp = _get_exp_mod_ofCello(_summoner, _exp);
+            ms.set_exp_cello(_summoner, ms.exp_cello(_summoner) + _exp);
         }
+        //event
+        emit Practice(_summoner, _item_type, _exp);
+        //update last_grooming_time_plus_working_time
+        uint _delta_sec = block.timestamp - ms.practice_start_time(_summoner);
+        uint _last_grooming_time_plus_working_time = 
+            ms.last_grooming_time_plus_working_time(_summoner) + _delta_sec;
+        ms.set_last_grooming_time_plus_working_time(
+            _summoner, 
+            _last_grooming_time_plus_working_time
+        );
         //reset parameters
         ms.set_practice_item_id(_summoner, 0);
         ms.set_practice_start_time(_summoner, 0);
+    }
+    
+    //internal: calc delta_sec
+    function _calc_delta_sec (uint _summoner) internal view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
+        Murasaki_Parameter mp = Murasaki_Parameter(ma.address_Murasaki_Parameter());
+        uint _now = block.timestamp;
+        uint _delta = _now - ms.practice_start_time(_summoner);
+        //check happy
+        uint _delta_grooming = _now - ms.last_grooming_time(_summoner);
+        uint _base_grooming = mp.BASE_SEC() *3 *100/mp.SPEED();
+        if (_delta_grooming >= _base_grooming) {
+            _delta = _base_grooming;
+        }
+        //speed boost
+        _delta = _delta * mp.SPEED() / 100;
+        return _delta;
+    }
+
+    //internal: calc exp
+    function _calc_exp (uint _summoner) internal view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Parameter mp = Murasaki_Parameter(ma.address_Murasaki_Parameter());
+        Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
+        uint _now = block.timestamp;
+        uint _delta = _now - ms.practice_start_time(_summoner);
+        //check happy
+        uint _delta_grooming = _now - ms.last_grooming_time(_summoner);
+        uint _base_grooming = mp.BASE_SEC() *3 *100/mp.SPEED();
+        if (_delta_grooming >= _base_grooming) {
+            _delta = _base_grooming;
+        }
+        //speed boost
+        _delta = _delta * mp.SPEED() / 100;
+        //1000exp = 1day
+        uint _exp = _delta * 1000 / mp.BASE_SEC();
+        return _exp;
     }
     
     //internal: get item_type
@@ -4547,6 +4640,12 @@ contract Murasaki_Function_Music_Practice is Ownable, ReentrancyGuard {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Craft mc = Murasaki_Craft(ma.address_Murasaki_Craft());
         (uint _item_type, , , ,) = mc.items(_item_id);
+        // uncommon, rare -> common
+        if (_item_type >= 129) {
+            _item_type -= 128;
+        } else if (_item_type >= 65) {
+            _item_type -= 64;
+        }
         return _item_type;
     }
     
@@ -4574,16 +4673,62 @@ contract Murasaki_Function_Music_Practice is Ownable, ReentrancyGuard {
             _item_type == item_type_clarinet
             || _item_type == item_type_piano
             || _item_type == item_type_violin
+            || _item_type == item_type_horn
+            || _item_type == item_type_timpani
+            || _item_type == item_type_cello
         );
         return true;
     }
     
-    //internal: get modified delta_sec
-    function _get_modified_delta_sec(uint _summoner, uint _delta_sec) internal view returns (uint) {
-        //***TODO*** modify of delta_sec
-        // STR/DEX/INT?
-        // fluffy?
-        return _delta_sec;
+    //internal: get exp_mod by item_rarity
+    //common: +0%, uncommon: +10%, rare: +20% exp
+    function _get_exp_mod_byRarity(uint _exp, uint _item_type) internal pure returns (uint) {
+        if (_item_type >= 129) {
+            return _exp * 120 / 100;
+        } else if (_item_type >= 65) {
+            return _exp * 110 / 100;
+        } else {
+            return _exp;
+        }
+    }
+    
+    //internal: get exp_mod by status
+    // +1% per 1 status point, STR, DEX, INT
+    function _get_exp_mod_ofClarinet(uint _summoner, uint _exp) internal view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Info mi = Murasaki_Info(ma.address_Murasaki_Info());
+        _exp += _exp * mi.strength_withItems(_summoner) / 10000;
+        return _exp;
+    }
+    function _get_exp_mod_ofPiano(uint _summoner, uint _exp) internal view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Info mi = Murasaki_Info(ma.address_Murasaki_Info());
+        _exp += _exp * mi.dexterity_withItems(_summoner) / 10000;
+        return _exp;
+    }
+    function _get_exp_mod_ofViolin(uint _summoner, uint _exp) internal view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Info mi = Murasaki_Info(ma.address_Murasaki_Info());
+        _exp += _exp * mi.intelligence_withItems(_summoner) / 10000;
+        return _exp;
+    }
+    function _get_exp_mod_ofHorn(uint _summoner, uint _exp) internal view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Info mi = Murasaki_Info(ma.address_Murasaki_Info());
+        _exp += _exp * mi.strength_withItems(_summoner) / 10000;
+        return _exp;
+    }
+    function _get_exp_mod_ofTimpani(uint _summoner, uint _exp) internal view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Info mi = Murasaki_Info(ma.address_Murasaki_Info());
+        _exp += _exp * mi.dexterity_withItems(_summoner) / 10000;
+        return _exp;
+    }
+    function _get_exp_mod_ofCello(uint _summoner, uint _exp) internal view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Info mi = Murasaki_Info(ma.address_Murasaki_Info());
+        _exp += _exp * mi.intelligence_withItems(_summoner) / 10000;
+        return _exp;
     }
     
     //get practice level of each instrument
@@ -4602,11 +4747,69 @@ contract Murasaki_Function_Music_Practice is Ownable, ReentrancyGuard {
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
         return _calc_level_from_exp(ms.exp_violin(_summoner));
     }
+    function get_practiceLevel_horn (uint _summoner) external view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
+        return _calc_level_from_exp(ms.exp_horn(_summoner));
+    }
+    function get_practiceLevel_timpani (uint _summoner) external view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
+        return _calc_level_from_exp(ms.exp_timpani(_summoner));
+    }
+    function get_practiceLevel_cello (uint _summoner) external view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
+        return _calc_level_from_exp(ms.exp_cello(_summoner));
+    }
     
     //internal: calc level from exp
-    function _calc_level_from_exp(uint _exp) internal view returns (uint) {
-        //***TODO*** calc level
-        uint _level = 1 + _exp / 1000;
+    function _calc_level_from_exp(uint _exp) internal pure returns (uint) {
+        //Lv2=5000, Lv3=Lv2+5000, Lv4=Lv3+5000+delta_add(=2000)*1
+        uint _level = 0;
+        if (_exp == 0) {
+            _level = 0;
+        } else if (_exp < 5000) {
+            _level = 1;
+        } else if (_exp < 10000) {
+            _level = 2;
+        } else if (_exp < 17000) {
+            _level = 3;
+        } else if (_exp < 26000) {
+            _level = 4;
+        } else if (_exp < 37000) {
+            _level = 5;
+        } else if (_exp < 50000) {
+            _level = 6;
+        } else if (_exp < 65000) {
+            _level = 7;
+        } else if (_exp < 82000) {
+            _level = 8;
+        } else if (_exp < 101000) {
+            _level = 9;
+        } else if (_exp < 122000) {
+            _level = 10;
+        } else if (_exp < 145000) {
+            _level = 11;
+        } else if (_exp < 170000) {
+            _level = 12;
+        } else if (_exp < 197000) {
+            _level = 13;
+        } else if (_exp < 226000) {
+            _level = 14;
+        } else if (_exp < 257000) {
+            _level = 15;
+        } else if (_exp < 290000) {
+            _level = 16;
+        } else if (_exp < 325000) {
+            _level = 17;
+        } else if (_exp < 362000) {
+            _level = 18;
+        } else if (_exp < 401000) {
+            _level = 19;
+        } else if (_exp >= 401000) {
+            _level = 20;
+        }
         return _level;
     }
 }
@@ -5993,9 +6196,86 @@ contract Murasaki_Info is Ownable {
         return ac.get_score_murasaki_nft(_owner);
     }
     
+    //Practice
+    function exp_clarinet (uint _summoner) public view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
+        return ms.exp_clarinet(_summoner);
+    }
+    function exp_piano (uint _summoner) public view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
+        return ms.exp_piano(_summoner);
+    }
+    function exp_violin (uint _summoner) public view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
+        return ms.exp_violin(_summoner);
+    }
+    function exp_horn (uint _summoner) public view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
+        return ms.exp_horn(_summoner);
+    }
+    function exp_timpani (uint _summoner) public view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
+        return ms.exp_timpani(_summoner);
+    }
+    function exp_cello (uint _summoner) public view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
+        return ms.exp_cello(_summoner);
+    }
+    function practice_status (uint _summoner) public view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
+        return ms.practice_status(_summoner);
+    }
+    function practice_item_id (uint _summoner) public view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
+        return ms.practice_item_id(_summoner);
+    }
+    function practice_start_time (uint _summoner) public view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
+        return ms.practice_start_time(_summoner);
+    }
+    function get_practiceLevel_clarinet (uint _summoner) public view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Function_Music_Practice mfp = Murasaki_Function_Music_Practice(ma.address_Murasaki_Function_Music_Practice());
+        return mfp.get_practiceLevel_clarinet(_summoner);
+    }
+    function get_practiceLevel_piano (uint _summoner) public view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Function_Music_Practice mfp = Murasaki_Function_Music_Practice(ma.address_Murasaki_Function_Music_Practice());
+        return mfp.get_practiceLevel_piano(_summoner);
+    }
+    function get_practiceLevel_violin (uint _summoner) public view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Function_Music_Practice mfp = Murasaki_Function_Music_Practice(ma.address_Murasaki_Function_Music_Practice());
+        return mfp.get_practiceLevel_violin(_summoner);
+    }
+    function get_practiceLevel_horn (uint _summoner) public view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Function_Music_Practice mfp = Murasaki_Function_Music_Practice(ma.address_Murasaki_Function_Music_Practice());
+        return mfp.get_practiceLevel_horn(_summoner);
+    }
+    function get_practiceLevel_timpani (uint _summoner) public view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Function_Music_Practice mfp = Murasaki_Function_Music_Practice(ma.address_Murasaki_Function_Music_Practice());
+        return mfp.get_practiceLevel_timpani(_summoner);
+    }
+    function get_practiceLevel_cello (uint _summoner) public view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Function_Music_Practice mfp = Murasaki_Function_Music_Practice(ma.address_Murasaki_Function_Music_Practice());
+        return mfp.get_practiceLevel_cello(_summoner);
+    }
+    
     //###dynamic
-    function allDynamicStatus(uint _summoner) external view returns (uint[72] memory) {
-        uint[72] memory _res;
+    function allDynamicStatus(uint _summoner) external view returns (uint[96] memory) {
+        uint[96] memory _res;
         _res[0] = block.number;
         _res[1] = age(_summoner);
         _res[2] = level(_summoner);
@@ -6066,6 +6346,21 @@ contract Murasaki_Info is Ownable {
         _res[66] = get_score_nft(_summoner);
         _res[67] = get_score_staking(_summoner);
         _res[68] = get_score_murasaki_nft(_summoner);
+        _res[69] = exp_clarinet(_summoner);
+        _res[70] = exp_piano(_summoner);
+        _res[71] = exp_violin(_summoner);
+        _res[72] = exp_horn(_summoner);
+        _res[73] = exp_timpani(_summoner);
+        _res[74] = exp_cello(_summoner);
+        _res[75] = practice_status(_summoner);
+        _res[76] = practice_item_id(_summoner);
+        _res[77] = practice_start_time(_summoner);
+        _res[78] = get_practiceLevel_clarinet(_summoner);
+        _res[79] = get_practiceLevel_piano(_summoner);
+        _res[80] = get_practiceLevel_violin(_summoner);
+        _res[81] = get_practiceLevel_horn(_summoner);
+        _res[82] = get_practiceLevel_timpani(_summoner);
+        _res[83] = get_practiceLevel_cello(_summoner);
         return _res;
     }
     
@@ -6848,7 +7143,9 @@ contract BufferVault is Ownable, ReentrancyGuard {
         uint _activeSummoners = _allSummoners - _disabledSummoners;
         uint _amountPerSummoner = bbt.amountPerSummoner();
         uint _amount_inTreasury = ma.address_BuybackTreasury().balance;
-        uint _amountNeeded_inTreasury = _activeSummoners * _amountPerSummoner * (10000 + inflationRate)/100;
+        //uint _amountPaied_total = bbt.amountPaied_total();
+        uint _amountNeeded_inTreasury = 
+            _activeSummoners * _amountPerSummoner * (10000 + inflationRate)/10000;
         bool _reflex;
         uint _amountNeeded_forTransfer;
         if (_amountNeeded_inTreasury >= _amount_inTreasury) {
@@ -6919,10 +7216,20 @@ contract BuybackTreasury is Ownable, ReentrancyGuard {
 
     //*approve of mc is needed
 
-    //receivable
+    //token receivable
     receive() external payable {
     }
     fallback() external payable {
+    }
+
+    //ERC721Holder
+    function onERC721Received(
+        address,
+        address,
+        uint256,
+        bytes memory
+    ) public pure returns (bytes4) {
+        return this.onERC721Received.selector;
     }
 
     //variants
@@ -7035,6 +7342,10 @@ contract BuybackTreasury is Ownable, ReentrancyGuard {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Craft mc = Murasaki_Craft(ma.address_Murasaki_Craft());
         (uint _item_type, , , ,) = mc.items(_item);
+        //when not normal item, return price 0
+        if (_item_type >= 193) {
+            return 0;
+        }
         uint _item_level = _item_type % 16;
         if (_item_level == 0) {
             _item_level = 16;
@@ -7090,10 +7401,9 @@ contract BuybackTreasury is Ownable, ReentrancyGuard {
         amountPaied_total += _price;
         //pay
         payable(msg.sender).transfer(_price);
-        //do not exceed x2 amount per summoner after paying
-        //uint _amount_per_summoner = calc_amount_per_summoner();
-        //require(amountPaied[_summoner] <= _amount_per_summoner * 2);
-        require(amountPaied[_summoner] <= amountPerSummoner * 2);
+        //do not exceed amount per summoner after paying
+        //require(amountPaied[_summoner] <= amountPerSummoner * 2);
+        require(amountPaied[_summoner] <= amountPerSummoner);
         //event
         emit Buyback(_summoner, _item, _price);
     }
