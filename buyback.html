@@ -11,7 +11,7 @@
 <head>
 	<meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=0.7">
-	<title>Murasaki-san Item Market</title>
+	<title>Buyback Market</title>
 	<link rel="stylesheet" type="text/css" href="lib/datatables.min.css"/>
 	<script type="text/javascript" language="javascript" src="lib/jquery-3.6.0.min.js"></script>
 	<script type="text/javascript" language="javascript" src="lib/datatables.min.js"></script>
@@ -34,12 +34,12 @@
     </nav>
     <h1>
         <img src="src/png/item_basic_sweet_potato.png" width="40" height="40">
-        Item Marketplace
+        Buyback Market
         <img src="src/png/item_basic_sweet_potato.png" width="40" height="40">
     </h1>
     <p><center>
-        You can buy and sell crafted item NFTs in the marketplace.<br>
-        Platform Fee is 5%. $ASTR is used as the currency token.
+        NFT items can always be burned for getting a fixed price.<br>
+        As the game economy expands, the buyback price will increase.
     </center></p>
 </header>
 
@@ -47,79 +47,31 @@
 
 
 <p><center><code class="language-plaintext highlighter-rouge">
-Only wallets with an active murasaki-san SBT<br>
-can use this Marketplace.
+Crafted item NFTs are available in the buyback market.<br>
+Fuluffy, bank/pouch and presentbox NFTs are not available.
 </code></center></p>
 
-
-    <h3>Item Market &#127873;</h3>
-	<table id="table_onMarketItems" class="display">
-		<thead><tr>
-			<th style="width:25px;"><center>ID</center></th>
-			<th><center>Type</center></th>
-            <th><center>Rarity</center></th>
-			<th><center>Crafter</center></th>
-			<th><center>Price<br>($ASTR)</center></th>
-			<th><center>Action</center></th>
-		</tr></thead>
-		<tbody id="tbody_sellingItems"></tbody>
-	</table>
-
-	<p>
-	<b>&#x1FAA7; Recent Activity &#x1FAA7;</b><br>
-	<div id="recentActivity"></div>
-    </p>
-
-    <h3>Your Sellings on the Market &#127926;</h3>
-	<table id="talbe_sellingItems" class="display">
-		<thead><tr>
-			<th style="width:25px;"><center>ID</center></th>
-			<th><center>Type</center></th>
-            <th><center>Rarity</center></th>
-			<th><center>Crafter</center></th>
-			<th><center>Price<br>($ASTR)</center></th>
-			<th><center>Action</center></th>
-		</tr></thead>
-		<tbody id="tbody_listedItems"></tbody>
-	</table>
-
-    <h3>Your Items in the House &#127752;</h3>
+    <h3>Item NFTs for buyback &#127752;</h3>
     <p><code class="language-plaintext highlighter-rouge">
-        Before selling, please approve the Market Contract:
-        <button id="button_approve" onclick='approve();'>Approve</button><br>
+        Before buyback, please approve the BuybackTreasury contract:
+        <button id="button_approve_buyback" onclick='approve_buyback();'>Approve</button><br>
     </code></p>
-	<table id="table_userItems" class="display">
+	<table id="table_buyback" class="display">
 	    <thead><tr>
             <th style="width:25px;"><center>ID</center></th>
             <th><center>Type</center></th>
             <th><center>Rarity</center></th>
             <th><center>Crafter</center></th>
-            <th><center>Selling Price<br>($ASTR)</center></th>
+            <th><center>Buyback Price<br><font color=blue>($ASTR)</font></center></th>
         </tr></thead>
         <tbody id="tbody_myItems"></tbody>
 	</table>
 
-	<p>
-	<b>&#127872; Send Item &#127872;</b><br>
-	You can transfer your items to the other Murasaki-san:<br>
-    Item ID: <input type="number" id="transfer_item_id" style="width:80px;">
-    &nbsp;&nbsp;to Murasaki-san: <input type="number" id="transfer_summoner" style="width:80px;">
-    &nbsp;&nbsp;<button onclick="transfer_item();">Send Item</button><br>
-	<code class="language-plaintext highlighter-rouge">
-    ⚠ <b>CAUTION!</b> ⚠<br>
-    Obvious botting play using multi-wallets will be penalized.<br>
-    </code>
-    </p>
-
-    <h3>Buyback Market &#127752;</h3>
-    <p><code class="language-plaintext highlighter-rouge">
-        NFT items can always be sold for a fixed price in the Buyback Market.
-    </code></p>
-    <button onclick="location.href='buyback.html'">Visit Buyback Market</a></button>    
-
     <script>
-        loading_in_html();
+        loading_in_html_buyback();
     </script>
+
+<p><div id="total_paied" style="text-align:right"><div></p>
 
 </main>
 

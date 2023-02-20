@@ -9,8 +9,9 @@ async function initialize_contract() {
     contract_mc.methods._add_permitted_address(address_Murasaki_Function_Crafting).send({from:wallet});
     contract_mc.methods._add_permitted_address(address_Murasaki_Function_Crafting2).send({from:wallet});
     contract_mc.methods._add_permitted_address(address_Murasaki_Mail).send({from:wallet});
-    contract_mc.methods._add_permitted_address(address_Murasaki_Function_Feeding_and_Grooming).send({from:wallet});
+    //contract_mc.methods._add_permitted_address(address_Murasaki_Function_Feeding_and_Grooming).send({from:wallet});
     contract_mc.methods._add_permitted_address(address_Fluffy_Festival).send({from:wallet});
+    contract_mc.methods._add_permitted_address(address_Murasaki_Function_Staking_Reward).send({from:wallet});
 
     //Address
     contract_ma.methods.set_Murasaki_Main(address_Murasaki_Main).send({from:wallet});
@@ -29,6 +30,7 @@ async function initialize_contract() {
     contract_ma.methods.set_Murasaki_Function_Crafting_Codex(address_Murasaki_Function_Crafting_Codex).send({from:wallet});
     contract_ma.methods.set_Murasaki_Function_Name(address_Murasaki_Function_Name).send({from:wallet});
     contract_ma.methods.set_Murasaki_Function_Achievement(address_Murasaki_Function_Achievement).send({from:wallet});
+    contract_ma.methods.set_Murasaki_Function_Staking_Reward(address_Murasaki_Function_Staking_Reward).send({from:wallet});
     contract_ma.methods.set_Murasaki_Dice(address_Murasaki_Dice).send({from:wallet});
     contract_ma.methods.set_Murasaki_Mail(address_Murasaki_Mail).send({from:wallet});
     contract_ma.methods.set_Fluffy_Festival(address_Fluffy_Festival).send({from:wallet});
@@ -57,6 +59,7 @@ async function initialize_contract() {
     contract_ms.methods._add_permitted_address(address_Murasaki_Function_Name).send({from:wallet});
     contract_ms.methods._add_permitted_address(address_Murasaki_Mail).send({from:wallet});
     contract_ms.methods._add_permitted_address(address_Murasaki_Function_Music_Practice).send({from:wallet});
+    contract_ms.methods._add_permitted_address(address_Murasaki_Function_Staking_Reward).send({from:wallet});
     contract_mss.methods._add_permitted_address(address_Murasaki_Function_Summon_and_LevelUp).send({from:wallet});
     contract_mss.methods._add_permitted_address(address_Murasaki_Function_Feeding_and_Grooming).send({from:wallet});
     contract_mss.methods._add_permitted_address(address_Murasaki_Function_Mining_and_Farming).send({from:wallet});
@@ -78,6 +81,7 @@ async function initialize_contract() {
     contract_mfn.methods._set_Murasaki_Address(address_Murasaki_Address).send({from:wallet});
     contract_mfa.methods._set_Murasaki_Address(address_Murasaki_Address).send({from:wallet});
     contract_mfp.methods._set_Murasaki_Address(address_Murasaki_Address).send({from:wallet});
+    contract_mfsl.methods._set_Murasaki_Address(address_Murasaki_Address).send({from:wallet});
 
     //Independent
     contract_md.methods._set_Murasaki_Address(address_Murasaki_Address).send({from:wallet});

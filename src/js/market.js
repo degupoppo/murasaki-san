@@ -155,6 +155,7 @@ async function update_userItems() {
     let myListLength = await contract_mc_wss.methods.myListLength(wallet).call();
     let myListsAt = await contract_mc_wss.methods.myListsAt(wallet, 0, myListLength).call();
     let _html_all = "";
+    let _dic_summoner_name = {};
     for (let i = 0; i < myListLength; i++) {
         let _item = myListsAt[i];
         _items = await contract_mc_wss.methods.items(_item).call();
@@ -166,7 +167,15 @@ async function update_userItems() {
         let _wallet1 = _crafted_wallet.substring(0,5);
         let _wallet2 = _crafted_wallet.slice(-4);
         //summoner_name
+        let _crafted_summoner_name = "";
+        _crafted_summoner_name = _dic_summoner_name[_crafted_summoner];
+        if (typeof _crafted_summoner_name == "undefined"){
+            _crafted_summoner_name = await call_name_from_summoner(_crafted_summoner);
+            _dic_summoner_name[_crafted_summoner] = _crafted_summoner_name;
+        }
+        /*
         let _crafted_summoner_name = await call_name_from_summoner(_crafted_summoner);
+        */
         if (_crafted_summoner_name == "") {
             _crafted_summoner_name = "#" + _crafted_summoner;
         }
@@ -231,6 +240,131 @@ async function update_userItems() {
 }
 
 
+//buyback
+async function update_buyback() {
+    let myListLength = await contract_mc_wss.methods.myListLength(wallet).call();
+    let myListsAt = await contract_mc_wss.methods.myListsAt(wallet, 0, myListLength).call();
+    let buybackPrices = await contract_bt_wss.methods.calc_buybackPrice_asArray().call();
+    let _html_all = "";
+    let _dic_summoner_name = {};
+    for (let i = 0; i < myListLength; i++) {
+        let _item = myListsAt[i];
+        _items = await contract_mc_wss.methods.items(_item).call();
+        let _item_type = Number(_items[0]);
+        //item level
+        let _item_level = 0;
+        //craft item
+        if (_item_type <= 192) {
+            _item_level = _item_type % 16;
+            if (_item_level == 0) {
+                _item_level = 16;
+            }
+        //nuichan
+        /*
+        } else if (_item_type >= 237 && _item_type <= 248) {
+            _item_level = 10;
+        */
+        } else {
+            _item_level = 0;
+        }
+        let _item_price = (buybackPrices[_item_level]/10**18).toFixed(2);
+        let _item_name = dic_items_reverse[_item_type];
+        //let _crafted_time = _items[1];
+        let _crafted_summoner = _items[2];
+        let _crafted_wallet = _items[3];
+        let _wallet1 = _crafted_wallet.substring(0,5);
+        let _wallet2 = _crafted_wallet.slice(-4);
+        //summoner_name
+        let _crafted_summoner_name = "";
+        _crafted_summoner_name = _dic_summoner_name[_crafted_summoner];
+        if (typeof _crafted_summoner_name == "undefined"){
+            _crafted_summoner_name = await call_name_from_summoner(_crafted_summoner);
+            _dic_summoner_name[_crafted_summoner] = _crafted_summoner_name;
+        }
+        /*
+        try {
+            _crafted_summoner_name = _dic_summoner_name[_crafted_summoner];
+        } catch (error) {
+            _crafted_summoner_name = await call_name_from_summoner(_crafted_summoner);
+            _dic_summoner_name[_crafted_summoner] = _crafted_summoner_name;
+        }
+        let _crafted_summoner_name = await call_name_from_summoner(_crafted_summoner);
+        */
+        if (_crafted_summoner_name == "") {
+            _crafted_summoner_name = "#" + _crafted_summoner;
+        }
+        //item_rarity
+        let _item_rarity;
+        if (_item_type <= 64) {
+            _item_rarity = "<font color=black>common</font>";
+        } else if (_item_type <= 128) {
+            _item_rarity = "<font color=blue>uncommon</font>";
+        } else if (_item_type <= 192) {
+            _item_rarity = "<font color=orange>rare</font>";
+        } else if (_item_type == 197) {
+            let _score = await contract_msn_wss.methods.score(_item).call();
+            _item_rarity = "<font color=#E85298>score: " + _score + "</font>";
+        } else if (_item_type >= 201 && _item_type <= 212) {
+            _item_rarity = "<font color=black>common</font>";
+        } else if (_item_type >= 213 && _item_type <= 224) {
+            _item_rarity = "<font color=blue>uncommon</font>";
+        } else if (_item_type >= 225 && _item_type <= 236) {
+            _item_rarity = "<font color=orange>rare</font>";
+        } else {
+            _item_rarity = "<font color=black>---</font>";
+        }
+        //console.log(_item, _item_type, _crafted_time, _crafted_summoner, _crafted_wallet);
+        let _html = "";
+        _html += "<tr><td valign='middle' align='center'><center>"
+        _html += _item;
+        _html += "</center></td><td valign='middle' align='center'><center>";
+        _html += "<img src='";
+        _html += "src/" + dic_items[_item_name]["icon_png"];
+        _html += "' width='32' height='32'> ";
+        _html += _item_name;
+        _html += "</center></td><td><center>";
+        _html += _item_rarity;
+        _html += "</center></td><td><center>";
+        _html += _crafted_summoner_name;
+        _html += "</center></td><td><center>";
+        if (_item_price > 0) {
+            _html += "<b>";
+            _html += _item_price;
+            _html += "</b>";
+            //_html += "<input type='number' style='width:70px;' id='" + "input_price_" + _item + "'>";
+            _html += "&nbsp;&nbsp;";
+            _html += "<button style='background-color:#ff4500' onclick='buyback_item(" + _item + ");'>";
+            _html += "Burn";
+            _html += "</button>";
+        } else {
+            _html += "---";
+        }
+        _html += "</center></td></tr>";
+        //add html
+        _html_all += _html;
+        //count-up loading
+        let _text = "&nbsp;Now&nbsp;Loading...&nbsp;" + i + "/" + myListLength;
+        tbody_myItems.innerHTML = _text;
+        
+    }
+    //write html
+    tbody_myItems.innerHTML = _html_all;
+    //after loading, activate JQuery CSS
+    $(document).ready(function(){
+       $('#table_buyback').DataTable({lengthChange: false});
+    });
+
+    //update amountpaied
+    let _summoner = await contract_mm.methods.tokenOf(wallet).call() 
+    let _amountpained = await contract_bt.methods.amountPaied(_summoner).call() 
+    _html_all = "";
+    _html_all += "Your total buybacked amount: <b>";
+    _html_all += (Number(_amountpained)/10**18).toFixed(2);
+    _html_all += "&nbsp;$ASTR</b>";
+    total_paied.innerHTML = _html_all;
+}
+
+
 //send
 
 //buy item
@@ -253,9 +387,18 @@ async function list_item(_item) {
     await contract_mmt.methods.list(_item, _price).send({from:wallet});
 }
 
+//buyback item
+async function buyback_item(_item) {
+    let _summoner = await contract_mm.methods.tokenOf(wallet).call() 
+    await contract_bt.methods.buyback(_summoner, _item).send({from:wallet});
+}
+
 //approve
 async function approve() {
     await contract_mc.methods.setApprovalForAll(address_Murasaki_Item_Market, true).send({from:wallet});
+}
+async function approve_buyback() {
+    await contract_mc.methods.setApprovalForAll(address_BuybackTreasury, true).send({from:wallet});
 }
 
 async function transfer_item() {
@@ -309,6 +452,16 @@ async function check_approve() {
     }
 }
 
+//check_approve buyback
+async function check_approve_buyback() {
+    let _res = await contract_mc_wss.methods.isApprovedForAll(wallet, address_BuybackTreasury).call();
+    //console.log(_res);
+    if (_res == true) {
+        document.getElementById("button_approve_buyback").disabled = true;
+        document.getElementById("button_approve_buyback").firstChild.data = "Approved";
+    }
+}
+
 //get event
 async function get_recent_activity() {
     let _block_latest = await web3.eth.getBlockNumber();
@@ -354,4 +507,15 @@ async function loading_in_html() {
     check_approve();
     check_approve_upgrade();
     get_recent_activity();
+}
+async function loading_in_html_buyback() {
+    //active JQuery Datatable
+    //TOFIX: using JSON!
+    await init_web3();
+    //update_onMarketItems();
+    //update_sellingItems();
+    update_buyback();
+    //check_approve();
+    check_approve_buyback();
+    //get_recent_activity();
 }

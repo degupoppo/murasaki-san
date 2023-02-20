@@ -89,76 +89,86 @@ contract ERC721 is IERC721 {
 
 //### 1st
 
-    Practiceバグ修正
-        practice中にfeedingするとinstrumentが増殖するバグの修正
+    Buybackシステムの修正
+        fluffy NFTのbuyback価格の設定
+            fluffyは不可で、estやdollあたりからpriceを付けるか
+            どのitem levelが妥当だろうか。Lv10あたり？
+            ちゃんと計算して設定する。
+        fluffyやflyffierにも採算取れない程度に小さくて良いので価格を設定するか
+        fluffy系列分の割当も計算する
 
-    +expアイテムの構想
+   *exp増加アイテムの構想
         発表会、お散歩報酬、おもちゃのカンヅメ報酬などに使用する
         一つ一つは+0.1%exp程度と小さな上昇率に留める
         solidity実装案
             種類ごとに別のitem_typeを用意するか？
-            countが大変なので、exp上昇率ごとに1種類にしたいところであるが
-            
+                countが大変なので、exp上昇率ごとに1種類にしたいところであるが
+            mcにsubtypeを実装してしまうか
+                exp補正率ごとに別typeで、その中での種類はsubtypeを参照する
+            例：
+                小さなきれいな石: すべてexp+0.03%, 色が12色ある
+                中くらいのきれいな石: すべてexp+0.05%, 色が6色ある、など
+            石シリーズ以外でも、exp+0.03%のアイテムはすべてこのitem_typeで処理する
+            amountOf * 0.03で補正率が算出しやすい
+        取得のタイミング
+            なにか特別なアクションの報酬としたい
+                散歩の報酬
+                    何も得られなかったら悲しいのでこれ以外の報酬も考える
+                発表会の報酬
+                    飾って楽しいトロフィー, シーズンごとに異なる
 
-    補正の種類の深慮
-        Luck
-            Fluffyで上昇
-        +exp
-            ぬいちゃんで加算
-            Astarスコアで加算
-            お散歩の宝物で加算
-                item_typeは一定で、seed値で内容を変化させるか
-                もしくは、itemsを512まで拡張させるか
-            発表会のトロフィーで加算
-        farming/mining/crafting効率
-            それぞれのステータス値で上昇
-            それぞれのアイテム所持で上昇
-        staking
-            なにか特別な加算を考えるか
-            いろいろなものが出現する専用のプレゼント箱など
-            進捗に応じて少しずつ作られるようにするか
-                むらさきさん型の貯金箱など？
-                おもちゃのカンヅメのような位置づけ
-            中身案：
-                fluffy
-                fluffier
-                貯金箱
-                がま口お財布
-                散歩の宝物
-                発表会のトロフィー
+   *お菓子の家の実装
+     ok Solidity:
+            counterを返す関数
+            counter=0でmintする関数
+                NFTをランダムで送る
+            counterはfeeding時に減少する
+                0以下には減少しない
+       *実装案：
+            staking=0では土台だけ表示
+            staking>0で、量に応じたクッキー人形と進捗を表示
+            100%で、バンザイしているクッキー人形と完成した家を表示
+            クリックで家が消費されてNFTをランダムに取得する
+            完成した家を消費しないと次の進捗％は貯まり始めない
+        演出の深慮
+            お菓子の家が少しずつ完成してゆく
+                not stakingでは土台だけ
+                stakingすると作り始める
+                staking量と、進捗％を表示させる
+                staking量に応じて小人さんの人数が変わるとなお良いか
+            完成後はどうするか
+                別のお菓子の家がすぐ作られ始めるのか
+                    つまり、完成品2つは成り立つのか、または売れるのか
+                それとも、完成品を開けないと次の％がたまらないのか
+                NFTとして発行するのか、NFTを取得するコントラとして実装するのか
+        専用アニメーションの用意
+            棒の飴をふりふりしているクッキー人形
+            完成後は人形たちがバンザイしている
+        専用コントラクトの用意
+            presentboxと似ているが、取得できるアイテムと確率が異なる
+        中身案：
+            fluffy
+            fluffier
+            貯金箱
+            がま口お財布
+            散歩の宝物
+            発表会のトロフィー
 
-    NFTの希少性の深慮
-        NFTの希少性について考える
-            BCGのインフレし続けるNFTは価値が希釈され続けていく
-            何かしらの希少価値はメカニズムとして組み込みたい
-        バイバックシステムにより最小の金額は担保されている
-            無限希釈による無価値化は防がれている
-
-    バイバックシステムのUIの実装
-        専用ページとするか、マーケットページに統合するか
-        マーケット売値はバイバック価格を下回れないよう修正する
-
- ok バイバックコントラクトのテスト
-        バイバックのテスト
-        bufferVaultの挙動テスト
-        バイバックボタンの実装
-        マーケットでバイバック価格以下で売れないよう設定
-        バイバックコントラへのapproveボタンの実装
-       *必要なアマウント量で、ばいばっく済み量を考慮するよう修正する
-        コントラ内の必要量に関する考察：
-            btコントラには、active_summoner * amountPerSummoner - total_paied_amountがあれば良い
-            しかし、deactiveされたsummonerのpaied_amountを合算することが困難なため、
-            total_paied_amountを計算することができない
-            そのため、厳密には多いが、active_summoner * 現在のamountPerSummoner分だけ
-                常に入っているように計算してbufferからtransferさせる
-            active_summonerがbuyback済みであるほど、過剰量がbtに格納されることになる
-            また、各summonerはamountPerSummoner x2までbuybackすることができる
-                x2にする意味もあまりないので、ハッキング対策としてx1とする
-            bt内の量としては、active_summoner全員がamountPerSummoner x1売れるだけの量に相当する
-            もう少し減らしてstakingへ回しても良いかもしれないが、
-                蓄積金が多いのもそれはそれで良いだろうか
-            50%程度の量でも良いかもしれない。要検討。
-                しかし、ユーザーからの預り金という位置づけなので、十分量を公開する意味はあるか。
+   *楽器練習UIの改善
+     ok 練習中のSEの用意
+        練習終了時の演出の実装
+            +expを表示させるか
+            Lv up時はどうするか
+       *各楽器のマスコット化アニメーションの用意
+       *練習ボタンの改装
+     ok 楽器の種類の決定
+            ホルン、ティンパニでよいだろうか
+     ok 練習中の演出の追加
+            fluffyやpetがよってくる
+            みんなで聴く or 音符を出して歌う
+     ok 練習中は音符が飛び出す
+            専用クラスの用意
+            跳ねるときに音がなる？
 
     散歩システムの実装検討
         feedingは基本的な+exp手段だが、
@@ -186,23 +196,12 @@ contract ERC721 is IERC721 {
             変数はprivateにして見えなくする
             計算式のコードはcodexとして別コントラにする
                 未公開のルールに従い定数を返すコントラで十分か
+                soltの更新をonlyOwnerで可能にしておく
+                もしくは、何かしらの行動に応じてsoltが自動で書き換わる、など
         目的・報酬
             この行動でしか手に入らない報酬を深慮する
             お花NFTなど？用途はどうするか
             シーズンを決めて、シーズン限定のお花NFTを発行するか
-
-    楽器練習UIの改善
-        練習中のSEの用意
-        練習終了時の演出の実装
-            +expを表示させるか
-            Lv up時はどうするか
-        各楽器のマスコット化アニメーションの用意
-        練習ボタンの改装
-        楽器の種類の決定
-            ホルン、ティンパニでよいだろうか
-        練習中の演出の追加
-            fluffyやpetがよってくる
-            みんなで聴く or 音符を出して歌う
 
     演奏会の実装
         楽器習熟レベルを発揮する場
@@ -276,6 +275,8 @@ contract ERC721 is IERC721 {
     		    3-4%: 4つ葉
     		    4%max: 4つ葉＋てんとう虫
     		マウスオーバーラップでスコア内訳を表示させる
+    	スタンプ案
+    	    壁の空いているところにNFTをデフォルメしたスタンプを貼る
 
     アイテム順の再考
         クレヨンの位置
@@ -283,25 +284,6 @@ contract ERC721 is IERC721 {
 
     ネオンちゃんの段階実装
         ステーキング量に応じてにぎやかにする
-
-    砂時計アイテムの再実装
-        条件
-            staking=0でも表示されるが、寂しい感じ
-            何かが溜まってゆくor成長してゆくのが楽しい要素
-            かつ、1週間～1ヶ月程度の時間が必要そうなもの
-            100%になったときになにかhappyな演出が可能
-            毎回、たまるものが違うとより楽しいだろうか
-        案
-            小さな盆栽、最大成長で実を収穫する、なんの実が成るかは毎回違う
-            小さな植木鉢、最大成長で花が咲く、何が咲くか毎回違う
-            ペットボトルロケット、最大成長で発射、星が降ってくる演出
-        絵の深慮
-            砂時計で良いか？
-        ステーキング量>0でのみ表示させる
-        あるいはステーキング量=0では非アクティブを表す絵とする
-            ステーキングしてアクティブ化したくなるような楽しい絵にしたい。
-        ステーキング量が多いほど豪華になり、
-            カウンターが進むと何かが溜まってゆく・成長してゆく絵を考える。
 
     ぬいちゃん貸し出しシステムの実装検討
         ぬいちゃんは他の人が所持した際の効果が大きい
@@ -320,39 +302,53 @@ contract ERC721 is IERC721 {
             また、ぬいちゃんの作成コストは、累積クラフト数か、
                 その時のスコアに応じて引き上げる
 
-    マーケットページの改善
-        → 実際の実装はdapps stakingの目処が立った後、かつローンチ後1ヶ月程度
-            よって、現時点で公開はできない。
-        情報取得のバッチ処理化
-       *バイバックシステムの組み込み
-            市場で売りに出すかバイバックするかを選択できるように
-            バイバックは気軽にはできないようにする
-        upgradeボタンの廃止
-        transfer機能はどうしようか。
-            present機能として残す。
-        transferに警告文を表示しておく。
-            「友人とのアイテムのやり取りに使用できます」
-            「present eventは監視されています」
-            「明らかにbotと思われるmulti-walletを用いたtransferは即座にbanされます」
-
-    バイバックシステムのUI実装
-        専用ページの用意
-            現在のバイバック価格の表示
-            バイバックボタンの実装
-            マーケットlistページと統合する？
-        意味論
-            アクティブユーザーが増えればインフレしにくくなる
-            ユーザー数に対してステーキング量が大きければインフレしやすくなる
-            脱落ユーザーはアクティブユーザーにカウントせず、
-                その分アクティブユーザー用のインフレに資金を回す
-                ただし、いきなりアクティブユーザー数で割らずに、
-                あくまで月ごとのインフレ率は小さく保つ
-            月ごとは3%-6%程度。
-                様子を見ながら調整する。
-                理想はdapps stakingで利益をとった上での定常状態化
-                アクティブユーザー数が多すぎるとインフレしにくいだろうか。
-
 //### 2nd
+
+ ig 砂時計アイテムの再実装
+        条件
+            staking=0でも表示されるが、寂しい感じ
+            何かが溜まってゆくor成長してゆくのが楽しい要素
+            かつ、1週間～1ヶ月程度の時間が必要そうなもの
+            100%になったときになにかhappyな演出が可能
+            毎回、たまるものが違うとより楽しいだろうか
+        案
+            小さな盆栽、最大成長で実を収穫する、なんの実が成るかは毎回違う
+            小さな植木鉢、最大成長で花が咲く、何が咲くか毎回違う
+            ペットボトルロケット、最大成長で発射、星が降ってくる演出
+        絵の深慮
+            砂時計で良いか？
+        ステーキング量>0でのみ表示させる
+        あるいはステーキング量=0では非アクティブを表す絵とする
+            ステーキングしてアクティブ化したくなるような楽しい絵にしたい。
+        ステーキング量が多いほど豪華になり、
+            カウンターが進むと何かが溜まってゆく・成長してゆく絵を考える。
+
+    NFTの希少性の深慮
+        NFTの希少性について考える
+            BCGのインフレし続けるNFTは価値が希釈され続けていく
+            何かしらの希少価値はメカニズムとして組み込みたい
+        バイバックシステムにより最小の金額は担保されている
+            無限希釈による無価値化は防がれている
+
+ ig 補正の種類の深慮
+        Luck
+            Fluffyで上昇
+        +exp
+            ぬいちゃんで加算
+            Astarスコアで加算
+            お散歩の宝物で加算
+                item_typeは一定で、seed値で内容を変化させるか
+                もしくは、itemsを512まで拡張させるか
+            発表会のトロフィーで加算
+        farming/mining/crafting効率
+            それぞれのステータス値で上昇
+            それぞれのアイテム所持で上昇
+        staking
+            なにか特別な加算を考えるか
+            いろいろなものが出現する専用のプレゼント箱など
+            進捗に応じて少しずつ作られるようにするか
+                むらさきさん型の貯金箱など？
+                おもちゃのカンヅメのような位置づけ
 
  ig NFT絵の表示の実装
         walletからnftの取得
@@ -660,6 +656,69 @@ contract ERC721 is IERC721 {
 
 
 //### 3rd
+
+ ok practice中のfeeding中にpracticeを抜けるとinstrumentが残っちゃうバグの修正
+
+ ok マーケットページの改善
+        → 実際の実装はdapps stakingの目処が立った後、かつローンチ後1ヶ月程度
+            よって、現時点で公開はできない。
+        情報取得のバッチ処理化
+       *バイバックシステムの組み込み
+            市場で売りに出すかバイバックするかを選択できるように
+            バイバックは気軽にはできないようにする
+        upgradeボタンの廃止
+        transfer機能はどうしようか。
+            present機能として残す。
+        transferに警告文を表示しておく。
+            「友人とのアイテムのやり取りに使用できます」
+            「present eventは監視されています」
+            「明らかにbotと思われるmulti-walletを用いたtransferは即座にbanされます」
+
+ ok バイバックシステムのUI実装
+        専用ページの用意
+            現在のバイバック価格の表示
+            バイバックボタンの実装
+            マーケットlistページと統合する？
+        意味論
+            アクティブユーザーが増えればインフレしにくくなる
+            ユーザー数に対してステーキング量が大きければインフレしやすくなる
+            脱落ユーザーはアクティブユーザーにカウントせず、
+                その分アクティブユーザー用のインフレに資金を回す
+                ただし、いきなりアクティブユーザー数で割らずに、
+                あくまで月ごとのインフレ率は小さく保つ
+            月ごとは3%-6%程度。
+                様子を見ながら調整する。
+                理想はdapps stakingで利益をとった上での定常状態化
+                アクティブユーザー数が多すぎるとインフレしにくいだろうか。
+
+ ok バイバックシステムのUIの実装
+        専用ページとするか、マーケットページに統合するか
+        マーケット売値はバイバック価格を下回れないよう修正する
+
+ ok バイバックコントラクトのテスト
+        バイバックのテスト
+        bufferVaultの挙動テスト
+        バイバックボタンの実装
+        マーケットでバイバック価格以下で売れないよう設定
+        バイバックコントラへのapproveボタンの実装
+       *必要なアマウント量で、ばいばっく済み量を考慮するよう修正する
+        コントラ内の必要量に関する考察：
+            btコントラには、active_summoner * amountPerSummoner - total_paied_amountがあれば良い
+            しかし、deactiveされたsummonerのpaied_amountを合算することが困難なため、
+            total_paied_amountを計算することができない
+            そのため、厳密には多いが、active_summoner * 現在のamountPerSummoner分だけ
+                常に入っているように計算してbufferからtransferさせる
+            active_summonerがbuyback済みであるほど、過剰量がbtに格納されることになる
+            また、各summonerはamountPerSummoner x2までbuybackすることができる
+                x2にする意味もあまりないので、ハッキング対策としてx1とする
+            bt内の量としては、active_summoner全員がamountPerSummoner x1売れるだけの量に相当する
+            もう少し減らしてstakingへ回しても良いかもしれないが、
+                蓄積金が多いのもそれはそれで良いだろうか
+            50%程度の量でも良いかもしれない。要検討。
+                しかし、ユーザーからの預り金という位置づけなので、十分量を公開する意味はあるか。
+
+ ok Practiceバグ修正
+        practice中にfeedingするとinstrumentが増殖するバグの修正
 
  ok 楽器rarityを加味する
         uncommon +10%
@@ -3046,7 +3105,14 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
                 this.anims.play("murasaki_left", true);
             }
             this.resting_count = 70 + Math.random() * 30;
-	    }else if (this.count >= this.resting_count){
+            //try to destry instrument
+            if (local_practice_status != 0) {
+                try {
+                    this.item_practice.destroy();
+                } catch (error) {
+                }
+            }
+	    } else if (this.count >= this.resting_count){
             let tmp = Math.random() * 100;
             if (tmp <= 5) {
     	        //check sleeping with hammock
@@ -3646,6 +3712,10 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
                 item_violin.visible = false;
                 _practice_name = "practice_violin";
             }
+            try {
+                this.item_practice.destroy();
+            } catch (error) {
+            }
             this.item_practice = this.scene.add.sprite(
                 this.target_x - 100,
                 this.target_y,
@@ -3654,8 +3724,9 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             this.submode = 3;
         } else if (this.submode == 3) {
             this.anims.play("murasaki_listning", true);
-            if (this.count % 500 == 10) {
-                sound_crafting_during.play();
+            if (this.count % 200 == 10) {
+                sound_practice.play();
+                summon_note(this.scene);
             }
             if (happy <= 0) {
                 this.anims.play("murasaki_sleeping", true);
@@ -3952,8 +4023,22 @@ class Pet extends Phaser.GameObjects.Sprite{
     	        }
 	            this.count = 0;
 	            this.submode = 0;
+	        } else if (murasakisan.mode == "practice") {
+	            this.mode = "practice";
+	            if (this.type == "mining") {
+    	            this.target_x = murasakisan.target_x - 65;
+    	            this.target_y = murasakisan.target_y + 55;
+    	        } else if (this.type == "farming") {
+    	            this.target_x = murasakisan.target_x + 0;
+    	            this.target_y = murasakisan.target_y + 70;
+    	        } else if (this.type == "crafting") {
+    	            this.target_x = murasakisan.target_x + 65;
+    	            this.target_y = murasakisan.target_y + 55;
+    	        }
+	            this.count = 0;
+	            this.submode = 0;
 	        } else {
-                let tmp = Math.random() * 100;
+                //let tmp = Math.random() * 100;
                 this.mode = "moving";
                 this.count = 0;
             }
@@ -4035,13 +4120,51 @@ class Pet extends Phaser.GameObjects.Sprite{
             if (this.x > this.target_x-1 
               && this.x < this.target_x+1 
               && this.y > this.target_y-1 
-              && this.y < this.target_y+1) {
+              && this.y < this.target_y+1
+            ) {
                 this.dist = "left";
                 this.anims.play(this.sprite_left, true);
                 this.submode = 2;
             }
         }else if (this.submode == 2) {
             if (murasakisan.mode != this.type) {
+                this.mode = "resting";
+                this.count = 0;
+            }
+        }
+    }
+    
+    //###practice
+    practice() {
+        this.count += 1;
+        if (this.submode == 0) {
+            let delta_x = this.target_x - this.x;
+            if (delta_x >0) {
+                this.dist = "right";
+                this.anims.play(this.sprite_right, true);
+            }else {
+                this.dist = "left";
+                this.anims.play(this.sprite_left, true);
+            }
+            this.submode = 1;
+        }else if (this.submode == 1) {
+            let delta_x = this.target_x - this.x;
+            let delta_y = this.target_y - this.y;
+            let delta_x2 = delta_x / (Math.abs(delta_x) + Math.abs(delta_y)) * 0.6;
+            let delta_y2 = delta_y / (Math.abs(delta_x) + Math.abs(delta_y)) * 0.6;
+            this.x += delta_x2;
+            this.y += delta_y2;
+            if (this.x > this.target_x-1 
+              && this.x < this.target_x+1 
+              && this.y > this.target_y-1 
+              && this.y < this.target_y+1
+            ) {
+                this.dist = "left";
+                this.anims.play(this.sprite_left, true);
+                this.submode = 2;
+            }
+        }else if (this.submode == 2) {
+            if (murasakisan.mode != "practice") {
                 this.mode = "resting";
                 this.count = 0;
             }
@@ -4126,6 +4249,7 @@ class Pet extends Phaser.GameObjects.Sprite{
         else if (this.mode == "moving") {this.moving();}
         //else if (this.mode == "sleeping") {this.sleeping();}
         else if (this.mode == "working") {this.working();}
+        else if (this.mode == "practice") {this.practice();}
         //depth
         this.depth = this.y;
         //draw item_wearing_hat
@@ -4960,11 +5084,9 @@ class Star extends Phaser.GameObjects.Sprite{
 }
 
 
-//---Fluffy
-//***TODO***
-/*
-class Fluffy extends Phaser.GameObjects.Sprite{
-    constructor(scene, x, y, img, rarity, itemId, type){
+//---Note
+class Note extends Phaser.GameObjects.Sprite{
+    constructor(scene, x, y, img){
         super(scene, x, y, img);
         this.scene.add.existing(this);
         this.setInteractive({ useHandCursor: true });
@@ -4973,217 +5095,110 @@ class Fluffy extends Phaser.GameObjects.Sprite{
         }, this);
         this.speed_x = 0;
         this.speed_y = 0;
-        this.line_y = y;        //initial value of line_y, the same as first position of y
+        this.count = 0;
+        this.line_y = y;      //initial value of line_y, the same as first position of y
         this.line_y_max = 500;  //max floor position
-        this.line_y_min = 800;
+        this.line_y_min = 1200;
         this.line_x_r = 1200;   //right side
         this.line_x_l = 50;     //left side
-        this.mode = "";
-        this.submode = 0;
-        this.resting_count = 200;
-        this.rarity = rarity;
-        this.itemId = itemId;
-        this.type = type;
-        if (this.rarity == "common") {
-            ;
-        } else if (this.rarity == "uncommon") {
-            this.anims.play("fluffy_fluffier_01", true);
-        } else if (this.rarity == "rare") {
-            
-        }
+        this.on_summon();
     }
     
     //### on_click
     on_click() {
-        this.speed_x = 6 + Math.random() * 4;
+        this.speed_x = 2 + Math.random() * 1;
         if (Math.random() > 0.5) {
             this.speed_x *= -1;
         }
-        this.speed_y = 6 + Math.random() * 4;
+        this.speed_y = 5 + Math.random() * 2;
+        this.count = 0;
         //define constant of y = b - a * x
         this.a = Math.random() * 0.8 - 0.4;
         this.b = this.y + this.a * this.x;
         //sound
         sound_dice.play();
-        this.mode = "rolling";
     }
     
     //### on_summon
     on_summon() {
-        //pos
-        this.x = 300 + Math.random() * 500;
-        this.y = 600 + Math.random() * 100;
-        //on click with modified speed
-        this.speed_x = 6 + Math.random() * 4;
+        this.x = murasakisan.x -50 + Math.random() * 100;
+        this.y = murasakisan.y -50 + Math.random() * 100;
+        this.speed_x = 2 + Math.random() * 1;
         if (Math.random() > 0.5) {
             this.speed_x *= -1;
         }
-        this.speed_y = 10 + Math.random() * 4;
-        //define constant of y = b - a * x
+        this.speed_y = 5 + Math.random() * 2;
+        this.count = 0;
         this.a = Math.random() * 0.8 - 0.4;
-        this.b = this.y + this.a * this.x;
+        this.b = this.line_y_max+100 + this.a * this.x;
         //sound
-        //sound_fluffy.play();
-        this.mode = "rolling";
-    }
-    
-    //### rolling
-    rolling(){
-        //define line_y
-        this.line_y = this.b - this.a * this.x;
-        if (this.line_y < this.line_y_max) {
-            this.line_y = this.line_y_max;
-        }
-        if (this.line_y > this.line_y_min) {
-            this.line_y = this.line_y_min;
-        }
-
-        //reducing x speed, -/+
-        if (this.speed_x > 0) {
-            //friction, when speed_y = 0
-            if (Math.abs(this.speed_y) <= 0.5) {
-                this.speed_x -= 0.1 * 2.5;
-            } else {
-                this.speed_x -= 0.1;
-            }
-        } else {
-            if (Math.abs(this.speed_y) <= 0.5) {
-                this.speed_x += 0.1 * 2.5;
-            } else {
-                this.speed_x += 0.1;
-            }
-        }
-
-        //reduction of y speed
-        this.speed_y -= 0.75;
-
-        //position moving
-        this.x += this.speed_x;
-        this.y -= this.speed_y;
-
-        //increase angle
-        this.angle += this.speed_x * 5;
-
-        //refrection y
-        if (this.y >= this.line_y) {
-            this.y = this.line_y;
-            this.speed_y *= -0.3;   //bounce coefficient
-            if (Math.abs(this.speed_y) > 0.5) {
-                sound_dice_impact.play();
-            }
-        }
-
-        //refrection x
-        //limit_y_right: y = (208/205)x - (115746/205)
-        if (this.y > 500) {
-            this.line_x_r = (this.y + 115746/205)/(208/205);
-        } else {
-            this.line_x_r = 1060;
-        }
-        if (this.x >= this.line_x_r) {
-            this.x = this.line_x_r;
-            this.speed_x *= -0.9;   //bounce coefficient
-            sound_dice_impact.play();
-        } else if (this.x <= this.line_x_l) {
-            this.x = this.line_x_l;
-            this.speed_x *= -0.9;
-            sound_dice_impact.play();
-        }
-        
-        //check speed
-        if (
-            Math.abs(this.speed_x) <= 0.5
-            && Math.abs(this.speed_y) <= 0.5
-            && this.line_y - this.y <= 1
-        ) {
-            this.mode = "resting";
-            this.submode = 0
-        }
-    }
-    
-    //### resting
-    resting() {
-        //low rarity, do nothing
-        if (this.rarity == "common" || this.rarity == "uncommon") {
-            ;
-        } else if (this.submode == 0){
-            this.resting_count = 200 + Math.random() * 50;
-            //this.anims.play("cat_visitor_standing", true);
-            this.submode += 1;
-        } else if (this.submode < this.resting_count)  {
-            this.submode += 1;
-        } else {
-            this.mode = "moving";
-            this.submode = 0;
-        }
-    }
-    
-    //### moving
-    moving() {
-        if (this.submode == 0){
-            //determine degree, 0-30, 150-210, 330-360
-            var li = [0,10,20,30,150,160,170,180,190,200,210,330,340,350]
-            this.moving_degree = li[Math.floor(Math.random() * li.length)];
-            //out of area check
-            if (this.x < 100 && this.moving_degree > 90 && this.moving_degree <270) {
-                this.moving_degree -= 180;
-            }else if (this.x > 1100 && (this.moving_degree < 90 || this.moving_degree > 270)) {
-                this.moving_degree -= 180;
-            }
-            //360 over check
-            this.moving_degree = this.moving_degree % 360;
-            //out of area check, y
-            if (this.y > 860 && this.moving_degree > 180) {
-                this.moving_degree = 360 - this.moving_degree;
-            }else if (this.y < 500 && this.moving_degree < 180) {
-                this.moving_degree = 360 - this.moving_degree;
-            }
-            //minus check
-            if (this.moving_degree < 0) {
-                this.moving_degree += 360;
-            }
-            //determine speed, count
-            this.moving_speed = 0.3 + Math.random() * 0.2;  //0.3-0.5
-            this.moving_count = 70 + Math.random() * 30;    //70-100
-            //determine left or right
-            if (this.moving_degree > 90 && this.moving_degree <= 270) {
-                this.dist = "left";
-                //this.anims.play("cat_visitor_moving_left", true);
-            }else {
-                this.dist = "right";
-                //this.anims.play("cat_visitor_moving_right", true);
-            }
-            this.angle = 0;
-            this.submode += 1;
-        } else {
-            this.x += Math.cos(this.moving_degree * (Math.PI/180)) * this.moving_speed;
-            this.y -= Math.sin(this.moving_degree * (Math.PI/180)) * this.moving_speed;
-            this.submode += 1;
-            if (this.submode >= 100){
-                this.mode = "resting";
-                this.submode = 0;
-            }
-        }
+        //sound_star.play();
+        let _li = [
+            sound_piano_a,
+            sound_piano_b,
+            sound_piano_c,
+            sound_piano_d,
+            sound_piano_e,
+            sound_piano_f,
+            sound_piano_g
+        ];
+        this.sound = _li[Math.floor(Math.random()*_li.length)]
+        this.count_bounch = 0;
     }
     
     //### update()
-    update() {
-        if (this.mode == "rolling"){this.rolling();}
-        else if (this.mode == "resting"){this.resting();}
-        else if (this.mode == "moving"){this.moving();}
-        if (turn % 100 == 0) {
-            if (!local_itemIds.includes(this.itemId)){
-                summoned_fluffies = summoned_fluffies.filter(n => n !== this.itemId);
-                this.destroy();
+    update(){
+        this.count += 1;
+        
+        //dept
+        //this.depth = this.y;
+        //check position
+        if (
+            this.x > 1400
+            || this.x < -100
+            || this.y > 1000
+        ) {
+            this.destroy();
+        } else {
+            //when moving
+            //define line_y
+            this.line_y = this.b - this.a * this.x;
+            this.setDepth(this.line_y);
+            if (this.line_y < this.line_y_max) {
+                this.line_y = this.line_y_max;
+            }
+            if (this.line_y > this.line_y_min) {
+                this.line_y = this.line_y_min;
+            }
+            //reduction of y speed
+            //this.speed_y -= 0.75;
+            this.speed_y -= 0.2;
+            //position moving
+            this.x += this.speed_x;
+            this.y -= this.speed_y;
+            //increase angle
+            //this.angle += this.speed_x * 2;
+            //refrection y
+            if (this.y >= this.line_y) {
+                this.y = this.line_y;
+                this.speed_y *= -1 * (0.7 + Math.random() * 0.6) ;   //bounce coefficient
+                if (this.speed_y > 0 && this.speed_y < 5) {
+                    this.speed_y = 5;
+                } else if (this.speed_y < 0 && this.speed_y > -5) {
+                    this.speed_y = -5;
+                }
+                if (this.count_bounch > 1) {
+                    //this.sound.play();
+                }
+                this.count_bounch += 1;
+                //sound_dice_impact.play();
             }
         }
     }
 }
-*/
 
 
 //---Fluffy2
-//***TODO***
 
 class Fluffy2 extends Phaser.GameObjects.Sprite{
     constructor(scene, x, y, img, type, itemId){
@@ -5628,7 +5643,11 @@ class Fluffy2 extends Phaser.GameObjects.Sprite{
     moving() {
         if (this.submode == 0){
             let _distance = this.calc_distance(murasakisan.x, murasakisan.y);
-            if (_distance > 400) {
+            let _distance_limit = 400;
+            if (murasakisan.mode == "practice") {
+                _distance_limit = 200;
+            }
+            if (_distance > _distance_limit) {
                 this.moving_degree = this.get_degree(murasakisan.x, murasakisan.y);
             } else {
                 //determine degree, 0-30, 150-210, 330-360
@@ -5824,7 +5843,6 @@ class Nuichan extends Phaser.GameObjects.Sprite{
 
 
 //---PresentBox
-//***TODO***
 
 class PresentBox extends Phaser.GameObjects.Sprite{
     constructor(scene, x, y, img, itemId, summoner_from, memo){
@@ -7992,6 +8010,18 @@ function summon_star(scene) {
     group_update.add(_star);
 }
 
+//---summon_note
+function summon_note(scene) {
+    let _type = Math.floor(Math.random()*6);
+    let _note = new Note(scene, 100, 100, "practice_notes")
+        .setOrigin(0.5)
+        .setScale(0.12)
+        .setAlpha(1)
+        .setDepth(3)
+        .setFrame(_type);
+    group_update.add(_note);
+}
+
 
 //---summon_fluffy
 
@@ -8365,6 +8395,14 @@ function preload(scene) {
     scene.load.audio("nyui", "src/sound/nyui.mp3");
     scene.load.audio("nyui2", "src/sound/nyui2.mp3");
     scene.load.audio("fluffy_house", "src/sound/fluffy_house.mp3");
+    scene.load.audio("practice", "src/sound/practice.mp3");
+    scene.load.audio("piano_a", "src/sound/piano_a.mp3");
+    scene.load.audio("piano_b", "src/sound/piano_b.mp3");
+    scene.load.audio("piano_c", "src/sound/piano_c.mp3");
+    scene.load.audio("piano_d", "src/sound/piano_d.mp3");
+    scene.load.audio("piano_e", "src/sound/piano_e.mp3");
+    scene.load.audio("piano_f", "src/sound/piano_f.mp3");
+    scene.load.audio("piano_g", "src/sound/piano_g.mp3");
 
     //---item_basic
     scene.load.image("item_table", "src/png/item_basic_table.png");
@@ -8470,7 +8508,7 @@ function preload(scene) {
     scene.load.image("item_window_night_closed", "src/png/item_window_night_closed.png");
     scene.load.image("item_newspaper", "src/png/item_newspaper.png");
     scene.load.image("item_book", "src/png/item_book.png");
-    scene.load.image("item_hourglass", "src/png/item_hourglass.png");
+    //scene.load.image("item_hourglass", "src/png/item_hourglass.png");
     scene.load.image("item_presentbox_01", "src/png/item_presentbox_01.png");
     scene.load.image("item_presentbox_02", "src/png/item_presentbox_02.png");
     scene.load.image("item_presentbox_03", "src/png/item_presentbox_03.png");
@@ -8488,6 +8526,7 @@ function preload(scene) {
     scene.load.spritesheet("item_hammock_list", "src/png/item_hammock_list.png", {frameWidth: 230, frameHeight: 320});
     scene.load.image("item_ukrere", "src/png/item_ukrere.png");
     scene.load.spritesheet("item_lantern_list", "src/png/item_lantern_list.png", {frameWidth: 370, frameHeight: 320});
+    scene.load.image("item_staking", "src/png/item_staking.png");
     
     //---item_practice
     scene.load.image("item_clarinet", "src/png/item_clarinet.png");
@@ -8504,6 +8543,7 @@ function preload(scene) {
     scene.load.spritesheet("practice_horn", "src/png/practice_piano.png", {frameWidth: 370, frameHeight: 320});
     scene.load.spritesheet("practice_timpani", "src/png/practice_piano.png", {frameWidth: 370, frameHeight: 320});
     scene.load.spritesheet("practice_cello", "src/png/practice_piano.png", {frameWidth: 370, frameHeight: 320});
+    scene.load.spritesheet("practice_notes", "src/png/practice_notes.png", {frameWidth: 370, frameHeight: 320});
 
     //---nui
     scene.load.spritesheet("item_nui_list", "src/png/item_nui_list.png", {frameWidth: 370, frameHeight: 320});
@@ -9736,6 +9776,14 @@ function create(scene) {
     sound_nyui = scene.sound.add("nyui", {volume:0.1});
     sound_nyui2 = scene.sound.add("nyui2", {volume:0.1});
     sound_fluiffy_house = scene.sound.add("fluffy_house", {volume:0.1});
+    sound_practice = scene.sound.add("practice", {volume:0.1});
+    sound_piano_a = scene.sound.add("piano_a", {volume:0.02});
+    sound_piano_b = scene.sound.add("piano_b", {volume:0.02});
+    sound_piano_c = scene.sound.add("piano_c", {volume:0.02});
+    sound_piano_d = scene.sound.add("piano_d", {volume:0.02});
+    sound_piano_e = scene.sound.add("piano_e", {volume:0.02});
+    sound_piano_f = scene.sound.add("piano_f", {volume:0.02});
+    sound_piano_g = scene.sound.add("piano_g", {volume:0.02});
 
     //---system message
     //system message
@@ -10128,6 +10176,15 @@ function create(scene) {
         murasakisan.count = 0;
         murasakisan.target_x = 950;
         murasakisan.target_y = 740;
+    } else if (local_practice_status == 1) {
+        murasakisan = new Murasakisan(scene, 640, 640)
+            .setOrigin(0.5)
+            .setScale(0.45);
+        murasakisan.set_mode = "practice";
+        murasakisan.submode = 0;
+        murasakisan.count = 0;
+        murasakisan.target_x = 650;
+        murasakisan.target_y = 650;
     } else {
         murasakisan = new Murasakisan(scene, 500 + Math.random()*200, 640 + Math.random()*100)
             .setOrigin(0.5)
@@ -11115,7 +11172,7 @@ function update_checkButtonActivation(this_scene) {
         || local_farming_status == 1 
         || local_crafting_status == 1 
         || local_level <= 5
-        || wallet != local_owner
+        //|| wallet != local_owner
     ) {
         button_practice.setTexture("button_practice_unable");
         button_practice.disableInteractive();
@@ -13910,14 +13967,14 @@ function update_checkItem(this_scene) {
         group_update.add(festligheter);
     }
     
-    //###000:Hourglass
+    //###000:Staking
     if (
         local_dapps_staking_amount > 0
-        && (typeof item_hourglass == "undefined" || typeof item_hourglass.scene == "undefined")
+        && (typeof item_staking == "undefined" || typeof item_staking.scene == "undefined")
     ){
         let _x;
         let _y;
-        let _pos_local = "pos_item_hourglass";
+        let _pos_local = "pos_item_staking";
         //recover position from localStorage
         if (localStorage.getItem(_pos_local) != null && local_owner == local_wallet) {
             let _json = localStorage.getItem(_pos_local);
@@ -13929,63 +13986,63 @@ function update_checkItem(this_scene) {
             _y = 847;
         }
         let _text = "";
-        _text += " dapps staking: " + local_dapps_staking_amount + " $ASTR \n";
-        _text += " rewarding speed: x" + local_staking_reward_speed/100 + " \n";
-        _text += " next reward: " + staking_reward_percent + "%";
-        item_hourglass_text = this_scene.add.text(
+        _text += " Staking: " + local_dapps_staking_amount + " $ASTR \n";
+        //_text += " rewarding speed: x" + local_staking_reward_speed/100 + " \n";
+        _text += " Complete: " + staking_reward_percent + "%";
+        item_staking_text = this_scene.add.text(
             _x,
-            _y-80,
+            _y-60,
             _text,
             {font: "20px Arial", fill: "#000000", backgroundColor: "#ffffff"}
         ).setOrigin(0.5).setVisible(false).setDepth(9999);
-        item_hourglass = this_scene.add.sprite(
+        item_staking = this_scene.add.sprite(
             _x,
             _y,
-            "item_hourglass",
-        ).setOrigin(0.5).setScale(0.08).setDepth(850)
+            "item_staking",
+        ).setOrigin(0.5).setScale(0.3).setDepth(850)
             .setInteractive({ draggable: true, useHandCursor: true })
             .on("pointerdown", () => {
-                item_hourglass_text.visible = true;
+                item_staking_text.visible = true;
                 setTimeout( () => {
-                    item_hourglass_text.visible = false;
+                    item_staking_text.visible = false;
                 }, 3000)
             })
             .on("drag", () => {
                 if (this_scene.sys.game.scale.gameSize._width == 1280) {
-                    item_hourglass.x = game.input.activePointer.x;
-                    item_hourglass.y = game.input.activePointer.y;
+                    item_staking.x = game.input.activePointer.x;
+                    item_staking.y = game.input.activePointer.y;
                 } else {
-                    item_hourglass.x = game.input.activePointer.y;
-                    item_hourglass.y = 960 - game.input.activePointer.x;
+                    item_staking.x = game.input.activePointer.y;
+                    item_staking.y = 960 - game.input.activePointer.x;
                 }
-                item_hourglass.depth = item_hourglass.y;
-                item_hourglass_text.x = item_hourglass.x;
-                item_hourglass_text.y = item_hourglass.y-80;
+                item_staking.depth = item_staking.y;
+                item_staking_text.x = item_staking.x;
+                item_staking_text.y = item_staking.y-60;
                 //item_hourglass_text.visible = false;
             })
             .on("dragend", () => {
-                item_hourglass_text.x = item_hourglass.x;
-                item_hourglass_text.y = item_hourglass.y-80;
-                let _pos = [item_hourglass.x, item_hourglass.y];
+                item_staking_text.x = item_staking.x;
+                item_staking_text.y = item_staking.y-60;
+                let _pos = [item_staking.x, item_staking.y];
                 if (local_owner == local_wallet) {
                     localStorage.setItem(_pos_local, JSON.stringify(_pos));
                 }
-            })
+            });
     } else if (
         local_dapps_staking_amount == 0 
     ){
         try { 
-            item_hourglass.destroy(true);
-            item_hourglass_text.destroy(true);
+            item_staking.destroy(true);
+            item_staking_text.destroy(true);
         } catch {};
     } else if (
-        typeof item_hourglass != "undefined" && typeof item_hourglass.scene != "undefined"
+        typeof item_staking != "undefined" && typeof item_staking.scene != "undefined"
     ){
         let _text = "";
-        _text += " dapps staking: " + local_dapps_staking_amount + " $ASTR \n";
-        _text += " rewarding speed: x" + local_staking_reward_speed/100 + " \n";
-        _text += " next reward: " + staking_reward_percent + "%";
-        item_hourglass_text.setText(_text);
+        _text += " Staking: " + local_dapps_staking_amount + " $ASTR \n";
+        //_text += " rewarding speed: x" + local_staking_reward_speed/100 + " \n";
+        _text += " Complete: " + staking_reward_percent + "%";
+        item_staking_text.setText(_text);
     }
     
     previous_local_items = local_items;
