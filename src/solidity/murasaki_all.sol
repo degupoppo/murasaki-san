@@ -903,49 +903,13 @@ contract Murasaki_Craft is ERC2665, Ownable{
             )
         );
     }
-    /*
-    //Inspired by OraclizeAPI's implementation - MIT license
-    //https://github.com/oraclize/ethereum-api/blob/b42146b063c7d6ee1358846c198246239e9360e8/oraclizeAPI_0.4.25.sol
-    function toString(uint256 value) internal pure returns (string memory) {
-        if (value == 0) {
-            return "0";
-        }
-        uint256 temp = value;
-        uint256 digits;
-        while (temp != 0) {
-            digits++;
-            temp /= 10;
-        }
-        bytes memory buffer = new bytes(digits);
-        while (value != 0) {
-            digits -= 1;
-            buffer[digits] = bytes1(uint8(48 + uint256(value % 10)));
-            value /= 10;
-        }
-        return string(buffer);
-    }
-    function tokenURI (uint _item) public view returns (string memory) {
-        string[9] memory parts;
-        parts[0] = '<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin meet" viewBox="0 0 350 350"><style>.base { fill: white; font-family: serif; font-size: 14px; }</style><rect width="100%" height="100%" fill="black" /><text x="10" y="20" class="base">';
-        parts[1] = string(abi.encodePacked("id", " ", toString(_item)));
-        parts[2] = '</text><text x="10" y="40" class="base">';
-        parts[3] = string(abi.encodePacked("type", " ", toString(items[_item].item_type)));
-        parts[4] = '</text><text x="10" y="60" class="base">';
-        parts[5] = string(abi.encodePacked("crafted time", " ", toString(items[_item].crafted_time)));
-        parts[6] = '</text><text x="10" y="80" class="base">';
-        parts[7] = string(abi.encodePacked("crafted summoner", " ", toString(items[_item].crafted_summoner)));
-        parts[8] = '</text></svg>';
-        string memory output = 
-            string(abi.encodePacked(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7], parts[8]));
-        string memory json = Base64.encode(bytes(string(abi.encodePacked('{"name": "summoner #', toString(_item), '", "description": "House of Murasaki-san. Murasaki-san is a pet living in your wallet. They grow with your dedication. https://murasaki-san.com/", "image": "data:image/svg+xml;base64,', Base64.encode(bytes(output)), '"}'))));
-        output = string(abi.encodePacked('data:application/json;base64,', json));
-        return output;
-    }
-    */
 
     //call items as array, need to write in Craft contract
     function get_balance_of_type(address _wallet) public view returns (uint[256] memory) {
         return balance_of_type[_wallet];
+    }
+    function balanceOfType(address _wallet, uint _item_type) external view returns (uint) {
+        return balance_of_type[_wallet][_item_type];
     }
 
     // Transfer fees
@@ -2053,8 +2017,8 @@ contract Murasaki_Function_Summon_and_LevelUp is Ownable, ReentrancyGuard {
         ms.set_last_level_up_time(_summoner, _now);
         ms.set_coin(_summoner, 0);
         ms.set_material(_summoner, 0);
-        ms.set_last_feeding_time(_summoner, _now - BASE_SEC * 100 / SPEED / 2);
-        ms.set_last_grooming_time(_summoner, _now - BASE_SEC * 100 / SPEED / 2);
+        ms.set_last_feeding_time(_summoner, _now - BASE_SEC * 100 / SPEED / 4);
+        ms.set_last_grooming_time(_summoner, _now - BASE_SEC * 100 / SPEED / 4);
         ms.set_mining_status(_summoner, 0);
         ms.set_mining_start_time(_summoner, 0);
         ms.set_farming_status(_summoner, 0);
@@ -2068,7 +2032,7 @@ contract Murasaki_Function_Summon_and_LevelUp is Ownable, ReentrancyGuard {
         ms.set_last_total_mining_sec(_summoner, 0);
         ms.set_last_total_farming_sec(_summoner, 0);
         ms.set_last_total_crafting_sec(_summoner, 0);
-        ms.set_last_grooming_time_plus_working_time(_summoner, _now - BASE_SEC * 100 / SPEED / 2);
+        ms.set_last_grooming_time_plus_working_time(_summoner, _now - BASE_SEC * 100 / SPEED / 4);
         ms.set_isActive(_summoner, true);
         ms.set_inHouse(_summoner, true);
         ms.set_staking_reward_counter(_summoner, mp.STAKING_REWARD_SEC());
@@ -2229,6 +2193,8 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable, ReentrancyGuard {
         //uint _delta_sec = ( _now - ms.last_feeding_time(_summoner) ) * mp.SPEED()/100;
         //achv onChain boost
         _exp_add = _get_exp_add_from_achv_onChain(_summoner, _exp_add);
+        //twinkle boost, multiplication
+        _exp_add = _get_exp_add_from_twinkle(_summoner, _exp_add);
         //nui boost, multiplication with onChain boost
         if (_item_nui > 0) {
             _exp_add = _get_exp_add_from_nui(_summoner, _item_nui, _exp_add);
@@ -2274,6 +2240,24 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable, ReentrancyGuard {
         _exp_add = _exp_add * _percent/100;
         return _exp_add;
     }
+    function _get_exp_add_from_twinkle(uint _summoner, uint _exp_add) internal view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
+        Murasaki_Craft mc = Murasaki_Craft(ma.address_Murasaki_Craft());
+        address _owner = mfs.get_owner(_summoner);
+        uint _twinkle_1 = mc.balanceOfType(_owner, 251);
+        uint _twinkle_2 = mc.balanceOfType(_owner, 252);
+        uint _twinkle_3 = mc.balanceOfType(_owner, 253);
+        uint _twinkle_4 = mc.balanceOfType(_owner, 254);
+        uint _twinkle_5 = mc.balanceOfType(_owner, 255);
+        uint _res = _exp_add;
+        _res += _exp_add * _twinkle_1*10/10000;
+        _res += _exp_add * _twinkle_2*20/10000;
+        _res += _exp_add * _twinkle_3*30/10000;
+        _res += _exp_add * _twinkle_4*40/10000;
+        _res += _exp_add * _twinkle_5*50/10000;
+        return _res;
+    }
     function calc_feeding(uint _summoner) external view returns (uint) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
@@ -2286,45 +2270,7 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable, ReentrancyGuard {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Staking_Reward mfsl = Murasaki_Function_Staking_Reward(ma.address_Murasaki_Function_Staking_Reward());
         mfsl.update_staking_counter(_summoner);
-        /*
-        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
-        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
-        Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
-        Murasaki_Parameter mp = Murasaki_Parameter(ma.address_Murasaki_Parameter());
-        uint _speed = mfs.get_speed_of_dappsStaking(_summoner);
-        if (_speed > 0) {
-            uint _decrease = _speed * _delta_sec / 100;
-            uint _counter = ms.staking_reward_counter(_summoner);
-            //decrease counter sec
-            if (_counter > _decrease) {
-                _counter = _counter - _decrease;
-                ms.set_staking_reward_counter(_summoner, _counter);
-            //when counter <= 0, mint presentbox
-            } else {
-                address _owner = mfs.get_owner(_summoner);
-                _mint_presentbox(_summoner, _owner);
-                ms.set_staking_reward_counter(_summoner, mp.STAKING_REWARD_SEC());   //reset counter
-            }
-            //update total_counter
-            ms.set_total_staking_reward_counter(
-                _summoner,
-                ms.total_staking_reward_counter(_summoner) + _decrease
-            );
-        }
-        */
     }
-    /*
-    //mint presentbox
-    function _mint_presentbox(uint _summoner_from, address _wallet_to) internal {
-        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
-        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
-        Murasaki_Craft mc = Murasaki_Craft(ma.address_Murasaki_Craft());
-        uint _seed = mfs.seed(_summoner_from);
-        uint _item_type = 200;
-        string memory _memo = "dapps staking";
-        mc.craft(_item_type, uint(0), _wallet_to, _seed, _memo);
-    }
-    */
 
     //petrification, debends on only feeding
     function not_petrified(uint _summoner) internal view returns (bool) {
@@ -2383,6 +2329,8 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable, ReentrancyGuard {
         uint _exp_add = 3000 * (100 - _happy) / 100;
         //achv onChain boost
         _exp_add = _get_exp_add_from_achv_onChain(_summoner, _exp_add);
+        //twinkle boost, multiplication
+        _exp_add = _get_exp_add_from_twinkle(_summoner, _exp_add);
         //nui boost
         if (_item_nui > 0) {
             address _owner = mfs.get_owner(_summoner);
@@ -7842,7 +7790,6 @@ contract Admin_Convert is Ownable {
         mcNew._admin_set_next_item(_value);
     }
 }
-
 
 //===End==================================================================================================================
 

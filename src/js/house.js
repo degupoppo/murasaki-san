@@ -80,14 +80,81 @@ contract ERC721 is IERC721 {
 
 /*
 
-772
-1450
-847
-796
-724
-1774
-
 //### 1st
+
+    スナップショットスクリプトを実装する
+        pythonなどで、mm, mn, ms, mss, mns, mcの状態をローカルに記録するスクリプト
+            可能ならば、スナップショットからの回復コードの実装も検討する
+        また、ローカルに保存したデータの解析方法にも慣れておく
+
+    free mintの可能性を考えてみる
+        現在の流行はfee 2 playのフリーミアムモデルが主流
+            mint feeをかけさせて2-3ヶ月で原資回収するモデルは主流ではない
+            課金しないライトユーザーは無視して、
+                ハマってくれたヘビーユーザーに青空天井の課金を促すモデル
+            また、本作品は原資回収を計算すると1年以上必要で魅力が少ない
+        よって、資金集めはdapps staking rewardを主軸とし、
+            mint feeを小さく抑えることで参入障壁を限りなく低くするモデルを考えてみる。
+        デメリット：
+            dapps stakingインセンティブが現状では不十分
+                自発的にdapps stakingしてくれないと資金が入らない
+                現状、ステーキングによる恩恵が弱く、また分かりにくい
+            bot対策が弱くなる
+                mint feeを下げると大量のmulti-walletを利用したbotに脆弱になる
+                分散してstakingするのは手間ではあるのだが。
+                    しかし、stakingによるreward効率は量が増えると鈍化する設計なので、
+                    multi-walletによって分散させたstakingが最大効率になってしまうか。
+            バイバック資金の消失
+                staking rewardが貯まるには時間を要するので、
+                バイバックシステムでPJの価値を下支えすることが難しくなる。
+                参入人数が多くなればstaking報酬のみでバイバック資金を賄うのが難しくなる
+                多額のstakingをする人だけ集められればよいが、そうもいかないだろう
+                staking/wallet値はどのくらいになるのだろうか。
+                    500ぐらい行けば御の字だろうか。
+                単純な人気によってNFTの価値が決まるが、その分逃げ足も早くなるだろう
+            金銭的インセンティブの低下
+                無から有を生み出す必要があるため難易度が高くなる
+                最初の人質金が無いため、参入しやすく離れやすい
+        メリット：
+            金たかり層を排除できる可能性
+                無料であるため、mint feeとリターンのバランスに対する不満などが出にくい
+                    原資抜きに時間がかかって怒られる、といったことが少ない
+                気楽にプレイしてもらえる
+            セキュリティ周り
+                コントラクト上にお金をプールしないので狙われにくい
+            金融性の低下
+                ユーザー側の金融要素はdapps stakingにステーキングするだけ
+                    持金を直接預けず、目減りもしないのでほぼノーリスク
+                ユーザーが原資抜きを考えなくて良い
+                開発側はdapps stakingに入れて欲しくなるシステムを作り続けるだけ
+                    staking rewardをゲーム性の中心に持ってくる改革が必要
+                トーケノミクスなどにあまり頭を悩ませなくても良いと予想される
+                総じて、のんびりプレイ可能なバランスに設計できる
+        設計：
+            mint fee
+                10 $ASTRなど少額に設定する
+                すべてdev報酬とする
+                    もしくは全てバイバックトレジャリーに入れる
+            stakingインセンティブ
+                dapps stakingをゲーム性の中心に据える必要がある
+                staking=0だと如実に不利にする
+                staking量に応じてrewardと演出が良くなる
+                ただし、継続的なgameplayが最もreward効率が高くする
+                    stakingはあくまで継続的なplayの「効率」を上昇させる
+            bot対策
+                少額でも良いのでmint feeを設定する
+                NFTのtransferにはfeeをかける
+                明らかなmulti-walletは監視して手動でbanする
+            ユーザーのearn設計
+                主な手段はcraftしたNFTの売却益となる
+                100%市場任せだと買い手がつかずにすぐに無価値化するだろうか
+                mint回数にlimitを設定し希少価値を付けるのも手だが、設計上不適切だろう
+                やはり、treasury資金によるバイバックが安定するだろうか
+                mint feeを少し多めに設定し、全額treasuryに入れるか
+            Staking Treasuryの使用方法
+                従来設計ではバイバックtreasuryに入れていた
+                ユーザーに還元したいが、適切な方法はなんだろうか
+                ユーザーとdevが同時にearnできるシステム設計にしたい
 
     Buybackシステムの修正
         fluffy NFTのbuyback価格の設定
@@ -96,26 +163,30 @@ contract ERC721 is IERC721 {
             ちゃんと計算して設定する。
         fluffyやflyffierにも採算取れない程度に小さくて良いので価格を設定するか
         fluffy系列分の割当も計算する
+        現在の時価総額を表示する
+            今すべてを売り切ったらいくらになるか
+            自分のHoMの金銭的価値の位置づけ
+            そしてこの最低時価総額は決して下がらず、未来に向けて必ず上昇してゆく
+        むらさきさんをburnしたらいくらか返金されるシステムはどうだろうか
+            決して目減りしないオンチェーン資産、を表現したい
+            そしてこの資産価格は継続的なゲームプレイで価値が上がってゆく
 
-   *exp増加アイテムの構想
-        発表会、お散歩報酬、おもちゃのカンヅメ報酬などに使用する
-        一つ一つは+0.1%exp程度と小さな上昇率に留める
-        solidity実装案
-            種類ごとに別のitem_typeを用意するか？
-                countが大変なので、exp上昇率ごとに1種類にしたいところであるが
-            mcにsubtypeを実装してしまうか
-                exp補正率ごとに別typeで、その中での種類はsubtypeを参照する
-            例：
-                小さなきれいな石: すべてexp+0.03%, 色が12色ある
-                中くらいのきれいな石: すべてexp+0.05%, 色が6色ある、など
-            石シリーズ以外でも、exp+0.03%のアイテムはすべてこのitem_typeで処理する
-            amountOf * 0.03で補正率が算出しやすい
+    exp増加アイテムのUI実装
+        絵の決定
+            トロフィー？
+            きれいな石？
+            お花？
+            置き場所は？
         取得のタイミング
+            現状はstaking rewardでのみLv1が出現する
             なにか特別なアクションの報酬としたい
                 散歩の報酬
                     何も得られなかったら悲しいのでこれ以外の報酬も考える
                 発表会の報酬
                     飾って楽しいトロフィー, シーズンごとに異なる
+        合計+exp%の表示方法のUI実装
+            どこに表示させるか
+            ぬいちゃんboostをどうするか
 
    *お菓子の家の実装
      ok Solidity:
@@ -656,6 +727,26 @@ contract ERC721 is IERC721 {
 
 
 //### 3rd
+
+ ok exp増加アイテムのsolidity実装
+        発表会、お散歩報酬、おもちゃのカンヅメ報酬などに使用する
+        一つ一つは+0.1%exp程度と小さな上昇率に留める
+        solidity実装案
+            種類ごとに別のitem_typeを用意するか？
+                countが大変なので、exp上昇率ごとに1種類にしたいところであるが
+            mcにsubtypeを実装してしまうか
+                exp補正率ごとに別typeで、その中での種類はsubtypeを参照する
+            例：
+                小さなきれいな石: すべてexp+0.03%, 色が12色ある
+                中くらいのきれいな石: すべてexp+0.05%, 色が6色ある、など
+            石シリーズ以外でも、exp+0.03%のアイテムはすべてこのitem_typeで処理する
+            amountOf * 0.03で補正率が算出しやすい
+        取得のタイミング
+            なにか特別なアクションの報酬としたい
+                散歩の報酬
+                    何も得られなかったら悲しいのでこれ以外の報酬も考える
+                発表会の報酬
+                    飾って楽しいトロフィー, シーズンごとに異なる
 
  ok practice中のfeeding中にpracticeを抜けるとinstrumentが残っちゃうバグの修正
 
@@ -7811,22 +7902,37 @@ function open_window_voting(scene) {
 //---draw_firework
 function draw_firework(scene) {
     sound_fireworks2.play();
-    const { FloatBetween } = Phaser.Math;
     const emitterConfig = {
         alpha: { start: 1, end: 0, ease: 'Cubic.easeIn' },
         angle: { start: 0, end: 360, steps: 100 },
         blendMode: 'ADD',
         frame: { frames: ['red', 'yellow', 'green', 'blue'], cycle: true, quantity: 500 },
-        //frequency: 2000,
-        frequency: 500,
+        //frequency: 500,
         gravityY: 300,
         lifespan: 1000,
         quantity: 500,
+        stopAfter: 500,
         reserve: 500,
         scale: { min: 0.05, max: 0.15 },
         speed: { min: 300, max: 600 },
-        x: 512, y: 384,
+        //x: 512, y: 384,
     };
+    const { width, height } = scene.scale;
+    const { FloatBetween } = Phaser.Math;
+    for (let i=0; i<=2000; i+=500) {
+        scene.time.addEvent({
+            delay: i,
+            callback: () => {
+                let _x = width * FloatBetween(0.25, 0.75);
+                let _y = height * FloatBetween(0, 0.5);
+                const emitter = scene.add.particles(_x, _y, "par_flares", emitterConfig)
+                    .onParticleEmit( () => {
+                    sound_fireworks.play();
+                });
+            }
+        });
+    }
+    /*
     const particles = scene.add.particles('par_flares');
     const emitter = particles.createEmitter(emitterConfig);
     emitter.onParticleEmit( () => {
@@ -7847,6 +7953,7 @@ function draw_firework(scene) {
             emitter.stop();
         }
     });
+    */
 }
 
 
@@ -7859,8 +7966,9 @@ function draw_flower(scene, _x, _y) {
         //blendMode: 'ADD',
         gravityY: 900,
         lifespan: { min:_lifespan*0.8, max:_lifespan},
-        frequency: _lifespan+200,
+        //frequency: _lifespan+200,
         quantity: 20,
+        stopAfter: 20,
         timeScale: 0.9,
         reserve: 20,
         rotate: { min:0, max:360 },
@@ -7869,9 +7977,11 @@ function draw_flower(scene, _x, _y) {
         frame: [0,1,2,3,4,5],
         //x: 50+Math.random()*1100, 
         //y: 500+Math.random()*350,
-        x: _x, 
-        y: _y,
+        //x: _x, 
+        //y: _y,
     };
+    const emitter = scene.add.particles(_x, _y, "par_flowers", emitterConfig);
+    /*
     const particles = scene.add.particles('par_flowers')
         .setDepth(9999);
     const emitter = particles.createEmitter(emitterConfig);
@@ -7881,14 +7991,12 @@ function draw_flower(scene, _x, _y) {
             emitter.stop();
         }
     });
+    */
 }
 
 
 //---draw_glitter
 function draw_glitter(scene, _item) {
-//***TODO***
-//need: get giom of following image
-    //let _circle = new Phaser.Geom.Circle(0,0,50);
     let _geom = new Phaser.Geom.Rectangle(
         -_item.width * _item.scale/2, 
         -_item.height * _item.scale/2, 
@@ -7906,20 +8014,14 @@ function draw_glitter(scene, _item) {
         follow:     _item,
         origin:     0.5,
     };
+    const emitter = scene.add.particles(_item.x, _item.y, "par_glitter", emitterConfig);
+    /*
     const particles = scene.add.particles('par_glitter')
         .setDepth(9999+10);
     scene.time.addEvent({
         delay: Math.random() * 1000,
         callback: () => {
             const emitter = particles.createEmitter(emitterConfig);
-        }
-    });
-    //const emitter = particles.createEmitter(emitterConfig);
-    /*
-    scene.time.addEvent({
-        delay: _lifespan+300000,
-        callback: () => {
-            emitter.stop();
         }
     });
     */
@@ -7931,59 +8033,65 @@ function draw_star(scene, _x, _y) {
     let _lifespan = 400;
     const emitterConfig = {
         alpha: 0.5,
-        //angle: { min: 250, max: 290 },
         angle: { min: 0, max: 360 },
         //blendMode: 'ADD',
         gravityY: 400,
         lifespan: { min:_lifespan*0.7, max:_lifespan},
-        frequency: _lifespan+200,
+        //frequency: _lifespan+200,
+        //duration: _lifespan+200,
         quantity: 15,
+        stopAfter: 15,
         timeScale: 0.9,
-        reserve: 15,
+        //reserve: 15,
         rotate: { min:0, max:360 },
         scale: { min: 0.05, max: 0.08 },
         speed: { min: 50, max: 300 },
         frame: [0,1,2,3,4,5,6,7],
-        //x: 50+Math.random()*1100, 
-        //y: 500+Math.random()*350,
-        x: _x, 
-        y: _y,
     };
+    /*
     const particles = scene.add.particles('par_stars')
         .setDepth(9999+200);
     const emitter = particles.createEmitter(emitterConfig);
+    */
+    const emitter = scene.add.particles(_x, _y, "par_stars", emitterConfig);
+    /*
     scene.time.addEvent({
         delay: _lifespan+100,
         callback: () => {
             emitter.stop();
         }
     });
+    */
 }
 
 
 //---draw_fluffyBit
 function draw_fluffyBit(scene, _x, _y) {
-    let _lifespan = 500;
+    let _lifespan = 900;
     const emitterConfig = {
         alpha: 0.5,
-        //angle: { min: 250, max: 290 },
-        angle: { min: 0, max: 360 },
+        angle: { min: 250, max: 290 },
+        //angle: { min: 0, max: 360 },
         //blendMode: 'ADD',
         gravityY: 400,
         lifespan: { min:_lifespan*0.7, max:_lifespan},
-        frequency: _lifespan+200,
+        //frequency: _lifespan+200,
         quantity: 20,
+        stopAfter: 20,
         timeScale: 0.9,
         reserve: 20,
         rotate: { min:0, max:360 },
-        scale: { min: 0.05, max: 0.10 },
+        //scale: { min: 0.05, max: 0.10 },
+        scale: { min: 0.03, max: 0.06 },
         speed: { min: 50, max: 300 },
         frame: [0,1,2,3,4,5,6,7,8,9,10,11],
         //x: 50+Math.random()*1100, 
         //y: 500+Math.random()*350,
-        x: _x, 
-        y: _y,
+        //x: _x, 
+        //y: _y,
     };
+    const emitter = scene.add.particles(_x, _y, "par_fluffys", emitterConfig);
+    /*
     const particles = scene.add.particles('par_fluffys')
         .setDepth(9999);
     const emitter = particles.createEmitter(emitterConfig);
@@ -7993,6 +8101,7 @@ function draw_fluffyBit(scene, _x, _y) {
             emitter.stop();
         }
     });
+    */
 }
 
 

@@ -81,7 +81,7 @@ async function initialize_contract() {
     contract_mfn.methods._set_Murasaki_Address(address_Murasaki_Address).send({from:wallet});
     contract_mfa.methods._set_Murasaki_Address(address_Murasaki_Address).send({from:wallet});
     contract_mfp.methods._set_Murasaki_Address(address_Murasaki_Address).send({from:wallet});
-    contract_mfsl.methods._set_Murasaki_Address(address_Murasaki_Address).send({from:wallet});
+    contract_mfst.methods._set_Murasaki_Address(address_Murasaki_Address).send({from:wallet});
 
     //Independent
     contract_md.methods._set_Murasaki_Address(address_Murasaki_Address).send({from:wallet});
@@ -114,59 +114,34 @@ async function initialize_contract() {
     contract_mc.methods._add_noFee_address(address_BuybackTreasury).send({from:wallet});
     
     //achievement_onChain, with dummy address
-    contract_ac.methods._set_tokens(1, "0xF458Fd09b0ceFd288B98A43D987B8F1A1C3a7BBF").send({from:wallet});
-    contract_ac.methods._set_tokens(2, "0xF458Fd09b0ceFd288B98A43D987B8F1A1C3a7BBF").send({from:wallet});
-    contract_ac.methods._set_tokens(3, "0xF458Fd09b0ceFd288B98A43D987B8F1A1C3a7BBF").send({from:wallet});
-    contract_ac.methods._set_tokens(4, "0xF458Fd09b0ceFd288B98A43D987B8F1A1C3a7BBF").send({from:wallet});
-    contract_ac.methods._set_tokens(5, "0xF458Fd09b0ceFd288B98A43D987B8F1A1C3a7BBF").send({from:wallet});
-    contract_ac.methods._set_tokens(6, "0xF458Fd09b0ceFd288B98A43D987B8F1A1C3a7BBF").send({from:wallet});
-    contract_ac.methods._set_tokens(7, "0xF458Fd09b0ceFd288B98A43D987B8F1A1C3a7BBF").send({from:wallet});
-    contract_ac.methods._set_tokens(8, "0xF458Fd09b0ceFd288B98A43D987B8F1A1C3a7BBF").send({from:wallet});
-    contract_ac.methods._set_tokens(9, "0xF458Fd09b0ceFd288B98A43D987B8F1A1C3a7BBF").send({from:wallet});
-    contract_ac.methods._set_tokens(10, "0xF458Fd09b0ceFd288B98A43D987B8F1A1C3a7BBF").send({from:wallet});
+    contract_ac.methods._set_tokens(1, "0x0a5Cc09bF95E4e7E6c1a73d02E4178782612251b").send({from:wallet});
+    contract_ac.methods._set_tokens(2, "0x0a5Cc09bF95E4e7E6c1a73d02E4178782612251b").send({from:wallet});
+    contract_ac.methods._set_tokens(3, "0x0a5Cc09bF95E4e7E6c1a73d02E4178782612251b").send({from:wallet});
+    contract_ac.methods._set_tokens(4, "0x0a5Cc09bF95E4e7E6c1a73d02E4178782612251b").send({from:wallet});
+    contract_ac.methods._set_tokens(5, "0x0a5Cc09bF95E4e7E6c1a73d02E4178782612251b").send({from:wallet});
+    contract_ac.methods._set_tokens(6, "0x0a5Cc09bF95E4e7E6c1a73d02E4178782612251b").send({from:wallet});
+    contract_ac.methods._set_tokens(7, "0x0a5Cc09bF95E4e7E6c1a73d02E4178782612251b").send({from:wallet});
+    contract_ac.methods._set_tokens(8, "0x0a5Cc09bF95E4e7E6c1a73d02E4178782612251b").send({from:wallet});
+    contract_ac.methods._set_tokens(9, "0x0a5Cc09bF95E4e7E6c1a73d02E4178782612251b").send({from:wallet});
+    contract_ac.methods._set_tokens(10, "0x0a5Cc09bF95E4e7E6c1a73d02E4178782612251b").send({from:wallet});
     contract_ac.methods._set_token_number(10).send({from:wallet});    
-    contract_ac.methods._set_nfts(1, "0xF458Fd09b0ceFd288B98A43D987B8F1A1C3a7BBF").send({from:wallet});
-    contract_ac.methods._set_nfts(2, "0xF458Fd09b0ceFd288B98A43D987B8F1A1C3a7BBF").send({from:wallet});
-    contract_ac.methods._set_nfts(3, "0xF458Fd09b0ceFd288B98A43D987B8F1A1C3a7BBF").send({from:wallet});
-    contract_ac.methods._set_nfts(4, "0xF458Fd09b0ceFd288B98A43D987B8F1A1C3a7BBF").send({from:wallet});
-    contract_ac.methods._set_nfts(5, "0xF458Fd09b0ceFd288B98A43D987B8F1A1C3a7BBF").send({from:wallet});
-    contract_ac.methods._set_nfts(6, "0xF458Fd09b0ceFd288B98A43D987B8F1A1C3a7BBF").send({from:wallet});
-    contract_ac.methods._set_nfts(7, "0xF458Fd09b0ceFd288B98A43D987B8F1A1C3a7BBF").send({from:wallet});
-    contract_ac.methods._set_nfts(8, "0xF458Fd09b0ceFd288B98A43D987B8F1A1C3a7BBF").send({from:wallet});
-    contract_ac.methods._set_nfts(9, "0xF458Fd09b0ceFd288B98A43D987B8F1A1C3a7BBF").send({from:wallet});
-    contract_ac.methods._set_nfts(10, "0xF458Fd09b0ceFd288B98A43D987B8F1A1C3a7BBF").send({from:wallet});
+    contract_ac.methods._set_nfts(1, "0x0a5Cc09bF95E4e7E6c1a73d02E4178782612251b").send({from:wallet});
+    contract_ac.methods._set_nfts(2, "0x0a5Cc09bF95E4e7E6c1a73d02E4178782612251b").send({from:wallet});
+    contract_ac.methods._set_nfts(3, "0x0a5Cc09bF95E4e7E6c1a73d02E4178782612251b").send({from:wallet});
+    contract_ac.methods._set_nfts(4, "0x0a5Cc09bF95E4e7E6c1a73d02E4178782612251b").send({from:wallet});
+    contract_ac.methods._set_nfts(5, "0x0a5Cc09bF95E4e7E6c1a73d02E4178782612251b").send({from:wallet});
+    contract_ac.methods._set_nfts(6, "0x0a5Cc09bF95E4e7E6c1a73d02E4178782612251b").send({from:wallet});
+    contract_ac.methods._set_nfts(7, "0x0a5Cc09bF95E4e7E6c1a73d02E4178782612251b").send({from:wallet});
+    contract_ac.methods._set_nfts(8, "0x0a5Cc09bF95E4e7E6c1a73d02E4178782612251b").send({from:wallet});
+    contract_ac.methods._set_nfts(9, "0x0a5Cc09bF95E4e7E6c1a73d02E4178782612251b").send({from:wallet});
+    contract_ac.methods._set_nfts(10, "0x0a5Cc09bF95E4e7E6c1a73d02E4178782612251b").send({from:wallet});
     contract_ac.methods._set_nft_number(10).send({from:wallet});    
-    contract_ac.methods._set_Murasaki_NFT("0xF458Fd09b0ceFd288B98A43D987B8F1A1C3a7BBF").send({from:wallet});    
+    contract_ac.methods._set_Murasaki_NFT("0x0a5Cc09bF95E4e7E6c1a73d02E4178782612251b").send({from:wallet});    
 
     //activate
     contract_mp.methods._set_isPaused(false).send({from:wallet});
 }
 
-
-async function test() {
-
-    //let web3 = await connect();
-    // HttpProviderでなくWebsocketProviderなので注意
-    console.log(-1);
-    //const web3 = await new Web3(new Web3.providers.WebsocketProvider("http://192.168.31.134:9944"));
-    let web3 = await connect();
-    console.log(0);
-
-    (async () => {
-        const contractAddress = "0x546a4b3806Db53384308b21e195Be5559891A55d";
-        const abi = [{"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint32","name":"_summoner","type":"uint32"},{"indexed":false,"internalType":"uint256","name":"_price","type":"uint256"}],"name":"Cure_Petrification","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint32","name":"_summoner","type":"uint32"},{"indexed":false,"internalType":"uint32","name":"_exp_gained","type":"uint32"}],"name":"Feeding","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint32","name":"_summoner","type":"uint32"},{"indexed":false,"internalType":"uint32","name":"_exp_gained","type":"uint32"}],"name":"Grooming","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"inputs":[{"internalType":"address","name":"_address","type":"address"}],"name":"_set1_murasaki_function_share_address","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint32","name":"_summoner","type":"uint32"}],"name":"cure_petrification","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"uint32","name":"_summoner","type":"uint32"}],"name":"feeding","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint32","name":"_summoner","type":"uint32"}],"name":"grooming","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"murasaki_function_share_address","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint32","name":"_summoner","type":"uint32"}],"name":"not_petrified","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"string","name":"pBaseURI","type":"string"}],"name":"setBaseURI","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"rdg","type":"address"}],"name":"setRDG","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"rec","type":"address"}],"name":"withdraw","outputs":[],"stateMutability":"nonpayable","type":"function"}];
-
-        const MappingStorage = await new web3.eth.Contract(abi, contractAddress);
-        console.log(1);
-
-        // {}内に色々入れることで購読するイベントをフィルタリングできます、詳しくは後述のドキュメント参照
-        MappingStorage.events.Feeding({}, (err, event) => {
-            console.log(`event called: ${event.event}`);
-            console.log(JSON.stringify(event, null, "    "));
-        });
-    })();
-
-}
 
 
 async function main() {
