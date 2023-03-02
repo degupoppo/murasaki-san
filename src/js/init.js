@@ -66,6 +66,7 @@ async function initialize_contract() {
     contract_mss.methods._add_permitted_address(address_Murasaki_Function_Crafting).send({from:wallet});
     contract_mss.methods._add_permitted_address(address_Murasaki_Function_Crafting2).send({from:wallet});
     contract_mss.methods._add_permitted_address(address_Murasaki_Function_Name).send({from:wallet});
+    contract_mss.methods._add_permitted_address(address_Murasaki_Function_Staking_Reward).send({from:wallet});
     contract_msn.methods._add_permitted_address(address_Murasaki_Function_Crafting).send({from:wallet});
     contract_msn.methods._add_permitted_address(address_Murasaki_Function_Crafting2).send({from:wallet});
     

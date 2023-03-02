@@ -82,79 +82,158 @@ contract ERC721 is IERC721 {
 
 //### 1st
 
+    Petとのふれあい機能の実装
+        Petと当たり判定したときに専用の演出を実装する
+        ハマらないようクールタイムを用意する
+
+    体験SBTの設計
+        別のmmを用意する
+            summoner IDに紐付いたms, mss, mnも別コントラが必要
+            admin converterのようなコントラでパラメータをコンバートする必要がある
+            かなり複雑になるが、エラーなく実装できるだろうか
+        mint関数と、convert関数を別に用意する
+            convert関数は引数はsummoner IDのみとする
+                でないと引数上限に引っかかるだろうか
+            require(flag_convert=0)
+            require(owner check)
+        mint関数
+            正式mmでmintする
+            正式summoner idが割り振られる
+        convert関数
+            mint関数に続いて同一tx内でconvertする
+            convert_mm(summoner_trial, summoner)
+            convert_ms(summoner_trial, summoner)
+            convert_mss(summoner_trial, summoner)
+
+    開始直後の調整の本質
+        初日中にゲーム性を体験できるイベントを発生させる
+            盛りすぎない、期待させすぎない
+            低頻度・長期間ほのぼのプレイであることを理解してもらう
+        3日目までは毎日新しい体験を提供する
+            1日目：
+                数回のお世話でレベルアップ
+                    Lv1 → Lv2
+                mining, farming解禁
+            2日目
+                Lv3へレベルアップ
+                crafting解禁
+                fluffyと出会う
+                    Lv3の特別報酬とするか
+            3日目
+                最初のクラフト品完成
+                    最初は低コスト、24 hrなどで完了とする
+            7日目までに
+                最低限のアイテムのクラフト完了
+                    iPad, Nameplate, MusicBoxの3つぐらい
+                    すべて資源1d, クラフト1d程度の難易度調整にする
+                    craft, 1d, coin or material: 1000程度
+        7日目までに一通りゲーム性が理解できるよう設計する
+            この7日目ぐらいで正式SBTのmintを促す
+        体験SBTの制限
+            マーケット不可
+            バイバック不可
+            Lv3上限
+        体験SBTの許可
+            名前SBTのmint
+            正式NFTのmint
+        問題点
+            体験SBTと正式SBTのIDが異なるため、lootlikeの属性が変わってしまう
+                lootlikeはwalletのみに依存させるよう修正が必要
+            無料なため、大量の体験SBTで大量のアイテムNFTをmintできてしまう
+            最初のクラフト時は低コストにする必要があるが、簡単にupgrade可能になってしまう
+                first ticketなどの別の機構が必要
+            体験SBT→正式SBTへのパラメータ引き継ぎが可能だろうか
+                msやmssなどもsummoner IDが変わるのですべてtransferする必要がある
+
+    mint直後の立ち上がりのバランス調整
+        流石にゲーム開始時の楽しみが弱すぎるだろう
+        初日中に何かしらのイベントを発生させる
+        1週間以内に必須のアイテムぐらいはクラフト可能にする
+        どこかのタイミングで正式SBTへの移行を促す
+        最も大事な、ゲーム開始から1-2週間のバランスを試行錯誤する
+        その後はmint feeがある意味人質になる
+            mint後は脱落者が増えるほど継続者の利益が増えるシステム
+        スタート直後：
+            presentboxを1つ同時にmintさせる
+            ないないさんを使って各種ボタンの説明を表示させる
+            24時間以内にLv2へレベルアップ可能にする
+        スタート3日後：
+            Lv3へレベルアップ可能にする
+        スタート7日後：
+            初期の1-2個のアイテムNFTをcraft完了可能にする
+            name plate, iPad, Musicbox
+        ゲーム性の中心はなにか
+            できるだけ早いタイミングで推しのゲーム性を体験してもらう
+            毎日継続してお世話することで少しずつ成長するNFT（SBT）
+                「成長」と「蓄積」を実感できる体験はなにか
+                    レベル？
+                    ステータス？
+                    資源の増加？
+            得た資源を支払って新しいNFTをmintする拡大再生産
+                拡大再生産を実感できる体験はなにか
+            目減りしない資産価値
+                バイバックで担保されたNFTの価値
+                「時価総額」としてUI内に表示させる
+
+    free2play機構の検討、体験版機能の検討
+        いきなり$10-20払ってくれというのは参入障壁が高すぎる
+            加えて、NFTではなく移動できないSBTなので気軽に購入しにくいだろう
+            ape inした層から売れない移動できない、といった苦情やトラブルが多いと思われる
+        そのため、例えばLv3程度、最初の1週間程度は機能制限ありの体験summonerとする
+            気に入れば、正式SBTを購入して継続してプレイできる
+            このほうが、将来的な利益が大きいだろう
+        体験SBTの時は機能制限を付ける：
+            マーケットの使用不可
+                バイバックも使用不可
+            Lv4以上へあげられない
+            アイテムクラフトやfluffy NFTはどうするか
+                体験NFTとし、正式summoner mint時に正式NFTに変換される
+                正式NFTをmint可能とする
+            名前SBTはどうするか
+                特に弊害はないので正式SBTでよいだろうか
+            クラフト回数に制限をかける
+                3回、など。
+            fluffyはどうするか
+                3匹までしか得られない、など。
+        bot対策
+            体験summonerがfree mintの場合、大量にmintし運用することで
+                正式summoner側の経済が破壊されることは避けなければならない
+            例えば、正式NFTをmint可としておくと、
+                大量の体験summonerから低レベルとはいえ大量の正式NFTが放出されうる
+                bankやpouchなどが大量に出回るとまずい
+                これは公式マーケットを使用不可としていても、裏マーケットなどで起こりうること
+            また、体験summonerでひたすらcoinを掘り続けるというプレイも可能になる
+                どこかで蓄積coin<mint feeとなったところで正式summonerをmintし
+                profitを得るという力技が可能になってしまう。
+            かといって制限をかけすぎると面白くない体験playとなってしまうだろう
+                例えばNFTは一切mint/craftできない、などはつまらなさそう
+
+    天気を実装する
+       *UI側だけの演出
+            ASTR価格が前日比プラスなら晴れ
+            前日比マイナスなら雨
+            基準はUTC0で（日本時間朝9時）
+            これぐらいのさりげない演出で良いだろう
+            あるいは、+10%>, 1-10%, -1~-10%, -10%<の5段階とかでも良いか。
+                大雨(<-10%)、小雨(-10%~-3%)、曇(-3%~+3%)、晴れ(+3%~+10%)、快晴(>+10%)、など
+        dexscreener API:
+            https://api.dexscreener.com/latest/dex/pairs/astar/0x806f746a7c4293092ac7aa604347be123322df1e
+     ok ASTR/USDT価格取得コード：
+            let request = new XMLHttpRequest();
+            astar_price_data = "";
+            request.open("GET", "https://api.dexscreener.com/latest/dex/pairs/astar/0x806f746a7c4293092ac7aa604347be123322df1e", URL, true);
+            request.onload = function () {
+                astar_price_data = this.response;
+                console.log(astar_price_data);
+            };
+            request.send();
+            let _json = JSON.parse(astar_price_data);
+            let _astar_priceChange_h24 = _json.pair.priceChange.h24
+
     スナップショットスクリプトを実装する
         pythonなどで、mm, mn, ms, mss, mns, mcの状態をローカルに記録するスクリプト
             可能ならば、スナップショットからの回復コードの実装も検討する
         また、ローカルに保存したデータの解析方法にも慣れておく
-
-    free mintの可能性を考えてみる
-        現在の流行はfee 2 playのフリーミアムモデルが主流
-            mint feeをかけさせて2-3ヶ月で原資回収するモデルは主流ではない
-            課金しないライトユーザーは無視して、
-                ハマってくれたヘビーユーザーに青空天井の課金を促すモデル
-            また、本作品は原資回収を計算すると1年以上必要で魅力が少ない
-        よって、資金集めはdapps staking rewardを主軸とし、
-            mint feeを小さく抑えることで参入障壁を限りなく低くするモデルを考えてみる。
-        デメリット：
-            dapps stakingインセンティブが現状では不十分
-                自発的にdapps stakingしてくれないと資金が入らない
-                現状、ステーキングによる恩恵が弱く、また分かりにくい
-            bot対策が弱くなる
-                mint feeを下げると大量のmulti-walletを利用したbotに脆弱になる
-                分散してstakingするのは手間ではあるのだが。
-                    しかし、stakingによるreward効率は量が増えると鈍化する設計なので、
-                    multi-walletによって分散させたstakingが最大効率になってしまうか。
-            バイバック資金の消失
-                staking rewardが貯まるには時間を要するので、
-                バイバックシステムでPJの価値を下支えすることが難しくなる。
-                参入人数が多くなればstaking報酬のみでバイバック資金を賄うのが難しくなる
-                多額のstakingをする人だけ集められればよいが、そうもいかないだろう
-                staking/wallet値はどのくらいになるのだろうか。
-                    500ぐらい行けば御の字だろうか。
-                単純な人気によってNFTの価値が決まるが、その分逃げ足も早くなるだろう
-            金銭的インセンティブの低下
-                無から有を生み出す必要があるため難易度が高くなる
-                最初の人質金が無いため、参入しやすく離れやすい
-        メリット：
-            金たかり層を排除できる可能性
-                無料であるため、mint feeとリターンのバランスに対する不満などが出にくい
-                    原資抜きに時間がかかって怒られる、といったことが少ない
-                気楽にプレイしてもらえる
-            セキュリティ周り
-                コントラクト上にお金をプールしないので狙われにくい
-            金融性の低下
-                ユーザー側の金融要素はdapps stakingにステーキングするだけ
-                    持金を直接預けず、目減りもしないのでほぼノーリスク
-                ユーザーが原資抜きを考えなくて良い
-                開発側はdapps stakingに入れて欲しくなるシステムを作り続けるだけ
-                    staking rewardをゲーム性の中心に持ってくる改革が必要
-                トーケノミクスなどにあまり頭を悩ませなくても良いと予想される
-                総じて、のんびりプレイ可能なバランスに設計できる
-        設計：
-            mint fee
-                10 $ASTRなど少額に設定する
-                すべてdev報酬とする
-                    もしくは全てバイバックトレジャリーに入れる
-            stakingインセンティブ
-                dapps stakingをゲーム性の中心に据える必要がある
-                staking=0だと如実に不利にする
-                staking量に応じてrewardと演出が良くなる
-                ただし、継続的なgameplayが最もreward効率が高くする
-                    stakingはあくまで継続的なplayの「効率」を上昇させる
-            bot対策
-                少額でも良いのでmint feeを設定する
-                NFTのtransferにはfeeをかける
-                明らかなmulti-walletは監視して手動でbanする
-            ユーザーのearn設計
-                主な手段はcraftしたNFTの売却益となる
-                100%市場任せだと買い手がつかずにすぐに無価値化するだろうか
-                mint回数にlimitを設定し希少価値を付けるのも手だが、設計上不適切だろう
-                やはり、treasury資金によるバイバックが安定するだろうか
-                mint feeを少し多めに設定し、全額treasuryに入れるか
-            Staking Treasuryの使用方法
-                従来設計ではバイバックtreasuryに入れていた
-                ユーザーに還元したいが、適切な方法はなんだろうか
-                ユーザーとdevが同時にearnできるシステム設計にしたい
 
     Buybackシステムの修正
         fluffy NFTのbuyback価格の設定
@@ -727,6 +806,108 @@ contract ERC721 is IERC721 {
 
 
 //### 3rd
+
+ ok working時にemitterを表示させる
+        mining: コインが飛び出す
+        farming: 葉っぱが降ってくる
+        crafing: ?
+
+ ok crafting UIの改善
+        item indicatorの下に進捗バーを表示させる
+        → 残り時間を％に変換するのが困難
+        → また、3日とかなので、％表記は不適切だろうか
+        → 解決した。導入OK
+    
+ ok random presentのコード修正
+        mailと同様に5回ループで候補を探すよう修正する
+        5回施行ならば：
+            active user 80%で失敗率0.032%
+            active user 50%で失敗率3.125%
+            active user 20%で失敗率32.76%
+        これならば、体験SBTと正式SBTをms内のフラグ管理しても大丈夫だろうか
+            体験SBTの20%が正式SBTに移行したとすると、成功率70%程度
+        しかし、やはり正式IDが汚染されるのは何かとコントロールが面倒そうなので、
+            正式IDを割り振るのはmint fee払ったwallet数にすべきか
+
+ ng free mintの可能性を考えてみる
+        → 体験play機構を実装することとする
+        現在の流行はfee 2 playのフリーミアムモデルが主流
+            mint feeをかけさせて2-3ヶ月で原資回収するモデルは主流ではない
+            課金しないライトユーザーは無視して、
+                ハマってくれたヘビーユーザーに青空天井の課金を促すモデル
+            また、本作品は原資回収を計算すると1年以上必要で魅力が少ない
+        よって、資金集めはdapps staking rewardを主軸とし、
+            mint feeを小さく抑えることで参入障壁を限りなく低くするモデルを考えてみる。
+            廃課金機構はつくらずに、有利に進めたい人はstaking量を多くしてもらう
+                Astarエコシステムにも良いだろう
+        デメリット：
+            dapps stakingインセンティブが現状では不十分
+                自発的にdapps stakingしてくれないと資金が入らない
+                現状、ステーキングによる恩恵が弱く、また分かりにくい
+            bot対策が弱くなる
+                mint feeを下げると大量のmulti-walletを利用したbotに脆弱になる
+                分散してstakingするのは手間ではあるのだが。
+                    しかし、stakingによるreward効率は量が増えると鈍化する設計なので、
+                    multi-walletによって分散させたstakingが最大効率になってしまうか。
+            バイバック資金の消失
+                staking rewardが貯まるには時間を要するので、
+                バイバックシステムでPJの価値を下支えすることが難しくなる。
+                参入人数が多くなればstaking報酬のみでバイバック資金を賄うのが難しくなる
+                多額のstakingをする人だけ集められればよいが、そうもいかないだろう
+                staking/wallet値はどのくらいになるのだろうか。
+                    500ぐらい行けば御の字だろうか。
+                単純な人気によってNFTの価値が決まるが、その分逃げ足も早くなるだろう
+            金銭的インセンティブの低下
+                無から有を生み出す必要があるため難易度が高くなる
+                最初の人質金が無いため、参入しやすく離れやすい
+            課金要素が貧弱
+                ヘビーユーザーからの集金機構が今のままでは弱いと思われる
+                完全なフリーミアムは課金機構とセットで考えるべきだろう。
+        メリット：
+            金たかり層を排除できる可能性
+                無料であるため、mint feeとリターンのバランスに対する不満などが出にくい
+                    原資抜きに時間がかかって怒られる、といったことが少ない
+                気楽にプレイしてもらえる
+            セキュリティ周り
+                コントラクト上にお金をプールしないので狙われにくい
+            金融性の低下
+                ユーザー側の金融要素はdapps stakingにステーキングするだけ
+                    持金を直接預けず、目減りもしないのでほぼノーリスク
+                ユーザーが原資抜きを考えなくて良い
+                開発側はdapps stakingに入れて欲しくなるシステムを作り続けるだけ
+                    staking rewardをゲーム性の中心に持ってくる改革が必要
+                トーケノミクスなどにあまり頭を悩ませなくても良いと予想される
+                総じて、のんびりプレイ可能なバランスに設計できる
+        設計：
+            mint fee
+                10 $ASTRなど少額に設定する
+                すべてdev報酬とする
+                    もしくは全てバイバックトレジャリーに入れる
+            stakingインセンティブ
+                dapps stakingをゲーム性の中心に据える必要がある
+                staking=0だと如実に不利にする
+                staking量に応じてrewardと演出が良くなる
+                ただし、継続的なgameplayが最もreward効率が高くする
+                    stakingはあくまで継続的なplayの「効率」を上昇させる
+            bot対策
+                少額でも良いのでmint feeを設定する
+                NFTのtransferにはfeeをかける
+                明らかなmulti-walletは監視して手動でbanする
+            ユーザーのearn設計
+                主な手段はcraftしたNFTの売却益となる
+                100%市場任せだと買い手がつかずにすぐに無価値化するだろうか
+                mint回数にlimitを設定し希少価値を付けるのも手だが、設計上不適切だろう
+                やはり、treasury資金によるバイバックが安定するだろうか
+                mint feeを少し多めに設定し、全額treasuryに入れるか
+            Staking Treasuryの使用方法
+                従来設計ではバイバックtreasuryに入れていた
+                ユーザーに還元したいが、適切な方法はなんだろうか
+                ユーザーとdevが同時にearnできるシステム設計にしたい
+
+ ig クラフトUIの改善
+        未クラフトアイテムをセレクトした時に、グレースケールのアイテムを表示させる
+            → 半透明とする
+        アイテム初期位置の調整
 
  ok exp増加アイテムのsolidity実装
         発表会、お散歩報酬、おもちゃのカンヅメ報酬などに使用する
@@ -1805,6 +1986,8 @@ async function init_global_variants() {
     staking_reward_percent = 0;
     //item_hat_helmet = 0;
     //item_hat_mortarboard = 0;
+    local_astar_priceChange_h24 = 0;
+    local_staking_percent = 0;
 
     //---flag
     flag_music = 0;
@@ -2363,6 +2546,9 @@ async function contract_update_dynamic_status(_summoner) {
     local_practice_level_horn = Number(_all_dynamic_status[81]);
     local_practice_level_timpani = Number(_all_dynamic_status[82]);
     local_practice_level_cello = Number(_all_dynamic_status[83]);
+    
+    //staking
+    local_staking_reward_percent = Number(_all_dynamic_status[84]);
     
     //update last_sync_time
     last_sync_time = Date.now();
@@ -3104,6 +3290,15 @@ async function contract_stop_practice(_summoner) {
         .on("receipt", (receipt) => update_tx_text("done", receipt.transactionHash));
 }
 
+//open open_staking_reward
+async function open_staking_reward(_summoner) {
+    if(wallet == local_owner) {
+        contract_mfst.methods.open_staking_reward(_summoner).send({from:wallet})
+            .on("transactionHash", (transactionHash) => update_tx_text("sending", transactionHash))
+            .on("receipt", (receipt) => update_tx_text("done", receipt.transactionHash));
+    }
+}
+
 
 //---eventMonitor
 
@@ -3140,6 +3335,21 @@ function start_eventMonitor() {
     eventMonitor(contract_mml_wss, li_eventLog);
     eventMonitor(contract_ff_wss, li_eventLog);
     eventMonitor(contract_bt_wss, li_eventLog);
+}
+
+//---get ASTR price
+
+
+function update_astarPrice() {
+    let _request = new XMLHttpRequest();
+    _request.open("GET", "https://api.dexscreener.com/latest/dex/pairs/astar/0x806f746a7c4293092ac7aa604347be123322df1e", URL, true);
+    _request.onload = function () {
+        let _res = this.response;
+        let _json = JSON.parse(_res);
+        let _astar_priceChange_h24 = _json.pair.priceChange.h24;
+        local_astar_priceChange_h24 = _astar_priceChange_h24;
+    };
+    _request.send();
 }
 
 //===class========================================================
@@ -3617,6 +3827,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             this.anims.play("murasaki_mining", true);
             if (this.count % 400 == 10) {
                 sound_mining_during.play();
+                summon_coin(this.scene);
             }
             if (happy <= 0) {
                 this.anims.play("murasaki_sleeping", true);
@@ -3669,6 +3880,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             this.anims.play("murasaki_farming", true);
             if (this.count % 400 == 10) {
                 sound_farming_during.play();
+                summon_leaf(this.scene);
             }
             if (happy <= 0) {
                 this.anims.play("murasaki_sleeping", true);
@@ -3708,6 +3920,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             this.anims.play("murasaki_crafting", true);
             if (this.count % 500 == 10) {
                 sound_crafting_during.play();
+                summon_flower(this.scene);
             }
             if (happy <= 0) {
                 this.anims.play("murasaki_sleeping", true);
@@ -4734,7 +4947,7 @@ class Dice extends Phaser.GameObjects.Sprite{
         this.count = 0;
         this.line_y = y;      //initial value of line_y, the same as first position of y
         this.line_y_max = 500;  //max floor position
-        this.line_y_min = 620;
+        this.line_y_min = 700;
         this.line_x_r = 1200;   //right side
         this.line_x_l = 50;     //left side
         //contract parameter
@@ -5287,6 +5500,58 @@ class Note extends Phaser.GameObjects.Sprite{
         }
     }
 }
+
+
+//---Coin
+class Coin extends Phaser.GameObjects.Sprite{
+
+    constructor(scene, x, y, img){
+        super(scene, x, y, img);
+        this.scene.add.existing(this);
+        this.speed_x = 0;
+        this.speed_y = 0;
+        this.line_y = 0;
+        this.count = 0;
+        this.on_summon();
+    }
+    
+    //### on_summon
+    on_summon() {
+        this.x = murasakisan.x + Math.random() * 5;
+        this.y = murasakisan.y + Math.random() * 10;
+        this.line_y = this.y;
+        this.speed_x = 3 + Math.random() * 1;
+        if (Math.random() > 0.5) {
+            this.speed_x *= -1;
+        }
+        this.speed_y = 9 + Math.random() * 3;
+        this.count = 0;
+    }
+    
+    //### update()
+    update(){
+        this.count += 1;
+        //check alive time
+        if (this.count >= 100) {
+            this.destroy();
+        }
+        this.setDepth(this.line_y);
+        //reduction of y speed
+        this.speed_y -= 0.6;
+        //position moving
+        this.x += this.speed_x;
+        this.y -= this.speed_y;
+        //increase angle
+        this.angle += this.speed_x * 5;
+        //refrection y
+        if (this.y >= this.line_y) {
+            this.y = this.line_y;
+            this.speed_y *= -0.3;   //y bounce
+            this.speed_x *= 0.9;    //x friction
+        }
+    }
+}
+
 
 
 //---Fluffy2
@@ -6665,6 +6930,15 @@ function makeBar(scene, x, y, color) {
     //return the bar
     return bar;
 }
+function makeMiniProgressBar(scene, x, y, length, width, color) {
+    let bar = scene.add.graphics();
+    bar.fillStyle(color, 1);
+    bar.fillRect(0, 0, length, width);
+    bar.x = x;
+    bar.y = y;
+    bar.depth = y+10;
+    return bar;
+}
 
 //---button
 //TODO: send transaction
@@ -6917,6 +7191,69 @@ function open_window_summon(scene) {
 
 
 //---window:craft
+
+//function, create temporary item indicator
+function create_item_indicator(scene, _item_type) {
+    if (_item_type <= 128) {
+        if (
+            local_items[_item_type] > 0
+            || local_items[_item_type+64] > 0
+            || local_items[_item_type+128] > 0
+        ){
+            return 0;
+        }
+    } else if (local_items[_item_type] > 0) {
+            return 0;
+    }
+    let _item_name = dic_items_reverse[_item_type];
+    let _img_name = dic_items[_item_name]["img_name"];
+    let _x = dic_items[_item_name]["pos_x"];
+    let _y = dic_items[_item_name]["pos_y"];
+    let _scale = dic_items[_item_name]["scale"];
+    let _description = dic_items[_item_name]["description"];
+    try {
+        group_item_indicator.destroy(true);
+    } catch (error) {
+        ;
+    }
+    group_item_indicator = scene.add.group();
+    _item_indicator_text = scene.add.text(
+        _x, 
+        _y-20, 
+        _description,
+        {font: "24px Arial", fill: "#0000ff", backgroundColor: "#ffffff"}
+    ).setOrigin(0.5).setDepth(_y+1).setVisible(false);
+    group_item_indicator.add(_item_indicator_text);
+    _item_indicator = scene.add.sprite(_x, _y, _img_name)
+        .setScale(_scale)
+        .setOrigin(0.5)
+        .setAlpha(0.3)
+        .setDepth(10)
+        .setInteractive()
+        .on("pointerover", () => {
+            _item_indicator_text.setVisible(true);
+        })
+        .on("pointerout", () => {
+            _item_indicator_text.setVisible(false);
+        });
+    //individual adjustment
+    if (["Helmet", "Straw Hat", "Mortarboard"].includes(_item_name)) {
+        _item_indicator.setAngle(90);
+    }
+    group_item_indicator.add(_item_indicator);
+}
+
+async function update_item_indicator_bar(){
+    let _modified_dc = await contract_mfcc.methods.get_modified_dc(summoner, local_crafting_item_type).call();
+    let _resting_dc = local_crafting_calc / 86400 * 1000;
+    let _percent = 1 - _resting_dc / _modified_dc;
+    try {
+        _item_indicator_bar.scaleX = _percent;
+    } catch(error) {
+        ;
+    }
+}
+
 function open_window_craft (scene) {
 
     //nyuinyui
@@ -6941,7 +7278,7 @@ function open_window_craft (scene) {
         //console.log(0);
         return 0;
     }
-
+    
     //function, closing: destroy group and update selecte_item
     async function close_crafting_window(_item) {
         //nyuinyui
@@ -6999,7 +7336,9 @@ function open_window_craft (scene) {
             //global_selected_crafting_item_required_heart = _heart_required;
             //text_crafting_selected_item_heart.setText(_heart_required);
             //icon_crafting_heart.visible = true;
-        } else {
+            //item indicator
+            create_item_indicator(murasakisan.scene, _item);
+        } else {    //when cancel
             text_crafting_selected_item_ohana.setText("");
             text_crafting_selected_item_kusa.setText("");
             text_crafting_selected_item_time.setText("");
@@ -7009,6 +7348,12 @@ function open_window_craft (scene) {
             icon_crafting_time.visible = false;
             //icon_crafting_heart.visible = false;
             text_select_item.setText(">> Select Item <<");
+            //destroy item indicator
+            try {
+                group_item_indicator.destroy(true);
+            } catch (error) {
+                ;
+            }
         }
     }
 
@@ -7915,7 +8260,6 @@ function draw_firework(scene) {
         reserve: 500,
         scale: { min: 0.05, max: 0.15 },
         speed: { min: 300, max: 600 },
-        //x: 512, y: 384,
     };
     const { width, height } = scene.scale;
     const { FloatBetween } = Phaser.Math;
@@ -7932,28 +8276,6 @@ function draw_firework(scene) {
             }
         });
     }
-    /*
-    const particles = scene.add.particles('par_flares');
-    const emitter = particles.createEmitter(emitterConfig);
-    emitter.onParticleEmit( () => {
-        sound_fireworks.play();
-    });
-    const { width, height } = scene.scale;
-    scene.time.addEvent({
-        delay: 250,
-        startAt: 0,
-        repeat: 10,
-        callback: () => {
-            emitter.setPosition(width * FloatBetween(0.25, 0.75), height * FloatBetween(0, 0.5));
-        },
-    });
-    scene.time.addEvent({
-        delay: 2400,
-        callback: () => {
-            emitter.stop();
-        }
-    });
-    */
 }
 
 
@@ -7966,7 +8288,6 @@ function draw_flower(scene, _x, _y) {
         //blendMode: 'ADD',
         gravityY: 900,
         lifespan: { min:_lifespan*0.8, max:_lifespan},
-        //frequency: _lifespan+200,
         quantity: 20,
         stopAfter: 20,
         timeScale: 0.9,
@@ -7975,23 +8296,8 @@ function draw_flower(scene, _x, _y) {
         scale: { min: 0.05, max: 0.15 },
         speed: { min: 300, max: 600 },
         frame: [0,1,2,3,4,5],
-        //x: 50+Math.random()*1100, 
-        //y: 500+Math.random()*350,
-        //x: _x, 
-        //y: _y,
     };
-    const emitter = scene.add.particles(_x, _y, "par_flowers", emitterConfig);
-    /*
-    const particles = scene.add.particles('par_flowers')
-        .setDepth(9999);
-    const emitter = particles.createEmitter(emitterConfig);
-    scene.time.addEvent({
-        delay: _lifespan+100,
-        callback: () => {
-            emitter.stop();
-        }
-    });
-    */
+    const emitter = scene.add.particles(_x, _y, "par_flowers", emitterConfig).setDepth(9999);
 }
 
 
@@ -8015,16 +8321,6 @@ function draw_glitter(scene, _item) {
         origin:     0.5,
     };
     const emitter = scene.add.particles(_item.x, _item.y, "par_glitter", emitterConfig);
-    /*
-    const particles = scene.add.particles('par_glitter')
-        .setDepth(9999+10);
-    scene.time.addEvent({
-        delay: Math.random() * 1000,
-        callback: () => {
-            const emitter = particles.createEmitter(emitterConfig);
-        }
-    });
-    */
 }
 
 
@@ -8037,31 +8333,15 @@ function draw_star(scene, _x, _y) {
         //blendMode: 'ADD',
         gravityY: 400,
         lifespan: { min:_lifespan*0.7, max:_lifespan},
-        //frequency: _lifespan+200,
-        //duration: _lifespan+200,
         quantity: 15,
         stopAfter: 15,
         timeScale: 0.9,
-        //reserve: 15,
         rotate: { min:0, max:360 },
         scale: { min: 0.05, max: 0.08 },
         speed: { min: 50, max: 300 },
         frame: [0,1,2,3,4,5,6,7],
     };
-    /*
-    const particles = scene.add.particles('par_stars')
-        .setDepth(9999+200);
-    const emitter = particles.createEmitter(emitterConfig);
-    */
     const emitter = scene.add.particles(_x, _y, "par_stars", emitterConfig);
-    /*
-    scene.time.addEvent({
-        delay: _lifespan+100,
-        callback: () => {
-            emitter.stop();
-        }
-    });
-    */
 }
 
 
@@ -8071,37 +8351,18 @@ function draw_fluffyBit(scene, _x, _y) {
     const emitterConfig = {
         alpha: 0.5,
         angle: { min: 250, max: 290 },
-        //angle: { min: 0, max: 360 },
-        //blendMode: 'ADD',
         gravityY: 400,
         lifespan: { min:_lifespan*0.7, max:_lifespan},
-        //frequency: _lifespan+200,
         quantity: 20,
         stopAfter: 20,
         timeScale: 0.9,
         reserve: 20,
         rotate: { min:0, max:360 },
-        //scale: { min: 0.05, max: 0.10 },
         scale: { min: 0.03, max: 0.06 },
         speed: { min: 50, max: 300 },
         frame: [0,1,2,3,4,5,6,7,8,9,10,11],
-        //x: 50+Math.random()*1100, 
-        //y: 500+Math.random()*350,
-        //x: _x, 
-        //y: _y,
     };
     const emitter = scene.add.particles(_x, _y, "par_fluffys", emitterConfig);
-    /*
-    const particles = scene.add.particles('par_fluffys')
-        .setDepth(9999);
-    const emitter = particles.createEmitter(emitterConfig);
-    scene.time.addEvent({
-        delay: _lifespan+100,
-        callback: () => {
-            emitter.stop();
-        }
-    });
-    */
 }
 
 
@@ -8129,6 +8390,40 @@ function summon_note(scene) {
         .setDepth(3)
         .setFrame(_type);
     group_update.add(_note);
+}
+
+
+//---summon_coin
+function summon_coin(scene) {
+    let _coin = new Coin(scene, 100, 100, "icon_ohana")
+        .setOrigin(0.5)
+        .setScale(0.07)
+        .setAlpha(1)
+        .setDepth(3)
+    group_update.add(_coin);
+}
+
+
+//---summon_leaf
+function summon_leaf(scene) {
+    let _coin = new Coin(scene, 100, 100, "icon_kusa")
+        .setOrigin(0.5)
+        .setScale(0.09)
+        .setAlpha(1)
+        .setDepth(3)
+    group_update.add(_coin);
+}
+
+
+//---summon_flower
+function summon_flower(scene) {
+    let _coin = new Coin(scene, 100, 100, "par_flowers")
+        .setFrame(Math.floor(Math.random()*5))
+        .setOrigin(0.5)
+        .setScale(0.1)
+        .setAlpha(1)
+        .setDepth(3)
+    group_update.add(_coin);
 }
 
 
@@ -10285,6 +10580,8 @@ function create(scene) {
         murasakisan.count = 0;
         murasakisan.target_x = 950;
         murasakisan.target_y = 740;
+        //item indicator
+        create_item_indicator(scene, local_crafting_item_type);
     } else if (local_practice_status == 1) {
         murasakisan = new Murasakisan(scene, 640, 640)
             .setOrigin(0.5)
@@ -10332,11 +10629,7 @@ function create(scene) {
             //Math.round(game.input.activePointer.x), 
             //Math.round(game.input.activePointer.y)
         );
-        //draw_flower(scene, game.input.mousePointer.x, game.input.mousePointer.y);
-        //draw_star(scene, game.input.mousePointer.x, game.input.mousePointer.y);
-        //draw_fluffyBit(scene, game.input.mousePointer.x, game.input.mousePointer.y);
         draw_star(scene, pointer_x, pointer_y);
-        //draw_star(scene, game.input.activePointer.x, game.input.activePointer.y);
     });
 
     //---nyuinyui
@@ -10433,6 +10726,7 @@ function update_syncTime(this_scene) {
         }
     }
 }
+
 
 
 //---numeric animation
@@ -10892,8 +11186,8 @@ function update_parametersWithoutAnimation(this_scene) {
     }
     
     //stakign reward counter, XX.X%
-    staking_reward_percent = 
-        Math.round( (100 - (local_staking_reward_counter / STAKING_REWARD_SEC * 100)) * 100) /100;
+    //staking_reward_percent = 
+    //    Math.round( (100 - (local_staking_reward_counter / STAKING_REWARD_SEC * 100)) * 100) /100;
 
     previous_local_rolled_dice = local_rolled_dice;
     previous_local_precious = local_precious;
@@ -11058,7 +11352,7 @@ function update_checkModeChange(this_scene) {
         murasakisan.target_x = 180;
         murasakisan.target_y = 450;
         sound_farming.play();
-    }else if (
+    } else if (
         local_farming_status == 0 
         && murasakisan.mode == "farming"
     ) {
@@ -11087,7 +11381,14 @@ function update_checkModeChange(this_scene) {
         text_select_item.setText('"'+dic_items_reverse[local_crafting_item_type]+'"')
         sound_crafting.play();
         local_crafting_calc = -1;
-    }else if (
+        //create item indicator
+        if (
+            typeof group_item_indicator == "undefined" 
+            || typeof group_item_indicator.scene == "undefined"
+        ){
+            create_item_indicator(this_scene, local_crafting_item_type);
+        }
+    } else if (  //when complete crafting
         local_crafting_status == 0 
         && murasakisan.mode == "crafting"
     ) {
@@ -11100,9 +11401,36 @@ function update_checkModeChange(this_scene) {
         } else {
             murasakisan.set_mode = "resting";
         }
+        //destroy item indicator
+        try {
+            group_item_indicator.destroy(true);
+        } catch (error) {
+            ;
+        }
+    } else if ( //during crafting
+        murasakisan.mode == "crafting"
+    ){
+        //progress bar
+        if (
+            typeof _item_indicator != "undefined"
+            && (
+                typeof _item_indicator_bar == "undefined" 
+                || typeof _item_indicator_bar.scene == "undefined"
+            )
+        ){
+            let _x = _item_indicator.x-20;
+            let _y = _item_indicator.y+_item_indicator.height*_item_indicator.scaleY*0.8/2;
+            let _bar_back = makeMiniProgressBar(this_scene, _x-2, _y-2, 40+4, 10+4, 0xecd9ff);
+            _item_indicator_bar = makeMiniProgressBar(this_scene, _x, _y, 40, 10, 0xb872f4);
+            _item_indicator_bar.scaleX = 0.01;
+            group_item_indicator.add(_bar_back);
+            group_item_indicator.add(_item_indicator_bar);
+        }
+        //update prograss bar
+        update_item_indicator_bar();
     
     //###practice check
-    }else if (
+    } else if (
         local_practice_status == 1 
         && murasakisan.mode != "practice" 
         && murasakisan.mode != "feeding"
@@ -11117,7 +11445,7 @@ function update_checkModeChange(this_scene) {
         murasakisan.target_x = 640;
         murasakisan.target_y = 650;
         sound_crafting.play();
-    }else if (
+    } else if (
         local_practice_status == 0 
         && murasakisan.mode == "practice"
     ) {
@@ -11399,8 +11727,8 @@ function update_checkItem(this_scene) {
         local_items_flag[_item_id] = true;
         mr_astar = new Pet(
             this_scene, 
-            400 + Math.random()*300, 
-            500 + Math.random()*200, 
+            dic_items[_item_name]["pos_x"] - 25 + Math.random()*50, 
+            dic_items[_item_name]["pos_y"] - 25 + Math.random()*50, 
             "mr_astar_right", 
             "mr_astar_left",
             "mining"
@@ -11428,7 +11756,11 @@ function update_checkItem(this_scene) {
         && local_items_flag[_item_id] != true
     ) {
         local_items_flag[_item_id] = true;
-        dice = new Dice(this_scene, 400, 600).setScale(0.3).setOrigin(0.5);
+        dice = new Dice(
+            this_scene,
+            dic_items[_item_name]["pos_x"],
+            dic_items[_item_name]["pos_y"],
+            600).setScale(0.3).setOrigin(0.5);
         group_update.add(dice);
         //uncommon
         if (local_items[_item_id+64] != 0) {
@@ -11456,8 +11788,8 @@ function update_checkItem(this_scene) {
         local_items_flag[_item_id] = true;
         //let _x = 60;
         //let _y = 700;
-        let _x = 530;
-        let _y = 255;
+        let _x = dic_items[_item_name]["pos_x"];
+        let _y = dic_items[_item_name]["pos_y"];
         item_hat_helmet = this_scene.add.sprite(_x, _y, "item_hat_helmet")
             .setOrigin(0.5)
             .setScale(0.22)
@@ -11516,7 +11848,11 @@ function update_checkItem(this_scene) {
         && local_items_flag[_item_id] != true
     ) {
         local_items_flag[_item_id] = true;
-        item_crown = this_scene.add.sprite(1050,290, "item_crown");
+        item_crown = this_scene.add.sprite(
+            dic_items[_item_name]["pos_x"],
+            dic_items[_item_name]["pos_y"], 
+            "item_crown"
+        );
         item_crown.anims.play("item_crown", true);
         item_crown.anims.isPlaying = false;
         item_crown.setScale(0.3);
@@ -11552,7 +11888,11 @@ function update_checkItem(this_scene) {
         && local_items_flag[_item_id] != true
     ) {
         local_items_flag[_item_id] = true;
-        item_ribbon = this_scene.add.sprite(1037, 401, "item_ribbon").setScale(0.15).setOrigin(0.5);
+        item_ribbon = this_scene.add.sprite(
+            dic_items[_item_name]["pos_x"], 
+            dic_items[_item_name]["pos_y"], 
+            "item_ribbon"
+        ).setScale(0.15).setOrigin(0.5);
         item_ribbon.depth = 9999;
         //uncommon
         if (local_items[_item_id+64] != 0) {
@@ -11576,8 +11916,8 @@ function update_checkItem(this_scene) {
         && local_items_flag[_item_id] != true
     ) {
         local_items_flag[_item_id] = true;
-        let _x = 110;
-        let _y = 225;
+        let _x = dic_items[_item_name]["pos_x"];
+        let _y = dic_items[_item_name]["pos_y"];
         item_window = this_scene.add.image(_x, _y, "item_window_day")
             .setScale(0.58)
             .setOrigin(0.5)
@@ -11617,8 +11957,8 @@ function update_checkItem(this_scene) {
         && local_items_flag[_item_id] != true
     ) {
         local_items_flag[_item_id] = true;
-        let _x = 690;
-        let _y = 255;
+        let _x = dic_items[_item_name]["pos_x"];
+        let _y = dic_items[_item_name]["pos_y"];
         item_hat_knit = this_scene.add.sprite(_x, _y, "item_hat_knit")
             .setOrigin(0.5)
             .setScale(0.20);
@@ -11671,8 +12011,8 @@ function update_checkItem(this_scene) {
         && local_items_flag[_item_id] != true
     ) {
         local_items_flag[_item_id] = true;
-        let _x2 = 890;
-        let _y2 = 300;
+        let _x2 = dic_items[_item_name]["pos_x"];
+        let _y2 = dic_items[_item_name]["pos_y"];
         item_frame = this_scene.add.image(_x2, _y2, "item_frame")
             .setOrigin(0.5)
             .setScale(0.25)
@@ -11713,62 +12053,6 @@ function update_checkItem(this_scene) {
         if (local_items[_item_id+64] != 0) {
             draw_glitter(this_scene, item_frame);
         }
-        /*
-        function _get_nft_url() {
-            
-            let _array = [
-                "ex_nft1.png",
-                "ex_nft2.png",
-                "ex_nft3.png",
-                //"https://cf-ipfs.com/ipfs/QmYqr4VYpNokipJnqGQ8CThqR9Mfw938RAwTwAFkkYEEN3",
-                //"https://1.bp.blogspot.com/-7uiCs6dI4a0/YEGQA-8JOrI/AAAAAAABddA/qPFt2E8vDfQwPQsAYLvk4lowkwP-GN7VQCNcBGAsYHQ/s896/buranko_girl_smile.png",
-                //"ipfs://QmQptLUg6Vakr2p3BCccmm2cs7M9hhEGvi4AoZMvMv3DJt/3945.png",
-            ];
-            let _url = _array[Math.floor(Math.random() * _array.length)];
-            //let _url = await call_AstarCats();
-            //console.log(_url);
-            let _url = "ex_nft1.png";
-            return _url;
-        }
-        let _x2 = 890;
-        let _y2 = 300;
-        let _url = _get_nft_url();
-        this_scene.load.image("pic_nft", _url);
-        this_scene.load.start()
-        this_scene.load.on(
-            "complete", 
-            () => {
-                item_frame = this_scene.add.image(_x2, _y2, "item_frame")
-                    .setOrigin(0.5)
-                    .setScale(0.25)
-                    .setDepth(_y2);
-                item_frame_inside = this_scene.add.sprite(_x2, _y2, "pic_nft")
-                    .setOrigin(0.5)
-                    .setScale(0.2)
-                    .setDepth(_y2)
-                    .setDisplaySize(67, 82)
-                    .setInteractive({useHandCursor: true})
-                    .on("pointerdown", async () => {
-                        sound_hat.play();
-                        item_frame_inside.setTexture("ff_duringFestival_left");
-                        this_scene.textures.remove("pic_nft");
-                        //let _url = await _get_nft_url();
-                        let _url = await call_AstarCats();
-                        this_scene.load.image("pic_nft", _url);
-                        //console.log(_url);
-                        this_scene.load.start()
-                        this_scene.load.on(
-                            "complete", 
-                            () => {
-                                item_frame_inside.setTexture("pic_nft");
-                            });
-                    });
-                //uncommon
-                if (local_items[_item_id+64] != 0) {
-                    draw_glitter(this_scene, item_frame);
-                }
-            });
-        */
     } else if (
         local_items[_item_id] == 0 
         && local_items[_item_id+64] == 0 
@@ -11819,44 +12103,9 @@ function update_checkItem(this_scene) {
         } else if (local_score >= 2200000) {
             item_wall_sticker = this_scene.add.image(_x, _y, "item_wall_sticker_12");
         }
-        /*
-        if (local_wallet_score == 0) {
-            //wait for calculation
-            local_items_flag[_item_id] = false;
-        } else if (local_wallet_score < 300) {
-            item_wall_sticker = this_scene.add.image(_x, _y, "item_wall_sticker_01");
-        } else if (local_wallet_score < 600) {
-            item_wall_sticker = this_scene.add.image(_x, _y, "item_wall_sticker_02");
-        } else if (local_wallet_score < 900) {
-            item_wall_sticker = this_scene.add.image(_x, _y, "item_wall_sticker_03");
-        } else if (local_wallet_score < 1200) {
-            item_wall_sticker = this_scene.add.image(_x, _y, "item_wall_sticker_04");
-        } else if (local_wallet_score < 1500) {
-            item_wall_sticker = this_scene.add.image(_x, _y, "item_wall_sticker_05");
-        } else if (local_wallet_score < 1800) {
-            item_wall_sticker = this_scene.add.image(_x, _y, "item_wall_sticker_06");
-        } else if (local_wallet_score < 2100) {
-            item_wall_sticker = this_scene.add.image(_x, _y, "item_wall_sticker_07");
-        } else if (local_wallet_score < 2400) {
-            item_wall_sticker = this_scene.add.image(_x, _y, "item_wall_sticker_08");
-        } else if (local_wallet_score < 2700) {
-            item_wall_sticker = this_scene.add.image(_x, _y, "item_wall_sticker_09");
-        } else if (local_wallet_score < 3000) {
-            item_wall_sticker = this_scene.add.image(_x, _y, "item_wall_sticker_10");
-        } else if (local_wallet_score < 3300) {
-            item_wall_sticker = this_scene.add.image(_x, _y, "item_wall_sticker_11");
-        } else if (local_wallet_score >= 3300) {
-            item_wall_sticker = this_scene.add.image(_x, _y, "item_wall_sticker_12");
-        }
-        */
         if (typeof item_wall_sticker != "undefined") {
             item_wall_sticker.setDepth(1).setAlpha(0.2);
         }
-        /*
-        item_wall_sticker = this_scene.add.image(_x, _y, "item_wall_sticker")
-            .setDepth(1)
-            .setAlpha(0.2);
-        */
     } else if (
         local_items[_item_id] == 0 
         && local_items[_item_id+64] == 0 
@@ -11875,8 +12124,8 @@ function update_checkItem(this_scene) {
         && local_items_flag[_item_id] != true
     ) {
         local_items_flag[_item_id] = true;
-        let _x = 505;
-        let _y = 370;
+        let _x = dic_items[_item_name]["pos_x"];
+        let _y = dic_items[_item_name]["pos_y"];
         let _pos_local = "pos_item_musicbox";
         //recover position from localStorage
         if (localStorage.getItem(_pos_local) != null && local_owner == local_wallet) {
@@ -11938,8 +12187,8 @@ function update_checkItem(this_scene) {
         && local_items_flag[_item_id] != true
     ) {
         local_items_flag[_item_id] = true;
-        let _x = 450;
-        let _y = 255;
+        let _x = dic_items[_item_name]["pos_x"];
+        let _y = dic_items[_item_name]["pos_y"];
         item_hat_mugiwara = this_scene.add.sprite(_x, _y, "item_hat_mugiwara")
             .setOrigin(0.5)
             .setScale(0.25)
@@ -11998,8 +12247,8 @@ function update_checkItem(this_scene) {
         local_items_flag[_item_id] = true;
         ms_ether = new Pet(
             this_scene, 
-            400 + Math.random()*300, 
-            500 + Math.random()*200, 
+            dic_items[_item_name]["pos_x"] - 25 + Math.random()*50, 
+            dic_items[_item_name]["pos_y"] - 25 + Math.random()*50, 
             "ms_ether_right", 
             "ms_ether_left",
             "farming"
@@ -12030,7 +12279,10 @@ function update_checkItem(this_scene) {
 
         //cushion
         //item_cushion = this_scene.add.sprite(90, 620, "item_cushion").setScale(0.25).setOrigin(0.5);
-        item_cushion = this_scene.add.sprite(90, 620, "item_cushion").setScale(0.5).setOrigin(0.5);
+        item_cushion = this_scene.add.sprite(
+            dic_items[_item_name]["pos_x"], 
+            dic_items[_item_name]["pos_y"], 
+            "item_cushion").setScale(0.5).setOrigin(0.5);
         item_cushion.depth = item_cushion.y - 50;
         //uncommon
         if (local_items[_item_id+64] != 0) {
@@ -12109,8 +12361,8 @@ function update_checkItem(this_scene) {
         && local_items_flag[_item_id] != true
     ) {
         local_items_flag[_item_id] = true;
-        let _x = 486;
-        let _y = 148;
+        let _x = dic_items[_item_name]["pos_x"];
+        let _y = dic_items[_item_name]["pos_y"];
         let _pos_local = "pos_item_fortune_status"
         //recover position from localStorage
         if (localStorage.getItem(_pos_local) != null && local_owner == local_wallet) {
@@ -12171,8 +12423,8 @@ function update_checkItem(this_scene) {
         && local_items_flag[_item_id] != true
     ) {
         local_items_flag[_item_id] = true;
-        let _x = 592;
-        let _y = 138;
+        let _x = dic_items[_item_name]["pos_x"];
+        let _y = dic_items[_item_name]["pos_y"];
         let _pos_local = "pos_item_asnya"
         //recover position from localStorage
         if (localStorage.getItem(_pos_local) != null && local_owner == local_wallet) {
@@ -12233,8 +12485,8 @@ function update_checkItem(this_scene) {
         && local_items_flag[_item_id] != true
     ) {
         local_items_flag[_item_id] = true;
-        let _x = 600;
-        let _y = 660;
+        let _x = dic_items[_item_name]["pos_x"];
+        let _y = dic_items[_item_name]["pos_y"];
         item_rugg = this_scene.add.image(_x, _y, "item_rugg")
             .setScale(1.7)
             .setOrigin(0.5)
@@ -12261,8 +12513,8 @@ function update_checkItem(this_scene) {
         && local_items_flag[_item_id] != true
     ) {
         local_items_flag[_item_id] = true;
-        let _x = 865;
-        let _y = 734;
+        let _x = dic_items[_item_name]["pos_x"];
+        let _y = dic_items[_item_name]["pos_y"];
         let _pos_local = "pos_item_vase"
         //recover position from localStorage
         if (localStorage.getItem(_pos_local) != null && local_owner == local_wallet) {
@@ -12306,60 +12558,6 @@ function update_checkItem(this_scene) {
         local_items_flag[_item_id] = false;
     }
 
-    /*
-    //###27:Floor Sticker
-    _item_name = "---";
-    _item_id = dic_items[_item_name]["item_id"];
-    if (
-        (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
-        && local_items_flag[_item_id] != true
-    ) {
-        local_items_flag[_item_id] = true;
-        let _x = 640;
-        let _y = 480;
-
-        if (local_wallet_score == 0) {
-            local_items_flag[_item_id] = false;
-        } else if (local_wallet_score < 300) {
-            item_floor_sticker = this_scene.add.image(_x, _y, "item_floor_sticker_01");
-        } else if (local_wallet_score < 600) {
-            item_floor_sticker = this_scene.add.image(_x, _y, "item_floor_sticker_02");
-        } else if (local_wallet_score < 900) {
-            item_floor_sticker = this_scene.add.image(_x, _y, "item_floor_sticker_03");
-        } else if (local_wallet_score < 1200) {
-            item_floor_sticker = this_scene.add.image(_x, _y, "item_floor_sticker_04");
-        } else if (local_wallet_score < 1500) {
-            item_floor_sticker = this_scene.add.image(_x, _y, "item_floor_sticker_05");
-        } else if (local_wallet_score < 1800) {
-            item_floor_sticker = this_scene.add.image(_x, _y, "item_floor_sticker_06");
-        } else if (local_wallet_score < 2100) {
-            item_floor_sticker = this_scene.add.image(_x, _y, "item_floor_sticker_07");
-        } else if (local_wallet_score < 2400) {
-            item_floor_sticker = this_scene.add.image(_x, _y, "item_floor_sticker_08");
-        } else if (local_wallet_score < 2700) {
-            item_floor_sticker = this_scene.add.image(_x, _y, "item_floor_sticker_09");
-        } else if (local_wallet_score < 3000) {
-            item_floor_sticker = this_scene.add.image(_x, _y, "item_floor_sticker_10");
-        } else if (local_wallet_score < 3300) {
-            item_floor_sticker = this_scene.add.image(_x, _y, "item_floor_sticker_11");
-        } else if (local_wallet_score >= 3300) {
-            item_floor_sticker = this_scene.add.image(_x, _y, "item_floor_sticker_12");
-        }
-        if (typeof item_floor_sticker != "undefined") {
-            item_floor_sticker.setDepth(1).setAlpha(0.6);
-        }
-
-    } else if (
-        local_items[_item_id] == 0 
-        && local_items[_item_id+64] == 0 
-        && local_items[_item_id+128] == 0
-        && typeof item_floor_sticker != "undefined"
-    ) {
-        item_floor_sticker.destroy(true);
-        local_items_flag[_item_id] = false;
-    }
-    */
-
     //###33:Table
     _item_name = "Tablet";
     _item_id = dic_items[_item_name]["item_id"];
@@ -12369,8 +12567,8 @@ function update_checkItem(this_scene) {
     ) {
         local_items_flag[_item_id] = true;
         //status pad
-        let _x = 700;
-        let _y = 390;
+        let _x = dic_items[_item_name]["pos_x"];
+        let _y = dic_items[_item_name]["pos_y"];
         let _pos_local = "pos_item_tablet";
         //recover position from localStorage
         if (localStorage.getItem(_pos_local) != null && local_owner == local_wallet) {
@@ -12444,7 +12642,8 @@ function update_checkItem(this_scene) {
         local_items_flag[_item_id] = false;
     }
 
-    //###34:*Score Board
+    //###34:Score Board
+    //***TODO*** its ok?
     _item_name = "Score Meter";
     _item_id = dic_items[_item_name]["item_id"];
     if (
@@ -12502,10 +12701,8 @@ function update_checkItem(this_scene) {
         && local_items_flag[_item_id] != true
     ) {
         local_items_flag[_item_id] = true;
-        //_x = 700;
-        //_y = 380;
-        let _x = 610;
-        let _y = 260;
+        let _x = dic_items[_item_name]["pos_x"];
+        let _y = dic_items[_item_name]["pos_y"];
         item_hat_mortarboard = this_scene.add.sprite(_x, _y, "item_hat_mortarboard")
             .setOrigin(0.5)
             .setScale(0.20)
@@ -12564,8 +12761,8 @@ function update_checkItem(this_scene) {
         local_items_flag[_item_id] = true;
         dr_bitco = new Pet(
             this_scene, 
-            400 + Math.random()*300, 
-            500 + Math.random()*200, 
+            dic_items[_item_name]["pos_x"] - 25 + Math.random()*50, 
+            dic_items[_item_name]["pos_y"] - 25 + Math.random()*50, 
             "dr_bitco_right", 
             "dr_bitco_left",
             "crafting"
@@ -12585,8 +12782,6 @@ function update_checkItem(this_scene) {
         local_items_flag[_item_id] = false;
     }
 
-    //###37:(Pancake)
-
     //###38:Violin
     _item_name = "Violin";
     _item_id = dic_items[_item_name]["item_id"];
@@ -12595,8 +12790,8 @@ function update_checkItem(this_scene) {
         && local_items_flag[_item_id] != true
     ) {
         local_items_flag[_item_id] = true;
-        let _x = 1134;
-        let _y = 789;
+        let _x = dic_items[_item_name]["pos_x"];
+        let _y = dic_items[_item_name]["pos_y"];
         let _pos_local = "pos_item_violin"
         //recover position from localStorage
         if (localStorage.getItem(_pos_local) != null && local_owner == local_wallet) {
@@ -12657,8 +12852,8 @@ function update_checkItem(this_scene) {
         && local_items_flag[_item_id] != true
     ) {
         local_items_flag[_item_id] = true;
-        let _x = 595;
-        let _y = 375;
+        let _x = dic_items[_item_name]["pos_x"];
+        let _y = dic_items[_item_name]["pos_y"];
         let _pos_local = "pos_item_piano";
         //recover position from localStorage
         if (localStorage.getItem(_pos_local) != null && local_owner == local_wallet) {
@@ -12750,10 +12945,11 @@ function update_checkItem(this_scene) {
             .setDepth(9999+2)
             .setAlpha(0.7)
             .setVisible(false);
-        item_switch = this_scene.add.sprite(1230,320, "item_switch")
-            .setOrigin(0.5)
-            .setScale(0.25)
-            .setInteractive({useHandCursor: true});
+        item_switch = this_scene.add.sprite(
+            dic_items[_item_name]["pos_x"],
+            dic_items[_item_name]["pos_y"],
+            "item_switch"
+        ).setOrigin(0.5).setScale(0.25).setInteractive({useHandCursor: true});
         item_switch.anims.play("item_switch_off", true);
         item_switch.on('pointerdown', () => {
             if (item_switch.anims.currentAnim.key == "item_switch_off") {
@@ -12848,8 +13044,8 @@ function update_checkItem(this_scene) {
         && local_items_flag[_item_id] != true
     ) {
         local_items_flag[_item_id] = true;
-        let _x = 1200;
-        let _y = 800;
+        let _x = dic_items[_item_name]["pos_x"];
+        let _y = dic_items[_item_name]["pos_y"];
         let _pos_local = "pos_item_lantern";
         //recover position from localStorage
         if (localStorage.getItem(_pos_local) != null && local_owner == local_wallet) {
@@ -12902,8 +13098,8 @@ function update_checkItem(this_scene) {
         && local_items_flag[_item_id] != true
     ) {
         local_items_flag[_item_id] = true;
-        let _x = 1037;
-        let _y = 600;
+        let _x = dic_items[_item_name]["pos_x"];
+        let _y = dic_items[_item_name]["pos_y"];
         item_tokenChest = this_scene.add.sprite(_x, _y, "item_tokenChest")
             .setFrame(0)
             .setScale(0.28)
@@ -12971,7 +13167,7 @@ function update_checkItem(this_scene) {
         local_items_flag[_item_id] = false;
     }
 
-    //###43:*Newspaper
+    //###43:Newspaper
     _item_name = "News Board";
     _item_id = dic_items[_item_name]["item_id"];
     if (
@@ -12979,8 +13175,8 @@ function update_checkItem(this_scene) {
         && local_items_flag[_item_id] != true
     ) {
         local_items_flag[_item_id] = true;
-        let _x = 110;
-        let _y = 370;
+        let _x = dic_items[_item_name]["pos_x"];
+        let _y = dic_items[_item_name]["pos_y"];
         item_newspaper = this_scene.add.image(_x, _y, "item_newspaper")
             .setOrigin(0.5)
             .setScale(0.19)
@@ -13010,20 +13206,6 @@ function update_checkItem(this_scene) {
             {font: "14px Arial", fill: "#000000"}
         ).setOrigin(0.5).setDepth(2);
         count_to_newsUpdate = 0;
-        /*
-        local_items_flag[_item_id] = true;
-        let _x = 250;
-        let _y = 940;
-        item_bbs_text = this_scene.add.text(
-            _x, 
-            _y, 
-            "", 
-            {font: "14px Arial", fill: "#ffffff", backgroundColor: "#000000"}
-            //{font: "14px Arial", fill: "#ffffff"}
-        ).setOrigin(0).setDepth(9999);
-        //item_newsbunner = this_scene.add.image(640, 485, "item_newsbunner")
-        //    .setDepth(900).setAlpha(0.8);
-        */
         //uncommon
         if (local_items[_item_id+64] != 0) {
             draw_glitter(this_scene, item_newspaper);
@@ -13071,8 +13253,8 @@ function update_checkItem(this_scene) {
             _x = _pos[0];
             _y = _pos[1];
         } else {
-            _x = 316;
-            _y = 900;
+            _x = dic_items[_item_name]["pos_x"];
+            _y = dic_items[_item_name]["pos_y"];
         }
         let _text = "";
         _text += " total exp gained: " + local_total_exp_gained + " \n";
@@ -13162,8 +13344,8 @@ function update_checkItem(this_scene) {
             _x = _pos[0];
             _y = _pos[1];
         } else {
-            _x = 693;
-            _y = 148;
+            _x = dic_items[_item_name]["pos_x"];
+            _y = dic_items[_item_name]["pos_y"];
         }
         item_fishbowl = this_scene.add.sprite(
             _x,
@@ -13233,8 +13415,8 @@ function update_checkItem(this_scene) {
         && local_items_flag[_item_id] != true
     ) {
         local_items_flag[_item_id] = true;
-        let _x = 990;
-        let _y = 180;
+        let _x = dic_items[_item_name]["pos_x"];
+        let _y = dic_items[_item_name]["pos_y"];
         item_clock = this_scene.add.sprite(_x, _y, "item_clock")
             .setFrame(0)
             .setScale(0.45)
@@ -13306,8 +13488,8 @@ function update_checkItem(this_scene) {
     ) {
         local_items_flag[_item_id] = true;
         //local_fluffy_house_count = 0;
-        let _x = 250;
-        let _y = 700;
+        let _x = dic_items[_item_name]["pos_x"];
+        let _y = dic_items[_item_name]["pos_y"];
         group_fluffy_house_in = this_scene.add.group();
         item_fluffy_house = this_scene.add.sprite(_x, _y, "item_fluffy_house_1")
             .setScale(0.4)
@@ -13371,8 +13553,8 @@ function update_checkItem(this_scene) {
         && local_items_flag[_item_id] != true
     ) {
         local_items_flag[_item_id] = true;
-        let _x = 1200;
-        let _y = 750;
+        let _x = dic_items[_item_name]["pos_x"];
+        let _y = dic_items[_item_name]["pos_y"];
         let _pos_local = "pos_item_crayon"
         //recover position from localStorage
         if (localStorage.getItem(_pos_local) != null && local_owner == local_wallet) {
@@ -13441,8 +13623,8 @@ function update_checkItem(this_scene) {
         && local_items_flag[_item_id] != true
     ) {
         local_items_flag[_item_id] = true;
-        let _x = 370;
-        let _y = 760;
+        let _x = dic_items[_item_name]["pos_x"];
+        let _y = dic_items[_item_name]["pos_y"];
         let _pos_local = "pos_item_bed"
         //recover position from localStorage
         if (localStorage.getItem(_pos_local) != null && local_owner == local_wallet) {
@@ -14091,30 +14273,38 @@ function update_checkItem(this_scene) {
             _x = _pos[0];
             _y = _pos[1];
         } else {
-            _x = 384;
-            _y = 847;
+            _x = 330;
+            _y = 900;
         }
         let _text = "";
         _text += " Staking: " + local_dapps_staking_amount + " $ASTR \n";
         //_text += " rewarding speed: x" + local_staking_reward_speed/100 + " \n";
-        _text += " Complete: " + staking_reward_percent + "%";
+        _text += " Complete: " + local_staking_reward_percent + "%";
         item_staking_text = this_scene.add.text(
             _x,
             _y-60,
             _text,
             {font: "20px Arial", fill: "#000000", backgroundColor: "#ffffff"}
         ).setOrigin(0.5).setVisible(false).setDepth(9999);
+        item_staking_bar_back = makeMiniProgressBar(this_scene, _x-20-2, _y+30-2, 40+4, 10+4, 0xFFD5D5)
+            .setDepth(_y+1);
+        item_staking_bar = makeMiniProgressBar(this_scene, _x-20, _y+30, 40, 10, 0xE5004F)
+            .setDepth(_y+2);
+        item_staking_bar.scaleX = 0.01;
         item_staking = this_scene.add.sprite(
             _x,
             _y,
             "item_staking",
-        ).setOrigin(0.5).setScale(0.3).setDepth(850)
+        ).setOrigin(0.5).setScale(0.3).setDepth(_y)
             .setInteractive({ draggable: true, useHandCursor: true })
             .on("pointerdown", () => {
                 item_staking_text.visible = true;
                 setTimeout( () => {
                     item_staking_text.visible = false;
-                }, 3000)
+                }, 3000);
+                if (local_staking_reward_percent == 100) {
+                    open_staking_reward(summoner);
+                }
             })
             .on("drag", () => {
                 if (this_scene.sys.game.scale.gameSize._width == 1280) {
@@ -14127,6 +14317,12 @@ function update_checkItem(this_scene) {
                 item_staking.depth = item_staking.y;
                 item_staking_text.x = item_staking.x;
                 item_staking_text.y = item_staking.y-60;
+                item_staking_bar_back.x = item_staking.x-20-2;
+                item_staking_bar_back.y = item_staking.y+30-2;
+                item_staking_bar_back.depth = item_staking.y+1;
+                item_staking_bar.x = item_staking.x-20;
+                item_staking_bar.y = item_staking.y+30;
+                item_staking_bar.depth = item_staking.y+2;
                 //item_hourglass_text.visible = false;
             })
             .on("dragend", () => {
@@ -14150,8 +14346,9 @@ function update_checkItem(this_scene) {
         let _text = "";
         _text += " Staking: " + local_dapps_staking_amount + " $ASTR \n";
         //_text += " rewarding speed: x" + local_staking_reward_speed/100 + " \n";
-        _text += " Complete: " + staking_reward_percent + "%";
+        _text += " Complete: " + local_staking_reward_percent + "%";
         item_staking_text.setText(_text);
+        item_staking_bar.scaleX = local_staking_reward_percent/100;
     }
     
     previous_local_items = local_items;
@@ -14193,6 +14390,7 @@ async function updateFirst(scene) {
     update_checkButtonActivation(scene);
     update_checkItem(scene);
     //update_systemMessage();
+    update_astarPrice();
 }
 
 async function checkChainId(scene, correctChainId) {
