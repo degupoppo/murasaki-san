@@ -685,131 +685,6 @@ contract Murasaki_Main is SoulBoundBadge, Ownable{
 }
 
 
-//---Murasaki_Main_Trial
-
-
-contract Murasaki_Main_Trial is SoulBoundBadge, Ownable{
-
-    //permitted address
-    mapping(address => bool) public permitted_address;
-
-    //admin, add or remove permitted_address
-    function _add_permitted_address(address _address) external onlyOwner {
-        permitted_address[_address] = true;
-    }
-    function _remove_permitted_address(address _address) external onlyOwner {
-        permitted_address[_address] = false;
-    }
-
-    //admin pause
-    bool notPaused = true;
-    function _set_notPaused(bool _bool) external onlyOwner {
-        notPaused = _bool;
-    }
-
-    //names
-    constructor() ERC721("House of Murasaki-san", "HoM") {}
-
-    //summoner info
-    mapping(uint => uint) public class;
-    mapping(uint => uint) public summoned_time;
-    mapping(uint => uint) public seed;
-
-    //summon
-    function summon(address _owner, uint _class, uint _seed) external {
-        require(permitted_address[msg.sender] == true);
-        require(notPaused);
-        //update summoner info
-        uint _now = block.timestamp;
-        class[next_token] = _class;
-        summoned_time[next_token] = _now;
-        seed[next_token] = _seed;
-        //mint
-        _safeMint(_owner, next_token);
-    }
-
-    //burn
-    function burn(uint _summoner) external {
-        require(permitted_address[msg.sender] == true);
-        ERC721._burn(_summoner);
-    }
-
-    string[] private flower = [
-        "Rose",
-        "Marigold",
-        "Dandelion",
-        "Rosemary",
-        "Olive",
-        "Holly",
-        "Nemophila",
-        "Hydrangea",
-        "Forget-me-not",
-        "Sumire",
-        "Gerbera",
-        "Anemone"
-    ];
-
-    string[] private color = [
-        "#E60012",
-        "#F39800",
-        "#FFF100",
-        "#8FC31F",
-        "#009944",
-        "#009E96",
-        "#00A0E9",
-        "#0068B7",
-        "#1D2088",
-        "#920783",
-        "#E4007F",
-        "#E5004F"
-    ];
-
-    //URI
-    //Inspired by OraclizeAPI's implementation - MIT license
-    //https://github.com/oraclize/ethereum-api/blob/b42146b063c7d6ee1358846c198246239e9360e8/oraclizeAPI_0.4.25.sol
-    function toString(uint256 value) internal pure returns (string memory) {
-        if (value == 0) {
-            return "0";
-        }
-        uint256 temp = value;
-        uint256 digits;
-        while (temp != 0) {
-            digits++;
-            temp /= 10;
-        }
-        bytes memory buffer = new bytes(digits);
-        while (value != 0) {
-            digits -= 1;
-            buffer[digits] = bytes1(uint8(48 + uint256(value % 10)));
-            value /= 10;
-        }
-        return string(buffer);
-    }
-    function tokenURI (uint _summoner) public view override returns (string memory) {
-        string[9] memory parts;
-        parts[0] = '<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin meet" viewBox="0 0 128 128"><style>.base { fill: #D81B60; font-family: arial; font-size: 12px; }</style><rect width="128" height="128" fill="';
-        parts[1] = color[class[_summoner]];
-        parts[2] = '" fill-opacity="0.5"/>';
-        parts[3] = '<image width="128" height="128" x="0" y="0" href="data:image/png;base64,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"/><text x="24" y="88" class="base" font-weight="bold">';
-        parts[4] = string(abi.encodePacked("#", toString(_summoner)));
-        parts[5] = '</text><text x="22" y="102" class="base" font-weight="bold">';
-        parts[6] = string(abi.encodePacked("&#x273f;", flower[class[_summoner]]));
-        parts[7] = '</text></svg>';
-        string memory output = 
-            string(abi.encodePacked(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7]));
-        string memory json = Base64.encode(bytes(string(abi.encodePacked('{"name": "Murasaki-san #', toString(_summoner), '", "description": "House of Murasaki-san. Murasaki-san is a pet living in your wallet on Astar Network. https://murasaki-san.com/", "image": "data:image/svg+xml;base64,', Base64.encode(bytes(output)), '"}'))));
-        output = string(abi.encodePacked('data:application/json;base64,', json));
-        return output;
-    }
-    
-    //admin, for convert
-    function set_summoned_time(uint _summoner, uint _value) external {
-        require(permitted_address[msg.sender] == true);
-        summoned_time[_summoner] = _value;
-    }
-}
-
-
 //---Murasaki_Name
 
 
@@ -1320,13 +1195,14 @@ contract Murasaki_Parameter is Ownable {
     bool public isPaused = true;
     uint public BASE_SEC = 86400;
     uint public SPEED = 1000; //100=100%
-    uint public PRICE = 500 * 10**18;    //ether, need to recalc 10**18 in methods
+    uint public PRICE = 200 * 10**18;    //ether, need to recalc 10**18 in methods
     uint public DAY_PETRIFIED = 30;
     uint public STAKING_REWARD_SEC = 2592000; //30 days
     uint public ELECTED_FLUFFY_TYPE = 0;
     string public DEVELOPER_SUMMONER_NAME = "*Fluffy Kingdom*";
     uint public EXP_FROM_PRESENTBOX = 50;
     uint public LIMIT_MINT = 9999999999;
+    bool public isTrial = false;
 
     //modifier
     modifier onlyPermitted {
@@ -1361,6 +1237,9 @@ contract Murasaki_Parameter is Ownable {
     }
     function _set_limit_mint(uint _value) external onlyPermitted {
         LIMIT_MINT = _value;
+    }
+    function _set_isTrial(bool _bool) external onlyPermitted {
+        isTrial = _bool;
     }
 }
 
@@ -1731,6 +1610,13 @@ contract Murasaki_Function_Share is Ownable {
     uint private _salt = 0;
     function update_salt(uint _summoner) external onlyOwner {
         _salt = dn(_summoner, 10);
+    }
+    
+    //check trial
+    function isTrial() external view returns (bool) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Parameter mp = Murasaki_Parameter(ma.address_Murasaki_Parameter());
+        return mp.isTrial();
     }
 
     //check owner of summoner
@@ -2290,8 +2176,23 @@ contract Murasaki_Function_Summon_and_LevelUp is Ownable, ReentrancyGuard {
         }else if (_next_level == 20) {
             ms.set_next_exp_required(_summoner, 9999999);
         }
+        //first level-up bonus
+        if (_next_level == 2) {
+            _mint_presentbox(uint(0), msg.sender);
+        }
         //event
         emit Level_up(_summoner, _next_level);
+    }
+
+    //internal, mint presentbox
+    function _mint_presentbox(uint _summoner_from, address _wallet_to) internal {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
+        Murasaki_Craft mc = Murasaki_Craft(ma.address_Murasaki_Craft());
+        uint _seed = mfs.seed(_summoner_from);
+        uint _item_type = 200;
+        string memory _memo = "first level-up bonus";
+        mc.craft(_item_type, _summoner_from, _wallet_to, _seed, _memo, 0);
     }
 }
 
@@ -2311,7 +2212,7 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable, ReentrancyGuard {
     function withdraw(address rec)public onlyOwner{
         payable(rec).transfer(address(this).balance);
     }
-
+    
     //feeding
     event Feeding(uint indexed _summoner, uint _exp_gained, bool _critical);
     function feeding(uint _summoner, uint _item_nui) external nonReentrant {
@@ -2343,6 +2244,10 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable, ReentrancyGuard {
             _exp_add = _exp_add * 2;
             _critical = true;
         }
+        //trial limit: when Lv>=3, _exp_add=0
+        if (mp.isTrial() && ms.level(_summoner) >= 3) {
+            _exp_add = 0;
+        }
         uint _exp = ms.exp(_summoner) + _exp_add;
         ms.set_exp(_summoner, _exp);
         ms.set_last_feeding_time(_summoner, _now);
@@ -2356,7 +2261,6 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable, ReentrancyGuard {
             ms.set_exp(_summoner_yours, _exp_yours + _exp_add / 50);
         }
         //update staking reward counter
-        //_update_staking_reward_counter(_summoner, _delta_sec);
         _update_staking_reward_counter(_summoner);
         //event
         emit Feeding(_summoner, _exp_add, _critical);
@@ -2479,9 +2383,12 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable, ReentrancyGuard {
         //luck challenge
         bool _critical;
         if (mfs.luck_challenge(_summoner)) {
-            //_exp_add = _exp_add * 3 / 2;
             _exp_add = _exp_add * 2;
             _critical = true;
+        }
+        //trial limit: when Lv>=3, _exp_add=0
+        if (mp.isTrial() && ms.level(_summoner) >= 3) {
+            _exp_add = 0;
         }
         //add exp
         uint _exp = ms.exp(_summoner) + _exp_add;
@@ -2577,21 +2484,23 @@ contract Murasaki_Function_Mining_and_Farming is Ownable, ReentrancyGuard {
         //luck challenge
         bool _critical;
         if (mfs.luck_challenge(_summoner)) {
-            //_delta = _delta * 3 / 2;
             _delta = _delta * 2;
             _critical = true;
+        }
+        //trial limit, when total>=3000, _delta=0
+        if (mfs.isTrial() && mss.total_coin_mined(_summoner) >= 3000) {
+            _delta = 0;
         }
         //add coin
         uint _coin = ms.coin(_summoner) + _delta;
         ms.set_coin(_summoner, _coin);
         //update timestamp
         uint _delta_sec = _now - ms.mining_start_time(_summoner);
-        //uint _total_mining_sec = ms.total_mining_sec(_summoner) + _delta_sec;
-        //ms.set_total_mining_sec(_summoner, _total_mining_sec);
         uint _last_total_mining_sec = ms.last_total_mining_sec(_summoner) + _delta_sec;
         ms.set_last_total_mining_sec(_summoner, _last_total_mining_sec);
         uint _last_grooming_time_plus_working_time = ms.last_grooming_time_plus_working_time(_summoner) + _delta_sec;
         ms.set_last_grooming_time_plus_working_time(_summoner, _last_grooming_time_plus_working_time);
+        //reset status
         ms.set_mining_status(_summoner, 0);
         //update score
         uint _total_coin_mined = mss.total_coin_mined(_summoner);
@@ -2604,21 +2513,15 @@ contract Murasaki_Function_Mining_and_Farming is Ownable, ReentrancyGuard {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
         Murasaki_Parameter mp = Murasaki_Parameter(ma.address_Murasaki_Parameter());
-        //address _owner = mfs.get_owner(_summoner);
-        //uint SPEED = mp.SPEED();
-        //uint BASE_SEC = mp.BASE_SEC();
-        //require(ms.mining_status(_summoner) == 1);
         if (ms.mining_status(_summoner) == 0) {
             return 0;
         }
         uint _now = block.timestamp;
-        //uint _delta = (_now - ms.mining_start_time(_summoner)) * SPEED/100;   //sec
         uint _delta = _now - ms.mining_start_time(_summoner);   //sec
         //happy limit: if happy=0, no more earning
         uint _delta_grooming = _now - ms.last_grooming_time(_summoner);
         uint _base_grooming = mp.BASE_SEC() *3 *100/mp.SPEED();
         if (_delta_grooming >= _base_grooming) {
-            //_delta = ms.last_grooming_time(_summoner) + BASE_SEC * 3;
             _delta = _base_grooming;
         }
         //speed boost
@@ -2626,9 +2529,9 @@ contract Murasaki_Function_Mining_and_Farming is Ownable, ReentrancyGuard {
         //1day = +1000
         _delta = _delta * 1000 / mp.BASE_SEC();
         //status, level, item boost
-        //uint _mod = ms.strength(_summoner) + ms.level(_summoner)*100 + count_mining_items(msg.sender);
-        //uint _mod = ms.strength(_summoner) + ms.level(_summoner)*100 + count_mining_items(_owner);
-        uint _mod = ms.strength(_summoner) + ms.level(_summoner)*100 + count_mining_items(mfs.get_owner(_summoner));
+        uint _mod = ms.strength(_summoner) 
+            + ms.level(_summoner)*100 
+            + count_mining_items(mfs.get_owner(_summoner));
         //5%/point, 100 -> 1.00
         _mod = _mod * 5 / 100;
         //boost
@@ -2696,21 +2599,23 @@ contract Murasaki_Function_Mining_and_Farming is Ownable, ReentrancyGuard {
         //luck challenge
         bool _critical;
         if (mfs.luck_challenge(_summoner)) {
-            //_delta = _delta * 3 / 2;
             _delta = _delta * 2;
             _critical = true;
+        }
+        //trial limit, when total>=3000, _delta=0
+        if (mfs.isTrial() && mss.total_material_farmed(_summoner) >= 3000) {
+            _delta = 0;
         }
         //add coin
         uint _material = ms.material(_summoner) + _delta;
         ms.set_material(_summoner, _material);
         //update timestamp
         uint _delta_sec = _now - ms.farming_start_time(_summoner);
-        //uint _total_farming_sec = ms.total_farming_sec(_summoner) + _delta_sec;
-        //ms.set_total_farming_sec(_summoner, _total_farming_sec);
         uint _last_total_farming_sec = ms.last_total_farming_sec(_summoner) + _delta_sec;
         ms.set_last_total_farming_sec(_summoner, _last_total_farming_sec);
         uint _last_grooming_time_plus_working_time = ms.last_grooming_time_plus_working_time(_summoner) + _delta_sec;
         ms.set_last_grooming_time_plus_working_time(_summoner, _last_grooming_time_plus_working_time);
+        //reset status
         ms.set_farming_status(_summoner, 0);
         //update score
         uint _total_material_farmed = mss.total_material_farmed(_summoner);
@@ -2723,10 +2628,6 @@ contract Murasaki_Function_Mining_and_Farming is Ownable, ReentrancyGuard {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
         Murasaki_Parameter mp = Murasaki_Parameter(ma.address_Murasaki_Parameter());
-        //address _owner = mfs.get_owner(_summoner);
-        //uint SPEED = mp.SPEED();
-        //uint BASE_SEC = mp.BASE_SEC();
-        //require(ms.farming_status(_summoner) == 1);
         if (ms.farming_status(_summoner) == 0) {
             return uint(0);
         }
@@ -2736,21 +2637,16 @@ contract Murasaki_Function_Mining_and_Farming is Ownable, ReentrancyGuard {
         uint _delta_grooming = _now - ms.last_grooming_time(_summoner);
         uint _base_grooming = mp.BASE_SEC() *3 *100/mp.SPEED();
         if (_delta_grooming >= _base_grooming) {
-            //_delta = ms.last_grooming_time(_summoner) + BASE_SEC * 3;
             _delta = _base_grooming;
         }
         //speed boost
         _delta = _delta * mp.SPEED() / 100;
         //1day = +1000
         _delta = _delta * 1000 / mp.BASE_SEC();
-        /*
-        uint _delta = (_now - ms.farming_start_time(_summoner)) * SPEED/100;  //sec
-        _delta = _delta * 1000 / BASE_SEC; // 1 day = +1000
-        */
         //status and item boost
-        //uint _mod = ms.dexterity(_summoner) + ms.level(_summoner)*100 + count_farming_items(msg.sender);
-        //uint _mod = ms.dexterity(_summoner) + ms.level(_summoner)*100 + count_farming_items(_owner);
-        uint _mod = ms.dexterity(_summoner) + ms.level(_summoner)*100 + count_farming_items(mfs.get_owner(_summoner));
+        uint _mod = ms.dexterity(_summoner) 
+            + ms.level(_summoner)*100 
+            + count_farming_items(mfs.get_owner(_summoner));
         //5%/point, 100 -> 1.00
         _mod = _mod * 5 / 100;
         //boost
@@ -2890,6 +2786,14 @@ contract Murasaki_Function_Crafting is Ownable, ReentrancyGuard {
             || _item_type == 195    //material bag
             || _item_type == 196    //mail
         );
+        //trial limitation, only item level=1
+        if (mp.isTrial()){
+            require(
+                _item_type == 1
+                || _item_type == 17
+                || _item_type == 33
+            );
+        }
         //get dc, cost, heart
         uint[4] memory _dc_table = get_item_dc(_item_type);
         uint _coin = _dc_table[2];
@@ -3034,8 +2938,10 @@ contract Murasaki_Function_Crafting is Ownable, ReentrancyGuard {
         mc.craft(_item_type, _summoner, msg.sender, _seed, _memo, 0);
         //when normal items, mint precious and update score
         if (_item_type <= 128) {
-            //_mint_precious(_summoner);
-            _send_randomPresentbox(_summoner);
+            //when trial, does not send presentbox
+            if (mfs.isTrial() == false) {
+                _send_randomPresentbox(_summoner);
+            }
             //update score
             uint _total_item_crafted = mss.total_item_crafted(_summoner);
             mss.set_total_item_crafted(_summoner, _total_item_crafted + 1);
@@ -3071,32 +2977,10 @@ contract Murasaki_Function_Crafting is Ownable, ReentrancyGuard {
             _count += 1;
         }
         address _wallet_to = mm.ownerOf(_summoner_to);
-        /*
-        uint _count_summoners = mm.next_token() - 1;
-        uint _summoner_to = mfs.dn(_summoner_from, _count_summoners) + 1;
-        //check _to_summoner
-        bool _isActive = ms.isActive(_summoner_to);
-        address _wallet_to;
-        //when _summoner_to is active
-        if (
-            _isActive == true
-            && ms.level(_summoner_to) >= 3
-            && mfs.calc_satiety(_summoner_to) >= 10
-            && mfs.calc_happy(_summoner_to) >= 10
-        ) {
-            _wallet_to = mm.ownerOf(_summoner_to);
-        //when _summoner_to is not active, wallet = msg.sender
-        } else {
-            //_wallet_to = msg.sender;
-            _wallet_to = mm.ownerOf(_summoner_from);
-            _summoner_to = _summoner_from;
-        }
-        */
         //mint presentbox
         _mint_presentbox(_summoner_from, _wallet_to);
         //event
         emit SendPresentbox(_summoner_from, _summoner_to);
-    
     }
     
     //internal, mint presentbox
@@ -3853,8 +3737,8 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
         //0:dummy
         9999999999,
         //1-16: mining item
-        3000,
-        3000,
+        3000 / 3,
+        3000 / 3 * 2,
         3000,
         3000,
         3000,
@@ -3870,8 +3754,8 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
         6000,
         7000,
         //17-32: farming item
-        3000,
-        3000,
+        3000 / 3,
+        3000 / 3 * 2,
         3000,
         3000,
         3000,
@@ -3887,8 +3771,8 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
         6000,
         7000,
         //33-48: crafting item
-        3000,
-        3000,
+        3000 / 3,
+        3000 / 3 * 2,
         3000,
         3000,
         3000,
@@ -3926,8 +3810,8 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
         //0:dummy
         9999999999,
         //1-16: mining item
-        3000,
-        3600,
+        3000 / 3,
+        3600 / 3 * 2,
         4050,
         4500,
         4950,
@@ -3943,8 +3827,8 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
         9450 * 6/3,
         9900 * 7/3,
         //17-32: farming item
-        300,
-        360,
+        300 / 3,
+        360 / 3 * 2,
         405,
         450,
         495,
@@ -3960,8 +3844,8 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
         945 * 6/3,
         990 * 7/3,
         //33-48: crafting item
-        1500,
-        1800,
+        1500 / 3,
+        1800 / 3 * 2,
         2025,
         2250,
         2475,
@@ -3999,8 +3883,8 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
         //0:dummy
         9999999999,
         //1-16: mining item
-        300,
-        360,
+        300 / 3,
+        360 / 3 * 2,
         405,
         450,
         495,
@@ -4016,8 +3900,8 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
         945 * 6/3,
         990 * 7/3,
         //17-32: farming item
-        3000,
-        3600,
+        3000 / 3,
+        3600 / 3 * 2,
         4050,
         4500,
         4950,
@@ -4033,8 +3917,8 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
         9450 * 6/3,
         9900 * 7/3,
         //33-48: crafting item
-        1500,
-        1800,
+        1500 / 3,
+        1800 / 3 * 2,
         2025,
         2250,
         2475,
@@ -4968,6 +4852,10 @@ contract Murasaki_Function_Staking_Reward is Ownable, ReentrancyGuard {
     function get_staking_amount (uint _summoner) public view returns (uint) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
+        //trial limit, no amount
+        if (mfs.isTrial()) {
+            return 0;
+        }
         address _owner = mfs.get_owner(_summoner);
         IAstarBase ASTARBASE = IAstarBase(ma.address_AstarBase());
         uint _staker_raw = ASTARBASE.checkStakerStatusOnContract(_owner, ma.address_Murasaki_Main());
@@ -6002,6 +5890,10 @@ contract Achievement_onChain is Ownable {
         uint _score_staking = get_score_staking(_owner);
         uint _score_murasaki_nft = get_score_murasaki_nft(_owner);
         uint _score = _score_token + _score_nft + _score_staking + _score_murasaki_nft;
+        //trial limit; score=0
+        if (mfs.isTrial()){
+            _score=0;
+        }
         return _score;
     }
     
@@ -6533,6 +6425,11 @@ contract Murasaki_Info is Ownable {
         Murasaki_Parameter mp = Murasaki_Parameter(ma.address_Murasaki_Parameter());
         return mp.ELECTED_FLUFFY_TYPE();
     }
+    function isTrial() public view returns (bool) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Parameter mp = Murasaki_Parameter(ma.address_Murasaki_Parameter());
+        return mp.isTrial();
+    }
     
     //Achievement_onChain
     function get_score(uint _summoner) public view returns (uint) {
@@ -6754,7 +6651,8 @@ contract Murasaki_Info is Ownable {
         uint,
         uint,
         uint,
-        uint
+        uint,
+        bool
     ) {
         uint _class = class(_summoner);
         address _owner = owner(_summoner);
@@ -6768,7 +6666,8 @@ contract Murasaki_Info is Ownable {
             speed(),
             price(),
             staking_reward_sec(),
-            elected_fluffy_type()
+            elected_fluffy_type(),
+            isTrial()
         );
     }
 
@@ -7167,8 +7066,14 @@ contract Murasaki_Lootlike is Ownable {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         address _owner = mfs.get_owner(_summoner);
-        //address _owner = address(this);
-        uint256 rand = random(string(abi.encodePacked(keyPrefix, abi.encodePacked(_owner, toString(_summoner)))));
+        uint256 rand = random(
+            string(
+                abi.encodePacked(
+                    keyPrefix,
+                    _owner
+                )
+            )
+        );
         string memory output = sourceArray[rand % sourceArray.length];
         return output;
     }
@@ -7406,10 +7311,15 @@ contract Murasaki_tokenURI is Ownable {
         return mc.balanceOf(mfs.get_owner(_summoner));
     }
     
-    function _get_endSVG(uint _summoner) internal pure returns (string memory) {
+    function _get_endSVG(uint _summoner) internal view returns (string memory) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Parameter mp = Murasaki_Parameter(ma.address_Murasaki_Parameter());
         if (_summoner == 0) {
             //token not found
             return '</text><rect width="128" height="128" fill="#ffffff" rx="5" ry="5" fill-opacity="0.8"/><text x="64"  y="60" class="base" text-anchor="middle">Token</text><text x="64"  y="80" class="base" text-anchor="middle">Not Found</text></svg>';
+        } else if (mp.isTrial()) {
+            //trial
+            return '</text><rect width="128" height="128" fill="#ffffff" rx="5" ry="5" fill-opacity="0.8"/><text x="64"  y="60" class="base" text-anchor="middle">Trial</text><text x="64"  y="80" class="base" text-anchor="middle">Token</text></svg>';
         } else {
             return '</text></svg>';
         }
@@ -7680,6 +7590,51 @@ contract BuybackTreasury is Ownable, ReentrancyGuard {
     */
     
     function _calc_itemPrice_fromLevel(uint _item_level) internal view returns (uint) {
+        uint _coefficient = 0;
+        if (_item_level == 1) {
+            _coefficient = 93;
+        } else if (_item_level == 2) {
+            _coefficient = 372;
+        } else if (_item_level == 3) {
+            _coefficient = 931;
+        } else if (_item_level == 4) {
+            _coefficient = 1396;
+        } else if (_item_level == 5) {
+            _coefficient = 1954;
+        } else if (_item_level == 6) {
+            _coefficient = 2606;
+        } else if (_item_level == 7) {
+            _coefficient = 3350;
+        } else if (_item_level == 8) {
+            _coefficient = 4188;
+        } else if (_item_level == 9) {
+            _coefficient = 5118;
+        } else if (_item_level == 10) {
+            _coefficient = 6142;
+        } else if (_item_level == 11) {
+            _coefficient = 7259;
+        } else if (_item_level == 12) {
+            _coefficient = 8469;
+        } else if (_item_level == 13) {
+            _coefficient = 9771;
+        } else if (_item_level == 14) {
+            _coefficient = 11167;
+        } else if (_item_level == 15) {
+            _coefficient = 12656;
+        } else if (_item_level == 16) {
+            _coefficient = 14238;
+        } else if (_item_level == 21) { //fluffy
+            _coefficient = 93;
+        } else if (_item_level == 22) { //fluffier
+            _coefficient = 512;
+        } else if (_item_level == 23) { //fluffiest
+            _coefficient = 2252;
+        } else if (_item_level == 24) { //doll
+            _coefficient = 7432;
+        }
+        uint _price = amountPerSummoner * _coefficient / 100000;
+        return _price;
+        /*
         uint _coefficient;
         if (_item_level == 1) {
             _coefficient = 10;
@@ -7717,29 +7672,43 @@ contract BuybackTreasury is Ownable, ReentrancyGuard {
         //uint _price = calc_amount_per_summoner() * _coefficient / 3227;
         uint _price = amountPerSummoner * _coefficient / 3227;
         return _price;
+        */
     }
     
     function calc_buybackPrice(uint _item) public view returns (uint) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Craft mc = Murasaki_Craft(ma.address_Murasaki_Craft());
         (uint _item_type, , , , ,) = mc.items(_item);
-        //when not normal item, return price 0
-        if (_item_type >= 193) {
-            return 0;
+        uint _price = 0;
+        uint _item_level = 0;
+        //crafting items
+        if (_item_type <= 192) {
+            _item_level = _item_type % 16;
+            if (_item_level == 0) {
+                _item_level = 16;
+            }
+            uint _item_rarity;
+            if (_item_type >= 129) {    //rare, x9
+                _item_rarity = 9;
+            } else if (_item_type >= 65) {  //uncommon, x3
+                _item_rarity = 3;
+            } else {    //common, x1
+                _item_rarity = 1;
+            }
+            _price = _calc_itemPrice_fromLevel(_item_level) * _item_rarity;
+        //fluffy
+        } else if (_item_type >= 201 && _item_type <= 248) {
+            if (_item_type <= 212) {    //fluffy
+                _item_level = 21;
+            } else if (_item_type <= 224) { //fluffier
+                _item_level = 22;
+            } else if (_item_type <= 236) { //fluffiest
+                _item_level = 23;
+            } else if (_item_type <= 248) { //doll
+                _item_level = 24;
+            }
+            _price = _calc_itemPrice_fromLevel(_item_level);
         }
-        uint _item_level = _item_type % 16;
-        if (_item_level == 0) {
-            _item_level = 16;
-        }
-        uint _item_rarity;
-        if (_item_type >= 129) {    //rare, x9
-            _item_rarity = 9;
-        } else if (_item_type >= 65) {  //uncommon, x3
-            _item_rarity = 3;
-        } else {    //common, x1
-            _item_rarity = 1;
-        }
-        uint _price = _calc_itemPrice_fromLevel(_item_level) * _item_rarity;
         return _price;
     }
     
@@ -7795,7 +7764,7 @@ contract BuybackTreasury is Ownable, ReentrancyGuard {
 //===Admin==================================================================================================================
 
 
-//---Convertion
+//---Admin_Converter
 
 
 contract Murasaki_Craft_Old {
@@ -7814,6 +7783,161 @@ contract Murasaki_Craft_Old {
 }
 
 contract Admin_Convert is Ownable {
+    
+    function mm_convert (
+        address _old_address, 
+        address _new_address, 
+        uint _summoner_256
+    ) external onlyOwner {
+        uint _summoner = _summoner_256;
+        Murasaki_Main mmOld = Murasaki_Main(_old_address);
+        Murasaki_Main mmNew = Murasaki_Main(_new_address);
+        uint _class = mmOld.class(_summoner);
+        uint _summoned_time = mmOld.summoned_time(_summoner);
+        uint _seed = mmOld.seed(_summoner);
+        address _owner = mmOld.ownerOf(_summoner);
+        mmNew.summon(_owner, _class, _seed);
+        mmNew.set_summoned_time(_summoner, _summoned_time);
+    }
+
+    function mn_convert (
+        address _old_address, 
+        address _new_address, 
+        uint _tokenId_256
+    ) external onlyOwner {
+        uint _tokenId = _tokenId_256;
+        Murasaki_Name mnOld = Murasaki_Name(_old_address);
+        Murasaki_Name mnNew = Murasaki_Name(_new_address);
+        string memory _name = mnOld.names(_tokenId);
+        uint _seed = mnOld.seed(_tokenId);
+        address _owner = mnOld.ownerOf(_tokenId);
+        mnNew.mint(_owner, _name, _seed);
+    }
+    
+    function ms_convert (
+        address _old_address,
+        address _new_address,
+        uint _summoner_uint256
+    ) external onlyOwner {
+        uint _summoner = _summoner_uint256;
+        Murasaki_Storage msOld = Murasaki_Storage(_old_address);
+        Murasaki_Storage msNew = Murasaki_Storage(_new_address);
+        msNew.set_level(_summoner, msOld.level(_summoner));
+        msNew.set_exp(_summoner, msOld.exp(_summoner));
+        msNew.set_strength(_summoner, msOld.strength(_summoner));
+        msNew.set_dexterity(_summoner, msOld.dexterity(_summoner));
+        msNew.set_intelligence(_summoner, msOld.intelligence(_summoner));
+        msNew.set_luck(_summoner, msOld.luck(_summoner));
+        msNew.set_next_exp_required(_summoner, msOld.next_exp_required(_summoner));
+        msNew.set_last_level_up_time(_summoner, msOld.last_level_up_time(_summoner));
+        msNew.set_coin(_summoner, msOld.coin(_summoner));
+        msNew.set_material(_summoner, msOld.material(_summoner));
+        msNew.set_last_feeding_time(_summoner, msOld.last_feeding_time(_summoner));
+        msNew.set_last_grooming_time(_summoner, msOld.last_grooming_time(_summoner));
+        msNew.set_mining_status(_summoner, msOld.mining_status(_summoner));
+        msNew.set_mining_start_time(_summoner, msOld.mining_start_time(_summoner));
+        msNew.set_farming_status(_summoner, msOld.farming_status(_summoner));
+        msNew.set_farming_start_time(_summoner, msOld.farming_start_time(_summoner));
+        msNew.set_crafting_status(_summoner, msOld.crafting_status(_summoner));
+        msNew.set_crafting_start_time(_summoner, msOld.crafting_start_time(_summoner));
+        msNew.set_crafting_item_type(_summoner, msOld.crafting_item_type(_summoner));
+        msNew.set_total_mining_sec(_summoner, msOld.total_mining_sec(_summoner));
+        msNew.set_total_farming_sec(_summoner, msOld.total_farming_sec(_summoner));
+        msNew.set_total_crafting_sec(_summoner, msOld.total_crafting_sec(_summoner));
+        msNew.set_last_total_mining_sec(_summoner, msOld.last_total_mining_sec(_summoner));
+        msNew.set_last_total_farming_sec(_summoner, msOld.last_total_farming_sec(_summoner));
+        msNew.set_last_total_crafting_sec(_summoner, msOld.last_total_crafting_sec(_summoner));
+        msNew.set_last_grooming_time_plus_working_time(_summoner, msOld.last_grooming_time_plus_working_time(_summoner));
+        msNew.set_isActive(_summoner, msOld.isActive(_summoner));
+        msNew.set_inHouse(_summoner, msOld.inHouse(_summoner));
+        msNew.set_staking_reward_counter(_summoner, msOld.staking_reward_counter(_summoner));
+    }
+    
+    function mss_convert (
+        address _old_address,
+        address _new_address,
+        uint _summoner_uint256
+    ) external onlyOwner {
+        uint _summoner = _summoner_uint256;
+        Murasaki_Storage_Score mssOld = Murasaki_Storage_Score(_old_address);
+        Murasaki_Storage_Score mssNew = Murasaki_Storage_Score(_new_address);
+        mssNew.set_total_exp_gained(_summoner, mssOld.total_exp_gained(_summoner));
+        mssNew.set_total_coin_mined(_summoner, mssOld.total_coin_mined(_summoner));
+        mssNew.set_total_material_farmed(_summoner, mssOld.total_material_farmed(_summoner));
+        mssNew.set_total_item_crafted(_summoner, mssOld.total_item_crafted(_summoner));
+        mssNew.set_total_precious_received(_summoner, mssOld.total_precious_received(_summoner));
+    }
+
+    function msn_convert (
+        address _old_address,
+        address _new_address,
+        uint _nuiId
+    ) external onlyOwner {
+        Murasaki_Storage_Nui msnOld = Murasaki_Storage_Nui(_old_address);
+        Murasaki_Storage_Nui msnNew = Murasaki_Storage_Nui(_new_address);
+        msnNew.set_mint_time(_nuiId, msnOld.mint_time(_nuiId));
+        msnNew.set_summoner(_nuiId, msnOld.summoner(_nuiId));
+        msnNew.set_class(_nuiId, msnOld.class(_nuiId));
+        msnNew.set_level(_nuiId, msnOld.level(_nuiId));
+        msnNew.set_strength(_nuiId, msnOld.strength(_nuiId));
+        msnNew.set_dexterity(_nuiId, msnOld.dexterity(_nuiId));
+        msnNew.set_intelligence(_nuiId, msnOld.intelligence(_nuiId));
+        msnNew.set_luck(_nuiId, msnOld.luck(_nuiId));
+        msnNew.set_total_exp_gained(_nuiId, msnOld.total_exp_gained(_nuiId));
+        msnNew.set_total_coin_mined(_nuiId, msnOld.total_coin_mined(_nuiId));
+        msnNew.set_total_material_farmed(_nuiId, msnOld.total_material_farmed(_nuiId));
+        msnNew.set_total_item_crafted(_nuiId, msnOld.total_item_crafted(_nuiId));
+        msnNew.set_total_precious_received(_nuiId, msnOld.total_precious_received(_nuiId));
+        msnNew.set_score(_nuiId, msnOld.score(_nuiId));
+    }
+
+    function mc_convert (
+        address _old_address, 
+        address _new_address, 
+        uint _item_id
+    ) external onlyOwner {
+        Murasaki_Craft_Old mcOld = Murasaki_Craft_Old(_old_address);
+        Murasaki_Craft mcNew = Murasaki_Craft(_new_address);
+        {
+            //correct old item infromation
+            (
+                uint _item_type, 
+                uint _crafted_time, 
+                uint _crafted_summoner, 
+                address _crafted_wallet, 
+                //string memory _memo
+            ) = mcOld.items(_item_id);
+            //conver nuichan id, random type
+            if (_item_type == 197) {
+                _item_type = _crafted_time % 12 + 237;
+            }
+            //uint32 _seed = mcOld.seed(_item_id);
+            address _wallet_to = mcOld.ownerOf(_item_id);
+            //craft_convert in new contract
+            mcNew._admin_craft_convert(
+                _item_type,
+                _crafted_summoner,
+                _crafted_wallet,
+                //mcOld.seed(uint32(_item_id_256)),
+                //888,
+                //_memo,
+                _item_id,
+                _crafted_time,
+                //mcOld.ownerOf(_item_id)
+                _wallet_to
+            );
+        }
+    }
+    
+    function mc_set_next_item (address _address, uint _value) external onlyOwner {
+        Murasaki_Craft mcNew = Murasaki_Craft(_address);
+        mcNew._admin_set_next_item(_value);
+    }
+}
+
+//---Trial_Converter
+
+contract Trial_Converter is Ownable {
     
     function mm_convert (
         address _old_address, 

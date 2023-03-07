@@ -82,131 +82,139 @@ contract ERC721 is IERC721 {
 
 //### 1st
 
-    Petとのふれあい機能の実装
-        Petと当たり判定したときに専用の演出を実装する
-        ハマらないようクールタイムを用意する
+    マーケティングの熟考
+        目的：
+            本PJの魅力をわかりやすく理解できる機会を提供する
+            本PJに興味を持ってくれる人に情報を届ける
+        伝えるべき魅力とは：
+            
+        方法：
+            Twitter
+            Discord
 
-    体験SBTの設計
-        別のmmを用意する
-            summoner IDに紐付いたms, mss, mnも別コントラが必要
-            admin converterのようなコントラでパラメータをコンバートする必要がある
-            かなり複雑になるが、エラーなく実装できるだろうか
-        mint関数と、convert関数を別に用意する
-            convert関数は引数はsummoner IDのみとする
-                でないと引数上限に引っかかるだろうか
-            require(flag_convert=0)
-            require(owner check)
-        mint関数
-            正式mmでmintする
-            正式summoner idが割り振られる
-        convert関数
-            mint関数に続いて同一tx内でconvertする
-            convert_mm(summoner_trial, summoner)
-            convert_ms(summoner_trial, summoner)
-            convert_mss(summoner_trial, summoner)
+    Trial Converterの実装
+        運用
+            いつでもコンバート可能にするか
+            特定の条件を満たした後コンバート可能とするか
+            コンバート無しで正規mint可能とするか
+        Solidity実装
+            mfslにconverting_summon()関数を実装する
+            まずsummonし新IDを割り振る
+            その後trialから正式へmm, ms, mssをコンバートする
+            所有trial_mcをすべて取得し、正式mcをmint、コンバートする
+        UI実装
 
-    開始直後の調整の本質
-        初日中にゲーム性を体験できるイベントを発生させる
-            盛りすぎない、期待させすぎない
-            低頻度・長期間ほのぼのプレイであることを理解してもらう
-        3日目までは毎日新しい体験を提供する
-            1日目：
-                数回のお世話でレベルアップ
-                    Lv1 → Lv2
-                mining, farming解禁
-            2日目
-                Lv3へレベルアップ
-                crafting解禁
-                fluffyと出会う
-                    Lv3の特別報酬とするか
-            3日目
-                最初のクラフト品完成
-                    最初は低コスト、24 hrなどで完了とする
-            7日目までに
-                最低限のアイテムのクラフト完了
-                    iPad, Nameplate, MusicBoxの3つぐらい
-                    すべて資源1d, クラフト1d程度の難易度調整にする
-                    craft, 1d, coin or material: 1000程度
-        7日目までに一通りゲーム性が理解できるよう設計する
-            この7日目ぐらいで正式SBTのmintを促す
-        体験SBTの制限
-            マーケット不可
-            バイバック不可
-            Lv3上限
-        体験SBTの許可
-            名前SBTのmint
-            正式NFTのmint
-        問題点
-            体験SBTと正式SBTのIDが異なるため、lootlikeの属性が変わってしまう
-                lootlikeはwalletのみに依存させるよう修正が必要
-            無料なため、大量の体験SBTで大量のアイテムNFTをmintできてしまう
-            最初のクラフト時は低コストにする必要があるが、簡単にupgrade可能になってしまう
-                first ticketなどの別の機構が必要
-            体験SBT→正式SBTへのパラメータ引き継ぎが可能だろうか
-                msやmssなどもsummoner IDが変わるのですべてtransferする必要がある
+   *体験summonerの設計II
+     ok コントラ群を別にすべて用意する
+            token, functionなどすべて
+            if(isTrial)トリガーを実装しコード自体はtrialと正式で共通とする
+     ok 制限をかける
+            mcのtransfer_feeを10000000など大きな数字に設定して事実上禁止
+            mfslのlevelup関数でrequire(level<=2): Lv3までしかあげれないよう制限
+            mfcでrequire(mss.total_item_crafted <=2): itemは3つまでしかcraftできないよう制限
+            mfcで、trialではfluffyが発生しないよう修正
+            そのかわり、mfslでLv2, Lv3などでpresentboxをもらえるよう修正
+            mpにisTrial変数を用意しtrueを代入する
+                他のmfも自前のisTrial()を持ち、中身はmp.isTrialを参照する
+                mf内ではif(isTrial){require()}で制限を実装する
+     ok 制限II
+         ok Lv>=3でfeeding, groomingのexp=0
+                Lv4にあげられないのではなく、expを得られなくする
+         ok start_crafting時にrequire(total_item_craft<3)
+                3個以上はクラフト開始できなくする
+         ok coin bank, leaf pouch, cat mailはtrialではクラフト不可とする
+                もしくは、クラフト可能品を絞る
+                require(_item_type==1 || _item_type==17 || _item_type==33)など
+         ok mc_trialはtransfer_fee=10000000000
+         ok 1ヶ月間放置されると再summonが必要なように設計する
+                isActive()を用意するか？
+                isPetrified & isTrialでresummon()とするか？
+                シンプルな設計を考える
+                → 石化し、cure cost=0とする（mint cost=0なのでそのままで良い）
+         ok coin, leafの取得上限も検討する
+                延々とcoin/leafを取得し続けるbotが成り立ってしまうため
+         ok onChain_Scoreによるexp boostは無効
+                item_wreathも表示させない
+         ok staking bonusも無効
+                メーターを貯めない
+                item_stakingも表示させない
+         ok uriで"Trial"と表示させる
+         ok presentboxはランダム送信しない
+                自分で作ったら自分でもらえる
+                → trialでは送らないこととする
+     ** init
+            maは独立したコントラ
+            ただしmnだけは正規コントラと共通
+            mcのtransfer feeは巨大な数字
+            mp.PRICE=0
+            mp.isTrial=true
+     ** コンバーターを用意する
+            mfslにconverting_summon()関数を実装する
+            まずsummonし新IDを割り振る
+            その後trialから正式へmm, ms, mssをコンバートする
+            所有trial_mcをすべて取得し、正式mcをmint、コンバートする
+        共通の情報
+            mnはtrial上で正式版をmintさせる
+                つまり、ma_trialには正規mnのアドレスを登録する
+            弊害としては、大量mintでnameが枯渇することだが、まあ大丈夫だろうか
+     ok 要修正
+            lootlike系はwalletアドレスとclassのみを参照するよう修正
+        要対策・要検討
+         ok coin/leafをひたすら掘り続けるtrial summoner
+         ok coin bank/leaf pouchを溜め込むtrial summoner
+            → 時間の制限か、total_coin/leafの制限を検討する
+         ok 長期間放置されたtrial summoner
+                石化する？
+                そのwalletで再開したいときはどうするか
+                trial summonerは石化しないようにするか
+                もしくは石化のタイミングで再mint必要にするか
+                正規summonerは石化し、trial summonerはリセットされる
+                普通に石化でも良いかもしれない
+                    trialではcureコストが0である、とする
+         ** trialを示すUI演出を考える
+                鬱陶しくなく、しかし変化がわかりやすく、かつ嬉しいUIが必要
+         ** 開始画面のUIを考える
+                trialあり/正規なし　→　trial summonerで開始
+                trialあり正規あり　→　(ありえない)
+                trialなし/正規あり　→　正規summonerで開始
+                trialなし/正規なし　→　summon画面
+         ** summonは必ずtrialからか、直接正規mint可とするか
+                条件を満たさないと正規へconvertできないのか、
+                feeを払えば初期から、もしくは度のタイミングでも正規summonerへconvert可能とするか
 
-    mint直後の立ち上がりのバランス調整
-        流石にゲーム開始時の楽しみが弱すぎるだろう
-        初日中に何かしらのイベントを発生させる
-        1週間以内に必須のアイテムぐらいはクラフト可能にする
-        どこかのタイミングで正式SBTへの移行を促す
-        最も大事な、ゲーム開始から1-2週間のバランスを試行錯誤する
-        その後はmint feeがある意味人質になる
-            mint後は脱落者が増えるほど継続者の利益が増えるシステム
-        スタート直後：
-            presentboxを1つ同時にmintさせる
-            ないないさんを使って各種ボタンの説明を表示させる
-            24時間以内にLv2へレベルアップ可能にする
-        スタート3日後：
-            Lv3へレベルアップ可能にする
-        スタート7日後：
-            初期の1-2個のアイテムNFTをcraft完了可能にする
-            name plate, iPad, Musicbox
-        ゲーム性の中心はなにか
-            できるだけ早いタイミングで推しのゲーム性を体験してもらう
-            毎日継続してお世話することで少しずつ成長するNFT（SBT）
-                「成長」と「蓄積」を実感できる体験はなにか
-                    レベル？
-                    ステータス？
-                    資源の増加？
-            得た資源を支払って新しいNFTをmintする拡大再生産
-                拡大再生産を実感できる体験はなにか
-            目減りしない資産価値
-                バイバックで担保されたNFTの価値
-                「時価総額」としてUI内に表示させる
+    クリック時の挙動統一
+        cat, festivalor, presentboxの仕様も統一する
+        現状これらはマウスオーバーとマウスクリックで挙動が異なるが、さてどうするか
+        クリックでtx飛ばしてしまうため、情報表示のUI設定がちょっと難しい
+        item_indicatorはどうするか
+            同時に、ステータス補正値の表示方法も考える
 
-    free2play機構の検討、体験版機能の検討
-        いきなり$10-20払ってくれというのは参入障壁が高すぎる
-            加えて、NFTではなく移動できないSBTなので気軽に購入しにくいだろう
-            ape inした層から売れない移動できない、といった苦情やトラブルが多いと思われる
-        そのため、例えばLv3程度、最初の1週間程度は機能制限ありの体験summonerとする
-            気に入れば、正式SBTを購入して継続してプレイできる
-            このほうが、将来的な利益が大きいだろう
-        体験SBTの時は機能制限を付ける：
-            マーケットの使用不可
-                バイバックも使用不可
-            Lv4以上へあげられない
-            アイテムクラフトやfluffy NFTはどうするか
-                体験NFTとし、正式summoner mint時に正式NFTに変換される
-                正式NFTをmint可能とする
-            名前SBTはどうするか
-                特に弊害はないので正式SBTでよいだろうか
-            クラフト回数に制限をかける
-                3回、など。
-            fluffyはどうするか
-                3匹までしか得られない、など。
-        bot対策
-            体験summonerがfree mintの場合、大量にmintし運用することで
-                正式summoner側の経済が破壊されることは避けなければならない
-            例えば、正式NFTをmint可としておくと、
-                大量の体験summonerから低レベルとはいえ大量の正式NFTが放出されうる
-                bankやpouchなどが大量に出回るとまずい
-                これは公式マーケットを使用不可としていても、裏マーケットなどで起こりうること
-            また、体験summonerでひたすらcoinを掘り続けるというプレイも可能になる
-                どこかで蓄積coin<mint feeとなったところで正式summonerをmintし
-                profitを得るという力技が可能になってしまう。
-            かといって制限をかけすぎると面白くない体験playとなってしまうだろう
-                例えばNFTは一切mint/craftできない、などはつまらなさそう
+    exp増加アイテムのUI実装
+        絵の決定
+            トロフィー？
+            きれいな石？
+            お花？
+            置き場所は？
+            例：
+                小さなきれいな石: すべてexp+0.03%, 色が12色ある
+                中くらいのきれいな石: すべてexp+0.05%, 色が6色ある、など
+        取得のタイミング
+            現状はstaking rewardでのみLv1が出現する
+            なにか特別なアクションの報酬としたい
+                散歩の報酬
+                    何も得られなかったら悲しいのでこれ以外の報酬も考える
+                発表会の報酬
+                    飾って楽しいトロフィー, シーズンごとに異なる
+        合計+exp%の表示方法のUI実装
+            どこに表示させるか
+            ぬいちゃんboostをどうするか
+
+    レベルアップの演出の改善
+        もう少し豪華に
+        新レベル値を大きく表示、など
+        付随して、文字表示の機構を実装する
+            happy new yearなどにも使えそう
+            文字が一つずつ可愛く出現する演出を考える
 
     天気を実装する
        *UI側だけの演出
@@ -229,43 +237,6 @@ contract ERC721 is IERC721 {
             request.send();
             let _json = JSON.parse(astar_price_data);
             let _astar_priceChange_h24 = _json.pair.priceChange.h24
-
-    スナップショットスクリプトを実装する
-        pythonなどで、mm, mn, ms, mss, mns, mcの状態をローカルに記録するスクリプト
-            可能ならば、スナップショットからの回復コードの実装も検討する
-        また、ローカルに保存したデータの解析方法にも慣れておく
-
-    Buybackシステムの修正
-        fluffy NFTのbuyback価格の設定
-            fluffyは不可で、estやdollあたりからpriceを付けるか
-            どのitem levelが妥当だろうか。Lv10あたり？
-            ちゃんと計算して設定する。
-        fluffyやflyffierにも採算取れない程度に小さくて良いので価格を設定するか
-        fluffy系列分の割当も計算する
-        現在の時価総額を表示する
-            今すべてを売り切ったらいくらになるか
-            自分のHoMの金銭的価値の位置づけ
-            そしてこの最低時価総額は決して下がらず、未来に向けて必ず上昇してゆく
-        むらさきさんをburnしたらいくらか返金されるシステムはどうだろうか
-            決して目減りしないオンチェーン資産、を表現したい
-            そしてこの資産価格は継続的なゲームプレイで価値が上がってゆく
-
-    exp増加アイテムのUI実装
-        絵の決定
-            トロフィー？
-            きれいな石？
-            お花？
-            置き場所は？
-        取得のタイミング
-            現状はstaking rewardでのみLv1が出現する
-            なにか特別なアクションの報酬としたい
-                散歩の報酬
-                    何も得られなかったら悲しいのでこれ以外の報酬も考える
-                発表会の報酬
-                    飾って楽しいトロフィー, シーズンごとに異なる
-        合計+exp%の表示方法のUI実装
-            どこに表示させるか
-            ぬいちゃんboostをどうするか
 
    *お菓子の家の実装
      ok Solidity:
@@ -352,6 +323,28 @@ contract ERC721 is IERC721 {
             この行動でしか手に入らない報酬を深慮する
             お花NFTなど？用途はどうするか
             シーズンを決めて、シーズン限定のお花NFTを発行するか
+        意味論II
+            ある種のエンドコンテンツのいち付けとする
+            後半のアイテムをクラフトすることで解禁される
+            working中とみなされgroomingのexpが入らない
+            特定の条件を満たすことでNFTをmintできる
+            報酬のNFTを取得するためにはtry&errorが必要なシステムにする
+                solt値+summonerIDで乱数を発生させ
+                この乱数に基づいて解答が変化するシステムはどうか
+            つまり、設計者自身にも正解がわからず、
+                正解の根拠となる乱数はtry&errorでしか絞り込めないようなシステムを考える
+            ex) 東西南北8方向のどこかが正解
+                正解の方向に近いほど強い手がかりが得られる
+                方角と距離の要素にする、など
+                方角は山・川・海など意味のある項目でも良いかも
+            方角と、あと１，２このplayerが設定できる要素を考える
+                誰と行くか
+                あと１つなにか要素
+            手がかりは、3つの要素の合算値がreturnされる
+                つまり、どの要素が正解だったのかがわかりにくい
+            また、returnは一定時間が経っていないとcall()できない
+            これには乱数生成コードの秘匿化が必要だろう
+                privateにsoltを保存するだけでは読み込めてしまうらしい
 
     演奏会の実装
         楽器習熟レベルを発揮する場
@@ -407,30 +400,10 @@ contract ERC721 is IERC721 {
                     あるいは、この行動でしか手に入らないトロフィーなど
                         トロフィーはNFTではなくSBTで実装する
     
-	Philandライクな戦略の検討
-		オンチェーンアクティビティに応じたオブジェクトを得る
-			onChainAchievementコントラクト
-		NFTではなくとも、落書きなど何かしらの表現を行いたい
-		    落書きはin-gameアクティビティの表現で実装済みなので、バッティングするだろうか
-    		各PJのトレースデフォルメアイコンを用意するか
-    		    どこに表示するか
-		また、インセンティブとしてはExp Boostボーナスを導入する
-	    *よつば案：
-		    1つ, 2つ, 3つ, 4つ葉の4段階
-		    葉っぱが薄いor透明で現在の段階を表すか
-		    もしくは、4つの別のイラストとするか
-    		    0-1%: 1つ葉
-    		    1-2%: 2つ葉
-    		    2-3%: 3つ葉
-    		    3-4%: 4つ葉
-    		    4%max: 4つ葉＋てんとう虫
-    		マウスオーバーラップでスコア内訳を表示させる
-    	スタンプ案
-    	    壁の空いているところにNFTをデフォルメしたスタンプを貼る
-
     アイテム順の再考
         クレヨンの位置
         楽器の位置
+        フラワーリース
 
     ネオンちゃんの段階実装
         ステーキング量に応じてにぎやかにする
@@ -806,6 +779,206 @@ contract ERC721 is IERC721 {
 
 
 //### 3rd
+
+ ig 体験SBTの設計
+        別のmmを用意する
+            summoner IDに紐付いたms, mss, mnも別コントラが必要
+            admin converterのようなコントラでパラメータをコンバートする必要がある
+            かなり複雑になるが、エラーなく実装できるだろうか
+        mint関数と、convert関数を別に用意する
+            convert関数は引数はsummoner IDのみとする
+                でないと引数上限に引っかかるだろうか
+            require(flag_convert=0)
+            require(owner check)
+        mint関数
+            正式mmでmintする
+            正式summoner idが割り振られる
+        convert関数
+            mint関数に続いて同一tx内でconvertする
+            convert_mm(summoner_trial, summoner)
+            convert_ms(summoner_trial, summoner)
+            convert_mss(summoner_trial, summoner)
+
+ ig free2play機構の検討、体験版機能の検討
+        いきなり$10-20払ってくれというのは参入障壁が高すぎる
+            加えて、NFTではなく移動できないSBTなので気軽に購入しにくいだろう
+            ape inした層から売れない移動できない、といった苦情やトラブルが多いと思われる
+        そのため、例えばLv3程度、最初の1週間程度は機能制限ありの体験summonerとする
+            気に入れば、正式SBTを購入して継続してプレイできる
+            このほうが、将来的な利益が大きいだろう
+        体験SBTの時は機能制限を付ける：
+            マーケットの使用不可
+                バイバックも使用不可
+            Lv4以上へあげられない
+            アイテムクラフトやfluffy NFTはどうするか
+                体験NFTとし、正式summoner mint時に正式NFTに変換される
+                正式NFTをmint可能とする
+            名前SBTはどうするか
+                特に弊害はないので正式SBTでよいだろうか
+            クラフト回数に制限をかける
+                3回、など。
+            fluffyはどうするか
+                3匹までしか得られない、など。
+        bot対策
+            体験summonerがfree mintの場合、大量にmintし運用することで
+                正式summoner側の経済が破壊されることは避けなければならない
+            例えば、正式NFTをmint可としておくと、
+                大量の体験summonerから低レベルとはいえ大量の正式NFTが放出されうる
+                bankやpouchなどが大量に出回るとまずい
+                これは公式マーケットを使用不可としていても、裏マーケットなどで起こりうること
+            また、体験summonerでひたすらcoinを掘り続けるというプレイも可能になる
+                どこかで蓄積coin<mint feeとなったところで正式summonerをmintし
+                profitを得るという力技が可能になってしまう。
+            かといって制限をかけすぎると面白くない体験playとなってしまうだろう
+                例えばNFTは一切mint/craftできない、などはつまらなさそう
+
+ ig 開始直後の調整の本質
+        初日中にゲーム性を体験できるイベントを発生させる
+            盛りすぎない、期待させすぎない
+            低頻度・長期間ほのぼのプレイであることを理解してもらう
+        3日目までは毎日新しい体験を提供する
+            1日目：
+                数回のお世話でレベルアップ
+                    Lv1 → Lv2
+                mining, farming解禁
+            2日目
+                Lv3へレベルアップ
+                crafting解禁
+                fluffyと出会う
+                    Lv3の特別報酬とするか
+            3日目
+                最初のクラフト品完成
+                    最初は低コスト、24 hrなどで完了とする
+            7日目までに
+                最低限のアイテムのクラフト完了
+                    iPad, Nameplate, MusicBoxの3つぐらい
+                    すべて資源1d, クラフト1d程度の難易度調整にする
+                    craft, 1d, coin or material: 1000程度
+        7日目までに一通りゲーム性が理解できるよう設計する
+            この7日目ぐらいで正式SBTのmintを促す
+        体験SBTの制限
+            マーケット不可
+            バイバック不可
+            Lv3上限
+        体験SBTの許可
+            名前SBTのmint
+            正式NFTのmint
+        問題点
+            体験SBTと正式SBTのIDが異なるため、lootlikeの属性が変わってしまう
+                lootlikeはwalletのみに依存させるよう修正が必要
+            無料なため、大量の体験SBTで大量のアイテムNFTをmintできてしまう
+            最初のクラフト時は低コストにする必要があるが、簡単にupgrade可能になってしまう
+                first ticketなどの別の機構が必要
+            体験SBT→正式SBTへのパラメータ引き継ぎが可能だろうか
+                msやmssなどもsummoner IDが変わるのですべてtransferする必要がある
+
+ ig mint直後の立ち上がりのバランス調整
+        流石にゲーム開始時の楽しみが弱すぎるだろう
+        初日中に何かしらのイベントを発生させる
+        1週間以内に必須のアイテムぐらいはクラフト可能にする
+        どこかのタイミングで正式SBTへの移行を促す
+        最も大事な、ゲーム開始から1-2週間のバランスを試行錯誤する
+        その後はmint feeがある意味人質になる
+            mint後は脱落者が増えるほど継続者の利益が増えるシステム
+        スタート直後：
+            presentboxを1つ同時にmintさせる
+            ないないさんを使って各種ボタンの説明を表示させる
+            24時間以内にLv2へレベルアップ可能にする
+        スタート3日後：
+            Lv3へレベルアップ可能にする
+        スタート7日後：
+            初期の1-2個のアイテムNFTをcraft完了可能にする
+            name plate, iPad, Musicbox
+        ゲーム性の中心はなにか
+            できるだけ早いタイミングで推しのゲーム性を体験してもらう
+            毎日継続してお世話することで少しずつ成長するNFT（SBT）
+                「成長」と「蓄積」を実感できる体験はなにか
+                    レベル？
+                    ステータス？
+                    資源の増加？
+            得た資源を支払って新しいNFTをmintする拡大再生産
+                拡大再生産を実感できる体験はなにか
+            目減りしない資産価値
+                バイバックで担保されたNFTの価値
+                「時価総額」としてUI内に表示させる
+
+ ig バランス調整の再考
+        優先ルール
+            2年程度で最大成長に達する
+            平均的なプレイで1週間に1個程度のitemがクラフト可能となる
+            1年で効率が2倍（+100%）程度のステータス上昇率に調整する
+        開始直後のバランス補正
+            7日間程度で一通りのゲーム性体験ができるように補正する
+            最初の3アイテムは24時間以内の難易度に設定する
+            資源あつめ1日 + クラフト1日 x 3 = 6日間、程度のバランスに補正する
+            1-2個のfluffyもボーナスでもらえる
+        バイバック調整
+            fluffy, fluffier, fluffiest, dollにも値段をつける
+            初期アイテムのコストを下げる
+                これに伴って、バイバック値段も引き下げる
+
+ ok インフォメーションの表示形式を統一する
+        クリックで表示させるのか、オーバーラップで表示させるのか
+        時間経過で消えるのか、オーバーラップ時のみ表示させるのか
+        マウスとタップで利便性が異なる
+            さて、どうするか
+        クリックで一定秒表示、が無難だろうか
+            マウスでもタップでも操作性が悪くはない
+
+ ok Buybackシステムの修正
+        fluffy NFTのbuyback価格の設定
+            fluffyは不可で、estやdollあたりからpriceを付けるか
+            どのitem levelが妥当だろうか。Lv10あたり？
+            ちゃんと計算して設定する。
+        fluffyやflyffierにも採算取れない程度に小さくて良いので価格を設定するか
+        fluffy系列分の割当も計算する
+        現在の時価総額を表示する
+            今すべてを売り切ったらいくらになるか
+            自分のHoMの金銭的価値の位置づけ
+            そしてこの最低時価総額は決して下がらず、未来に向けて必ず上昇してゆく
+        むらさきさんをburnしたらいくらか返金されるシステムはどうだろうか
+            決して目減りしないオンチェーン資産、を表現したい
+            そしてこの資産価格は継続的なゲームプレイで価値が上がってゆく
+
+ ok 初期アイテムのコスト減弱とバイバック値の減弱
+        同時にfluffyのバイバックコストの設定
+
+  ok Philandライクな戦略の検討
+        やはり何かしらのオブジェクトとしたい
+            移動可能なオブジェクト
+            おかしの家とは異なり、普遍的に発展/成長してゆく小物
+            小さな植木鉢？
+            お花のリーフはどうか
+       *独立したオブジェクトのitem_wrethとして実装させる
+            trialでは無いならば初期から所持する
+    	オンチェーンアクティビティに応じたオブジェクトを得る
+    		onChainAchievementコントラクト
+    	NFTではなくとも、落書きなど何かしらの表現を行いたい
+    	    落書きはin-gameアクティビティの表現で実装済みなので、バッティングするだろうか
+    		各PJのトレースデフォルメアイコンを用意するか
+    		    どこに表示するか
+    	また、インセンティブとしてはExp Boostボーナスを導入する
+        *よつば案：
+            1つ, 2つ, 3つ, 4つ葉の4段階
+            葉っぱが薄いor透明で現在の段階を表すか
+            もしくは、4つの別のイラストとするか
+                0-1%: 1つ葉
+                1-2%: 2つ葉
+                2-3%: 3つ葉
+                3-4%: 4つ葉
+                4%max: 4つ葉＋てんとう虫
+            マウスオーバーラップでスコア内訳を表示させる
+        スタンプ案
+            壁の空いているところにNFTをデフォルメしたスタンプを貼る
+
+ ok スナップショットスクリプトを実装する
+        pythonなどで、mm, mn, ms, mss, mns, mcの状態をローカルに記録するスクリプト
+            可能ならば、スナップショットからの回復コードの実装も検討する
+        また、ローカルに保存したデータの解析方法にも慣れておく
+
+ ok Petとのふれあい機能の実装
+        Petと当たり判定したときに専用の演出を実装する
+        ハマらないようクールタイムを用意する
 
  ok working時にemitterを表示させる
         mining: コインが飛び出す
@@ -1988,6 +2161,7 @@ async function init_global_variants() {
     //item_hat_mortarboard = 0;
     local_astar_priceChange_h24 = 0;
     local_staking_percent = 0;
+    local_house_price = 0;
 
     //---flag
     flag_music = 0;
@@ -2384,17 +2558,20 @@ async function contract_update_dynamic_status(_summoner) {
         for (let i = 1; i <= 64; i++) {
             local_items[i] += 1;
         }
-        local_wallet_score = 1000;
+        local_wallet_age = 5;
+        local_score = 500000;
     } else if (flag_debug == 2) {
         for (let i = 65; i <= 128; i++) {
             local_items[i] += 1;
         }
-        local_wallet_score = 2000;
+        local_wallet_age = 10;
+        local_score = 1000000;
     } else if (flag_debug == 3) {
         for (let i = 129; i <= 192; i++) {
             local_items[i] += 1;
         }
-        local_wallet_score = 3300;
+        local_wallet_age = 20;
+        local_score = 2200000;
     }
 
     //call dynamic status from chain
@@ -3019,6 +3196,26 @@ async function get_nft_url() {
     return _url;
 }
 
+//calc house price
+async function update_house_price() {
+    let _buybackPrice_asArray = await contract_bt.methods.calc_buybackPrice_asArray().call();
+    let _house_price = 0;
+    for (i=1; i<=16; i++) {
+        _house_price += local_items[i] * _buybackPrice_asArray[i];
+        _house_price += local_items[i+64] * _buybackPrice_asArray[i] *3;
+        _house_price += local_items[i+64+64] * _buybackPrice_asArray[i] *3 *3;
+        _house_price += local_items[i+16] * _buybackPrice_asArray[i];
+        _house_price += local_items[i+16+64] * _buybackPrice_asArray[i] *3;
+        _house_price += local_items[i+16+64+64] * _buybackPrice_asArray[i] *3 *3;
+        _house_price += local_items[i+16+16] * _buybackPrice_asArray[i];
+        _house_price += local_items[i+16+16+64] * _buybackPrice_asArray[i] *3;
+        _house_price += local_items[i+16+16+64+64] * _buybackPrice_asArray[i] *3 *3;
+    }
+    _house_price /= 10**18; //wei -> eth
+    _house_price = Math.floor(_house_price*100)/100;    //2 decimal places
+    local_house_price = _house_price;
+}
+
 
 //---send
 
@@ -3375,6 +3572,16 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             this.on_click();
         }, this);
     }
+
+    checkOverlap(spriteA, spriteB) {
+        var boundsA = spriteA.getBounds();
+        boundsA.x += boundsA.width/4;
+        boundsA.y += boundsA.height/2;
+        boundsA.width /= 2;
+        boundsA.height /= 3;
+        var boundsB = spriteB.getBounds();
+        return Phaser.Geom.Intersects.RectangleToRectangle(boundsA, boundsB);
+    }
     
     set set_mode(mode){
         this.mode = mode;
@@ -3411,6 +3618,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
                 try {
                     this.item_practice.destroy();
                 } catch (error) {
+                    ;
                 }
             }
 	    } else if (this.count >= this.resting_count){
@@ -3425,16 +3633,24 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
                     this.mode = "sleeping";
                     this.count = 0;
                 }
-            }else if (tmp <= 20 && satiety <= 10 && count_sync > 3) {
+            } else if (tmp <= 15) {
+                for (let i = 0; i < group_pet.getLength(); i++) {
+                    if (this.checkOverlap(this, group_pet.getChildren()[i])){
+                        this.mode = "meet_a_pet";
+                        this.count = 0;
+                        break;
+                    }
+                }
+            } else if (tmp <= 30 && satiety <= 10 && count_sync > 3) {
                 this.mode = "hungry";
                 this.count = 0;
-            }else if (tmp <= 20 && happy <= 10 && count_sync > 3) {
+            } else if (tmp <= 30 && happy <= 10 && count_sync > 3) {
                 this.mode = "crying";
                 this.count = 0;
-            }else if (tmp <= 20 && flag_music == 1 && count_sync > 3) {
+            } else if (tmp <= 30 && flag_music == 1 && count_sync > 3) {
                 this.mode = "listning";
                 this.count = 0;
-            }else {
+            } else {
                 this.mode = "moving";
                 this.count = 0;
             }
@@ -3485,17 +3701,8 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
                 && this.count == 2 
                 && Math.random()*100 >= 50
             ) {
-                function checkOverlap(spriteA, spriteB) {
-                    var boundsA = spriteA.getBounds();
-                    boundsA.x += boundsA.width/4;
-                    boundsA.y += boundsA.height/2;
-                    boundsA.width /= 2;
-                    boundsA.height /= 3;
-                    var boundsB = spriteB.getBounds();
-                    return Phaser.Geom.Intersects.RectangleToRectangle(boundsA, boundsB);
-                }
                 for (let i = 0; i < group_tokenBall.getLength(); i++) {
-                    if (checkOverlap(this, group_tokenBall.getChildren()[i])){
+                    if (this.checkOverlap(this, group_tokenBall.getChildren()[i])){
                         group_tokenBall.getChildren()[i].on_click();
                         break;
                     }
@@ -3507,17 +3714,8 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
                 this.count == 3
                 && Math.random()*100 >= 50
             ) {
-                function checkOverlap(spriteA, spriteB) {
-                    var boundsA = spriteA.getBounds();
-                    boundsA.x += boundsA.width/4;
-                    boundsA.y += boundsA.height/2;
-                    boundsA.width /= 2;
-                    boundsA.height /= 3;
-                    var boundsB = spriteB.getBounds();
-                    return Phaser.Geom.Intersects.RectangleToRectangle(boundsA, boundsB);
-                }
                 for (let i = 0; i < group_star.getLength(); i++) {
-                    if (checkOverlap(this, group_star.getChildren()[i])){
+                    if (this.checkOverlap(this, group_star.getChildren()[i])){
                         group_star.getChildren()[i].on_kick();
                         break;
                     }
@@ -3850,6 +4048,26 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         }
     }
     
+    //### meet a pet
+    meet_a_pet() {
+        this.count += 1;
+        if (this.count % 200 == 50) {
+            sound_happy.play();
+        }
+        if (this.count == 1){
+            this.anims.play("murasaki_click", true);
+            for (let i = 0; i < group_pet.getLength(); i++) {
+                if (this.checkOverlap(this, group_pet.getChildren()[i])){
+                    group_pet.getChildren()[i].count = 0;
+                    group_pet.getChildren()[i].mode = "meet";
+                }
+            }
+        }else if (this.count >= 300) {
+            this.mode = "resting";
+            this.count = 0;
+        }
+    }
+    
     //### farming
     farming() {
         this.count += 1;
@@ -4050,6 +4268,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             || this.mode == "crying"
             || this.mode == "listning"
             || this.mode == "attenting"
+            || this.mode == "meet_a_pet"
         ) {
             item_wearing_hat.x = this.x;
             item_wearing_hat.y = this.y - 65;
@@ -4150,6 +4369,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             else if (this.mode == "attenting") {this.attenting();}
             else if (this.mode == "hammock") {this.sleeping_withHammock();}
             else if (this.mode == "practice") {this.practice();}
+            else if (this.mode == "meet_a_pet") {this.meet_a_pet();}
             //draw item_wearing_hat
             if (item_wearing_hat != 0) {
                 this.update_item_wearing_hat();
@@ -4301,6 +4521,23 @@ class Pet extends Phaser.GameObjects.Sprite{
         }
         */
     }
+    
+    //### meet
+    meet() {
+        this.count += 1;
+        if (this.count == 1){
+            if (this.type == "mining"){
+                this.anims.play("mr_astar_meet", true);
+            } else if (this.type == "farming") {
+                this.anims.play("ms_ether_meet", true);
+            } else if (this.type == "crafting") {
+                this.anims.play("dr_bitco_meet", true);
+            }
+        }else if (this.count >= 300) {
+            this.mode = "resting";
+            this.count = 0;
+        }
+    }
 
     //### resting
     resting(){
@@ -4438,7 +4675,7 @@ class Pet extends Phaser.GameObjects.Sprite{
         }
     }
     
-    //###practice
+    //### practice
     practice() {
         this.count += 1;
         if (this.submode == 0) {
@@ -4554,6 +4791,7 @@ class Pet extends Phaser.GameObjects.Sprite{
         //else if (this.mode == "sleeping") {this.sleeping();}
         else if (this.mode == "working") {this.working();}
         else if (this.mode == "practice") {this.practice();}
+        else if (this.mode == "meet") {this.meet();}
         //depth
         this.depth = this.y;
         //draw item_wearing_hat
@@ -5520,8 +5758,11 @@ class Coin extends Phaser.GameObjects.Sprite{
         this.x = murasakisan.x + Math.random() * 5;
         this.y = murasakisan.y + Math.random() * 10;
         this.line_y = this.y;
+        if (this.line_y < 510) {
+            this.line_y = 510;
+        }
         this.speed_x = 3 + Math.random() * 1;
-        if (Math.random() > 0.5) {
+        if (murasakisan.mode != "mining" && Math.random() > 0.5) {
             this.speed_x *= -1;
         }
         this.speed_y = 9 + Math.random() * 3;
@@ -7051,47 +7292,7 @@ function radarchart2(
     group_chart.add(scene.add.sprite(x0-15-12, y0+r-5+14, "icon_luk").setOrigin(0.5).setScale(0.10));
     group_chart.add(scene.add.sprite(x0-r-20+16, y0-10-16, "icon_int").setOrigin(0.5).setScale(0.10));
 }
-function achv_onChain(scene, _x, _y) {
-    let _text = "";
-    _text += " Score \n";
-    _text += " Tokens \n";
-    _text += " NFTs \n";
-    _text += " Staking \n";
-    _text += " Special           ";
-    let _msg = scene.add.text(
-        _x-50, 
-        _y+75, 
-        _text, 
-        {font: "17px Arial", fill: "#000000", backgroundColor: "#ffffff"}
-    ).setOrigin(0.4).setVisible(false).setDepth(9999);
-    _text = "";
-    _text += "           : " + local_achv_onChain_score + " \n";
-    _text += "           : " + local_achv_onChain_score_token + " \n";
-    _text += "           : " + local_achv_onChain_score_nft + " \n";
-    _text += "           : " + local_achv_onChain_score_staking + " \n";
-    _text += "           : " + local_achv_onChain_score_murasaki_nft + " ";
-    let _msg2 = scene.add.text(
-        _x-50, 
-        _y+75, 
-        _text, 
-        {font: "17px Arial", fill: "#E5004F"}
-    ).setOrigin(0.4).setVisible(false).setDepth(9999);
-    let _sprite = scene.add.sprite(_x, _y, "icon_counter")
-        .setOrigin(0.5)
-        .setScale(0.1)
-        .setInteractive({ useHandCursor: true })
-        .on("pointerover", () => {
-            _msg.setVisible(true);
-            _msg2.setVisible(true);
-        })
-        .on("pointerout", () => {
-            setTimeout( () => {
-                _msg.setVisible(false);
-                _msg2.setVisible(false);
-            }, 2000)
-        });
-    group_chart.add(_sprite); 
-}
+
 async function draw_radarchart(scene) {
     let _x = 1160;
     let _y = 115;
@@ -7113,7 +7314,6 @@ async function draw_radarchart(scene) {
         //local_luck_withItems_withStaking_withDice
         local_luck_withItems_withDice
     );
-    achv_onChain(scene, 1225, 180);
 }
 
 
@@ -7217,30 +7417,35 @@ function create_item_indicator(scene, _item_type) {
         ;
     }
     group_item_indicator = scene.add.group();
-    _item_indicator_text = scene.add.text(
+    item_indicator_text = scene.add.text(
         _x, 
         _y-20, 
         _description,
         {font: "24px Arial", fill: "#0000ff", backgroundColor: "#ffffff"}
     ).setOrigin(0.5).setDepth(_y+1).setVisible(false);
-    group_item_indicator.add(_item_indicator_text);
-    _item_indicator = scene.add.sprite(_x, _y, _img_name)
+    group_item_indicator.add(item_indicator_text);
+    item_indicator_click = 0;
+    item_indicator = scene.add.sprite(_x, _y, _img_name)
         .setScale(_scale)
         .setOrigin(0.5)
         .setAlpha(0.3)
         .setDepth(10)
-        .setInteractive()
-        .on("pointerover", () => {
-            _item_indicator_text.setVisible(true);
-        })
-        .on("pointerout", () => {
-            _item_indicator_text.setVisible(false);
+        .setInteractive({useHandCursor: true})
+        .on("pointerdown", () => {
+            item_indicator_text.setVisible(true);
+            item_indicator_click += 1;
+            let _item_indicator_click_now = item_indicator_click;
+            setTimeout( () => {
+                if (_item_indicator_click_now == item_indicator_click) {
+                    item_indicator_text.setVisible(false);
+                }
+            }, 2000)
         });
     //individual adjustment
     if (["Helmet", "Straw Hat", "Mortarboard"].includes(_item_name)) {
-        _item_indicator.setAngle(90);
+        item_indicator.setAngle(90);
     }
-    group_item_indicator.add(_item_indicator);
+    group_item_indicator.add(item_indicator);
 }
 
 async function update_item_indicator_bar(){
@@ -7248,7 +7453,7 @@ async function update_item_indicator_bar(){
     let _resting_dc = local_crafting_calc / 86400 * 1000;
     let _percent = 1 - _resting_dc / _modified_dc;
     try {
-        _item_indicator_bar.scaleX = _percent;
+        item_indicator_bar.scaleX = _percent;
     } catch(error) {
         ;
     }
@@ -8342,6 +8547,7 @@ function draw_star(scene, _x, _y) {
         frame: [0,1,2,3,4,5,6,7],
     };
     const emitter = scene.add.particles(_x, _y, "par_stars", emitterConfig);
+    emitter.setDepth(99999);
 }
 
 
@@ -8564,8 +8770,10 @@ function update_tx_text(mode, hash) {
     if (typeof timeout_tx != "undefined") {
         clearTimeout(timeout_tx);
     }
-    let _hash1 = hash.substring(0,10);
-    let _hash2 = hash.slice(-10);
+    //let _hash1 = hash.substring(0,10);
+    //let _hash2 = hash.slice(-10);
+    let _hash1 = hash.substring(0,8);
+    let _hash2 = hash.slice(-8);
     let _txt = " (" + _hash1 + "..." + _hash2 + ")";
     group_tx.setVisible(true);
     if (mode == "sending") {
@@ -8743,6 +8951,7 @@ function preload(scene) {
     //---pet
     scene.load.spritesheet("mr_astar_right", "src/png/pet_mr_astar_right.png", {frameWidth: 600, frameHeight: 600});
     scene.load.spritesheet("mr_astar_left", "src/png/pet_mr_astar_left.png", {frameWidth: 600, frameHeight: 600});
+    scene.load.spritesheet("mr_astar_meet", "src/png/pet_mr_astar_meet.png", {frameWidth: 600, frameHeight: 600});
     scene.load.spritesheet("ms_ether_right", "src/png/pet_ms_ether_right.png", {frameWidth: 600, frameHeight: 600});
     scene.load.spritesheet("ms_ether_left", "src/png/pet_ms_ether_left.png", {frameWidth: 600, frameHeight: 600});
     scene.load.spritesheet("dr_bitco_right", "src/png/pet_dr_bitco_right.png", {frameWidth: 600, frameHeight: 600});
@@ -8948,6 +9157,9 @@ function preload(scene) {
     scene.load.spritesheet("practice_timpani", "src/png/practice_piano.png", {frameWidth: 370, frameHeight: 320});
     scene.load.spritesheet("practice_cello", "src/png/practice_piano.png", {frameWidth: 370, frameHeight: 320});
     scene.load.spritesheet("practice_notes", "src/png/practice_notes.png", {frameWidth: 370, frameHeight: 320});
+
+    //---item_etc
+    scene.load.image("item_wreath", "src/png/item_wreath.png");    
 
     //---nui
     scene.load.spritesheet("item_nui_list", "src/png/item_nui_list.png", {frameWidth: 370, frameHeight: 320});
@@ -9155,6 +9367,7 @@ function create(scene) {
     group_info2 = scene.add.group();
     group_nyuinyui_ohana = scene.add.group();
     group_neonStar = scene.add.group();
+    group_pet = scene.add.group();
     
     //---back image
     scene.add.image(640, 480, "back");
@@ -9344,6 +9557,12 @@ function create(scene) {
     scene.anims.create({
         key: "mr_astar_left",
         frames: scene.anims.generateFrameNumbers("mr_astar_left", {start:0, end:1}),
+        frameRate: 1,
+        repeat: -1
+    });
+    scene.anims.create({
+        key: "mr_astar_meet",
+        frames: scene.anims.generateFrameNumbers("mr_astar_meet", {start:0, end:1}),
         frameRate: 1,
         repeat: -1
     });
@@ -10337,14 +10556,19 @@ function create(scene) {
         .setOrigin(1,0)
         .setVisible(false)
         .setDepth(9999);
+    text_heart_click = 0;
     text_heart = scene.add.text(975, 15, "***", {font: "17px Arial", fill: "#000", backgroundColor: "#FDEEED"})
         .setDepth(9999)
-        .setInteractive()
-        .on("pointerover", () => text_fluffy.setVisible(true))
-        .on("pointerout", () => {
+        .setInteractive({useHandCursor: true})
+        .on("pointerdown", () => {
+            text_fluffy.setVisible(true)
+            text_heart_click += 1;
+            let _text_heart_click_now = text_heart_click;
             setTimeout( () => {
-                text_fluffy.setVisible(false);
-            }, 1000);
+                if (_text_heart_click_now == text_heart_click) {
+                    text_fluffy.setVisible(false);
+                }
+            }, 2000);
         });
     group_info.add(icon_heart);
     group_info.add(text_heart);
@@ -10514,12 +10738,17 @@ function create(scene) {
     group_lootlike.add(text_lootlike_personality);
     group_lootlike.setVisible(false);
     group_lootlike.setDepth(9999);
+    item_kanban_click = 0;
     item_kanban.setInteractive({useHandCursor: true})
         .on("pointerdown", () => {
+            item_kanban_click += 1;
+            let item_kanban_click_now = item_kanban_click;
             group_lootlike.setVisible(true);
             setTimeout( () => {
-                group_lootlike.setVisible(false);
-            }, 3000)
+                if (item_kanban_click == item_kanban_click_now) {
+                    group_lootlike.setVisible(false);
+                }
+            }, 2000)
         });
 
     //group
@@ -11144,41 +11373,23 @@ function update_parametersWithoutAnimation(this_scene) {
     let _owner2 = local_owner.slice(-4);
     let _text = "";
     if (local_owner == local_wallet || local_owner == "0x0000000000000000000000000000000000000000") {
-        _text += "House #" + summoner + ", ";
+        _text += "House #" + summoner + " (" + local_house_price + " $ASTR), ";
         _text += _owner1 + "..." + _owner2 + ", ";
         _text += local_street + ", " + local_city + ", ";
-        _text += "Astar EVM, United Parachains of Polkadot, WEB3.";
+        //_text += "Astar EVM, United Parachains of Polkadot, WEB3.";
+        _text += "Astar EVM, Polkadot, WEB3.";
         text_wallet.setText(_text);
         text_wallet.setColor("#FF4264");
     } else {
-        _text += "House #" + summoner + ", ";
+        _text += "House #" + summoner + "(" + local_house_price + " $ASTR), ";
         _text += _owner1 + "..." + _owner2 + ", ";
         _text += local_street + ", " + local_city + ", ";
-        _text += "Astar EVM, United Chains of Polkadot, Web3.";
+        //_text += "Astar EVM, United Parachains of Polkadot, WEB3.";
+        _text += "Astar EVM, Polkadot, WEB3.";
         _text += " (not owner)";
         text_wallet.setText(_text);
         text_wallet.setColor("blue");
     }
-    /*
-    if (local_owner == local_wallet || local_owner == "0x0000000000000000000000000000000000000000") {
-        _text += "Lives at: ";
-        _text += "house #" + summoner + ", ";
-        //_text += local_owner + ", ";
-        _text += _owner1 + "..." + _owner2 + ", ";
-        _text += "Astar Network EVM, Polkadot, Web3.";
-        text_wallet.setText(_text);
-        text_wallet.setColor("#FF4264");
-    } else {
-        _text += "Lives at: ";
-        _text += "house #" + summoner + ", ";
-        //_text += local_owner + ", ";
-        _text += _owner1 + "..." + _owner2 + ", ";
-        _text += "Astar Network EVM, Polkadot, Web3.";
-        _text += " (not your wallet)";
-        text_wallet.setText(_text);
-        text_wallet.setColor("blue");
-    }
-    */
     
     //radarchart
     if (previous_local_rolled_dice != local_rolled_dice && flag_radarchart == 1) {
@@ -11412,19 +11623,19 @@ function update_checkModeChange(this_scene) {
     ){
         //progress bar
         if (
-            typeof _item_indicator != "undefined"
+            typeof item_indicator != "undefined"
             && (
-                typeof _item_indicator_bar == "undefined" 
-                || typeof _item_indicator_bar.scene == "undefined"
+                typeof item_indicator_bar == "undefined" 
+                || typeof item_indicator_bar.scene == "undefined"
             )
         ){
-            let _x = _item_indicator.x-20;
-            let _y = _item_indicator.y+_item_indicator.height*_item_indicator.scaleY*0.8/2;
+            let _x = item_indicator.x-20;
+            let _y = item_indicator.y+item_indicator.height*item_indicator.scaleY*0.8/2;
             let _bar_back = makeMiniProgressBar(this_scene, _x-2, _y-2, 40+4, 10+4, 0xecd9ff);
-            _item_indicator_bar = makeMiniProgressBar(this_scene, _x, _y, 40, 10, 0xb872f4);
-            _item_indicator_bar.scaleX = 0.01;
+            item_indicator_bar = makeMiniProgressBar(this_scene, _x, _y, 40, 10, 0xb872f4);
+            item_indicator_bar.scaleX = 0.01;
             group_item_indicator.add(_bar_back);
-            group_item_indicator.add(_item_indicator_bar);
+            group_item_indicator.add(item_indicator_bar);
         }
         //update prograss bar
         update_item_indicator_bar();
@@ -11734,6 +11945,7 @@ function update_checkItem(this_scene) {
             "mining"
         ).setScale(0.12);
         group_update.add(mr_astar);
+        group_pet.add(mr_astar);
         //uncommon
         if (local_items[_item_id+64] != 0) {
             draw_glitter(this_scene, mr_astar);
@@ -12254,6 +12466,7 @@ function update_checkItem(this_scene) {
             "farming"
         ).setScale(0.12);
         group_update.add(ms_ether);
+        group_pet.add(ms_ether);
         //uncommon
         if (local_items[_item_id+64] != 0) {
             draw_glitter(this_scene, ms_ether);
@@ -12768,6 +12981,7 @@ function update_checkItem(this_scene) {
             "crafting"
         ).setScale(0.11);
         group_update.add(dr_bitco);
+        group_pet.add(dr_bitco);
         //uncommon
         if (local_items[_item_id+64] != 0) {
             draw_glitter(this_scene, dr_bitco);
@@ -13257,17 +13471,18 @@ function update_checkItem(this_scene) {
             _y = dic_items[_item_name]["pos_y"];
         }
         let _text = "";
-        _text += " total exp gained: " + local_total_exp_gained + " \n";
-        _text += " total coin mined: " + local_total_coin_mined + " \n";
-        _text += " total leaf farmed: " + local_total_material_farmed + "\n";
-        _text += " total item crafted: " + local_total_item_crafted + " \n";
-        _text += " total fluffy gifted: " + local_total_precious_received;
+        _text += " total exp: " + local_total_exp_gained + " \n";
+        _text += " total coin: " + local_total_coin_mined + " \n";
+        _text += " total leaf: " + local_total_material_farmed + "\n";
+        _text += " total craft: " + local_total_item_crafted + " \n";
+        _text += " total fluffy: " + local_total_precious_received + " ";
         item_book_text = this_scene.add.text(
             _x,
             _y-90,
             _text,
             {font: "20px Arial", fill: "#000000", backgroundColor: "#ffffff"}
         ).setOrigin(0.5).setVisible(false).setDepth(9999);
+        item_book_click = 0;
         item_book = this_scene.add.sprite(
             _x, 
             _y, 
@@ -13276,10 +13491,14 @@ function update_checkItem(this_scene) {
             .setInteractive({ draggable: true, useHandCursor: true })
             .on("pointerdown", () => {
                 if (flag_info == 1) {
+                    item_book_click += 1;
+                    let item_book_click_now = item_book_click;
                     item_book_text.visible = true;
                     setTimeout( () => {
-                        item_book_text.visible = false;
-                    }, 3000)
+                        if (item_book_click == item_book_click_now) {
+                            item_book_text.visible = false;
+                        }
+                    }, 2000)
                 }
             })
             .on("drag", () => {
@@ -13290,14 +13509,15 @@ function update_checkItem(this_scene) {
                     item_book.x = game.input.activePointer.y;
                     item_book.y = 960 - game.input.activePointer.x;
                 }
-                item_book_text.x = item_book.x;
-                item_book_text.y = item_book.y-90;
-                item_book.depth = item_book.y;
-                //item_book_text.visible = false;
+                //item_book_text.x = item_book.x;
+                //item_book_text.y = item_book.y-90;
+                //item_book.depth = item_book.y;
+                item_book_text.visible = false;
             })
             .on("dragend", () => {
                 item_book_text.x = item_book.x;
                 item_book_text.y = item_book.y-90;
+                item_book.depth = item_book.y;
                 let _pos = [item_book.x, item_book.y];
                 if (local_owner == local_wallet) {
                     localStorage.setItem(_pos_local, JSON.stringify(_pos));
@@ -13318,11 +13538,11 @@ function update_checkItem(this_scene) {
         local_items_flag[_item_id] = false;
     } else if (local_items_flag[_item_id] == true) {
         let _text = "";
-        _text += " total exp gained: " + local_total_exp_gained + "\n";
-        _text += " total coin mined: " + local_total_coin_mined + "\n";
-        _text += " total leaf farmed: " + local_total_material_farmed + "\n";
-        _text += " total item crafted: " + local_total_item_crafted + "\n";
-        _text += " total fluffy gifted: " + local_total_precious_received;
+        _text += " total exp: " + local_total_exp_gained + " \n";
+        _text += " total coin: " + local_total_coin_mined + " \n";
+        _text += " total leaf: " + local_total_material_farmed + "\n";
+        _text += " total craft: " + local_total_item_crafted + " \n";
+        _text += " total fluffy: " + local_total_precious_received + " ";
         item_book_text.setText(_text);
     }
 
@@ -13838,128 +14058,7 @@ function update_checkItem(this_scene) {
         _do(this_scene);
     }
 
-    //###197:Nuichan
-    /*
-    if (local_items[197] != previous_local_item197) {
-        // define async function
-        async function _do(scene) {
-            // get item194 list, need to wait
-            let _array_item197 = await get_userItems(summoner, 197);
-            // recreate sprite group
-            try {
-                group_item197.destroy(true);
-            } catch (error) {
-            }
-            group_item197 = scene.add.group();
-            // create sprite, add group, using array for independency
-            let _array_nui = [];
-            let _array_nui_text = [];
-            let _array_nui_ribbon = [];
-            let _score_max = 0;
-            for (let i = 0; i < _array_item197.length; i++) {
-                let _x = 1070 + i*30;
-                let _y = 520 + i*30;
-                let _item_id = _array_item197[i];
-                let _pos_local = "pos_item_nui_" + _item_id;
-                //recover position from localStorage
-                if (localStorage.getItem(_pos_local) != null && local_owner == local_wallet) {
-                    let _json = localStorage.getItem(_pos_local);
-                    _pos = JSON.parse(_json);
-                    _x = _pos[0];
-                    _y = _pos[1];
-                }
-                let _item_nui = await contract_get_item_nui(_item_id);
-                let _summoner = _item_nui[0];
-                let _class = _item_nui[1];
-                let _score = _item_nui[2];
-                //update active nui_id
-                if (_score >= _score_max) {
-                    active_nui_id = _item_id;
-                    _score_max = _score;
-                }
-                let _exp_rate = _item_nui[3] - 100;
-                let _summoner_name = await call_name_from_summoner(_summoner);
-                if (_summoner_name == "") {
-                    _summoner_name = "#" + _summoner;
-                }
-                let _text = "";
-                _text += " id: " + "#" + _array_item197[i] + " \n";
-                _text +=" crafter: " + _summoner_name + " \n";
-                _text += " score: " + _score + " \n";
-                _text += " exp: +" + _exp_rate + "% ";
-                _array_nui_text[i] = scene.add.text(
-                    _x,
-                    _y+68,
-                    _text,
-                    {font: "15px Arial", fill: "#000000", backgroundColor: "#ffffff"}
-                ).setOrigin(0.5).setDepth(9999);
-                _array_nui_text[i].visible = false;
-                _array_nui[i] = scene.add.sprite(_x, _y, "item_nui")
-                    .setOrigin(0.5)
-                    .setScale(0.38)
-                    .setInteractive({ draggable: true, useHandCursor: true })
-                    .setDepth(_y)
-                    .on("dragstart", () => {
-                        //sound, depth
-                    })
-                    .on("drag", () => {
-                        if (scene.sys.game.scale.gameSize._width == 1280) {
-                            _array_nui[i].x = game.input.activePointer.x;
-                            _array_nui[i].y = game.input.activePointer.y;
-                        } else {
-                            _array_nui[i].x = game.input.activePointer.y;
-                            _array_nui[i].y = 960 - game.input.activePointer.x;
-                        }
-                        _array_nui[i].depth = _array_nui[i].y;
-                        _array_nui_text[i].visible = false;
-                        _array_nui_ribbon[i].x = _array_nui[i].x;
-                        _array_nui_ribbon[i].y = _array_nui[i].y;
-                        _array_nui_ribbon[i].depth = _array_nui[i].depth+1;
-                    })
-                    .on("dragend", () => {
-                        //grand, sound, depth
-                        _array_nui_text[i].x = _array_nui[i].x;
-                        _array_nui_text[i].y = _array_nui[i].y+68;
-                        if (flag_info == 1) {
-                            _array_nui_text[i].visible = true;
-                        }
-                        sound_nui.play();
-                        let _pos = [_array_nui[i].x, _array_nui[i].y];
-                        if (local_owner == local_wallet) {
-                            localStorage.setItem(_pos_local, JSON.stringify(_pos));
-                        }
-                        //attenting
-                        if (
-                            _array_nui[i].x >= 100
-                            && _array_nui[i].x <= 1100
-                            && _array_nui[i].y >= 500
-                            && _array_nui[i].y <= 800
-                        ){
-                            murasakisan.try_attenting(_array_nui[i].x, _array_nui[i].y);
-                        }
-                    })
-                    .on("pointerover", () => {
-                        if (flag_info == 1) {
-                            _array_nui_text[i].visible = true;
-                        }
-                    })
-                    .on("pointerout", () => {
-                        _array_nui_text[i].visible = false;
-                    });
-                _array_nui_ribbon[i] = scene.add.sprite(_x,_y, "item_nui_ribbon").setOrigin(0.5).setScale(0.38);
-                _array_nui_ribbon[i].depth = _array_nui[i].y + 1;
-                //add group
-                group_item197.add(_array_nui[i]);
-                group_item197.add(_array_nui_text[i]);
-                group_item197.add(_array_nui_ribbon[i]);
-            }
-        }
-        _do(this_scene);
-    }
-    */
-
     //###200:Presentbox
-    //***TODO***
     if (local_items[200] > previous_local_item200) {
         let _itemIds = get_itemIds_from_itemType(local_myListsAt_withItemType, 200);
         _itemIds.forEach( async (_itemId) => {
@@ -14291,6 +14390,7 @@ function update_checkItem(this_scene) {
         item_staking_bar = makeMiniProgressBar(this_scene, _x-20, _y+30, 40, 10, 0xE5004F)
             .setDepth(_y+2);
         item_staking_bar.scaleX = 0.01;
+        item_staking_click = 0;
         item_staking = this_scene.add.sprite(
             _x,
             _y,
@@ -14299,11 +14399,16 @@ function update_checkItem(this_scene) {
             .setInteractive({ draggable: true, useHandCursor: true })
             .on("pointerdown", () => {
                 item_staking_text.visible = true;
+                item_staking_click += 1;
+                let item_staking_click_now = item_staking_click;
                 setTimeout( () => {
-                    item_staking_text.visible = false;
-                }, 3000);
+                    if (item_staking_click == item_staking_click_now) {
+                        item_staking_text.visible = false;
+                    }
+                }, 2000);
                 if (local_staking_reward_percent == 100) {
                     open_staking_reward(summoner);
+                    sound_button_on.play();
                 }
             })
             .on("drag", () => {
@@ -14315,19 +14420,20 @@ function update_checkItem(this_scene) {
                     item_staking.y = 960 - game.input.activePointer.x;
                 }
                 item_staking.depth = item_staking.y;
-                item_staking_text.x = item_staking.x;
-                item_staking_text.y = item_staking.y-60;
+                //item_staking_text.x = item_staking.x;
+                //item_staking_text.y = item_staking.y-60;
                 item_staking_bar_back.x = item_staking.x-20-2;
                 item_staking_bar_back.y = item_staking.y+30-2;
                 item_staking_bar_back.depth = item_staking.y+1;
                 item_staking_bar.x = item_staking.x-20;
                 item_staking_bar.y = item_staking.y+30;
                 item_staking_bar.depth = item_staking.y+2;
-                //item_hourglass_text.visible = false;
+                item_staking_text.visible = false;
             })
             .on("dragend", () => {
                 item_staking_text.x = item_staking.x;
                 item_staking_text.y = item_staking.y-60;
+                item_staking_text.depth = item_staking.y;
                 let _pos = [item_staking.x, item_staking.y];
                 if (local_owner == local_wallet) {
                     localStorage.setItem(_pos_local, JSON.stringify(_pos));
@@ -14349,6 +14455,91 @@ function update_checkItem(this_scene) {
         _text += " Complete: " + local_staking_reward_percent + "%";
         item_staking_text.setText(_text);
         item_staking_bar.scaleX = local_staking_reward_percent/100;
+    }
+    
+    //###000:onChainScore
+    //***TODO*** Score
+    if (
+        local_achv_onChain_score > 0
+        && (typeof item_wreath == "undefined" || typeof item_wreath.scene == "undefined")
+    ){
+        let _x;
+        let _y;
+        let _pos_local = "pos_item_wreath";
+        //recover position from localStorage
+        if (localStorage.getItem(_pos_local) != null && local_owner == local_wallet) {
+            let _json = localStorage.getItem(_pos_local);
+            _pos = JSON.parse(_json);
+            _x = _pos[0];
+            _y = _pos[1];
+        } else {
+            _x = 340;
+            _y = 140;
+        }
+
+        let _text = "";
+        _text += " Total Exp \n";
+        _text += "   (token                 ) \n";
+        _text += "   (nft                      ) \n";
+        _text += "   (staking               ) \n";
+        _text += "   (special               ) ";
+        item_wreath_text1 = this_scene.add.text(
+            _x-15, 
+            _y+75, 
+            _text, 
+            {font: "17px Arial", fill: "#000000", backgroundColor: "#ffffff"}
+        ).setOrigin(0.4).setVisible(false).setDepth(9999);
+        _text = "";
+        _text += "                 +" + (local_achv_onChain_score/100).toFixed(2) + "% \n";
+        _text += "                 +" + (local_achv_onChain_score_token/100).toFixed(2) + "% \n";
+        _text += "                 +" + (local_achv_onChain_score_nft/100).toFixed(2) + "% \n";
+        _text += "                 +" + (local_achv_onChain_score_staking/100).toFixed(2) + "% \n";
+        _text += "                 +" + (local_achv_onChain_score_murasaki_nft/100).toFixed(2) + "% ";
+        item_wreath_text2 = this_scene.add.text(
+            _x-15, 
+            _y+75, 
+            _text, 
+            {font: "17px Arial", fill: "#E5004F"}
+        ).setOrigin(0.4).setVisible(false).setDepth(9999);
+        item_wreath_click = 0;
+        item_wreath = this_scene.add.sprite(_x, _y, "item_wreath")
+            .setOrigin(0.5)
+            .setScale(0.2)
+            .setInteractive({ useHandCursor: true, draggable: true })
+            .on("pointerdown", () => {
+                item_wreath_text1.setVisible(true);
+                item_wreath_text2.setVisible(true);
+                item_wreath_click += 1;
+                let item_wreath_click_now = item_wreath_click;
+                setTimeout( () => {
+                    if (item_wreath_click == item_wreath_click_now) { 
+                        item_wreath_text1.setVisible(false);
+                        item_wreath_text2.setVisible(false);
+                    }
+                }, 2000);
+            })
+            .on("drag", () => {
+                if (this_scene.sys.game.scale.gameSize._width == 1280) {
+                    item_wreath.x = game.input.activePointer.x;
+                    item_wreath.y = game.input.activePointer.y;
+                } else {
+                    item_wreath.x = game.input.activePointer.y;
+                    item_wreath.y = 960 - game.input.activePointer.x;
+                }
+                item_wreath.depth = item_wreath.y;
+                item_wreath_text1.visible = false;
+                item_wreath_text2.visible = false;
+            })
+            .on("dragend", () => {
+                let _pos = [item_wreath.x, item_wreath.y];
+                if (local_owner == local_wallet) {
+                    localStorage.setItem(_pos_local, JSON.stringify(_pos));
+                }
+                item_wreath_text1.x = item_wreath.x-15;
+                item_wreath_text1.y = item_wreath.y+75;
+                item_wreath_text2.x = item_wreath.x-15;
+                item_wreath_text2.y = item_wreath.y+75;
+            });
     }
     
     previous_local_items = local_items;
@@ -14391,6 +14582,7 @@ async function updateFirst(scene) {
     update_checkItem(scene);
     //update_systemMessage();
     update_astarPrice();
+    update_house_price();
 }
 
 async function checkChainId(scene, correctChainId) {

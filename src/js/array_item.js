@@ -2,7 +2,7 @@
 
 let _dic_items = {
 
-    //item_str
+    //###item_str
     "Nameplate":{
         "item_id":1,
         "item_id_uncommon":1+64,
@@ -12,7 +12,7 @@ let _dic_items = {
         "pos_x":85,
         "pos_y":100,
         "scale":0.4,
-        "description":"mint a name",
+        "description":"mint a name\n(STR +1)",
     },
     "Mr. Astar":{
         "item_id":2,
@@ -170,7 +170,7 @@ let _dic_items = {
         "icon_png":"icon/icon_clock.png",
     },
     
-    //item_dex
+    //###item_dex
     "Music Box":{
         "item_id":17,
         "item_id_uncommon":17+64,
@@ -334,7 +334,7 @@ let _dic_items = {
         "icon_png":"icon/icon_clock.png",
     },
     
-    //item_int
+    //###item_int
     "Tablet":{
         "item_id":33,
         "item_id_uncommon":33+64,
@@ -344,7 +344,7 @@ let _dic_items = {
         "pos_x":700,
         "pos_y":390,
         "scale":0.25,
-        "description":"status display",
+        "description":"show status (INT+1)",
     },
     "Choco Bread":{
         "item_id":34,
@@ -355,7 +355,7 @@ let _dic_items = {
         "pos_x":600+35,
         "pos_y":840+10,
         "scale":0.25,
-        "description":"taesty",
+        "description":"looks taesty (INT+1)",
     },
     "Ribbon":{
         "item_id":35,
@@ -498,7 +498,7 @@ let _dic_items = {
         "icon_png":"icon/icon_clock.png",
     },
 
-    //special item
+    //###special item
     "Coin Bank":{
         "item_id":194,
         "item_id_uncommon":0,
@@ -547,7 +547,7 @@ let _dic_items = {
         "icon_png":"png/item_presentbox_01.png",
     },
     
-    //fluffy
+    //###fluffy
     "Gray Fluffy":{
         "item_id":201,
         "item_id_uncommon":0,
@@ -645,7 +645,7 @@ let _dic_items = {
         "frame_no":0+10*11,
     },
     
-    //fluffier
+    //###fluffier
     "Gray Fluffier":{
         "item_id":201+12,
         "item_id_uncommon":0,
@@ -743,7 +743,7 @@ let _dic_items = {
         "frame_no":1+10*11,
     },
     
-    //fluffiest
+    //###fluffiest
     "Gray Fluffiest":{
         "item_id":201+24,
         "item_id_uncommon":0,
@@ -841,7 +841,7 @@ let _dic_items = {
         "frame_no":3+10*11,
     },
 
-    //doll
+    //###doll
     "Gray Doll":{
         "item_id":201+36,
         "item_id_uncommon":0,
