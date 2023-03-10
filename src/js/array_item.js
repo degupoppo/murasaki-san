@@ -12,7 +12,7 @@ let _dic_items = {
         "pos_x":85,
         "pos_y":100,
         "scale":0.4,
-        "description":"mint a name\n(STR +1)",
+        "description":" Mint a name (STR+1) ",
     },
     "Mr. Astar":{
         "item_id":2,
@@ -23,7 +23,7 @@ let _dic_items = {
         "pos_x":480,
         "pos_y":680,
         "scale":0.12,
-        "description":"little housemate",
+        "description":" Little housemate (STR+1) ",
     },
     "Onigiri":{
         "item_id":3,
@@ -34,7 +34,7 @@ let _dic_items = {
         "pos_x":600-35,
         "pos_y":840+10,
         "scale":0.1,
-        "description":"looks delicious",
+        "description":" Looks delicious (STR+1) ",
     },
     "Helmet":{
         "item_id":4,
@@ -45,7 +45,7 @@ let _dic_items = {
         "pos_x":530,
         "pos_y":255,
         "scale":0.22,
-        "description":"wearable hat",
+        "description":" Wearable hat (STR+1) ",
     },
     "Dice":{
         "item_id":5,
@@ -56,7 +56,7 @@ let _dic_items = {
         "pos_x":750,
         "pos_y":600,
         "scale":0.3,
-        "description":"daily luck up",
+        "description":" Daily luck up (STR+1) ",
     },
     "Wall Sticker":{
         "item_id":6,
@@ -67,7 +67,7 @@ let _dic_items = {
         "pos_x":865,
         "pos_y":330,
         "scale":0.4,
-        "description":"wall decoration",
+        "description":" Wall decoration (STR+1) ",
     },
     "Token Chest":{
         "item_id":7,
@@ -78,7 +78,7 @@ let _dic_items = {
         "pos_x":1037,
         "pos_y":600,
         "scale":0.28,
-        "description":"tokens inside",
+        "description":" Tokens inside (STR+1) ",
     },
     "Diary Book":{
         "item_id":8,
@@ -89,7 +89,7 @@ let _dic_items = {
         "pos_x":300,
         "pos_y":570,
         "scale":0.1,
-        "description":"histrical parameters",
+        "description":" Histrical status (STR+1) ",
     },
     "Fishbowl":{
         "item_id":9,
@@ -100,7 +100,7 @@ let _dic_items = {
         "pos_x":693,
         "pos_y":148,
         "scale":0.3,
-        "description":"growing goldfish",
+        "description":" Growing goldfish (STR+1) ",
     },
     "Hammock":{
         "item_id":10,
@@ -111,7 +111,7 @@ let _dic_items = {
         "pos_x":1155,
         "pos_y":730,
         "scale":0.8,
-        "description":"sleeping when lights out",
+        "description":" Sleep at night (STR+1) ",
     },
     "Crown":{
         "item_id":11,
@@ -122,7 +122,7 @@ let _dic_items = {
         "pos_x":1050,
         "pos_y":290,
         "scale":0.3,
-        "description":"bear decoration",
+        "description":" Bear decoration (STR+1) ",
     },
     "Fortune Statue":{
         "item_id":12,
@@ -133,7 +133,7 @@ let _dic_items = {
         "pos_x":486,
         "pos_y":148,
         "scale":0.35,
-        "description":"eyes may shine\nin the night...",
+        "description":" Eyes shine at night (STR+1) ",
     },
     "Cake":{
         "item_id":13,
@@ -144,7 +144,7 @@ let _dic_items = {
         "pos_x":600+25,
         "pos_y":840-18,
         "scale":0.15,
-        "description":"tastes good",
+        "description":" Looks yummy (STR+1) ",
     },
     "Clarinet":{
         "item_id":14,
@@ -153,6 +153,7 @@ let _dic_items = {
         "img_name":"item_clarinet",
         "img_name_inactive":"item_clarinet_inactive",
         "icon_png":"png/item_clarinet.png",
+        "description":" Start practice (STR+1) ",
     },
     "Horn":{
         "item_id":15,
@@ -161,6 +162,7 @@ let _dic_items = {
         "img_name":"item_horn",
         "img_name_inactive":"item_horn_inactive",
         "icon_png":"png/item_horn.png",
+        "description":" Start practice (STR+1) ",
     },
     "Door of Travel":{
         "item_id":16,
@@ -180,7 +182,7 @@ let _dic_items = {
         "pos_x":505,
         "pos_y":370,
         "scale":0.30,
-        "description":"play music",
+        "description":" Play music (DEX+1) ",
     },
     "Straw Hat":{
         "item_id":18,
@@ -191,7 +193,7 @@ let _dic_items = {
         "pos_x":450,
         "pos_y":255,
         "scale":0.25,
-        "description":"wearable hat",
+        "description":" Wearable hat (DEX+1) ",
     },
     "Ms. Ether":{
         "item_id":19,
@@ -202,7 +204,7 @@ let _dic_items = {
         "pos_x":714,
         "pos_y":685,
         "scale":0.12,
-        "description":"little housemate",
+        "description":" Little housemate (DEX+1) ",
     },
     "Window":{
         "item_id":20,
@@ -213,7 +215,7 @@ let _dic_items = {
         "pos_x":110,
         "pos_y":225,
         "scale":0.58,
-        "description":"wall decoration",
+        "description":" Wall decoration (DEX+1) ",
     },
     "Cat Cushion":{
         "item_id":21,
@@ -224,7 +226,7 @@ let _dic_items = {
         "pos_x":90,
         "pos_y":620,
         "scale":0.5,
-        "description":"a cat will\nsettle down here",
+        "description":" Meet a cat (DEX+1) ",
     },
     "Knit Hat":{
         "item_id":22,
@@ -235,7 +237,7 @@ let _dic_items = {
         "pos_x":690,
         "pos_y":255,
         "scale":0.2,
-        "description":"wearable hat",
+        "description":" Wearable hat (DEX+1) ",
     },
     "Pancake":{
         "item_id":23,
@@ -246,9 +248,9 @@ let _dic_items = {
         "pos_x":600-25,
         "pos_y":840-18,
         "scale":0.2,
-        "description":"Yummy",
+        "description":" Looks good (DEX+1) ",
     },
-    "Fluffy House":{
+    "House of Fluffy":{
         "item_id":24,
         "item_id_uncommon":24+64,
         "item_id_rare":24+128,
@@ -257,7 +259,7 @@ let _dic_items = {
         "pos_x":250,
         "pos_y":700,
         "scale":0.4,
-        "description":"fluffy sticks",
+        "description":" Fluffy sticks together (DEX+1) ",
     },
     "Picture Frame":{
         "item_id":25,
@@ -268,7 +270,7 @@ let _dic_items = {
         "pos_x":890,
         "pos_y":300,
         "scale":0.25,
-        "description":"display your NFTs",
+        "description":" Display your NFTs (DEX+1) ",
     },
     "Flowerpot":{
         "item_id":26,
@@ -279,7 +281,7 @@ let _dic_items = {
         "pos_x":865,
         "pos_y":734,
         "scale":0.18,
-        "description":"room decoration",
+        "description":" Room decoration (DEX+1) ",
     },
     "Piano":{
         "item_id":27,
@@ -291,7 +293,7 @@ let _dic_items = {
         "pos_x":595,
         "pos_y":375,
         "scale":0.4,
-        "description":"practice the instrument",
+        "description":" Start practice (DEX+1) ",
     },
     "Asnya":{
         "item_id":28,
@@ -302,7 +304,7 @@ let _dic_items = {
         "pos_x":592,
         "pos_y":138,
         "scale":0.25,
-        "description":"room decoration",
+        "description":" Room decoration (DEX+1) ",
     },
     "Tea Set":{
         "item_id":29,
@@ -318,6 +320,7 @@ let _dic_items = {
         "img_name":"item_timpani",
         "img_name_inactive":"item_timpani_inactive",
         "icon_png":"png/item_timpani.png",
+        "description":" Start practice (DEX+1) ",
     },
     "(Item31)":{
         "item_id":31,
@@ -344,7 +347,7 @@ let _dic_items = {
         "pos_x":700,
         "pos_y":390,
         "scale":0.25,
-        "description":"show status (INT+1)",
+        "description":" Show status (INT+1) ",
     },
     "Choco Bread":{
         "item_id":34,
@@ -355,7 +358,7 @@ let _dic_items = {
         "pos_x":600+35,
         "pos_y":840+10,
         "scale":0.25,
-        "description":"looks taesty (INT+1)",
+        "description":" Looks great (INT+1) ",
     },
     "Ribbon":{
         "item_id":35,
@@ -366,7 +369,7 @@ let _dic_items = {
         "pos_x":1037,
         "pos_y":401,
         "scale":0.15,
-        "description":"bear decoration",
+        "description":" Bear decoration (INT+1) ",
     },
     "Dr. Bitco":{
         "item_id":36,
@@ -377,7 +380,7 @@ let _dic_items = {
         "pos_x":480,
         "pos_y":680,
         "scale":0.1,
-        "description":"little housemate",
+        "description":" Little housemate (INT+1) ",
     },
     "Score Meter":{
         "item_id":37,
@@ -395,7 +398,7 @@ let _dic_items = {
         "pos_x":610,
         "pos_y":260,
         "scale":0.20,
-        "description":"wearable hat",
+        "description":" Wearable hat (INT+1) ",
     },
     "News Board":{
         "item_id":39,
@@ -406,7 +409,7 @@ let _dic_items = {
         "pos_x":110,
         "pos_y":370,
         "scale":0.19,
-        "description":"news display",
+        "description":" Display news (INT+1) ",
     },
     "Light Switch":{
         "item_id":40,
@@ -417,7 +420,7 @@ let _dic_items = {
         "pos_x":1230,
         "pos_y":320,
         "scale":0.25,
-        "description":"turn off the light",
+        "description":" Turn off \n the light \n (INT+1) ",
     },
     "Rug-Pull":{
         "item_id":41,
@@ -428,7 +431,7 @@ let _dic_items = {
         "pos_x":600,
         "pos_y":660,
         "scale":1.7,
-        "description":"room decoration",
+        "description":" Floor decoration (INT+1) ",
     },
     "Cuckoo Clock":{
         "item_id":42,
@@ -439,7 +442,7 @@ let _dic_items = {
         "pos_x":990,
         "pos_y":180,
         "scale":0.45,
-        "description":"room decoration",
+        "description":" Room decoration (INT+1) ",
     },
     "Lantern":{
         "item_id":43,
@@ -450,7 +453,7 @@ let _dic_items = {
         "pos_x":230,
         "pos_y":830,
         "scale":0.275,
-        "description":"room decoration",
+        "description":" Glow at night (INT+1) ",
     },
     "Violin":{
         "item_id":44,
@@ -462,7 +465,7 @@ let _dic_items = {
         "pos_x":500,
         "pos_y":650,
         "scale":0.2,
-        "description":"practice the instrument",
+        "description":" Start practice (INT+1) ",
     },
     "Crayon":{
         "item_id":45,
@@ -473,7 +476,7 @@ let _dic_items = {
         "pos_x":870,
         "pos_y":550,
         "scale":0.2,
-        "description":"draw the achievements",
+        "description":" Display achievements (INT+1) ",
     },
     "Cello":{
         "item_id":46,
@@ -508,7 +511,7 @@ let _dic_items = {
         "pos_x":650,
         "pos_y":500,
         "scale":0.275,
-        "description":"store coins",
+        "description":" Coin inside ",
     },
     "Leaf Pouch":{
         "item_id":195,
@@ -519,7 +522,7 @@ let _dic_items = {
         "pos_x":550,
         "pos_y":490,
         "scale":0.225,
-        "description":"store leaves",
+        "description":" Leaf inside ",
     },
     "Cat Mail":{
         "item_id":196,
@@ -530,7 +533,7 @@ let _dic_items = {
         "pos_x":75,
         "pos_y":655,
         "scale":0.6,
-        "description":"send a mail\n(cat cushion required)",
+        "description":" Send mail ",
     },
     "Fluffy Doll":{
         "item_id":197,

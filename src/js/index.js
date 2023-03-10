@@ -121,18 +121,23 @@ async function _show_onChain_parameters() {
 
 //show icon
 async function _show_icon() {
+    if (typeof(contract_mm_wss) == "undefined") {
+        await init_web3();
+    }
+    //let web3 = await new Web3("wss://testnetwss.murasaki-san.com");
     let web3 = await new Web3(window.ethereum);
-    await window.ethereum.request({method: 'eth_requestAccounts'});
+    let _wallets = await window.ethereum.request({method: 'eth_requestAccounts'});
     // get wallet
-    let _wallets = await web3.eth.getAccounts();
+    //let _wallets = await web3.eth.getAccounts();
     let wallet = _wallets[0];
     // prepare contract
     //let _abi = [{'inputs': [{'internalType': 'address', 'name': '_wallet', 'type': 'address'}], 'name': 'tokenURI_fromWallet', 'outputs': [{'internalType': 'string', 'name': '', 'type': 'string'}], 'stateMutability': 'view', 'type': 'function'}];
     //let _address = "0xcdA558BE0717D4F34b1f288c79a60d007daA11bf";
     //let contract = new web3.eth.Contract(_abi, _address);
-    let contract = contract_mu;
+    //let contract = contract_mu;
     // get tokenURI
-    let _res = await contract.methods.tokenURI_fromWallet(wallet).call();
+    //let _res = await contract.methods.tokenURI_fromWallet(wallet).call();
+    let _res = await contract_mu.methods.tokenURI_fromWallet(wallet).call();
     // get SVG
     _res = _res.split("base64,")[1];
     _res = atob(_res);

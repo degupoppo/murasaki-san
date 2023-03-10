@@ -823,7 +823,14 @@ contract Murasaki_Craft is ERC2665, Ownable{
         require(permitted_address[msg.sender] == true);
         uint _now = block.timestamp;
         uint _crafting_item = next_item;
-        items[_crafting_item] = item(_item_type, _now, _summoner, _wallet, _memo, _item_subtype);
+        items[_crafting_item] = item(
+            _item_type, 
+            _now, 
+            _summoner, 
+            _wallet, 
+            _memo, 
+            _item_subtype
+        );
         balance_of_type[_wallet][_item_type] += 1;  //balanceOf each item type
         count_of_mint[_item_type]++;
         seed[_crafting_item] = _seed;
@@ -1075,6 +1082,8 @@ contract Murasaki_Address is Ownable {
     address public address_Illustrator_Wallet;
     address public address_Achievement_onChain;
     address public address_Murasaki_Function_Music_Practice;
+    address public address_Murasaki_Address_Regular;
+    address public address_Murasaki_Address_Trial;
     
     function set_Murasaki_Main(address _address) external onlyOwner {
         address_Murasaki_Main = _address;
@@ -1171,6 +1180,12 @@ contract Murasaki_Address is Ownable {
     }
     function set_Murasaki_Function_Music_Practice(address _address) external onlyOwner {
         address_Murasaki_Function_Music_Practice = _address;
+    }
+    function set_address_Murasaki_Address_Regular(address _address) external onlyOwner {
+        address_Murasaki_Address_Regular = _address;
+    }
+    function set_address_Murasaki_Address_Trial(address _address) external onlyOwner {
+        address_Murasaki_Address_Trial = _address;
     }
 }
 
@@ -2018,6 +2033,8 @@ contract Murasaki_Function_Summon_and_LevelUp is Ownable, ReentrancyGuard {
         Murasaki_Main mm = Murasaki_Main(ma.address_Murasaki_Main());
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
         Murasaki_Parameter mp = Murasaki_Parameter(ma.address_Murasaki_Parameter());
+        //check wallet
+        require(_check_wallet(msg.sender));
         require(mp.isPaused() == false);
         require( mm.next_token() < mp.LIMIT_MINT() );
         uint PRICE = mp.PRICE();
@@ -2071,6 +2088,25 @@ contract Murasaki_Function_Summon_and_LevelUp is Ownable, ReentrancyGuard {
         payable(ma.address_BuybackTreasury()).transfer(address(this).balance);   //45%
         //event
         emit Summon(_summoner, msg.sender, _class);
+    }
+    function _check_wallet (address _wallet) internal view returns (bool) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Parameter mp = Murasaki_Parameter(ma.address_Murasaki_Parameter());
+        bool _res;
+        if (mp.isTrial()) { //when trial, not possess regular summoner
+            Murasaki_Address ma_reg = Murasaki_Address(ma.address_Murasaki_Address_Regular());
+            Murasaki_Main mm_reg = Murasaki_Main(ma_reg.address_Murasaki_Main());
+            if (mm_reg.tokenOf(_wallet) == 0) {
+                _res = true;
+            }
+        } else {    //when regular, not possess trial summoner
+            Murasaki_Address ma_trial = Murasaki_Address(ma.address_Murasaki_Address_Trial());
+            Murasaki_Main mm_trial = Murasaki_Main(ma_trial.address_Murasaki_Main());
+            if (mm_trial.tokenOf(_wallet) == 0) {
+                _res = true;
+            }
+        }
+        return _res;
     }
 
     //burn
@@ -2765,6 +2801,7 @@ contract Murasaki_Function_Crafting is Ownable, ReentrancyGuard {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
+        Murasaki_Storage_Score mss = Murasaki_Storage_Score(ma.address_Murasaki_Storage_Score());
         Murasaki_Parameter mp = Murasaki_Parameter(ma.address_Murasaki_Parameter());
         require(mp.isPaused() == false);
         require(ms.inHouse(_summoner));
@@ -2789,9 +2826,12 @@ contract Murasaki_Function_Crafting is Ownable, ReentrancyGuard {
         //trial limitation, only item level=1
         if (mp.isTrial()){
             require(
-                _item_type == 1
-                || _item_type == 17
-                || _item_type == 33
+                mss.total_item_crafted(_summoner) < 3
+                && (
+                    _item_type == 1
+                    || _item_type == 17
+                    || _item_type == 33
+                )
             );
         }
         //get dc, cost, heart
@@ -4958,7 +4998,6 @@ contract Murasaki_Function_Staking_Reward is Ownable, ReentrancyGuard {
         return _bool;
     }
     
-    //***TODO*** mint random nft
     event Staking_Reward(uint indexed _summoner, string _reward);
     function open_staking_reward (uint _summoner) external nonReentrant {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
@@ -5062,6 +5101,221 @@ contract Murasaki_Function_Staking_Reward is Ownable, ReentrancyGuard {
     }
 }
 
+
+//---Trial_Converter
+
+contract Trial_Converter is Ownable, ReentrancyGuard {
+
+    //address
+    address public address_Murasaki_Address;
+    function _set_Murasaki_Address(address _address) external onlyOwner {
+        address_Murasaki_Address = _address;
+    }
+    
+    //converting summon
+    event ConvertingSummon(uint indexed _summoner, uint _trial_summoner);
+    function converting_summon () external nonReentrant payable {
+        //check not paused
+        require(_check_notPaused());
+        //only trial
+        require(_check_trial());
+        //prepare wallet and summoner
+        address _wallet = msg.sender;
+        uint _trial_summoner = _tokenOf(_wallet);
+        //check wallet: token possess check
+        require(_check_wallet(_wallet));
+        //check cost payment
+        require(_check_payment(msg.value));
+        //summon regular summoner
+        uint _summoner = _summon_regular_summoner_and_convert_mm(_trial_summoner, _wallet);
+        //convert ms, mss
+        _convert_ms(_trial_summoner, _summoner);
+        _convert_mss(_trial_summoner, _summoner);
+        //convert all item NFTs
+        _mint_and_convert_mc(_wallet);
+        //burn trial summoner
+        _burn_trial_summoner(_trial_summoner);
+        //bonus presentbox
+        _mint_presentbox(_trial_summoner, _wallet);
+        //event
+        emit ConvertingSummon(_summoner, _trial_summoner);
+    }
+    
+    //internal functions
+    function _check_notPaused () internal view returns (bool) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Parameter mp = Murasaki_Parameter(ma.address_Murasaki_Parameter());
+        return !mp.isPaused();
+    }
+    function _tokenOf (address _wallet) internal view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Main mm = Murasaki_Main(ma.address_Murasaki_Main());
+        return mm.tokenOf(_wallet);
+    }
+    function _check_wallet (address _wallet) internal view returns (bool) {
+        Murasaki_Address ma_trial = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Main mm = Murasaki_Main(ma_trial.address_Murasaki_Main());
+        Murasaki_Address ma_reg = Murasaki_Address(ma_trial.address_Murasaki_Address_Regular());
+        Murasaki_Main mm_reg = Murasaki_Main(ma_reg.address_Murasaki_Main());
+        bool _res;
+        //possess trial_summoner and not possess regular_summoner
+        if (
+            mm.tokenOf(_wallet) != 0
+            && mm_reg.tokenOf(_wallet) == 0
+        ) {
+            _res = true;
+        }
+        return _res;
+    }
+    function _check_trial () internal view returns (bool) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Parameter mp = Murasaki_Parameter(ma.address_Murasaki_Parameter());
+        return mp.isTrial();
+    }
+    function _check_payment (uint _msg_value) internal view returns (bool) {
+        Murasaki_Address ma_trial = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Address ma_reg = Murasaki_Address(ma_trial.address_Murasaki_Address_Regular());
+        Murasaki_Parameter mp_reg = Murasaki_Parameter(ma_reg.address_Murasaki_Parameter());
+        bool _res;
+        if (_msg_value >= mp_reg.PRICE()){
+            _res = true;
+        }
+        return _res;
+    }
+    function _summon_regular_summoner_and_convert_mm (
+        uint _trial_summoner,
+        address _wallet
+    ) internal returns (uint) {
+        Murasaki_Address ma_trial = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Address ma_reg = Murasaki_Address(ma_trial.address_Murasaki_Address_Regular());
+        Murasaki_Main mm_trial = Murasaki_Main(ma_trial.address_Murasaki_Main());
+        Murasaki_Main mm_reg = Murasaki_Main(ma_reg.address_Murasaki_Main());
+        uint _summoner = mm_reg.next_token();
+        uint _class = mm_trial.class(_trial_summoner);
+        uint _seed = mm_trial.seed(_trial_summoner);
+        //summon regular summoner
+        mm_reg.summon(_wallet, _class, _seed);
+        //convert summoned_time
+        uint _summoned_time = mm_trial.summoned_time(_trial_summoner);
+        mm_reg.set_summoned_time(_summoner, _summoned_time);
+        return _summoner;
+    }
+    function _convert_ms (uint _trial_summoner, uint _summoner) internal {
+        Murasaki_Address ma_trial = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Address ma_reg = Murasaki_Address(ma_trial.address_Murasaki_Address_Regular());
+        Murasaki_Storage ms_trial = Murasaki_Storage(ma_trial.address_Murasaki_Storage());
+        Murasaki_Storage ms_reg = Murasaki_Storage(ma_reg.address_Murasaki_Storage());
+        ms_reg.set_level(_summoner, ms_trial.level(_trial_summoner));
+        ms_reg.set_exp(_summoner, ms_trial.exp(_trial_summoner));
+        ms_reg.set_strength(_summoner, ms_trial.strength(_trial_summoner));
+        ms_reg.set_dexterity(_summoner, ms_trial.dexterity(_trial_summoner));
+        ms_reg.set_intelligence(_summoner, ms_trial.intelligence(_trial_summoner));
+        ms_reg.set_luck(_summoner, ms_trial.luck(_trial_summoner));
+        ms_reg.set_next_exp_required(_summoner, ms_trial.next_exp_required(_trial_summoner));
+        ms_reg.set_last_level_up_time(_summoner, ms_trial.last_level_up_time(_trial_summoner));
+        ms_reg.set_coin(_summoner, ms_trial.coin(_trial_summoner));
+        ms_reg.set_material(_summoner, ms_trial.material(_trial_summoner));
+        ms_reg.set_last_feeding_time(_summoner, ms_trial.last_feeding_time(_trial_summoner));
+        ms_reg.set_last_grooming_time(_summoner, ms_trial.last_grooming_time(_trial_summoner));
+        ms_reg.set_mining_status(_summoner, ms_trial.mining_status(_trial_summoner));
+        ms_reg.set_mining_start_time(_summoner, ms_trial.mining_start_time(_trial_summoner));
+        ms_reg.set_farming_status(_summoner, ms_trial.farming_status(_trial_summoner));
+        ms_reg.set_farming_start_time(_summoner, ms_trial.farming_start_time(_trial_summoner));
+        ms_reg.set_crafting_status(_summoner, ms_trial.crafting_status(_trial_summoner));
+        ms_reg.set_crafting_start_time(_summoner, ms_trial.crafting_start_time(_trial_summoner));
+        ms_reg.set_crafting_item_type(_summoner, ms_trial.crafting_item_type(_trial_summoner));
+        ms_reg.set_total_mining_sec(_summoner, ms_trial.total_mining_sec(_trial_summoner));
+        ms_reg.set_total_farming_sec(_summoner, ms_trial.total_farming_sec(_trial_summoner));
+        ms_reg.set_total_crafting_sec(_summoner, ms_trial.total_crafting_sec(_trial_summoner));
+        ms_reg.set_last_total_mining_sec(_summoner, ms_trial.last_total_mining_sec(_trial_summoner));
+        ms_reg.set_last_total_farming_sec(_summoner, ms_trial.last_total_farming_sec(_trial_summoner));
+        ms_reg.set_last_total_crafting_sec(_summoner, ms_trial.last_total_crafting_sec(_trial_summoner));
+        ms_reg.set_last_grooming_time_plus_working_time(_summoner, ms_trial.last_grooming_time_plus_working_time(_trial_summoner));
+        ms_reg.set_isActive(_summoner, ms_trial.isActive(_trial_summoner));
+        ms_reg.set_inHouse(_summoner, ms_trial.inHouse(_trial_summoner));
+        /*  =0 when trial
+        ms_reg.set_staking_reward_counter(_summoner, ms_trial.staking_reward_counter(_trial_summoner));
+        ms_reg.set_total_staking_reward_counter(_summoner, ms_trial.total_staking_reward_counter(_trial_summoner));
+        ms_reg.set_last_counter_update_time(_summoner, ms_trial.last_counter_update_time(_trial_summoner));
+        ms_reg.set_crafting_resume_flag(_summoner, ms_trial.crafting_resume_flag(_trial_summoner));
+        ms_reg.set_crafting_resume_item_type(_summoner, ms_trial.crafting_resume_item_type(_trial_summoner));
+        ms_reg.set_crafting_resume_item_dc(_summoner, ms_trial.crafting_resume_item_dc(_trial_summoner));
+        ms_reg.set_exp_clarinet(_summoner, ms_trial.exp_clarinet(_trial_summoner));
+        ms_reg.set_exp_piano(_summoner, ms_trial.exp_piano(_trial_summoner));
+        ms_reg.set_exp_violin(_summoner, ms_trial.exp_violin(_trial_summoner));
+        ms_reg.set_exp_horn(_summoner, ms_trial.exp_horn(_trial_summoner));
+        ms_reg.set_exp_timpani(_summoner, ms_trial.exp_timpani(_trial_summoner));
+        ms_reg.set_exp_cello(_summoner, ms_trial.exp_cello(_trial_summoner));
+        ms_reg.set_practice_status(_summoner, ms_trial.practice_status(_trial_summoner));
+        ms_reg.set_practice_item_id(_summoner, ms_trial.practice_item_id(_trial_summoner));
+        ms_reg.set_practice_start_time(_summoner, ms_trial.practice_start_time(_trial_summoner));
+        */
+    }
+    function _convert_mss (uint _trial_summoner, uint _summoner) internal {
+        Murasaki_Address ma_trial = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Address ma_reg = Murasaki_Address(ma_trial.address_Murasaki_Address_Regular());
+        Murasaki_Storage_Score mss_trial = Murasaki_Storage_Score(ma_trial.address_Murasaki_Storage_Score());
+        Murasaki_Storage_Score mss_reg = Murasaki_Storage_Score(ma_reg.address_Murasaki_Storage_Score());
+        mss_reg.set_total_exp_gained(_summoner, mss_trial.total_exp_gained(_trial_summoner));
+        mss_reg.set_total_coin_mined(_summoner, mss_trial.total_coin_mined(_trial_summoner));
+        mss_reg.set_total_material_farmed(_summoner, mss_trial.total_material_farmed(_trial_summoner));
+        mss_reg.set_total_item_crafted(_summoner, mss_trial.total_item_crafted(_trial_summoner));
+        mss_reg.set_total_precious_received(_summoner, mss_trial.total_precious_received(_trial_summoner));
+    }
+    function _mint_and_convert_mc (address _wallet) internal {
+        Murasaki_Address ma_trial = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Craft mc_trial = Murasaki_Craft(ma_trial.address_Murasaki_Craft());
+        //get all item ids
+        uint _myListsLength = mc_trial.myListLength(_wallet);
+        uint[] memory _myListsAt = mc_trial.myListsAt(_wallet, 0, _myListsLength);
+        //mint and convert each item
+        for (uint i=0; i<_myListsLength; i++) {
+            uint _trial_item_id = _myListsAt[i];
+            //mint and convert
+            _craft_regular_item_and_convert(_trial_item_id, _wallet);
+        }
+    }
+    function _craft_regular_item_and_convert (uint _trial_item_id, address _wallet) internal {
+        Murasaki_Address ma_trial = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Address ma_reg = Murasaki_Address(ma_trial.address_Murasaki_Address_Regular());
+        Murasaki_Craft mc_trial = Murasaki_Craft(ma_trial.address_Murasaki_Craft());
+        Murasaki_Craft mc_reg = Murasaki_Craft(ma_reg.address_Murasaki_Craft());
+        //uint _item_id = mc_reg.next_item();
+        (
+            uint _item_type, 
+            , //uint _crafted_time, 
+            uint _crafted_summoner, 
+            , //address _crafted_wallet, 
+            , //string memory _memo,
+            uint _item_subtype
+        ) = mc_trial.items(_trial_item_id);
+        uint _seed = mc_trial.seed(_trial_item_id);
+        string memory _memo = "converted from trial";
+        mc_reg.craft(
+            _item_type, 
+            _crafted_summoner, 
+            _wallet, 
+            _seed, 
+            _memo, 
+            _item_subtype
+        );
+    }
+    function _burn_trial_summoner (uint _trial_summoner) internal {
+        Murasaki_Address ma_trial = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Main mm_trial = Murasaki_Main(ma_trial.address_Murasaki_Main());
+        mm_trial.burn(_trial_summoner);
+    }
+    function _mint_presentbox (uint _summoner, address _wallet_to) internal {
+        Murasaki_Address ma_trial = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Address ma_reg = Murasaki_Address(ma_trial.address_Murasaki_Address_Regular());
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma_reg.address_Murasaki_Function_Share());
+        Murasaki_Craft mc = Murasaki_Craft(ma_reg.address_Murasaki_Craft());
+        uint _seed = mfs.seed(_summoner);
+        uint _item_type = 200;
+        string memory _memo = "summon bonus";
+        mc.craft(_item_type, 0, _wallet_to, _seed, _memo, 0);
+    }
+}
 
 //===Independent==================================================================================================================
 
@@ -7783,161 +8037,6 @@ contract Murasaki_Craft_Old {
 }
 
 contract Admin_Convert is Ownable {
-    
-    function mm_convert (
-        address _old_address, 
-        address _new_address, 
-        uint _summoner_256
-    ) external onlyOwner {
-        uint _summoner = _summoner_256;
-        Murasaki_Main mmOld = Murasaki_Main(_old_address);
-        Murasaki_Main mmNew = Murasaki_Main(_new_address);
-        uint _class = mmOld.class(_summoner);
-        uint _summoned_time = mmOld.summoned_time(_summoner);
-        uint _seed = mmOld.seed(_summoner);
-        address _owner = mmOld.ownerOf(_summoner);
-        mmNew.summon(_owner, _class, _seed);
-        mmNew.set_summoned_time(_summoner, _summoned_time);
-    }
-
-    function mn_convert (
-        address _old_address, 
-        address _new_address, 
-        uint _tokenId_256
-    ) external onlyOwner {
-        uint _tokenId = _tokenId_256;
-        Murasaki_Name mnOld = Murasaki_Name(_old_address);
-        Murasaki_Name mnNew = Murasaki_Name(_new_address);
-        string memory _name = mnOld.names(_tokenId);
-        uint _seed = mnOld.seed(_tokenId);
-        address _owner = mnOld.ownerOf(_tokenId);
-        mnNew.mint(_owner, _name, _seed);
-    }
-    
-    function ms_convert (
-        address _old_address,
-        address _new_address,
-        uint _summoner_uint256
-    ) external onlyOwner {
-        uint _summoner = _summoner_uint256;
-        Murasaki_Storage msOld = Murasaki_Storage(_old_address);
-        Murasaki_Storage msNew = Murasaki_Storage(_new_address);
-        msNew.set_level(_summoner, msOld.level(_summoner));
-        msNew.set_exp(_summoner, msOld.exp(_summoner));
-        msNew.set_strength(_summoner, msOld.strength(_summoner));
-        msNew.set_dexterity(_summoner, msOld.dexterity(_summoner));
-        msNew.set_intelligence(_summoner, msOld.intelligence(_summoner));
-        msNew.set_luck(_summoner, msOld.luck(_summoner));
-        msNew.set_next_exp_required(_summoner, msOld.next_exp_required(_summoner));
-        msNew.set_last_level_up_time(_summoner, msOld.last_level_up_time(_summoner));
-        msNew.set_coin(_summoner, msOld.coin(_summoner));
-        msNew.set_material(_summoner, msOld.material(_summoner));
-        msNew.set_last_feeding_time(_summoner, msOld.last_feeding_time(_summoner));
-        msNew.set_last_grooming_time(_summoner, msOld.last_grooming_time(_summoner));
-        msNew.set_mining_status(_summoner, msOld.mining_status(_summoner));
-        msNew.set_mining_start_time(_summoner, msOld.mining_start_time(_summoner));
-        msNew.set_farming_status(_summoner, msOld.farming_status(_summoner));
-        msNew.set_farming_start_time(_summoner, msOld.farming_start_time(_summoner));
-        msNew.set_crafting_status(_summoner, msOld.crafting_status(_summoner));
-        msNew.set_crafting_start_time(_summoner, msOld.crafting_start_time(_summoner));
-        msNew.set_crafting_item_type(_summoner, msOld.crafting_item_type(_summoner));
-        msNew.set_total_mining_sec(_summoner, msOld.total_mining_sec(_summoner));
-        msNew.set_total_farming_sec(_summoner, msOld.total_farming_sec(_summoner));
-        msNew.set_total_crafting_sec(_summoner, msOld.total_crafting_sec(_summoner));
-        msNew.set_last_total_mining_sec(_summoner, msOld.last_total_mining_sec(_summoner));
-        msNew.set_last_total_farming_sec(_summoner, msOld.last_total_farming_sec(_summoner));
-        msNew.set_last_total_crafting_sec(_summoner, msOld.last_total_crafting_sec(_summoner));
-        msNew.set_last_grooming_time_plus_working_time(_summoner, msOld.last_grooming_time_plus_working_time(_summoner));
-        msNew.set_isActive(_summoner, msOld.isActive(_summoner));
-        msNew.set_inHouse(_summoner, msOld.inHouse(_summoner));
-        msNew.set_staking_reward_counter(_summoner, msOld.staking_reward_counter(_summoner));
-    }
-    
-    function mss_convert (
-        address _old_address,
-        address _new_address,
-        uint _summoner_uint256
-    ) external onlyOwner {
-        uint _summoner = _summoner_uint256;
-        Murasaki_Storage_Score mssOld = Murasaki_Storage_Score(_old_address);
-        Murasaki_Storage_Score mssNew = Murasaki_Storage_Score(_new_address);
-        mssNew.set_total_exp_gained(_summoner, mssOld.total_exp_gained(_summoner));
-        mssNew.set_total_coin_mined(_summoner, mssOld.total_coin_mined(_summoner));
-        mssNew.set_total_material_farmed(_summoner, mssOld.total_material_farmed(_summoner));
-        mssNew.set_total_item_crafted(_summoner, mssOld.total_item_crafted(_summoner));
-        mssNew.set_total_precious_received(_summoner, mssOld.total_precious_received(_summoner));
-    }
-
-    function msn_convert (
-        address _old_address,
-        address _new_address,
-        uint _nuiId
-    ) external onlyOwner {
-        Murasaki_Storage_Nui msnOld = Murasaki_Storage_Nui(_old_address);
-        Murasaki_Storage_Nui msnNew = Murasaki_Storage_Nui(_new_address);
-        msnNew.set_mint_time(_nuiId, msnOld.mint_time(_nuiId));
-        msnNew.set_summoner(_nuiId, msnOld.summoner(_nuiId));
-        msnNew.set_class(_nuiId, msnOld.class(_nuiId));
-        msnNew.set_level(_nuiId, msnOld.level(_nuiId));
-        msnNew.set_strength(_nuiId, msnOld.strength(_nuiId));
-        msnNew.set_dexterity(_nuiId, msnOld.dexterity(_nuiId));
-        msnNew.set_intelligence(_nuiId, msnOld.intelligence(_nuiId));
-        msnNew.set_luck(_nuiId, msnOld.luck(_nuiId));
-        msnNew.set_total_exp_gained(_nuiId, msnOld.total_exp_gained(_nuiId));
-        msnNew.set_total_coin_mined(_nuiId, msnOld.total_coin_mined(_nuiId));
-        msnNew.set_total_material_farmed(_nuiId, msnOld.total_material_farmed(_nuiId));
-        msnNew.set_total_item_crafted(_nuiId, msnOld.total_item_crafted(_nuiId));
-        msnNew.set_total_precious_received(_nuiId, msnOld.total_precious_received(_nuiId));
-        msnNew.set_score(_nuiId, msnOld.score(_nuiId));
-    }
-
-    function mc_convert (
-        address _old_address, 
-        address _new_address, 
-        uint _item_id
-    ) external onlyOwner {
-        Murasaki_Craft_Old mcOld = Murasaki_Craft_Old(_old_address);
-        Murasaki_Craft mcNew = Murasaki_Craft(_new_address);
-        {
-            //correct old item infromation
-            (
-                uint _item_type, 
-                uint _crafted_time, 
-                uint _crafted_summoner, 
-                address _crafted_wallet, 
-                //string memory _memo
-            ) = mcOld.items(_item_id);
-            //conver nuichan id, random type
-            if (_item_type == 197) {
-                _item_type = _crafted_time % 12 + 237;
-            }
-            //uint32 _seed = mcOld.seed(_item_id);
-            address _wallet_to = mcOld.ownerOf(_item_id);
-            //craft_convert in new contract
-            mcNew._admin_craft_convert(
-                _item_type,
-                _crafted_summoner,
-                _crafted_wallet,
-                //mcOld.seed(uint32(_item_id_256)),
-                //888,
-                //_memo,
-                _item_id,
-                _crafted_time,
-                //mcOld.ownerOf(_item_id)
-                _wallet_to
-            );
-        }
-    }
-    
-    function mc_set_next_item (address _address, uint _value) external onlyOwner {
-        Murasaki_Craft mcNew = Murasaki_Craft(_address);
-        mcNew._admin_set_next_item(_value);
-    }
-}
-
-//---Trial_Converter
-
-contract Trial_Converter is Ownable {
     
     function mm_convert (
         address _old_address, 

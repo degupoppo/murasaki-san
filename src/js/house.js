@@ -82,114 +82,72 @@ contract ERC721 is IERC721 {
 
 //### 1st
 
-    マーケティングの熟考
-        目的：
-            本PJの魅力をわかりやすく理解できる機会を提供する
-            本PJに興味を持ってくれる人に情報を届ける
-        伝えるべき魅力とは：
-            
-        方法：
-            Twitter
-            Discord
-
-    Trial Converterの実装
+ ** Trial ConverterのUI実装
+        js実装
+            scene内でsummoner取得しに行くときにregularとtrialを両方取得しモード分岐させる
+            他のコントラは、
+            1:
+                share内ですべてtrialもコントラを作っておく
+                web3絡みはすべてflag_trialで通常コントラかtrialコントラか
+                    どちらを読みに行くか分岐させる
+            2:
+                メインコード内ではコントラは変化させない
+                shareなりどこかで、trialとregularで全コントラを入れ替える分岐を行う
+            また、trial→regularへとコンバートした直後の挙動も実装する必要あり
+                やはり、flag_trialと、各コントラ2重用意で分岐、が受けが広いだろうか。
         運用
             いつでもコンバート可能にするか
             特定の条件を満たした後コンバート可能とするか
             コンバート無しで正規mint可能とするか
-        Solidity実装
-            mfslにconverting_summon()関数を実装する
-            まずsummonし新IDを割り振る
-            その後trialから正式へmm, ms, mssをコンバートする
-            所有trial_mcをすべて取得し、正式mcをmint、コンバートする
+            → Trialで開始し, Lv3以上でいつでもregularへconvert可能、とする
         UI実装
-
-   *体験summonerの設計II
-     ok コントラ群を別にすべて用意する
-            token, functionなどすべて
-            if(isTrial)トリガーを実装しコード自体はtrialと正式で共通とする
-     ok 制限をかける
-            mcのtransfer_feeを10000000など大きな数字に設定して事実上禁止
-            mfslのlevelup関数でrequire(level<=2): Lv3までしかあげれないよう制限
-            mfcでrequire(mss.total_item_crafted <=2): itemは3つまでしかcraftできないよう制限
-            mfcで、trialではfluffyが発生しないよう修正
-            そのかわり、mfslでLv2, Lv3などでpresentboxをもらえるよう修正
-            mpにisTrial変数を用意しtrueを代入する
-                他のmfも自前のisTrial()を持ち、中身はmp.isTrialを参照する
-                mf内ではif(isTrial){require()}で制限を実装する
-     ok 制限II
-         ok Lv>=3でfeeding, groomingのexp=0
-                Lv4にあげられないのではなく、expを得られなくする
-         ok start_crafting時にrequire(total_item_craft<3)
-                3個以上はクラフト開始できなくする
-         ok coin bank, leaf pouch, cat mailはtrialではクラフト不可とする
-                もしくは、クラフト可能品を絞る
-                require(_item_type==1 || _item_type==17 || _item_type==33)など
-         ok mc_trialはtransfer_fee=10000000000
-         ok 1ヶ月間放置されると再summonが必要なように設計する
-                isActive()を用意するか？
-                isPetrified & isTrialでresummon()とするか？
-                シンプルな設計を考える
-                → 石化し、cure cost=0とする（mint cost=0なのでそのままで良い）
-         ok coin, leafの取得上限も検討する
-                延々とcoin/leafを取得し続けるbotが成り立ってしまうため
-         ok onChain_Scoreによるexp boostは無効
-                item_wreathも表示させない
-         ok staking bonusも無効
-                メーターを貯めない
-                item_stakingも表示させない
-         ok uriで"Trial"と表示させる
-         ok presentboxはランダム送信しない
-                自分で作ったら自分でもらえる
-                → trialでは送らないこととする
+            Lv3以上でconverting_summonボタンを表示する
+                ないないさんを使うか
+                もぐもぐさんを使うか
+     ** 開始画面のUI分岐を実装する
+            trialあり/正規なし　→　trial summonerで開始
+            trialあり正規あり　→　(ありえない)
+            trialなし/正規あり　→　正規summonerで開始
+            trialなし/正規なし　→　summon画面
+            つまり：
+                trial summoner own → trialコントラで開始
+                trial summoner not own → regular summoner own → regularコントラで開始
+                trial, regular summoner いずれもnot own → trial summon画面
+            また、visitはregular summonerのみとする
+                trial summonerはvisitできない
+                コントラとしてはfeeding可能だが、UIは実装せず想定しない
      ** init
             maは独立したコントラ
             ただしmnだけは正規コントラと共通
             mcのtransfer feeは巨大な数字
             mp.PRICE=0
             mp.isTrial=true
-     ** コンバーターを用意する
-            mfslにconverting_summon()関数を実装する
-            まずsummonし新IDを割り振る
-            その後trialから正式へmm, ms, mssをコンバートする
-            所有trial_mcをすべて取得し、正式mcをmint、コンバートする
-        共通の情報
-            mnはtrial上で正式版をmintさせる
-                つまり、ma_trialには正規mnのアドレスを登録する
-            弊害としては、大量mintでnameが枯渇することだが、まあ大丈夫だろうか
-     ok 要修正
-            lootlike系はwalletアドレスとclassのみを参照するよう修正
-        要対策・要検討
-         ok coin/leafをひたすら掘り続けるtrial summoner
-         ok coin bank/leaf pouchを溜め込むtrial summoner
-            → 時間の制限か、total_coin/leafの制限を検討する
-         ok 長期間放置されたtrial summoner
-                石化する？
-                そのwalletで再開したいときはどうするか
-                trial summonerは石化しないようにするか
-                もしくは石化のタイミングで再mint必要にするか
-                正規summonerは石化し、trial summonerはリセットされる
-                普通に石化でも良いかもしれない
-                    trialではcureコストが0である、とする
-         ** trialを示すUI演出を考える
-                鬱陶しくなく、しかし変化がわかりやすく、かつ嬉しいUIが必要
-         ** 開始画面のUIを考える
-                trialあり/正規なし　→　trial summonerで開始
-                trialあり正規あり　→　(ありえない)
-                trialなし/正規あり　→　正規summonerで開始
-                trialなし/正規なし　→　summon画面
-         ** summonは必ずtrialからか、直接正規mint可とするか
-                条件を満たさないと正規へconvertできないのか、
-                feeを払えば初期から、もしくは度のタイミングでも正規summonerへconvert可能とするか
-
-    クリック時の挙動統一
-        cat, festivalor, presentboxの仕様も統一する
-        現状これらはマウスオーバーとマウスクリックで挙動が異なるが、さてどうするか
-        クリックでtx飛ばしてしまうため、情報表示のUI設定がちょっと難しい
-        item_indicatorはどうするか
-            同時に、ステータス補正値の表示方法も考える
+            trialのma.address_Murasaki_Address_Regularに正規版のmaを格納する
+            regularのma.addressにはTrialのmaアドレスを格納する
+            mc_regにはtrialのconverterをpermitしておく
+            trialのffにはintervalを多めに設定しておく
 
     exp増加アイテムのUI実装
+        木の実を中心とした小物
+        お散歩で見つけられそうなもの
+        人工物ではないもの
+            松ぼっくり
+            もみじ
+            どんぐり
+            イチョウの葉
+            クリ
+            くるみ
+            きのこ
+            かぼちゃ
+            ヒイラギの葉
+            桜の枝
+            野いちご
+            いい感じの木の棒
+            フウセンカズラ
+            セミの抜け殻
+            カタツムリのから
+            貝殻
+            ヤドカリの貝殻
         絵の決定
             トロフィー？
             きれいな石？
@@ -238,7 +196,7 @@ contract ERC721 is IERC721 {
             let _json = JSON.parse(astar_price_data);
             let _astar_priceChange_h24 = _json.pair.priceChange.h24
 
-   *お菓子の家の実装
+    お菓子の家の実装
      ok Solidity:
             counterを返す関数
             counter=0でmintする関数
@@ -290,6 +248,33 @@ contract ERC721 is IERC721 {
      ok 練習中は音符が飛び出す
             専用クラスの用意
             跳ねるときに音がなる？
+
+    アイテム順の再考
+        クレヨンの位置
+        楽器の位置
+        フラワーリース
+
+    ネオンちゃんの段階実装
+        ステーキング量に応じてにぎやかにする
+
+//### 2nd
+
+    ぬいちゃん貸し出しシステムの実装検討
+        ぬいちゃんは他の人が所持した際の効果が大きい
+            しかし、売りに出すのは愛着が湧くため、なかなかにハードルが高い
+            そのため、売りに出す以外に他のむらさきさんに期間限定で貸与する機構を考える
+            ぬいちゃんのお泊り会なイメージ
+        構想
+            ステータス・期間・料金を提示してlistする
+                コストを一括で支払ってrentする
+            あるいは、コスト/日と、最大日数を提示してlistする
+                rent側はいつでも返却できる
+                    使用時（feeding/grooming時）に料金を支払う
+                    もしくは返却時に返金される
+                最大日数が残っている間はlistに表示される
+            rentされていたぬいちゃんには、経過時間に応じて専用のパラメータが積算する
+            また、ぬいちゃんの作成コストは、累積クラフト数か、
+                その時のスコアに応じて引き上げる
 
     散歩システムの実装検討
         feedingは基本的な+exp手段だが、
@@ -400,32 +385,32 @@ contract ERC721 is IERC721 {
                     あるいは、この行動でしか手に入らないトロフィーなど
                         トロフィーはNFTではなくSBTで実装する
     
-    アイテム順の再考
-        クレヨンの位置
-        楽器の位置
-        フラワーリース
+    寄り道機構の拡充
+        プレイヤーの選択肢として、他のsink手段をもっと用意する
+        mining/farming以外に行う行動
+        メイン資産である「時間」を費やす他の方法
+        別のworking状態とも言える
+        案：
+            散歩（謎解き、報酬NFT）
+            楽器練習（エンドコンテンツ、演奏会準備）
 
-    ネオンちゃんの段階実装
-        ステーキング量に応じてにぎやかにする
+    SFLからの教訓
+        ・Pay to Winは避ける。課金なしでも根源的に楽しい。
+            楽しいので資金を投入してしまう、というのが理想。
+        ・ゲームをわざわざ不便にして便利さを販売することは、
+            UXを悪化させるので避ける。
+        ・先に進んでいるプレイヤーが新しいプレイヤーを助けることに
+            インセンティブを与える設計を検討する。
 
-    ぬいちゃん貸し出しシステムの実装検討
-        ぬいちゃんは他の人が所持した際の効果が大きい
-            しかし、売りに出すのは愛着が湧くため、なかなかにハードルが高い
-            そのため、売りに出す以外に他のむらさきさんに期間限定で貸与する機構を考える
-            ぬいちゃんのお泊り会なイメージ
-        構想
-            ステータス・期間・料金を提示してlistする
-                コストを一括で支払ってrentする
-            あるいは、コスト/日と、最大日数を提示してlistする
-                rent側はいつでも返却できる
-                    使用時（feeding/grooming時）に料金を支払う
-                    もしくは返却時に返金される
-                最大日数が残っている間はlistに表示される
-            rentされていたぬいちゃんには、経過時間に応じて専用のパラメータが積算する
-            また、ぬいちゃんの作成コストは、累積クラフト数か、
-                その時のスコアに応じて引き上げる
-
-//### 2nd
+    マーケティングの熟考
+        目的：
+            本PJの魅力をわかりやすく理解できる機会を提供する
+            本PJに興味を持ってくれる人に情報を届ける
+        伝えるべき魅力とは：
+            Play to Own
+        方法：
+            Twitter
+            Discord
 
  ig 砂時計アイテムの再実装
         条件
@@ -779,6 +764,103 @@ contract ERC721 is IERC721 {
 
 
 //### 3rd
+
+ ok クリック時の挙動統一
+        cat, festivalor, presentboxの仕様も統一する
+        現状これらはマウスオーバーとマウスクリックで挙動が異なるが、さてどうするか
+        クリックでtx飛ばしてしまうため、情報表示のUI設定がちょっと難しい
+        item_indicatorはどうするか
+            同時に、ステータス補正値の表示方法も考える
+
+ ig 体験summonerの設計II
+     ok コントラ群を別にすべて用意する
+            token, functionなどすべて
+            if(isTrial)トリガーを実装しコード自体はtrialと正式で共通とする
+     ok 制限をかける
+            mcのtransfer_feeを10000000など大きな数字に設定して事実上禁止
+            mfslのlevelup関数でrequire(level<=2): Lv3までしかあげれないよう制限
+            mfcでrequire(mss.total_item_crafted <=2): itemは3つまでしかcraftできないよう制限
+            mfcで、trialではfluffyが発生しないよう修正
+            そのかわり、mfslでLv2, Lv3などでpresentboxをもらえるよう修正
+            mpにisTrial変数を用意しtrueを代入する
+                他のmfも自前のisTrial()を持ち、中身はmp.isTrialを参照する
+                mf内ではif(isTrial){require()}で制限を実装する
+     ok 制限II
+         ok Lv>=3でfeeding, groomingのexp=0
+                Lv4にあげられないのではなく、expを得られなくする
+         ok start_crafting時にrequire(total_item_craft<3)
+                3個以上はクラフト開始できなくする
+         ok coin bank, leaf pouch, cat mailはtrialではクラフト不可とする
+                もしくは、クラフト可能品を絞る
+                require(_item_type==1 || _item_type==17 || _item_type==33)など
+         ok mc_trialはtransfer_fee=10000000000
+         ok 1ヶ月間放置されると再summonが必要なように設計する
+                isActive()を用意するか？
+                isPetrified & isTrialでresummon()とするか？
+                シンプルな設計を考える
+                → 石化し、cure cost=0とする（mint cost=0なのでそのままで良い）
+         ok coin, leafの取得上限も検討する
+                延々とcoin/leafを取得し続けるbotが成り立ってしまうため
+         ok onChain_Scoreによるexp boostは無効
+                item_wreathも表示させない
+         ok staking bonusも無効
+                メーターを貯めない
+                item_stakingも表示させない
+         ok uriで"Trial"と表示させる
+         ok presentboxはランダム送信しない
+                自分で作ったら自分でもらえる
+                → trialでは送らないこととする
+         ok summon時の条件の整備
+                trial, regularのsummonerのpossess条件に応じて、
+                trial, regularのsummonを許可・不許可する条件を整備する
+                いきなりregular summonerのsummonは許可するか？
+                trial所持 → convert許可
+                trial未所持・regular所持 → trial summon不許可・trial convert不許可
+     ** init
+            maは独立したコントラ
+            ただしmnだけは正規コントラと共通
+            mcのtransfer feeは巨大な数字
+            mp.PRICE=0
+            mp.isTrial=true
+            trialのma.address_Murasaki_Address_Regularに正規版のmaを格納する
+            regularのma.addressにはTrialのmaアドレスを格納する
+            mc_regにはtrialのconverterをpermitしておく
+            trialのffにはintervalを多めに設定しておく
+     ok コンバーターを用意する
+            mfslにconverting_summon()関数を実装する
+            まずsummonし新IDを割り振る
+            その後trialから正式へmm, ms, mssをコンバートする
+            所有trial_mcをすべて取得し、正式mcをmint、コンバートする
+        共通の情報
+            mnはtrial上で正式版をmintさせる
+                つまり、ma_trialには正規mnのアドレスを登録する
+            弊害としては、大量mintでnameが枯渇することだが、まあ大丈夫だろうか
+     ok 要修正
+            lootlike系はwalletアドレスとclassのみを参照するよう修正
+        要対策・要検討
+         ok coin/leafをひたすら掘り続けるtrial summoner
+         ok coin bank/leaf pouchを溜め込むtrial summoner
+            → 時間の制限か、total_coin/leafの制限を検討する
+         ok 長期間放置されたtrial summoner
+                石化する？
+                そのwalletで再開したいときはどうするか
+                trial summonerは石化しないようにするか
+                もしくは石化のタイミングで再mint必要にするか
+                正規summonerは石化し、trial summonerはリセットされる
+                普通に石化でも良いかもしれない
+                    trialではcureコストが0である、とする
+            trialを示すUI演出を考える
+                鬱陶しくなく、しかし変化がわかりやすく、かつ嬉しいUIが必要
+                → mogumoguさんを使う
+         ** 開始画面のUI分岐を実装する
+                trialあり/正規なし　→　trial summonerで開始
+                trialあり正規あり　→　(ありえない)
+                trialなし/正規あり　→　正規summonerで開始
+                trialなし/正規なし　→　summon画面
+            summonは必ずtrialからか、直接正規mint可とするか
+                条件を満たさないと正規へconvertできないのか、
+                feeを払えば初期から、もしくは度のタイミングでも正規summonerへconvert可能とするか
+                → Lv3でmogumoguさん出現とする
 
  ig 体験SBTの設計
         別のmmを用意する
@@ -2750,72 +2832,6 @@ async function contract_update_all() {
 
 
 //### event
-
-/*
-//update event_heart
-async function contract_update_event_precious() {
-    let _block_latest = await web3.eth.getBlockNumber();
-    let _block_from = _block_latest - 7200; //1 day
-    let _text = "";
-
-    //event craft
-    let _events_mc = await contract_mfc.getPastEvents("Precious", {
-            fromBlock: _block_from,
-            toBlock: _block_latest
-    })
-    if (_events_mc) {
-        for (let event of _events_mc) {
-            let _summoner_to = event.returnValues[1];
-            if (_summoner_to == summoner) {
-                //let _block = event.blockNumber;
-                let _summoner_from = event.returnValues[0];
-                let _name_from = await call_name_from_summoner(_summoner_from);
-                //let _name_from = "";
-                if (_name_from == "") {
-                    _name_from = "#" + _summoner_from;
-                }
-                _text += " +1 from " + _name_from + " (item crafting) \n";
-            }
-        }
-    }
-    
-    //event mail
-    let _events_ml = await contract_mml.getPastEvents("Open_Mail", {
-            fromBlock: _block_from,
-            toBlock: _block_latest
-    });
-    //console.log(_block_from, _block_latest);
-    //console.log(_events_ml);
-    if (_events_ml) {
-        for (let event of _events_ml) {
-            let _summoner_to = event.returnValues[0];
-            let _summoner_from = event.returnValues[1];
-            if (_summoner_to == summoner) {
-                //let _block = event.blockNumber;
-                let _name_from = await call_name_from_summoner(_summoner_from);
-                //let _name_from = "";
-                if (_name_from == "") {
-                    _name_from = "#" + _summoner_from;
-                }
-                _text += " +1 from " + _name_from + " (mail receiving) \n";
-            }
-            if (_summoner_from == summoner) {
-                //let _block = event.blockNumber;
-                let _name_to = await call_name_from_summoner(_summoner_to);
-                //let _name_to = "";
-                if (_name_to == "") {
-                    _name_to = "#" + _summoner_to;
-                }
-                _text += " +1 from " + _name_to + " (mail sending) \n";
-            }
-        }
-    }
-    
-    _text = _text.slice(0, -2);
-
-    text_event_heart.setText(_text);
-}
-*/
 
 //update event random
 async function contract_update_event_random() {
@@ -6376,9 +6392,9 @@ class Nuichan extends Phaser.GameObjects.Sprite{
             //grand, sound, depth
             this.msg.x = this.x;
             this.msg.y = this.y+68;
-            if (flag_info == 1) {
-                this.msg.visible = true;
-            }
+            //if (flag_info == 1) {
+            //    this.msg.visible = true;
+            //}
             sound_nui.play();
             if (local_owner == local_wallet) {
                 let _pos = [this.x, this.y];
@@ -6394,16 +6410,26 @@ class Nuichan extends Phaser.GameObjects.Sprite{
                 murasakisan.try_attenting(this.x, this.y);
             }
         })
-        this.on("pointerover", () => {
+        this.click = 0;
+        this.on("pointerdown", () => {
             if (flag_info == 1) {
+                this.click += 1;
+                let click_now = this.click;
                 this.msg.visible = true;
+                setTimeout( () => {
+                    if (click_now == this.click) {
+                        this.msg.visible = false;
+                    }
+                }, 2000);
             }
         })
+        /*
         this.on("pointerout", () => {
             setTimeout( () => {
                 this.msg.visible = false;
             }, 500);
         });
+        */
         //image
         if (this.type == 237) {
             this.setFrame(0);
@@ -7345,8 +7371,8 @@ function open_window_summon(scene) {
     let window_summon = scene.add.sprite(640, 480, "window").setInteractive();
     //create message
     let _text = "";
-    _text += "Mint your Murasaki-san!\n";
-    _text += "Mint Cost: 200 $ASTR\n"
+    _text += "Summon your Murasaki-san!\n";
+    _text += "Summon Cost: 200 $ASTR\n"
     _text += "\n";
     _text += "Choose your favorite flower or color (this does not affect any gameplays.)\n";
     let msg1 = scene.add.text(150, 120, _text)
@@ -7390,6 +7416,142 @@ function open_window_summon(scene) {
 }
 
 
+//---window:convert
+function open_window_convert(scene) {
+
+    sound_window_open.play();
+
+    //create group
+    group_window_convert = scene.add.group();
+
+    //close window and summon
+    function close_window_summon(_class) {
+        group_window_convert.destroy(true);
+        if (_class >= 0) {
+            sound_button_on.play();
+            contract_summon(_class);
+        } else {
+            sound_window_select.play();
+        }
+    }
+
+    //create button with color and class
+    function create_button(_x, _y, _text, _color, _class, scene, _size) {
+        let obj = scene.add.text(_x, _y, _text)
+            .setFontSize(_size).setFontFamily("Arial").setFill(_color)
+            .setInteractive({useHandCursor: true})
+            .on("pointerdown", () => close_window_summon(_class) )
+            .on("pointerover", () => obj.setStyle({ fontSize: _size, fontFamily: "Arial", fill: '#ffff00' }))
+            .on("pointerout", () => obj.setStyle({ fontSize: _size, fontFamily: "Arial", fill: _color }))
+            .on("pointerover", () => sound_window_pointerover.play())
+        return obj;
+    }
+
+    //create window
+    let window_summon = scene.add.sprite(640, 480, "window").setInteractive();
+
+    //create message
+    let _text = "";
+    _text += "End the trial and summon your Murasaki-san!\n";
+    _text += "All status and NFTs that you own in the trial will be kept.\n";
+    let msg1 = scene.add.text(210, 120, _text)
+            .setFontSize(28).setFontFamily("Arial").setFill("#333333")
+
+    //msg2
+    _text = "";
+    _text += "After trial finished:\n";
+    _text += "   ✿ can grow beyond Lv3.\n";
+    _text += "   ✿ all items will be craftable.\n";
+    _text += "   ✿ presentbox as crafting bonus will be activated.\n";
+    _text += "   ✿ dApps staking bonus will be activated.\n";
+    _text += "   ✿ a cat from other player can visit your house.\n";
+    _text += "   ✿ Marketplace will be available.\n";
+    let msg2 = scene.add.text(230, 210, _text)
+        .setFontSize(24)
+        .setFontFamily("Arial")
+        .setFill("#E62E8B");
+
+    //create button
+    _text = ">> Summon Murasaki-san <<";
+    let _button = create_button(640, 480, _text, "#E60012", 0, scene, 40)
+        .setOrigin(0.5);
+
+    //msg3
+    _text = "";
+    _text += "Current Fee: " + local_price/10**18 + " $ASTR\n";
+    let msg3 = scene.add.text(640, 480+65, _text)
+        .setOrigin(0.5)
+        .setFontSize(30)
+        .setFontFamily("Arial")
+        .setFill("#0000ff");
+
+    //msg4
+    _text = "";
+    _text += "90% of summon fee will be spend to expand the ecosystem.\n";
+    _text += "    ♦ 45% will be stored in the staking treasury to control inflation rate.\n";
+    _text += "    ♦ 45% will be stored in the buyback treasury as a player asset.\n";
+    _text += "    ♦ 10% will be paied as a developer reward.\n";
+    _text += "    ♦ summon fee will be increased as the ecosystem expanding.\n";
+    let msg4 = scene.add.text(230, 630, _text)
+            .setFontSize(24).setFontFamily("Arial").setFill("#0000ff")
+
+    //cancel button
+    let button_cancel = create_button(1070, 840, "Cancel", "#000000", -1, scene, 30);
+    
+    //nainai
+    let _nainai = scene.add.sprite(1010, 510, "ff_duringFestival_isEndable_left")
+        .setOrigin(0.5)
+        .setScale(0.25);
+    
+    //flower
+    function _increase_angle (_image) {
+        _image.setAngle(_image.angle + 30);
+        setTimeout( () => {
+            _increase_angle(_image);
+        }, 1000);
+    }
+    for (i=0; i<3; i++) {
+        setTimeout( () => {
+            if (typeof(group_window_convert.scene) != "undefined"){
+                let _ohana = scene.add.image(
+                    960 -10 +Math.random()*20,
+                    480 -20 +Math.random()*40,
+                    "par_flowers"
+                )
+                    .setFrame(Math.floor(Math.random()*5))
+                    .setOrigin(0.5)
+                    .setScale(0.1 + Math.random()*0.05)
+                    .setAngle(Math.random()*360)
+                    .setDepth(99999);
+                _increase_angle(_ohana);
+                group_window_convert.add(_ohana);
+                sound_nyui.play();
+            }
+        }, 500 + i*500);
+    }
+    
+    //cat
+    let _cat = scene.add.sprite(310, 490, "cats")
+        .setOrigin(0.5)
+        .setScale(0.4)
+        .setFrame(4);
+
+    //create group
+    group_window_convert.add(window_summon);
+    group_window_convert.add(msg1);
+    group_window_convert.add(msg2);
+    group_window_convert.add(msg3);
+    group_window_convert.add(msg4);
+    group_window_convert.add(_button);
+    group_window_convert.add(button_cancel);
+    group_window_convert.add(_nainai);
+    group_window_convert.add(_cat);
+
+    //set depth
+    group_window_convert.setDepth(99999);
+}
+
+
 //---window:craft
 
 //function, create temporary item indicator
@@ -7419,9 +7581,9 @@ function create_item_indicator(scene, _item_type) {
     group_item_indicator = scene.add.group();
     item_indicator_text = scene.add.text(
         _x, 
-        _y-20, 
+        _y, 
         _description,
-        {font: "24px Arial", fill: "#0000ff", backgroundColor: "#ffffff"}
+        {font: "18px Arial", fill: "#0000ff", backgroundColor: "#ffffff"}
     ).setOrigin(0.5).setDepth(_y+1).setVisible(false);
     group_item_indicator.add(item_indicator_text);
     item_indicator_click = 0;
@@ -8765,6 +8927,35 @@ function summon_fallingFlower(scene) {
 }
 
 
+//---summon_mogumogu
+function summon_mogumogu(scene) {
+    let _x = 350;
+    let _y = 600;
+    mogumogu = scene.add.sprite(_x, _y, "mogumogu")
+        .anims.play("mogumogu", true)
+        .setOrigin(0.5)
+        .setScale(0.3)
+        .setDepth(_y)
+        .setInteractive({draggable: true, useHandCursor: true})
+        .on("pointerover", () => {
+            sound_button_select.play();
+        })
+        .on("pointerdown", () => {
+            open_window_convert(scene);
+        });
+    let _text = "";
+    _text += "✿ End Trial ✿";
+    mogumogu_text = scene.add.text(_x, _y+35, _text)
+        .setFontSize(20)
+        .setFontFamily("Arial")
+        .setFill("#E62E8B")
+        .setOrigin(0.5);
+    group_mogumogu = scene.add.group();
+    group_mogumogu.add(mogumogu);
+    group_mogumogu.add(mogumogu_text);
+}
+
+
 //---update tx text
 function update_tx_text(mode, hash) {
     if (typeof timeout_tx != "undefined") {
@@ -9193,6 +9384,9 @@ function preload(scene) {
     //---nyui
     scene.load.spritesheet("nyui_moving", "src/png/nyui_moving.png", {frameWidth: 370, frameHeight: 320});
     scene.load.spritesheet("nyui_happy", "src/png/nyui_happy.png", {frameWidth: 370, frameHeight: 320});
+
+    //---mogumogu
+    scene.load.spritesheet("mogumogu", "src/png/mogumogu.png", {frameWidth: 370, frameHeight: 320});
 
     //---fluffy
     /*
@@ -9844,6 +10038,15 @@ function create(scene) {
         frameRate: 1,
         repeat: -1
     });    
+
+    //---animation mogumogu
+    scene.anims.create({
+        key: "mogumogu",
+        frames: scene.anims.generateFrameNumbers("mogumogu", {start:0, end:1}),
+        frameRate: 1,
+        repeat: -1
+    });
+
     //---animation ff
     scene.anims.create({
         key: "ff_report",
@@ -10912,11 +11115,6 @@ function protection_code(this_scene) {
 
 //---system message
 function update_systemMessage(this_scene) {
-    //if (summoner == -1) {
-    //if (count_sync == 0) {
-    //    //text_system_message.setText(" --- Connecting to Astar Network --- ");
-    //    text_system_message.setText("");
-    //} else if (summoner == 0) {
     if (summoner == 0) {
         text_system_message.setText(" --- You have not minted Murasaki-san yet --- ");
         text_summon.visible = true;
@@ -10924,7 +11122,7 @@ function update_systemMessage(this_scene) {
     } else if (local_isActive == false) {
         text_system_message.setText(" --- This Murasaki-san is not Available --- ");
     } else if (local_notPetrified == 0) {
-        text_system_message.setText(" --- This murasaki-san has been petrified --- ");
+        text_system_message.setText(" --- This Murasaki-san has been Petrified --- ");
         text_curePetrification.visible = true;
     } else {
         text_system_message.setText("");
@@ -13700,7 +13898,7 @@ function update_checkItem(this_scene) {
     }
     
     //###24:Fluffy House
-    _item_name = "Fluffy House";
+    _item_name = "House of Fluffy";
     _item_id = dic_items[_item_name]["item_id"];
     if (
         (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
@@ -14569,7 +14767,7 @@ function calc_fps() {
 }
 
 async function updateFirst(scene) {
-    await contract_update_all();
+    //await contract_update_all();
     if (flag_radarchart == 1) {
         draw_radarchart(scene);
     }
@@ -14793,6 +14991,7 @@ class Loading extends Phaser.Scene {
     
     //load wallet, contract, status here
     async update_web3() {
+        //***TODO*** check trial
         let _start = Date.now();
         this.count_web3Loading = 0;
         console.log("load: web3");
@@ -14836,7 +15035,6 @@ class Loading extends Phaser.Scene {
             url: "lib/rexuiplugin.min.js",
             sceneKey: 'rexUI'
         });
-
     }
     
     create() {
@@ -14870,15 +15068,6 @@ class Loading_overlap extends Phaser.Scene {
     constructor() {
         super({ key:"Loading_overlap", active:false });
         this.turn = 0;
-        /*
-        try {
-            //let _json = localStorage.getItem("flowerCount");
-            let _json = localStorage.getItem("flowerCount_inGame");
-            this.flowerCount = JSON.parse(_json);
-        } catch (err) {
-            this.flowerCount = 0;
-        }
-        */
         this.flowerCount_present = 0;
     }
     
@@ -14886,7 +15075,6 @@ class Loading_overlap extends Phaser.Scene {
         this.load.spritesheet("nyui_loading", "src/png/nyui_moving.png", {frameWidth: 370, frameHeight: 320});
         this.load.spritesheet("nyui_loading2", "src/png/nyui_happy.png", {frameWidth: 370, frameHeight: 320});
         this.load.spritesheet("ohana_loading", "src/particle/flowers.png", {frameWidth: 370, frameHeight: 320});
-        //this.load.spritesheet("ohana_loading", "src/particle/stars.png", {frameWidth: 200, frameHeight: 191});
     }
     
     create() {
@@ -14916,8 +15104,6 @@ class Loading_overlap extends Phaser.Scene {
                 //this.flowerCount += 1;
                 this.flowerCount_present += 1;
                 localStorage_flowerCount += 1;
-                //this.nyui_text.setText(this.flowerCount + " stars");
-                //this.nyui_text.setText(this.flowerCount + " flowers");
                 this.nyui_text.setText(localStorage_flowerCount + " flowers");
                 this.nyui_text.setVisible(true);
                 this.nyui_text2.setVisible(true);
@@ -14931,8 +15117,6 @@ class Loading_overlap extends Phaser.Scene {
                     .setScale(0.1)
                     .setAngle(Math.random()*360)
                     .setDepth(9999-1);
-                //sound_nyui_loading.play();
-                //localStorage.setItem("flowerCount", JSON.stringify(this.flowerCount));
                 localStorage.setItem("flowerCount_inGame", JSON.stringify(localStorage_flowerCount));
             });
     }
@@ -14963,20 +15147,6 @@ class Opeaning extends Phaser.Scene {
     }
     
     create(){
-        /*
-        let back_opeaning = this.add.image(640, 480, "back")
-            .setInteractive()
-            .on('pointerdown', () => {
-
-                this.cameras.main.fadeOut(1200, 244, 108, 208);
-                this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
-                    this.scene.start("Main");
-                });
-
-                //this.scene.start("Main");
-            });
-        */
-        //let back_opeaning = this.add.image(640, 480, "back")
         //fade out
         //contract_update_all();
         this.cameras.main.fadeOut(300, 255, 255, 255);
@@ -15021,22 +15191,11 @@ class SomethingWrong extends Phaser.Scene {
 //---Main
 
 class Main extends Phaser.Scene {
+
     constructor() {
         super({ key:"Main", active:false });
     }
-    preload(){
-        //preload(this);
-        
-        /*
-        this.load.scenePlugin({
-            key: 'rexuiplugin',
-            url: "lib/rexuiplugin.min.js",
-            sceneKey: 'rexUI'
-        });
-        */
-        
-        //this.load.plugin('rextexteditplugin', 'lib/rextexteditplugin.min.js', true);
-    }
+
     create(){
         let _start = Date.now();
         console.log("create...");
@@ -15044,26 +15203,12 @@ class Main extends Phaser.Scene {
         console.log("  OK", Date.now() - _start);
         updateFirst(this);
     }
+
     update(){
         //fade in
         if (flag_fadein == 0) {
-            //this.cameras.main.fadeIn(600, 255, 255, 255, update(this));
             this.cameras.main.fadeIn(600, 255, 255, 255);
             flag_fadein = 1;
-            
-            //plugin: rexuiplugin
-            //need for nameplate
-            //need to load in Main secene,
-            //need to load after fadein because of camera flashing
-            // -> to prevent flas, load in Loading scene
-            /*
-            this.load.scenePlugin({
-                key: 'rexuiplugin',
-                url: "lib/rexuiplugin.min.js",
-                sceneKey: 'rexUI'
-            });
-            */
-            //this.load.plugin('rextexteditplugin', 'lib/rextexteditplugin.min.js', true);
         }
         update(this);
     }
