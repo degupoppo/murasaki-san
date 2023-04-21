@@ -1,1 +1,41 @@
-{"name": "House of Murasaki-san Item NFT","description": "https://murasaki-san.com/","image": "https://murasaki-san.com/src/png/item_kanban4.png"}
+{
+  "name": "AstarCats#6312",
+  "description": "AstarCats is the first cats NFT collection on Astar Network.\nAstarCats is not just another PFP project, but it comes with many utilities and holder benefits planned ahead!\nOur ultimate mission is to support promising projects on Astar Network by providing our creative resources.",
+  "external_url": "https://astarcats.xyz/",
+  "image": "https://arweave.net/wYdhZ2VnSfp1snktcjfUi4maEJ_3ZynQCxLSyERzopI/6312.png",
+  "background_color": "FFFFFF",
+  "attributes": [
+    {
+      "trait_type": "Background",
+      "value": "Blue"
+    },
+    {
+      "trait_type": "Body",
+      "value": "Yellow"
+    },
+    {
+      "trait_type": "Clothes",
+      "value": "Shirt Mint"
+    },
+    {
+      "trait_type": "Face",
+      "value": "Yellow"
+    },
+    {
+      "trait_type": "Special",
+      "value": "Angel Blue"
+    },
+    {
+      "trait_type": "Mouth",
+      "value": "Neutral"
+    },
+    {
+      "trait_type": "Hat",
+      "value": "Apricot Flower"
+    },
+    {
+      "trait_type": "Eyes",
+      "value": "Squint"
+    }
+  ]
+}
