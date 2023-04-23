@@ -1,6 +1,6 @@
 
 //SPDX-License-Identifier: MIT
-pragma solidity ^0.8.7;
+pragma solidity ^0.8.19;
 
 
 //=== Basic ==================================================================================================================
@@ -11,9 +11,17 @@ import "github.com/OpenZeppelin/openzeppelin-contracts/contracts/access/Ownable.
 import "github.com/OpenZeppelin/openzeppelin-contracts/contracts/utils/structs/EnumerableSet.sol";
 import "github.com/OpenZeppelin/openzeppelin-contracts/contracts/utils/Base64.sol";
 import "github.com/OpenZeppelin/openzeppelin-contracts/contracts/token/ERC721/ERC721.sol";
+import "github.com/OpenZeppelin/openzeppelin-contracts/contracts/token/ERC721/IERC721.sol";
+import "github.com/OpenZeppelin/openzeppelin-contracts/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 import "github.com/OpenZeppelin/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
 import "github.com/OpenZeppelin/openzeppelin-contracts/contracts/token/ERC721/IERC721Receiver.sol";
 import "github.com/AstarNetwork/astarbase/contract/example/IAstarBase.sol";
+import "github.com/OpenZeppelin/openzeppelin-contracts/contracts/utils/Address.sol";
+import "github.com/OpenZeppelin/openzeppelin-contracts/contracts/utils/Context.sol";
+import "github.com/OpenZeppelin/openzeppelin-contracts/contracts/utils/Strings.sol";
+import "github.com/OpenZeppelin/openzeppelin-contracts/contracts/utils/introspection/ERC165.sol";
+import "github.com/OpenZeppelin/openzeppelin-contracts/contracts/utils/introspection/IERC165.sol";
+import "github.com/OpenZeppelin/openzeppelin-contracts/contracts/token/ERC721/utils/ERC721Holder.sol";
 
 
 /* for solc
@@ -22,9 +30,17 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@openzeppelin/contracts/utils/Base64.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@astarbase/contract/example/IAstarBase.sol";
+import "@openzeppelin/contracts/utils/Address.sol";
+import "@openzeppelin/contracts/utils/Context.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
+import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
+import "@openzeppelin/contracts/utils/introspection/IERC165.sol";
+import "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
 */
 
 
@@ -159,122 +175,212 @@ interface IERC2665 /* is ERC165, is ERC721 but overide it's Design by contract s
 }
 
 
+//---IERC2665Metadata
+
+// @dev of HoM: IERC2665Metadata
+// @dev of HoM: The following code is based on the IERC721Metadata.sol code from OpenZeppelin.
+// @dev of HoM: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC721/extensions/IERC721Metadata.sol
+
+/**
+ * @title ERC-721 Non-Fungible Token Standard, optional metadata extension
+ * @dev See https://eips.ethereum.org/EIPS/eip-721
+ */
+interface IERC2665Metadata is IERC2665 {//IERC721Metadata is IERC721 {
+    /**
+     * @dev Returns the token collection name.
+     */
+    function name() external view returns (string memory);
+
+    /**
+     * @dev Returns the token collection symbol.
+     */
+    function symbol() external view returns (string memory);
+
+    /**
+     * @dev Returns the Uniform Resource Identifier (URI) for `tokenId` token.
+     */
+    function tokenURI(uint256 tokenId) external view returns (string memory);
+}
+
+
 //---ERC2665
 
-// @dev of HoM: ERC2665 is ERC721 but added payable modifier at transfer functions
-// @dev of HoM: Following ERC721 codes are based on https://github.com/andrecronje/rarity
+// @dev of HoM: ERC2665 is an extension of ERC721 that adds the payable modifier 
+// @dev of HoM: to the "approve", "transferFrom", and "safeTransferFrom" functions. 
+// @dev of HoM: The "supportsInterface" function has alose been modified to include 
+// @dev of HoM: the IERC2665 interface. Additionally, a new function called "getTransferFee" 
+// @dev of HoM: has been added to match the IERC2665 interface. "ERC721.ownerOf(tokenId)"
+// @dev of HoM: codes have also been replaced to "ERC2665.ownerOf(tokenId)". 
+// @dev of HoM: The collowing code is based on the ERC721.sol code from OpenZeppelin:
+// @dev of HoM: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC721/ERC721.sol
 
-contract ERC2665 is IERC2665 {
+/**
+ * @dev Implementation of https://eips.ethereum.org/EIPS/eip-721[ERC721] Non-Fungible Token Standard, including
+ * the Metadata extension, but not including the Enumerable extension, which is available separately as
+ * {ERC721Enumerable}.
+ */
+contract ERC2665 is Context, ERC165, IERC2665Metadata { // ERC721 is Context, ERC165, IERC721, IERC721Metadata {
+    using Address for address;
     using Strings for uint256;
 
+    // Token name
+    string private _name;
+
+    // Token symbol
+    string private _symbol;
+
+    // Mapping from token ID to owner address
     mapping(uint256 => address) private _owners;
+
+    // Mapping owner address to token count
     mapping(address => uint256) private _balances;
+
+    // Mapping from token ID to approved address
     mapping(uint256 => address) private _tokenApprovals;
+
+    // Mapping from owner to operator approvals
     mapping(address => mapping(address => bool)) private _operatorApprovals;
-    
-	// name
-	string private _name;
-	string private _symbol;
+
+    /**
+     * @dev Initializes the contract by setting a `name` and a `symbol` to the token collection.
+     */
     constructor(string memory name_, string memory symbol_) {
         _name = name_;
         _symbol = symbol_;
     }
-	function name() public view virtual returns (string memory) {
-		return _name;
-	}
-	function symbol() public view virtual returns (string memory) {
-		return _symbol;
-	}
 
+    /**
+     * @dev See {IERC165-supportsInterface}.
+     */
+    //function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165, IERC165) returns (bool) {
+    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {    //@dev of HoM: modified
+        return
+            interfaceId == type(IERC721).interfaceId ||
+            interfaceId == type(IERC721Metadata).interfaceId ||
+            interfaceId == type(IERC2665).interfaceId ||            //@dev of HoM: added
+            interfaceId == type(IERC2665Metadata).interfaceId ||    //@dev of HoM: added
+            super.supportsInterface(interfaceId);
+    }
+
+    /**
+     * @dev See {IERC721-balanceOf}.
+     */
     function balanceOf(address owner) public view virtual override returns (uint256) {
-        require(owner != address(0), "ERC721: balance query for the zero address");
+        require(owner != address(0), "ERC721: address zero is not a valid owner");
         return _balances[owner];
     }
-    
+
+    /**
+     * @dev See {IERC721-ownerOf}.
+     */
     function ownerOf(uint256 tokenId) public view virtual override returns (address) {
-        address owner = _owners[tokenId];
-        require(owner != address(0), "ERC721: owner query for nonexistent token");
+        address owner = _ownerOf(tokenId);
+        require(owner != address(0), "ERC721: invalid token ID");
         return owner;
     }
-    
+
+    /**
+     * @dev See {IERC721Metadata-name}.
+     */
+    function name() public view virtual override returns (string memory) {
+        return _name;
+    }
+
+    /**
+     * @dev See {IERC721Metadata-symbol}.
+     */
+    function symbol() public view virtual override returns (string memory) {
+        return _symbol;
+    }
+
+    /**
+     * @dev See {IERC721Metadata-tokenURI}.
+     */
+    function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
+        _requireMinted(tokenId);
+
+        string memory baseURI = _baseURI();
+        return bytes(baseURI).length > 0 ? string(abi.encodePacked(baseURI, tokenId.toString())) : "";
+    }
+
+    /**
+     * @dev Base URI for computing {tokenURI}. If set, the resulting URI for each
+     * token will be the concatenation of the `baseURI` and the `tokenId`. Empty
+     * by default, can be overridden in child contracts.
+     */
     function _baseURI() internal view virtual returns (string memory) {
         return "";
     }
-    
+
+    /**
+     * @dev See {IERC721-approve}.
+     */
     function approve(address to, uint256 tokenId) public virtual override payable {
-        address owner = ERC2665.ownerOf(tokenId);
+        //address owner = ERC721.ownerOf(tokenId);
+        address owner = ERC2665.ownerOf(tokenId);   //@dev of HoM: modified
         require(to != owner, "ERC721: approval to current owner");
 
         require(
-            msg.sender == owner || isApprovedForAll(owner, msg.sender),
-            "ERC721: approve caller is not owner nor approved for all"
+            _msgSender() == owner || isApprovedForAll(owner, _msgSender()),
+            "ERC721: approve caller is not token owner or approved for all"
         );
 
         _approve(to, tokenId);
     }
-    
+
+    /**
+     * @dev See {IERC721-getApproved}.
+     */
     function getApproved(uint256 tokenId) public view virtual override returns (address) {
-        require(_exists(tokenId), "ERC721: approved query for nonexistent token");
+        _requireMinted(tokenId);
 
         return _tokenApprovals[tokenId];
     }
-    
-    function setApprovalForAll(address operator, bool approved) public virtual override {
-        require(operator != msg.sender, "ERC721: approve to caller");
 
-        _operatorApprovals[msg.sender][operator] = approved;
-        emit ApprovalForAll(msg.sender, operator, approved);
+    /**
+     * @dev See {IERC721-setApprovalForAll}.
+     */
+    function setApprovalForAll(address operator, bool approved) public virtual override {
+        _setApprovalForAll(_msgSender(), operator, approved);
     }
-    
-    function _isContract(address account) internal view returns (bool) {
-        uint256 size;
-        assembly {
-            size := extcodesize(account)
-        }
-        return size > 0;
-    }
-    
+
+    /**
+     * @dev See {IERC721-isApprovedForAll}.
+     */
     function isApprovedForAll(address owner, address operator) public view virtual override returns (bool) {
         return _operatorApprovals[owner][operator];
     }
-    
-    function transferFrom(
-        address from,
-        address to,
-        uint256 tokenId
-    ) public virtual override payable {
+
+    /**
+     * @dev See {IERC721-transferFrom}.
+     */
+    function transferFrom(address from, address to, uint256 tokenId) public virtual override payable {
         //solhint-disable-next-line max-line-length
-        require(_isApprovedOrOwner(msg.sender, tokenId), "ERC721: transfer caller is not owner nor approved");
+        require(_isApprovedOrOwner(_msgSender(), tokenId), "ERC721: caller is not token owner or approved");
 
         _transfer(from, to, tokenId);
     }
-    
-    function safeTransferFrom(
-        address from,
-        address to,
-        uint256 tokenId
-    ) public virtual override payable {
+
+    /**
+     * @dev See {IERC721-safeTransferFrom}.
+     */
+    function safeTransferFrom(address from, address to, uint256 tokenId) public virtual override payable {
         safeTransferFrom(from, to, tokenId, "");
     }
 
     /**
      * @dev See {IERC721-safeTransferFrom}.
      */
-    function safeTransferFrom(
-        address from,
-        address to,
-        uint256 tokenId,
-        bytes memory _data
-    ) public virtual override payable {
-        require(_isApprovedOrOwner(msg.sender, tokenId), "ERC721: transfer caller is not owner nor approved");
-        _safeTransfer(from, to, tokenId, _data);
+    function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory data) public virtual override payable {
+        require(_isApprovedOrOwner(_msgSender(), tokenId), "ERC721: caller is not token owner or approved");
+        _safeTransfer(from, to, tokenId, data);
     }
 
     /**
      * @dev Safely transfers `tokenId` token from `from` to `to`, checking first that contract recipients
      * are aware of the ERC721 protocol to prevent tokens from being forever locked.
      *
-     * `_data` is additional data, it has no specified format and it is sent in call to `to`.
+     * `data` is additional data, it has no specified format and it is sent in call to `to`.
      *
      * This internal function is equivalent to {safeTransferFrom}, and can be used to e.g.
      * implement alternative mechanisms to perform token transfer, such as signature-based.
@@ -288,14 +394,16 @@ contract ERC2665 is IERC2665 {
      *
      * Emits a {Transfer} event.
      */
-    function _safeTransfer(
-        address from,
-        address to,
-        uint256 tokenId,
-        bytes memory _data
-    ) internal virtual {
+    function _safeTransfer(address from, address to, uint256 tokenId, bytes memory data) internal virtual {
         _transfer(from, to, tokenId);
-        require(_checkOnERC721Received(from, to, tokenId, _data), "ERC721: transfer to non ERC721Receiver implementer");
+        require(_checkOnERC721Received(from, to, tokenId, data), "ERC721: transfer to non ERC721Receiver implementer");
+    }
+
+    /**
+     * @dev Returns the owner of the `tokenId`. Does NOT revert if token doesn't exist
+     */
+    function _ownerOf(uint256 tokenId) internal view virtual returns (address) {
+        return _owners[tokenId];
     }
 
     /**
@@ -307,7 +415,7 @@ contract ERC2665 is IERC2665 {
      * and stop existing when they are burned (`_burn`).
      */
     function _exists(uint256 tokenId) internal view virtual returns (bool) {
-        return _owners[tokenId] != address(0);
+        return _ownerOf(tokenId) != address(0);
     }
 
     /**
@@ -318,9 +426,9 @@ contract ERC2665 is IERC2665 {
      * - `tokenId` must exist.
      */
     function _isApprovedOrOwner(address spender, uint256 tokenId) internal view virtual returns (bool) {
-        require(_exists(tokenId), "ERC721: operator query for nonexistent token");
-        address owner = ERC2665.ownerOf(tokenId);
-        return (spender == owner || getApproved(tokenId) == spender || isApprovedForAll(owner, spender));
+        //address owner = ERC721.ownerOf(tokenId);
+        address owner = ERC2665.ownerOf(tokenId);   //@dev of HoM: modified
+        return (spender == owner || isApprovedForAll(owner, spender) || getApproved(tokenId) == spender);
     }
 
     /**
@@ -341,14 +449,10 @@ contract ERC2665 is IERC2665 {
      * @dev Same as {xref-ERC721-_safeMint-address-uint256-}[`_safeMint`], with an additional `data` parameter which is
      * forwarded in {IERC721Receiver-onERC721Received} to contract recipients.
      */
-    function _safeMint(
-        address to,
-        uint256 tokenId,
-        bytes memory _data
-    ) internal virtual {
+    function _safeMint(address to, uint256 tokenId, bytes memory data) internal virtual {
         _mint(to, tokenId);
         require(
-            _checkOnERC721Received(address(0), to, tokenId, _data),
+            _checkOnERC721Received(address(0), to, tokenId, data),
             "ERC721: transfer to non ERC721Receiver implementer"
         );
     }
@@ -369,17 +473,30 @@ contract ERC2665 is IERC2665 {
         require(to != address(0), "ERC721: mint to the zero address");
         require(!_exists(tokenId), "ERC721: token already minted");
 
-        _beforeTokenTransfer(address(0), to, tokenId);
+        _beforeTokenTransfer(address(0), to, tokenId, 1);
 
-        _balances[to] += 1;
+        // Check that tokenId was not minted by `_beforeTokenTransfer` hook
+        require(!_exists(tokenId), "ERC721: token already minted");
+
+        unchecked {
+            // Will not overflow unless all 2**256 token ids are minted to the same owner.
+            // Given that tokens are minted one by one, it is impossible in practice that
+            // this ever happens. Might change if we allow batch minting.
+            // The ERC fails to describe this case.
+            _balances[to] += 1;
+        }
+
         _owners[tokenId] = to;
 
         emit Transfer(address(0), to, tokenId);
+
+        _afterTokenTransfer(address(0), to, tokenId, 1);
     }
 
     /**
      * @dev Destroys `tokenId`.
      * The approval is cleared when the token is burned.
+     * This is an internal function that does not check if the sender is authorized to operate on the token.
      *
      * Requirements:
      *
@@ -388,17 +505,28 @@ contract ERC2665 is IERC2665 {
      * Emits a {Transfer} event.
      */
     function _burn(uint256 tokenId) internal virtual {
-        address owner = ERC2665.ownerOf(tokenId);
+        //address owner = ERC721.ownerOf(tokenId);
+        address owner = ERC2665.ownerOf(tokenId);    //@dev of HoM: modified
 
-        _beforeTokenTransfer(owner, address(0), tokenId);
+        _beforeTokenTransfer(owner, address(0), tokenId, 1);
+
+        // Update ownership in case tokenId was transferred by `_beforeTokenTransfer` hook
+        //owner = ERC721.ownerOf(tokenId);
+        owner = ERC2665.ownerOf(tokenId);    //@dev of HoM: modified
 
         // Clear approvals
-        _approve(address(0), tokenId);
+        delete _tokenApprovals[tokenId];
 
-        _balances[owner] -= 1;
+        unchecked {
+            // Cannot overflow, as that would require more tokens to be burned/transferred
+            // out than the owner initially received through minting and transferring in.
+            _balances[owner] -= 1;
+        }
         delete _owners[tokenId];
 
         emit Transfer(owner, address(0), tokenId);
+
+        _afterTokenTransfer(owner, address(0), tokenId, 1);
     }
 
     /**
@@ -412,34 +540,63 @@ contract ERC2665 is IERC2665 {
      *
      * Emits a {Transfer} event.
      */
-    function _transfer(
-        address from,
-        address to,
-        uint256 tokenId
-    ) internal virtual {
-        require(ERC2665.ownerOf(tokenId) == from, "ERC721: transfer of token that is not own");
+    function _transfer(address from, address to, uint256 tokenId) internal virtual {
+        //require(ERC721.ownerOf(tokenId) == from, "ERC721: transfer from incorrect owner");
+        require(ERC2665.ownerOf(tokenId) == from, "ERC721: transfer from incorrect owner"); //@dev of HoM: modified
         require(to != address(0), "ERC721: transfer to the zero address");
 
-        _beforeTokenTransfer(from, to, tokenId);
+        _beforeTokenTransfer(from, to, tokenId, 1);
+
+        // Check that tokenId was not transferred by `_beforeTokenTransfer` hook
+        //require(ERC721.ownerOf(tokenId) == from, "ERC721: transfer from incorrect owner");
+        require(ERC2665.ownerOf(tokenId) == from, "ERC721: transfer from incorrect owner");  //@dev of HoM: modified
 
         // Clear approvals from the previous owner
-        _approve(address(0), tokenId);
+        delete _tokenApprovals[tokenId];
 
-        _balances[from] -= 1;
-        _balances[to] += 1;
+        unchecked {
+            // `_balances[from]` cannot overflow for the same reason as described in `_burn`:
+            // `from`'s balance is the number of token held, which is at least one before the current
+            // transfer.
+            // `_balances[to]` could overflow in the conditions described in `_mint`. That would require
+            // all 2**256 token ids to be minted, which in practice is impossible.
+            _balances[from] -= 1;
+            _balances[to] += 1;
+        }
         _owners[tokenId] = to;
 
         emit Transfer(from, to, tokenId);
+
+        _afterTokenTransfer(from, to, tokenId, 1);
     }
 
     /**
      * @dev Approve `to` to operate on `tokenId`
      *
-     * Emits a {Approval} event.
+     * Emits an {Approval} event.
      */
     function _approve(address to, uint256 tokenId) internal virtual {
         _tokenApprovals[tokenId] = to;
-        emit Approval(ERC2665.ownerOf(tokenId), to, tokenId);
+        //emit Approval(ERC721.ownerOf(tokenId), to, tokenId);
+        emit Approval(ERC2665.ownerOf(tokenId), to, tokenId);    //@dev of HoM: modified
+    }
+
+    /**
+     * @dev Approve `operator` to operate on all of `owner` tokens
+     *
+     * Emits an {ApprovalForAll} event.
+     */
+    function _setApprovalForAll(address owner, address operator, bool approved) internal virtual {
+        require(owner != operator, "ERC721: approve to caller");
+        _operatorApprovals[owner][operator] = approved;
+        emit ApprovalForAll(owner, operator, approved);
+    }
+
+    /**
+     * @dev Reverts if the `tokenId` has not been minted yet.
+     */
+    function _requireMinted(uint256 tokenId) internal view virtual {
+        require(_exists(tokenId), "ERC721: invalid token ID");
     }
 
     /**
@@ -449,22 +606,23 @@ contract ERC2665 is IERC2665 {
      * @param from address representing the previous owner of the given token ID
      * @param to target address that will receive the tokens
      * @param tokenId uint256 ID of the token to be transferred
-     * @param _data bytes optional data to send along with the call
+     * @param data bytes optional data to send along with the call
      * @return bool whether the call correctly returned the expected magic value
      */
     function _checkOnERC721Received(
         address from,
         address to,
         uint256 tokenId,
-        bytes memory _data
+        bytes memory data
     ) private returns (bool) {
-        if (_isContract(to)) {
-            try IERC721Receiver(to).onERC721Received(msg.sender, from, tokenId, _data) returns (bytes4 retval) {
-                return retval == IERC721Receiver(to).onERC721Received.selector;
+        if (to.isContract()) {
+            try IERC721Receiver(to).onERC721Received(_msgSender(), from, tokenId, data) returns (bytes4 retval) {
+                return retval == IERC721Receiver.onERC721Received.selector;
             } catch (bytes memory reason) {
                 if (reason.length == 0) {
                     revert("ERC721: transfer to non ERC721Receiver implementer");
                 } else {
+                    /// @solidity memory-safe-assembly
                     assembly {
                         revert(add(32, reason), mload(reason))
                     }
@@ -476,36 +634,61 @@ contract ERC2665 is IERC2665 {
     }
 
     /**
-     * @dev Hook that is called before any token transfer. This includes minting
-     * and burning.
+     * @dev Hook that is called before any token transfer. This includes minting and burning. If {ERC721Consecutive} is
+     * used, the hook may be called as part of a consecutive (batch) mint, as indicated by `batchSize` greater than 1.
      *
      * Calling conditions:
      *
-     * - When `from` and `to` are both non-zero, ``from``'s `tokenId` will be
-     * transferred to `to`.
-     * - When `from` is zero, `tokenId` will be minted for `to`.
-     * - When `to` is zero, ``from``'s `tokenId` will be burned.
+     * - When `from` and `to` are both non-zero, ``from``'s tokens will be transferred to `to`.
+     * - When `from` is zero, the tokens will be minted for `to`.
+     * - When `to` is zero, ``from``'s tokens will be burned.
      * - `from` and `to` are never both zero.
+     * - `batchSize` is non-zero.
      *
      * To learn more about hooks, head to xref:ROOT:extending-contracts.adoc#using-hooks[Using Hooks].
      */
-    function _beforeTokenTransfer(
-        address from,
-        address to,
-        uint256 tokenId
-    ) internal virtual {}
+    function _beforeTokenTransfer(address from, address to, uint256 firstTokenId, uint256 batchSize) internal virtual {}
 
-    //added to match the interface
-    //function getTransferFee(uint256 _tokenId) external view virtual returns (uint256) {
+    /**
+     * @dev Hook that is called after any token transfer. This includes minting and burning. If {ERC721Consecutive} is
+     * used, the hook may be called as part of a consecutive (batch) mint, as indicated by `batchSize` greater than 1.
+     *
+     * Calling conditions:
+     *
+     * - When `from` and `to` are both non-zero, ``from``'s tokens were transferred to `to`.
+     * - When `from` is zero, the tokens were minted for `to`.
+     * - When `to` is zero, ``from``'s tokens were burned.
+     * - `from` and `to` are never both zero.
+     * - `batchSize` is non-zero.
+     *
+     * To learn more about hooks, head to xref:ROOT:extending-contracts.adoc#using-hooks[Using Hooks].
+     */
+    function _afterTokenTransfer(address from, address to, uint256 firstTokenId, uint256 batchSize) internal virtual {}
+
+    /**
+     * @dev Unsafe write access to the balances, used by extensions that "mint" tokens using an {ownerOf} override.
+     *
+     * WARNING: Anyone calling this MUST ensure that the balances remain consistent with the ownership. The invariant
+     * being that for any address `a` the value returned by `balanceOf(a)` must be equal to the number of tokens such
+     * that `ownerOf(tokenId)` is `a`.
+     */
+    // solhint-disable-next-line func-name-mixedcase
+    function __unsafe_increaseBalance(address account, uint256 amount) internal {
+        _balances[account] += amount;
+    }
+
+    //@dev of HoM: add the functions to match IERC2665
+    //@dev of HoM: these functions are overrided after inheritance
+
     function getTransferFee(uint256) external view virtual returns (uint256) {
         return 0;
     }
 
-    //function getTransferFee(uint256 _tokenId, string calldata _currencySymbol) external view virtual returns (uint256) {
     function getTransferFee(uint256, string calldata) external view virtual returns (uint256) {
         return 0;
     }
 }
+
 
 
 //---SoulBoundBadge
@@ -567,6 +750,12 @@ contract Murasaki_Main is SoulBoundBadge, Ownable{
     bool notPaused = true;
     function _set_notPaused(bool _bool) external onlyOwner {
         notPaused = _bool;
+    }
+    
+    //admin migratable
+    bool isMigratable = false;
+    function _set_isMigratable (bool _bool) external onlyOwner {
+        isMigratable = _bool;
     }
 
     //names
@@ -682,6 +871,14 @@ contract Murasaki_Main is SoulBoundBadge, Ownable{
         require(permitted_address[msg.sender] == true);
         summoned_time[_summoner] = _value;
     }
+    
+    //migration, only when isMigratable=true
+    function migration(uint _summoner, address _owner_new) external {
+        require(permitted_address[msg.sender] == true);
+        require(isMigratable);
+        _burn(_summoner);
+        _mint(_owner_new, _summoner);
+    }
 }
 
 
@@ -777,9 +974,15 @@ contract Murasaki_Craft is ERC2665, Ownable{
         uint item_subtype;
     }
     mapping(uint => item) public items;
-    mapping(address => uint[256]) public balance_of_type;
+    mapping(address => uint[320]) public balance_of_type;
     mapping(uint => uint) public seed;
     mapping(uint => uint) public count_of_mint; //item_type => count_of_mint
+    
+    //mint limit
+    uint public mintLimit_perItemType = 900000;
+    function _set_mintLimit_perItemType(uint _value) external onlyOwner {
+        mintLimit_perItemType = _value;
+    }
 
     //override ERC721 transfer, 
     function _transfer(
@@ -821,6 +1024,7 @@ contract Murasaki_Craft is ERC2665, Ownable{
         uint _item_subtype
     ) external {
         require(permitted_address[msg.sender] == true);
+        require(count_of_mint[_item_type] < mintLimit_perItemType);
         uint _now = block.timestamp;
         uint _crafting_item = next_item;
         items[_crafting_item] = item(
@@ -912,7 +1116,8 @@ contract Murasaki_Craft is ERC2665, Ownable{
         }
         return string(buffer);
     }
-    function tokenURI (uint _tokenId) public view returns (string memory) {
+    //override tokenURI
+    function tokenURI (uint _tokenId) public view override returns (string memory) {
         require(_exists(_tokenId), "token must exist");
         uint _item_type = items[_tokenId].item_type;
         return string(
@@ -925,7 +1130,7 @@ contract Murasaki_Craft is ERC2665, Ownable{
     }
 
     //call items as array, need to write in Craft contract
-    function get_balance_of_type(address _wallet) public view returns (uint[256] memory) {
+    function get_balance_of_type(address _wallet) public view returns (uint[320] memory) {
         return balance_of_type[_wallet];
     }
     function balanceOfType(address _wallet, uint _item_type) external view returns (uint) {
@@ -957,7 +1162,7 @@ contract Murasaki_Craft is ERC2665, Ownable{
         bufferTreasury_address = _address;
     }
     
-    //override interface IERC2665
+    //override ERC2665
     //function getTransferFee(uint256 _tokenId) external view override returns (uint256) {
     function getTransferFee(uint256) external view override returns (uint256) {
         return TRANSFER_FEE;
@@ -1084,6 +1289,7 @@ contract Murasaki_Address is Ownable {
     address public address_Murasaki_Function_Music_Practice;
     address public address_Murasaki_Address_Regular;
     address public address_Murasaki_Address_Trial;
+    address public address_Stroll;
     
     function set_Murasaki_Main(address _address) external onlyOwner {
         address_Murasaki_Main = _address;
@@ -1187,6 +1393,9 @@ contract Murasaki_Address is Ownable {
     function set_address_Murasaki_Address_Trial(address _address) external onlyOwner {
         address_Murasaki_Address_Trial = _address;
     }
+    function set_address_Stroll(address _address) external onlyOwner {
+        address_Stroll = _address;
+    }
 }
 
 
@@ -1209,7 +1418,7 @@ contract Murasaki_Parameter is Ownable {
     //global variants
     bool public isPaused = true;
     uint public BASE_SEC = 86400;
-    uint public SPEED = 1000; //100=100%
+    uint public SPEED = 100; //100=100%
     uint public PRICE = 200 * 10**18;    //ether, need to recalc 10**18 in methods
     uint public DAY_PETRIFIED = 30;
     uint public STAKING_REWARD_SEC = 2592000; //30 days
@@ -1294,11 +1503,13 @@ contract Murasaki_Storage is Ownable {
     mapping(uint => uint) public last_grooming_time;
 
     //working
-    mapping(uint => uint) public mining_status;
+    mapping(uint => uint) public working_status;
+        //1:mining, 2:farming, 3:crafting, 4:practice, 5:strolling
+    //mapping(uint => uint) public mining_status;
     mapping(uint => uint) public mining_start_time;
-    mapping(uint => uint) public farming_status;
+    //mapping(uint => uint) public farming_status;
     mapping(uint => uint) public farming_start_time;
-    mapping(uint => uint) public crafting_status;
+    //mapping(uint => uint) public crafting_status;
     mapping(uint => uint) public crafting_start_time;
     mapping(uint => uint) public crafting_item_type;
     mapping(uint => uint) public total_mining_sec;
@@ -1331,8 +1542,8 @@ contract Murasaki_Storage is Ownable {
     mapping(uint => uint) public exp_violin;
     mapping(uint => uint) public exp_horn;
     mapping(uint => uint) public exp_timpani;
-    mapping(uint => uint) public exp_cello;
-    mapping(uint => uint) public practice_status;
+    mapping(uint => uint) public exp_harp;
+    //mapping(uint => uint) public practice_status;
     mapping(uint => uint) public practice_item_id;
     mapping(uint => uint) public practice_start_time;
 
@@ -1379,21 +1590,27 @@ contract Murasaki_Storage is Ownable {
     function set_last_grooming_time(uint _summoner, uint _value) external onlyPermitted {
         last_grooming_time[_summoner] = _value;
     }
+    /*
     function set_mining_status(uint _summoner, uint _value) external onlyPermitted {
         mining_status[_summoner] = _value;
     }
+    */
     function set_mining_start_time(uint _summoner, uint _value) external onlyPermitted {
         mining_start_time[_summoner] = _value;
     }
+    /*
     function set_farming_status(uint _summoner, uint _value) external onlyPermitted {
         farming_status[_summoner] = _value;
     }
+    */
     function set_farming_start_time(uint _summoner, uint _value) external onlyPermitted {
         farming_start_time[_summoner] = _value;
     }
+    /*
     function set_crafting_status(uint _summoner, uint _value) external onlyPermitted {
         crafting_status[_summoner] = _value;
     }
+    */
     function set_crafting_start_time(uint _summoner, uint _value) external onlyPermitted {
         crafting_start_time[_summoner] = _value;
     }
@@ -1460,17 +1677,22 @@ contract Murasaki_Storage is Ownable {
     function set_exp_timpani(uint _summoner, uint _value) external onlyPermitted {
         exp_timpani[_summoner] = _value;
     }
-    function set_exp_cello(uint _summoner, uint _value) external onlyPermitted {
-        exp_cello[_summoner] = _value;
+    function set_exp_harp(uint _summoner, uint _value) external onlyPermitted {
+        exp_harp[_summoner] = _value;
     }
+    /*
     function set_practice_status(uint _summoner, uint _value) external onlyPermitted {
         practice_status[_summoner] = _value;
     }
+    */
     function set_practice_item_id(uint _summoner, uint _value) external onlyPermitted {
         practice_item_id[_summoner] = _value;
     }
     function set_practice_start_time(uint _summoner, uint _value) external onlyPermitted {
         practice_start_time[_summoner] = _value;
+    }
+    function set_working_status(uint _summoner, uint _value) external onlyPermitted {
+        working_status[_summoner] = _value;
     }
 }
 
@@ -1674,14 +1896,14 @@ contract Murasaki_Function_Share is Ownable {
     }
 
     //call items as array
-    function get_balance_of_type_array(address _wallet) external view returns (uint[256] memory) {
+    function get_balance_of_type_array(address _wallet) external view returns (uint[320] memory) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Craft mc = Murasaki_Craft(ma.address_Murasaki_Craft());
         return mc.get_balance_of_type(_wallet);
     }
 
     //call items as array from summoner
-    function get_balance_of_type_array_from_summoner(uint _summoner) public view returns (uint[256] memory) {
+    function get_balance_of_type_array_from_summoner(uint _summoner) public view returns (uint[320] memory) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Main mm = Murasaki_Main(ma.address_Murasaki_Main());
         Murasaki_Craft mc = Murasaki_Craft(ma.address_Murasaki_Craft());
@@ -1727,12 +1949,12 @@ contract Murasaki_Function_Share is Ownable {
         return _happy;
     }
 
-    //calc precious
+    //calc fluffy
     function calc_precious(uint _summoner) public view returns (uint) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
         Murasaki_Parameter mp = Murasaki_Parameter(ma.address_Murasaki_Parameter());
-        uint[256] memory _balance_of_type = get_balance_of_type_array_from_summoner(_summoner);
+        uint[320] memory _balance_of_type = get_balance_of_type_array_from_summoner(_summoner);
         uint _precious_score = 0;
         //fluffy
         uint _elected_precious_type = mp.ELECTED_FLUFFY_TYPE();
@@ -1821,7 +2043,7 @@ contract Murasaki_Function_Share is Ownable {
         return _score;
     }
     function _calc_score_nft(uint _summoner) internal view returns (uint) {
-        uint[256] memory _array = get_balance_of_type_array_from_summoner(_summoner);
+        uint[320] memory _array = get_balance_of_type_array_from_summoner(_summoner);
         uint _score = 0;
         for (uint i=1; i<=255; i++) {
             if (_array[i] > 0) {
@@ -1861,23 +2083,52 @@ contract Murasaki_Function_Share is Ownable {
     }
         
     //calc_exp_addition_rate_from_nui, item_nui required
-    //return XXX% (100% - 200%, x1 - x2 ratio)
-    function calc_exp_addition_rate(uint _summoner, uint _item_nui) external view returns (uint) {
+    //return XXX% * 100; 30000 = +300%
+    function calc_exp_addition_rate_from_nui(uint _summoner, uint _item_nui) external view returns (uint) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Storage_Nui msn = Murasaki_Storage_Nui(ma.address_Murasaki_Storage_Nui());
         //call summoner score
         uint _score_summoner = calc_score(_summoner);
         //call nui score
         uint _score_nui = msn.score(_item_nui);
-        //formula: _score_nui / _score_summoner * 100 (%)
-        uint _percent = _score_nui * 100 / (_score_summoner + 1);
-        if (_percent <= 103) {
-            return 103;
-        } else if (_percent >= 300) {
-            return 300;
+        //formula: _score_nui / _score_summoner * 100 - 100 (%) 
+        uint _percentx100;
+        if (_score_nui * 100 <= _score_summoner * 103) {
+            _percentx100 = 0;
         } else {
-            return _percent;
+            _percentx100 = ( (_score_nui * 100 / _score_summoner) - 100 ) * 100;
         }
+        if (_percentx100 < 300) {
+            _percentx100 = 300;
+        } else if (_percentx100 > 30000) {
+            _percentx100 = 30000;
+        }
+        return _percentx100;
+    }
+
+    //calc_exp_addition_rate_from_twinkle
+    //return XXX% * 100; 150 = +0.15%
+    function calc_exp_addition_rate_from_twinkle(uint _summoner) external view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
+        Murasaki_Craft mc = Murasaki_Craft(ma.address_Murasaki_Craft());
+        Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
+        address _owner = mfs.get_owner(_summoner);
+        uint _twinkle_1 = mc.balanceOfType(_owner, 251);
+        uint _twinkle_2 = mc.balanceOfType(_owner, 252);
+        uint _twinkle_3 = mc.balanceOfType(_owner, 253);
+        uint _twinkle_4 = mc.balanceOfType(_owner, 254);
+        uint _twinkle_5 = mc.balanceOfType(_owner, 255);
+        uint _percentx100 = 0;
+        _percentx100 += _twinkle_1*10;  //0.1%
+        _percentx100 += _twinkle_2*20;  //0.2%
+        _percentx100 += _twinkle_3*30;  //0.3%
+        _percentx100 += _twinkle_4*40;  //0.4%
+        _percentx100 += _twinkle_5*50;  //0.5%
+        if (_percentx100 > ms.level(_summoner) * 50) {
+            _percentx100 = ms.level(_summoner) * 50;    // limit: 0.5%/Lv
+        }
+        return _percentx100;
     }
 
     //cehck petrification, debends on only feeding
@@ -2000,6 +2251,7 @@ contract Murasaki_Function_Share is Ownable {
                 abi.encodePacked(
                     block.timestamp,
                     blockhash(block.number - 1 - _salt),
+                    block.coinbase,
                     _summoner,
                     msg.sender
                 )
@@ -2054,17 +2306,18 @@ contract Murasaki_Function_Summon_and_LevelUp is Ownable, ReentrancyGuard {
         ms.set_dexterity(_summoner, 300);
         ms.set_intelligence(_summoner, 300);
         ms.set_luck(_summoner, 300);
-        ms.set_next_exp_required(_summoner, 1000);
+        //ms.set_next_exp_required(_summoner, 1000);
+        ms.set_next_exp_required(_summoner, 560);
         ms.set_last_level_up_time(_summoner, _now);
         ms.set_coin(_summoner, 0);
         ms.set_material(_summoner, 0);
         ms.set_last_feeding_time(_summoner, _now - BASE_SEC * 100 / SPEED / 4);
         ms.set_last_grooming_time(_summoner, _now - BASE_SEC * 100 / SPEED / 4);
-        ms.set_mining_status(_summoner, 0);
+        //ms.set_mining_status(_summoner, 0);
         ms.set_mining_start_time(_summoner, 0);
-        ms.set_farming_status(_summoner, 0);
+        //ms.set_farming_status(_summoner, 0);
         ms.set_farming_start_time(_summoner, 0);
-        ms.set_crafting_status(_summoner, 0);
+        //ms.set_crafting_status(_summoner, 0);
         ms.set_crafting_start_time(_summoner, 0);
         ms.set_crafting_item_type(_summoner, 0);
         ms.set_total_mining_sec(_summoner, 0);
@@ -2135,13 +2388,16 @@ contract Murasaki_Function_Summon_and_LevelUp is Ownable, ReentrancyGuard {
 
     //level-up
     event Level_up(uint indexed _summoner, uint _level);
-    function level_up(uint _summoner) external nonReentrant {
+    function level_up (uint _summoner) external nonReentrant {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
         require(mfs.check_owner(_summoner, msg.sender));
-        require(ms.mining_status(_summoner) == 0 && ms.farming_status(_summoner) == 0 && ms.crafting_status(_summoner) == 0);
+        //require(ms.mining_status(_summoner) == 0 && ms.farming_status(_summoner) == 0 && ms.crafting_status(_summoner) == 0);
+        require(ms.working_status(_summoner) == 0);
         require(ms.exp(_summoner) >= ms.next_exp_required(_summoner));
+        //trial check
+        require(_check_trial(_summoner));
         //petrified check
         require(not_petrified(_summoner));
         //calculate working percent
@@ -2173,6 +2429,46 @@ contract Murasaki_Function_Summon_and_LevelUp is Ownable, ReentrancyGuard {
         ms.set_level(_summoner, _next_level);
         ms.set_last_level_up_time(_summoner, block.timestamp);
         //update next_exp_required
+        if (_next_level == 2) {
+            ms.set_next_exp_required(_summoner, 1000);
+        }else if (_next_level == 3) {
+            ms.set_next_exp_required(_summoner, 3000);
+        }else if (_next_level == 4) {
+            ms.set_next_exp_required(_summoner, 6000);
+        }else if (_next_level == 5) {
+            ms.set_next_exp_required(_summoner, 10000);
+        }else if (_next_level == 6) {
+            ms.set_next_exp_required(_summoner, 15000);
+        }else if (_next_level == 7) {
+            ms.set_next_exp_required(_summoner, 21000);
+        }else if (_next_level == 8) {
+            ms.set_next_exp_required(_summoner, 28000);
+        }else if (_next_level == 9) {
+            ms.set_next_exp_required(_summoner, 36000);
+        }else if (_next_level == 10) {
+            ms.set_next_exp_required(_summoner, 45000);
+        }else if (_next_level == 11) {
+            ms.set_next_exp_required(_summoner, 55000);
+        }else if (_next_level == 12) {
+            ms.set_next_exp_required(_summoner, 66000);
+        }else if (_next_level == 13) {
+            ms.set_next_exp_required(_summoner, 78000);
+        }else if (_next_level == 14) {
+            ms.set_next_exp_required(_summoner, 91000);
+        }else if (_next_level == 15) {
+            ms.set_next_exp_required(_summoner, 105000);
+        }else if (_next_level == 16) {
+            ms.set_next_exp_required(_summoner, 120000);
+        }else if (_next_level == 17) {
+            ms.set_next_exp_required(_summoner, 136000);
+        }else if (_next_level == 18) {
+            ms.set_next_exp_required(_summoner, 153000);
+        }else if (_next_level == 19) {
+            ms.set_next_exp_required(_summoner, 171000);
+        }else if (_next_level == 20) {
+            ms.set_next_exp_required(_summoner, 9999999);
+        }
+        /*
         if (_next_level == 2) {
             ms.set_next_exp_required(_summoner, 3000);
         }else if (_next_level == 3) {
@@ -2212,12 +2508,24 @@ contract Murasaki_Function_Summon_and_LevelUp is Ownable, ReentrancyGuard {
         }else if (_next_level == 20) {
             ms.set_next_exp_required(_summoner, 9999999);
         }
+        */
         //first level-up bonus
         if (_next_level == 2) {
             _mint_presentbox(uint(0), msg.sender);
         }
         //event
         emit Level_up(_summoner, _next_level);
+    }
+    
+    function _check_trial(uint _summoner) internal view returns (bool) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
+        Murasaki_Parameter mp = Murasaki_Parameter(ma.address_Murasaki_Parameter());
+        bool _res;
+        if ( mp.isTrial() == false || ms.level(_summoner) < 4) {
+            _res = true;
+        }
+        return _res;
     }
 
     //internal, mint presentbox
@@ -2229,6 +2537,19 @@ contract Murasaki_Function_Summon_and_LevelUp is Ownable, ReentrancyGuard {
         uint _item_type = 200;
         string memory _memo = "first level-up bonus";
         mc.craft(_item_type, _summoner_from, _wallet_to, _seed, _memo, 0);
+    }
+    
+    //migration, price=summon_fee, require isMigration=true in mm
+    function migration (uint _summoner, address _owner_new) external payable nonReentrant {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
+        Murasaki_Main mm = Murasaki_Main(ma.address_Murasaki_Main());
+        Murasaki_Parameter mp = Murasaki_Parameter(ma.address_Murasaki_Parameter());
+        require(msg.value == mp.PRICE(), 'bad msg.value');
+        require(mfs.check_owner(_summoner, msg.sender));
+        require(mm.tokenOf(_owner_new) == 0);  //not already possess token
+        mm.migration(_summoner, _owner_new);
+        payable(ma.address_BufferVault()).transfer(address(this).balance);
     }
 }
 
@@ -2249,8 +2570,22 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable, ReentrancyGuard {
         payable(rec).transfer(address(this).balance);
     }
     
+    //mapping, last_feeding_time for other user's summoner
+    mapping (address => uint) private lastFeedingTime_forOtherSummoner;
+    mapping (address => uint) private gained_expAddExtra;
+    
+    //variants
+    uint public feedingInterval_forOtherSummoner = 24 * 60 * 60;
+    uint public gainMax_forOtherSummoner = 50;
+    function _set_feedingInterval_forOtherSummoner(uint _value) external onlyOwner {
+        feedingInterval_forOtherSummoner = _value;
+    }
+    function _set_gainMax_forOtherSummoner(uint _value) external onlyOwner {
+        gainMax_forOtherSummoner = _value;
+    }
+    
     //feeding
-    event Feeding(uint indexed _summoner, uint _exp_gained, bool _critical);
+    event Feeding(uint indexed _summoner, uint _exp_gained, bool _critical, bool _other);
     function feeding(uint _summoner, uint _item_nui) external nonReentrant {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
@@ -2264,8 +2599,6 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable, ReentrancyGuard {
         uint _now = block.timestamp;
         uint _satiety = mfs.calc_satiety(_summoner);
         uint _exp_add = 500 * (100 - _satiety) / 100;
-        //for staking counter, sec before boost
-        //uint _delta_sec = ( _now - ms.last_feeding_time(_summoner) ) * mp.SPEED()/100;
         //achv onChain boost
         _exp_add = _get_exp_add_from_achv_onChain(_summoner, _exp_add);
         //twinkle boost, multiplication
@@ -2280,10 +2613,6 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable, ReentrancyGuard {
             _exp_add = _exp_add * 2;
             _critical = true;
         }
-        //trial limit: when Lv>=3, _exp_add=0
-        if (mp.isTrial() && ms.level(_summoner) >= 3) {
-            _exp_add = 0;
-        }
         uint _exp = ms.exp(_summoner) + _exp_add;
         ms.set_exp(_summoner, _exp);
         ms.set_last_feeding_time(_summoner, _now);
@@ -2292,19 +2621,45 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable, ReentrancyGuard {
         mss.set_total_exp_gained(_summoner, _total_exp_gained + _exp_add);
         //owner check, gain some exp when not your summoner
         uint _summoner_yours = mfs.get_summoner(msg.sender);
+        bool _other;
+        //when feed other player's summoner
         if (_summoner_yours != 0 && _summoner != _summoner_yours) {
+            uint _exp_add_extra = _get_exp_add_extra(_exp_add, msg.sender);
+            //update last feeding time for others
+            lastFeedingTime_forOtherSummoner[msg.sender] = _now;
             uint _exp_yours = ms.exp(_summoner_yours);
-            ms.set_exp(_summoner_yours, _exp_yours + _exp_add / 50);
+            ms.set_exp(_summoner_yours, _exp_yours + _exp_add_extra);
+            _other = true;
         }
         //update staking reward counter
         _update_staking_reward_counter(_summoner);
         //event
-        emit Feeding(_summoner, _exp_add, _critical);
+        emit Feeding(_summoner, _exp_add, _critical, _other);
+    }
+    function _get_exp_add_extra(uint _exp_add, address _sender) internal returns (uint) {
+        //calc deltaSec
+        uint _now = block.timestamp;
+        uint _lastFeedTime = lastFeedingTime_forOtherSummoner[_sender];
+        uint _deltaSec = _now - _lastFeedTime;
+        //when deltaSec >= limit, reset timen and point
+        if (_deltaSec >= feedingInterval_forOtherSummoner) {
+            lastFeedingTime_forOtherSummoner[_sender] = _now;
+            gained_expAddExtra[_sender] = 0;
+        }
+        //extra exp = 2%
+        uint _exp_add_extra = _exp_add / 50;
+        //extra exp has an acquisition limit every 24 hr
+        if (gained_expAddExtra[_sender] + _exp_add_extra >= gainMax_forOtherSummoner){
+            _exp_add_extra = gainMax_forOtherSummoner - gained_expAddExtra[_sender];
+        }
+        //increment total amount of extra exp gained
+        gained_expAddExtra[_sender] += _exp_add_extra;
+        return _exp_add_extra;
     }
     function _get_exp_add_from_achv_onChain(uint _summoner, uint _exp_add) internal view returns (uint) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Achievement_onChain ac = Achievement_onChain(ma.address_Achievement_onChain());
-        uint _percentx100 = ac.get_score(_summoner);
+        uint _percentx100 = ac.get_score_itemChecked(_summoner);
         _exp_add += _exp_add * _percentx100 / 10000;
         return _exp_add;
     }
@@ -2314,27 +2669,16 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable, ReentrancyGuard {
         Murasaki_Craft mc = Murasaki_Craft(ma.address_Murasaki_Craft());
         address _owner = mfs.get_owner(_summoner);
         require(mc.ownerOf(_item_nui) == _owner);
-        uint _percent = mfs.calc_exp_addition_rate(_summoner, _item_nui);
-        _exp_add = _exp_add * _percent/100;
+        uint _percentx100 = mfs.calc_exp_addition_rate_from_nui(_summoner, _item_nui);
+        _exp_add += _exp_add * _percentx100 / 10000;
         return _exp_add;
     }
     function _get_exp_add_from_twinkle(uint _summoner, uint _exp_add) internal view returns (uint) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
-        Murasaki_Craft mc = Murasaki_Craft(ma.address_Murasaki_Craft());
-        address _owner = mfs.get_owner(_summoner);
-        uint _twinkle_1 = mc.balanceOfType(_owner, 251);
-        uint _twinkle_2 = mc.balanceOfType(_owner, 252);
-        uint _twinkle_3 = mc.balanceOfType(_owner, 253);
-        uint _twinkle_4 = mc.balanceOfType(_owner, 254);
-        uint _twinkle_5 = mc.balanceOfType(_owner, 255);
-        uint _res = _exp_add;
-        _res += _exp_add * _twinkle_1*10/10000;
-        _res += _exp_add * _twinkle_2*20/10000;
-        _res += _exp_add * _twinkle_3*30/10000;
-        _res += _exp_add * _twinkle_4*40/10000;
-        _res += _exp_add * _twinkle_5*50/10000;
-        return _res;
+        uint _percentx100 = mfs.calc_exp_addition_rate_from_twinkle(_summoner);
+        _exp_add += _exp_add * _percentx100 / 10000;
+        return _exp_add;
     }
     function calc_feeding(uint _summoner) external view returns (uint) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
@@ -2370,9 +2714,12 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable, ReentrancyGuard {
         require(msg.value >= PRICE);
         uint _now = block.timestamp;
         ms.set_last_feeding_time(_summoner, _now);
+        /*
         ms.set_mining_status(_summoner, 0);
         ms.set_farming_status(_summoner, 0);
         ms.set_crafting_status(_summoner, 0);
+        */
+        ms.set_working_status(_summoner, 0);
         //fee transfer, same as summon
         //payable(ma.address_bufferVault()).transfer(address(this).balance);
         payable(ma.address_Coder_Wallet()).transfer(PRICE/20);          //5%
@@ -2390,18 +2737,20 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable, ReentrancyGuard {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
         Murasaki_Parameter mp = Murasaki_Parameter(ma.address_Murasaki_Parameter());
-        Murasaki_Craft mc = Murasaki_Craft(ma.address_Murasaki_Craft());
         Murasaki_Storage_Score mss = Murasaki_Storage_Score(ma.address_Murasaki_Storage_Score());
         require(mp.isPaused() == false);
         require(ms.inHouse(_summoner));
         require(mfs.check_owner(_summoner, msg.sender));
         require(not_petrified(_summoner));
+        /*
         require(
             ms.mining_status(_summoner) == 0 
             && ms.farming_status(_summoner) == 0 
             && ms.crafting_status(_summoner) == 0
             && ms.practice_status(_summoner) == 0
         );
+        */
+        require(ms.working_status(_summoner) == 0);
         uint _now = block.timestamp;
         uint _happy = _calc_happy_real(_summoner);
         uint _exp_add = 3000 * (100 - _happy) / 100;
@@ -2409,22 +2758,15 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable, ReentrancyGuard {
         _exp_add = _get_exp_add_from_achv_onChain(_summoner, _exp_add);
         //twinkle boost, multiplication
         _exp_add = _get_exp_add_from_twinkle(_summoner, _exp_add);
-        //nui boost
+        //nui boost, multiplication with onChain boost
         if (_item_nui > 0) {
-            address _owner = mfs.get_owner(_summoner);
-            require(mc.ownerOf(_item_nui) == _owner);
-            uint _percent = mfs.calc_exp_addition_rate(_summoner, _item_nui);
-            _exp_add = _exp_add * _percent/100;
+            _exp_add = _get_exp_add_from_nui(_summoner, _item_nui, _exp_add);
         }
         //luck challenge
         bool _critical;
         if (mfs.luck_challenge(_summoner)) {
             _exp_add = _exp_add * 2;
             _critical = true;
-        }
-        //trial limit: when Lv>=3, _exp_add=0
-        if (mp.isTrial() && ms.level(_summoner) >= 3) {
-            _exp_add = 0;
         }
         //add exp
         uint _exp = ms.exp(_summoner) + _exp_add;
@@ -2495,16 +2837,20 @@ contract Murasaki_Function_Mining_and_Farming is Ownable, ReentrancyGuard {
         require(mp.isPaused() == false);
         require(ms.inHouse(_summoner));
         require(mfs.check_owner(_summoner, msg.sender));
+        /*
         require(
             ms.mining_status(_summoner) == 0 
             && ms.farming_status(_summoner) == 0 
             && ms.crafting_status(_summoner) == 0
             && ms.practice_status(_summoner) == 0
         );
+        */
+        require(ms.working_status(_summoner) == 0);
         require(mfs.calc_satiety(_summoner) >= 10 && mfs.calc_happy(_summoner) >= 10);
         require(ms.level(_summoner) >= 2);
         uint _now = block.timestamp;
-        ms.set_mining_status(_summoner, 1);
+        //ms.set_mining_status(_summoner, 1);
+        ms.set_working_status(_summoner, 1);
         ms.set_mining_start_time(_summoner, _now);
     }
     event Mining(uint indexed _summoner, uint _coin_mined, bool _critical);
@@ -2514,7 +2860,8 @@ contract Murasaki_Function_Mining_and_Farming is Ownable, ReentrancyGuard {
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
         Murasaki_Storage_Score mss = Murasaki_Storage_Score(ma.address_Murasaki_Storage_Score());
         require(mfs.check_owner(_summoner, msg.sender));
-        require(ms.mining_status(_summoner) == 1);
+        //require(ms.mining_status(_summoner) == 1);
+        require(ms.working_status(_summoner) == 1);
         uint _now = block.timestamp;
         uint _delta = calc_mining(_summoner);
         //luck challenge
@@ -2537,7 +2884,8 @@ contract Murasaki_Function_Mining_and_Farming is Ownable, ReentrancyGuard {
         uint _last_grooming_time_plus_working_time = ms.last_grooming_time_plus_working_time(_summoner) + _delta_sec;
         ms.set_last_grooming_time_plus_working_time(_summoner, _last_grooming_time_plus_working_time);
         //reset status
-        ms.set_mining_status(_summoner, 0);
+        //ms.set_mining_status(_summoner, 0);
+        ms.set_working_status(_summoner, 0);
         //update score
         uint _total_coin_mined = mss.total_coin_mined(_summoner);
         mss.set_total_coin_mined(_summoner, _total_coin_mined + _delta);
@@ -2549,9 +2897,11 @@ contract Murasaki_Function_Mining_and_Farming is Ownable, ReentrancyGuard {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
         Murasaki_Parameter mp = Murasaki_Parameter(ma.address_Murasaki_Parameter());
-        if (ms.mining_status(_summoner) == 0) {
+        //if (ms.mining_status(_summoner) == 0) {
+        if (ms.working_status(_summoner) != 1) {
             return 0;
         }
+        address _owner = mfs.get_owner(_summoner);
         uint _now = block.timestamp;
         uint _delta = _now - ms.mining_start_time(_summoner);   //sec
         //happy limit: if happy=0, no more earning
@@ -2567,17 +2917,30 @@ contract Murasaki_Function_Mining_and_Farming is Ownable, ReentrancyGuard {
         //status, level, item boost
         uint _mod = ms.strength(_summoner) 
             + ms.level(_summoner)*100 
-            + count_mining_items(mfs.get_owner(_summoner));
+            + count_mining_items(_owner);
         //5%/point, 100 -> 1.00
         _mod = _mod * 5 / 100;
         //boost
         _delta += _delta * _mod / 100;
+        //sparkle boost
+        _delta += _delta * count_sparkles(_summoner) / 10000;
         return _delta;
+    }
+    function calc_mining_perDay (uint _summoner) external view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
+        Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
+        uint _mod = ms.strength(_summoner) 
+            + ms.level(_summoner)*100 
+            + count_mining_items(mfs.get_owner(_summoner));
+        _mod = _mod * 5 / 100;  //%
+        uint _earn_perDay = 1000 + 1000 * _mod / 100;
+        return _earn_perDay;
     }
     function count_mining_items(address _address) public view returns (uint) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
-        uint[256] memory _balance_of_type = mfs.get_balance_of_type_array(_address);
+        uint[320] memory _balance_of_type = mfs.get_balance_of_type_array(_address);
         uint _mining_items = 0;
         for (uint i = 1; i <= 16; i++) {
             if (_balance_of_type[i+128] > 0) {
@@ -2600,6 +2963,29 @@ contract Murasaki_Function_Mining_and_Farming is Ownable, ReentrancyGuard {
         }
         return _mining_items;
     }
+    function count_sparkles (uint _summoner) public view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
+        Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
+        address _owner = mfs.get_owner(_summoner);
+        uint[320] memory _balance_of_type = mfs.get_balance_of_type_array(_owner);
+        uint _sparkles = 0;
+        if (_balance_of_type[256] > 0) {
+            _sparkles += 30;
+        } else if (_balance_of_type[257] > 0) {
+            _sparkles += 60;
+        } else if (_balance_of_type[258] > 0) {
+            _sparkles += 90;
+        } else if (_balance_of_type[259] > 0) {
+            _sparkles += 120;
+        } else if (_balance_of_type[260] > 0) {
+            _sparkles += 150;
+        }
+        if (_sparkles > ms.level(_summoner) * 50) {
+            _sparkles = ms.level(_summoner) * 50;    // limit: 0.5%/Lv
+        }
+        return _sparkles;   //percent x 100
+    }
 
     //farming
     function start_farming(uint _summoner) external nonReentrant {
@@ -2610,16 +2996,20 @@ contract Murasaki_Function_Mining_and_Farming is Ownable, ReentrancyGuard {
         require(mp.isPaused() == false);
         require(ms.inHouse(_summoner));
         require(mfs.check_owner(_summoner, msg.sender));
+        require(ms.working_status(_summoner) == 0);
+        /*
         require(
             ms.mining_status(_summoner) == 0 
             && ms.farming_status(_summoner) == 0 
             && ms.crafting_status(_summoner) == 0
             && ms.practice_status(_summoner) == 0
         );
+        */
         require(mfs.calc_satiety(_summoner) >= 10 && mfs.calc_happy(_summoner) >= 10);
         require(ms.level(_summoner) >= 2);
         uint _now = block.timestamp;
-        ms.set_farming_status(_summoner, 1);
+        ms.set_working_status(_summoner, 2);
+        //ms.set_farming_status(_summoner, 1);
         ms.set_farming_start_time(_summoner, _now);
     }
     event Farming(uint indexed _summoner, uint _material_farmed, bool _critical);
@@ -2629,7 +3019,8 @@ contract Murasaki_Function_Mining_and_Farming is Ownable, ReentrancyGuard {
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
         Murasaki_Storage_Score mss = Murasaki_Storage_Score(ma.address_Murasaki_Storage_Score());
         require(mfs.check_owner(_summoner, msg.sender));
-        require(ms.farming_status(_summoner) == 1);
+        require(ms.working_status(_summoner) == 2);
+        //require(ms.farming_status(_summoner) == 1);
         uint _now = block.timestamp;
         uint _delta = calc_farming(_summoner);
         //luck challenge
@@ -2652,7 +3043,8 @@ contract Murasaki_Function_Mining_and_Farming is Ownable, ReentrancyGuard {
         uint _last_grooming_time_plus_working_time = ms.last_grooming_time_plus_working_time(_summoner) + _delta_sec;
         ms.set_last_grooming_time_plus_working_time(_summoner, _last_grooming_time_plus_working_time);
         //reset status
-        ms.set_farming_status(_summoner, 0);
+        ms.set_working_status(_summoner, 0);
+        //ms.set_farming_status(_summoner, 0);
         //update score
         uint _total_material_farmed = mss.total_material_farmed(_summoner);
         mss.set_total_material_farmed(_summoner, _total_material_farmed + _delta);
@@ -2664,9 +3056,11 @@ contract Murasaki_Function_Mining_and_Farming is Ownable, ReentrancyGuard {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
         Murasaki_Parameter mp = Murasaki_Parameter(ma.address_Murasaki_Parameter());
-        if (ms.farming_status(_summoner) == 0) {
+        //if (ms.farming_status(_summoner) == 0) {
+        if (ms.working_status(_summoner) != 2) {
             return uint(0);
         }
+        address _owner = mfs.get_owner(_summoner);
         uint _now = block.timestamp;
         uint _delta = _now - ms.farming_start_time(_summoner);   //sec
         //happy limit: if happy=0, no more earning
@@ -2682,17 +3076,30 @@ contract Murasaki_Function_Mining_and_Farming is Ownable, ReentrancyGuard {
         //status and item boost
         uint _mod = ms.dexterity(_summoner) 
             + ms.level(_summoner)*100 
-            + count_farming_items(mfs.get_owner(_summoner));
+            + count_farming_items(_owner);
         //5%/point, 100 -> 1.00
         _mod = _mod * 5 / 100;
         //boost
         _delta += _delta * _mod / 100;
+        //glitter boost
+        _delta += _delta * count_glitter(_summoner) / 10000;
         return _delta;
+    }
+    function calc_farming_perDay (uint _summoner) external view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
+        Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
+        uint _mod = ms.dexterity(_summoner) 
+            + ms.level(_summoner)*100 
+            + count_farming_items(mfs.get_owner(_summoner));
+        _mod = _mod * 5 / 100;  //%
+        uint _earn_perDay = 1000 + 1000 * _mod / 100;
+        return _earn_perDay;
     }
     function count_farming_items(address _address) public view returns (uint) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
-        uint[256] memory _balance_of_type = mfs.get_balance_of_type_array(_address);
+        uint[320] memory _balance_of_type = mfs.get_balance_of_type_array(_address);
         uint _farming_items = 0;
         for (uint i = 17; i <= 32; i++) {
             if (_balance_of_type[i+128] > 0) {
@@ -2715,13 +3122,48 @@ contract Murasaki_Function_Mining_and_Farming is Ownable, ReentrancyGuard {
         }
         return _farming_items;
     }
+    function count_glitter (uint _summoner) public view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
+        Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
+        address _owner = mfs.get_owner(_summoner);
+        uint[320] memory _balance_of_type = mfs.get_balance_of_type_array(_owner);
+        uint _glitters = 0;
+        if (_balance_of_type[261] > 0) {
+            _glitters += 30;
+        } else if (_balance_of_type[262] > 0) {
+            _glitters += 60;
+        } else if (_balance_of_type[263] > 0) {
+            _glitters += 90;
+        } else if (_balance_of_type[264] > 0) {
+            _glitters += 120;
+        } else if (_balance_of_type[265] > 0) {
+            _glitters += 150;
+        }
+        if (_glitters > ms.level(_summoner) * 50) {
+            _glitters = ms.level(_summoner) * 50;    // limit: 0.5%/Lv
+        }
+        return _glitters;   //percent x 100
+    }
 
     //luck challenge of mfmf
     function luck_challenge(uint _summoner) public view returns (bool) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         return mfs.luck_challenge(_summoner);
-    }    
+    }
+    
+    //forced termination of any working
+    function terminate_working (uint _summoner) external {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
+        Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
+        Murasaki_Parameter mp = Murasaki_Parameter(ma.address_Murasaki_Parameter());
+        require(mp.isPaused() == false);
+        require(mfs.check_owner(_summoner, msg.sender));
+        require(ms.working_status(_summoner) > 0);
+        ms.set_working_status(_summoner, 0);
+    }
 }
 
 
@@ -2808,12 +3250,15 @@ contract Murasaki_Function_Crafting is Ownable, ReentrancyGuard {
         require(mfs.check_owner(_summoner, msg.sender));
         require(ms.level(_summoner) >= 3);
         require(mfs.calc_satiety(_summoner) >= 10 && mfs.calc_happy(_summoner) >= 10);
+        require(ms.working_status(_summoner) == 0);
+        /*
         require(
             ms.mining_status(_summoner) == 0 
             && ms.farming_status(_summoner) == 0 
             && ms.crafting_status(_summoner) == 0
             && ms.practice_status(_summoner) == 0
         );
+        */
         require(ms.crafting_resume_flag(_summoner) == 0);        
         //check item_type
         require(_item_type > 0);
@@ -2846,7 +3291,8 @@ contract Murasaki_Function_Crafting is Ownable, ReentrancyGuard {
         ms.set_material(_summoner, ms.material(_summoner) - _material);
         //start crafting
         ms.set_crafting_item_type(_summoner, _item_type);
-        ms.set_crafting_status(_summoner, 1);
+        ms.set_working_status(_summoner, 3);
+        //ms.set_crafting_status(_summoner, 1);
         ms.set_crafting_start_time(_summoner, block.timestamp);
     }
 
@@ -2857,7 +3303,8 @@ contract Murasaki_Function_Crafting is Ownable, ReentrancyGuard {
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
         Murasaki_Parameter mp = Murasaki_Parameter(ma.address_Murasaki_Parameter());
         require(mfs.check_owner(_summoner, msg.sender));
-        require(ms.crafting_status(_summoner) == 1);
+        require(ms.working_status(_summoner) == 3);
+        //require(ms.crafting_status(_summoner) == 1);
         require(calc_crafting(_summoner) > 0);
         uint _now = block.timestamp;
         uint _delta_sec = (_now - ms.crafting_start_time(_summoner));
@@ -2876,7 +3323,8 @@ contract Murasaki_Function_Crafting is Ownable, ReentrancyGuard {
             _summoner, 
             ms.last_grooming_time_plus_working_time(_summoner) + _delta_sec
         );
-        ms.set_crafting_status(_summoner, 0);
+        ms.set_working_status(_summoner, 0);
+        //ms.set_crafting_status(_summoner, 0);
         //pause crafting to resume
         ms.set_crafting_resume_flag(_summoner, 1);
         ms.set_crafting_resume_item_type(_summoner, _item_type);
@@ -2889,7 +3337,8 @@ contract Murasaki_Function_Crafting is Ownable, ReentrancyGuard {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
         require(mfs.check_owner(_summoner, msg.sender));
-        require(ms.crafting_status(_summoner) == 0);
+        require(ms.working_status(_summoner) == 3);
+        //require(ms.crafting_status(_summoner) == 0);
         require(ms.crafting_resume_flag(_summoner) == 1);
         uint _item_type = ms.crafting_item_type(_summoner);
         //calcel resume
@@ -2913,8 +3362,9 @@ contract Murasaki_Function_Crafting is Ownable, ReentrancyGuard {
         require(mfs.check_owner(_summoner, msg.sender));
         require(ms.level(_summoner) >= 3);
         require(mfs.calc_satiety(_summoner) >= 10 && mfs.calc_happy(_summoner) >= 10);
-        require(ms.mining_status(_summoner) == 0 && ms.farming_status(_summoner) == 0);
-        require(ms.crafting_status(_summoner) == 0);
+        require(ms.working_status(_summoner) == 0);
+        //require(ms.mining_status(_summoner) == 0 && ms.farming_status(_summoner) == 0);
+        //require(ms.crafting_status(_summoner) == 0);
         require(ms.crafting_resume_flag(_summoner) == 1);
         //resume item_type
         uint _item_type = ms.crafting_resume_item_type(_summoner);
@@ -2939,7 +3389,8 @@ contract Murasaki_Function_Crafting is Ownable, ReentrancyGuard {
         */
         //start crafting
         ms.set_crafting_item_type(_summoner, _item_type);
-        ms.set_crafting_status(_summoner, 1);
+        ms.set_working_status(_summoner, 3);
+        //ms.set_crafting_status(_summoner, 1);
         ms.set_crafting_start_time(_summoner, block.timestamp);
         //**when resume_flag==1, _resume_dc is used for calc_crafting
     }
@@ -2953,7 +3404,8 @@ contract Murasaki_Function_Crafting is Ownable, ReentrancyGuard {
         Murasaki_Craft mc = Murasaki_Craft(ma.address_Murasaki_Craft());
         Murasaki_Storage_Score mss = Murasaki_Storage_Score(ma.address_Murasaki_Storage_Score());
         require(mfs.check_owner(_summoner, msg.sender));
-        require(ms.crafting_status(_summoner) == 1);
+        require(ms.working_status(_summoner) == 3);
+        //require(ms.crafting_status(_summoner) == 1);
         require(calc_crafting(_summoner) == 0);
         uint _now = block.timestamp;
         uint _delta_sec = (_now - ms.crafting_start_time(_summoner));
@@ -2962,7 +3414,8 @@ contract Murasaki_Function_Crafting is Ownable, ReentrancyGuard {
         ms.set_last_total_crafting_sec(_summoner, ms.last_total_crafting_sec(_summoner) + _delta_sec);
         ms.set_last_grooming_time_plus_working_time(
             _summoner, ms.last_grooming_time_plus_working_time(_summoner) + _delta_sec);
-        ms.set_crafting_status(_summoner, 0);
+        ms.set_working_status(_summoner, 0);
+        //ms.set_crafting_status(_summoner, 0);
         //reset resume
         ms.set_crafting_resume_flag(_summoner, 0);
         //craft
@@ -2981,6 +3434,10 @@ contract Murasaki_Function_Crafting is Ownable, ReentrancyGuard {
             //when trial, does not send presentbox
             if (mfs.isTrial() == false) {
                 _send_randomPresentbox(_summoner);
+            }
+            //first craft bonus
+            if (mss.total_item_crafted(_summoner) == 0) {
+                _mint_presentbox_firstCraftBonus(msg.sender);
             }
             //update score
             uint _total_item_crafted = mss.total_item_crafted(_summoner);
@@ -3032,6 +3489,17 @@ contract Murasaki_Function_Crafting is Ownable, ReentrancyGuard {
         uint _item_type = 200;
         string memory _memo = "item crafting";
         mc.craft(_item_type, _summoner_from, _wallet_to, _seed, _memo, 0);
+    }
+
+    //internal, mint presentbox, first craft bonus
+    function _mint_presentbox_firstCraftBonus(address _wallet_to) internal {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
+        Murasaki_Craft mc = Murasaki_Craft(ma.address_Murasaki_Craft());
+        uint _seed = mfs.seed(0);
+        uint _item_type = 200;
+        string memory _memo = "first craft bonus";
+        mc.craft(_item_type, 0, _wallet_to, _seed, _memo, 0);
     }
     
     //get item name
@@ -3410,13 +3878,15 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
         Murasaki_Parameter mp = Murasaki_Parameter(ma.address_Murasaki_Parameter());
         //when crafting=0 & resume_flag=0, return 0
         if (
-            ms.crafting_status(_summoner) == 0 
+            ms.working_status(_summoner) != 3 
+            //ms.crafting_status(_summoner) == 0 
             && ms.crafting_resume_flag(_summoner) == 0
         ) {
             return 0;
         //when crafting=0 & resume_flag=1, remining sec
         } else if (
-            ms.crafting_status(_summoner) == 0 
+            ms.working_status(_summoner) != 3 
+            //ms.crafting_status(_summoner) == 0 
             && ms.crafting_resume_flag(_summoner) == 1
         ) {
             uint BASE_SEC = mp.BASE_SEC();
@@ -3424,13 +3894,15 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
             return _dc * BASE_SEC/1000;
         //when crafting=1 & resume_flag=0, calc from item_dc
         } else if (
-            ms.crafting_status(_summoner) == 1
+            ms.working_status(_summoner) == 3
+            //ms.crafting_status(_summoner) == 1
             && ms.crafting_resume_flag(_summoner) == 0
         ) {
             return _calc_crafting_noResume(_summoner);
         //when crafting=1 & resume_flag=1, calc from resume_dc
         } else if (
-            ms.crafting_status(_summoner) == 1 
+            ms.working_status(_summoner) == 3 
+            //ms.crafting_status(_summoner) == 1 
             && ms.crafting_resume_flag(_summoner) == 1
         ) {
             return _calc_crafting_resume(_summoner);
@@ -3531,7 +4003,7 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
     function count_crafting_items(address _address) public view returns (uint) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
-        uint[256] memory _balance_of_type = mfs.get_balance_of_type_array(_address);
+        uint[320] memory _balance_of_type = mfs.get_balance_of_type_array(_address);
         uint _crafting_items = 0;
         for (uint i = 33; i <= 48; i++) {
             if (_balance_of_type[i+128] > 0) {
@@ -3993,62 +4465,65 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
     
 
     //item name
-    string[256] public item_name_table = [
+    string[320] public item_name_table = [
     
-        //***TODO*** need mod
+        //### item name
 
+        //0:dummy
+        "",
+    
         //1-16
         "Nameplate",
         "Mr. Astar",
         "Onigiri",
         "Helmet",
-        "Dice",
+        "Lucky Dice",
         "Wall Sticker",
+        "Hammock",
         "Token Chest",
-        "Diary Book",
-        "Fishbowl",
-        "Sleeping Bed",
+        "Knit Hat",
+        "House of Fluffy",
         "Crown",
-        "Fortune Statue",
+        "Clarinet",
+        "Horn",
         "Cake",
-        "(Item14)",
-        "(Item15)",
+        "Fortune Statue",
         "Door of Travel",
 
         //17-32
         "Music Box",
         "Straw Hat",
+        "Score Meter",
         "Ms. Ether",
+        "Rug-Pull",
         "Window",
         "Cat Cushion",
-        "Knit Hat",
-        "Pancake",
-        "Fluffy House",
         "Picture Frame",
-        "Flowerpot",
+        "Crayon",
+        "Pancake",
+        "Fishbowl",
         "Piano",
+        "Timpani",
+        "Pinwheel",
         "Asnya",
-        "Tea Party Set",
-        "(Item30)",
-        "(Item31)",
         "Key to Travel",
 
         //33-48
         "Tablet",
         "Choco Bread",
+        "Flower Wreath",
         "Ribbon",
         "Dr. Bitco",
-        "Score Meter",
+        "Light Switch",
         "Mortarboard",
         "News Board",
-        "Light Switch",
-        "Rug-Pull",
+        "Water Bottle",
+        "Diary Book",
         "Cuckoo Clock",
-        "Lantern",
         "Violin",
-        "(Item45)",
-        "(Item46)",
-        "(Item47)",
+        "Harp",
+        "Flowerpot",
+        "Lantern",
         "Travel Bag",
 
         //49-64
@@ -4076,51 +4551,51 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
         "Uncommon Helmet",
         "Uncommon Dice",
         "Uncommon Wall Sticker",
+        "Uncommon Hammock",
         "Uncommon Token Chest",
-        "Uncommon Diary Book",
-        "Uncommon Fishbowl",
-        "Uncommon Sleeping Bed",
+        "Uncommon Knit Hat",
+        "Uncommon House of Fluffy",
         "Uncommon Crown",
-        "Uncommon Fortune Statue",
+        "Uncommon Clarinet",
+        "Uncommon Horn",
         "Uncommon Cake",
-        "Uncommon (Item14)",
-        "Uncommon (Item15)",
+        "Uncommon Fortune Statue",
         "Uncommon Door of Travel",
 
         //81-96
         "Uncommon Music Box",
         "Uncommon Straw Hat",
+        "Uncommon Score Meter",
         "Uncommon Ms. Ether",
+        "Uncommon Rug-Pull",
         "Uncommon Window",
         "Uncommon Cat Cushion",
-        "Uncommon Knit Hat",
-        "Uncommon Pancake",
-        "Uncommon Fluffy House",
         "Uncommon Picture Frame",
-        "Uncommon Flowerpot",
+        "Uncommon Crayon",
+        "Uncommon Pancake",
+        "Uncommon Fishbowl",
         "Uncommon Piano",
+        "Uncommon Timpani",
+        "Uncommon Pinwheel",
         "Uncommon Asnya",
-        "Uncommon Tea Party Set",
-        "Uncommon (Item30)",
-        "Uncommon (Item31)",
         "Uncommon Key to Travel",
 
         //97-112
         "Uncommon Tablet",
         "Uncommon Choco Bread",
+        "Uncommon Flower Wreath",
         "Uncommon Ribbon",
         "Uncommon Dr. Bitco",
-        "Uncommon Score Meter",
+        "Uncommon Light Switch",
         "Uncommon Mortarboard",
         "Uncommon News Board",
-        "Uncommon Light Switch",
-        "Uncommon Rug-Pull",
+        "Uncommon Water Bottle",
+        "Uncommon Diary Book",
         "Uncommon Cuckoo Clock",
-        "Uncommon Lantern",
         "Uncommon Violin",
-        "Uncommon (Item45)",
-        "Uncommon (Item46)",
-        "Uncommon (Item47)",
+        "Uncommon Harp",
+        "Uncommon Flowerpot",
+        "Uncommon Lantern",
         "Uncommon Travel Bag",
 
         //113-128
@@ -4148,51 +4623,51 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
         "Rare Helmet",
         "Rare Dice",
         "Rare Wall Sticker",
+        "Rare Hammock",
         "Rare Token Chest",
-        "Rare Diary Book",
-        "Rare Fishbowl",
-        "Rare Sleeping Bed",
+        "Rare Knit Hat",
+        "Rare House of Fluffy",
         "Rare Crown",
-        "Rare Fortune Statue",
+        "Rare Clarinet",
+        "Rare Horn",
         "Rare Cake",
-        "Rare (Item14)",
-        "Rare (Item15)",
+        "Rare Fortune Statue",
         "Rare Door of Travel",
 
         //145-160
         "Rare Music Box",
         "Rare Straw Hat",
+        "Rare Score Meter",
         "Rare Ms. Ether",
+        "Rare Rug-Pull",
         "Rare Window",
         "Rare Cat Cushion",
-        "Rare Knit Hat",
-        "Rare Pancake",
-        "Rare Fluffy House",
         "Rare Picture Frame",
-        "Rare Flowerpot",
+        "Rare Crayon",
+        "Rare Pancake",
+        "Rare Fishbowl",
         "Rare Piano",
+        "Rare Timpani",
+        "Rare Pinwheel",
         "Rare Asnya",
-        "Rare Tea Party Set",
-        "Rare (Item30)",
-        "Rare (Item31)",
         "Rare Key to Travel",
 
         //161-176
         "Rare Tablet",
         "Rare Choco Bread",
+        "Rare Flower Wreath",
         "Rare Ribbon",
         "Rare Dr. Bitco",
-        "Rare Score Meter",
+        "Rare Light Switch",
         "Rare Mortarboard",
         "Rare News Board",
-        "Rare Light Switch",
-        "Rare Rug-Pull",
+        "Rare Water Bottle",
+        "Rare Diary Book",
         "Rare Cuckoo Clock",
-        "Rare Lantern",
         "Rare Violin",
-        "Rare (Item45)",
-        "Rare (Item46)",
-        "Rare (Item47)",
+        "Rare Harp",
+        "Rare Flowerpot",
+        "Rare Lantern",
         "Rare Travel Bag",
 
         //177-192
@@ -4271,7 +4746,7 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
         "Orange Fluffiest",
         "Pink Fluffiest",
         "Yellow Fluffiest",
-        "White Fluffiest"
+        "White Fluffiest",
 
         //237-248
         "Gray Doll",
@@ -4285,7 +4760,98 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
         "Orange Doll",
         "Pink Doll",
         "Yellow Doll",
-        "White Doll"
+        "White Doll",
+        
+        //249-250
+        "",
+        "",
+        
+        //251-255, twinkle
+        "Chipped Twinkle",
+        "Flawed Twinkle",
+        "Regular Twinkle",
+        "Flawless Twinkle",
+        "Perfect Twinkle",
+        
+        //256-260, sparkle
+        "Chipped Sparkle",
+        "Flawed Sparkle",
+        "Regular Sparkle",
+        "Flawless Sparkle",
+        "Perfect Sparkle",
+
+        //261-265, glitter
+        "Chipped Glitter",
+        "Flawed Glitter",
+        "Regular Glitter",
+        "Flawless Glitter",
+        "Perfect Glitter",
+
+        //265-270
+        "",
+        "",
+        "",
+        "",
+        "",
+
+        //271-280
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+
+        //281-290
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+
+        //291-300
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+
+        //301-310
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+
+        //311-319
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
     ];
 }
 
@@ -4306,6 +4872,7 @@ contract Murasaki_Function_Name is Ownable, ReentrancyGuard {
         payable(rec).transfer(address(this).balance);
     }
     
+    //### item types
     //nameplate item_type
     uint public nameplate_item_type = 1;
     //set dice item_type
@@ -4558,14 +5125,13 @@ contract Murasaki_Function_Music_Practice is Ownable, ReentrancyGuard {
         address_Murasaki_Address = _address;
     }
     
-    //item types
-    //***TODO*** item_type
-    uint item_type_clarinet = 14;
-    uint item_type_piano = 27;
+    //### item types
+    uint item_type_clarinet = 12;
+    uint item_type_piano = 28;
     uint item_type_violin = 44;
-    uint item_type_horn = 15;
-    uint item_type_timpani = 30;
-    uint item_type_cello = 46;
+    uint item_type_horn = 13;
+    uint item_type_timpani = 29;
+    uint item_type_harp = 45;
     uint required_level = 5;
     
     //admin modify item types
@@ -4584,8 +5150,8 @@ contract Murasaki_Function_Music_Practice is Ownable, ReentrancyGuard {
     function _set_item_type_timpani(uint _value) external onlyOwner {
         item_type_timpani = _value;
     }
-    function _set_item_type_cello(uint _value) external onlyOwner {
-        item_type_cello = _value;
+    function _set_item_type_harp(uint _value) external onlyOwner {
+        item_type_harp = _value;
     }
     function _set_required_level(uint _value) external onlyOwner {
         required_level = _value;
@@ -4598,15 +5164,19 @@ contract Murasaki_Function_Music_Practice is Ownable, ReentrancyGuard {
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
         require(_check_summoner(_summoner, msg.sender));
         require(_check_item(_item_id, msg.sender));
+        require(ms.working_status(_summoner) == 0);
+        /*
         require(
             ms.mining_status(_summoner) == 0 
             && ms.farming_status(_summoner) == 0 
             && ms.crafting_status(_summoner) == 0
             && ms.practice_status(_summoner) == 0
         );
+        */
         require(mfs.calc_satiety(_summoner) >= 10 && mfs.calc_happy(_summoner) >= 10);
         require(ms.level(_summoner) >= required_level);
-        ms.set_practice_status(_summoner, 1);
+        ms.set_working_status(_summoner, 4);
+        //ms.set_practice_status(_summoner, 1);
         ms.set_practice_item_id(_summoner, _item_id);
         ms.set_practice_start_time(_summoner, block.timestamp);
     }
@@ -4617,8 +5187,10 @@ contract Murasaki_Function_Music_Practice is Ownable, ReentrancyGuard {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
         require(_check_summoner(_summoner, msg.sender));
-        require(ms.practice_status(_summoner) == 1);
-        ms.set_practice_status(_summoner, 0);
+        require(ms.working_status(_summoner) == 4);
+        //require(ms.practice_status(_summoner) == 1);
+        ms.set_working_status(_summoner, 0);
+        //ms.set_practice_status(_summoner, 0);
         //get item_type used in practice
         uint _item_id = ms.practice_item_id(_summoner);
         uint _item_type = _get_item_type(_item_id);
@@ -4642,9 +5214,9 @@ contract Murasaki_Function_Music_Practice is Ownable, ReentrancyGuard {
         } else if (_item_type == item_type_timpani) {
             _exp = _get_exp_mod_ofTimpani(_summoner, _exp);
             ms.set_exp_timpani(_summoner, ms.exp_timpani(_summoner) + _exp);
-        } else if (_item_type == item_type_cello) {
-            _exp = _get_exp_mod_ofCello(_summoner, _exp);
-            ms.set_exp_cello(_summoner, ms.exp_cello(_summoner) + _exp);
+        } else if (_item_type == item_type_harp) {
+            _exp = _get_exp_mod_ofHarp(_summoner, _exp);
+            ms.set_exp_harp(_summoner, ms.exp_harp(_summoner) + _exp);
         }
         //event
         emit Practice(_summoner, _item_type, _exp);
@@ -4739,7 +5311,7 @@ contract Murasaki_Function_Music_Practice is Ownable, ReentrancyGuard {
             || _item_type == item_type_violin
             || _item_type == item_type_horn
             || _item_type == item_type_timpani
-            || _item_type == item_type_cello
+            || _item_type == item_type_harp
         );
         return true;
     }
@@ -4788,7 +5360,7 @@ contract Murasaki_Function_Music_Practice is Ownable, ReentrancyGuard {
         _exp += _exp * mi.dexterity_withItems(_summoner) / 10000;
         return _exp;
     }
-    function _get_exp_mod_ofCello(uint _summoner, uint _exp) internal view returns (uint) {
+    function _get_exp_mod_ofHarp(uint _summoner, uint _exp) internal view returns (uint) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Info mi = Murasaki_Info(ma.address_Murasaki_Info());
         _exp += _exp * mi.intelligence_withItems(_summoner) / 10000;
@@ -4821,10 +5393,10 @@ contract Murasaki_Function_Music_Practice is Ownable, ReentrancyGuard {
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
         return _calc_level_from_exp(ms.exp_timpani(_summoner));
     }
-    function get_practiceLevel_cello (uint _summoner) external view returns (uint) {
+    function get_practiceLevel_harp (uint _summoner) external view returns (uint) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
-        return _calc_level_from_exp(ms.exp_cello(_summoner));
+        return _calc_level_from_exp(ms.exp_harp(_summoner));
     }
     
     //internal: calc level from exp
@@ -4960,9 +5532,11 @@ contract Murasaki_Function_Staking_Reward is Ownable, ReentrancyGuard {
     function update_staking_counter (uint _summoner) external nonReentrant {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
+        Murasaki_Parameter mp = Murasaki_Parameter(ma.address_Murasaki_Parameter());
         //only from mffg
         //require(msg.sender == ma.address_Murasaki_Function_Feeding_and_Grooming());
         uint _delta_sec = block.timestamp - ms.last_counter_update_time(_summoner);
+        _delta_sec = _delta_sec * mp.SPEED() / 100;
         //delta_sec limit, <= 1/2 day
         if (_delta_sec > 43200) {
             _delta_sec = 43200;
@@ -5011,13 +5585,22 @@ contract Murasaki_Function_Staking_Reward is Ownable, ReentrancyGuard {
         //mint random nft
         uint _rnd = mfs.d100(_summoner);
         string memory _reward = "";
-        if (_rnd < 10) {
+        if (_rnd < 3) {
+            _mint_twinkleSparkleGlitter(_summoner, 251);
+            _reward = "twinkle";
+        } else if (_rnd < 6) {
+            _mint_twinkleSparkleGlitter(_summoner, 256);
+            _reward = "sparkle";
+        } else if (_rnd < 9) {
+            _mint_twinkleSparkleGlitter(_summoner, 261);
+            _reward = "glitter";
+        } else if (_rnd < 19) {
             _mint_fluffier(_summoner);
             _reward = "fluffier";
-        } else if (_rnd < 20) {
+        } else if (_rnd < 29) {
             _mint_bank(_summoner);
             _reward = "piggy bank";
-        } else if (_rnd < 30) {
+        } else if (_rnd < 39) {
             _mint_pouch(_summoner);
             _reward = "leaf pouch";
         } else {
@@ -5039,7 +5622,7 @@ contract Murasaki_Function_Staking_Reward is Ownable, ReentrancyGuard {
         address _owner = mfs.get_owner(_summoner_to);
         uint _seed = mfs.seed(_summoner_to);
         uint _item_type = 200 + mfs.d12(_summoner_to) + 1;   //201-212
-        string memory _memo = "";
+        string memory _memo = "staking reword";
         mc.craft(_item_type, 0, _owner, _seed, _memo, 0);
         //update score
         uint _total_precious_received = mss.total_precious_received(_summoner_to);
@@ -5055,7 +5638,7 @@ contract Murasaki_Function_Staking_Reward is Ownable, ReentrancyGuard {
         address _owner = mfs.get_owner(_summoner_to);
         uint _seed = mfs.seed(_summoner_to);
         uint _item_type = 200 + mfs.d12(_summoner_to) + 1 +12;   //213-224
-        string memory _memo = "";
+        string memory _memo = "staking reword";
         mc.craft(_item_type, 0, _owner, _seed, _memo, 0);
         //update score
         uint _total_precious_received = mss.total_precious_received(_summoner_to);
@@ -5070,7 +5653,7 @@ contract Murasaki_Function_Staking_Reward is Ownable, ReentrancyGuard {
         address _owner = mfs.get_owner(_summoner_to);
         uint _seed = mfs.seed(_summoner_to);
         uint _item_type = 194;
-        string memory _memo = "";
+        string memory _memo = "staking reword";
         mc.craft(_item_type, 0, _owner, _seed, _memo, 0);
     }
     //mint pouch
@@ -5082,21 +5665,19 @@ contract Murasaki_Function_Staking_Reward is Ownable, ReentrancyGuard {
         address _owner = mfs.get_owner(_summoner_to);
         uint _seed = mfs.seed(_summoner_to);
         uint _item_type = 195;
-        string memory _memo = "";
+        string memory _memo = "staking reword";
         mc.craft(_item_type, 0, _owner, _seed, _memo, 0);
     }
-    //mint twinkle
-    //+0.1, 
-    function _mint_twinkle(uint _summoner_to) internal {
+    //mint twinkle:251, sparkle:256, glitter:261
+    function _mint_twinkleSparkleGlitter (uint _summoner_to, uint _item_type) internal {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         Murasaki_Craft mc = Murasaki_Craft(ma.address_Murasaki_Craft());
         //mint precious
         address _owner = mfs.get_owner(_summoner_to);
         uint _seed = mfs.seed(_summoner_to);
-        uint _item_type = 250;
         uint _item_subtype = mfs.d12(_seed + _summoner_to);
-        string memory _memo = "";
+        string memory _memo = "staking reword";
         mc.craft(_item_type, 0, _owner, _seed, _memo, _item_subtype);
     }
 }
@@ -5110,6 +5691,11 @@ contract Trial_Converter is Ownable, ReentrancyGuard {
     address public address_Murasaki_Address;
     function _set_Murasaki_Address(address _address) external onlyOwner {
         address_Murasaki_Address = _address;
+    }
+
+    //admin. withdraw
+    function withdraw(address rec)public onlyOwner{
+        payable(rec).transfer(address(this).balance);
     }
     
     //converting summon
@@ -5137,6 +5723,8 @@ contract Trial_Converter is Ownable, ReentrancyGuard {
         _burn_trial_summoner(_trial_summoner);
         //bonus presentbox
         _mint_presentbox(_trial_summoner, _wallet);
+        //fee transfer
+        _fee_transfer();
         //event
         emit ConvertingSummon(_summoner, _trial_summoner);
     }
@@ -5217,11 +5805,12 @@ contract Trial_Converter is Ownable, ReentrancyGuard {
         ms_reg.set_material(_summoner, ms_trial.material(_trial_summoner));
         ms_reg.set_last_feeding_time(_summoner, ms_trial.last_feeding_time(_trial_summoner));
         ms_reg.set_last_grooming_time(_summoner, ms_trial.last_grooming_time(_trial_summoner));
-        ms_reg.set_mining_status(_summoner, ms_trial.mining_status(_trial_summoner));
+        ms_reg.set_working_status(_summoner, ms_trial.working_status(_trial_summoner));
+        //ms_reg.set_mining_status(_summoner, ms_trial.mining_status(_trial_summoner));
         ms_reg.set_mining_start_time(_summoner, ms_trial.mining_start_time(_trial_summoner));
-        ms_reg.set_farming_status(_summoner, ms_trial.farming_status(_trial_summoner));
+        //ms_reg.set_farming_status(_summoner, ms_trial.farming_status(_trial_summoner));
         ms_reg.set_farming_start_time(_summoner, ms_trial.farming_start_time(_trial_summoner));
-        ms_reg.set_crafting_status(_summoner, ms_trial.crafting_status(_trial_summoner));
+        //ms_reg.set_crafting_status(_summoner, ms_trial.crafting_status(_trial_summoner));
         ms_reg.set_crafting_start_time(_summoner, ms_trial.crafting_start_time(_trial_summoner));
         ms_reg.set_crafting_item_type(_summoner, ms_trial.crafting_item_type(_trial_summoner));
         ms_reg.set_total_mining_sec(_summoner, ms_trial.total_mining_sec(_trial_summoner));
@@ -5233,6 +5822,9 @@ contract Trial_Converter is Ownable, ReentrancyGuard {
         ms_reg.set_last_grooming_time_plus_working_time(_summoner, ms_trial.last_grooming_time_plus_working_time(_trial_summoner));
         ms_reg.set_isActive(_summoner, ms_trial.isActive(_trial_summoner));
         ms_reg.set_inHouse(_summoner, ms_trial.inHouse(_trial_summoner));
+        //reset staking counter
+        Murasaki_Parameter mp_reg = Murasaki_Parameter(ma_reg.address_Murasaki_Parameter());
+        ms_reg.set_staking_reward_counter(_summoner, mp_reg.STAKING_REWARD_SEC());
         /*  =0 when trial
         ms_reg.set_staking_reward_counter(_summoner, ms_trial.staking_reward_counter(_trial_summoner));
         ms_reg.set_total_staking_reward_counter(_summoner, ms_trial.total_staking_reward_counter(_trial_summoner));
@@ -5273,6 +5865,8 @@ contract Trial_Converter is Ownable, ReentrancyGuard {
             uint _trial_item_id = _myListsAt[i];
             //mint and convert
             _craft_regular_item_and_convert(_trial_item_id, _wallet);
+            //burn trial_item
+            mc_trial.burn(_trial_item_id);
         }
     }
     function _craft_regular_item_and_convert (uint _trial_item_id, address _wallet) internal {
@@ -5312,12 +5906,297 @@ contract Trial_Converter is Ownable, ReentrancyGuard {
         Murasaki_Craft mc = Murasaki_Craft(ma_reg.address_Murasaki_Craft());
         uint _seed = mfs.seed(_summoner);
         uint _item_type = 200;
-        string memory _memo = "summon bonus";
+        string memory _memo = "start bonus";
         mc.craft(_item_type, 0, _wallet_to, _seed, _memo, 0);
+    }
+    function _fee_transfer () internal {
+        Murasaki_Address ma_trial = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Address ma_reg = Murasaki_Address(ma_trial.address_Murasaki_Address_Regular());
+        Murasaki_Parameter mp_reg = Murasaki_Parameter(ma_reg.address_Murasaki_Parameter());
+        payable(ma_reg.address_Coder_Wallet()).transfer(mp_reg.PRICE()/20);          //5%
+        payable(ma_reg.address_Illustrator_Wallet()).transfer(mp_reg.PRICE()/20);    //5%
+        payable(ma_reg.address_Staking_Wallet()).transfer(address(this).balance/2);  //45%
+        payable(ma_reg.address_BuybackTreasury()).transfer(address(this).balance);   //45%
     }
 }
 
+
+
 //===Independent==================================================================================================================
+
+
+//---Murasaki_Market_Item
+
+// @dev of HoM: Following codes are based on "SummonerMarket" contract 
+// @dev of HoM: from Rarity game by Andre Cronje on the Fantom chain.
+// @dev of HoM: Contract address on the Fantom: 0xee973c3bb8bc27a76bcdf91e6e0921cf78d8e1ff
+
+/// @dev Summoner market to allow trading of summoners
+/// @author swit.eth (@nomorebear) + nipun (@nipun_pit) + jade (@jade_arin)
+
+contract Murasaki_Market_Item is Ownable, ReentrancyGuard, ERC721Holder {
+
+    //address
+    address public address_Murasaki_Address;
+    function _set_Murasaki_Address(address _address) external onlyOwner {
+        address_Murasaki_Address = _address;
+    }
+
+    using EnumerableSet for EnumerableSet.UintSet;
+
+    event List(uint indexed _summoner, uint _item, uint _price);
+    event Unlist(uint indexed _summoner, uint _item);
+    event Buy(uint indexed _summoner, uint _summonerSeller, uint _item, uint _price, uint _fee);
+    event SetFeeBps(uint feeBps);
+    /*
+    event List(uint indexed id, address indexed lister, uint price);
+    event Unlist(uint indexed id, address indexed lister);
+    event Buy(uint indexed id, address indexed seller, address indexed buyer, uint price, uint fee);
+    event SetFeeBps(uint feeBps);
+    */
+
+    //IERC721 public rarity;
+    uint public feeBps = 500;
+    uint public lowestPrice = 1 * 10**18;   // 1 $ASTR
+    uint public dutchAuction_interval = 24 * 60 * 60;   //24 hr
+    uint public dutchAuction_startPrice = 100 * 10**18;   //100 $ASTR
+    EnumerableSet.UintSet private set;
+    mapping(address => EnumerableSet.UintSet) private mySet;
+
+    //mapping
+    mapping(uint => uint) public prices;
+    mapping(uint => address) public listers;
+    mapping(uint => uint) public listedTime;
+    mapping(uint => uint) public averageSoldPrice;  //per item_type
+    mapping(uint => uint) public soldCount;         //per item_type
+    
+    // set lowestPrice
+    function setLowestPrice(uint _value) external onlyOwner {
+        lowestPrice = _value;
+    }
+
+    /// @dev Updates fee. Only callable by owner.
+    function setFeeBps(uint _feeBps) external onlyOwner {
+        feeBps = _feeBps;
+        emit SetFeeBps(_feeBps);
+    }
+    
+    //admin set variants
+    function set_dutchAuction_interval (uint _value) external onlyOwner {
+        dutchAuction_interval = _value;
+    }
+    function set_dutchAuction_startPrice (uint _value) external onlyOwner {
+        dutchAuction_startPrice = _value;
+    }
+
+    /// @dev Lists the given summoner. This contract will take custody until bought / unlisted.
+    function list(uint _item, uint price) external nonReentrant {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Craft mc = Murasaki_Craft(ma.address_Murasaki_Craft());
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
+        _check_wallet(msg.sender);
+        require(price > 0, 'bad price');
+        require(prices[_item] == 0, 'already listed');
+        require(price >= lowestPrice, 'under the lowest price');
+        require(price >= _get_buybackPrice(_item));  //buyback price check
+        //rarity.safeTransferFrom(msg.sender, address(this), summonerId);
+        mc.safeTransferFrom(msg.sender, address(this), _item);
+        prices[_item] = price;
+        listers[_item] = msg.sender;
+        listedTime[_item] = block.timestamp;
+        set.add(_item);
+        mySet[msg.sender].add(_item);
+        //emit List(_item, msg.sender, price);
+        emit List(mfs.get_summoner(msg.sender), _item, price);
+    }
+    function _get_buybackPrice (uint _item) internal view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        BuybackTreasury bbt = BuybackTreasury(payable(ma.address_BuybackTreasury()));
+        return bbt.calc_buybackPrice(_item);
+    }
+
+    /// @dev Unlists the given summoner. Must be the lister.
+    function unlist(uint _item) external nonReentrant {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Craft mc = Murasaki_Craft(ma.address_Murasaki_Craft());
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
+        _check_wallet(msg.sender);
+        require(prices[_item] > 0, 'not listed');
+        require(listers[_item] == msg.sender, 'not lister');
+        prices[_item] = 0;
+        listers[_item] = address(0);
+        //rarity.safeTransferFrom(address(this), msg.sender, summonerId);
+        mc.safeTransferFrom(address(this), msg.sender, _item);
+        set.remove(_item);
+        mySet[msg.sender].remove(_item);
+        //emit Unlist(_item, msg.sender);
+        emit Unlist(mfs.get_summoner(msg.sender), _item);
+    }
+
+    /// @dev Buys the given summoner. Must pay the exact correct prirce.
+    function buy(uint _item) external payable nonReentrant {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Craft mc = Murasaki_Craft(ma.address_Murasaki_Craft());
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
+        _check_wallet(msg.sender);
+        require(prices[_item] > 0, 'not listed');
+        //uint price = prices[_item];
+        uint price = get_auctionPrice(_item);
+        require(msg.value >= price, 'bad msg.value');
+        uint fee = (price * feeBps) / 10000;
+        uint get = price - fee;
+        address lister = listers[_item];
+        prices[_item] = 0;
+        listers[_item] = address(0);
+        //rarity.safeTransferFrom(address(this), msg.sender, summonerId);
+        mc.safeTransferFrom(address(this), msg.sender, _item);
+        payable(lister).transfer(get);
+        set.remove(_item);
+        mySet[lister].remove(_item);
+        //fee transfer
+        payable(ma.address_BufferVault()).transfer(address(this).balance);
+        //update average price
+        (uint _item_type, , , , ,) = mc.items(_item);
+        uint _newAverageSoldPrice = 
+            ( averageSoldPrice[_item_type] * soldCount[_item_type] + price ) / ( soldCount[_item_type] + 1 );
+        averageSoldPrice[_item_type] = _newAverageSoldPrice;
+        soldCount[_item_type] += 1;
+        //emit Buy(_item, lister, msg.sender, price, fee);
+        emit Buy(mfs.get_summoner(msg.sender), mfs.get_summoner(lister), _item, price, fee);
+    }
+
+    //get auction price
+    function get_auctionPrice (uint _item) public view returns (uint) {
+        uint _listPrice = prices[_item];
+        uint _deltaSec = block.timestamp - listedTime[_item];
+        uint _price;
+        //after 24 hr, listPrice
+        if (_deltaSec >= dutchAuction_interval) {
+            _price = _listPrice;
+        //when listPrice >= startPrice(=100$ASTR), listPrice
+        } else if (_listPrice >= dutchAuction_startPrice) {
+            _price = _listPrice;
+        //when else, listPrice + extraPrice
+        } else {
+            _price = _listPrice;
+            _price += 
+                (dutchAuction_startPrice - _listPrice) 
+                * (dutchAuction_interval - _deltaSec) 
+                / dutchAuction_interval;
+        }
+        return _price;
+    }
+    
+    //get itemInfo
+    //item_type, item_subtype, crafter, (crafter_name), listedPrice, auctionPrice, auctionRestingTime
+    function get_itemInfo (uint _item) external view returns (uint[10] memory, string memory) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Craft mc = Murasaki_Craft(ma.address_Murasaki_Craft());
+        Murasaki_Name mn = Murasaki_Name(ma.address_Murasaki_Name());
+        (
+            uint _item_type, 
+            , 
+            uint _crafter, 
+            , 
+            , 
+            uint _item_subtype
+        ) = mc.items(_item);
+        uint _deltaSec = block.timestamp - listedTime[_item];
+        uint _auctionRestingTime;
+        if (_deltaSec >= dutchAuction_interval) {
+            _auctionRestingTime = 0;
+        } else {
+            _auctionRestingTime = dutchAuction_interval - _deltaSec;
+        }
+        uint[10] memory _res;
+        _res[0] = _item_type;
+        _res[1] = _item_subtype;
+        _res[2] = _crafter;
+        _res[3] = prices[_item];
+        _res[4] = get_auctionPrice(_item);
+        _res[5] = _auctionRestingTime;
+        return (_res, mn.names(_crafter));
+    }
+
+    //check wallet
+    function _check_wallet(address _wallet) public view returns (bool) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
+        Murasaki_Main mm = Murasaki_Main(ma.address_Murasaki_Main());
+        Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
+        //check summoner possession
+        uint _summoner = mm.tokenOf(_wallet);
+        require(_summoner > 0);
+        //check summoner activation
+        require(ms.isActive(_summoner));
+        //check summoner petrification
+        require(mfs.not_petrified(_summoner));
+        return true;
+    }
+
+    /// @dev Withdraw trading fees. Only called by owner.
+    /*
+    function withdraw(uint amount) external onlyOwner {
+        payable(msg.sender).transfer(amount == 0 ? address(this).balance : amount);
+    }
+    */
+    function withdraw(address rec)public onlyOwner{
+        payable(rec).transfer(address(this).balance);
+    }
+
+    /// @dev Returns list the total number of listed summoners.
+    function listLength() external view returns (uint) {
+        return set.length();
+    }
+
+    /// @dev Returns the ids and the prices of the listed summoners.
+    function listsAt(uint start, uint count)
+        external
+        view
+        returns (uint[] memory rIds, uint[] memory rPrices)
+    {
+        rIds = new uint[](count);
+        rPrices = new uint[](count);
+        for (uint idx = 0; idx < count; idx++) {
+            rIds[idx] = set.at(start + idx);
+            rPrices[idx] = prices[rIds[idx]];
+        }
+    }
+
+    /// @dev Returns list the total number of listed summoners of the given user.
+    function myListLength(address user) external view returns (uint) {
+        return mySet[user].length();
+    }
+
+    /// @dev Returns the ids and the prices of the listed summoners of the given user.
+    function myListsAt(
+        address user,
+        uint start,
+        uint count
+    ) external view returns (uint[] memory rIds, uint[] memory rPrices) {
+        rIds = new uint[](count);
+        rPrices = new uint[](count);
+        for (uint idx = 0; idx < count; idx++) {
+            rIds[idx] = mySet[user].at(start + idx);
+            rPrices[idx] = prices[rIds[idx]];
+        }
+    }
+    
+    //myListsAt, with current auction price instead of listed price
+    function myListsAt_withAuctionPrice(
+        address user,
+        uint start,
+        uint count
+    ) external view returns (uint[] memory rIds, uint[] memory rPrices) {
+        rIds = new uint[](count);
+        rPrices = new uint[](count);
+        for (uint idx = 0; idx < count; idx++) {
+            rIds[idx] = mySet[user].at(start + idx);
+            rPrices[idx] = get_auctionPrice(rIds[idx]);
+        }
+    }
+}
+
 
 
 //---Murasaki_Dice
@@ -5360,6 +6239,7 @@ contract Murasaki_Dice is Ownable, ReentrancyGuard {
     //variants
     mapping(uint => uint[4]) public rolled_dice;
     mapping(uint => uint) public last_dice_roll_time;
+    //### item types
     uint public dice_item_type = 5;
     uint public buffer_sec = 14400;  //4 hr
 
@@ -5542,8 +6422,9 @@ contract Murasaki_Mail is Ownable, ReentrancyGuard {
     //variants
     //interval, both of sending interval & receving limit
     uint public interval_sec = 60 * 60 * 24 * 7;    // 7 days
+    //### item types
     uint public item_type_of_mail = 196;
-    uint public item_type_of_cushion = 21;
+    uint public item_type_of_cushion = 23;
 
     //admin, set variants
     function set_interval_sec(uint _value) external onlyOwner {
@@ -5828,7 +6709,7 @@ contract Fluffy_Festival is Ownable, ReentrancyGuard {
         uint value;
     }
     mapping(uint => vote) public votes;
-    uint[256] each_voting_count;
+    uint[320] each_voting_count;
     mapping(uint => uint) public last_voting_block; //summoner => blocknumber
     mapping(uint => uint) public last_voting_type;  //summoner => fluffy_type
     
@@ -6134,8 +7015,15 @@ contract Achievement_onChain is Ownable {
         nft_number = _value;
     }
     
+    //### item types
+    //admin, set flower_wreath item_type
+    uint public flowerWreath_item_type = 35;
+    function _set_flowerWreath_item_type (uint _item_type) external onlyOwner {
+        flowerWreath_item_type = _item_type;
+    }
+    
     //get_score
-    function get_score (uint _summoner) external view returns (uint) {
+    function get_score (uint _summoner) public view returns (uint) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         address _owner = mfs.get_owner(_summoner);
@@ -6147,6 +7035,20 @@ contract Achievement_onChain is Ownable {
         //trial limit; score=0
         if (mfs.isTrial()){
             _score=0;
+        }
+        return _score;
+    }
+    
+    //get_score, item checked
+    function get_score_itemChecked (uint _summoner) external view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
+        address _owner = mfs.get_owner(_summoner);
+        uint _score;
+        if ( mfs.get_balance_of_type_specific(_owner, flowerWreath_item_type) > 0 ) {
+            _score = get_score(_summoner);
+        } else {
+            _score = 0;
         }
         return _score;
     }
@@ -6192,7 +7094,7 @@ contract Achievement_onChain is Ownable {
             ERC721 _nft = ERC721(nfts[i]);
             uint _balance = _nft.balanceOf(_owner);
             if (_balance > 0) {
-                _score += 1;
+                _score += 10;
             }
         }
         if (_score > 100) {
@@ -6239,6 +7141,532 @@ contract Achievement_onChain is Ownable {
         return _score;
     }
 }
+
+
+//---Stroll
+
+
+contract Stroll is Ownable, ReentrancyGuard {
+
+    //address
+    address public address_Murasaki_Address;
+    function _set_Murasaki_Address(address _address) external onlyOwner {
+        address_Murasaki_Address = _address;
+    }
+
+    //### item types
+    //nameplate item_type
+    uint public waterBottle_item_type = 41;
+    //set dice item_type
+    function _set_waterBottle_item_type(uint _item_type) external onlyOwner {
+        waterBottle_item_type = _item_type;
+    }
+    
+    //admin
+    bool public isActive = true;
+    function _set_isActive (bool _bool) external onlyOwner {
+        isActive = _bool;
+    }
+    
+    //mapping
+
+    //public summoner accumulated parameters
+    mapping (uint => uint) public total_strolledDistance;
+    mapping (uint => uint[4]) public total_strolledDistance_ofCompanion;
+    mapping (uint => uint) public total_metSummoners;
+    mapping (uint => uint) public stroll_level;
+    mapping (uint => uint) public met_level;
+
+    //public summoner dynamic parameters
+    mapping (uint => bool) public isStrolling;
+    mapping (uint => uint) public start_time;
+    mapping (uint => uint) public end_time;
+    mapping (uint => uint[5]) public metSummoners;
+
+    //private summoner parameters
+    mapping (uint => uint) private direction;
+    mapping (uint => uint) private companion;
+    mapping (uint => uint) private drink;
+    mapping (uint => mapping(uint => uint)) private summoner2summoner_metTime;
+
+    //global parameters
+    using EnumerableSet for EnumerableSet.UintSet;
+    mapping (uint => EnumerableSet.UintSet) private strolledSummoners;
+    mapping (uint => uint) public total_strolling_direction;
+    mapping (uint => uint) public total_strolling_companion;
+    
+    //getter
+    function get_strollInfo (uint _summoner) external view returns (uint[15] memory) {
+        uint[15] memory _res;
+        if (isStrolling[_summoner]){
+            _res[0] = 1;
+        } else {
+            _res[0] = 0;
+        }
+        _res[1] = total_strolledDistance[_summoner];
+        _res[2] = total_strolledDistance_ofCompanion[_summoner][1];
+        _res[3] = total_strolledDistance_ofCompanion[_summoner][2];
+        _res[4] = total_strolledDistance_ofCompanion[_summoner][3];
+        _res[5] = total_metSummoners[_summoner];
+        _res[6] = metSummoners[_summoner][0];
+        _res[7] = metSummoners[_summoner][1];
+        _res[8] = metSummoners[_summoner][2];
+        _res[9] = metSummoners[_summoner][3];
+        _res[10] = metSummoners[_summoner][4];
+        _res[11] = total_strolling_direction[_summoner];
+        _res[12] = total_strolling_companion[_summoner];
+        _res[13] = stroll_level[_summoner];
+        _res[14] = met_level[_summoner];
+        return _res;
+    }
+    
+    //variants
+    uint public stroll_sec = 4 * 60 * 60;   // 4 hr
+    uint public stroll_interval_sec = 16 * 60 * 60; // 16 hr
+    uint public level_limit = 5;
+    
+    //set variants
+    function _set_stroll_sec(uint _value) external onlyOwner {
+        stroll_sec = _value;
+    }
+    function _set_stroll_interval_sec(uint _value) external onlyOwner {
+        stroll_interval_sec = _value;
+    }
+    function _set_level_limit(uint _value) external onlyOwner {
+        level_limit = _value;
+    }
+    
+    //get_SPEED
+    function _get_SPEED () internal view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Parameter mp = Murasaki_Parameter(ma.address_Murasaki_Parameter());
+        return mp.SPEED();
+    }
+    
+    //get_rnd
+    function _get_rnd (uint _summoner, uint _number) internal view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
+        return mfs.dn(_summoner, _number);
+    }
+    
+    //start stroll
+    function startStroll (
+        uint _summoner, 
+        uint _direction, 
+        uint _companion, 
+        uint _drink
+    ) external nonReentrant {
+        require(_check_summoner_start(_summoner, msg.sender));
+        require(_direction>=1 && _direction<=4);
+        require(_companion>=1 && _companion<=3);
+        require(_drink>=1 && _drink<=4);
+        require(_check_companion(msg.sender, _companion));
+        _write_strollInfo(_summoner, _direction, _companion, _drink);
+        _reset_metSummoners(_summoner);
+        _update_summonerStatus_start(_summoner);
+    }
+    
+    //sub functions
+    function _check_summoner_start (uint _summoner, address _address) internal view returns (bool) {
+        require(isActive);
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
+        Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
+        Murasaki_Parameter mp = Murasaki_Parameter(ma.address_Murasaki_Parameter());
+        require(mp.isPaused() == false);
+        require(ms.inHouse(_summoner));
+        require(mfs.check_owner(_summoner, _address));
+        require(ms.level(_summoner) >= level_limit);
+        require(mfs.calc_satiety(_summoner) >= 50 && mfs.calc_happy(_summoner) >= 50);
+        require(ms.working_status(_summoner) == 0);
+        /*
+        require(
+            ms.mining_status(_summoner) == 0 
+            && ms.farming_status(_summoner) == 0 
+            && ms.crafting_status(_summoner) == 0
+            && ms.practice_status(_summoner) == 0
+        );
+        */
+        address _owner = mfs.get_owner(_summoner);
+        require(
+            mfs.get_balance_of_type_specific(_owner, waterBottle_item_type) > 0
+            || mfs.get_balance_of_type_specific(_owner, waterBottle_item_type +64) > 0
+            || mfs.get_balance_of_type_specific(_owner, waterBottle_item_type +128) > 0
+        );
+        require(isStrolling[_summoner]==false);
+        require( (block.timestamp - end_time[_summoner]) * _get_SPEED() / 100 >= stroll_interval_sec);
+        return true;
+    }
+    function _check_companion (address _wallet, uint _companion) internal view returns (bool) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
+        uint _item_type;
+        if (_companion == 1) {
+            _item_type = 2;
+        } else if (_companion == 2) {
+            _item_type = 20;
+        } else if (_companion == 3) {
+            _item_type = 37;
+        }
+        bool _res;
+        if (
+            mfs.get_balance_of_type_specific(_wallet, _item_type)>0
+            || mfs.get_balance_of_type_specific(_wallet, _item_type+64)>0
+            || mfs.get_balance_of_type_specific(_wallet, _item_type+128)>0
+        ) {
+            _res = true;
+        }
+        return _res;
+    }
+    function _write_strollInfo (
+        uint _summoner, 
+        uint _direction, 
+        uint _companion, 
+        uint _drink
+    ) internal {
+        isStrolling[_summoner] = true;
+        start_time[_summoner] = block.timestamp;
+        direction[_summoner] = _direction;
+        companion[_summoner] = _companion;
+        drink[_summoner] = _drink;
+        uint _direction_and_companion = _direction * 1 + _companion * 10;
+        strolledSummoners[_direction_and_companion].add(_summoner);
+        total_strolling_direction[_direction] += 1;
+        total_strolling_companion[_companion] += 1;
+    }
+    function _reset_metSummoners (uint _summoner) internal {
+        metSummoners[_summoner][0] = 0;
+        metSummoners[_summoner][1] = 0;
+        metSummoners[_summoner][2] = 0;
+        metSummoners[_summoner][3] = 0;
+        metSummoners[_summoner][4] = 0;
+    }
+    function _update_summonerStatus_start (uint _summoner) internal {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
+        //ms.set_inHouse(_summoner, false);
+        ms.set_working_status(_summoner, 5);
+    }
+    
+    //check stroll endable
+    function check_strollEndable (uint _summoner) public view returns (bool) {
+        bool _res;
+        if ( (block.timestamp - start_time[_summoner]) * _get_SPEED() / 100 > stroll_sec) {
+            _res = true;
+        }
+        return _res;
+    }
+
+    //end stroll
+    event End_Stroll (uint indexed _summoner, uint _strolledDistance);
+    event Summoners_Met (uint indexed _summoner, uint _summoner_met, bool _isFirstTime);
+    function endStroll (uint _summoner) external nonReentrant {
+        require(_check_summoner_end(_summoner, msg.sender));
+        _update_metSummoners(_summoner);
+        _update_total_metSummoners(_summoner);
+        _update_totalDistance(_summoner);
+        _update_meetTimes(_summoner);
+        _try_itemMinting(_summoner);
+        _clear_strollInfo(_summoner);
+        _update_summonerStatus_end(_summoner);
+    }
+    
+    //sub functions
+    function _check_summoner_end (uint _summoner, address _address) internal view returns (bool) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
+        Murasaki_Parameter mp = Murasaki_Parameter(ma.address_Murasaki_Parameter());
+        Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
+        require(mp.isPaused() == false);
+        require(ms.working_status(_summoner) == 5);
+        require(isStrolling[_summoner]);
+        require(mfs.check_owner(_summoner, _address));
+        require(check_strollEndable(_summoner));
+        return true;
+    }
+    function _update_metSummoners (uint _summoner) internal {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
+        //get total number of summoners in the same direction and companion
+        uint _direction_and_companion = direction[_summoner] * 1 + companion[_summoner] * 10;
+        uint _total_strolling_inSame = strolledSummoners[_direction_and_companion].length();
+        uint _summoner_met;
+        //choose random summoner 5 times
+        for (uint i=0; i<5; i++) {
+            //select random summoner
+            _summoner_met = mfs.dn(_summoner + i, _total_strolling_inSame);
+            //check not exist in the list and the list is not full each other
+            if (
+                _summoner != _summoner_met
+                && __check_notExistInMetSummoners(_summoner, _summoner_met)
+                && __check_notExistInMetSummoners(_summoner_met, _summoner)
+                && __check_notFullOfMetSummoners(_summoner)
+                && __check_notFullOfMetSummoners(_summoner_met)
+            ){
+                //append met summoner to the list of summoner
+                for (uint j=0; j<5; j++) {
+                    if (metSummoners[_summoner][j] == 0) {
+                        metSummoners[_summoner][j] = _summoner_met;
+                        break;
+                    }
+                }
+                //append summoner to the list of met summoner
+                for (uint k=0; k<5; k++) {
+                    if (metSummoners[_summoner_met][k] == 0) {
+                        metSummoners[_summoner_met][k] = _summoner;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    function __check_notExistInMetSummoners (uint _summoner, uint _summoner_met) internal view returns (bool) {
+        bool _res;
+        if (
+            metSummoners[_summoner][0] != _summoner_met
+            && metSummoners[_summoner][1] != _summoner_met
+            && metSummoners[_summoner][2] != _summoner_met
+            && metSummoners[_summoner][3] != _summoner_met
+            && metSummoners[_summoner][4] != _summoner_met
+        ){
+            _res = true;
+        }
+        return _res;
+    }
+    function __check_notFullOfMetSummoners (uint _summoner) internal view returns (bool) {
+        bool _res;
+        if (
+            metSummoners[_summoner][0] == 0
+            || metSummoners[_summoner][1] == 0
+            || metSummoners[_summoner][2] == 0
+            || metSummoners[_summoner][3] == 0
+            || metSummoners[_summoner][4] == 0
+        ){
+            _res = true;
+        }
+        return _res;
+    }
+    function _update_total_metSummoners (uint _summoner) internal {
+        uint _count_newMeet = 0;
+        uint _summoner_met;
+        for (uint i; i<5; i++) {
+            _summoner_met = metSummoners[_summoner][i];
+            if (
+                _summoner_met != 0
+                && summoner2summoner_metTime[_summoner][_summoner_met] == 0
+                && summoner2summoner_metTime[_summoner_met][_summoner] == 0
+            ) {
+                _count_newMeet += 1;
+            }
+        }
+        total_metSummoners[_summoner] += _count_newMeet;
+    }
+    function _update_totalDistance (uint _summoner) internal {
+        uint _distance;
+        _distance = block.timestamp - start_time[_summoner];
+        _distance = _distance * _get_SPEED() / 100;
+        if (_distance > stroll_sec) {
+            _distance = stroll_sec;    //limit 4 hr
+        }
+        _distance = _distance * 500 / 3600; // meter, 500 m/hr
+        uint _percentx100 = __get_boostRate_percentx100(_summoner);
+        _distance += _distance * _percentx100 / 10000;
+        total_strolledDistance[_summoner] += _distance;
+        total_strolledDistance_ofCompanion[_summoner][companion[_summoner]] += _distance;
+        emit End_Stroll(_summoner, _distance);
+    }
+    function __get_boostRate_percentx100 (uint _summoner) internal view returns (uint) {
+        uint _boostRate = 0;
+        uint _summoner_met;
+        for (uint i; i<5; i++) {
+            _summoner_met = metSummoners[_summoner][i];
+            if (_summoner_met == 0) {
+                _boostRate += 0;
+            } else if (
+                summoner2summoner_metTime[_summoner][_summoner_met] == 0
+                && summoner2summoner_metTime[_summoner_met][_summoner] == 0
+            ) {
+                if (drink[_summoner] == drink[_summoner_met]) {
+                    _boostRate += 1000;  // +10%
+                } else {
+                    _boostRate += 1500;  // +15%
+                }
+            } else {
+                if (drink[_summoner] == drink[_summoner_met]) {
+                    _boostRate += 500;   // +5%
+                } else {
+                    _boostRate += 750;   // +7.5%
+                }
+            }
+        }
+        //when nobody met, low frequency bonus
+        if (_boostRate == 0) {
+            uint _rnd = _get_rnd(_summoner, 100);
+            if (_rnd < 1) {
+                _boostRate *= 10000;    // 1%: +100%
+            } else if (_rnd < 1+3) {
+                _boostRate *= 5000;     // 3%: +50%
+            } else if (_rnd < 1+3+10) {
+                _boostRate *= 2000;     // 10%: +20%
+            }
+        }
+        return _boostRate;
+    }
+    function _update_meetTimes (uint _summoner) internal {
+        uint _summoner_met;
+        for (uint i; i<5; i++) {
+            _summoner_met = metSummoners[_summoner][i];
+            if (_summoner_met != 0) {
+                //check first time met
+                bool _isFirstTime;
+                if (
+                    summoner2summoner_metTime[_summoner][_summoner_met] == 0
+                    && summoner2summoner_metTime[_summoner_met][_summoner] == 0
+                ) {
+                    _isFirstTime = true;
+                }
+                //update met time
+                summoner2summoner_metTime[_summoner][_summoner_met] = block.timestamp;
+                summoner2summoner_metTime[_summoner_met][_summoner] = block.timestamp;
+                emit Summoners_Met(_summoner, _summoner_met, _isFirstTime);
+            }
+        }
+    }
+    function _try_itemMinting (uint _summoner) internal {
+        uint _total_distance = total_strolledDistance[_summoner];
+        uint _total_metSummoners = total_metSummoners[_summoner];
+        uint _stroll_level = stroll_level[_summoner];
+        uint _met_level = met_level[_summoner];
+        if (
+            (_stroll_level <= 1 && _total_distance >= 6000)
+            || (_stroll_level <= 2 && _total_distance >= 20000)
+            || (_stroll_level <= 3 && _total_distance >= 40000)
+            || (_stroll_level <= 4 && _total_distance >= 64000)
+            || (_stroll_level <= 5 && _total_distance >= 92800)
+            || (_stroll_level <= 6 && _total_distance >= 127360)
+            || (_stroll_level <= 7 && _total_distance >= 168832)
+            || (_stroll_level <= 8 && _total_distance >= 218598)
+            || (_stroll_level <= 9 && _total_distance >= 278318)
+            || (_stroll_level <= 10 && _total_distance >= 349982)
+            || (_stroll_level <= 11 && _total_distance >= 435978)
+            || (_stroll_level <= 12 && _total_distance >= 539174)
+            || (_stroll_level <= 13 && _total_distance >= 663008)
+            || (_stroll_level <= 14 && _total_distance >= 811610)
+            || (_stroll_level <= 15 && _total_distance >= 989932)
+            || (_stroll_level <= 16 && _total_distance >= 1203918)
+        ) {
+            stroll_level[_summoner] += 1;
+            __mint_randomTwinkle(_summoner);
+        } else if (
+            (_met_level <= 1 && _total_metSummoners >= 10)
+            || (_met_level <= 2 && _total_metSummoners >= 30)
+            || (_met_level <= 3 && _total_metSummoners >= 70)
+            || (_met_level <= 4 && _total_metSummoners >= 150)
+            || (_met_level <= 5 && _total_metSummoners >= 310)
+            || (_met_level <= 6 && _total_metSummoners >= 630)
+            || (_met_level <= 7 && _total_metSummoners >= 1270)
+            || (_met_level <= 8 && _total_metSummoners >= 2550)
+            || (_met_level <= 9 && _total_metSummoners >= 5110)
+            || (_met_level <= 10 && _total_metSummoners >= 10230)
+            || (_met_level <= 11 && _total_metSummoners >= 20470)
+            || (_met_level <= 12 && _total_metSummoners >= 40950)
+        ) {
+            met_level[_summoner] += 1;
+            __mint_randomTwinkle(_summoner);
+        }
+    }
+    function __mint_randomTwinkle (uint _summoner) internal {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
+        Murasaki_Craft mc = Murasaki_Craft(ma.address_Murasaki_Craft());
+        address _owner = mfs.get_owner(_summoner);
+        uint _seed = mfs.seed(_summoner);
+        uint _rnd = mfs.dn(_seed + _summoner, 3);
+        uint _item_type;
+        if (_rnd == 0) {
+            _item_type = 251;
+        } else if (_rnd == 1) {
+            _item_type = 256;
+        } else if (_rnd == 2) {
+            _item_type = 261;
+        }
+        uint _item_subtype = mfs.d8(_seed + _summoner);
+        string memory _memo = "";
+        mc.craft(_item_type, _summoner, _owner, _seed, _memo, _item_subtype);
+    }
+    function _clear_strollInfo (uint _summoner) internal {
+        isStrolling[_summoner] = false;
+        end_time[_summoner] = block.timestamp;
+        total_strolling_direction[ direction[_summoner] ] -= 1;
+        total_strolling_companion[ companion[_summoner] ] -= 1;
+        uint _direction_and_companion = direction[_summoner] * 1 + companion[_summoner] * 10;
+        strolledSummoners[_direction_and_companion].remove(_summoner);
+        direction[_summoner] = 0;
+        companion[_summoner] = 0;
+        drink[_summoner] = 0;
+    }
+    function _update_summonerStatus_end (uint _summoner) internal {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
+        //ms.set_inHouse(_summoner, true);
+        ms.set_working_status(_summoner, 0);
+        //update working time
+        uint _delta_sec = (block.timestamp - start_time[_summoner]) * _get_SPEED() / 100;
+        uint _last_grooming_time_plus_working_time = ms.last_grooming_time_plus_working_time(_summoner) + _delta_sec;
+        ms.set_last_grooming_time_plus_working_time(_summoner, _last_grooming_time_plus_working_time);
+    }
+    
+    //get distribution of directions
+    function get_distributionOfDirections () external view returns (uint[5] memory) {
+        uint[5] memory _res;
+        for (uint i=1; i<=4; i++) {
+            _res[i] = total_strolling_direction[i];
+        }
+        return _res;
+    }
+    
+    //get distribution of companions
+    function get_distributionOfCompanions () external view returns (uint[4] memory) {
+        uint[4] memory _res;
+        for (uint i=1; i<=3; i++) {
+            _res[i] = total_strolling_companion[i];
+        }
+        return _res;
+    }
+}
+
+
+//---Position_Storage
+//***TODO***
+
+/*
+contract Position_Storage is Ownable {
+
+    //address
+    address public address_Murasaki_Address;
+    function _set_Murasaki_Address(address _address) external onlyOwner {
+        address_Murasaki_Address = _address;
+    }
+
+    //mapping
+    mapping (uint => string) positions;
+    
+    //set positions
+    function set_positions (uint _summoner, string memory _positions) external {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
+        require(mfs.check_owner(_summoner, msg.sender));
+        positions[_summoner] = _positions;
+    }
+    
+    //get positions
+    function get_positions (uint _summoner) external view returns (string memory) {
+        return positions[_summoner];
+    }
+}
+*/
+
 
 
 //===Info==================================================================================================================
@@ -6354,31 +7782,42 @@ contract Murasaki_Info is Ownable {
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
         return ms.last_grooming_time(_summoner);
     }
+    function working_status(uint _summoner) public view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
+        return ms.working_status(_summoner);
+    }
+    /*
     function mining_status(uint _summoner) public view returns (uint) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
         return ms.mining_status(_summoner);
     }
+    */
     function mining_start_time(uint _summoner) public view returns (uint) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
         return ms.mining_start_time(_summoner);
     }
+    /*
     function farming_status(uint _summoner) public view returns (uint) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
         return ms.farming_status(_summoner);
     }
+    */
     function farming_start_time(uint _summoner) public view returns (uint) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
         return ms.farming_start_time(_summoner);
     }
+    /*
     function crafting_status(uint _summoner) public view returns (uint) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
         return ms.crafting_status(_summoner);
     }
+    */
     function crafting_start_time(uint _summoner) public view returns (uint) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
@@ -6507,6 +7946,11 @@ contract Murasaki_Info is Ownable {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         return mfs.get_speed_of_dappsStaking(_summoner);
+    }
+    function calc_exp_addition_rate_from_twinkle(uint _summoner) public view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
+        return mfs.calc_exp_addition_rate_from_twinkle(_summoner);
     }
     
     //Function_Working
@@ -6746,16 +8190,18 @@ contract Murasaki_Info is Ownable {
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
         return ms.exp_timpani(_summoner);
     }
-    function exp_cello (uint _summoner) public view returns (uint) {
+    function exp_harp (uint _summoner) public view returns (uint) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
-        return ms.exp_cello(_summoner);
+        return ms.exp_harp(_summoner);
     }
+    /*
     function practice_status (uint _summoner) public view returns (uint) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
         return ms.practice_status(_summoner);
     }
+    */
     function practice_item_id (uint _summoner) public view returns (uint) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
@@ -6791,10 +8237,10 @@ contract Murasaki_Info is Ownable {
         Murasaki_Function_Music_Practice mfp = Murasaki_Function_Music_Practice(ma.address_Murasaki_Function_Music_Practice());
         return mfp.get_practiceLevel_timpani(_summoner);
     }
-    function get_practiceLevel_cello (uint _summoner) public view returns (uint) {
+    function get_practiceLevel_harp (uint _summoner) public view returns (uint) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Music_Practice mfp = Murasaki_Function_Music_Practice(ma.address_Murasaki_Function_Music_Practice());
-        return mfp.get_practiceLevel_cello(_summoner);
+        return mfp.get_practiceLevel_harp(_summoner);
     }
     
     //staking
@@ -6820,11 +8266,11 @@ contract Murasaki_Info is Ownable {
         _res[10] = material(_summoner);
         _res[11] = last_feeding_time(_summoner);
         _res[12] = last_grooming_time(_summoner);
-        _res[13] = mining_status(_summoner);
+        //_res[13] = mining_status(_summoner);
         _res[14] = mining_start_time(_summoner);
-        _res[15] = farming_status(_summoner);
+        //_res[15] = farming_status(_summoner);
         _res[16] = farming_start_time(_summoner);
-        _res[17] = crafting_status(_summoner);
+        //_res[17] = crafting_status(_summoner);
         _res[18] = crafting_start_time(_summoner);
         _res[19] = crafting_item_type(_summoner);
         //_res[20] = total_mining_sec(_summoner);
@@ -6882,8 +8328,8 @@ contract Murasaki_Info is Ownable {
         _res[71] = exp_violin(_summoner);
         _res[72] = exp_horn(_summoner);
         _res[73] = exp_timpani(_summoner);
-        _res[74] = exp_cello(_summoner);
-        _res[75] = practice_status(_summoner);
+        _res[74] = exp_harp(_summoner);
+        //_res[75] = practice_status(_summoner);
         _res[76] = practice_item_id(_summoner);
         _res[77] = practice_start_time(_summoner);
         _res[78] = get_practiceLevel_clarinet(_summoner);
@@ -6891,8 +8337,10 @@ contract Murasaki_Info is Ownable {
         _res[80] = get_practiceLevel_violin(_summoner);
         _res[81] = get_practiceLevel_horn(_summoner);
         _res[82] = get_practiceLevel_timpani(_summoner);
-        _res[83] = get_practiceLevel_cello(_summoner);
+        _res[83] = get_practiceLevel_harp(_summoner);
         _res[84] = get_staking_percent(_summoner);
+        _res[85] = calc_exp_addition_rate_from_twinkle(_summoner);
+        _res[86] = working_status(_summoner);
         return _res;
     }
     
@@ -6913,20 +8361,20 @@ contract Murasaki_Info is Ownable {
         string memory _name = name(_summoner);
         string[8] memory lootStatus = allStatus(_summoner);
         return (
-            _class, 
-            _owner, 
-            _name, 
-            lootStatus,
-            speed(),
-            price(),
-            staking_reward_sec(),
-            elected_fluffy_type(),
-            isTrial()
+            _class, //0
+            _owner, //1
+            _name, //2
+            lootStatus, //3
+            speed(),    //4
+            price(),    //5
+            staking_reward_sec(),   //6
+            elected_fluffy_type(),  //7
+            isTrial()   //8
         );
     }
 
     //item
-    function allItemBalance(uint _summoner) public view returns (uint[256] memory) {
+    function allItemBalance(uint _summoner) public view returns (uint[320] memory) {
         address _owner = owner(_summoner);
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Craft mc = Murasaki_Craft(ma.address_Murasaki_Craft());
@@ -6944,6 +8392,7 @@ contract Murasaki_Info is Ownable {
 
 
 //---Murasaki_Info_fromWallet
+//***TODO***
 
 
 interface IMurasaki_Info_fromWallet {
@@ -6959,9 +8408,9 @@ interface IMurasaki_Info_fromWallet {
 
     // Character
     function birthplace  (address _wallet) external view returns (string memory);
-    function softness    (address _wallet) external view returns (string memory);
-    function fluffiness  (address _wallet) external view returns (string memory);
-    function elasticity  (address _wallet) external view returns (string memory);
+    function character   (address _wallet) external view returns (string memory);
+    function weakpoint   (address _wallet) external view returns (string memory);
+    function scent       (address _wallet) external view returns (string memory);
     function personality (address _wallet) external view returns (string memory);
     function flower      (address _wallet) external view returns (string memory);
 
@@ -7186,18 +8635,18 @@ contract Murasaki_Info_fromWallet is Ownable, IMurasaki_Info_fromWallet {
         Murasaki_Info mi = Murasaki_Info(_get_info_address());
         return mi.allStatus(summoner(_wallet))[0];
     }
-    //softness
-    function softness(address _wallet) external view returns (string memory) {
+    //character
+    function character(address _wallet) external view returns (string memory) {
         Murasaki_Info mi = Murasaki_Info(_get_info_address());
         return mi.allStatus(summoner(_wallet))[1];
     }
-    //fluffiness
-    function fluffiness(address _wallet) external view returns (string memory) {
+    //weakpoint
+    function weakpoint(address _wallet) external view returns (string memory) {
         Murasaki_Info mi = Murasaki_Info(_get_info_address());
         return mi.allStatus(summoner(_wallet))[2];
     }
-    //elasticity
-    function elasticity(address _wallet) external view returns (string memory) {
+    //scent
+    function scent(address _wallet) external view returns (string memory) {
         Murasaki_Info mi = Murasaki_Info(_get_info_address());
         return mi.allStatus(summoner(_wallet))[3];
     }
@@ -7254,17 +8703,17 @@ contract Murasaki_Lootlike is Ownable {
     function get_birthplace(uint _summoner) public view returns (string memory) {
         return pluckName(_summoner, "birthplace", birthplace);
     }
-    function get_softness(uint _summoner) public view returns (string memory) {
-        return pluckName(_summoner, "softness", softness);
-    }
-    function get_fluffiness(uint _summoner) public view returns (string memory) {
-        return pluckName(_summoner, "fluffiness", fluffiness);
-    }
-    function get_elasticity(uint _summoner) public view returns (string memory) {
-        return pluckName(_summoner, "elasticity", elasticity);
-    }
     function get_personality(uint _summoner) public view returns (string memory) {
         return pluckName(_summoner, "personality", personality);
+    }
+    function get_character(uint _summoner) public view returns (string memory) {
+        return pluckName(_summoner, "character", character);
+    }
+    function get_weakpoint(uint _summoner) public view returns (string memory) {
+        return pluckName(_summoner, "weakpoint", weakpoint);
+    }
+    function get_scent(uint _summoner) public view returns (string memory) {
+        return pluckName(_summoner, "scent", scent);
     }
     function get_flower(uint _summoner) public view returns (string memory) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
@@ -7281,10 +8730,10 @@ contract Murasaki_Lootlike is Ownable {
     function get_allStatus(uint _summoner) public view returns (string[8] memory) {
         string[8] memory _status;
         _status[0] = get_birthplace(_summoner);
-        _status[1] = get_softness(_summoner);
-        _status[2] = get_fluffiness(_summoner);
-        _status[3] = get_elasticity(_summoner);
-        _status[4] = get_personality(_summoner);
+        _status[1] = get_personality(_summoner);
+        _status[2] = get_character(_summoner);
+        _status[3] = get_weakpoint(_summoner);
+        _status[4] = get_scent(_summoner);
         _status[5] = get_flower(_summoner);        
         _status[6] = get_street(_summoner);        
         _status[7] = get_city(_summoner);        
@@ -7338,88 +8787,61 @@ contract Murasaki_Lootlike is Ownable {
         "Fluffy Carpet",
         "Fluffy Cushion",
         "Fluffy Scarf",
-        "Fluffy Towel",
-        "Woolly Sweater",
-        "Woolly Blanket",
-        "Woolly Carpet",
-        "Woolly Cushion",
-        "Woolly Scarf",
-        "Wwoolly Towel",
-        "Feathery Sweater",
-        "Feathery Blanket",
-        "Feathery Carpet",
-        "Feathery Cushion",
-        "Ffeathery Scarf",
-        "Ffeathery Towel"
+        "Fluffy Sofa"
     ];
     
-    string[] private softness = [
-        "Inredible",
-        "Marvelous",
-        "Excellent",
-        "Amazing",
-        "Great",
-        "Fabulous",
-        "Wonderful",
-        "Gorgeous",
-        "Awesome",
-        "Fantastic",
-        "Lovely",
-        "Brilliant",
-        "Impressive",
-        "Superb"
+    string[] private character = [
+        "Diligent",
+        "Optimist",
+        "Realist",
+        "Ethical",
+        "Sensitive",
+        "Adventurous",
+        "Compassionate",
+        "Empathetic",
+        "Patient",
+        "Courageous",
+        "Honest"
     ];
     
-    string[] private fluffiness = [
-        "Inredible",
-        "Marvelous",
-        "Excellent",
-        "Amazing",
-        "Great",
-        "Fabulous",
-        "Wonderful",
-        "Gorgeous",
-        "Awesome",
-        "Fantastic",
-        "Lovely",
-        "Brilliant",
-        "Impressive",
-        "Superb"
+    string[] private weakpoint = [
+        "a bit Moody",
+        "a bit Lonely",
+        "a bit Sleeper",
+        "a bit Nervous",
+        "a bit Competitive",
+        "a bit Obstinate",
+        "a bit Forgetful",
+        "a bit Perfectionist",
+        "a bit Shy",
+        "a bit Tomboy"
     ];
 
-    string[] private elasticity = [
-        "Inredible",
-        "Marvelous",
-        "Excellent",
-        "Amazing",
-        "Great",
-        "Fabulous",
-        "Wonderful",
-        "Gorgeous",
-        "Awesome",
-        "Fantastic",
-        "Lovely",
-        "Brilliant",
-        "Impressive",
-        "Superb"
+    string[] private scent = [
+        "Floral",
+        "Refreshing",
+        "Gentle",
+        "Mild",
+        "Fruity",
+        "Sunshine",
+        "Sweet",
+        "Soft",
+        "Exotic"
     ];
     
     string[] private personality = [
         "Friendly",
         "Reliable",
-        "Optimistic",
         "Frisky",
         "Thoughtful",
-        "Honest",
         "Easygoing",
         "Tolerant",
-        "Mild",
         "Affectionate",
         "Intelligent",
-        "Patient",
         "Faithful",
         "Innocent",
-        "Gentle"
+        "Gentle",              
+        "Cheerful"
     ];
     
     string[] private flower = [
@@ -7453,44 +8875,44 @@ contract Murasaki_Lootlike is Ownable {
     ];
 
     string[] private street = [
-        "Apple Ave",
-        "Strawberry Ave",
-        "Avocado Ave",
-        "Orange Ave",
-        "Raspberry Ave",
-        "Kiwi Ave",
-        "Grapefrit Ave",
-        "Coconut Ave",
-        "Cherry Ave",
-        "Pineapple Ave",
-        "Banana Ave",
-        "Grape Ave",
-        "Blueberry Ave",
-        "Muskmelon Ave",
-        "Mango Ave",
-        "Peach Ave",
-        "Yuzu Ave",
-        "Lemon Ave",
-        "Lime Ave",
-        "Pumpkin St",
-        "Cabbage St",
-        "Cucumber St",
-        "Sesami St",
-        "Potato St",
-        "Ginger St",
-        "Leek St",
-        "Soybean St",
-        "Onion St",
-        "Tomato St",
-        "Carrot St",
-        "Garlic St",
-        "Basil St",
-        "Paprika St",
-        "Broccoli St",
-        "Lotus St",
-        "Califlower St",
-        "Bamboo St",
-        "Eggplant St"
+        "Apple Ave.",
+        "Strawberry Ave.",
+        "Avocado Ave.",
+        "Orange Ave.",
+        "Raspberry Ave.",
+        "Kiwi Ave.",
+        "Grapefrit Ave.",
+        "Coconut Ave.",
+        "Cherry Ave.",
+        "Pineapple Ave.",
+        "Banana Ave.",
+        "Grape Ave.",
+        "Blueberry Ave.",
+        "Muskmelon Ave.",
+        "Mango Ave.",
+        "Peach Ave.",
+        "Yuzu Ave.",
+        "Lemon Ave.",
+        "Lime Ave.",
+        "Pumpkin St.",
+        "Cabbage St.",
+        "Cucumber St.",
+        "Sesami St.",
+        "Potato St.",
+        "Ginger St.",
+        "Leek St.",
+        "Soybean St.",
+        "Onion St.",
+        "Tomato St.",
+        "Carrot St.",
+        "Garlic St.",
+        "Basil St.",
+        "Paprika St.",
+        "Broccoli St.",
+        "Lotus St.",
+        "Califlower St.",
+        "Bamboo St.",
+        "Eggplant St."
     ];
 }
 
@@ -7573,7 +8995,7 @@ contract Murasaki_tokenURI is Ownable {
             return '</text><rect width="128" height="128" fill="#ffffff" rx="5" ry="5" fill-opacity="0.8"/><text x="64"  y="60" class="base" text-anchor="middle">Token</text><text x="64"  y="80" class="base" text-anchor="middle">Not Found</text></svg>';
         } else if (mp.isTrial()) {
             //trial
-            return '</text><rect width="128" height="128" fill="#ffffff" rx="5" ry="5" fill-opacity="0.8"/><text x="64"  y="60" class="base" text-anchor="middle">Trial</text><text x="64"  y="80" class="base" text-anchor="middle">Token</text></svg>';
+            return '</text><rect width="128" height="128" fill="#ffffff" rx="5" ry="5" fill-opacity="0.8"/><text x="64"  y="60" class="base" text-anchor="middle">Trial</text><text x="64"  y="82" class="base" text-anchor="middle">Token</text></svg>';
         } else {
             return '</text></svg>';
         }
@@ -7741,10 +9163,10 @@ contract BufferVault is Ownable, ReentrancyGuard {
         }
         //all the rest: transfer to staking wallet
         payable(ma.address_Staking_Wallet()).transfer(address(this).balance);
-        //set inflation rate
+        //inflate amountPerSummoner
         uint _amountPerSummoner = bbt.amountPerSummoner();
         bbt.set_amountPerSummoner(_amountPerSummoner * (10000 + inflationRate) / 10000);
-        //set mint price
+        //inflate summon price
         uint _price = mp.PRICE();
         mp._set_price(_price * (10000 + inflationRate) / 10000);
         //update timestamp
@@ -7888,45 +9310,6 @@ contract BuybackTreasury is Ownable, ReentrancyGuard {
         }
         uint _price = amountPerSummoner * _coefficient / 100000;
         return _price;
-        /*
-        uint _coefficient;
-        if (_item_level == 1) {
-            _coefficient = 10;
-        } else if (_item_level == 2) {
-            _coefficient = 20;
-        } else if (_item_level == 3) {
-            _coefficient = 33;
-        } else if (_item_level == 4) {
-            _coefficient = 50;
-        } else if (_item_level == 5) {
-            _coefficient = 70;
-        } else if (_item_level == 6) {
-            _coefficient = 93;
-        } else if (_item_level == 7) {
-            _coefficient = 120;
-        } else if (_item_level == 8) {
-            _coefficient = 150;
-        } else if (_item_level == 9) {
-            _coefficient = 183;
-        } else if (_item_level == 10) {
-            _coefficient = 220;
-        } else if (_item_level == 11) {
-            _coefficient = 260;
-        } else if (_item_level == 12) {
-            _coefficient = 303;
-        } else if (_item_level == 13) {
-            _coefficient = 350;
-        } else if (_item_level == 14) {
-            _coefficient = 400;
-        } else if (_item_level == 15) {
-            _coefficient = 453;
-        } else if (_item_level == 16) {
-            _coefficient = 510;
-        }
-        //uint _price = calc_amount_per_summoner() * _coefficient / 3227;
-        uint _price = amountPerSummoner * _coefficient / 3227;
-        return _price;
-        */
     }
     
     function calc_buybackPrice(uint _item) public view returns (uint) {
@@ -7962,12 +9345,16 @@ contract BuybackTreasury is Ownable, ReentrancyGuard {
                 _item_level = 24;
             }
             _price = _calc_itemPrice_fromLevel(_item_level);
+        //twinkleSparkleGlitter
+        } else if (_item_type >= 251 && _item_type <= 265) {
+            _item_level = 22;   //=fluffier
+            _price = _calc_itemPrice_fromLevel(_item_level);
         }
         return _price;
     }
     
-    function calc_buybackPrice_asArray() public view returns (uint[17] memory) {
-        uint[17] memory _res;
+    function calc_buybackPrice_asArray() public view returns (uint[36] memory) {
+        uint[36] memory _res;
         _res[1] = _calc_itemPrice_fromLevel(1);
         _res[2] = _calc_itemPrice_fromLevel(2);
         _res[3] = _calc_itemPrice_fromLevel(3);
@@ -7984,6 +9371,10 @@ contract BuybackTreasury is Ownable, ReentrancyGuard {
         _res[14] = _calc_itemPrice_fromLevel(14);
         _res[15] = _calc_itemPrice_fromLevel(15);
         _res[16] = _calc_itemPrice_fromLevel(16);
+        _res[21] = _calc_itemPrice_fromLevel(21);
+        _res[22] = _calc_itemPrice_fromLevel(22);
+        _res[23] = _calc_itemPrice_fromLevel(23);
+        _res[24] = _calc_itemPrice_fromLevel(24);
         return _res;
     }
 
@@ -8088,11 +9479,12 @@ contract Admin_Convert is Ownable {
         msNew.set_material(_summoner, msOld.material(_summoner));
         msNew.set_last_feeding_time(_summoner, msOld.last_feeding_time(_summoner));
         msNew.set_last_grooming_time(_summoner, msOld.last_grooming_time(_summoner));
-        msNew.set_mining_status(_summoner, msOld.mining_status(_summoner));
+        msNew.set_working_status(_summoner, msOld.working_status(_summoner));
+        //msNew.set_mining_status(_summoner, msOld.mining_status(_summoner));
         msNew.set_mining_start_time(_summoner, msOld.mining_start_time(_summoner));
-        msNew.set_farming_status(_summoner, msOld.farming_status(_summoner));
+        //msNew.set_farming_status(_summoner, msOld.farming_status(_summoner));
         msNew.set_farming_start_time(_summoner, msOld.farming_start_time(_summoner));
-        msNew.set_crafting_status(_summoner, msOld.crafting_status(_summoner));
+        //msNew.set_crafting_status(_summoner, msOld.crafting_status(_summoner));
         msNew.set_crafting_start_time(_summoner, msOld.crafting_start_time(_summoner));
         msNew.set_crafting_item_type(_summoner, msOld.crafting_item_type(_summoner));
         msNew.set_total_mining_sec(_summoner, msOld.total_mining_sec(_summoner));

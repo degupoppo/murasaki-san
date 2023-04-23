@@ -13,6 +13,127 @@ async function update_onMarketItems() {
     let ListsAt = await contract_mmt_wss.methods.listsAt(0, ListLength).call();
     let _html_all = "";
     for (let i = 0; i < ListLength; i++) {
+
+        //get info
+        let _item = ListsAt[0][i];
+        let _itemInfo = await contract_mmt.methods.get_itemInfo(_item).call();
+        let _item_type = _itemInfo[0][0];
+        let _item_subtype = _itemInfo[0][1];
+        let _crafter = _itemInfo[0][2];
+        let _listedPrice = _itemInfo[0][3];
+        let _auctionPrice = _itemInfo[0][4];
+        let _auctionRestingTime = _itemInfo[0][5];
+        let _crafterName = _itemInfo[1];
+        let _itemName = dic_items_reverse[_item_type];
+        let _itemPng = dic_items[_itemName]["icon_png"];
+
+        //convert prices
+        _listedPrice = web3.utils.fromWei(_listedPrice, "ether")
+        _auctionPrice = web3.utils.fromWei(_auctionPrice, "ether")
+
+        //define mode
+        let _isPrelisting = false;
+        if (
+            _listedPrice < 100
+            && _auctionRestingTime <= 24 * 60 * 60
+        ) {
+            _isPrelisting = true;
+        }
+        
+        //round prices
+        _listedPrice = (Math.round(_listedPrice*100)/100).toFixed(2);
+        _auctionPrice = (Math.round(_auctionPrice*100)/100).toFixed(2);
+
+        //convert time
+        let _h = Math.floor(_auctionRestingTime / 3600);
+        let _m = Math.floor(_auctionRestingTime % 3600 / 60);
+        _auctionRestingTime = 
+            _h.toString().padStart(2, "0") + "h:" 
+            + _m.toString().padStart(2, "0") + "m";
+        
+        //name check
+        if (_crafter == 0) {
+            _crafterName = "*Fluffy Kingdom*";
+        } else if (_crafterName == "") {
+            _crafterName = "#" + _crafter;
+        }
+        
+        //item_rarity
+        let _item_rarity;
+        if (_item_type <= 64) {
+            _item_rarity = "<font color=green>common</font>";
+        } else if (_item_type <= 128) {
+            _item_rarity = "<font color=blue>uncommon</font>";
+        } else if (_item_type <= 192) {
+            _item_rarity = "<font color=orange>rare</font>";
+        } else if (_item_type == 197) {
+            let _score = await contract_msn_wss.methods.score(_item).call();
+            _item_rarity = "<font color=#E85298>score: " + _score + "</font>";
+        } else if (_item_type >= 201 && _item_type <= 212) {
+            _item_rarity = "<font color=black>common</font>";
+        } else if (_item_type >= 213 && _item_type <= 224) {
+            _item_rarity = "<font color=blue>uncommon</font>";
+        } else if (_item_type >= 225 && _item_type <= 236) {
+            _item_rarity = "<font color=orange>rare</font>";
+        } else {
+            _item_rarity = "<font color=black>---</font>";
+        }
+        
+        //prepare html
+        let _html = "";
+        _html += "<tr><td><center>"
+        _html += _item;
+        _html += "</center></td><td><center>";
+        _html += "<img src='";
+        _html += "src/" + _itemPng;
+        _html += "' width='32' height='32'> ";
+        _html += _itemName;
+        _html += "</center></td><td><center>";
+        _html += _item_rarity;
+        _html += "</center></td><td><center>";
+        _html += _crafterName;
+        _html += "</center></td>";
+        if (_isPrelisting == false) {
+            _html += "<td id='" + "input_price_" + _item + "'><center><b>";
+            _html += _listedPrice;
+            _html += "</b></center></td><td><center>";
+            _html += "<button onclick='buy_item(" + _item + "," + _auctionPrice + ");'>";
+            _html += "Buy";
+            _html += "</button>";
+            _html += "</center></td></tr>";
+        } else {
+            _html += "<td id='" + "input_price_" + _item + "'><center>";
+            _html += "<font color='blue'><b>" + _auctionPrice + "</b></font><br>";
+            _html += "<div style='line-height:100%'>";
+            _html += "<font size='2' color='blue'><b>" + "- prelisting -" + "</b></font><br>";
+            //_html += "(Listing price: <b>" + _listedPrice + "</b>)<br>";
+            _html += "<font size='2' color='blue'><b>&#x231b;" + _auctionRestingTime + "</b></font>";
+            _html += "</div>";
+            _html += "</center></td><td><center>";
+            _html += "<button onclick='buy_item(" + _item + "," + _auctionPrice + ");'>";
+            _html += "Buy";
+            _html += "</button>";
+            _html += "</center></td></tr>";
+        }
+        //combine html
+        _html_all += _html;
+        //count-up loading
+        let _text = "&nbsp;Now&nbsp;Loading...&nbsp;" + i + "/" + ListLength;
+        tbody_sellingItems.innerHTML = _text;
+    }
+    //write html
+    tbody_sellingItems.innerHTML = _html_all;
+    //after loading, activate JQuery CSS
+    $(document).ready(function(){
+       $('#table_onMarketItems').DataTable({lengthChange: false});
+    });
+}
+/*
+async function update_onMarketItems() {
+    let ListLength = await contract_mmt_wss.methods.listLength().call();
+    let ListsAt = await contract_mmt_wss.methods.listsAt(0, ListLength).call();
+    let _html_all = "";
+    for (let i = 0; i < ListLength; i++) {
         let _item = ListsAt[0][i];
         let _price = ListsAt[1][i];
         _price = web3.utils.fromWei(_price, "ether");
@@ -78,6 +199,7 @@ async function update_onMarketItems() {
        $('#table_onMarketItems').DataTable({lengthChange: false});
     });
 }
+*/
 
 //get selling items of listed
 async function update_sellingItems() {
@@ -120,7 +242,7 @@ async function update_sellingItems() {
         let _html = "";
         _html += "<tr><td><center>"
         _html += _item;
-        _html += "</center></td><td><center>";
+        _html += '</center></td><td><center>';
         _html += "<img src='";
         _html += "src/" + dic_items[_item_name]["icon_png"];
         _html += "' width='32' height='32'> ";
@@ -249,7 +371,7 @@ async function update_buyback() {
     let _dic_summoner_name = {};
     for (let i = 0; i < myListLength; i++) {
         let _item = myListsAt[i];
-        _items = await contract_mc_wss.methods.items(_item).call();
+        let _items = await contract_mc_wss.methods.items(_item).call();
         let _item_type = Number(_items[0]);
         //item level
         let _item_level = 0;
@@ -259,11 +381,20 @@ async function update_buyback() {
             if (_item_level == 0) {
                 _item_level = 16;
             }
-        //nuichan
-        /*
-        } else if (_item_type >= 237 && _item_type <= 248) {
-            _item_level = 10;
-        */
+        //fluffy
+        } else if (_item_type >= 201 && _item_type <= 248) {
+            if (_item_type <= 212) {
+                _item_level = 21;
+            } else if (_item_type <= 224) {
+                _item_level = 22;
+            } else if (_item_type <= 236) {
+                _item_level = 23;
+            } else if (_item_type <= 248) {
+                _item_level = 24;
+            }
+        //twinkleSparkleGlitter
+        } else if (_item_type >= 251 && _item_type <= 256) {
+            _item_level = 22;
         } else {
             _item_level = 0;
         }
@@ -299,8 +430,10 @@ async function update_buyback() {
             _item_rarity = "<font color=black>common</font>";
         } else if (_item_type <= 128) {
             _item_rarity = "<font color=blue>uncommon</font>";
+            _item_price *= 3;
         } else if (_item_type <= 192) {
             _item_rarity = "<font color=orange>rare</font>";
+            _item_price *= 9;
         } else if (_item_type == 197) {
             let _score = await contract_msn_wss.methods.score(_item).call();
             _item_rarity = "<font color=#E85298>score: " + _score + "</font>";
@@ -395,17 +528,18 @@ async function buyback_item(_item) {
 
 //approve
 async function approve() {
-    await contract_mc.methods.setApprovalForAll(address_Murasaki_Item_Market, true).send({from:wallet});
+    await contract_mc.methods.setApprovalForAll(address_Murasaki_Market_Item, true).send({from:wallet});
 }
 async function approve_buyback() {
     await contract_mc.methods.setApprovalForAll(address_BuybackTreasury, true).send({from:wallet});
 }
 
 async function transfer_item() {
+    let _fee = await contract_mc.methods.getTransferFee(0).call();
     let _item = document.getElementById("transfer_item_id").value;
     let _to_summoner = document.getElementById("transfer_summoner").value;
     let _to_wallet = await contract_mm.methods.ownerOf(_to_summoner).call();
-    contract_mc.methods.safeTransferFrom(wallet, _to_wallet, _item).send({from:wallet});
+    contract_mc.methods.safeTransferFrom(wallet, _to_wallet, _item).send({from:wallet, value: _fee});
 }
 
 //transfer item
@@ -444,7 +578,7 @@ async function check_approve_upgrade() {
     
 //check_approve
 async function check_approve() {
-    let _res = await contract_mc_wss.methods.isApprovedForAll(wallet, address_Murasaki_Item_Market).call();
+    let _res = await contract_mc_wss.methods.isApprovedForAll(wallet, address_Murasaki_Market_Item).call();
     //console.log(_res);
     if (_res == true) {
         document.getElementById("button_approve").disabled = true;
@@ -466,6 +600,9 @@ async function check_approve_buyback() {
 async function get_recent_activity() {
     let _block_latest = await web3.eth.getBlockNumber();
     let _block_from = _block_latest - 10000;
+    if (_block_from < 1) {
+        _block_from = 1;
+    }
     let events = await contract_mmt_wss.getPastEvents("Buy", {
             fromBlock: _block_from,
             toBlock: _block_latest

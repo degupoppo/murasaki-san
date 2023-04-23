@@ -1,41 +1,19 @@
 {
-  "name": "AstarCats#6312",
-  "description": "AstarCats is the first cats NFT collection on Astar Network.\nAstarCats is not just another PFP project, but it comes with many utilities and holder benefits planned ahead!\nOur ultimate mission is to support promising projects on Astar Network by providing our creative resources.",
-  "external_url": "https://astarcats.xyz/",
-  "image": "https://arweave.net/wYdhZ2VnSfp1snktcjfUi4maEJ_3ZynQCxLSyERzopI/6312.png",
-  "background_color": "FFFFFF",
-  "attributes": [
-    {
-      "trait_type": "Background",
-      "value": "Blue"
-    },
-    {
-      "trait_type": "Body",
-      "value": "Yellow"
-    },
-    {
-      "trait_type": "Clothes",
-      "value": "Shirt Mint"
-    },
-    {
-      "trait_type": "Face",
-      "value": "Yellow"
-    },
-    {
-      "trait_type": "Special",
-      "value": "Angel Blue"
-    },
-    {
-      "trait_type": "Mouth",
-      "value": "Neutral"
-    },
-    {
-      "trait_type": "Hat",
-      "value": "Apricot Flower"
-    },
-    {
-      "trait_type": "Eyes",
-      "value": "Squint"
-    }
-  ]
+    "name": "House of Murasaki-san Item NFT",
+    "description": "House of Murasaki-san (HoM) is a dApp game built on Astar Network.\nMurasaki-san is a virtual pet living in your Astar EVM wallet.\nhttps://murasaki-san.com/",
+    "image": "https://murasaki-san.com/src/png/item_kanban4.png",
+    "attributes": [
+        {
+            "trait_type": "Type",
+            "value": 1
+        },
+        {
+            "trait_type": "Level",
+            "value": 1
+        },
+        {
+            "trait_type": "Effect",
+            "value": "STR+1"
+        }
+    ]
 }

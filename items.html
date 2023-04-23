@@ -1,0 +1,196 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<script src="lib/web3.min.js"></script>
+<script src="src/js/array_item.js"></script>
+<script src="src/js/share.js"></script>
+<script> init_web3(); </script>
+<script src="src/js/market.js"></script>
+
+<head>
+	<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=0.7">
+	<title>Murasaki-san Item Market</title>
+	<link rel="stylesheet" type="text/css" href="lib/datatables.min.css"/>
+	<script type="text/javascript" language="javascript" src="lib/jquery-3.6.0.min.js"></script>
+	<script type="text/javascript" language="javascript" src="lib/datatables.min.js"></script>
+    <link rel="stylesheet" href="src/css/simple.css">
+    <link rel="stylesheet" href="src/css/style.css">
+    <link rel="stylesheet" href="src/css/datatable.css">
+    <link rel="icon" href="src/png/favicon.png" />
+    <link rel="apple-touch-icon" href="src/png/favicon.png">
+</head>
+
+<body>
+
+<header>
+    <nav>
+      <a href="index.html"><b>&#x1f3e0; Home</b></a>
+      <a href="house.html" ><b>&#x1f497; Play</b></a>
+      <a href="market.html"><b>&#x1f6d2; Market</b></a>
+      <a href="https://twitter.com/degupoppo" >Twitter</a>
+      <a href="https://github.com/degupoppo/murasakisan/" >GitHub</a>
+    </nav>
+    <h1>
+        <img src="src/png/item_basic_sweet_potato.png" width="40" height="40">
+        Item Details
+        <img src="src/png/item_basic_sweet_potato.png" width="40" height="40">
+    </h1>
+    <p><center>
+        All item details are described here.<br>
+    </center></p>
+</header>
+
+<main>
+
+<p>
+<h4><u>Nameplate</u>&nbsp;<img src="src/png/item_kanban4.png" width="50" height="50"></h4>
+<b>Item type:&nbsp;</b><font color="blue">001</font> (Uncommon: <font color="blue">065</font>, Rare: <font color="blue">129</font>)<br>
+<b>Crafting cost:&nbsp;</b><font color="blue"><img src="src/png/icon_system_ohana.png" width="25" height="25">1000</font> / <font color="blue"><img src="src/png/icon_system_kusa.png" width="25" height="25">100</font> / <font color="blue"><img src="src/png/icon_system_clock.png" width="18" height="18">1440 </font>min (DC: <font color="blue">3000</font>)<br>
+<b>Status boost:&nbsp;</b><img src="src/png/icon_status_str.png" width="30" height="30"><font color="blue">+1</font><br>
+<b>Description:</b>&nbsp;You can name your Murasaki-san by minting a name SBT to your wallet. The cost of maning is 100 coins and 100 leaves. The name can be a maximum of 12 characters, and is case sensitive. Only the characters a-z, A-Z, 0-9, and space are allowed. Duplicate names are not allowed.
+</p><br>
+
+<p>
+<h4><u>Mr.Astar</u>&nbsp;<img src="src/icon/mr_astar.png" width="50" height="50"></h4>
+<b>Item type:&nbsp;</b><font color="blue">002</font> (Uncommon: <font color="blue">066</font>, Rare: <font color="blue">130</font>)<br>
+<b>Crafting cost:&nbsp;</b><font color="blue"><img src="src/png/icon_system_ohana.png" width="25" height="25">2400</font> / <font color="blue"><img src="src/png/icon_system_kusa.png" width="25" height="25">240</font> / <font color="blue"><img src="src/png/icon_system_clock.png" width="18" height="18">2880 </font>min (DC: <font color="blue">6000</font>)<br>
+<b>Status boost:&nbsp;</b><img src="src/png/icon_status_str.png" width="30" height="30"><font color="blue">+1</font><br>
+<b>Description:</b>&nbsp;You will meet a little roommate who will work together with your Murasaki-san while mining. There are three types of little roommates, and Mr.Astar is one of them. Sometimes he enjoys interacting with your Murasaki-san.
+</p><br>
+
+<p>
+<h4><u>Onigiri</u>&nbsp;<img src="src/png/item_food_onigiri.png" width="50" height="50"></h4>
+<b>Item type:&nbsp;</b><font color="blue">003</font> (Uncommon: <font color="blue">067</font>, Rare: <font color="blue">131</font>)<br>
+<b>Crafting cost:&nbsp;</b><font color="blue"><img src="src/png/icon_system_ohana.png" width="25" height="25">4050</font> / <font color="blue"><img src="src/png/icon_system_kusa.png" width="25" height="25">405</font> / <font color="blue"><img src="src/png/icon_system_clock.png" width="18" height="18">4320 </font>min (DC: <font color="blue">10000</font>)<br>
+<b>Status boost:&nbsp;</b><img src="src/png/icon_status_str.png" width="30" height="30"><font color="blue">+1</font><br>
+<b>Description:</b>&nbsp;Feeding for your Murasaki-san will be more luxurious (but the amount of exp gained will not change ;) You can give delicious-looking onigiri for Your Murasaki-san.
+</p><br>
+
+<p>
+<h4><u>Helmet</u>&nbsp;<img src="src/png/item_hat_helmet.png" width="50" height="50"></h4>
+<b>Item type:&nbsp;</b><font color="blue">004</font> (Uncommon: <font color="blue">068</font>, Rare: <font color="blue">132</font>)<br>
+<b>Crafting cost:&nbsp;</b><font color="blue"><img src="src/png/icon_system_ohana.png" width="25" height="25">4500</font> / <font color="blue"><img src="src/png/icon_system_kusa.png" width="25" height="25">450</font> / <font color="blue"><img src="src/png/icon_system_clock.png" width="18" height="18">4320 </font>min (DC: <font color="blue">15000</font>)<br>
+<b>Status boost:&nbsp;</b><img src="src/png/icon_status_str.png" width="30" height="30"><font color="blue">+1</font><br>
+<b>Description:</b>&nbsp;A wearable helmet will be placed in your house. By clicking on it, you can put the helmet on your Murasaki-san. There are three types of hats, and Murasaki-san can wear only one at a time. Murasaki-san loves to wear hats :)
+</p><br>
+
+<p>
+<h4><u>Lucky Dice</u>&nbsp;<img src="src/png/item_dice.png" width="50" height="50"></h4>
+<b>Item type:&nbsp;</b><font color="blue">005</font> (Uncommon: <font color="blue">069</font>, Rare: <font color="blue">133</font>)<br>
+<b>Crafting cost:&nbsp;</b><font color="blue"><img src="src/png/icon_system_ohana.png" width="25" height="25">4950</font> / <font color="blue"><img src="src/png/icon_system_kusa.png" width="25" height="25">495</font> / <font color="blue"><img src="src/png/icon_system_clock.png" width="18" height="18">4320 </font>min (DC: <font color="blue">21000</font>)<br>
+<b>Status boost:&nbsp;</b><img src="src/png/icon_status_str.png" width="30" height="30"><font color="blue">+1</font><br>
+<b>Description:</b>&nbsp;A 20-sided dice will be placed in your house, and you can roll it once per day to get a new dice roll (transaction occurs). Your Murasaki-san's luck will increase for the day depending on the dice roll (specifically, 1/10 of the moving average of the last 3 dice rolls).
+</p><br>
+
+<p>
+<h4><u>Wall Sticker</u>&nbsp;<img src="src/icon/wall_sticker.png" width="50" height="50"></h4>
+<b>Item type:&nbsp;</b><font color="blue">006</font> (Uncommon: <font color="blue">070</font>, Rare: <font color="blue">134</font>)<br>
+<b>Crafting cost:&nbsp;</b><font color="blue"><img src="src/png/icon_system_ohana.png" width="25" height="25">5400</font> / <font color="blue"><img src="src/png/icon_system_kusa.png" width="25" height="25">540</font> / <font color="blue"><img src="src/png/icon_system_clock.png" width="18" height="18">4320 </font>min (DC: <font color="blue">28000</font>)<br>
+<b>Status boost:&nbsp;</b><img src="src/png/icon_status_str.png" width="30" height="30"><font color="blue">+1</font><br>
+<b>Description:</b>&nbsp;The walls of your house will be adorned with tree stickers. The level of sticker luxury will correspond to your house score, with a total of 12 levels available. The higher level stickers will glows at night.
+</p><br>
+
+<p>
+<h4><u>Hammock</u>&nbsp;<img src="src/icon/item_hammock.png" width="50" height="50"></h4>
+<b>Item type:&nbsp;</b><font color="blue">007</font> (Uncommon: <font color="blue">071</font>, Rare: <font color="blue">135</font>)<br>
+<b>Crafting cost:&nbsp;</b><font color="blue"><img src="src/png/icon_system_ohana.png" width="25" height="25">5850</font> / <font color="blue"><img src="src/png/icon_system_kusa.png" width="25" height="25">585</font> / <font color="blue"><img src="src/png/icon_system_clock.png" width="18" height="18">4320 </font>min (DC: <font color="blue">36000</font>)<br>
+<b>Status boost:&nbsp;</b><img src="src/png/icon_status_str.png" width="30" height="30"><font color="blue">+1</font><br>
+<b>Description:</b>&nbsp;A freestanding hammock will be placed in your house, and Murasaki-san will sleep on it at night.
+</p><br>
+
+<p>
+<h4><u>Token Chest</u>&nbsp;<img src="src/icon/item_tokenChest.png" width="50" height="50"></h4>
+<b>Item type:&nbsp;</b><font color="blue">008</font> (Uncommon: <font color="blue">072</font>, Rare: <font color="blue">136</font>)<br>
+<b>Crafting cost:&nbsp;</b><font color="blue"><img src="src/png/icon_system_ohana.png" width="25" height="25">6300</font> / <font color="blue"><img src="src/png/icon_system_kusa.png" width="25" height="25">630</font> / <font color="blue"><img src="src/png/icon_system_clock.png" width="18" height="18">4320 </font>min (DC: <font color="blue">45000</font>)<br>
+<b>Status boost:&nbsp;</b><img src="src/png/icon_status_str.png" width="30" height="30"><font color="blue">+1</font><br>
+<b>Description:</b>&nbsp;A chest will be placed in your house. When you click to open it, token balls will pop out based on the number of tokens in your wallet (for example, if you have $SDN token in your wallet, a $SDN token ball will pop out). Murasaki-san will play by kicking these balls.
+</p><br>
+
+<p>
+<h4><u>Knit Hat</u>&nbsp;<img src="src/png/item_hat_knit.png" width="50" height="50"></h4>
+<b>Item type:&nbsp;</b><font color="blue">009</font> (Uncommon: <font color="blue">073</font>, Rare: <font color="blue">137</font>)<br>
+<b>Crafting cost:&nbsp;</b><font color="blue"><img src="src/png/icon_system_ohana.png" width="25" height="25">9000</font> / <font color="blue"><img src="src/png/icon_system_kusa.png" width="25" height="25">900</font> / <font color="blue"><img src="src/png/icon_system_clock.png" width="18" height="18">5760 </font>min (DC: <font color="blue">55000</font>)<br>
+<b>Status boost:&nbsp;</b><img src="src/png/icon_status_str.png" width="30" height="30"><font color="blue">+1</font><br>
+<b>Description:</b>&nbsp;A wearable kinit hat will be placed in your house. Clicking on it allows you to put the hat on your pets (Mr.Astar, Ms.Ether, or Dr.Bitco). Pets also love to wear hats :)
+</p><br>
+
+<p>
+<h4><u>House of Fluffy</u>&nbsp;<img src="src/png/item_fluffy_house_1.png" width="50" height="50"></h4>
+<b>Item type:&nbsp;</b><font color="blue">010</font> (Uncommon: <font color="blue">074</font>, Rare: <font color="blue">138</font>)<br>
+<b>Crafting cost:&nbsp;</b><font color="blue"><img src="src/png/icon_system_ohana.png" width="25" height="25">9600</font> / <font color="blue"><img src="src/png/icon_system_kusa.png" width="25" height="25">960</font> / <font color="blue"><img src="src/png/icon_system_clock.png" width="18" height="18">5760 </font>min (DC: <font color="blue">66000</font>)<br>
+<b>Status boost:&nbsp;</b><img src="src/png/icon_status_str.png" width="30" height="30"><font color="blue">+1</font><br>
+<b>Description:</b>&nbsp;A fluffy blanket will be placed in your house, and your fluffies will stick it. By clicking on it, sticked fluffies will pop out from the blanket and your Murasaki-san will be happy.
+</p><br>
+
+<p>
+<h4><u>Crown</u>&nbsp;<img src="src/icon/item_crown.png" width="50" height="50"></h4>
+<b>Item type:&nbsp;</b><font color="blue">011</font> (Uncommon: <font color="blue">075</font>, Rare: <font color="blue">139</font>)<br>
+<b>Crafting cost:&nbsp;</b><font color="blue"><img src="src/png/icon_system_ohana.png" width="25" height="25">10200</font> / <font color="blue"><img src="src/png/icon_system_kusa.png" width="25" height="25">1020</font> / <font color="blue"><img src="src/png/icon_system_clock.png" width="18" height="18">5760 </font>min (DC: <font color="blue">78000</font>)<br>
+<b>Status boost:&nbsp;</b><img src="src/png/icon_status_str.png" width="30" height="30"><font color="blue">+1</font><br>
+<b>Description:</b>&nbsp;A shiny crown will be placed on the bear. When you click it, it will start to blink.
+</p><br>
+
+<p>
+<h4><u>Clarinet</u>&nbsp;<img src="src/png/item_clarinet.png" width="50" height="50"></h4>
+<b>Item type:&nbsp;</b><font color="blue">012</font> (Uncommon: <font color="blue">076</font>, Rare: <font color="blue">140</font>)<br>
+<b>Crafting cost:&nbsp;</b><font color="blue"><img src="src/png/icon_system_ohana.png" width="25" height="25">10800</font> / <font color="blue"><img src="src/png/icon_system_kusa.png" width="25" height="25">1080</font> / <font color="blue"><img src="src/png/icon_system_clock.png" width="18" height="18">5760 </font>min (DC: <font color="blue">91000</font>)<br>
+<b>Status boost:&nbsp;</b><img src="src/png/icon_status_str.png" width="30" height="30"><font color="blue">+1</font><br>
+<b>Description:</b>&nbsp;A clarinet will be placed in your house, and once you have at least one instrument, your Murasaki-san can begin practicing. It takes a long time to master the instrument, and the difficulty of mastering each instrument is the same. However, higher STR and using higher rarity insturument will increase efficiency of the practice of clarinet.
+</p><br>
+
+<p>
+<h4><u>Horn</u>&nbsp;<img src="src/png/item_horn.png" width="50" height="50"></h4>
+<b>Item type:&nbsp;</b><font color="blue">013</font> (Uncommon: <font color="blue">077</font>, Rare: <font color="blue">141</font>)<br>
+<b>Crafting cost:&nbsp;</b><font color="blue"><img src="src/png/icon_system_ohana.png" width="25" height="25">11400</font> / <font color="blue"><img src="src/png/icon_system_kusa.png" width="25" height="25">1140</font> / <font color="blue"><img src="src/png/icon_system_clock.png" width="18" height="18">7200 </font>min (DC: <font color="blue">105000</font>)<br>
+<b>Status boost:&nbsp;</b><img src="src/png/icon_status_str.png" width="30" height="30"><font color="blue">+1</font><br>
+<b>Description:</b>&nbsp;A horn will be placed in your house, and once you have at least one instrument, your Murasaki-san can begin practicing. It takes a long time to master the instrument, and tha difficulty of mastering each instrument is the same. However, higher STR and using higher rarity insturument will increase efficiency of the practice of horn.
+</p><br>
+
+<p>
+<h4><u>Cake</u>&nbsp;<img src="src/png/item_food_cake.png" width="50" height="50"></h4>
+<b>Item type:&nbsp;</b><font color="blue">014</font> (Uncommon: <font color="blue">078</font>, Rare: <font color="blue">142</font>)<br>
+<b>Crafting cost:&nbsp;</b><font color="blue"><img src="src/png/icon_system_ohana.png" width="25" height="25">15000</font> / <font color="blue"><img src="src/png/icon_system_kusa.png" width="25" height="25">1500</font> / <font color="blue"><img src="src/png/icon_system_clock.png" width="18" height="18">7200 </font>min (DC: <font color="blue">120000</font>)<br>
+<b>Status boost:&nbsp;</b><img src="src/png/icon_status_str.png" width="30" height="30"><font color="blue">+1</font><br>
+<b>Description:</b>&nbsp;Feeding for your Murasaki-san will be more luxurious (but the amount of exp gained will not change ;) You can give yummy-looking cake for Your Murasaki-san.
+</p><br>
+
+<p>
+<h4><u>Fortune Statue</u>&nbsp;<img src="src/png/item_fortune_statue.png" width="50" height="50"></h4>
+<b>Item type:&nbsp;</b><font color="blue">015</font> (Uncommon: <font color="blue">079</font>, Rare: <font color="blue">143</font>)<br>
+<b>Crafting cost:&nbsp;</b><font color="blue"><img src="src/png/icon_system_ohana.png" width="25" height="25">18900</font> / <font color="blue"><img src="src/png/icon_system_kusa.png" width="25" height="25">1890</font> / <font color="blue"><img src="src/png/icon_system_clock.png" width="18" height="18">8640 </font>min (DC: <font color="blue">136000</font>)<br>
+<b>Status boost:&nbsp;</b><img src="src/png/icon_status_str.png" width="30" height="30"><font color="blue">+1</font><br>
+<b>Description:</b>&nbsp;A statue will be placed in your house. This stone statue is said to bring good luck and happiness to your house (although in reality, it has no effect other than increasing STR by 1 ;) Its eyes may shine at night...
+</p><br>
+
+<p>
+<h4><u>Door of Travel</u>&nbsp;<img src="src/icon/icon_clock.png" width="30" height="30"></h4>
+<b>Item type:&nbsp;</b><font color="blue">016</font> (Uncommon: <font color="blue">080</font>, Rare: <font color="blue">144</font>)<br>
+<b>Crafting cost:&nbsp;</b><font color="blue"><img src="src/png/icon_system_ohana.png" width="25" height="25">23100</font> / <font color="blue"><img src="src/png/icon_system_kusa.png" width="25" height="25">2310</font> / <font color="blue"><img src="src/png/icon_system_clock.png" width="18" height="18">10080 </font>min (DC: <font color="blue">153000</font>)<br>
+<b>Status boost:&nbsp;</b><img src="src/png/icon_status_str.png" width="30" height="30"><font color="blue">+1</font><br>
+<b>Description:</b>&nbsp;Comming soon.
+</p><br>
+
+
+</main>
+
+<footer>
+        Developper's wallet: 0x2F7448B62134e52C2f46454d0089Ae21B5248805<br>
+        Donation:
+        &nbsp;
+        <button style="height:28px;font-size:80%" onclick="donate(1);">
+            <script type="text/javascript">write_icon(1)</script>&nbsp;1 $ASTR
+        </button>
+        &nbsp;
+        <button style="height:28px;font-size:80%" onclick="donate(10);">
+            <script type="text/javascript">write_icon(10)</script>&nbsp;10 $ASTR
+        </button>
+        &nbsp;
+        <button style="height:28px;font-size:80%" onclick="donate(100);">
+            <script type="text/javascript">write_icon(100)</script>&nbsp;100 $ASTR
+        </button>
+</footer>
+
+</body>
+</html>
