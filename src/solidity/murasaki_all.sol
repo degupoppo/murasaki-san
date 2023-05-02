@@ -185,7 +185,7 @@ interface IERC2665 /* is ERC165, is ERC721 but overide it's Design by contract s
  * @title ERC-721 Non-Fungible Token Standard, optional metadata extension
  * @dev See https://eips.ethereum.org/EIPS/eip-721
  */
-interface IERC2665Metadata is IERC2665 {//IERC721Metadata is IERC721 {
+interface IERC2665Metadata is IERC2665 { //IERC721Metadata is IERC721 {
     /**
      * @dev Returns the token collection name.
      */
@@ -211,7 +211,7 @@ interface IERC2665Metadata is IERC2665 {//IERC721Metadata is IERC721 {
 // @dev of HoM: the IERC2665 interface. Additionally, a new function called "getTransferFee" 
 // @dev of HoM: has been added to match the IERC2665 interface. "ERC721.ownerOf(tokenId)"
 // @dev of HoM: codes have also been replaced to "ERC2665.ownerOf(tokenId)". 
-// @dev of HoM: The collowing code is based on the ERC721.sol code from OpenZeppelin:
+// @dev of HoM: The following code is based on the ERC721.sol code from OpenZeppelin:
 // @dev of HoM: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC721/ERC721.sol
 
 /**
@@ -727,11 +727,472 @@ abstract contract SoulBoundBadge is ERC721 {
 }
 
 
+//=== All-in ==================================================================================================================
+
+
+//---Murasakisan
+
+
+interface IMurasakisan {
+
+    // Murasaki-san ID of the wallet
+    function summoner   (address _wallet) external view returns (uint);
+
+    // Basic informations of Murasaki-san
+    function class  (address _wallet) external view returns (uint);
+    function age    (address _wallet) external view returns (uint);
+    function name   (address _wallet) external view returns (string memory);
+    function level  (address _wallet) external view returns (uint);
+
+    // Character of Murasaki-san
+    function birthplace  (address _wallet) external view returns (string memory);
+    function character   (address _wallet) external view returns (string memory);
+    function weakpoint   (address _wallet) external view returns (string memory);
+    function scent       (address _wallet) external view returns (string memory);
+    function personality (address _wallet) external view returns (string memory);
+    function flower      (address _wallet) external view returns (string memory);
+
+    // Address of the house
+    function street      (address _wallet) external view returns (string memory);
+    function city        (address _wallet) external view returns (string memory);
+
+    // Status
+    function strength       (address _wallet) external view returns (uint);
+    function dexterity      (address _wallet) external view returns (uint);
+    function intelligence   (address _wallet) external view returns (uint);
+    function luck           (address _wallet) external view returns (uint);
+
+    // Status adjusted for item effects
+    function strength_withItems      (address _wallet) external view returns (uint);
+    function dexterity_withItems     (address _wallet) external view returns (uint);
+    function intelligence_withItems  (address _wallet) external view returns (uint);
+    function luck_withItems          (address _wallet) external view returns (uint);
+    function luck_withItems_withDice (address _wallet) external view returns (uint);
+    
+    // Current parameters of Murasaki-san
+    function satiety    (address _wallet) external view returns (uint);
+    function happy      (address _wallet) external view returns (uint);
+    function exp        (address _wallet) external view returns (uint);
+    function coin       (address _wallet) external view returns (uint);
+    function leaf       (address _wallet) external view returns (uint);
+    function fluffy     (address _wallet) external view returns (uint);
+    function score      (address _wallet) external view returns (uint);
+
+    // Total counts
+    function total_exp_gained       (address _wallet) external view returns (uint);
+    function total_coin_mined       (address _wallet) external view returns (uint);
+    function total_leaf_farmed      (address _wallet) external view returns (uint);
+    function total_item_crafted     (address _wallet) external view returns (uint);
+    function total_fluffy_received  (address _wallet) external view returns (uint);
+
+    // Other parameters
+    function not_petrified  (address _wallet) external view returns (uint);
+    function isActive       (address _wallet) external view returns (uint);
+    function inHouse        (address _wallet) external view returns (uint);
+    
+    // Achievements
+    function countOf_achievement            (address _wallet) external view returns (uint);
+    function scoreOf_achievement_onChain    (address _wallet) external view returns (uint);
+
+    // Practice
+    function clarinet_level  (address _wallet) external view returns (uint);
+    function piano_level     (address _wallet) external view returns (uint);
+    function violin_level    (address _wallet) external view returns (uint);
+    function horn_level      (address _wallet) external view returns (uint);
+    function timpani_level   (address _wallet) external view returns (uint);
+    function harp_level      (address _wallet) external view returns (uint);
+    
+    // Stroll
+    function total_strolledDistance (address _wallet) external view returns (uint);
+    function total_metSummoners     (address _wallet) external view returns (uint);
+    
+    // Mail
+    function total_mail_sent    (address _wallet) external view returns (uint);
+    function total_mail_opened  (address _wallet) external view returns (uint);
+    
+    // Festival
+    function total_voted (address _wallet) external view returns (uint);
+    
+    // Dice
+    function critical_count (address _wallet) external view returns (uint);
+    function fumble_count   (address _wallet) external view returns (uint);
+    
+    // Doing now
+    function doing_now (address _wallet) external view returns (string memory);
+
+    // Mimic ERC721 and ERC165 interface for compatibility with Metamask etc.
+    function name() external view returns (string memory);
+    function symbol() external view returns (string memory);
+    function ownerOf(uint256 _tokenId) external view returns (address);
+    function tokenURI(uint256 _tokenId) external view returns (string memory);
+    function supportsInterface(bytes4 interfaceId) external view returns (bool);
+}
+
+
+contract Murasakisan is Ownable, IMurasakisan {
+
+    //address
+    address public address_Murasaki_Address;
+    function _set_Murasaki_Address(address _address) external onlyOwner {
+        address_Murasaki_Address = _address;
+    }
+    
+    //address, get Murasaki_Info address
+    function _get_info_address() internal view returns (address) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        return ma.address_Murasaki_Info();
+    }
+
+    //summoner
+    function summoner(address _wallet) public view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Main mm = Murasaki_Main(ma.address_Murasaki_Main());
+        Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
+        uint _summoner = mm.tokenOf(_wallet);
+        if (_summoner == 0) {
+            return 0;
+        }
+        bool _isActive = ms.isActive(_summoner);
+        if (_isActive) {
+            return _summoner;
+        } else {
+            return 0;
+        }
+    }
+    
+    //class
+    function class(address _wallet) external view returns (uint) {
+        Murasaki_Info mi = Murasaki_Info(_get_info_address());
+        return mi.class(summoner(_wallet));
+    }
+    //age
+    function age(address _wallet) external view returns (uint) {
+        Murasaki_Info mi = Murasaki_Info(_get_info_address());
+        return mi.age(summoner(_wallet));
+    }
+    //name
+    function name(address _wallet) external view returns (string memory) {
+        Murasaki_Info mi = Murasaki_Info(_get_info_address());
+        return mi.name(summoner(_wallet));
+    }
+    //level
+    function level(address _wallet) external view returns (uint) {
+        Murasaki_Info mi = Murasaki_Info(_get_info_address());
+        return mi.level(summoner(_wallet));
+    }
+    //exp
+    function exp(address _wallet) external view returns (uint) {
+        Murasaki_Info mi = Murasaki_Info(_get_info_address());
+        return mi.exp(summoner(_wallet));
+    }
+    //strength
+    function strength(address _wallet) external view returns (uint) {
+        Murasaki_Info mi = Murasaki_Info(_get_info_address());
+        return mi.strength(summoner(_wallet));
+    }
+    //dexterity
+    function dexterity(address _wallet) external view returns (uint) {
+        Murasaki_Info mi = Murasaki_Info(_get_info_address());
+        return mi.dexterity(summoner(_wallet));
+    }
+    //intelligence
+    function intelligence(address _wallet) external view returns (uint) {
+        Murasaki_Info mi = Murasaki_Info(_get_info_address());
+        return mi.intelligence(summoner(_wallet));
+    }
+    //luck
+    function luck(address _wallet) external view returns (uint) {
+        Murasaki_Info mi = Murasaki_Info(_get_info_address());
+        return mi.luck(summoner(_wallet));
+    }
+    //coin
+    function coin(address _wallet) external view returns (uint) {
+        Murasaki_Info mi = Murasaki_Info(_get_info_address());
+        return mi.coin(summoner(_wallet));
+    }
+    //leaf
+    function leaf(address _wallet) external view returns (uint) {
+        Murasaki_Info mi = Murasaki_Info(_get_info_address());
+        return mi.material(summoner(_wallet));
+    }
+    //total_exp_gained
+    function total_exp_gained(address _wallet) external view returns (uint) {
+        Murasaki_Info mi = Murasaki_Info(_get_info_address());
+        return mi.total_exp_gained(summoner(_wallet));
+    }
+    //total_coin_mined
+    function total_coin_mined(address _wallet) external view returns (uint) {
+        Murasaki_Info mi = Murasaki_Info(_get_info_address());
+        return mi.total_coin_mined(summoner(_wallet));
+    }
+    //total_leaf_farmed
+    function total_leaf_farmed(address _wallet) external view returns (uint) {
+        Murasaki_Info mi = Murasaki_Info(_get_info_address());
+        return mi.total_material_farmed(summoner(_wallet));
+    }
+    //total_item_crafted
+    function total_item_crafted(address _wallet) external view returns (uint) {
+        Murasaki_Info mi = Murasaki_Info(_get_info_address());
+        return mi.total_item_crafted(summoner(_wallet));
+    }
+    //total_fluffy_received
+    function total_fluffy_received(address _wallet) external view returns (uint) {
+        Murasaki_Info mi = Murasaki_Info(_get_info_address());
+        return mi.total_precious_received(summoner(_wallet));
+    }
+    //satiety
+    function satiety(address _wallet) external view returns (uint) {
+        Murasaki_Info mi = Murasaki_Info(_get_info_address());
+        return mi.satiety(summoner(_wallet));
+    }
+    //happy
+    function happy(address _wallet) external view returns (uint) {
+        Murasaki_Info mi = Murasaki_Info(_get_info_address());
+        return mi.happy(summoner(_wallet));
+    }
+    //precious
+    function fluffy(address _wallet) external view returns (uint) {
+        Murasaki_Info mi = Murasaki_Info(_get_info_address());
+        return mi.precious(summoner(_wallet));
+    }
+    //not_petrified
+    function not_petrified(address _wallet) external view returns (uint) {
+        Murasaki_Info mi = Murasaki_Info(_get_info_address());
+        return mi.not_petrified(summoner(_wallet));
+    }
+    //score
+    function score(address _wallet) external view returns (uint) {
+        Murasaki_Info mi = Murasaki_Info(_get_info_address());
+        return mi.score(summoner(_wallet));
+    }
+    //strength_withItems
+    function strength_withItems(address _wallet) external view returns (uint) {
+        Murasaki_Info mi = Murasaki_Info(_get_info_address());
+        return mi.strength_withItems(summoner(_wallet));
+    }
+    //dexterity_withItems
+    function dexterity_withItems(address _wallet) external view returns (uint) {
+        Murasaki_Info mi = Murasaki_Info(_get_info_address());
+        return mi.dexterity_withItems(summoner(_wallet));
+    }
+    //intelligence_withItems
+    function intelligence_withItems(address _wallet) external view returns (uint) {
+        Murasaki_Info mi = Murasaki_Info(_get_info_address());
+        return mi.intelligence_withItems(summoner(_wallet));
+    }
+    //luck_withItems
+    function luck_withItems(address _wallet) external view returns (uint) {
+        Murasaki_Info mi = Murasaki_Info(_get_info_address());
+        return mi.luck_withItems(summoner(_wallet));
+    }
+    //luck_withItems_withDice
+    function luck_withItems_withDice(address _wallet) external view returns (uint) {
+        Murasaki_Info mi = Murasaki_Info(_get_info_address());
+        return mi.luck_withItems_withDice(summoner(_wallet));
+    }
+    //isActive
+    function isActive(address _wallet) external view returns (uint) {
+        Murasaki_Info mi = Murasaki_Info(_get_info_address());
+        return mi.isActive(summoner(_wallet));
+    }
+    //inHouse
+    function inHouse(address _wallet) external view returns (uint) {
+        Murasaki_Info mi = Murasaki_Info(_get_info_address());
+        return mi.inHouse(summoner(_wallet));
+    }
+    //birthplace
+    function birthplace(address _wallet) external view returns (string memory) {
+        Murasaki_Info mi = Murasaki_Info(_get_info_address());
+        return mi.allStatus(summoner(_wallet))[0];
+    }
+    //character
+    function character(address _wallet) external view returns (string memory) {
+        Murasaki_Info mi = Murasaki_Info(_get_info_address());
+        return mi.allStatus(summoner(_wallet))[1];
+    }
+    //weakpoint
+    function weakpoint(address _wallet) external view returns (string memory) {
+        Murasaki_Info mi = Murasaki_Info(_get_info_address());
+        return mi.allStatus(summoner(_wallet))[3];
+    }
+    //scent
+    function scent(address _wallet) external view returns (string memory) {
+        Murasaki_Info mi = Murasaki_Info(_get_info_address());
+        return mi.allStatus(summoner(_wallet))[4];
+    }
+    //personality
+    function personality(address _wallet) external view returns (string memory) {
+        Murasaki_Info mi = Murasaki_Info(_get_info_address());
+        return mi.allStatus(summoner(_wallet))[2];
+    }
+    //flower
+    function flower(address _wallet) external view returns (string memory) {
+        Murasaki_Info mi = Murasaki_Info(_get_info_address());
+        return mi.allStatus(summoner(_wallet))[5];
+    }
+    //street
+    function street(address _wallet) external view returns (string memory) {
+        Murasaki_Info mi = Murasaki_Info(_get_info_address());
+        return mi.allStatus(summoner(_wallet))[6];
+    }
+    //city
+    function city(address _wallet) external view returns (string memory) {
+        Murasaki_Info mi = Murasaki_Info(_get_info_address());
+        return mi.allStatus(summoner(_wallet))[7];
+    }
+    
+    //achievement
+    function countOf_achievement (address _wallet) external view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Main mm = Murasaki_Main(ma.address_Murasaki_Main());
+        Murasaki_Function_Achievement mfa = Murasaki_Function_Achievement(ma.address_Murasaki_Function_Achievement());
+        uint _summoner = mm.tokenOf(_wallet);
+        return mfa.get_countOf_achievement(_summoner);
+    }
+    function scoreOf_achievement_onChain (address _wallet) external view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Main mm = Murasaki_Main(ma.address_Murasaki_Main());
+        Achievement_onChain ac = Achievement_onChain(ma.address_Achievement_onChain());
+        uint _summoner = mm.tokenOf(_wallet);
+        return ac.get_score(_summoner);
+    }
+
+    //practice
+    function clarinet_level (address _wallet) external view returns (uint) {
+        Murasaki_Info mi = Murasaki_Info(_get_info_address());
+        return mi.get_practiceLevel_clarinet(summoner(_wallet));
+    }
+    function piano_level (address _wallet) external view returns (uint) {
+        Murasaki_Info mi = Murasaki_Info(_get_info_address());
+        return mi.get_practiceLevel_piano(summoner(_wallet));
+    }
+    function violin_level (address _wallet) external view returns (uint) {
+        Murasaki_Info mi = Murasaki_Info(_get_info_address());
+        return mi.get_practiceLevel_violin(summoner(_wallet));
+    }
+    function horn_level (address _wallet) external view returns (uint) {
+        Murasaki_Info mi = Murasaki_Info(_get_info_address());
+        return mi.get_practiceLevel_horn(summoner(_wallet));
+    }
+    function timpani_level (address _wallet) external view returns (uint) {
+        Murasaki_Info mi = Murasaki_Info(_get_info_address());
+        return mi.get_practiceLevel_timpani(summoner(_wallet));
+    }
+    function harp_level (address _wallet) external view returns (uint) {
+        Murasaki_Info mi = Murasaki_Info(_get_info_address());
+        return mi.get_practiceLevel_harp(summoner(_wallet));
+    }
+    
+    //stroll
+    function total_strolledDistance (address _wallet) external view returns (uint) {
+        Murasaki_Info mi = Murasaki_Info(_get_info_address());
+        return mi.total_strolledDistance(summoner(_wallet));
+    }
+    function total_metSummoners (address _wallet) external view returns (uint) {
+        Murasaki_Info mi = Murasaki_Info(_get_info_address());
+        return mi.total_metSummoners(summoner(_wallet));
+    }
+    
+    //mail
+    function total_mail_sent (address _wallet) external view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Main mm = Murasaki_Main(ma.address_Murasaki_Main());
+        Murasaki_Mail mml = Murasaki_Mail(ma.address_Murasaki_Mail());
+        uint _summoner = mm.tokenOf(_wallet);
+        return mml.total_sent(_summoner);
+    }
+    function total_mail_opened  (address _wallet) external view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Main mm = Murasaki_Main(ma.address_Murasaki_Main());
+        Murasaki_Mail mml = Murasaki_Mail(ma.address_Murasaki_Mail());
+        uint _summoner = mm.tokenOf(_wallet);
+        return mml.total_opened(_summoner);
+    }
+    
+    //festival
+    function total_voted (address _wallet) external view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Main mm = Murasaki_Main(ma.address_Murasaki_Main());
+        Fluffy_Festival ff = Fluffy_Festival(ma.address_Fluffy_Festival());
+        uint _summoner = mm.tokenOf(_wallet);
+        return ff.voteCount(_summoner);
+    }
+    
+    //dice
+    function critical_count (address _wallet) external view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Main mm = Murasaki_Main(ma.address_Murasaki_Main());
+        Murasaki_Dice md = Murasaki_Dice(ma.address_Murasaki_Dice());
+        uint _summoner = mm.tokenOf(_wallet);
+        return md.critical_count(_summoner);
+    }
+    function fumble_count (address _wallet) external view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Main mm = Murasaki_Main(ma.address_Murasaki_Main());
+        Murasaki_Dice md = Murasaki_Dice(ma.address_Murasaki_Dice());
+        uint _summoner = mm.tokenOf(_wallet);
+        return md.fumble_count(_summoner);
+    }
+    
+    //doing now
+    function doing_now (address _wallet) external view returns (string memory) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Main mm = Murasaki_Main(ma.address_Murasaki_Main());
+        Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
+        uint _summoner = mm.tokenOf(_wallet);
+        uint _working_status = ms.working_status(_summoner);
+            //1:mining, 2:farming, 3:crafting, 4:practice, 5:strolling
+        string memory _doing_now;
+        if (_working_status == 0) {
+            _doing_now = "Resting";
+        } else if (_working_status == 1) {
+            _doing_now = "Mining";
+        } else if (_working_status == 2) {
+            _doing_now = "Farming";
+        } else if (_working_status == 3) {
+            _doing_now = "Crafting";
+        } else if (_working_status == 4) {
+            _doing_now = "Practicing";
+        } else if (_working_status == 5) {
+            _doing_now = "Strolling";
+        }
+        return _doing_now;
+    }
+    
+    //mimic ERC721 and ERC165 interface
+    function name() external view returns (string memory) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Main mm = Murasaki_Main(ma.address_Murasaki_Main());
+        return mm.name();
+    }
+    function symbol() external view returns (string memory) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Main mm = Murasaki_Main(ma.address_Murasaki_Main());
+        return mm.symbol();
+    }
+    function ownerOf(uint256 _tokenId) external view returns (address) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Main mm = Murasaki_Main(ma.address_Murasaki_Main());
+        return mm.ownerOf(_tokenId);
+    }
+    function tokenURI(uint256 _tokenId) external view returns (string memory) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_tokenURI mu = Murasaki_tokenURI(ma.address_Murasaki_tokenURI());
+        return mu.tokenURI(_tokenId);
+    }
+    function supportsInterface(bytes4 interfaceId) external pure returns (bool) {
+        return
+            interfaceId == type(IERC165).interfaceId ||
+            interfaceId == type(IERC721).interfaceId ||
+            interfaceId == type(IERC721Metadata).interfaceId;
+    }
+}
+
+
 //=== SBT/NFT ==================================================================================================================
 
 
 //---Murasaki_Main
-
 
 contract Murasaki_Main is SoulBoundBadge, Ownable{
 
@@ -884,7 +1345,6 @@ contract Murasaki_Main is SoulBoundBadge, Ownable{
 
 //---Murasaki_Name
 
-
 contract Murasaki_Name is SoulBoundBadge, Ownable {
 
     //permitted address
@@ -937,7 +1397,6 @@ contract Murasaki_Name is SoulBoundBadge, Ownable {
 
 
 //---Murasaki_Craft
-
 
 contract Murasaki_Craft is ERC2665, Ownable{
 
@@ -1252,7 +1711,6 @@ contract Murasaki_Craft is ERC2665, Ownable{
 
 //---Murasaki_Address
 
-
 contract Murasaki_Address is Ownable {
 
     address public address_Murasaki_Main;
@@ -1276,7 +1734,7 @@ contract Murasaki_Address is Ownable {
     address public address_Murasaki_Mail;
     address public address_Fluffy_Festival;
     address public address_Murasaki_Info;
-    address public address_Murasaki_Info_fromWallet;
+    //address public address_Murasaki_Info_fromWallet;
     address public address_Murasaki_Lootlike;
     address public address_Murasaki_tokenURI;
     address public address_BufferVault;
@@ -1290,6 +1748,9 @@ contract Murasaki_Address is Ownable {
     address public address_Murasaki_Address_Regular;
     address public address_Murasaki_Address_Trial;
     address public address_Stroll;
+    address public address_Murasaki_Market_Item;
+    address public address_Murasakisan;
+    address public address_Trial_Converter;
     
     function set_Murasaki_Main(address _address) external onlyOwner {
         address_Murasaki_Main = _address;
@@ -1354,9 +1815,11 @@ contract Murasaki_Address is Ownable {
     function set_Murasaki_Info(address _address) external onlyOwner {
         address_Murasaki_Info = _address;
     }
+    /*
     function set_Murasaki_Info_fromWallet(address _address) external onlyOwner {
         address_Murasaki_Info_fromWallet = _address;
     }
+    */
     function set_Murasaki_Lootlike(address _address) external onlyOwner {
         address_Murasaki_Lootlike = _address;
     }
@@ -1387,20 +1850,72 @@ contract Murasaki_Address is Ownable {
     function set_Murasaki_Function_Music_Practice(address _address) external onlyOwner {
         address_Murasaki_Function_Music_Practice = _address;
     }
-    function set_address_Murasaki_Address_Regular(address _address) external onlyOwner {
+    function set_Murasaki_Address_Regular(address _address) external onlyOwner {
         address_Murasaki_Address_Regular = _address;
     }
-    function set_address_Murasaki_Address_Trial(address _address) external onlyOwner {
+    function set_Murasaki_Address_Trial(address _address) external onlyOwner {
         address_Murasaki_Address_Trial = _address;
     }
-    function set_address_Stroll(address _address) external onlyOwner {
+    function set_Stroll(address _address) external onlyOwner {
         address_Stroll = _address;
+    }
+    function set_Murasaki_Market_Item(address _address) external onlyOwner {
+        address_Murasaki_Market_Item = _address;
+    }
+    function set_Murasakisan(address _address) external onlyOwner {
+        address_Murasakisan = _address;
+    }
+    function set_Trial_Converter(address _address) external onlyOwner {
+        address_Trial_Converter = _address;
+    }
+    
+    //all getter
+    function get_addresses() external view returns (address[40] memory) {
+        address[40] memory _res;
+        _res[1] = address_Murasaki_Main;
+        _res[2] = address_Murasaki_Name;
+        _res[3] = address_Murasaki_Craft;
+        _res[4] = address_Murasaki_Parameter;
+        _res[5] = address_Murasaki_Storage;
+        _res[6] = address_Murasaki_Storage_Score;
+        _res[7] = address_Murasaki_Storage_Nui;
+        _res[8] = address_Murasaki_Function_Share;
+        _res[9] = address_Murasaki_Function_Summon_and_LevelUp;
+        _res[10] = address_Murasaki_Function_Feeding_and_Grooming;
+        _res[11] = address_Murasaki_Function_Mining_and_Farming;
+        _res[12] = address_Murasaki_Function_Crafting;
+        _res[13] = address_Murasaki_Function_Crafting2;
+        _res[14] = address_Murasaki_Function_Crafting_Codex;
+        _res[15] = address_Murasaki_Function_Name;
+        _res[16] = address_Murasaki_Function_Achievement;
+        _res[17] = address_Murasaki_Function_Staking_Reward;
+        _res[18] = address_Murasaki_Dice;
+        _res[19] = address_Murasaki_Mail;
+        _res[20] = address_Fluffy_Festival;
+        _res[21] = address_Murasaki_Info;
+        //_res[22] = address_Murasaki_Info_fromWallet;
+        _res[23] = address_Murasaki_Lootlike;
+        _res[24] = address_Murasaki_tokenURI;
+        _res[25] = address_BufferVault;
+        _res[26] = address_BuybackTreasury;
+        _res[27] = address_AstarBase;
+        _res[28] = address_Staking_Wallet;
+        _res[29] = address_Coder_Wallet;
+        _res[30] = address_Illustrator_Wallet;
+        _res[31] = address_Achievement_onChain;
+        _res[32] = address_Murasaki_Function_Music_Practice;
+        _res[33] = address_Murasaki_Address_Regular;
+        _res[34] = address_Murasaki_Address_Trial;
+        _res[35] = address_Stroll;
+        _res[36] = address_Murasaki_Market_Item;
+        _res[37] = address_Murasakisan;
+        _res[38] = address_Trial_Converter;
+        return _res;
     }
 }
 
 
 //---Murasaki_Parameter
-
 
 contract Murasaki_Parameter is Ownable {
 
@@ -1469,7 +1984,6 @@ contract Murasaki_Parameter is Ownable {
 
 
 //---Murasaki_Storage
-
 
 contract Murasaki_Storage is Ownable {
 
@@ -1699,7 +2213,6 @@ contract Murasaki_Storage is Ownable {
 
 //---Murasaki_Storage_Score
 
-
 contract Murasaki_Storage_Score is Ownable {
 
     //permitted address
@@ -1746,7 +2259,6 @@ contract Murasaki_Storage_Score is Ownable {
 
 
 //---Murasaki_Storage_Nui
-
 
 contract Murasaki_Storage_Nui is Ownable {
 
@@ -1833,7 +2345,6 @@ contract Murasaki_Storage_Nui is Ownable {
 
 
 //---Share
-
 
 contract Murasaki_Function_Share is Ownable {
 
@@ -2263,7 +2774,6 @@ contract Murasaki_Function_Share is Ownable {
 
 //---Summon_and_LevelUp
 
-
 contract Murasaki_Function_Summon_and_LevelUp is Ownable, ReentrancyGuard {
 
     //address
@@ -2556,7 +3066,6 @@ contract Murasaki_Function_Summon_and_LevelUp is Ownable, ReentrancyGuard {
 
 //---Feeding_and_Grooming
 
-
 contract Murasaki_Function_Feeding_and_Grooming is Ownable, ReentrancyGuard {
 
     //address
@@ -2813,7 +3322,6 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable, ReentrancyGuard {
 
 
 //---Mining_and_Farming
-
 
 contract Murasaki_Function_Mining_and_Farming is Ownable, ReentrancyGuard {
 
@@ -3855,7 +4363,6 @@ contract Murasaki_Function_Crafting2 is Ownable, ReentrancyGuard {
 
 //---Crafting_Codex
 
-
 contract Murasaki_Function_Crafting_Codex is Ownable {
 
     //address
@@ -4467,7 +4974,7 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
     //item name
     string[320] public item_name_table = [
     
-        //### item name
+        //## item name
 
         //0:dummy
         "",
@@ -4858,7 +5365,6 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
 
 //---Name
 
-
 contract Murasaki_Function_Name is Ownable, ReentrancyGuard {
 
     //address
@@ -4872,7 +5378,7 @@ contract Murasaki_Function_Name is Ownable, ReentrancyGuard {
         payable(rec).transfer(address(this).balance);
     }
     
-    //### item types
+    //## item types
     //nameplate item_type
     uint public nameplate_item_type = 1;
     //set dice item_type
@@ -4974,7 +5480,6 @@ contract Murasaki_Function_Name is Ownable, ReentrancyGuard {
 
 
 //---Achievement
-
 
 contract Murasaki_Function_Achievement is Ownable {
 
@@ -5117,6 +5622,7 @@ contract Murasaki_Function_Achievement is Ownable {
 
 
 //---Music_Practice
+
 contract Murasaki_Function_Music_Practice is Ownable, ReentrancyGuard {
 
     //address
@@ -5125,7 +5631,7 @@ contract Murasaki_Function_Music_Practice is Ownable, ReentrancyGuard {
         address_Murasaki_Address = _address;
     }
     
-    //### item types
+    //## item types
     uint item_type_clarinet = 12;
     uint item_type_piano = 28;
     uint item_type_violin = 44;
@@ -5452,6 +5958,7 @@ contract Murasaki_Function_Music_Practice is Ownable, ReentrancyGuard {
 
 
 //---Staking_Reward
+
 contract Murasaki_Function_Staking_Reward is Ownable, ReentrancyGuard {
 
     //address
@@ -6201,7 +6708,6 @@ contract Murasaki_Market_Item is Ownable, ReentrancyGuard, ERC721Holder {
 
 //---Murasaki_Dice
 
-
 contract Murasaki_Dice is Ownable, ReentrancyGuard {
 
     /*
@@ -6239,7 +6745,9 @@ contract Murasaki_Dice is Ownable, ReentrancyGuard {
     //variants
     mapping(uint => uint[4]) public rolled_dice;
     mapping(uint => uint) public last_dice_roll_time;
-    //### item types
+    mapping(uint => uint) public critical_count;
+    mapping(uint => uint) public fumble_count;
+    //## item types
     uint public dice_item_type = 5;
     uint public buffer_sec = 14400;  //4 hr
 
@@ -6288,6 +6796,11 @@ contract Murasaki_Dice is Ownable, ReentrancyGuard {
         require(_elasped_time >= BASE_SEC - buffer_sec);
         //dice roll
         uint _dice_roll = (mfs.d20(_summoner) + 1) * 10;
+        if (_dice_roll == 200) {
+            critical_count[_summoner] += 1;
+        } else if (_dice_roll == 10) {
+            fumble_count[_summoner] += 1;
+        }
         //update rolled_dice, after 48hr, input 0 in each 24hr
         if (_elasped_time > BASE_SEC * 4) {
             rolled_dice[_summoner] = [
@@ -6395,7 +6908,6 @@ contract Murasaki_Dice is Ownable, ReentrancyGuard {
 
 //---Murasaki_Mail
 
-
 contract Murasaki_Mail is Ownable, ReentrancyGuard {
 
     //address
@@ -6422,7 +6934,7 @@ contract Murasaki_Mail is Ownable, ReentrancyGuard {
     //variants
     //interval, both of sending interval & receving limit
     uint public interval_sec = 60 * 60 * 24 * 7;    // 7 days
-    //### item types
+    //## item types
     uint public item_type_of_mail = 196;
     uint public item_type_of_cushion = 23;
 
@@ -6624,7 +7136,6 @@ contract Murasaki_Mail is Ownable, ReentrancyGuard {
 
 //---Fluffy_Festival
 
-
 contract Fluffy_Festival is Ownable, ReentrancyGuard {
 
     //address
@@ -6712,6 +7223,7 @@ contract Fluffy_Festival is Ownable, ReentrancyGuard {
     uint[320] each_voting_count;
     mapping(uint => uint) public last_voting_block; //summoner => blocknumber
     mapping(uint => uint) public last_voting_type;  //summoner => fluffy_type
+    mapping(uint => uint) public voteCount;
     
     //step
     uint next_step = 1;
@@ -6746,6 +7258,7 @@ contract Fluffy_Festival is Ownable, ReentrancyGuard {
         last_voting_block[_summoner] = _block;
         last_voting_type[_summoner] = _select;
         each_voting_count[_select] += 1;
+        voteCount[_summoner] += 1;
         next_vote += 1;
         //update winner in step
         winner_inStep[next_step] = _get_winner_inStep_now();
@@ -6970,7 +7483,6 @@ contract Fluffy_Festival is Ownable, ReentrancyGuard {
 
 //---Achievement_onChain
 
-
 contract Achievement_onChain is Ownable {
 
     //address
@@ -7015,7 +7527,7 @@ contract Achievement_onChain is Ownable {
         nft_number = _value;
     }
     
-    //### item types
+    //## item types
     //admin, set flower_wreath item_type
     uint public flowerWreath_item_type = 35;
     function _set_flowerWreath_item_type (uint _item_type) external onlyOwner {
@@ -7145,7 +7657,6 @@ contract Achievement_onChain is Ownable {
 
 //---Stroll
 
-
 contract Stroll is Ownable, ReentrancyGuard {
 
     //address
@@ -7154,7 +7665,7 @@ contract Stroll is Ownable, ReentrancyGuard {
         address_Murasaki_Address = _address;
     }
 
-    //### item types
+    //## item types
     //nameplate item_type
     uint public waterBottle_item_type = 41;
     //set dice item_type
@@ -7196,8 +7707,8 @@ contract Stroll is Ownable, ReentrancyGuard {
     mapping (uint => uint) public total_strolling_companion;
     
     //getter
-    function get_strollInfo (uint _summoner) external view returns (uint[15] memory) {
-        uint[15] memory _res;
+    function get_strollInfo (uint _summoner) external view returns (uint[22] memory) {
+        uint[22] memory _res;
         if (isStrolling[_summoner]){
             _res[0] = 1;
         } else {
@@ -7213,10 +7724,17 @@ contract Stroll is Ownable, ReentrancyGuard {
         _res[8] = metSummoners[_summoner][2];
         _res[9] = metSummoners[_summoner][3];
         _res[10] = metSummoners[_summoner][4];
-        _res[11] = total_strolling_direction[_summoner];
-        _res[12] = total_strolling_companion[_summoner];
-        _res[13] = stroll_level[_summoner];
-        _res[14] = met_level[_summoner];
+        _res[11] = total_strolling_direction[1];
+        _res[12] = total_strolling_direction[2];
+        _res[13] = total_strolling_direction[3];
+        _res[14] = total_strolling_direction[4];
+        _res[15] = total_strolling_companion[1];
+        _res[16] = total_strolling_companion[2];
+        _res[17] = total_strolling_companion[3];
+        _res[18] = stroll_level[_summoner];
+        _res[19] = met_level[_summoner];
+        _res[20] = direction[_summoner];
+        _res[21] = companion[_summoner];
         return _res;
     }
     
@@ -8250,7 +8768,20 @@ contract Murasaki_Info is Ownable {
         return mfsl.get_staking_percent(_summoner);
     }
     
-    //###dynamic
+    //stroll
+    function total_strolledDistance(uint _summoner) public view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Stroll s = Stroll(ma.address_Stroll());
+        return s.total_strolledDistance(_summoner);
+    }
+    function total_metSummoners(uint _summoner) public view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Stroll s = Stroll(ma.address_Stroll());
+        return s.total_metSummoners(_summoner);
+    }
+    
+    
+    //### dynamic
     function allDynamicStatus(uint _summoner) external view returns (uint[96] memory) {
         uint[96] memory _res;
         _res[0] = block.number;
@@ -8341,10 +8872,12 @@ contract Murasaki_Info is Ownable {
         _res[84] = get_staking_percent(_summoner);
         _res[85] = calc_exp_addition_rate_from_twinkle(_summoner);
         _res[86] = working_status(_summoner);
+        _res[87] = total_strolledDistance(_summoner);
+        _res[88] = total_metSummoners(_summoner);
         return _res;
     }
     
-    //###static
+    //### static
     function allStaticStatus(uint _summoner) external view returns (
         uint,
         address,
@@ -8391,306 +8924,7 @@ contract Murasaki_Info is Ownable {
 }
 
 
-//---Murasaki_Info_fromWallet
-//***TODO***
-
-
-interface IMurasaki_Info_fromWallet {
-
-    // Murasaki-san ID of wallet
-    function summoner   (address _wallet) external view returns (uint);
-
-    // Basic informations
-    function class  (address _wallet) external view returns (uint);
-    function age    (address _wallet) external view returns (uint);
-    function name   (address _wallet) external view returns (string memory);
-    function level  (address _wallet) external view returns (uint);
-
-    // Character
-    function birthplace  (address _wallet) external view returns (string memory);
-    function character   (address _wallet) external view returns (string memory);
-    function weakpoint   (address _wallet) external view returns (string memory);
-    function scent       (address _wallet) external view returns (string memory);
-    function personality (address _wallet) external view returns (string memory);
-    function flower      (address _wallet) external view returns (string memory);
-
-    // Address
-    function street      (address _wallet) external view returns (string memory);
-    function city        (address _wallet) external view returns (string memory);
-
-    // Parameters
-    function strength       (address _wallet) external view returns (uint);
-    function dexterity      (address _wallet) external view returns (uint);
-    function intelligence   (address _wallet) external view returns (uint);
-    function luck           (address _wallet) external view returns (uint);
-
-    // Parameters with item modification
-    function strength_withItems      (address _wallet) external view returns (uint);
-    function dexterity_withItems     (address _wallet) external view returns (uint);
-    function intelligence_withItems  (address _wallet) external view returns (uint);
-    function luck_withItems          (address _wallet) external view returns (uint);
-    function luck_withItems_withDice (address _wallet) external view returns (uint);
-    
-    // Present status, material means leaf, precious means fluffy_score
-    function satiety    (address _wallet) external view returns (uint);
-    function happy      (address _wallet) external view returns (uint);
-    function exp        (address _wallet) external view returns (uint);
-    function coin       (address _wallet) external view returns (uint);
-    function material   (address _wallet) external view returns (uint);
-    function precious   (address _wallet) external view returns (uint);
-
-    // Scores
-    function score                      (address _wallet) external view returns (uint);
-    function total_exp_gained           (address _wallet) external view returns (uint);
-    function total_coin_mined           (address _wallet) external view returns (uint);
-    function total_material_farmed      (address _wallet) external view returns (uint);
-    function total_item_crafted         (address _wallet) external view returns (uint);
-    function total_precious_received    (address _wallet) external view returns (uint);
-
-    // etc
-    function not_petrified  (address _wallet) external view returns (uint);
-    function isActive       (address _wallet) external view returns (uint);
-    function inHouse        (address _wallet) external view returns (uint);
-    
-    // Achievement
-    function countOf_achievement (address _wallet) external view returns (uint);
-    // Achievement_onChain
-    function scoreOf_achievement_onChain (address _wallet) external view returns (uint);
-}
-
-
-contract Murasaki_Info_fromWallet is Ownable, IMurasaki_Info_fromWallet {
-
-    //address
-    address public address_Murasaki_Address;
-    function _set_Murasaki_Address(address _address) external onlyOwner {
-        address_Murasaki_Address = _address;
-    }
-    
-    //address, get Murasaki_Info address
-    function _get_info_address() internal view returns (address) {
-        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
-        return ma.address_Murasaki_Info();
-    }
-
-    //summoner
-    function summoner(address _wallet) public view returns (uint) {
-        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
-        Murasaki_Main mm = Murasaki_Main(ma.address_Murasaki_Main());
-        Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
-        uint _summoner = mm.tokenOf(_wallet);
-        if (_summoner == 0) {
-            return 0;
-        }
-        bool _isActive = ms.isActive(_summoner);
-        if (_isActive) {
-            return _summoner;
-        } else {
-            return 0;
-        }
-    }
-    
-    //class
-    function class(address _wallet) external view returns (uint) {
-        Murasaki_Info mi = Murasaki_Info(_get_info_address());
-        return mi.class(summoner(_wallet));
-    }
-    //age
-    function age(address _wallet) external view returns (uint) {
-        Murasaki_Info mi = Murasaki_Info(_get_info_address());
-        return mi.age(summoner(_wallet));
-    }
-    //name
-    function name(address _wallet) external view returns (string memory) {
-        Murasaki_Info mi = Murasaki_Info(_get_info_address());
-        return mi.name(summoner(_wallet));
-    }
-    //level
-    function level(address _wallet) external view returns (uint) {
-        Murasaki_Info mi = Murasaki_Info(_get_info_address());
-        return mi.level(summoner(_wallet));
-    }
-    //exp
-    function exp(address _wallet) external view returns (uint) {
-        Murasaki_Info mi = Murasaki_Info(_get_info_address());
-        return mi.exp(summoner(_wallet));
-    }
-    //strength
-    function strength(address _wallet) external view returns (uint) {
-        Murasaki_Info mi = Murasaki_Info(_get_info_address());
-        return mi.strength(summoner(_wallet));
-    }
-    //dexterity
-    function dexterity(address _wallet) external view returns (uint) {
-        Murasaki_Info mi = Murasaki_Info(_get_info_address());
-        return mi.dexterity(summoner(_wallet));
-    }
-    //intelligence
-    function intelligence(address _wallet) external view returns (uint) {
-        Murasaki_Info mi = Murasaki_Info(_get_info_address());
-        return mi.intelligence(summoner(_wallet));
-    }
-    //luck
-    function luck(address _wallet) external view returns (uint) {
-        Murasaki_Info mi = Murasaki_Info(_get_info_address());
-        return mi.luck(summoner(_wallet));
-    }
-    //coin
-    function coin(address _wallet) external view returns (uint) {
-        Murasaki_Info mi = Murasaki_Info(_get_info_address());
-        return mi.coin(summoner(_wallet));
-    }
-    //material
-    function material(address _wallet) external view returns (uint) {
-        Murasaki_Info mi = Murasaki_Info(_get_info_address());
-        return mi.material(summoner(_wallet));
-    }
-    //total_exp_gained
-    function total_exp_gained(address _wallet) external view returns (uint) {
-        Murasaki_Info mi = Murasaki_Info(_get_info_address());
-        return mi.total_exp_gained(summoner(_wallet));
-    }
-    //total_coin_mined
-    function total_coin_mined(address _wallet) external view returns (uint) {
-        Murasaki_Info mi = Murasaki_Info(_get_info_address());
-        return mi.total_coin_mined(summoner(_wallet));
-    }
-    //total_material_farmed
-    function total_material_farmed(address _wallet) external view returns (uint) {
-        Murasaki_Info mi = Murasaki_Info(_get_info_address());
-        return mi.total_material_farmed(summoner(_wallet));
-    }
-    //total_item_crafted
-    function total_item_crafted(address _wallet) external view returns (uint) {
-        Murasaki_Info mi = Murasaki_Info(_get_info_address());
-        return mi.total_item_crafted(summoner(_wallet));
-    }
-    //total_precious_received
-    function total_precious_received(address _wallet) external view returns (uint) {
-        Murasaki_Info mi = Murasaki_Info(_get_info_address());
-        return mi.total_precious_received(summoner(_wallet));
-    }
-    //satiety
-    function satiety(address _wallet) external view returns (uint) {
-        Murasaki_Info mi = Murasaki_Info(_get_info_address());
-        return mi.satiety(summoner(_wallet));
-    }
-    //happy
-    function happy(address _wallet) external view returns (uint) {
-        Murasaki_Info mi = Murasaki_Info(_get_info_address());
-        return mi.happy(summoner(_wallet));
-    }
-    //precious
-    function precious(address _wallet) external view returns (uint) {
-        Murasaki_Info mi = Murasaki_Info(_get_info_address());
-        return mi.precious(summoner(_wallet));
-    }
-    //not_petrified
-    function not_petrified(address _wallet) external view returns (uint) {
-        Murasaki_Info mi = Murasaki_Info(_get_info_address());
-        return mi.not_petrified(summoner(_wallet));
-    }
-    //score
-    function score(address _wallet) external view returns (uint) {
-        Murasaki_Info mi = Murasaki_Info(_get_info_address());
-        return mi.score(summoner(_wallet));
-    }
-    //strength_withItems
-    function strength_withItems(address _wallet) external view returns (uint) {
-        Murasaki_Info mi = Murasaki_Info(_get_info_address());
-        return mi.strength_withItems(summoner(_wallet));
-    }
-    //dexterity_withItems
-    function dexterity_withItems(address _wallet) external view returns (uint) {
-        Murasaki_Info mi = Murasaki_Info(_get_info_address());
-        return mi.dexterity_withItems(summoner(_wallet));
-    }
-    //intelligence_withItems
-    function intelligence_withItems(address _wallet) external view returns (uint) {
-        Murasaki_Info mi = Murasaki_Info(_get_info_address());
-        return mi.intelligence_withItems(summoner(_wallet));
-    }
-    //luck_withItems
-    function luck_withItems(address _wallet) external view returns (uint) {
-        Murasaki_Info mi = Murasaki_Info(_get_info_address());
-        return mi.luck_withItems(summoner(_wallet));
-    }
-    //luck_withItems_withDice
-    function luck_withItems_withDice(address _wallet) external view returns (uint) {
-        Murasaki_Info mi = Murasaki_Info(_get_info_address());
-        return mi.luck_withItems_withDice(summoner(_wallet));
-    }
-    //isActive
-    function isActive(address _wallet) external view returns (uint) {
-        Murasaki_Info mi = Murasaki_Info(_get_info_address());
-        return mi.isActive(summoner(_wallet));
-    }
-    //inHouse
-    function inHouse(address _wallet) external view returns (uint) {
-        Murasaki_Info mi = Murasaki_Info(_get_info_address());
-        return mi.inHouse(summoner(_wallet));
-    }
-    //birthplace
-    function birthplace(address _wallet) external view returns (string memory) {
-        Murasaki_Info mi = Murasaki_Info(_get_info_address());
-        return mi.allStatus(summoner(_wallet))[0];
-    }
-    //character
-    function character(address _wallet) external view returns (string memory) {
-        Murasaki_Info mi = Murasaki_Info(_get_info_address());
-        return mi.allStatus(summoner(_wallet))[1];
-    }
-    //weakpoint
-    function weakpoint(address _wallet) external view returns (string memory) {
-        Murasaki_Info mi = Murasaki_Info(_get_info_address());
-        return mi.allStatus(summoner(_wallet))[2];
-    }
-    //scent
-    function scent(address _wallet) external view returns (string memory) {
-        Murasaki_Info mi = Murasaki_Info(_get_info_address());
-        return mi.allStatus(summoner(_wallet))[3];
-    }
-    //personality
-    function personality(address _wallet) external view returns (string memory) {
-        Murasaki_Info mi = Murasaki_Info(_get_info_address());
-        return mi.allStatus(summoner(_wallet))[4];
-    }
-    //flower
-    function flower(address _wallet) external view returns (string memory) {
-        Murasaki_Info mi = Murasaki_Info(_get_info_address());
-        return mi.allStatus(summoner(_wallet))[5];
-    }
-    //street
-    function street(address _wallet) external view returns (string memory) {
-        Murasaki_Info mi = Murasaki_Info(_get_info_address());
-        return mi.allStatus(summoner(_wallet))[6];
-    }
-    //city
-    function city(address _wallet) external view returns (string memory) {
-        Murasaki_Info mi = Murasaki_Info(_get_info_address());
-        return mi.allStatus(summoner(_wallet))[7];
-    }
-    
-    //achievement
-    function countOf_achievement (address _wallet) external view returns (uint) {
-        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
-        Murasaki_Main mm = Murasaki_Main(ma.address_Murasaki_Main());
-        Murasaki_Function_Achievement mfa = Murasaki_Function_Achievement(ma.address_Murasaki_Function_Achievement());
-        uint _summoner = mm.tokenOf(_wallet);
-        return mfa.get_countOf_achievement(_summoner);
-    }
-    function scoreOf_achievement_onChain (address _wallet) external view returns (uint) {
-        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
-        Murasaki_Main mm = Murasaki_Main(ma.address_Murasaki_Main());
-        Achievement_onChain ac = Achievement_onChain(ma.address_Achievement_onChain());
-        uint _summoner = mm.tokenOf(_wallet);
-        return ac.get_score(_summoner);
-    }
-}
-
-
 //---Murasaki_Lootlike
-
 
 contract Murasaki_Lootlike is Ownable {
 
@@ -8919,7 +9153,6 @@ contract Murasaki_Lootlike is Ownable {
 
 //---Murasaki_tokenURI
 
-
 contract Murasaki_tokenURI is Ownable {
 
     //address
@@ -8990,14 +9223,22 @@ contract Murasaki_tokenURI is Ownable {
     function _get_endSVG(uint _summoner) internal view returns (string memory) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Parameter mp = Murasaki_Parameter(ma.address_Murasaki_Parameter());
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
+        Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
         if (_summoner == 0) {
             //token not found
-            return '</text><rect width="128" height="128" fill="#ffffff" rx="5" ry="5" fill-opacity="0.8"/><text x="64"  y="60" class="base" text-anchor="middle">Token</text><text x="64"  y="80" class="base" text-anchor="middle">Not Found</text></svg>';
+            return '<rect width="128" height="128" fill="#ffffff" rx="5" ry="5" fill-opacity="0.8"/><text x="64"  y="60" class="base" text-anchor="middle">Token</text><text x="64"  y="80" class="base" text-anchor="middle">Not Found</text></svg>';
         } else if (mp.isTrial()) {
             //trial
-            return '</text><rect width="128" height="128" fill="#ffffff" rx="5" ry="5" fill-opacity="0.8"/><text x="64"  y="60" class="base" text-anchor="middle">Trial</text><text x="64"  y="82" class="base" text-anchor="middle">Token</text></svg>';
+            return '<rect width="128" height="128" fill="#ffffff" rx="5" ry="5" fill-opacity="0.8"/><text x="64"  y="60" class="base" text-anchor="middle">Trial</text><text x="64"  y="82" class="base" text-anchor="middle">Token</text></svg>';
+        } else if (!mfs.not_petrified(_summoner)) {
+            //petrified
+            return '<rect width="128" height="128" fill="#ffffff" rx="5" ry="5" fill-opacity="0.8"/><text x="64"  y="60" class="base" text-anchor="middle">Petrified</text><text x="64"  y="82" class="base" text-anchor="middle">Token</text></svg>';
+        } else if (!ms.isActive(_summoner)) {
+            //petrified
+            return '<rect width="128" height="128" fill="#ffffff" rx="5" ry="5" fill-opacity="0.8"/><text x="64"  y="60" class="base" text-anchor="middle">Not Active</text><text x="64"  y="82" class="base" text-anchor="middle">Token</text></svg>';
         } else {
-            return '</text></svg>';
+            return '</svg>';
         }
     }
     
@@ -9025,7 +9266,21 @@ contract Murasaki_tokenURI is Ownable {
                     '</tspan></text><text x="64"  y="92" class="base" text-anchor="middle"><tspan font-size="20px">',
                     string(abi.encodePacked(mi.name(_summoner))),
                     '</tspan></text><text x="124" y="122" class="base" text-anchor="end">&#x1f4bc;',
+                    
+                    //detailed
                     string(abi.encodePacked(toString(_balanceOfItems(_summoner)))),
+                    '</text><text x="124" y="38" class="base" text-anchor="end"><tspan font-size="14">&#x1f359;',
+                    string(abi.encodePacked(toString(mi.satiety(_summoner)))),
+                    '</tspan></text><text x="4" y="124" class="base" text-anchor="start"><tspan font-size="9" fill="black">',
+                    string(abi.encodePacked(toString(mi.score(_summoner)))),
+                    '</tspan></text>',
+
+                    /*
+                    //simple
+                    '</tspan></text><text x="124" y="122" class="base" text-anchor="end">&#x1f4bc;',
+                    string(abi.encodePacked(toString(_balanceOfItems(_summoner)))),
+                    */
+
                     _get_endSVG(_summoner)
                 )
             )
@@ -9049,15 +9304,34 @@ contract Murasaki_tokenURI is Ownable {
         uint _summoner = mm.tokenOf(_wallet);
         return tokenURI(_summoner);
     }
+    
+    //mimic ERC165
+    function supportsInterface(bytes4 interfaceId) public pure returns (bool) {
+        return
+            interfaceId == type(IERC721).interfaceId ||
+            interfaceId == type(IERC721Metadata).interfaceId;
+    }
+    
+    //mimic ERC721Metadata
+    function name() external view returns (string memory) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Main mm = Murasaki_Main(ma.address_Murasaki_Main());
+        string memory _res = mm.name();
+        return _res;
+    }
+    function symbol() external view returns (string memory) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Main mm = Murasaki_Main(ma.address_Murasaki_Main());
+        string memory _res = mm.symbol();
+        return _res;
+    }
 }
-
 
 
 //===Treasury======================================================================================================
 
 
 //---BufferVault
-
 
 //trading fee, dapps staking reward, other fees
 contract BufferVault is Ownable, ReentrancyGuard {
@@ -9176,7 +9450,6 @@ contract BufferVault is Ownable, ReentrancyGuard {
 
 
 //---BuybackTreasury
-
 
 //for buyback items
 contract BuybackTreasury is Ownable, ReentrancyGuard {
@@ -9411,7 +9684,7 @@ contract BuybackTreasury is Ownable, ReentrancyGuard {
 
 //---Admin_Converter
 
-
+/*
 contract Murasaki_Craft_Old {
     struct item {
         uint item_type;
@@ -9580,6 +9853,7 @@ contract Admin_Convert is Ownable {
         mcNew._admin_set_next_item(_value);
     }
 }
+*/
 
 //===End==================================================================================================================
 

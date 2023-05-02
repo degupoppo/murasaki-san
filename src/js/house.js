@@ -86,13 +86,44 @@ contract ERC721 is IERC721 {
 //### 1st
 
 
+    Murasaki_Addressの修正
+        Trial_Converterを追加で実装
+        addressはjs側には極力保存せず、maを参照させる
+        また、abiは別ファイルとする。
+
+
+    覚書：コントラ更新手順
+        remixでコントラを手動でデプロイ
+        murasaki/deploy/3_init.pyのaddressを修正
+        murasaki/deploy/3_init.pyのabiを必要に応じて修正
+        murasaki/deploy/3_init.pyのabiから該当行を抜き出して実行
+        share.jsのaddressを修正
+        share.jsのabiを必要に応じて修正
+        permitted_addressを設定していたコントラは、旧アドレスにfalseを代入
+
+
     要修正
+        コントラ書き換え
+            address
+            murasakisan
+            dice
+            festival
+            stroll
+        デモ用キャラの演出を考える
+            #1を晒してしまって大丈夫だろうか。ネタバレや楽しみの先取りになるだろうか。
+            お腹が減りやすく、経験値が得られにくい、demo用キャラを別途用意するか？
+            trial終了直後ぐらいの進行度が良いだろうか。
+        かざぐるまと王冠を交換する
         売買回数、平均購入価格などを集計したマーケット情報ページを作成する？
-        フェスティバルのvoteのevent確認
         フェスティバル前の演出の改善
         depthをspriteのy下段に設定する？
             マウスドラッグ時は前面に設定する？
         変数書き換え対策の実装, さてどうするか
+     ok diceコントラに20を出した回数を記録させる
+     ok festivalのvote回数を記録させる
+     ok info_fromWalletにcat-mailを追加する
+     ok infoにtokenURIとERC721も統合する
+     ok フェスティバルのvoteのevent確認
      ig tokenURI用jsonの用意
      ok イベントの再考、集計しやすいように修正
      ok twinkleのbuyback priceを設定する
@@ -131,6 +162,36 @@ contract ERC721 is IERC721 {
      ok resume cancel時luckyとなるのを修正
 
 
+    散歩システムUI実装：
+     ig 水筒を持って、お供を連れてお散歩に向かうむらさきさん絵
+            音符やハートを出しながら楽しそうに出発する
+            水筒を持って、喜びながらcompanionが来るのを待つ
+                一緒に連れ立って画面外に移動する
+                この時ハートや音符を出しながら移動する
+     ok 散歩条件を選択するウィンドウ
+            行き先、お供、水筒の中身を選択する
+            総歩行距離、総met数、現在のお散歩分布などを表示する
+            帰宅予定時間、インターバル残り時間、なども表示する？
+                → インターバル残り時間は水筒に表示
+                → 帰宅までの残り時間は散歩中ウィンドウに表示
+        散歩中のむらさきさんを眺める横長のウィンドウ
+            背景4パターン（山道、河川敷、海岸、草原）
+                ループ背景を用意する
+            お供を一緒に歩かせる
+            残り時間を数字と進行バーで表示させる
+            誰に会ったかのログを表示させる
+            何を拾ったかのNFTも表示させる（可能か？）
+        帰宅時の演出を考える
+            時間がすぎると、まだ帰ってないのか、もう帰ってるのか。
+            txを飛ばさなければならない事の必然性をうまく表現したい。
+                散歩から帰宅後は、ユーザーからの何かしらのアクションが必要な演出を考える
+                寝てる→お風呂はいる
+                水筒洗う、など
+            散歩を思い出しながら寝ている
+                → クリックしてtx飛ばすと、吹き出しを出して散歩内容を飼い主に報告して
+                　 総歩行距離と友達人数が更新される。
+
+
     item detailsの完成
         STR系アイテム
         DEX系アイテム
@@ -140,17 +201,6 @@ contract ERC721 is IERC721 {
         cat-mail
         presentbox
         twinkle系(comming soom)
-
-
-    info_walletの公開情報の整備
-        PJ外で有用なパラメータにできるだけ網羅的にアクセス可能とする
-            外部で使用するときに有用と思われる値を吟味する
-            各パラメータの簡単な説明を掲載する
-        interfaceとabiを公開する
-            コントラインポートへのリンクも明記する
-        jsを用いた使用例を公開する
-            greeting例、icon表示例のjsを公開する
-            lootlineな楽しみ方を紹介する
 
 
     Fluffyシステムについて情報を整理する
@@ -238,21 +288,6 @@ contract ERC721 is IERC721 {
             
 
     構想：散歩システムII
-        UI実装：
-            散歩条件を選択するウィンドウ
-                行き先、お供、水筒の中身を選択する
-                総歩行距離、総met数、現在のお散歩分布などを表示する
-                帰宅予定時間、インターバル残り時間濃霧、なども表示する
-            水筒を持って、お供を連れてお散歩に向かうむらさきさん絵
-                音符やハートを出しながら楽しそうに出発する
-                画面外に出てゆく
-            散歩中のむらさきさんを眺める横長のウィンドウ
-                背景4パターン（山道、河川敷、海岸、草原）
-                    ループ背景を用意する
-                お供を一緒に歩かせる
-                残り時間を数字と進行バーで表示させる
-                誰に会ったかのログを表示させる
-                何を拾ったかのNFTも表示させる（可能か？）
      ok バランス調整：
             報酬期間: 3d, 7d, 14d, 28d, 
             補正値: 最大で+50% (新規meetで+10% x 5)
@@ -1237,6 +1272,29 @@ contract ERC721 is IERC721 {
 
 
 //### 3rd
+
+ ok いらすとやの規約クリア
+        20点までの使用
+        アルファベットだけで20点を越えてしまっている。
+            アルファベット  まとめて1点
+            きらきら    3点
+            星  まとめて1点
+            本  置換予定
+            楽器　置換予定
+            ダンボール　1点
+            プレゼントボックス　1点
+            額縁
+            フラワーリース
+
+ ok info_walletの公開情報の整備
+        PJ外で有用なパラメータにできるだけ網羅的にアクセス可能とする
+            外部で使用するときに有用と思われる値を吟味する
+            各パラメータの簡単な説明を掲載する
+        interfaceとabiを公開する
+            コントラインポートへのリンクも明記する
+        jsを用いた使用例を公開する
+            greeting例、icon表示例のjsを公開する
+            lootlineな楽しみ方を紹介する
 
  ok 新コントラのテストプレイ
         other summoner feeding
@@ -3040,6 +3098,28 @@ async function init_global_variants() {
     
     //---local strolling
     local_strolling_status = 0;
+    local_stroll_endable = 0;
+    local_total_strolledDistance = 0;
+    local_total_strolledDistance_ofCompanion_01 = 0;
+    local_total_strolledDistance_ofCompanion_02 = 0;
+    local_total_strolledDistance_ofCompanion_03 = 0;
+    local_total_metSummoners = 0;
+    local_metSummoners_01 = 0;
+    local_metSummoners_02 = 0;
+    local_metSummoners_03 = 0;
+    local_metSummoners_04 = 0;
+    local_metSummoners_05 = 0;
+    local_total_strolling_direction_01 = 0;
+    local_total_strolling_direction_02 = 0;
+    local_total_strolling_direction_03 = 0;
+    local_total_strolling_direction_04 = 0;
+    local_total_strolling_companion_01 = 0;
+    local_total_strolling_companion_02 = 0;
+    local_total_strolling_companion_03 = 0;
+    local_stroll_level = 0;
+    local_met_level = 0;
+    local_direction = 0;
+    local_companion = 0;
     
     //---local etc
     turn = 0;
@@ -3633,6 +3713,7 @@ async function contract_update_dynamic_status(_summoner) {
         local_crafting_status = 0;
         local_practice_status = 0;
         local_strolling_status = 1;
+        contract_update_stroll_info(_summoner);
     }
 
     //dice
@@ -3713,6 +3794,11 @@ async function contract_update_dynamic_status(_summoner) {
     
     //twinkle exp boost
     local_exp_rate_twinkle = Number(_all_dynamic_status[85]);
+    
+    //stroll
+    local_stroll_total_strolledDistance = Number(_all_dynamic_status[87]);
+    local_stroll_total_metSummoners = Number(_all_dynamic_status[88]);
+    //local_stroll_endable = Number(_all_dynamic_status[89]);
     
     //update last_sync_time
     last_sync_time = Date.now();
@@ -3876,6 +3962,44 @@ async function contract_update_festival_info(_summoner) {
     local_ff_isEndable =             Number(_festival_info[21]);
     local_ff_elected_type =          Number(_festival_info[22]);
     local_ff_previous_elected_type = Number(_festival_info[23]);
+}
+
+//### stroll
+async function contract_update_stroll_info(_summoner) {
+    if (summoner == 0) {
+        return 0;
+    }
+    //call
+    let _stroll_info = 0;
+    try {
+        if (gamemode == "regular") {
+            _stroll_info = await contract_st_wss.methods.get_strollInfo(_summoner).call({from:wallet});
+        }
+    } catch(error) {
+        console.log("***ERROR***: update_stroll_info");
+    }
+    //update local
+    local_total_strolledDistance = Number(_stroll_info[1]);
+    local_total_strolledDistance_ofCompanion_01 = Number(_stroll_info[2]);
+    local_total_strolledDistance_ofCompanion_02 = Number(_stroll_info[3]);
+    local_total_strolledDistance_ofCompanion_03 = Number(_stroll_info[4]);
+    local_total_metSummoners = Number(_stroll_info[5]);
+    local_metSummoners_01 = Number(_stroll_info[6]);
+    local_metSummoners_02 = Number(_stroll_info[7]);
+    local_metSummoners_03 = Number(_stroll_info[8]);
+    local_metSummoners_04 = Number(_stroll_info[9]);
+    local_metSummoners_05 = Number(_stroll_info[10]);
+    local_total_strolling_direction_01 = Number(_stroll_info[11]);
+    local_total_strolling_direction_02 = Number(_stroll_info[12]);
+    local_total_strolling_direction_03 = Number(_stroll_info[13]);
+    local_total_strolling_direction_04 = Number(_stroll_info[14]);
+    local_total_strolling_companion_01 = Number(_stroll_info[15]);
+    local_total_strolling_companion_02 = Number(_stroll_info[16]);
+    local_total_strolling_companion_03 = Number(_stroll_info[17]);
+    local_stroll_level = Number(_stroll_info[18]);
+    local_met_level = Number(_stroll_info[19]);
+    local_direction = Number(_stroll_info[20]);
+    local_companion = Number(_stroll_info[21]);
 }
 
 //---call
@@ -4659,6 +4783,23 @@ async function open_staking_reward(_summoner) {
     }
 }
 
+//stroll
+async function contract_start_stroll(_summoner, _direction, _companion, _drink) {
+    if (gamemode == "regular") {
+        contract_st.methods.startStroll(_summoner, _direction, _companion, _drink).send({from:wallet})
+            .on("transactionHash", (transactionHash) => update_tx_text("sending", transactionHash))
+            .on("receipt", (receipt) => update_tx_text("done", receipt.transactionHash));
+    }
+}
+async function contract_end_stroll(_summoner) {
+    if (gamemode == "regular") {
+        contract_st.methods.endStroll(_summoner).send({from:wallet})
+            .on("transactionHash", (transactionHash) => update_tx_text("sending", transactionHash))
+            .on("receipt", (receipt) => update_tx_text("done", receipt.transactionHash));
+    }
+}
+
+
 
 //---eventMonitor
 
@@ -4720,6 +4861,12 @@ async function update_txCount() {
     if (tx_counts_forPinwheel <= 0) {
         tx_counts_forPinwheel = tx_counts.reduce((a,b)=>Math.max(a,b));
     }
+}
+
+//---stroll
+async function get_strollInfo(_summoner) {
+    let _res = await contract_st.methods.get_strollInfo(_summoner).call();
+    return _res;
 }
 
 
@@ -5478,6 +5625,103 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         }
     }
     
+    //### strolling_start
+    strolling_start() {
+        this.count += 1;
+        if (this.submode == 0) {    //waiting for pet
+            if (this.count == 1) {
+                //***TODO*** animation with waterbottle
+                if (this.dist == "right"){
+                    this.anims.play("murasaki_right", true);
+                }else if (this.dist == "left") {
+                    this.anims.play("murasaki_left", true);
+                }
+                strolling_companion.mode = "strolling_start";
+                strolling_companion.submode = 0;
+            }
+        } else if (this.submode == 1) { //interacting with pet
+            if (this.count == 1){
+                this.anims.play("murasaki_click", true);
+            }
+            if (this.count % 200 == 50) {
+                sound_happy.play();
+            }
+            if (this.count >= 300) {
+                this.count = 0;
+                this.submode = 2;
+                strolling_companion.submode += 1;
+            }
+        } else if (this.submode == 2) { //going out
+            if (this.count == 1){
+                this.speed_x = -0.8;
+                this.speed_y = Math.random() * 0.8;
+                //***TODO*** animation with waterbottle
+                this.anims.play("murasaki_left", true);
+                sound_mining.play();
+            }
+            this.x += this.speed_x;
+            this.y += this.speed_y;
+            if (this.count % 100 == 0) {
+                sound_mining_during.play();
+                summon_heart(this.scene);
+            }
+            if (this.count > 200) {
+                this.count = 0;
+                this.submode = 3;
+            }
+            if (this.x < -200 || this.y > 1200) {
+                this.count = 0;
+                this.submode = 4;
+            }
+        } else if (this.submode == 3) { //waiting
+            this.anims.play("murasaki_click", true);
+            this.flipX = true;
+            if (this.count % 200 == 50) {
+                sound_happy.play();
+            }
+            if (this.count > 300) {
+                this.submode = 2;
+                this.count = 1;
+                this.anims.play("murasaki_left", true);
+                this.flipX = false;
+            }
+        } else if (this.submode == 4) { //open window
+            open_window_strollingDuring(this.scene);
+            this.submode = 5;
+        } else if (this.submode == 5) { //end
+            ;
+        }
+    }
+
+    //### strolling_end
+    strolling_end() {
+        if (this.submode == 0) {
+            this.target_x = 400 + Math.random()*400;
+            this.target_y = 550 + Math.random()*200;
+            this.anims.play("murasaki_right", true);
+            this.flipX = false;
+            this.submode = 1;
+        } else if (this.submode == 1) {
+            let delta_x = this.target_x - this.x;
+            let delta_y = this.target_y - this.y;
+            let delta_x2 = delta_x / (Math.abs(delta_x) + Math.abs(delta_y)) * 1.5;
+            let delta_y2 = delta_y / (Math.abs(delta_x) + Math.abs(delta_y)) * 1.5;
+            this.x += delta_x2;
+            this.y += delta_y2;
+            if (this.x > this.target_x-10 
+              && this.x < this.target_x+10 
+              && this.y > this.target_y-10 
+              && this.y < this.target_y+10) {
+                this.submode = 2;
+                this.subcount = 0;
+            }
+        }else if (this.submode == 2) {
+            this.subcount = 0;                    
+            this.submode = 0;
+            this.mode = "resting";
+        }
+    }
+    
     //### update wearing_hat
     update_item_wearing_hat() {
 
@@ -5591,6 +5835,8 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             else if (this.mode == "hammock") {this.sleeping_withHammock();}
             else if (this.mode == "practice") {this.practice();}
             else if (this.mode == "meet_a_pet") {this.meet_a_pet();}
+            else if (this.mode == "strolling_start") {this.strolling_start();}
+            else if (this.mode == "strolling_end") {this.strolling_end();}
             //draw item_wearing_hat
             if (item_wearing_hat != 0) {
                 this.update_item_wearing_hat();
@@ -5949,7 +6195,64 @@ class Pet extends Phaser.GameObjects.Sprite{
         }
     }
     */
-
+    
+    //### strolling_start
+    strolling_start() {
+        if (this.submode == 0) {
+            let delta_x = murasakisan.x - this.x;
+            if (delta_x >0) {
+                this.dist = "right";
+                this.anims.play(this.sprite_right, true);
+            }else {
+                this.dist = "left";
+                this.anims.play(this.sprite_left, true);
+            }
+            this.submode = 1;
+        } else if (this.submode == 1) {
+            let delta_x = murasakisan.x +25 - this.x;
+            let delta_y = murasakisan.y +25 - this.y;
+            let delta_x2 = delta_x / (Math.abs(delta_x) + Math.abs(delta_y)) * 0.6;
+            let delta_y2 = delta_y / (Math.abs(delta_x) + Math.abs(delta_y)) * 0.6;
+            this.x += delta_x2;
+            this.y += delta_y2;
+            if (this.x > murasakisan.x +25 -10 
+              && this.x < murasakisan.x +25 +10 
+              && this.y > murasakisan.y +25 -10 
+              && this.y < murasakisan.y +25 +10) {
+                this.submode = 2;
+                murasakisan.submode += 1;
+                murasakisan.count = 0;
+            }
+        } else if (this.submode == 2) {
+            if (this.type == "mining"){
+                this.anims.play("mr_astar_meet", true);
+            } else if (this.type == "farming") {
+                this.anims.play("ms_ether_meet", true);
+            } else if (this.type == "crafting") {
+                this.anims.play("dr_bitco_meet", true);
+            }
+        } else if (this.submode == 3) {
+            let delta = murasakisan.x - this.x;
+            if (delta >0) {
+                this.dist = "right";
+                this.anims.play(this.sprite_right, true);
+            }else {
+                this.dist = "left";
+                this.anims.play(this.sprite_left, true);
+            }
+            let delta_x = murasakisan.x +30 - this.x;
+            let delta_y = murasakisan.y +30 - this.y;
+            let delta_x2 = delta_x / (Math.abs(delta_x) + Math.abs(delta_y)) * 0.6;
+            let delta_y2 = delta_y / (Math.abs(delta_x) + Math.abs(delta_y)) * 0.6;
+            this.x += delta_x2;
+            this.y += delta_y2;
+            if (this.x < -100) {
+                this.submode = 4;
+            }
+        } else if (this.submode == 4) {
+        }
+    }
+    
     //### update wearing_hat
     update_item_wearing_hat() {
         if (this.type == "mining") {
@@ -6017,6 +6320,7 @@ class Pet extends Phaser.GameObjects.Sprite{
         else if (this.mode == "working") {this.working();}
         else if (this.mode == "practice") {this.practice();}
         else if (this.mode == "meet") {this.meet();}
+        else if (this.mode == "strolling_start") {this.strolling_start();}
         //depth
         this.depth = this.y;
         //draw item_wearing_hat
@@ -10328,7 +10632,7 @@ function open_window_practice(scene) {
         group_window_practice.destroy(true);
         if (_item_id > 0) {
             sound_button_on.play();
-            console.log(_item_id);
+            //console.log(_item_id);
             contract_start_practice(_summoner, _item_id);
         } else {
             sound_window_select.play();
@@ -10770,6 +11074,568 @@ function open_window_voting(scene) {
 }
 
 
+//### strolling
+async function open_window_strolling(scene) {
+
+
+    //functions
+    
+    //create selection
+    function create_selection(
+        scene, 
+        _x, _y, 
+        _img, _scale, _anim,
+        _text, _fontSize, _fontColor,
+        _type, _select,
+        _summonerCount=0
+     ) {
+        
+        //create icon
+        let _icon = scene.add.sprite(_x, _y, _img,)
+            .setOrigin(0.5)
+            .setScale(_scale)
+            .setInteractive({useHandCursor: true});
+        if (_anim != 0) {
+            _icon.anims.play(_anim);
+        }
+        group_window_strolling.add(_icon);
+
+        //create text
+        if (_summonerCount != 0) {
+            _text = _text + " (" + _summonerCount + ")";
+        }
+        let _title = scene.add.text(_x, _y+50, _text)
+            .setFontSize(_fontSize)
+            .setOrigin(0.5)
+            .setFontFamily("Arial")
+            .setFill(_fontColor);
+        group_window_strolling.add(_title);
+        
+        //define clicking
+        _icon.on("pointerover", () => {
+            sound_window_pointerover.play();
+            _title.setFill("#ffff00");
+        });
+        _icon.on("pointerout", () => {
+            _title.setFill(_fontColor);
+        });
+        _icon.on("pointerdown", () => {
+            sound_window_select.play();
+            if (_type == 1) {
+                _selected_direction.x = _x-90;
+                _selected_direction.y = _y-70;
+                _selected_direction.visible = true;
+                group_window_strolling.selected_direction = _select;
+            } else if (_type == 2) {
+                _selected_companion.x = _x-90;
+                _selected_companion.y = _y-70;
+                _selected_companion.visible = true;
+                group_window_strolling.selected_companion = _select;
+            } else if (_type == 3) {
+                _selected_drink.x = _x-90;
+                _selected_drink.y = _y-70;
+                _selected_drink.visible = true;
+                group_window_strolling.selected_drink = _select;
+            }
+        });
+    }
+    
+
+    //create button
+    function create_button(_x, _y, _text, _color, _colorb, _type, _select, scene, _size) {
+        let obj = scene.add.text(_x, _y, _text)
+            .setFontSize(_size)
+            .setFontFamily("Arial")
+            .setFill(_color)
+            .setInteractive({useHandCursor: true})
+            .on("pointerover", () => {
+                obj.setStyle({ fontSize: _size, fontFamily: "Arial", fill: '#ffff00' });
+                sound_window_pointerover.play();
+            })
+            .on("pointerout", () => {
+                obj.setStyle({ fontSize: _size, fontFamily: "Arial", fill: _color });
+            })
+            .on("pointerdown", () => {
+                //cancel button
+                if (_type == -1) {
+                    group_window_strolling.destroy(true);
+                    sound_window_select.play();
+                //start button
+                } else if (_type == 0) {
+                    sound_button_on.play();
+                    if (
+                        group_window_strolling.selected_direction > 0
+                        && group_window_strolling.selected_companion > 0
+                        && group_window_strolling.selected_drink > 0
+                    ) {
+                        contract_start_stroll(
+                            summoner,
+                            group_window_strolling.selected_direction,
+                            group_window_strolling.selected_companion,
+                            group_window_strolling.selected_drink
+                        )
+                        group_window_strolling.destroy(true);
+                    }
+                }
+            });
+        group_window_strolling.add(obj);
+    }
+
+
+    //begin
+
+    sound_window_open.play();
+    if (local_owner != local_wallet) {
+        return 0;
+    }
+
+    //create group
+    group_window_strolling = scene.add.group();
+    group_window_strolling.selected_direction = 0;
+    group_window_strolling.selected_companion = 0;
+    group_window_strolling.selected_drink = 0;
+
+    //create window
+    let _window = scene.add.sprite(640, 480, "window2").setInteractive();
+    group_window_strolling.add(_window).setDepth(5000);
+
+    //create message
+
+    let _text = "";
+    _text += "Loading...";
+    let msg1 = scene.add.text(140, 110, _text)
+            .setFontSize(24).setFontFamily("Arial").setFill("#333333").setDepth(5001);
+    group_window_strolling.add(msg1);
+
+    //get strollInfo
+    let _strollInfo = await get_strollInfo(summoner);
+    let _isStrolling = Number(_strollInfo[0]);
+    let _total_strolledDistance = Number(_strollInfo[1]);
+    let _total_strolledDistance_ofCompanion_01 = Number(_strollInfo[2]);
+    let _total_strolledDistance_ofCompanion_02 = Number(_strollInfo[3]);
+    let _total_strolledDistance_ofCompanion_03 = Number(_strollInfo[4]);
+    let _total_metSummoners = Number(_strollInfo[5]);
+    let _metSummoners_01 = Number(_strollInfo[6]);
+    let _metSummoners_02 = Number(_strollInfo[7]);
+    let _metSummoners_03 = Number(_strollInfo[8]);
+    let _metSummoners_04 = Number(_strollInfo[9]);
+    let _metSummoners_05 = Number(_strollInfo[10]);
+    let _total_strolling_direction_01 = Number(_strollInfo[11]);
+    let _total_strolling_direction_02 = Number(_strollInfo[12]);
+    let _total_strolling_direction_03 = Number(_strollInfo[13]);
+    let _total_strolling_direction_04 = Number(_strollInfo[14]);
+    let _total_strolling_companion_01 = Number(_strollInfo[15]);
+    let _total_strolling_companion_02 = Number(_strollInfo[16]);
+    let _total_strolling_companion_03 = Number(_strollInfo[17]);
+    let _stroll_level = Number(_strollInfo[18]);
+    let _met_level = Number(_strollInfo[19]);
+
+    //create selected square
+    let _selected_direction = scene.add.graphics()
+        .fillStyle(0x4169e1, 0.4)
+        .fillRoundedRect(0, 0, 180, 150, 32/2)
+        .setVisible(false);
+    let _selected_companion = scene.add.graphics()
+        .fillStyle(0xffff00, 0.5)
+        .fillRoundedRect(0, 0, 180, 150, 32/2)
+        .setVisible(false);
+    let _selected_drink = scene.add.graphics()
+        .fillStyle(0xff1493, 0.3)
+        .fillRoundedRect(0, 0, 180, 150, 32/2)
+        .setVisible(false);
+    group_window_strolling.add(_selected_direction);
+    group_window_strolling.add(_selected_companion);
+    group_window_strolling.add(_selected_drink);
+
+    //close window and summon
+    function close_window(_summoner, _type) {
+        group_window_strolling.destroy(true);
+        if (_type >= 0) {
+            //contract_voting(_summoner, _type);
+            sound_button_on.play();
+        } else {
+            sound_window_select.play();
+        }
+    }
+    
+    //create message
+
+    //update msg1
+    _text = "";
+    _text += "Choose the direction, companion, and drink to begin the stroll!\n";
+    _text += "Your Murasaki-san has strolled a total of ";
+    _text +=_total_strolledDistance;
+    _text += "m and met ";
+    _text += _total_metSummoners;
+    _text += " friends to date.\n";
+    msg1.setText(_text);
+
+    //msg2
+    _text = "";
+    _text += "・Strolling takes 4 hours with a 20-hour interval. Murasaki-san walks 500m per hour.\n";
+    _text += "・During the stroll, Murasaki-san has a chance to meet friends who have chosen the same direction and companion.\n";
+    _text += "・Meeting friends makes Murasaki-san happy and slightly increases the distance of the stroll.\n";
+    _text += "・Matching drinks with the friends met also makes Murasaki-san even happier.\n";
+    _text += "・Murasaki-san will discover twinkling NFTs depending on the total distance strolled or the number of friends met.\n";
+    let msg2 = scene.add.text(200, 680, _text)
+            .setFontSize(18).setFontFamily("Arial").setFill("blue");
+    group_window_strolling.add(msg2);
+
+    /*
+    _text = "";
+    _text += "・Test3.\n";
+    let msg3 = scene.add.text(750, 730, _text)
+            .setFontSize(24).setFontFamily("Arial").setFill("blue");
+    group_window_strolling.add(msg3);
+    */
+
+
+    //create selection
+
+    let _x = 280;
+    let _y = 260;
+    let _x_add = 230;
+    let _y_add = 150;
+    
+    //direction
+    create_selection(
+        scene, 
+        _x+_x_add*0, _y+_y_add*0, 
+        "stroll_direction_01", 0.3, 0,
+        "Mountain", 36, "#000000",
+        1, 1,
+        _total_strolling_direction_01
+    );
+    create_selection(
+        scene, 
+        _x+_x_add*1, _y+_y_add*0, 
+        "stroll_direction_02", 0.3, 0,
+        "Riverside", 36, "#000000",
+        1, 2,
+        _total_strolling_direction_02
+    );
+    create_selection(
+        scene, 
+        _x+_x_add*2, _y+_y_add*0, 
+        "stroll_direction_03", 0.3, 0,
+        "Seaside", 36, "#000000",
+        1, 3,
+        _total_strolling_direction_03
+    );
+    create_selection(
+        scene, 
+        _x+_x_add*3, _y+_y_add*0, 
+        "stroll_direction_04", 0.3, 0,
+        "Grassland", 36, "#000000",
+        1, 4,
+        _total_strolling_direction_04
+    );
+
+    //companion
+    
+    let _item_name;
+    let _item_id;
+
+    //Mr. Astar
+    _item_name = "Mr. Astar";
+    _item_id = dic_items[_item_name]["item_id"];
+    if (local_items_flag[_item_id] == true) {
+        create_selection(
+            scene, 
+            _x+_x_add*0, _y+_y_add*1, 
+            "mr_astar_left", 0.12, "mr_astar_left",
+            "Mr. Astar", 36, "#000000",
+            2, 1,
+            _total_strolling_companion_01
+        );
+    }
+
+    //Ms. Ether    
+    _item_name = "Ms. Ether";
+    _item_id = dic_items[_item_name]["item_id"];
+    if (local_items_flag[_item_id] == true) {
+        create_selection(
+            scene, 
+            _x+_x_add*1, _y+_y_add*1, 
+            "ms_ether_left", 0.12, "ms_ether_left",
+            "Ms. Ether", 36, "#000000",
+            2, 2,
+            _total_strolling_companion_02
+        );
+    }
+
+    //Ms. Ether    
+    _item_name = "Dr. Bitco";
+    _item_id = dic_items[_item_name]["item_id"];
+    if (local_items_flag[_item_id] == true) {
+        create_selection(
+            scene, 
+            _x+_x_add*2, _y+_y_add*1, 
+            "dr_bitco_left", 0.12, "dr_bitco_left",
+            "Dr. Bitco", 36, "#000000",
+            2, 3,
+            _total_strolling_companion_03
+        );
+    }
+
+    //drink
+    create_selection(
+        scene, 
+        _x+_x_add*0, _y+_y_add*2, 
+        "stroll_drink_01", 0.2, 0,
+        "Water", 36, "#000000",
+        3, 1
+    );
+    create_selection(
+        scene, 
+        _x+_x_add*1, _y+_y_add*2, 
+        "stroll_drink_02", 0.2, 0,
+        "Coffee", 36, "#000000",
+        3, 2
+    );
+    create_selection(
+        scene, 
+        _x+_x_add*2, _y+_y_add*2, 
+        "stroll_drink_03", 0.2, 0,
+        "Tea", 36, "#000000",
+        3, 3
+    );
+    create_selection(
+        scene, 
+        _x+_x_add*3, _y+_y_add*2, 
+        "stroll_drink_04", 0.2, 0,
+        "Juice", 36, "#000000",
+        3, 4
+    );
+    
+    //create button
+    create_button(750, 820, "Go for a Stroll", "#000000", "", 0, 0, scene, 36);
+    create_button(1030, 820, "Cancel", "#000000", "", -1, 0, scene, 36);
+
+    //set depth
+    group_window_strolling.setDepth(5000);
+}
+
+
+//### strolling_during
+function open_window_strollingDuring(scene) {
+
+    //create object
+    function _create_obj(scene, _x, _y, _img, _scale, _speed, _depth) {
+        let _obj = scene.add.sprite(_x, _y, _img)
+            .setScale(_scale)
+            .setDepth(_depth)
+            .setOrigin(0.5);
+        _obj.update = function() {
+            if (group_window_strollingDuring.flag_walk == 1) {
+                this.x += _speed;
+            }
+            if (this.x >= 1600) {
+                this.x = -200;
+            }
+        }
+        group_update.add(_obj);
+        group_window_strollingDuring.add(_obj);
+    }
+
+    //start
+    sound_nyui.play();
+    if (local_owner != local_wallet) {
+        return 0;
+    }
+    let _text = "";
+
+    //create group
+    group_window_strollingDuring = scene.add.group();
+    group_window_strollingDuring.flag_walk = 1;
+
+    //create background
+    let _img_back = scene.add.sprite(640, 480, "stroll_during_01_back")
+        .setDepth(5001)
+        .setScale(0.8)
+        .setInteractive();
+    group_window_strollingDuring.add(_img_back);
+    
+    //create cloud
+    _create_obj(scene, -300, 360, "stroll_during_01_cloud", 0.4, 0.05, 5001);
+    _create_obj(scene, 200, 360, "stroll_during_01_cloud", 0.4, 0.05, 5001);
+    _create_obj(scene, 400, 400, "stroll_during_01_cloud", 0.4, 0.05, 5001);
+    _create_obj(scene, 600, 300, "stroll_during_01_cloud", 0.4, 0.05, 5001);
+    _create_obj(scene, 1000, 350, "stroll_during_01_cloud", 0.4, 0.05, 5001);
+
+    //create mountain
+    _create_obj(scene, -300, 540, "stroll_during_01_mountain", 1.2, 0.1, 5001);
+    _create_obj(scene, 100, 540, "stroll_during_01_mountain", 1.2, 0.1, 5001);
+    _create_obj(scene, 500, 540, "stroll_during_01_mountain", 1.2, 0.1, 5001);
+    _create_obj(scene, 800, 540, "stroll_during_01_mountain", 1.2, 0.1, 5001);
+    _create_obj(scene, 1200, 540, "stroll_during_01_mountain", 1.2, 0.1, 5001);
+
+    //create grass
+    _create_obj(scene, -500, 640, "stroll_during_01_grass", 0.4, 0.4, 5002);
+    _create_obj(scene, -400, 640, "stroll_during_01_grass", 0.4, 0.4, 5002);
+    _create_obj(scene, -300, 640, "stroll_during_01_grass", 0.4, 0.4, 5002);
+    _create_obj(scene, -200, 640, "stroll_during_01_grass", 0.4, 0.4, 5002);
+    _create_obj(scene, -100, 640, "stroll_during_01_grass", 0.4, 0.4, 5002);
+    _create_obj(scene, 100, 640, "stroll_during_01_grass", 0.4, 0.4, 5002);
+    _create_obj(scene, 200, 640, "stroll_during_01_grass", 0.4, 0.4, 5002);
+    _create_obj(scene, 300, 640, "stroll_during_01_grass", 0.4, 0.4, 5002);
+    _create_obj(scene, 400, 640, "stroll_during_01_grass", 0.4, 0.4, 5002);
+    _create_obj(scene, 500, 640, "stroll_during_01_grass", 0.4, 0.4, 5002);
+    _create_obj(scene, 600, 640, "stroll_during_01_grass", 0.4, 0.4, 5002);
+    _create_obj(scene, 800, 640, "stroll_during_01_grass", 0.4, 0.4, 5002);
+    _create_obj(scene, 900, 640, "stroll_during_01_grass", 0.4, 0.4, 5002);
+    _create_obj(scene, 1000, 640, "stroll_during_01_grass", 0.4, 0.4, 5002);
+    _create_obj(scene, 1100, 640, "stroll_during_01_grass", 0.4, 0.4, 5002);
+    
+    //create summoner
+    let _walking_summoner = scene.add.sprite(640, 640, "murasaki_left")
+        .setDepth(5003)
+        .setScale(0.4)
+        .setOrigin(0.5)
+        .anims.play("murasaki_left", true);
+    _walking_summoner.count = 0;
+    _walking_summoner.countBuffer = 0;
+    _walking_summoner.update = function() {
+        if (local_stroll_endable == 1) {
+            group_window_strollingDuring.flag_walk = 0;
+            this.anims.play("murasaki_sleeping", true);
+        } else if (group_window_strollingDuring.flag_walk == 0 && this.countBuffer <= 0) {
+            this.anims.play("murasaki_click", true);
+            this.count += 1;
+            if (this.count % 200 == 50) {
+                sound_happy.play();
+            }
+            if (this.count >= 300) {
+                group_window_strollingDuring.flag_walk = 1;
+                this.anims.play("murasaki_left", true);
+                this.count = 0;
+                this.countBuffer = 100;
+            }
+        } else {
+            group_window_strollingDuring.flag_walk = 1;
+        }
+        if (this.countBuffer > 0) {
+            this.countBuffer -= 1;
+        }
+        /*
+        flag_debug=1
+        flag_sync=0
+        open_window_strolling(scene_main)
+        local_strolling_status=1
+        local_stroll_endable=1
+        local_strolling_status=0
+        */
+    }
+    group_window_strollingDuring.add(_walking_summoner);
+    group_update.add(_walking_summoner);
+    
+    //create companion
+    let _walking_companion = scene.add.sprite(670, 660, "mr_astar_left")
+        .setDepth(5004)
+        .setScale(0.1)
+        .setOrigin(0.5)
+        .anims.play("mr_astar_left", true);
+    group_window_strollingDuring.add(_walking_companion);
+    
+    //create msg1
+    _text = "";
+    _text += "⌛ 3h:59m\n";
+    _text += "🥾 800m\n";
+    let _msg1 = scene.add.text(1150, 260, _text)
+        .setDepth(5009)
+        .setFontSize(24)
+        .setFontFamily("Arial")
+        .setFill("#1D2088");
+    group_window_strollingDuring.add(_msg1);
+
+    //create msg2
+    _text = "";
+    _text += "Kapico met Fumapo, Fumamo, Mogumogu\n";
+    let _msg2 = scene.add.text(10, 260, _text)
+        .setDepth(5009)
+        .setFontSize(24)
+        .setFontFamily("Arial")
+        .setFill("#1D2088");
+    group_window_strollingDuring.add(_msg2);
+    
+    //mogumogu
+    let _mogumogu = scene.add.sprite(-200, 680, "mogumogu")
+        .setDepth(5005)
+        .setScale(0.2)
+        .setOrigin(0.5)
+        .anims.play("mogumogu", true);
+    _mogumogu.count = Math.round( Math.random() * 3600 );
+    _mogumogu.update = function() {
+        this.count -= 1;
+        if (this.count < 0) {
+            if (group_window_strollingDuring.flag_walk == 1) {
+                this.x += 0.4;
+            } else {
+                this.x += 0;
+            }
+        }
+        if (this.x >= 1600) {
+            this.x = -200;
+            this.count = Math.random() * 3600;
+        }
+        if (this.x >= 580 && this.x <= 581) {
+            group_window_strollingDuring.flag_walk = 0;
+        }
+    }
+    group_update.add(_mogumogu);
+    group_window_strollingDuring.add(_mogumogu);
+
+    //create cat
+    let _cat = scene.add.sprite(-200, 660, "cat_walking_right_withMail_fast")
+        .setDepth(5006)
+        .setScale(0.3)
+        .setOrigin(0.5)
+        .anims.play("cat_walking_right_withMail_fast", true);
+    _cat.count = Math.round( Math.random() * 3600 );
+    _cat.update = function() {
+        this.count -= 1;
+        if (this.count < 0) {
+            if (group_window_strollingDuring.flag_walk == 1) {
+                this.x += 0.8;
+            } else {
+                this.x += 0.4;
+            }
+        }
+        if (this.x >= 1600) {
+            this.x = -200;
+            this.count = Math.random() * 3600;
+        }
+        if (this.x >= 580 && this.x <= 581) {
+            group_window_strollingDuring.flag_walk = 0;
+        }
+    }
+    group_update.add(_cat);
+    group_window_strollingDuring.add(_cat);
+
+    //create nainai
+    /*
+    let _nainai = scene.add.sprite(-200, 640, "ff_duringFestival_right")
+        .setDepth(5001)
+        .setScale(0.12)
+        .setOrigin(0.5)
+        //.anims.play("cat_walking_right_withMail_fast", true);
+    _nainai.count = Math.random() * 3600;
+    _nainai.update = function() {
+        this.count -= 1;
+        if (this.count < 0) {
+            this.x += 0.2;
+        }
+        if (this.x >= 1600) {
+            this.x = -200;
+            this.count = Math.random() * 3600;
+        }
+    }
+    group_update.add(_nainai);
+    group_window_strollingDuring.add(_nainai);
+    */
+}
+
+
 //---draw
 
 
@@ -11037,6 +11903,17 @@ function summon_flower(scene) {
         .setFrame(Math.floor(Math.random()*5))
         .setOrigin(0.5)
         .setScale(0.1)
+        .setAlpha(1)
+        .setDepth(3)
+    group_update.add(_coin);
+}
+
+
+//### summon_heart
+function summon_heart(scene) {
+    let _coin = new Coin(scene, 100, 100, "icon_heart")
+        .setOrigin(0.5)
+        .setScale(0.07)
         .setAlpha(1)
         .setDepth(3)
     group_update.add(_coin);
@@ -11614,6 +12491,25 @@ function preload(scene) {
     scene.load.image("twinkle_01", "src/png/twinkle_01.png");
     scene.load.image("sparkle_01", "src/png/sparkle_01.png");
     scene.load.image("glitter_01", "src/png/glitter_01.png");
+
+    //### stroll
+    scene.load.image("stroll_drink_01", "src/png/stroll_drink_01.png");
+    scene.load.image("stroll_drink_02", "src/png/stroll_drink_02.png");
+    scene.load.image("stroll_drink_03", "src/png/stroll_drink_03.png");
+    scene.load.image("stroll_drink_04", "src/png/stroll_drink_04.png");
+    scene.load.image("stroll_direction_01", "src/png/stroll_direction_01.png");
+    scene.load.image("stroll_direction_02", "src/png/stroll_direction_02.png");
+    scene.load.image("stroll_direction_03", "src/png/stroll_direction_03.png");
+    scene.load.image("stroll_direction_04", "src/png/stroll_direction_04.png");
+    scene.load.image("stroll_direction_during_01", "src/png/stroll_direction_during_01.png");
+    scene.load.image("stroll_during_01a", "src/png/stroll_during_01a.png");
+    scene.load.image("stroll_during_01b", "src/png/stroll_during_01b.png");
+    scene.load.image("stroll_during_01c", "src/png/stroll_during_01c.png");
+
+    scene.load.image("stroll_during_01_back", "src/png/stroll_during_01_back.png");
+    scene.load.image("stroll_during_01_cloud", "src/png/stroll_during_01_cloud.png");
+    scene.load.image("stroll_during_01_mountain", "src/png/stroll_during_01_mountain.png");
+    scene.load.image("stroll_during_01_grass", "src/png/stroll_during_01_grass.png");
 
 
     //---sounds
@@ -12692,7 +13588,7 @@ function create(scene) {
     //icon_clock
     icon_crafting_time = scene.add.sprite(_x+58, _y+42, "icon_clock")
         .setDepth(2000)
-        .setScale(0.18)
+        .setScale(0.12)
         .setVisible(false);
     group_info2.add(icon_crafting_time);
     //text
@@ -12729,7 +13625,7 @@ function create(scene) {
     //icon_clock
     icon_crafting_time_remining = scene.add.image(_x+60, _y+15, "icon_clock")
         .setDepth(2000)
-        .setScale(0.2)
+        .setScale(0.12)
         .setVisible(false);
     //text
     group_info2.add(icon_crafting_time_remining);
@@ -12830,8 +13726,8 @@ function create(scene) {
     sound_system = scene.sound.add("system", {volume:0.2});
     sound_nui = scene.sound.add("nui", {volume:0.2});
     sound_pad = scene.sound.add("pad", {volume:0.2});
-    sound_fireworks = scene.sound.add("fireworks", {volume:0.2});
-    sound_fireworks2 = scene.sound.add("fireworks2", {volume:0.2});
+    sound_fireworks = scene.sound.add("fireworks", {volume:0.1});
+    sound_fireworks2 = scene.sound.add("fireworks2", {volume:0.1});
     sound_basket = scene.sound.add("basket", {volume:0.2});
     sound_cat1 = scene.sound.add("cat1", {volume:0.2});
     sound_cat2 = scene.sound.add("cat2", {volume:0.2});
@@ -14577,6 +15473,40 @@ function update_checkModeChange(this_scene) {
         }
         murasakisan.item_practice.destroy();
         murasakisan.set_mode = "hugging";
+    
+    //### strolling
+    } else if (
+        local_strolling_status == 1 
+        && murasakisan.mode != "practice" 
+        && murasakisan.mode != "feeding"
+        && murasakisan.mode != "grooming"
+        && murasakisan.mode != "sleeping"
+        && murasakisan.mode != "hammock"
+        && murasakisan.mode != "strolling_start"
+    ){
+        murasakisan.set_mode = "strolling_start";
+        murasakisan.setScale(0.45);
+        murasakisan.submode = 0;
+        murasakisan.count = 0;
+        sound_mining.play();
+        if (local_companion == 1) {
+            strolling_companion = mr_astar;
+        } else if (local_companion == 2) {
+            strolling_companion = ms_ether;
+        } else if (local_companion == 3) {
+            strolling_companion = dr_bitco;
+        }
+        strolling_companion.mode = "strolling_start";
+        strolling_companion.submode = 0;
+    } else if (
+        local_strolling_status == 0
+        && murasakisan.mode == "strolling_start"
+    ){
+        group_window_strollingDuring.destroy(true);
+        murasakisan.set_mode = "strolling_end";
+        murasakisan.setScale(0.45);
+        murasakisan.submode = 0;
+        murasakisan.count = 0;
     }
 
     //### end
@@ -16497,10 +17427,12 @@ function update_checkItem(this_scene) {
                     group_info.setVisible(false);
                     group_info2.setVisible(false);   //set unvisible only
                     group_chart.destroy(true);
+                    /*
                     try {
                         group_item_indicator.destroy(true);
                     } catch (error) {
                     }
+                    */
                     item_pad.setTexture("item_pad_off");
                     //init_global_variants();
                 }
@@ -16510,7 +17442,6 @@ function update_checkItem(this_scene) {
         //uncommon
         if (local_items[_item_id+64] != 0) {
             draw_glitter(this_scene, item_pad);
-            console.log(100);
         }
         //draw flower3
         if (count_sync > 3) {
