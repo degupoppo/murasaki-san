@@ -7,6 +7,7 @@ pragma solidity ^0.8.19;
 
 
 import "github.com/OpenZeppelin/openzeppelin-contracts/contracts/security/ReentrancyGuard.sol";
+import "github.com/OpenZeppelin/openzeppelin-contracts/contracts/security/Pausable.sol";
 import "github.com/OpenZeppelin/openzeppelin-contracts/contracts/access/Ownable.sol";
 import "github.com/OpenZeppelin/openzeppelin-contracts/contracts/utils/structs/EnumerableSet.sol";
 import "github.com/OpenZeppelin/openzeppelin-contracts/contracts/utils/Base64.sol";
@@ -26,6 +27,7 @@ import "github.com/OpenZeppelin/openzeppelin-contracts/contracts/token/ERC721/ut
 
 /* for solc
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@openzeppelin/contracts/utils/Base64.sol";
@@ -219,7 +221,7 @@ interface IERC2665Metadata is IERC2665 { //IERC721Metadata is IERC721 {
  * the Metadata extension, but not including the Enumerable extension, which is available separately as
  * {ERC721Enumerable}.
  */
-contract ERC2665 is Context, ERC165, IERC2665Metadata { // ERC721 is Context, ERC165, IERC721, IERC721Metadata {
+contract ERC2665 is Context, ERC165, IERC2665, IERC2665Metadata { // ERC721 is Context, ERC165, IERC721, IERC721Metadata {
     using Address for address;
     using Strings for uint256;
 
@@ -1194,7 +1196,15 @@ contract Murasakisan is Ownable, IMurasakisan {
 
 //---Murasaki_Main
 
-contract Murasaki_Main is SoulBoundBadge, Ownable{
+contract Murasaki_Main is SoulBoundBadge, Ownable, Pausable {
+
+    //pausable
+    function pause() external onlyOwner {
+        _pause();
+    }
+    function unpause() external onlyOwner {
+        _unpause();
+    }
 
     //permitted address
     mapping(address => bool) public permitted_address;
@@ -1207,11 +1217,13 @@ contract Murasaki_Main is SoulBoundBadge, Ownable{
         permitted_address[_address] = false;
     }
 
+    /*
     //admin pause
     bool notPaused = true;
     function _set_notPaused(bool _bool) external onlyOwner {
         notPaused = _bool;
     }
+    */
     
     //admin migratable
     bool isMigratable = false;
@@ -1228,9 +1240,9 @@ contract Murasaki_Main is SoulBoundBadge, Ownable{
     mapping(uint => uint) public seed;
 
     //summon
-    function summon(address _owner, uint _class, uint _seed) external {
+    function summon(address _owner, uint _class, uint _seed) external whenNotPaused {
         require(permitted_address[msg.sender] == true);
-        require(notPaused);
+        //require(notPaused);
         //update summoner info
         uint _now = block.timestamp;
         class[next_token] = _class;
@@ -1241,9 +1253,9 @@ contract Murasaki_Main is SoulBoundBadge, Ownable{
     }
     
     //summon from trial
-    function summon_fromTrial(address _owner, uint _class, uint _seed) external {
+    function summon_fromTrial(address _owner, uint _class, uint _seed) external whenNotPaused {
         require(permitted_address[msg.sender] == true);
-        require(notPaused);
+        //require(notPaused);
         //update summoner info
         uint _now = block.timestamp;
         class[next_token] = _class;
@@ -1254,7 +1266,7 @@ contract Murasaki_Main is SoulBoundBadge, Ownable{
     }
 
     //burn
-    function burn(uint _summoner) external {
+    function burn(uint _summoner) external whenNotPaused {
         require(permitted_address[msg.sender] == true);
         ERC721._burn(_summoner);
     }
@@ -1345,7 +1357,15 @@ contract Murasaki_Main is SoulBoundBadge, Ownable{
 
 //---Murasaki_Name
 
-contract Murasaki_Name is SoulBoundBadge, Ownable {
+contract Murasaki_Name is SoulBoundBadge, Ownable, Pausable {
+
+    //pausable
+    function pause() external onlyOwner {
+        _pause();
+    }
+    function unpause() external onlyOwner {
+        _unpause();
+    }
 
     //permitted address
     mapping(address => bool) public permitted_address;
@@ -1375,7 +1395,7 @@ contract Murasaki_Name is SoulBoundBadge, Ownable {
     mapping(string => bool) public isMinted;
 
     //mint
-    function mint(address _owner, string memory _name_str, uint _seed) external {
+    function mint(address _owner, string memory _name_str, uint _seed) external whenNotPaused {
         require(permitted_address[msg.sender] == true);
         names[next_token] = _name_str;
         uint _now = block.timestamp;
@@ -1387,7 +1407,7 @@ contract Murasaki_Name is SoulBoundBadge, Ownable {
     }
 
     //burn
-    function burn(uint _name_id) external {
+    function burn(uint _name_id) external whenNotPaused {
         require(permitted_address[msg.sender] == true);
         string memory _name_str = names[_name_id];
         isMinted[_name_str] = false;
@@ -1398,7 +1418,15 @@ contract Murasaki_Name is SoulBoundBadge, Ownable {
 
 //---Murasaki_Craft
 
-contract Murasaki_Craft is ERC2665, Ownable{
+contract Murasaki_Craft is ERC2665, Ownable, Pausable {
+
+    //pausable
+    function pause() external onlyOwner {
+        _pause();
+    }
+    function unpause() external onlyOwner {
+        _unpause();
+    }
 
     //permitted address
     mapping(address => bool) public permitted_address;
@@ -1468,7 +1496,7 @@ contract Murasaki_Craft is ERC2665, Ownable{
     }
 
     //burn
-    function burn(uint256 tokenId) external {
+    function burn(uint256 tokenId) external whenNotPaused {
         require(permitted_address[msg.sender] == true);
         _burn(tokenId);
     }
@@ -1481,7 +1509,7 @@ contract Murasaki_Craft is ERC2665, Ownable{
         uint _seed, 
         string memory _memo,
         uint _item_subtype
-    ) external {
+    ) external whenNotPaused {
         require(permitted_address[msg.sender] == true);
         require(count_of_mint[_item_type] < mintLimit_perItemType);
         uint _now = block.timestamp;
@@ -1636,7 +1664,7 @@ contract Murasaki_Craft is ERC2665, Ownable{
         address from,
         address to,
         uint256 tokenId
-    ) public virtual override payable {
+    ) public virtual override payable whenNotPaused {
         //added code, when not noFee address, require transfer fee
         if (noFee_address[from] == false && noFee_address[to] == false) {
             require(msg.value >= TRANSFER_FEE);
@@ -1650,7 +1678,7 @@ contract Murasaki_Craft is ERC2665, Ownable{
         address from,
         address to,
         uint256 tokenId
-    ) public virtual override payable {
+    ) public virtual override payable whenNotPaused {
         if (noFee_address[from] == false && noFee_address[to] == false) {
             require(msg.value >= TRANSFER_FEE);
             payable(bufferTreasury_address).transfer(address(this).balance);
@@ -1663,7 +1691,7 @@ contract Murasaki_Craft is ERC2665, Ownable{
         address to,
         uint256 tokenId,
         bytes memory _data
-    ) public virtual override payable {
+    ) public virtual override payable whenNotPaused {
         if (noFee_address[from] == false && noFee_address[to] == false) {
             require(msg.value >= TRANSFER_FEE);
             payable(bufferTreasury_address).transfer(address(this).balance);
@@ -2774,7 +2802,15 @@ contract Murasaki_Function_Share is Ownable {
 
 //---Summon_and_LevelUp
 
-contract Murasaki_Function_Summon_and_LevelUp is Ownable, ReentrancyGuard {
+contract Murasaki_Function_Summon_and_LevelUp is Ownable, ReentrancyGuard, Pausable {
+
+    //pausable
+    function pause() external onlyOwner {
+        _pause();
+    }
+    function unpause() external onlyOwner {
+        _unpause();
+    }
 
     //address
     address public address_Murasaki_Address;
@@ -2789,7 +2825,7 @@ contract Murasaki_Function_Summon_and_LevelUp is Ownable, ReentrancyGuard {
 
     //summon
     event Summon(uint indexed _summoner, address _wallet, uint _class);
-    function summon(uint _class) external payable nonReentrant {
+    function summon(uint _class) external payable nonReentrant whenNotPaused {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         Murasaki_Main mm = Murasaki_Main(ma.address_Murasaki_Main());
@@ -2874,7 +2910,7 @@ contract Murasaki_Function_Summon_and_LevelUp is Ownable, ReentrancyGuard {
 
     //burn
     event Burn(uint indexed _summoner);
-    function burn(uint _summoner) external nonReentrant {
+    function burn(uint _summoner) external nonReentrant whenNotPaused {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         Murasaki_Main mm = Murasaki_Main(ma.address_Murasaki_Main());
@@ -2898,7 +2934,7 @@ contract Murasaki_Function_Summon_and_LevelUp is Ownable, ReentrancyGuard {
 
     //level-up
     event Level_up(uint indexed _summoner, uint _level);
-    function level_up (uint _summoner) external nonReentrant {
+    function level_up (uint _summoner) external nonReentrant whenNotPaused {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
@@ -3066,7 +3102,15 @@ contract Murasaki_Function_Summon_and_LevelUp is Ownable, ReentrancyGuard {
 
 //---Feeding_and_Grooming
 
-contract Murasaki_Function_Feeding_and_Grooming is Ownable, ReentrancyGuard {
+contract Murasaki_Function_Feeding_and_Grooming is Ownable, ReentrancyGuard, Pausable {
+
+    //pausable
+    function pause() external onlyOwner {
+        _pause();
+    }
+    function unpause() external onlyOwner {
+        _unpause();
+    }
 
     //address
     address public address_Murasaki_Address;
@@ -3095,7 +3139,7 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable, ReentrancyGuard {
     
     //feeding
     event Feeding(uint indexed _summoner, uint _exp_gained, bool _critical, bool _other);
-    function feeding(uint _summoner, uint _item_nui) external nonReentrant {
+    function feeding(uint _summoner, uint _item_nui) external nonReentrant whenNotPaused {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
@@ -3210,7 +3254,7 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable, ReentrancyGuard {
         return mfs.not_petrified(_summoner);
     }
     event Cure_Petrification(uint indexed _summoner, uint _price);
-    function cure_petrification(uint _summoner) external payable nonReentrant {
+    function cure_petrification(uint _summoner) external payable nonReentrant whenNotPaused {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
@@ -3241,7 +3285,7 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable, ReentrancyGuard {
 
     //grooming
     event Grooming(uint indexed _summoner, uint _exp_gained, bool _critical);
-    function grooming(uint _summoner, uint _item_nui) external nonReentrant {
+    function grooming(uint _summoner, uint _item_nui) external nonReentrant whenNotPaused {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
@@ -3323,7 +3367,15 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable, ReentrancyGuard {
 
 //---Mining_and_Farming
 
-contract Murasaki_Function_Mining_and_Farming is Ownable, ReentrancyGuard {
+contract Murasaki_Function_Mining_and_Farming is Ownable, ReentrancyGuard, Pausable {
+
+    //pausable
+    function pause() external onlyOwner {
+        _pause();
+    }
+    function unpause() external onlyOwner {
+        _unpause();
+    }
 
     //address
     address public address_Murasaki_Address;
@@ -3337,7 +3389,7 @@ contract Murasaki_Function_Mining_and_Farming is Ownable, ReentrancyGuard {
     }
 
     //mining
-    function start_mining(uint _summoner) external nonReentrant {
+    function start_mining(uint _summoner) external nonReentrant whenNotPaused {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
@@ -3362,7 +3414,7 @@ contract Murasaki_Function_Mining_and_Farming is Ownable, ReentrancyGuard {
         ms.set_mining_start_time(_summoner, _now);
     }
     event Mining(uint indexed _summoner, uint _coin_mined, bool _critical);
-    function stop_mining(uint _summoner) external nonReentrant {
+    function stop_mining(uint _summoner) external nonReentrant whenNotPaused {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
@@ -3496,7 +3548,7 @@ contract Murasaki_Function_Mining_and_Farming is Ownable, ReentrancyGuard {
     }
 
     //farming
-    function start_farming(uint _summoner) external nonReentrant {
+    function start_farming(uint _summoner) external nonReentrant whenNotPaused {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
@@ -3521,7 +3573,7 @@ contract Murasaki_Function_Mining_and_Farming is Ownable, ReentrancyGuard {
         ms.set_farming_start_time(_summoner, _now);
     }
     event Farming(uint indexed _summoner, uint _material_farmed, bool _critical);
-    function stop_farming(uint _summoner) external nonReentrant {
+    function stop_farming(uint _summoner) external nonReentrant whenNotPaused {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
@@ -3678,7 +3730,15 @@ contract Murasaki_Function_Mining_and_Farming is Ownable, ReentrancyGuard {
 //---Crafting
 
 //item NFT crafting, burn Mail
-contract Murasaki_Function_Crafting is Ownable, ReentrancyGuard {
+contract Murasaki_Function_Crafting is Ownable, ReentrancyGuard, Pausable {
+
+    //pausable
+    function pause() external onlyOwner {
+        _pause();
+    }
+    function unpause() external onlyOwner {
+        _unpause();
+    }
 
     //address
     address public address_Murasaki_Address;
@@ -3747,7 +3807,7 @@ contract Murasaki_Function_Crafting is Ownable, ReentrancyGuard {
     */
 
     //start_crafting, resume_flag==0
-    function start_crafting(uint _summoner, uint _item_type) external nonReentrant {
+    function start_crafting(uint _summoner, uint _item_type) external nonReentrant whenNotPaused {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
@@ -3805,7 +3865,7 @@ contract Murasaki_Function_Crafting is Ownable, ReentrancyGuard {
     }
 
     //pause_crafting, remining_time > 0
-    function pause_crafting(uint _summoner) external nonReentrant {
+    function pause_crafting(uint _summoner) external nonReentrant whenNotPaused {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
@@ -3840,7 +3900,7 @@ contract Murasaki_Function_Crafting is Ownable, ReentrancyGuard {
     }
 
     //cancel_crafting, crafting_status==0 & resume_flag==1
-    function cancel_crafting(uint _summoner) external nonReentrant {
+    function cancel_crafting(uint _summoner) external nonReentrant whenNotPaused {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
@@ -3860,7 +3920,7 @@ contract Murasaki_Function_Crafting is Ownable, ReentrancyGuard {
     }
 
     //resume_crafting, crafting_status==0 & resume_flag==1
-    function resume_crafting(uint _summoner) external nonReentrant {
+    function resume_crafting(uint _summoner) external nonReentrant whenNotPaused {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
@@ -3905,7 +3965,7 @@ contract Murasaki_Function_Crafting is Ownable, ReentrancyGuard {
 
     //complete_crafting, crafting_status==1 & remining_time == 0
     event Crafting(uint indexed _summoner, uint _item_type, uint _item, bool _critical);
-    function complete_crafting(uint _summoner) external nonReentrant {
+    function complete_crafting(uint _summoner) external nonReentrant whenNotPaused {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
@@ -4022,7 +4082,15 @@ contract Murasaki_Function_Crafting is Ownable, ReentrancyGuard {
 //---Crafting2
 
 //upgrading, unpack bag/pouch, 
-contract Murasaki_Function_Crafting2 is Ownable, ReentrancyGuard {
+contract Murasaki_Function_Crafting2 is Ownable, ReentrancyGuard, Pausable {
+
+    //pausable
+    function pause() external onlyOwner {
+        _pause();
+    }
+    function unpause() external onlyOwner {
+        _unpause();
+    }
 
     //address
     address public address_Murasaki_Address;
@@ -4077,7 +4145,7 @@ contract Murasaki_Function_Crafting2 is Ownable, ReentrancyGuard {
         uint _item1, 
         uint _item2, 
         uint _item3
-    ) external nonReentrant {
+    ) external nonReentrant whenNotPaused {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         Murasaki_Craft mc = Murasaki_Craft(ma.address_Murasaki_Craft());
@@ -4140,7 +4208,7 @@ contract Murasaki_Function_Crafting2 is Ownable, ReentrancyGuard {
         uint _item3,
         uint _item4,
         uint _item5
-    ) external nonReentrant {
+    ) external nonReentrant whenNotPaused {
         require(_check_summoner(_summoner, msg.sender));
         require(_check_items(_item1, _item2, _item3, _item4, _item5, msg.sender));
         uint _sourceItemType = _get_sourceItemType(_item1);
@@ -4287,7 +4355,7 @@ contract Murasaki_Function_Crafting2 is Ownable, ReentrancyGuard {
     
     //unpack coin/material
     event Unpack(uint indexed _summoner, uint _item_type, uint _item);
-    function unpack_bag(uint _summoner, uint _item) external nonReentrant {
+    function unpack_bag (uint _summoner, uint _item) external nonReentrant whenNotPaused {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
@@ -4314,7 +4382,7 @@ contract Murasaki_Function_Crafting2 is Ownable, ReentrancyGuard {
     
     //open present box and mint precious
     //presentbox = 200
-    function open_presentbox(uint _summoner, uint _item) external nonReentrant {
+    function open_presentbox (uint _summoner, uint _item) external nonReentrant whenNotPaused {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         Murasaki_Craft mc = Murasaki_Craft(ma.address_Murasaki_Craft());
@@ -5365,7 +5433,15 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
 
 //---Name
 
-contract Murasaki_Function_Name is Ownable, ReentrancyGuard {
+contract Murasaki_Function_Name is Ownable, ReentrancyGuard, Pausable {
+
+    //pausable
+    function pause() external onlyOwner {
+        _pause();
+    }
+    function unpause() external onlyOwner {
+        _unpause();
+    }
 
     //address
     address public address_Murasaki_Address;
@@ -5388,7 +5464,7 @@ contract Murasaki_Function_Name is Ownable, ReentrancyGuard {
 
     //mint
     event Name(uint indexed _summoner, string _name_str, uint _name_id);
-    function mint(uint _summoner, string memory _name_str) external nonReentrant {
+    function mint(uint _summoner, string memory _name_str) external nonReentrant whenNotPaused {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         Murasaki_Name mn = Murasaki_Name(ma.address_Murasaki_Name());
@@ -5426,7 +5502,7 @@ contract Murasaki_Function_Name is Ownable, ReentrancyGuard {
 
     //burn
     event Burn(uint indexed _summoner, uint _name_id);
-    function burn(uint _summoner) external nonReentrant {
+    function burn(uint _summoner) external nonReentrant whenNotPaused {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         Murasaki_Name mn = Murasaki_Name(ma.address_Murasaki_Name());
@@ -5623,7 +5699,15 @@ contract Murasaki_Function_Achievement is Ownable {
 
 //---Music_Practice
 
-contract Murasaki_Function_Music_Practice is Ownable, ReentrancyGuard {
+contract Murasaki_Function_Music_Practice is Ownable, ReentrancyGuard, Pausable {
+
+    //pausable
+    function pause() external onlyOwner {
+        _pause();
+    }
+    function unpause() external onlyOwner {
+        _unpause();
+    }
 
     //address
     address public address_Murasaki_Address;
@@ -5664,7 +5748,7 @@ contract Murasaki_Function_Music_Practice is Ownable, ReentrancyGuard {
     }
 
     //start practice
-    function start_practice(uint _summoner, uint _item_id) external nonReentrant {
+    function start_practice(uint _summoner, uint _item_id) external nonReentrant whenNotPaused {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
@@ -5689,7 +5773,7 @@ contract Murasaki_Function_Music_Practice is Ownable, ReentrancyGuard {
     
     //stop practice
     event Practice(uint indexed _summoner, uint _itemType, uint _exp);
-    function stop_practice(uint _summoner) external nonReentrant {
+    function stop_practice(uint _summoner) external nonReentrant whenNotPaused {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
         require(_check_summoner(_summoner, msg.sender));
@@ -5959,7 +6043,15 @@ contract Murasaki_Function_Music_Practice is Ownable, ReentrancyGuard {
 
 //---Staking_Reward
 
-contract Murasaki_Function_Staking_Reward is Ownable, ReentrancyGuard {
+contract Murasaki_Function_Staking_Reward is Ownable, ReentrancyGuard, Pausable {
+
+    //pausable
+    function pause() external onlyOwner {
+        _pause();
+    }
+    function unpause() external onlyOwner {
+        _unpause();
+    }
 
     //address
     address public address_Murasaki_Address;
@@ -6036,7 +6128,7 @@ contract Murasaki_Function_Staking_Reward is Ownable, ReentrancyGuard {
     
     //update staking counter
     //can be exected by direct contract access
-    function update_staking_counter (uint _summoner) external nonReentrant {
+    function update_staking_counter (uint _summoner) external nonReentrant whenNotPaused {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
         Murasaki_Parameter mp = Murasaki_Parameter(ma.address_Murasaki_Parameter());
@@ -6080,7 +6172,7 @@ contract Murasaki_Function_Staking_Reward is Ownable, ReentrancyGuard {
     }
     
     event Staking_Reward(uint indexed _summoner, string _reward);
-    function open_staking_reward (uint _summoner) external nonReentrant {
+    function open_staking_reward (uint _summoner) external nonReentrant whenNotPaused {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         Murasaki_Parameter mp = Murasaki_Parameter(ma.address_Murasaki_Parameter());
@@ -6192,7 +6284,15 @@ contract Murasaki_Function_Staking_Reward is Ownable, ReentrancyGuard {
 
 //---Trial_Converter
 
-contract Trial_Converter is Ownable, ReentrancyGuard {
+contract Trial_Converter is Ownable, ReentrancyGuard, Pausable {
+
+    //pausable
+    function pause() external onlyOwner {
+        _pause();
+    }
+    function unpause() external onlyOwner {
+        _unpause();
+    }
 
     //address
     address public address_Murasaki_Address;
@@ -6207,7 +6307,7 @@ contract Trial_Converter is Ownable, ReentrancyGuard {
     
     //converting summon
     event ConvertingSummon(uint indexed _summoner, uint _trial_summoner);
-    function converting_summon () external nonReentrant payable {
+    function converting_summon () external nonReentrant payable whenNotPaused {
         //check not paused
         require(_check_notPaused());
         //only trial
@@ -6441,7 +6541,15 @@ contract Trial_Converter is Ownable, ReentrancyGuard {
 /// @dev Summoner market to allow trading of summoners
 /// @author swit.eth (@nomorebear) + nipun (@nipun_pit) + jade (@jade_arin)
 
-contract Murasaki_Market_Item is Ownable, ReentrancyGuard, ERC721Holder {
+contract Murasaki_Market_Item is Ownable, ReentrancyGuard, ERC721Holder, Pausable {
+
+    //pausable
+    function pause() external onlyOwner {
+        _pause();
+    }
+    function unpause() external onlyOwner {
+        _unpause();
+    }
 
     //address
     address public address_Murasaki_Address;
@@ -6497,7 +6605,7 @@ contract Murasaki_Market_Item is Ownable, ReentrancyGuard, ERC721Holder {
     }
 
     /// @dev Lists the given summoner. This contract will take custody until bought / unlisted.
-    function list(uint _item, uint price) external nonReentrant {
+    function list(uint _item, uint price) external nonReentrant whenNotPaused {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Craft mc = Murasaki_Craft(ma.address_Murasaki_Craft());
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
@@ -6523,7 +6631,7 @@ contract Murasaki_Market_Item is Ownable, ReentrancyGuard, ERC721Holder {
     }
 
     /// @dev Unlists the given summoner. Must be the lister.
-    function unlist(uint _item) external nonReentrant {
+    function unlist(uint _item) external nonReentrant whenNotPaused {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Craft mc = Murasaki_Craft(ma.address_Murasaki_Craft());
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
@@ -6541,7 +6649,7 @@ contract Murasaki_Market_Item is Ownable, ReentrancyGuard, ERC721Holder {
     }
 
     /// @dev Buys the given summoner. Must pay the exact correct prirce.
-    function buy(uint _item) external payable nonReentrant {
+    function buy(uint _item) external payable nonReentrant whenNotPaused {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Craft mc = Murasaki_Craft(ma.address_Murasaki_Craft());
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
@@ -6708,7 +6816,15 @@ contract Murasaki_Market_Item is Ownable, ReentrancyGuard, ERC721Holder {
 
 //---Murasaki_Dice
 
-contract Murasaki_Dice is Ownable, ReentrancyGuard {
+contract Murasaki_Dice is Ownable, ReentrancyGuard, Pausable {
+
+    //pausable
+    function pause() external onlyOwner {
+        _pause();
+    }
+    function unpause() external onlyOwner {
+        _unpause();
+    }
 
     /*
 
@@ -6777,7 +6893,7 @@ contract Murasaki_Dice is Ownable, ReentrancyGuard {
 
     //dice roll
     event Dice_Roll(uint indexed _summoner, uint _rolled_dice);
-    function dice_roll(uint _summoner) external nonReentrant {
+    function dice_roll(uint _summoner) external nonReentrant whenNotPaused {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         Murasaki_Parameter mp = Murasaki_Parameter(ma.address_Murasaki_Parameter());
@@ -6908,7 +7024,15 @@ contract Murasaki_Dice is Ownable, ReentrancyGuard {
 
 //---Murasaki_Mail
 
-contract Murasaki_Mail is Ownable, ReentrancyGuard {
+contract Murasaki_Mail is Ownable, ReentrancyGuard, Pausable {
+
+    //pausable
+    function pause() external onlyOwner {
+        _pause();
+    }
+    function unpause() external onlyOwner {
+        _unpause();
+    }
 
     //address
     address public address_Murasaki_Address;
@@ -7011,7 +7135,7 @@ contract Murasaki_Mail is Ownable, ReentrancyGuard {
     
     //send mail, need to burn item_mail nft
     event Send_Mail(uint indexed _summoner_from, uint _summoner_to, uint _item_mail);
-    function send_mail(uint _summoner_from, uint _item_mail) external nonReentrant {
+    function send_mail(uint _summoner_from, uint _item_mail) external nonReentrant whenNotPaused {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         Murasaki_Parameter mp = Murasaki_Parameter(ma.address_Murasaki_Parameter());
@@ -7093,7 +7217,7 @@ contract Murasaki_Mail is Ownable, ReentrancyGuard {
     
     //open mail
     event Open_Mail(uint indexed _summoner_to, uint _summoner_from);
-    function open_mail(uint _summoner_to) external nonReentrant {
+    function open_mail(uint _summoner_to) external nonReentrant whenNotPaused {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         Murasaki_Parameter mp = Murasaki_Parameter(ma.address_Murasaki_Parameter());
@@ -7136,7 +7260,15 @@ contract Murasaki_Mail is Ownable, ReentrancyGuard {
 
 //---Fluffy_Festival
 
-contract Fluffy_Festival is Ownable, ReentrancyGuard {
+contract Fluffy_Festival is Ownable, ReentrancyGuard, Pausable {
+
+    //pausable
+    function pause() external onlyOwner {
+        _pause();
+    }
+    function unpause() external onlyOwner {
+        _unpause();
+    }
 
     //address
     address public address_Murasaki_Address;
@@ -7232,7 +7364,7 @@ contract Fluffy_Festival is Ownable, ReentrancyGuard {
     //Voting
     event Start_Voting(uint indexed _summoner);
     event Voting(uint indexed _summoner, uint _select);
-    function voting(uint _summoner, uint _select) external nonReentrant {
+    function voting (uint _summoner, uint _select) external nonReentrant whenNotPaused {
         //check ff active
         require(isActive);
         //check owner
@@ -7378,7 +7510,7 @@ contract Fluffy_Festival is Ownable, ReentrancyGuard {
     }
     //public, executable without voting
     event End_Voting(uint indexed _summoner, uint _winner);
-    function end_voting(uint _summoner) external nonReentrant {
+    function end_voting(uint _summoner) external nonReentrant whenNotPaused {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         require(mfs.check_owner(_summoner, msg.sender));
@@ -7657,7 +7789,15 @@ contract Achievement_onChain is Ownable {
 
 //---Stroll
 
-contract Stroll is Ownable, ReentrancyGuard {
+contract Stroll is Ownable, ReentrancyGuard, Pausable {
+
+    //pausable
+    function pause() external onlyOwner {
+        _pause();
+    }
+    function unpause() external onlyOwner {
+        _unpause();
+    }
 
     //address
     address public address_Murasaki_Address;
@@ -7774,7 +7914,7 @@ contract Stroll is Ownable, ReentrancyGuard {
         uint _direction, 
         uint _companion, 
         uint _drink
-    ) external nonReentrant {
+    ) external nonReentrant whenNotPaused {
         require(_check_summoner_start(_summoner, msg.sender));
         require(_direction>=1 && _direction<=4);
         require(_companion>=1 && _companion<=3);
@@ -7879,7 +8019,7 @@ contract Stroll is Ownable, ReentrancyGuard {
     //end stroll
     event End_Stroll (uint indexed _summoner, uint _strolledDistance);
     event Summoners_Met (uint indexed _summoner, uint _summoner_met, bool _isFirstTime);
-    function endStroll (uint _summoner) external nonReentrant {
+    function endStroll (uint _summoner) external nonReentrant whenNotPaused {
         require(_check_summoner_end(_summoner, msg.sender));
         _update_metSummoners(_summoner);
         _update_total_metSummoners(_summoner);
@@ -9271,7 +9411,7 @@ contract Murasaki_tokenURI is Ownable {
                     string(abi.encodePacked(toString(_balanceOfItems(_summoner)))),
                     '</text><text x="124" y="38" class="base" text-anchor="end"><tspan font-size="14">&#x1f359;',
                     string(abi.encodePacked(toString(mi.satiety(_summoner)))),
-                    '</tspan></text><text x="4" y="124" class="base" text-anchor="start"><tspan font-size="9" fill="black">',
+                    '</tspan></text><text x="4" y="124" class="base" text-anchor="start"><tspan font-size="14" fill="black">',
                     string(abi.encodePacked(toString(mi.score(_summoner)))),
                     '</tspan></text>',
 
@@ -9334,7 +9474,15 @@ contract Murasaki_tokenURI is Ownable {
 //---BufferVault
 
 //trading fee, dapps staking reward, other fees
-contract BufferVault is Ownable, ReentrancyGuard {
+contract BufferVault is Ownable, ReentrancyGuard, Pausable {
+
+    //pausable
+    function pause() external onlyOwner {
+        _pause();
+    }
+    function unpause() external onlyOwner {
+        _unpause();
+    }
 
     //receivable
     receive() external payable {
@@ -9419,7 +9567,7 @@ contract BufferVault is Ownable, ReentrancyGuard {
     }
     
     //admin, transfer
-    function transfer_for_buybackTreasury() external nonReentrant onlyOwner{
+    function transfer_for_buybackTreasury() external nonReentrant onlyOwner whenNotPaused {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         BuybackTreasury bbt = BuybackTreasury(payable(ma.address_BuybackTreasury()));
         Murasaki_Parameter mp = Murasaki_Parameter(ma.address_Murasaki_Parameter());
@@ -9452,7 +9600,15 @@ contract BufferVault is Ownable, ReentrancyGuard {
 //---BuybackTreasury
 
 //for buyback items
-contract BuybackTreasury is Ownable, ReentrancyGuard {
+contract BuybackTreasury is Ownable, ReentrancyGuard, Pausable {
+
+    //pausable
+    function pause() external onlyOwner {
+        _pause();
+    }
+    function unpause() external onlyOwner {
+        _unpause();
+    }
 
     //*approve of mc is needed
 
@@ -9473,7 +9629,7 @@ contract BuybackTreasury is Ownable, ReentrancyGuard {
     }
 
     //variants
-    bool public isPaused;
+    //bool public isPaused;
     uint public amountPaied_total = 0;
     uint public disabledSummoners = 0;
     uint public amountPerSummoner = 225 * 10**18;
@@ -9491,9 +9647,11 @@ contract BuybackTreasury is Ownable, ReentrancyGuard {
     }
 
     //admin, set isPaused
+    /*
     function set_isPaused(bool _bool) external onlyOwner{
         isPaused = _bool;
     }
+    */
 
     //admin, update notActivated summoner number by manually
     function set_disabledSummoners(uint _value) external onlyOwner {
@@ -9652,13 +9810,13 @@ contract BuybackTreasury is Ownable, ReentrancyGuard {
     }
 
     event Buyback(uint indexed _summoner, uint _item, uint _price);    
-    function buyback(uint _summoner, uint _item) external nonReentrant {
+    function buyback(uint _summoner, uint _item) external nonReentrant whenNotPaused {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         Murasaki_Craft mc = Murasaki_Craft(ma.address_Murasaki_Craft());
         Murasaki_Parameter mp = Murasaki_Parameter(ma.address_Murasaki_Parameter());
         require(mp.isPaused() == false);
-        require(isPaused == false);
+        //require(isPaused == false);
         require(mfs.check_owner(_summoner, msg.sender));
         require(mc.ownerOf(_item) == msg.sender);
         mc.safeTransferFrom(msg.sender, address(this), _item);

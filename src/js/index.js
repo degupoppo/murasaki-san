@@ -272,13 +272,14 @@ async function show_murasakiInfo() {
         //prepare text
 
         _text = "";
-        _text += "---------------------------------------------------------------------------------------------";
+        _text += "-------------------------------------------------------------------------";
+        _text += "<br>";
 
         //icon
         _text += "<style>.showIcon{display: inline-block; width: 64px; float: left; margin-right: 16px; margin-top: 8px;}</style>";
         _text += "<span class='showIcon' align='left'>";
         _text += _tokenURI;
-        _text += "</span><br>";
+        _text += "</span>";
 
         //text
         _text += "You are the owner of a <b><font color='#ff7f50'>";
@@ -325,7 +326,7 @@ async function show_murasakiInfo() {
         _text += _score;
         _text += "</font></b>.";
         _text += "<br>";
-        _text += "---------------------------------------------------------------------------------------------";
+        _text += "-------------------------------------------------------------------------";
         _text += "<br>";
     }
     //override html

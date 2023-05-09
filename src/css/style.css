@@ -65,3 +65,8 @@ nav a.current {
     inline-size: 700px;
     overflow-wrap: break-word;
 }
+
+.show_icon{
+    display: inline-block; 
+    width: 64px;
+}
