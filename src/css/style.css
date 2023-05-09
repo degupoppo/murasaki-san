@@ -23,6 +23,7 @@ nav a.current {
   border-radius: 5px;
   padding: 1.5rem;
   margin: 2rem 0;
+  text-align: center;
 }
 
 .medium {
@@ -69,4 +70,17 @@ nav a.current {
 .show_icon{
     display: inline-block; 
     width: 64px;
+}
+
+.vertical-middle{
+  display: inline-block; /* インライン要素にすることで横に回り込む */
+  vertical-align: middle; /* 上下中央に寄せる */ 
+}
+
+.showIconTop{
+    display: inline-block; 
+    width: 64px; 
+    float: center; 
+    margin-right: 16px; 
+    margin-top: 0px;
 }

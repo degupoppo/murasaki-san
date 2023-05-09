@@ -176,6 +176,41 @@ async function _show_icon() {
 }
 
 
+//show icon2
+async function _show_icon2() {
+    try {
+        if (typeof(wallet) == "undefined") {
+            await init_web3();
+        }
+        let _res;
+        let _balance = await contract_mm.methods.balanceOf(wallet).call();
+        if (_balance == 0) {    //when no token, call for trial
+            _res = await contract_trial_mu.methods.tokenURI_fromWallet(wallet).call();
+        } else {
+            _res = await contract_mu.methods.tokenURI_fromWallet(wallet).call();
+        }
+        // get SVG
+        _res = _res.split("base64,")[1];
+        _res = atob(_res);
+        _res = _res.split("base64,")[1];
+        _res = _res.split('"')[0];
+        _res = atob(_res);
+        // insert into html
+        let _text = "";
+
+        //_text += "<style>.showIcon{display: inline-block; width: 64px; float: center; margin-right: 16px; margin-top: 0px;}</style>";
+        //_text += "<span class='showIcon' align='center'>";
+        _text += _res;
+        //_text += "</span>";
+
+        let target = document.getElementById("output_murasakiIcon");
+        target.innerHTML = _text;
+    } catch (err) {
+        setTimeout( _show_icon2, 5000);
+    }
+}
+
+
 
 //Hello Murasaki-san button
 
