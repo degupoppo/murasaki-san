@@ -35,7 +35,8 @@ async function update_onMarketItems() {
         let _isPrelisting = false;
         if (
             _listedPrice < 100
-            && _auctionRestingTime <= 24 * 60 * 60
+            //&& _auctionRestingTime <= 24 * 60 * 60
+            && _auctionRestingTime > 0
         ) {
             _isPrelisting = true;
         }

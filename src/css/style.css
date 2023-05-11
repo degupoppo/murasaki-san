@@ -84,3 +84,11 @@ nav a.current {
     margin-right: 16px; 
     margin-top: 0px;
 }
+
+.footer{
+    line-height: 0px;
+}
+
+.textMiddle{
+    vertical-align: middle;
+}

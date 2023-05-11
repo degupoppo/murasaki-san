@@ -16,7 +16,7 @@
 
 <title>House of Murasaki-san</title>
 <meta name="description" content="Murasaki-san is a virtual pet that lives in your wallet on Astar Network." />
-<link rel="stylesheet" href="src/css/simple.css">
+<link rel="stylesheet" href="src/css/simple2.css">
 <link rel="stylesheet" href="src/css/style.css">
 
 <link rel="icon" href="src/png/favicon.png" />
@@ -63,7 +63,7 @@ House of Murasaki-san
 <p>
 <center>
 Murasaki-san is a virtual pet that lives in your wallet on <a href="https://astar.network/">Astar Network</a>.<br>
-They will grow depending on your dedication and time.
+Their growth depends on your dedication and time.
 </center>
 </p>
 
@@ -90,7 +90,7 @@ This is our fan project using <b>Astar Network</b> <img src="src/png/coin_color_
 
 <p class="notice">
 <b>&#x1f497; News! &#x1f497;</b><br>
-We have released Murasaki-san <b><a href="https://store.line.me/stickershop/product/16670298/en">LINE stickers</a></b> and <b><a href="https://store.line.me/emojishop/product/644a021e1033b65e5ca8ff7d/en">LINE emojis</a></b>!<br>
+We have released Murasaki-san <b><a href="https://store.line.me/stickershop/product/16670298/en">LINE sticker</a></b> and <b><a href="https://store.line.me/emojishop/product/644a021e1033b65e5ca8ff7d/en">LINE emoji</a></b>!<br>
 </p>
 
 <br>
@@ -108,6 +108,10 @@ We have released Murasaki-san <b><a href="https://store.line.me/stickershop/prod
 <b><a href="house.html?summoner=1">Demo Preview</a></b> is available for everyone. Meet developer's Murasaki-san and try <b>Feeding</b> them :)<br>
 </p>
 
+<p>
+This product can be used accross multiple platforms. You can play the game using EVM-compatible web browsers such as Chrome, Firefox, etc., on Windows or macOS with the Metamask plugin, or using the Brave browser on iOS or Android smartphones.
+</p>
+
 <br>
 
 <details>
@@ -118,9 +122,9 @@ We have released Murasaki-san <b><a href="https://store.line.me/stickershop/prod
 <p>
 &nbsp;&nbsp;&nbsp;That's why we started creating on a game to move, take care of, and grow our Murasaki-san. It was just two weeks after the Astar Network launched and we wanted to build something fun on Astar chain. After about a year of development period, we are happy to launch our product on the Astar Network :)<br>
 </p>
-<p>
+<p class="textMiddle">
 &nbsp;&nbsp;&nbsp;Cheers to Astar and Murasaki-san.<br>
-<img src="src/icon/murasakisan_02.png" width="96" height="96">&lt;&nbsp;cheers!
+<img src="src/icon/murasakisan_02.png" width="96" height="96" class="textMiddle">&lt;&nbsp;cheers!
 </p>
 </details>
 
@@ -300,19 +304,23 @@ Item NFTs listed in the marketplace will be moved out of your house and will no 
 </p>
 
 <p>
-<b>Marketplace Rules:</b><br>
+<b>Currency and fees:</b><br>
 </p>
 
 <ul>
-<li>Platform fee: <b>5%</b>.<br>
 <li>Token used for trading: <b>$ASTR</b>.<br>
-<li>Minimum listing price: <b>1.00</b> $ASTR.
+<li>Platform fee: <b>5%</b>.<br>
 </ul>
 
 <p>
-<b>Attention:</b><br>
-&nbsp;&nbsp;&nbsp;Only wallets posessing an active Murasaki-san can use the Marketplace.
+<b>Usage rules:</b><br>
 </p>
+
+<ul>
+<li><b>Wallets that have an active Murasaki-san SBT</b> can use this marketplace.
+<li><b>The Minimum listing price is set at the buyback price or 1.00 $ASTR</b>, whichever is higher. The buyback prices for each item can be found in <a href="buyback.html">Buyback Market</a>.
+<li>Dutch auction: Items <b>listed for less than 100 $ASTR will be pre-listed using the Dutch auction mechanism</b>. The auction will start at a price of 100 $ASTR and will decrease to the listing price over a 24 hr period. The item will then remain at the listing price unless the owner unlists it.
+</ul>
 
 <br>
 
@@ -378,16 +386,21 @@ Monitoring on-chain events here.
 </div>
 </p>
 
+<p>
+<b>Visiting another house:</b><br>
+If you know friend's Murasaki-san ID, you can visit their house. You can feed their Murasaki-san and earn a little extra exp (2% of exp gained). However, you are not allowed to take any other actions in another user's house.<br>
+<br>
+&nbsp;&nbsp;&nbsp;<b>Murasaki-san ID:</b>&nbsp;<input type="number" id="summoner" style="width:100px;" text-align="center">&nbsp;&nbsp;<button onclick="button_select_summoner();">Visit House</button><br>
+<br>
+</p>
+
+
 <br>
 
 
 <!--- Details --->
 
 <h3 id="details">Game Details &#x1f52c;</h3>
-
-<p>
-<b><font color="blue">--- Under construction ---</font></b>
-</p>
 
 <!---### actions --->
 <details>
@@ -475,23 +488,77 @@ You can take care of your Murasaki-san with these actions.
 </p>
 </details>
 
-<!---### visit --->
-<details><summary>Visiting another house</summary>
+
+<!---### fluffy --->
+<details>
+
+<summary>About Fluffy</summary>
+
 <p>
-If you know friend's Murasaki-san ID, you can visit their house. You can feed their Murasaki-san and earn a little extra exp (2% of exp gained). However, you are not allowed to take any other actions in another user's house.<br>
+Fluffy is a small housemate in your house who dreams of becomming Murasaki-san. The more fluffies that live in the house, <b>the more luck</b> your Murasaki-san will have (One fluffy score is equivalent to +0.01 LUK). You can <b>upgrade</b> your fluffy from a lower level to an upper level by burning fluffies of the same color.
+</p>
+
+<p>
+<b>By opening the present boxes</b>, you will get a random color of fluffy. You can receive the present box in the following situations: <b>crafting bonus</b> (when Murasaki-san completes crafting an item, a random Murasaki-san will receive a present box), <b>cat-mail bonus</b> (when your Murasaki-san open a cat-mail, both the sender and recipient will receive a present box), <b>festival participation bonus</b> (your Murasaki-san receive a present box by voting during the Fluffy Festival. The first voter and the last voter can receive an additional one), <b>dApps staking bonus</b> (depending on your dapps staking amount, you can receive fluffy once every 7-30 days).
+</p>
+
+<img width="700" src="src/png/fig_fluffy.png" />
+
+<p>
+<b>Fluffy:</b> <img src="src/icon/fluffy_08.png" width="20" height="20"> It's a smallest fluffy. You can mainly obtain it by opening present boxes. There are a total of 12 colors available (gray, beige, limegreen, lightblue, blue, purple, redpurple, red, orange, pink, yellow, white). Fluffies love Murasaki-san and dream of becoming like Murasaki-san. By collecting five fluffies of the same color, you can upgrade them to a slightly larger fluffier.<br>
 <br>
-&nbsp;&nbsp;&nbsp;<b>Murasaki-san ID:</b>&nbsp;<input type="number" id="summoner" style="width:100px;" text-align="center">&nbsp;&nbsp;<button onclick="button_select_summoner();">Visit House</button><br>
+<b>Fluffier:</b> <img src="src/icon/fluffier_08.png" width="25" height="25"> It's a little bigger fluffy. You can mainly obtain it by upgrading fluffies. They are cherished, and their sense of self has started to blossom. By collecting four fluffiers of the same color, you can upgrade them to a larger fluffiest. <br>
 <br>
+<b>Fluffiest:</b> <img src="src/icon/fluffiest_08.png" width="30" height="30"> It's a biggest fluffy. You can mainly obtain it by upgrading fluffiers. They have been cherished so much that they have gained the ability to move around on their own. By collecting three fluffiests of the same color, you can upgrade them to a fluffy doll.<br>
+<br>
+<b>Fluffy Doll:</b> <img src="src/icon/doll_08.png" width="35" height="35"> The dreams of the fluffies have finally come true! It's a fluffy, coveted plush dull that looks just like Murasaki-san. It is crafted by upgrading three fluffiest of the same color. The Fluffy Doll possesses a mysterious ability and provides an exp boost bonus when placed in the house. The Fluffy Doll retains the comfort score of the house at the time of its creation, and the smaller the score of the house where it is placed, the greater the exp boost it provides. This functioins as a kind of relief mechanism for latecomers. If your friends start a new House of Murasaki-san, lending them your favorite Fluffy Doll will help their Murasaki-san's growth a lot.
+</p>
+
+</details>
+
+
+<!---### cat-mail --->
+<details><summary>About Cat-Mail</summary>
+
+<img src="src/png/cat_sitting.png" width="96" height="96" class="textMiddle">
+
+<p>
+Cat-mail is one of <b>the mechanisms to obtain present boxes</b>. It is unlocked when you have the <b>Cat Cushion</b><img src="src/png/item_cushion.png" width="40" height="40" class="textMiddle">in your house.
+</p>
+<p>
+By crafting cat-mail<img src="src/icon/mail.png" width="40" height="40" class="textMiddle">(which requires a cost of 100 coins and 100 leaves) and having it in your house, you can send cat-mail <b>to a random recipient</b> by clicking on your cat. A cat with the mail will appear in the recipient's house, and the recipient can click to open the mail. <b>When the cat-mail is opened, present boxes are sent to both the sender and the recipient</b>.
+</p>
+<p>
+Once a cat has sent out with mail, it becomes tired and will sleep even when it returns to your house. After <b>7 days</b> from the sending date, your cat will wake up and be able to send mail again.
+</p>
+<p>
+The cat tries to visit a well-cared Murasaki-san (<b><img src="src/png/icon_system_satiety.png" width="25" height="25">satiety >30% and <img src="src/png/icon_system_happy.png" width="25" height="25">happy >30%</b>). If a suitable Murasaki-san is not found, the cat may occasionally get lost, but it will safely return your house after 7 days.
+</p>
+<p>
+Only one cat can visit at a time in the house, and two cats will not visit the same house (although your cat and a visiting cat from someone else can be in the your house at the same time).
+</p>
+
+&nbsp;&nbsp;&nbsp;<img src="src/icon/cat_sleeping.png" width="72" height="72">
+
+<p>
+Having the cat cushion is necessary to send cat-mail, but <b>even if you don't have a cat cushion, someone's cat may visit your house</b>. Visiting cats will stay in your house for a maximum of 7 days. Please make sure to open the cat-mail without missing it.
 </p>
 </details>
 
-<!---### fluffy --->
-<details><summary>About Fluffy</summary>
-<p>Fluffy is a small roommate in your house who dreams of becomming Murasaki-san. The more fluffies that live in the house, the more luck your Murasaki-san will have. You can upgrade your fluffy from a lower level to an upper level by burning fluffies of the same color and level.</p>
-<b><a href="fluffy.html">>> Details of fluffy ecology are described here <<</a></b><br>
-<br>
+<!---### stroll --->
+<details><summary>About Strolling</summary>
+<p>
+comming soon.
 </p>
 </details>
+
+<!---### practice --->
+<details><summary>About Practicing</summary>
+<p>
+comming soon.
+</p>
+</details>
+
 
 <br>
 
@@ -501,27 +568,21 @@ If you know friend's Murasaki-san ID, you can visit their house. You can feed th
 <h3 id="detailedspecific">More Details &#x1f9ec;</h3>
 <p><b><font color="blue">--- Under construction ---</font></b></p>
 
-<details><summary>Contract Details</summary>
-blah-blah-blah...
+<details><summary>Contracts</summary>
+<img width="700" src="src/png/fig_contracts.png" />
 </details>
 
-<details><summary>STR/DEX status boost</summary>
-blah-blah-blah...
-</details>
-
-<details><summary>INT status boost</summary>
-blah-blah-blah...
-</details>
-
-<details><summary>LUK and Critical</summary>
-blah-blah-blah...
+<details><summary>Status Formulas</summary>
+STR,DEX:<br>
+INT:<br>
+LUK and Critical:<br>
 </details>
 
 <details><summary>Buyback Treajury</summary>
 blah-blah-blah...
 </details>
 
-<details><summary>Economy details</summary>
+<details><summary>Economy Details</summary>
 Token Currency<br>
 Buyback System<br>
 Inflation rate<br>
@@ -785,37 +846,37 @@ We would like to express our thanks to followings:
 <li>Excellent game framework from <b><a href="https://phaser.io/phaser3">Phaser3</a></b>.
 <li>Useful sound effects from <b><a href="https://soundeffect-lab.info/">Kokaon Lab</a></b> and <b><a href="https://otologic.jp/">OtoLogic</a></b>.
 <li>Wealthy illustrations from <b><a href="https://www.irasutoya.com/">Irasuto-ya</a></b>.
-<li>Good musics from <b><a href="https://dova-s.jp/">DOVA-SYNDROME</a></b>.
-<li>Great CSS framework from <b><a href="https://simplecss.org/">Simple.css</a></b>.
+<li>Great musics from <b><a href="https://dova-s.jp/">DOVA-SYNDROME</a></b>.
+<li>Excellent CSS framework from <b><a href="https://simplecss.org/">Simple.css</a></b>.
 <li>Enhanced drawing environment from <b><a href="https://ibispaint.com/">ibisPaint</b></a>.
-<li>Some solidity codes and really good inspiration from <b><a href="https://github.com/andrecronje/rarity">Rarity by Andre Cronje</a></b>.
+<li>Some Solidity codes and really good inspiration from <b><a href="https://github.com/andrecronje/rarity">Rarity by Andre Cronje</a></b>.
 <li>Amazing development environment and testnet from <b><a href="https://github.com/AstarNetwork/Astar">Astar Network</a></b>
-<li>The exciting future vision presented by <b><a href="https://twitter.com/watanabesota">Sota Watanabe</a></b> and all the Web3 contributors including <b><a href="https://https://twitter.com/you425you">you425</a></b> as one of the best Astar Ambassador.
+<li>The exciting future vision presented by <b><a href="https://twitter.com/watanabesota">Sota Watanabe</a></b> and all the Web3 contributors including <b><a href="https://https://twitter.com/you425you">you425</a></b>, as one of the best Astar Ambassadors.
 </ul>
 
 
 </main>
 
 
-<footer>
+<footer class="footer">
 
-Donation💗:&nbsp;
-<button style="height:28px;font-size:80%" onclick="donate(1);">
+Donation:&nbsp;
+<button style="height:26px;font-size:75%" onclick="donate(1);">
 <script type="text/javascript">write_icon(1)</script>&nbsp;1 $ASTR
 </button>
 &nbsp;
-<button style="height:28px;font-size:80%" onclick="donate(10);">
+<button style="height:26px;font-size:75%" onclick="donate(10);">
 <script type="text/javascript">write_icon(10)</script>&nbsp;10 $ASTR
 </button>
 &nbsp;
-<button style="height:28px;font-size:80%" onclick="donate(100);">
+<button style="height:26px;font-size:75%" onclick="donate(100);">
 <script type="text/javascript">write_icon(100)</script>&nbsp;100 $ASTR
 </button>
 
 <br>
 
-<input type="radio" name="donationWallet" value="0x2F7448B62134e52C2f46454d0089Ae21B5248805">For Coder🐀: 0x2F7448B62134e52C2f46454d0089Ae21B5248805<br>
-<input type="radio" name="donationWallet" checked value="0xe79d44309e4daD2CD7eaf3CA4CD1d80a6b8733f7">For Illustrator🐈: 0xe79d44309e4daD2CD7eaf3CA4CD1d80a6b8733f7<br>
+<label><input type="radio" name="donationWallet" value="0x2F7448B62134e52C2f46454d0089Ae21B5248805">For Coder&#x1f400;: <font size="-2">0x2F7448B62134e52C2f46454d0089Ae21B5248805</font></label><br>
+<label><input type="radio" name="donationWallet" checked value="0xe79d44309e4daD2CD7eaf3CA4CD1d80a6b8733f7">For Illustrator&#x1f408;: <font size="-2">0xe79d44309e4daD2CD7eaf3CA4CD1d80a6b8733f7</font></label><br>
 
 <br>
 

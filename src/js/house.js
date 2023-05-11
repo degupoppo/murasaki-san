@@ -86,11 +86,56 @@ contract ERC721 is IERC721 {
 //### 1st
 
 
+    item detailsの完成
+        STR系アイテム
+        DEX系アイテム
+        INT系アイテム
+        Fluffy系（概要）
+        bank/pouch
+        cat-mail
+        presentbox
+        twinkle系(comming soom)
+
+
+    むらさきさんをアイコンで一覧閲覧できるページを作成する
+        ランダムで10-20体のアイコンを表示する
+            クリックでその家に飛べる
+        ランキングも表示する
+            total_coin, total_leaf, total_exp, score, total_craft, critical
+            数値と順位と一緒にアイコンを表示する
+            ランキングはオフチェーンで行うか、オンチェーンで行うか
+                例えば、feeding時にupdate_ranking()を動かす、など
+                ランキング用コントラが別途必要だろう
+            また、murasakisanコントラにsummoner id -> address変換の関数を実装する
+                もしくは普通にinfoコントラを使えばよいか。
+        リアルタイムログもここに表示する
+            直近のログを予め表示する
+            新たなeventを監視してリアルタイムで更新していく
+        in-game infoもここに表示する
+            trial summoner数
+            main summoner数
+            total nft mint数
+            インフレ率
+                starting feeの初期値からの増加率を表示（currentry +3%など）
+            vault内のtoken量は生々しいので非表示とするか
+
+
     散歩システムを詰める
         コントラから経過時間、終了までの時間、現在の歩行距離、の取得を実装する
         strolling windowに上記情報を表示させる
         strolling windowに現在までのmet summonerを表示させる
         帰宅の演出を完成させる
+        Strollテスト
+            flag_sync=0
+            open_window_strolling(scene_main)
+
+            flag_sync=0
+            local_strolling_status=1
+            local_crafting_status=0
+            local_direction=1
+            local_companion=1
+
+            local_stroll_endable = 1;        
 
 
     なぜアスターなのか
@@ -110,19 +155,6 @@ contract ERC721 is IERC721 {
             我々はpolkadotのビジョンに共感している。
             Astarはpolkadotのパラチェーンにおいて、
             上記３つの理由から最もbuildに向いていると考えるため。
-        
-
-    Strollテスト
-        flag_sync=0
-        open_window_strolling(scene_main)
-
-        flag_sync=0
-        local_strolling_status=1
-        local_crafting_status=0
-        local_direction=1
-        local_companion=1
-
-        local_stroll_endable = 1;        
 
 
     Murasaki_Addressの修正
@@ -142,11 +174,11 @@ contract ERC721 is IERC721 {
 
 
     修正案
-        むらさきさんをアイコンで一覧閲覧できるページを作成する
-            クリックでその家に飛べる
-            ランキングも実装する？
-            リアルタイムログもここに表示するか
-            in-game infoもここに表示するか
+        rugg-pullの実装
+            ひとまず、右端をクリックでrugをスライドさせる
+            接触しているfluffyとむらさきさん, diceがon_clickされる
+        bgmの追加
+            カノン、むらさきさん
         strollコントラより情報抜き出し
             終了時間、現在の歩行距離を取得する
         コントラ書き換え
@@ -237,17 +269,6 @@ contract ERC721 is IERC721 {
             散歩を思い出しながら寝ている
                 → クリックしてtx飛ばすと、吹き出しを出して散歩内容を飼い主に報告して
                 　 総歩行距離と友達人数が更新される。
-
-
-    item detailsの完成
-        STR系アイテム
-        DEX系アイテム
-        INT系アイテム
-        Fluffy系（概要）
-        bank/pouch
-        cat-mail
-        presentbox
-        twinkle系(comming soom)
 
 
     Fluffyシステムについて情報を整理する

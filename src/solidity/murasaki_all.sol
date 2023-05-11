@@ -1,6 +1,6 @@
 
 //SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity 0.8.19;
 
 
 //=== Basic ==================================================================================================================
@@ -6241,7 +6241,7 @@ contract Murasaki_Function_Staking_Reward is Ownable, ReentrancyGuard, Pausable 
         mc.craft(_item_type, 0, _owner, _seed, _memo, 0);
         //update score
         uint _total_precious_received = mss.total_precious_received(_summoner_to);
-        mss.set_total_precious_received(_summoner_to, _total_precious_received + 1);
+        mss.set_total_precious_received(_summoner_to, _total_precious_received + 5);
     }
     //mint bank
     function _mint_bank(uint _summoner_to) internal {
@@ -7185,8 +7185,8 @@ contract Murasaki_Mail is Ownable, ReentrancyGuard, Pausable {
                 _summoner_to == 0
                 && ms.isActive(_summoner_tmp)
                 //&& ms.level(_summoner_tmp) >= 3
-                && mfs.calc_satiety(_summoner_tmp) >= 10
-                && mfs.calc_happy(_summoner_tmp) >= 10
+                && mfs.calc_satiety(_summoner_tmp) >= 30
+                && mfs.calc_happy(_summoner_tmp) >= 30
                 && _summoner_tmp != _summoner_from
             ) {
                 _summoner_to = _summoner_tmp;
@@ -8325,6 +8325,136 @@ contract Position_Storage is Ownable {
 }
 */
 
+
+
+//---Murasaki_Ranking
+
+contract Murasaki_Storage_Ranking is Ownable, ReentrancyGuard, Pausable {
+    
+    //pausable
+    function pause() external onlyOwner {
+        _pause();
+    }
+    function unpause() external onlyOwner {
+        _unpause();
+    }
+
+    //address
+    address public address_Murasaki_Address;
+    function _set_Murasaki_Address(address _address) external onlyOwner {
+        address_Murasaki_Address = _address;
+    }
+
+    //ranking summoner
+    uint[10] public ranking_exp;
+    uint[10] public ranking_mining;
+    uint[10] public ranking_farming;
+    uint[10] public ranking_crafting;
+    uint[10] public ranking_fluffy;
+    uint[10] public ranking_strolling;
+    uint[10] public ranking_mail;
+    uint[10] public ranking_score;
+    uint[10] public ranking_practicing;
+
+    //ranking value
+    uint[10] public ranking_exp_value;
+    uint[10] public ranking_mining_value;
+    uint[10] public ranking_farming_value;
+    uint[10] public ranking_crafting_value;
+    uint[10] public ranking_fluffy_value;
+    uint[10] public ranking_strolling_value;
+    uint[10] public ranking_mail_value;
+    uint[10] public ranking_score_value;
+    uint[10] public ranking_practicing_value;
+
+    //getter
+    function get_ranking () external view returns (
+        uint[10] memory,
+        uint[10] memory,
+        uint[10] memory,
+        uint[10] memory,
+        uint[10] memory,
+        uint[10] memory,
+        uint[10] memory,
+        uint[10] memory,
+        uint[10] memory
+    ) {
+        return (
+            ranking_exp,
+            ranking_mining,
+            ranking_farming,
+            ranking_crafting,
+            ranking_fluffy,
+            ranking_strolling,
+            ranking_mail,
+            ranking_score,
+            ranking_practicing
+        );
+    }
+
+    //update ranking
+    function update_ranking (uint _summoner) external {
+        _update_ranking_exp(_summoner);
+    }
+    
+    //internal functions
+    function _update_ranking_exp (uint _summoner) internal {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage_Score mss = Murasaki_Storage_Score(ma.address_Murasaki_Storage_Score());
+        uint _total_exp_challenger = mss.total_exp_gained(_summoner);
+        uint _total_exp_ranker;
+        for (let i=9; i>=0; i--) {
+            _total_exp_ranker = ranking_exp_value[i];
+            if (_total_exp_challenger > _total_exp_ranker) {
+                ranking_exp[i] = _summoner;
+            }
+        }
+    }
+}
+
+
+contract Murasaki_Storage_Ranking is Ownable, ReentrancyGuard, Pausable {
+
+    //pausable
+    function pause() external onlyOwner {
+        _pause();
+    }
+    function unpause() external onlyOwner {
+        _unpause();
+    }
+
+    //address
+    address public address_Murasaki_Address;
+    function _set_Murasaki_Address(address _address) external onlyOwner {
+        address_Murasaki_Address = _address;
+    }
+
+    //define struct
+    struct Player {
+        uint256 _summoner;
+        uint256 _score;
+    }
+
+    //storage
+    Player[5] public topPlayers_exp;
+
+    //update ranking
+    function updateRanking_exp(uint _summoner, uint _score) public {
+        Player memory newPlayer = Player(_summoner, _score);
+        // Check if the new score is higher than any of the existing scores
+        for (uint256 i = 0; i < topPlayers_exp.length; i++) {
+            if (newPlayer._score > topPlayers_exp[i]._score) {
+                // Shift the lower scores down the ranking
+                for (uint256 j = topPlayers_exp.length - 1; j > i; j--) {
+                    topPlayers_exp[j] = topPlayers_exp[j - 1];
+                }
+                // Update the new score at the appropriate position
+                topPlayers_exp[i] = newPlayer;
+                break;
+            }
+        }
+    }
+}
 
 
 //===Info==================================================================================================================
