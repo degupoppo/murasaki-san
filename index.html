@@ -249,6 +249,10 @@ Aside from <b><a href="#staking">the Dapps Staking Bonus</a></b>, we have not im
 
 <h3 id="attention">Attentions &#x1F6A8;</h3>
 
+<p>
+Before starting the game, please take note of the following precautions:
+</p>
+
 <ul>
 <li>Murasaki-san is a <b>SBT</b>, not a NFT, so you can <b>only summon once per wallet</b>, and you <b>cannot transfer or sell it.</b> On the other hand, you can buy and sell crafted item NFTs.
 <li>If you neglect to take care of your Murasaki-san for a long time (<b>about a month</b>), Murasaki-san will become petrified, and you will need some <b>additional cost</b> to cure.
@@ -546,14 +550,14 @@ Having the cat cushion is necessary to send cat-mail, but <b>even if you don't h
 </details>
 
 <!---### stroll --->
-<details><summary>About Strolling</summary>
+<details><summary>About Strolling  -comming soon-</summary>
 <p>
 comming soon.
 </p>
 </details>
 
 <!---### practice --->
-<details><summary>About Practicing</summary>
+<details><summary>About Practicing  -comming soon-</summary>
 <p>
 comming soon.
 </p>
@@ -566,64 +570,171 @@ comming soon.
 <!--- More Details --->
 
 <h3 id="detailedspecific">More Details &#x1f9ec;</h3>
-<p><b><font color="blue">--- Under construction ---</font></b></p>
 
-<details><summary>Contracts</summary>
+
+<!---### contracts --->
+
+<details>
+<summary>Contracts</summary>
+<p>
+The project is currently implemented as a complex set of contracts consisting of one NFT contract, two SBT contracts, five storage contracts, seven function contracts, and several add-on contracts.
+</p>
+
+<p>
+Here is an overview of each contract:
+</p>
+
+<p class="lineHeight8">
 <img width="700" src="src/png/fig_contracts.png" />
+<font size="-2">
+<b>Abbreviations:</b> mfs:Murasaki_Function_Share, mfcc:Murasaki_Function_Crafting_Codex, ma:Murasaki_Address, mp:Murasaki_Parameter, mffg:Murasaki_Function_Feeding_and_Grooming, mfmf:Murasaki_Function_Mining_and_Farming, mfsl:Murasaki_Function_Summon_and_Levelup, mmp:Murasaki_Music_Practice, mfc1:Murasaki_Function_Crafting1, mfc2:Murasaki_Function_Crafting2, mfn:Murasaki_Function_name, mss:Murasaki_Storage_Score, ms:Murasaki_Storage, msn:Murasaki_Storage_Nui, mm:Murasaki_Main, mc:Murasaki_Craft, mn:Murasaki_Name, market:Murasaki_Market_Item, mav:Murasaki_Achievement, uri:Murasaki_tokenURI, mml:Murasaki_Mail, md:Murasaki_Dice, mst:Murasaki_Staking, ll:Murasaki_Lootlike, ff:Fluffy_Festival, st:Strolling, info:Murasaki_Info, Murasaki:Murasakisan
+</font>
+</p>
+
+<p>
+All contracts are linked and managed through the summoner ID assigned to the Murasaki-san SBT.
+Function contracts are individually replaceable, and bug fixes, balance adjustments, and other game upgrades can be implemented by replacing or updating them. Add-on contracts are created as needed when adding new features for the gameplay.
+</p>
+
+<p>
+Due to the complexity of the project's contract system, a viewer contract has been prepared to provide convenient access to major parameters of Murasaki-san. The viewer contract follows the concept of web3 and is available for anyone to use without any permissions. It is also designed to be referenced in the future endeavors, such as the upcomming next product that we plan to create using WASM. For more detailed information about the viewer contract, please refer to the "<a href="#developer">For the Developers</a>" session.
+</p>
+
 </details>
 
-<details><summary>Status Formulas</summary>
-STR,DEX:<br>
-INT:<br>
-LUK and Critical:<br>
+
+<!---### formula --->
+
+<details>
+
+<summary>Calculation Formulas</summary>
+
+<p>
+The calculation formula regarding the effect of each status value on the results of each action is as follows:
+</p>
+
+<p>
+<b>Feeding efficacy:</b><br>
+<font size="-0.5">
+&nbsp;&nbsp;&nbsp;Exp Gained = (500 * (100 - Satiety) / 100) * ExpBoost<br>
+&nbsp;&nbsp;&nbsp;ExpBoost = Boost_from_FlowerWreath * Boost_from_FluffyDoll
+</font>
+</p>
+
+<p>
+<b>Grooming efficacy:</b><br>
+<font size="-0.5">
+&nbsp;&nbsp;&nbsp;Exp Gained = (3000 * (100 - Happy * Coefficient) / 100) * ExpBoost<br>
+&nbsp;&nbsp;&nbsp;ExpBoost = Boost_from_FlowerWreath * Boost_from_FluffyDoll<br>
+&nbsp;&nbsp;&nbsp;Coefficient = (Now - LastGroomingTime - WorkingTime) / (Now - LastGroomingTime)
+&nbsp;&nbsp;&nbsp;Working: Mining, Farming, Crafting, Strolling, Practicing</font>
+</p>
+
+<p>
+<b>Mining efficacy:</b><br>
+<font size="-0.5">
+&nbsp;&nbsp;&nbsp;Mining Coins = (SEC / 86400 * 1000) * ( 1 + (STR + Lv + STR_item) * 5/100 )
+</font>
+</p>
+
+<p>
+<b>Farming efficacy:</b><br>
+<font size="-0.5">
+&nbsp;&nbsp;&nbsp;Farming Leaves = (SEC / 86400 * 1000) * ( 1 + (DEX + Lv + DEX_item) * 5/100 )
+</font>
+</p>
+
+<p>
+<b>Crafting efficacy:</b><br>
+<font size="-0.5">
+&nbsp;&nbsp;&nbsp;Crafting Sec = item_DC * (INT + Lv + INT_item - 400) / (item_Lv * 300) * 86400 / 1000<br>
+&nbsp;&nbsp;&nbsp;Crafting Sec >= [Sec Limit set for each item]
+</font>
+</p>
+
+<p>
+<b>Critical efficacy:</b><br>
+<font size="-0.5">
+&nbsp;&nbsp;&nbsp;Conditional Expression: D100 <= LUK + FluffyScore/100 + RolledDice/10<br>
+&nbsp;&nbsp;&nbsp;Success: gain x2 Exp, earn x2 Coin/Leaf, craft uncommon item
+</font>
+</p>
+
 </details>
 
-<details><summary>Buyback Treajury</summary>
-blah-blah-blah...
+
+<!---### buyback --->
+
+<details>
+
+<summary>Buyback Treajury</summary>
+
+<p>
+The buyback system was designed to ensure that players can sell the NFTs of this project to the treasury at a fixed price at any time, thus constantly guaranteeing the asset value of the NFTs in this project.
+</p>
+
+<p>
+The developers believe that continuing to play the game solely for monetary gain can be somewhat burdensome. Lucky players may be able to sell their earned NFTs at a high price and make some profits. However, this can create temporary and sometimes harmful bubbles, disadvantaging unlucky players or latecomers.
+</p>
+
+<p>
+On the other hand, the developers also understand the enjoyment of having NFTs with asset value.
+</p>
+
+<p>
+To improve on this goal, the developers have implemented an automated buyback system in this project. Approximately half of the starting fee paid by the player is immediately sent to the buyback treasury. Players can receive a fixed-price buyback at any time by burning the NFTs of this project. Item NFTs that require more resources to craft in the game are assigned higher buyback prices. Additionally, the buyback prices set for each item gradually increase over time.
+</p>
+
+<p>
+<b>Buyback price calculation:</b><br>
+<font size="-0.5">
+&nbsp;&nbsp;&nbsp;Price = Resource / 1074560 * AmountPerPlayer<br>
+&nbsp;&nbsp;&nbsp;Resouce = [The sum of coins and leaves required for crafting]<br>
+&nbsp;&nbsp;&nbsp;AmountPerPlayer = [Set at 45% of the starting price and increasing]
+</font>
+</p>
+
+<p>
+In other words, the minimum price of each NFTs in this project is determined, and this minimum price (buyback price) never decreases but always increase over time. With each acquisition of NFTs through ongoing gameplay, the player's asset value increases steadily, and it also continues to increase by holding the NFTs. Since the buyback treajury always holds enough to buyback all items from all players, there will never be a situation where the reasury runs out and later players cannot receive buybacks.
+</p>
+
+<p>
+<center>
+<img width="400" src="src/png/fig_price.png" />
+<figcaption>
+The price trend model secured by the buyback system for NFTs. The rate of increase is not very high, but the price never decreases and gradually rises over time.
+</figcaption>
+</center>
+</p>
+
+<p>
+Regarding the rate of increase in the buyback price, developers plan to tradually raise it, but developers don't have specific calculations for the appropriate rate of increase at the moment. The buyback price will increase faster as additional funds flow into this project (see the Economy Details session). As an example, developers are considering a rate of increase of approximately 1-3% per month. Additionally, if there are many dropout players who have stopped playing the game, the buyback prices for players who continue to play will be more likely to increase (the buyback tokens allocated for dropout players will be reallocated to the remaining players). On the other hand, interestingly, a large influx of new players is expected to make it difficult to increase the buyback price (as the buyback price is equivalent ot the new inflow value divided by the total active players).
+</p>
+
+<p>
+Of course, all players have the option to sell NFTs on the marketplace insted of burning them in the buyback system. It is likely that players can sell NFTs at higher prices on the marketplace compared to buyback price. The buyback system can be seen as a defensive mechanism to prevent the price of NFTs from plummeting in case there are no buyers.
+</p>
+
+<p>
+This buyback system is somewhat experimental, and its acceptance by players will only be known after it has been operational for a while. The developers will continuously explore areas for improvement.
+</p>
+
 </details>
 
-<details><summary>Economy Details</summary>
+
+<!---### economy --->
+
+<details>
+
+<summary>Economy Details -comming soon-</summary>
+
+<p>
 Token Currency<br>
 Buyback System<br>
 Inflation rate<br>
+</p>
+
 </details>
-
-<br>
-
-
-<!--- Earn --->
-
-<h3 id="earn">Play to Earn...? &#x1fa99;</h3>
-
-<p>
-<b><font color="blue">--- We have not applied for Builder's Program yet ---<br>
---- The strategy of Buyback system could be changed ---</font></b>
-</p>
-
-<font color="darkgray">
-
-<p>
-<b>Don't expect too much.<br></b>
-We will NOT issue our own tokens that can be pumped and dumped.
-</p>
-
-<p>
-Based on market principles, item NFT may or may not be priced high. Sometimes it may sell for a high price on the marketplace. But we think these are always temporary.
-</p>
-
-<p>
-We think playing games only to earn money is kind of a pain. But we also understand it is fun to realize that the NFTs you own have some value.
-</p>
-
-<p>
-To improve on this goal, we have devised a buyback system. Half of the mint cost is immediately sent to the buyback vault, which buys item NFTs for a fixed amount at any time. This minimum price is by no means a high amount, but will never fall, and will rise little by little as the game economy expands.
-</p>
-
-<p>
-It may be difficult to make money using the Buyback System, but it will prove that the NFTs we have are not worthless.
-</p>
-
-</font>
 
 <br>
 
@@ -633,7 +744,19 @@ It may be difficult to make money using the Buyback System, but it will prove th
 <h3 id="astar">Why Astar? &#9203;</h3>
 
 <p>
-We...
+<b>dApps Staking</b><br>
+</p>
+
+<p>
+<b>XVM</b><br>
+</p>
+
+<p>
+<b>Gas Fee</b><br>
+</p>
+
+<p>
+<b>Top of the Polkadot</b><br>
 </p>
 
 <br>
@@ -802,8 +925,8 @@ Yay! We have summoned our Murasaki-san and have crafted some items! Say Cheese!
 <li>The mint price (starting price) for unlimited SBT will be adjusted to never fall below $10 in US dollars.
 <li>Holding NFT or SBT of this project does not entitle you to any financial asset diviends directly.
 <li>There are currently no plans to issue any cryptocurrency tokens following the ERC-20 or equivalent standard for this project.
-<li>The developer receives a 10% donation of the tokens paid by users as a game fee and has no ownership over the remaining 90% of the fees, which are either staked or held on the blockchain.
-<li>This project does not have any operators or managers, and all program operations are executed by on-chain smart contracts.
+<li>This project is an experimental endeavor in Web3 and its primary goal is not profit-oriented. The developer receives a 10% donation of the tokens paid by users as a game fee and has no ownership over the remaining 90% of the fees, which are either staked or held on the blockchain.
+<li>This project does not have any "operators" or "managers", and all program operations are executed by on-chain smart contracts.
 </ul>
 
 <p>

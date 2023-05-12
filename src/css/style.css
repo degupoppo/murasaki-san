@@ -92,3 +92,7 @@ nav a.current {
 .textMiddle{
     vertical-align: middle;
 }
+
+.lineHeight8{
+    line-height: 8px;
+}
