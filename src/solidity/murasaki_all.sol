@@ -1630,7 +1630,7 @@ contract Murasaki_Craft is ERC2665, Ownable, Pausable {
     mapping(address => bool) private noFee_address;
     
     //set transfer fee
-    uint public TRANSFER_FEE = 10 * 10**18;   //ether
+    uint public TRANSFER_FEE = 20 * 10**18;   //wei
     
     //a wallet collecting fees
     address private bufferTreasury_address;
@@ -1962,7 +1962,7 @@ contract Murasaki_Parameter is Ownable {
     bool public isPaused = true;
     uint public BASE_SEC = 86400;
     uint public SPEED = 100; //100=100%
-    uint public PRICE = 200 * 10**18;    //ether, need to recalc 10**18 in methods
+    uint public PRICE = 500 * 10**18;   //wei
     uint public DAY_PETRIFIED = 30;
     uint public STAKING_REWARD_SEC = 2592000; //30 days
     uint public ELECTED_FLUFFY_TYPE = 0;
@@ -3012,6 +3012,8 @@ contract Murasaki_Function_Summon_and_LevelUp is Ownable, ReentrancyGuard, Pausa
         }else if (_next_level == 19) {
             ms.set_next_exp_required(_summoner, 171000);
         }else if (_next_level == 20) {
+            ms.set_next_exp_required(_summoner, 190000);
+        }else if (_next_level == 21) {
             ms.set_next_exp_required(_summoner, 9999999);
         }
         /*

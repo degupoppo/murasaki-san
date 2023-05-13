@@ -20,22 +20,24 @@
     <link rel="stylesheet" href="src/css/datatable.css">
     <link rel="icon" href="src/png/favicon.png" />
     <link rel="apple-touch-icon" href="src/png/favicon.png">
+
+<script src="https://cdn.jsdelivr.net/npm/@twemoji/api@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
+
 </head>
 
 <body>
 
 <header>
-    <nav>
-      <a href="index.html"><b>&#x1f3e0; Home</b></a>
-      <a href="house.html" ><b>&#x1f497; Play</b></a>
-      <a href="market.html" class="current"><b>&#x1f6d2; Market</b></a>
-      <a href="https://twitter.com/degupoppo" >Twitter</a>
-      <a href="https://github.com/degupoppo/murasakisan/" >GitHub</a>
-    </nav>
+
+<nav>
+<a href="index.html"><b>&#x1f3e0; Home</b></a>
+<a href="house.html" ><b>&#x2764; Play</b></a>
+<a href="market.html" class="current"><b>&#x1f6d2; Market</b></a>
+<a href="info.html"><b>&#x1f4d7; Info</b></a>
+</nav>
+
     <h1>
-        <img src="src/png/item_basic_sweet_potato.png" width="40" height="40">
         Item Marketplace
-        <img src="src/png/item_basic_sweet_potato.png" width="40" height="40">
     </h1>
     <p><center>
         You can purchase and trade crafted item NFTs on the marketplace.<br>
@@ -114,7 +116,7 @@
 You can transfer or gift your items directly to another Murasaki-san without using the Marketplace, but <b>you will need to pay a transfer fee</b> to prevent botting. The development team have been adjusting the transfer fee, and it may be removed in the future.<br>
 </p>
 <p>
-Current transfer fee: <font color="blue"><b>10.00</font> $ASTR</b> /item<br>
+Current transfer fee: <font color="blue"><b>20.00</font> $ASTR</b> /item<br>
 </p>
 <p>
 <b>Item ID</b>: <input type="number" id="transfer_item_id" style="width:80px;">&nbsp;&nbsp;to <b>Murasaki-san</b>: <input type="number" id="transfer_summoner" style="width:80px;">&nbsp;&nbsp;<button onclick="transfer_item();">Pay fee and Send item</button><br>
@@ -158,4 +160,9 @@ Donation:&nbsp;
 </footer>
 
 </body>
+
+<script>
+twemoji.parse(document.body);
+</script>
+
 </html>

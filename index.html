@@ -27,6 +27,8 @@
 <meta property="og:url" content="https://murasaki-san.com/">
 <meta property="og:description" content="Murasaki-san is a virtual pet that lives in your wallet on Astar Network.">
 
+<script src="https://cdn.jsdelivr.net/npm/@twemoji/api@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
+
 </head>
 
 
@@ -37,10 +39,13 @@
 
 <nav>
 <a href="index.html" class="current"><b>&#x1f3e0; Home</b></a>
-<a href="house.html" ><b>&#x1f497; Play</b></a>
+<a href="house.html" ><b>&#x2764; Play</b></a>
 <a href="market.html"><b>&#x1f6d2; Market</b></a>
+<a href="info.html"><b>&#x1f4d7; Info</b></a>
+<!---
 <a href="https://twitter.com/degupoppo" >Twitter</a>
 <a href="https://github.com/degupoppo/murasakisan/" >GitHub</a>
+--->
 </nav>
 
 
@@ -89,7 +94,7 @@ This is our fan project using <b>Astar Network</b> <img src="src/png/coin_color_
 <!--- News --->
 
 <p class="notice">
-<b>&#x1f497; News! &#x1f497;</b><br>
+<b>&#x2764; News! &#x2764;</b><br>
 We have released Murasaki-san <b><a href="https://store.line.me/stickershop/product/16670298/en">LINE sticker</a></b> and <b><a href="https://store.line.me/emojishop/product/644a021e1033b65e5ca8ff7d/en">LINE emoji</a></b>!<br>
 </p>
 
@@ -155,7 +160,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).<br>
 
 <!--- Concept --->
 
-<h3 id="concept">The Main Concept &#127799;</h3>
+<h3 id="concept">The Main Concept &#127800;</h3>
 <p>
 Murasaki-san is <b>the virtual pet</b> that lives in your Astar EVM wallet. Murasaki-san is a Soulbound token (SBT), not an NFT. <b>Only one Murasaki-san can live in a single wallet.</b>
 </p>
@@ -216,7 +221,7 @@ Our main motivations for developing this project are:<br>
 
 <p>
 <u><i>Trial Fee:</i> <b>*FREE*</b></u><br>
-After trial, <u><i>Starting Fee</i>: <b>200 $ASTR <img src="src/png/coin_color_ASTR.png" width="24" height="24"></u></b>
+After trial, <u><i>Starting Fee</i>: <b>500 $ASTR <img src="src/png/coin_color_ASTR.png" width="24" height="24"></u></b>
 </p>
 
 <p>
@@ -247,7 +252,7 @@ Aside from <b><a href="#staking">the Dapps Staking Bonus</a></b>, we have not im
 
 <!--- Attention --->
 
-<h3 id="attention">Attentions &#x1F6A8;</h3>
+<h3 id="attention">Attentions &#127775;</h3>
 
 <p>
 Before starting the game, please take note of the following precautions:
@@ -264,7 +269,7 @@ Before starting the game, please take note of the following precautions:
 
 <!--- Staking Bonus --->
 
-<h3 id="staking">Dapps Staking Bonus! &#x1f389;</h3>
+<h3 id="staking">Dapps Staking Bonus! &#x1f973;</h3>
 
 <p>
 <b><font color="blue">--- We have not applied for Builder's Program yet ---<br>
@@ -297,7 +302,7 @@ Participation in dapps staking benefits both the individual and the product as a
 
 <!--- Market --->
 
-<h3 id="market">Item Marketplace &#x1f30f;</h3>
+<h3 id="market">Item Marketplace &#x1f6d2;</h3>
 
 <p>
 Item and fluffy NFTs can be bought and be listed to sell on the <b><a href="market.html">Marketplace</a></b>.
@@ -521,6 +526,38 @@ Fluffy is a small housemate in your house who dreams of becomming Murasaki-san. 
 </details>
 
 
+<!---### flowerWreath --->
+<details>
+
+<summary>About Flower Wreath and Exp Boost</summary>
+
+<img src="src/png/item_wreath.png" width="40" height="40" class="textMiddle">
+
+<p>
+</p>
+
+<p>
+</p>
+
+</details>
+
+
+<!---### dice --->
+<details>
+
+<summary>About Lucky Dice</summary>
+
+<img src="src/png/item_dice.png" width="40" height="40" class="textMiddle">
+
+<p>
+</p>
+
+<p>
+</p>
+
+</details>
+
+
 <!---### cat-mail --->
 <details><summary>About Cat-Mail</summary>
 
@@ -589,6 +626,10 @@ Here is an overview of each contract:
 <font size="-2">
 <b>Abbreviations:</b> mfs:Murasaki_Function_Share, mfcc:Murasaki_Function_Crafting_Codex, ma:Murasaki_Address, mp:Murasaki_Parameter, mffg:Murasaki_Function_Feeding_and_Grooming, mfmf:Murasaki_Function_Mining_and_Farming, mfsl:Murasaki_Function_Summon_and_Levelup, mmp:Murasaki_Music_Practice, mfc1:Murasaki_Function_Crafting1, mfc2:Murasaki_Function_Crafting2, mfn:Murasaki_Function_name, mss:Murasaki_Storage_Score, ms:Murasaki_Storage, msn:Murasaki_Storage_Nui, mm:Murasaki_Main, mc:Murasaki_Craft, mn:Murasaki_Name, market:Murasaki_Market_Item, mav:Murasaki_Achievement, uri:Murasaki_tokenURI, mml:Murasaki_Mail, md:Murasaki_Dice, mst:Murasaki_Staking, ll:Murasaki_Lootlike, ff:Fluffy_Festival, st:Strolling, info:Murasaki_Info, Murasaki:Murasakisan
 </font>
+</p>
+
+<p>
+The solidity code for each contract can be referenced <a href="src/solidity/murasaki_all.sol">here</a>. The latest address of each contract is storaged in the <a href="https://blockscout.com/astar/address/0x176C5B3582C8C851B7aF4efac618fb17901cDDf1">Murasaki_Address</a> contract.
 </p>
 
 <p>
@@ -663,11 +704,57 @@ The calculation formula regarding the effect of each status value on the results
 </details>
 
 
+<!---### exp --->
+
+<details>
+
+<summary>Next exp required</summary>
+
+<p>
+The following exp point table has been set based on the Dungeons & Dragons 3.5 rulebook. Upon leveling up, all exp points are paid and reset to 0.
+</p>
+
+<font size="-0.5">
+<table>
+  <thead>
+    <tr>
+      <th><center>Lv</center></th>
+      <th>Exp required to level-up</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td><b><center>1</center></b></td><td>1000</td></tr>
+    <tr><td><b><center>2</center></b></td><td>3000</td></tr>
+    <tr><td><b><center>3</center></b></td><td>6000</td></tr>
+    <tr><td><b><center>4</center></b></td><td>10000</td></tr>
+    <tr><td><b><center>5</center></b></td><td>15000</td></tr>
+    <tr><td><b><center>6</center></b></td><td>21000</td></tr>
+    <tr><td><b><center>7</center></b></td><td>28000</td></tr>
+    <tr><td><b><center>8</center></b></td><td>36000</td></tr>
+    <tr><td><b><center>9</center></b></td><td>45000</td></tr>
+    <tr><td><b><center>10</center></b></td><td>55000</td></tr>
+    <tr><td><b><center>11</center></b></td><td>66000</td></tr>
+    <tr><td><b><center>12</center></b></td><td>78000</td></tr>
+    <tr><td><b><center>13</center></b></td><td>91000</td></tr>
+    <tr><td><b><center>14</center></b></td><td>105000</td></tr>
+    <tr><td><b><center>15</center></b></td><td>120000</td></tr>
+    <tr><td><b><center>16</center></b></td><td>136000</td></tr>
+    <tr><td><b><center>17</center></b></td><td>153000</td></tr>
+    <tr><td><b><center>18</center></b></td><td>171000</td></tr>
+    <tr><td><b><center>19</center></b></td><td>190000</td></tr>
+    <tr><td><b><center>20</center></b></td><td>------</td></tr>
+  </tbody>
+</table>
+</font>
+
+</details>
+
+
 <!---### buyback --->
 
 <details>
 
-<summary>Buyback Treajury</summary>
+<summary>Buyback Treasury</summary>
 
 <p>
 The buyback system was designed to ensure that players can sell the NFTs of this project to the treasury at a fixed price at any time, thus constantly guaranteeing the asset value of the NFTs in this project.
@@ -695,7 +782,7 @@ To improve on this goal, the developers have implemented an automated buyback sy
 </p>
 
 <p>
-In other words, the minimum price of each NFTs in this project is determined, and this minimum price (buyback price) never decreases but always increase over time. With each acquisition of NFTs through ongoing gameplay, the player's asset value increases steadily, and it also continues to increase by holding the NFTs. Since the buyback treajury always holds enough to buyback all items from all players, there will never be a situation where the reasury runs out and later players cannot receive buybacks.
+In other words, the minimum price of each NFTs in this project is determined, and this minimum price (buyback price) never decreases but always increase over time. With each acquisition of NFTs through ongoing gameplay, the player's asset value increases steadily, and it also continues to increase by holding the NFTs. Since the buyback treasury always holds enough to buyback all items from all players, there will never be a situation where the reasury runs out and later players cannot receive buybacks.
 </p>
 
 <p>
@@ -726,12 +813,22 @@ This buyback system is somewhat experimental, and its acceptance by players will
 
 <details>
 
-<summary>Economy Details -comming soon-</summary>
+<summary>Economy Details</summary>
 
 <p>
-Token Currency<br>
-Buyback System<br>
-Inflation rate<br>
+</p>
+
+<p>
+Here is an overview of token currency:<br>
+<center>
+<img width="600" src="src/png/fig_economy.png" />
+<figcaption>
+1) Update buback price: (X%) and (Y%), 2) Irregular fees: petrification cure fees and direct item transfer fees.
+</figcaption>
+</center>
+</p>
+
+<p>
 </p>
 
 </details>
@@ -741,22 +838,34 @@ Inflation rate<br>
 
 <!--- Astar --->
 
-<h3 id="astar">Why Astar? &#9203;</h3>
+<h3 id="astar">Why Astar? <img src="src/png/coin_color_ASTR.png" width="32" height="32"></h3>
 
 <p>
-<b>dApps Staking</b><br>
+Astar is a highly promising and excellent blockchain. The developers have chosen Astar as the launch platform for this project primarily for the following reasons:
 </p>
 
 <p>
-<b>XVM</b><br>
+<b>dApps Staking:</b><br>
+The developers can focus on the project's development without worrying about financial sustainability, if their project were adopted for dapps staking. On the player's side, they can support the project financially without exposing their assets to hacking risks or depleting them by excessive purchases of the project's NFTs or tokens. In this project, players engaging in dapps staking are rewarded with in-game incentives, allowing both the project and players to benefit from low-risk profit. In other words, players who are fond of this project and want to play more efficiently have an incentive to stake more assets in dApps staking. This incentivizes the project's developers strive to make development that encourage players to stake more funds in dApps staking. To our knowledge, Astar Network is the first to advocate for this excellent mechanism.
 </p>
 
 <p>
-<b>Gas Fee</b><br>
+<b>Cross-Virtual Machine (XVM):</b><br>
+By utilizing XVM, the developers will have the freedom to seamlessly interoperate between EVM (Ethereum Virtual Machine) contracts and WASM (WebAssembly) contracts, allowing for future compatibility. Currently, EVM benefits from excellent libraries and development knowledge. However, in the near future, within a few years, WASM is expected to become a core technology in Web3. We believe that Astar chain, with the availability of XVM, is the only platform that enables a seamless shift of development resources from EVM to WASM. One of our main goals is to constantly keep up with the latest technologies in web3. For our next season project, we aim to leverage the assets of this EVM-based project while developing on a WASM basis, and Astar Network is the only platform that allows for such development possibilities.
 </p>
 
 <p>
-<b>Top of the Polkadot</b><br>
+<b>Low Gas Fee:</b><br>
+When developing a fully on-chain game, the low cost of gas fee is extremely important. Currently, Astar chain maintains very low gas fees, allowing players to engage in gameplay with minimal concerns about gas costs, even for transactions involving relatively complex operations.
+</p>
+
+<p>
+<b>Top of the Polkadot:</b><br>
+We strongly believe in the future interoperability brought by Polkadot and parachains. Based on the three reasons mentioned above, we are confident that Astar Network is currently the most suitable environment for project development among the parachains of Polkadot.
+</p>
+
+<p>
+Cheers to Astar :)
 </p>
 
 <br>
@@ -764,7 +873,7 @@ Inflation rate<br>
 
 <!--- Developer --->
 
-<h3 id="developer">For the Developers &#x1f527;</h3>
+<h3 id="developer">For the Developers &#128736;</h3>
 
 <p>
 We have prepared a contract that enables anyone to access information about Murasaki-san in this project. Although the contracts in this project are complex, you can access the major information using this contract. Consistent with web3 principles, the information within this contract is free to use without requiring any permissions.
@@ -865,7 +974,7 @@ After this product is sufficiently stable, we plan to gradually renounce ownersh
 
 <!--- About Us --->
 
-<h3 id="about">About Us &#x1f33c;</h3>
+<h3 id="about">About Us &#127802;</h3>
 
 <p>
 We are supporters, diamond handers, and hodlers of the Astar Network ecosystem and the Polkadot union. In late 2021, we also participated in the Astar parachain auction. This is our first fan product using the Astar blockchain. Although we are a small team and only work on the weekends, our production concept is simple: <br>
@@ -892,7 +1001,7 @@ A whimsical hobby illustrator who loves cats and fluffy dolls.
 </ul>
 
 <p>
-Any donation is greatly appreciated. The donations will be used to buy some coffee for the coder, pay for drawing software and Apple Pencil for the illustrator, and purchase fluffy wool for our Murasaki-san ;)<br>
+Any donation is greatly appreciated. The donations will be used to buy some coffee for the coder, pay for drawing software and Apple Pencil for the illustrator, and purchase fluffy wool for Murasaki-san ;)<br>
 </p>
 
 <p>
@@ -923,10 +1032,11 @@ Yay! We have summoned our Murasaki-san and have crafted some items! Say Cheese!
 <li>It is prohibited to use NFTs from this project as a means of payment to unidentified individuals for any goods or services.
 <li>The maximum mint limit for each item type of NFT is set at 900,000 and will not exceed 1,000,000.
 <li>The mint price (starting price) for unlimited SBT will be adjusted to never fall below $10 in US dollars.
-<li>Holding NFT or SBT of this project does not entitle you to any financial asset diviends directly.
+<li>Holding NFT or SBT of this project does not entitle users to any financial asset diviends directly.
 <li>There are currently no plans to issue any cryptocurrency tokens following the ERC-20 or equivalent standard for this project.
-<li>This project is an experimental endeavor in Web3 and its primary goal is not profit-oriented. The developer receives a 10% donation of the tokens paid by users as a game fee and has no ownership over the remaining 90% of the fees, which are either staked or held on the blockchain.
-<li>This project does not have any "operators" or "managers", and all program operations are executed by on-chain smart contracts.
+<li>This project is an experimental endeavor in Web3, and its primary goal is not profit-oriented. The developers receive a 10% donation from the tokens paid by users as a game fee and reward from dapps staking. The developers do not have ownership over the remaining 90% of the assets, which are either staked or held on the blockchain.
+<li>This project does not have any "operators" or "managers", and all program operations are automatically executed by on-chain smart contracts.
+<li>The above terms and conditions are subject to change in the event of tax regulation modifications or project transition to the next season.
 </ul>
 
 <p>
@@ -1008,6 +1118,9 @@ Donation:&nbsp;
 
 </body>
 
+<script>
+twemoji.parse(document.body);
+</script>
 
 </html>
 

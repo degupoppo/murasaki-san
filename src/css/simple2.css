@@ -284,13 +284,14 @@ header > nav ol {
 }
 
 /* List items are inline elements, make them behave more like blocks */
-header > nav ul li,
-header > nav ol li {
+nav ul li,
+nav ol li {
   display: inline-block;
 }
 
-header > nav a,
-header > nav a:visited {
+nav a,
+nav a:visited {
+
   margin: 0 0.5rem 1rem 0.5rem;
   border: 2px solid var(--border);
   border-radius: var(--standard-border-radius);
@@ -300,7 +301,7 @@ header > nav a:visited {
   text-decoration: none;
 }
 
-header > nav a:hover {
+nav a:hover {
   border-color: var(--accent);
   color: var(--accent);
   cursor: pointer;
