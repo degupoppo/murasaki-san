@@ -98,6 +98,39 @@ async function balanceOfbt() {
     return Math.floor( Number(_res) / (10**18) * 100 )/100;
 }
 async function _show_onChain_parameters() {
+    if (typeof(wallet) != "undefined" && wallet != "") {
+        let _text
+        let _target
+        //total_summoned_trial
+        _text = await total_trial_summoned();
+        _target = document.getElementById("info_total_trial_summoned");
+        _target.innerHTML = _text + " wallets";
+        //total_summoned
+        _text = await total_summoned();
+        _target = document.getElementById("info_total_summoned");
+        _target.innerHTML = _text + " wallets";
+        //total_item_minted
+        _text = await totalItemMinted();
+        _target = document.getElementById("info_total_item_minted");
+        _target.innerHTML = _text + " NFTs";
+        //price
+        _text = await getPrice();
+        _target = document.getElementById("info_price");
+        _target.innerHTML = _text + " $ASTR";
+        /*
+        //balance of bv
+        _text = await balanceOfbv();
+        _target = document.getElementById("info_balanceOf_bv");
+        _target.innerHTML = _text + " $ASTR";
+        //balance of bt
+        _text = await balanceOfbt();
+        _target = document.getElementById("info_balanceOf_bt");
+        _target.innerHTML = _text + " $ASTR";
+        */
+    } else {
+        setTimeout(_show_onChain_parameters, 1000);
+    }
+    /*
     try {
         if (typeof(wallet) == "undefined") {
             await init_web3();
@@ -131,10 +164,33 @@ async function _show_onChain_parameters() {
     } catch (err) {
         setTimeout(_show_onChain_parameters, 5000);
     }
+    */
 }
 
 //show icon
 async function _show_icon() {
+    if (typeof(wallet) != "undefined") {
+        let _res;
+        let _balance = await contract_mm.methods.balanceOf(wallet).call();
+        if (_balance == 0) {    //when no token, call for trial
+            _res = await contract_trial_mu.methods.tokenURI_fromWallet(wallet).call();
+        } else {
+            _res = await contract_mu.methods.tokenURI_fromWallet(wallet).call();
+        }
+        // get SVG
+        _res = _res.split("base64,")[1];
+        _res = atob(_res);
+        _res = _res.split("base64,")[1];
+        _res = _res.split('"')[0];
+        _res = atob(_res);
+        // insert into html
+        let _text = _res;
+        let target = document.getElementById("icon");
+        target.innerHTML = _text;
+    } else {
+        setTimeout( _show_icon, 5000);
+    }
+        /*
     try {
         if (typeof(wallet) == "undefined") {
             await init_web3();
@@ -173,11 +229,40 @@ async function _show_icon() {
     } catch (err) {
         setTimeout( _show_icon, 5000);
     }
+        */
 }
 
 
 //show icon2
 async function _show_icon2() {
+    if (typeof(wallet) != "undefined" && wallet != "") {
+        let _res;
+        let _balance = await contract_mm.methods.balanceOf(wallet).call();
+        if (_balance == 0) {    //when no token, call for trial
+            _res = await contract_trial_mu.methods.tokenURI_fromWallet(wallet).call();
+        } else {
+            _res = await contract_mu.methods.tokenURI_fromWallet(wallet).call();
+        }
+        // get SVG
+        _res = _res.split("base64,")[1];
+        _res = atob(_res);
+        _res = _res.split("base64,")[1];
+        _res = _res.split('"')[0];
+        _res = atob(_res);
+        // insert into html
+        let _text = "";
+
+        //_text += "<style>.showIcon{display: inline-block; width: 64px; float: center; margin-right: 16px; margin-top: 0px;}</style>";
+        //_text += "<span class='showIcon' align='center'>";
+        _text += _res;
+        //_text += "</span>";
+
+        let target = document.getElementById("output_murasakiIcon");
+        target.innerHTML = _text;
+    } else {
+        setTimeout( _show_icon2, 1000);
+    }
+    /*
     try {
         if (typeof(wallet) == "undefined") {
             await init_web3();
@@ -208,6 +293,7 @@ async function _show_icon2() {
     } catch (err) {
         setTimeout( _show_icon2, 5000);
     }
+    */
 }
 
 

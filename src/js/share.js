@@ -1,4 +1,23 @@
 
+
+
+//connected button
+async function check_connected() {
+    let accounts = await ethereum.request({ method: 'eth_accounts' });
+    let _text = "";
+    let target = document.getElementById("button_connect");
+    if (accounts.length > 0) {
+        _text = '<button disabled>Connected</button>';
+        target.innerHTML = _text;
+        init_web3();
+    } else {
+        _text = '<button onclick="init_web3();">Connect</button>';
+        target.innerHTML = _text;
+        setTimeout(check_connected, 1000);
+    }
+}
+
+
 //connect to metamask
 async function connect() {
     const web3 = await new Web3(window.ethereum);
