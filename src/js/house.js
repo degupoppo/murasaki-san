@@ -86,6 +86,49 @@ contract ERC721 is IERC721 {
 //### 1st
 
 
+    長所と短所の整理
+        良い点：
+            育成ゲームというわかりやすいカテゴリのため、
+                理解しやすく直感で気軽に楽しめる
+            独自トークンではなくASTRトークンをゲーム内通貨として利用するため、
+                $ASTRのユースケースに貢献できる点
+            dapps stakingへインセンティブを組み込んだ初めての例であり、
+                NFTやtokenを購入するのではなく、stakingだけで作品内のリターンを得られる設計
+            Astar上の他のPJのtokenやNFTの所持にインセンティブを与えたり、
+                astarトークンの値段を反映したギミックや、
+                astarチェーン上のトランザクション数を反映したギミックなど、
+                full on-chainの特性を活かし、
+                Astar networkとのギミックを可能な限り実装している点。
+            dapps stakingで受け取るrewardのほとんど（90%）がプレイヤー資産へと還流するため、
+                $ASTRトークンの売り圧が生じにくい点
+            プロジェクトの実装と開発がほぼ完了しており、
+                また本プロジェクトはserverlessで動作するため、
+                今後の開発と継続に追加の資金がほとんど必要ない点
+        懸念点：
+            フルタイムワーカーではないためアグレッシブなマーケティングが困難な点
+            資金調達などは一切行っていないため、フルタイムワーカーを新たに雇うことが困難な点
+            開発チーム（2人）に英語のネイティブスピーカーがいないため、
+                英語のリアルタイムのコミュニケーションが困難な点
+                一方で、文章ベースコミュニケーションは、リアルタイムでなければ問題ない
+            solidityコードが膨大なためコードレビューを依頼することが困難であり、
+                将来のセキュリティリスクを完全には排除できていない点
+                ただし、ユーザーの資金を預かる2つのtreasuryコントラクトは独立しており、
+                可能な限り単純なコーディングがされている。
+        疑問点：
+            ローンチ前にdapps stakingへの審査が可能か、先に実績が必要か
+                ローンチ前に採択されると、token currency戦略を確定できるのでとても助かる
+            self stakingは認められているか
+                本プロジェクトでは、ユーザーから受け取った開始費用の45%を
+                セルフステーキングに回すことで、プロジェクトの継続的な価値上昇を狙っている。
+                このメカニズムは、dapps stakingの趣旨
+                    （各ユーザーの自由意志に基づいたプロジェクトの応援、と理解しているが）
+                に反しないか。
+                ただし、dapps stakinのrewardは直接devへ行くのではなく、
+                そのほとんど（90%）がプロジェクト全体の資産へと再還流する。
+                また、本メカニズムのため、dapps stakin rewardの振込先を
+                    直接コントラクトとすることは可能か
+
+
     長期的な意味論の深慮
         お金に換算できない価値（宗教・称号・勲章など）が
             PJの中心に厚い層で存在するほうが周りが安定する
@@ -97,7 +140,8 @@ contract ERC721 is IERC721 {
         価値が目減りしにくいNFTとはなんであろうか。
             この価値とは、根っこの本質はお金ではない方が良い。
             つまり、根本的価値を創造するスタンスとしては、お金に換算できないベクトルが良い。
-            
+            コミュニティの育成と居場所の提供、は非常に良い例だろうか。
+                ただし、これはマネジメントにカリスマとセンスが必要か。
             
 
     item detailsの完成
@@ -188,6 +232,7 @@ contract ERC721 is IERC721 {
 
 
     修正案
+     ok connectボタンの設置
         コストの引き上げ
             mint: 500, transfer fee: 50
         rugg-pullの実装
@@ -9191,6 +9236,8 @@ function summon_twinkles(scene, _mode, _num, _x=500, _y=600){
         "dummy",
         "glitter_01",
     ];
+    //debug
+    _num = 1;
     if (_mode == "twinkle"){
         _img = _li_twinkle[_num];
     } else if (_mode == "sparkle") {
@@ -13992,9 +14039,9 @@ function create(scene) {
     let _text_exp_boost = "";
     //flower rewath check
     if (typeof item_wreath != "undefined") {
-        _text_exp_boost += " wallet boost: +" + (local_achv_onChain_score/100).toFixed(2) + "% \n";
+        _text_exp_boost += " wreath boost: +" + (local_achv_onChain_score/100).toFixed(2) + "% \n";
     } else {
-        _text_exp_boost += " wallet boost: +" + (0).toFixed(2) + "% \n";
+        _text_exp_boost += " wreath boost: +" + (0).toFixed(2) + "% \n";
     }
     _text_exp_boost += " twinkle boost: +" + (local_exp_rate_twinkle/100).toFixed(2) + "% \n";
     _text_exp_boost += " doll boost: +" + ((active_nui_exp_rate/100)).toFixed(2) + "% ";
@@ -14011,9 +14058,9 @@ function create(scene) {
             let _text_exp_boost = "";
             //flower rewath check
             if (typeof item_wreath != "undefined") {
-                _text_exp_boost += " wallet boost: +" + (local_achv_onChain_score/100).toFixed(2) + "% \n";
+                _text_exp_boost += " wreath boost: +" + (local_achv_onChain_score/100).toFixed(2) + "% \n";
             } else {
-                _text_exp_boost += " wallet boost: +" + (0).toFixed(2) + "% \n";
+                _text_exp_boost += " wreath boost: +" + (0).toFixed(2) + "% \n";
             }
             _text_exp_boost += " item boost: +" + (local_exp_rate_twinkle/100).toFixed(2) + "% \n";
             _text_exp_boost += " doll boost: +" + ((active_nui_exp_rate/100)).toFixed(2) + "% ";
@@ -14797,7 +14844,7 @@ function create(scene) {
         }
         //***TODO*** test
         summon_twinkles(scene, "twinkle", 1, 200 + Math.random() * 800, 520 + Math.random() * 200);
-        summon_twinkles(scene, "sparkle", 1, 200 + Math.random() * 800, 520 + Math.random() * 200);
+        summon_twinkles(scene, "glitter", 1, 200 + Math.random() * 800, 520 + Math.random() * 200);
         //summon_twinkles(scene, "glitter", 1, 150+2*20, 560);
     }
 }
