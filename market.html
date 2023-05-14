@@ -1,0 +1,168 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<script src="lib/web3.min.js"></script>
+<script src="src/js/array_item.js"></script>
+<script src="src/js/share.js"></script>
+<script> init_web3(); </script>
+<script src="src/js/market.js"></script>
+
+<head>
+	<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=0.7">
+	<title>Murasaki-san Item Market</title>
+	<link rel="stylesheet" type="text/css" href="lib/datatables.min.css"/>
+	<script type="text/javascript" language="javascript" src="lib/jquery-3.6.0.min.js"></script>
+	<script type="text/javascript" language="javascript" src="lib/datatables.min.js"></script>
+    <link rel="stylesheet" href="src/css/simple2.css">
+    <link rel="stylesheet" href="src/css/style.css">
+    <link rel="stylesheet" href="src/css/datatable.css">
+    <link rel="icon" href="src/png/favicon.png" />
+    <link rel="apple-touch-icon" href="src/png/favicon.png">
+
+<script src="https://cdn.jsdelivr.net/npm/@twemoji/api@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
+
+</head>
+
+<body>
+
+<header>
+
+<nav>
+<a href="index.html"><b>&#x1f3e0; Home</b></a>
+<a href="house.html" ><b>&#x2764; Play</b></a>
+<a href="market.html" class="current"><b>&#x1f6d2; Market</b></a>
+<a href="info.html"><b>&#x1f4d7; Info</b></a>
+</nav>
+
+    <h1>
+        Item Marketplace
+    </h1>
+    <p><center>
+        You can purchase and trade crafted item NFTs on the marketplace.<br>
+        There is a <b>5%</b> platform fee and the currency token used is <b>$ASTR</b>.
+    </center></p>
+</header>
+
+<main>
+
+
+<h3>Marketplace Rules &#128216;</h3>
+<p><ul>
+<li><b>Wallets that have an active Murasaki-san SBT</b> can use this marketplace.<br>
+<br>
+<li><b>The Minimum listing price is set at the buyback price or 1.00 $ASTR</b>, whichever is higher. The buyback prices for each item can be found in <a href="buyback.html">Buyback Market</a>.<br>
+<br>
+<li>Dutch auction: Items <b>listed for less than 100 $ASTR will be pre-listed using the Dutch auction mechanism</b>. The auction will start at a price of 100 $ASTR and will decrease to the listing price over a 24 hr period. The item will then remain at the listing price unless the owner unlists it.<br>
+</ul></p>
+<br>
+
+
+<h3>Item Market &#x1f6d2;</h3>
+<table id="table_onMarketItems" class="display">
+	<thead><tr>
+		<th style="width:25px;"><center>ID</center></th>
+		<th><center>Type</center></th>
+        <th><center>Rarity</center></th>
+		<th><center>Crafter</center></th>
+		<th><center>Price<br>($ASTR)</center></th>
+		<th><center>Action</center></th>
+	</tr></thead>
+	<tbody id="tbody_sellingItems"></tbody>
+</table>
+
+<p>
+<b>&#x1FAA7; Recent Activity &#x1FAA7;</b><br>
+<div id="recentActivity"></div>
+</p>
+<br>
+
+<h3>Your Sellings on the Market &#127926;</h3>
+<table id="talbe_sellingItems" class="display">
+	<thead><tr>
+		<th style="width:25px;"><center>ID</center></th>
+		<th><center>Type</center></th>
+        <th><center>Rarity</center></th>
+		<th><center>Crafter</center></th>
+		<th><center>Price<br>($ASTR)</center></th>
+		<th><center>Action</center></th>
+	</tr></thead>
+	<tbody id="tbody_listedItems"></tbody>
+</table>
+<br>
+
+<h3>Your Items in the House &#127752;</h3>
+<p><code class="language-plaintext highlighter-rouge">
+    Before listing, please approve the Market Contract:
+    <button id="button_approve" onclick='approve();'>Approve</button><br>
+</code></p>
+<table id="table_userItems" class="display">
+    <thead><tr>
+        <th style="width:25px;"><center>ID</center></th>
+        <th><center>Type</center></th>
+        <th><center>Rarity</center></th>
+        <th><center>Crafter</center></th>
+        <th><center>Listing Price<br>($ASTR)</center></th>
+    </tr></thead>
+    <tbody id="tbody_myItems"></tbody>
+</table>
+<br>
+
+<p>
+<b><font size="+2">Send Item &#127873;</b></font><br>
+</p>
+<p>
+You can transfer or gift your items directly to another Murasaki-san without using the Marketplace, but <b>you will need to pay a transfer fee</b> to prevent botting. The development team have been adjusting the transfer fee, and it may be removed in the future.<br>
+</p>
+<p>
+Current transfer fee: <font color="blue"><b>20.00</font> $ASTR</b> /item<br>
+</p>
+<p>
+<b>Item ID</b>: <input type="number" id="transfer_item_id" style="width:80px;">&nbsp;&nbsp;to <b>Murasaki-san</b>: <input type="number" id="transfer_summoner" style="width:80px;">&nbsp;&nbsp;<button onclick="transfer_item();">Pay fee and Send item</button><br>
+</p>
+<br>
+
+<h3>Buyback Market &#x1f33c;</h3>
+<p>
+NFT items can be sold for a fixed price at any time on the Buyback Market. Buyback prices will increases as the ecosyste grows.
+</p>
+<button onclick="location.href='buyback.html'">Visit Buyback Market</a></button>    
+
+<script>
+    loading_in_html();
+</script>
+
+</main>
+
+<footer class="footer">
+
+Donation:&nbsp;
+<button style="height:26px;font-size:75%" onclick="donate(1);">
+<script type="text/javascript">write_icon(1)</script>&nbsp;1 $ASTR
+</button>
+&nbsp;
+<button style="height:26px;font-size:75%" onclick="donate(10);">
+<script type="text/javascript">write_icon(10)</script>&nbsp;10 $ASTR
+</button>
+&nbsp;
+<button style="height:26px;font-size:75%" onclick="donate(100);">
+<script type="text/javascript">write_icon(100)</script>&nbsp;100 $ASTR
+</button>
+
+<br>
+
+<label><input type="radio" name="donationWallet" value="0x2F7448B62134e52C2f46454d0089Ae21B5248805">For Coder&#x1f400;: <font size="-2">0x2F7448B62134e52C2f46454d0089Ae21B5248805</font></label><br>
+<label><input type="radio" name="donationWallet" checked value="0xe79d44309e4daD2CD7eaf3CA4CD1d80a6b8733f7">For Illustrator&#x1f408;: <font size="-2">0xe79d44309e4daD2CD7eaf3CA4CD1d80a6b8733f7</font></label><br>
+
+<br>
+
+</footer>
+
+</body>
+
+<script>
+twemoji.parse(document.body);
+</script>
+
+</html>
