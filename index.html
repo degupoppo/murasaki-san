@@ -42,7 +42,7 @@
 <a href="house.html" ><b>&#x2764; Play</b></a>
 <a href="market.html"><b>&#x1f6d2; Market</b></a>
 <a href="info.html"><b>&#x1f4d7; Info</b></a>
-&nbsp;<span id="button_connect"><button onclick="init_web3();">Connect</button></span>
+&nbsp;<span id="button_connect"><button onclick="init_web3();" style="width:100px;">Connect</button></span>
 
 <!---
 <a href="https://twitter.com/degupoppo" >Twitter</a>
@@ -356,55 +356,6 @@ Also see below for more detailed game specs.
 <br>
 
 
-<!--- Game Info --->
-
-
-<h3 id="info">Game Information &#x1f33c;</h3>
-
-<p>
-<b>Current in-game parameters:</b><br>
-</p>
-
-<ul>
-<li>Total trial Murasaki-san summoned:&nbsp;<b><idv id="info_total_trial_summoned"></div></b>
-<li>Total Murasaki-san summoned:&nbsp;<b><idv id="info_total_summoned"></div></b>
-<li>Total item NFT minted:&nbsp;<b><idv id="info_total_item_minted"></div></b>
-<li>Current summon cost:&nbsp;<b><idv id="info_price"></div></b>
-<!---
-<li>Balance of Buffer Vault:&nbsp;<b><idv id="info_balanceOf_bv"></div></b>
-<li>Balance of Buyback Treasury:&nbsp;<b><idv id="info_balanceOf_bt"></div></b>
---->
-</ul>
-
-<script>
-    _show_onChain_parameters();
-</script>
-
-<p>
-<b>Realtime in-game logs:</b><br>
-Monitoring on-chain events here.
-</p>
-
-<p>
-<div id="realtimeLog">
-    &nbsp;&nbsp;&nbsp;
-    <button style="height:28px;font-size:80%" onclick="_show_realtimeLog();">
-        &nbsp;<b>Start Monitoring</b>&nbsp;
-    </button>
-</div>
-</p>
-
-<p>
-<b>Visiting another house:</b><br>
-If you know friend's Murasaki-san ID, you can visit their house. You can feed their Murasaki-san and earn a little extra exp (2% of exp gained). However, you are not allowed to take any other actions in another user's house.<br>
-<br>
-&nbsp;&nbsp;&nbsp;<b>Murasaki-san ID:</b>&nbsp;<input type="number" id="summoner" style="width:100px;" text-align="center">&nbsp;&nbsp;<button onclick="button_select_summoner();">Visit House</button><br>
-<br>
-</p>
-
-
-<br>
-
 
 <!--- Details --->
 
@@ -520,6 +471,38 @@ Fluffy is a small housemate in your house who dreams of becomming Murasaki-san. 
 <b>Fluffiest:</b> <img src="src/icon/fluffiest_08.png" width="30" height="30"> It's a biggest fluffy. You can mainly obtain it by upgrading fluffiers. They have been cherished so much that they have gained the ability to move around on their own. By collecting three fluffiests of the same color, you can upgrade them to a fluffy doll.<br>
 <br>
 <b>Fluffy Doll:</b> <img src="src/icon/doll_08.png" width="35" height="35"> The dreams of the fluffies have finally come true! It's a fluffy, coveted plush doll that looks just like Murasaki-san. It is crafted by upgrading three fluffiest of the same color. The Fluffy Doll possesses a mysterious ability and provides an exp boost bonus when placed in the house. The Fluffy Doll retains the comfort score of the house at the time of its creation, and the smaller the score of the house where it is placed, the greater the exp boost it provides. This functioins as a kind of relief mechanism for latecomers. If your friends start a new House of Murasaki-san, lending them your favorite Fluffy Doll will help their Murasaki-san's growth a lot.
+</p>
+
+</details>
+
+
+<!---### festival --->
+<details>
+
+<summary>About Fluffy Festival</summary>
+
+<p>
+Fluffy Festival is a <b>monthly event</b> where <b>the most popular color of fluffy is determined through player on-chain voting</b>. The elected color of fluffy will receive a bonus for the following month, with their fluffy score being calculated <b>as double</b>. Players who participate in the voting will receive a <b>present box</b> as a participation reward.
+</p>
+
+&nbsp;&nbsp;&nbsp;<img src="src/png/ff_duringFestival_isEndable_right.png" width="64" height="64" class="textMiddle"> < Festival!<img src="src/icon/ohana.png" width="32" height="32" class="textMiddle">
+
+<p>
+<b>Nainai-san:</b> Nainai-san is a small fairy that visits the player's house during Fluffy Festival. By clicking on Nainai-san, a voting window opens where players can decide which color of luffy to vote for. After voting, players can see the remaining block count and the current number of votes. The festival lasts for 24 hours, and once 24 hours have passed since the first vote, it concludes, and the results are determined.
+</p>
+
+<p>
+<b>Candle Auction Mechanism:</b> The Candle Auction mechanism is also adopted in the crowdloan auctions on Polkadot. Once Fluffy Festival concludes, a random time interval between the start and end of the auction is selected. At that chosen time, the color of the fluffy with the highest number of votes becomes the winner of the festival. During the auction, nobody knows which time interval will be chosen. This process is automatically carried out by the smart contract.
+</p>
+
+<p>
+<b>The Winning Fluffy:</b> The color of the fluffy elected as the winner of the Fluffy Festival receives a bonus where its fluffy score is doubled until the next festival concludes. The winning fluffy can be easily identified as it sparkles and twinkles. Once a fluffy becomes a winner, it is excluded from being eligible for voting in the subsequent two festivals.
+</p>
+
+&nbsp;&nbsp;&nbsp;<img src="src/png/ff_report.png" width="48" height="48" class="textMiddle">
+
+<p>
+<b>First and Last Voter Bonus:</b> Players who vote first or last will receive an additional presentbox. This is a reward for paying higher gas fees, as the start and end processes of the festival require more gas than usual. The festival's end process can be initiated by players who have already voted as well as those who haven't specified their vote yet. Once the festival becomes ready for conclusion, Nainai-san leaves an election report at the house, notifying everyone immediately
 </p>
 
 </details>
@@ -762,7 +745,7 @@ The following exp point table has been set based on the Dungeons & Dragons 3.5 r
 <summary>Buyback Treasury</summary>
 
 <p>
-The buyback system was designed to ensure that players can sell the NFTs of this project to the treasury at a fixed price at any time, thus constantly guaranteeing the asset value of the NFTs in this project.
+The buyback system was designed to ensure that players can sell the NFTs of this project to the treasury at a fixed price at any time, thus <b>constantly guaranteeing the asset value of the NFTs</b> in this project.
 </p>
 
 <p>
@@ -787,7 +770,7 @@ To improve on this goal, the developers have implemented an automated buyback sy
 </p>
 
 <p>
-In other words, the minimum price of each NFTs in this project is determined, and this minimum price (buyback price) never decreases but always increase over time. With each acquisition of NFTs through ongoing gameplay, the player's asset value increases steadily, and it also continues to increase by holding the NFTs. Since the buyback treasury always holds enough to buyback all items from all players, there will never be a situation where the reasury runs out and later players cannot receive buybacks.
+In other words, the minimum price of each NFTs in this project is determined, and this minimum price (buyback price) <b>never decreases but always increase</b> over time. With each acquisition of NFTs through ongoing gameplay, the player's asset value increases steadily, and it also continues to increase by holding the NFTs. Since the buyback treasury always holds enough to buyback all items from all players, there will never be a situation where the reasury runs out and later players cannot receive buybacks.
 </p>
 
 <p>
@@ -821,6 +804,7 @@ This buyback system is somewhat experimental, and its acceptance by players will
 <summary>Economy Details</summary>
 
 <p>
+
 </p>
 
 <p>
@@ -834,6 +818,7 @@ Here is an overview of token currency:<br>
 </p>
 
 <p>
+
 </p>
 
 </details>

@@ -8,42 +8,62 @@
 <script> init_web3(); </script>
 <script src="src/js/market.js"></script>
 
+
+
 <head>
-	<meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=0.7">
-	<title>Murasaki-san Item Market</title>
-	<link rel="stylesheet" type="text/css" href="lib/datatables.min.css"/>
-	<script type="text/javascript" language="javascript" src="lib/jquery-3.6.0.min.js"></script>
-	<script type="text/javascript" language="javascript" src="lib/datatables.min.js"></script>
-    <link rel="stylesheet" href="src/css/simple2.css">
-    <link rel="stylesheet" href="src/css/style.css">
-    <link rel="stylesheet" href="src/css/datatable.css">
-    <link rel="icon" href="src/png/favicon.png" />
-    <link rel="apple-touch-icon" href="src/png/favicon.png">
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=0.9">
+
+<title>Murasaki-san Item Market</title>
+<meta name="description" content="Murasaki-san is a virtual pet that lives in your wallet on Astar Network." />
+<link rel="stylesheet" href="src/css/simple2.css">
+<link rel="stylesheet" href="src/css/style.css">
+
+<link rel="icon" href="src/png/favicon.png" />
+<link rel="apple-touch-icon" href="src/png/favicon.png">
+
+<meta property="og:title" content="Murasaki-san Item Market">
+<meta property="og:image" content="src/png/favicon.png">
+<meta property="og:url" content="https://murasaki-san.com/">
+<meta property="og:description" content="Murasaki-san is a virtual pet that lives in your wallet on Astar Network.">
 
 <script src="https://cdn.jsdelivr.net/npm/@twemoji/api@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
 
+<link rel="stylesheet" type="text/css" href="lib/datatables.min.css"/>
+<link rel="stylesheet" href="src/css/datatable.css">
+<script type="text/javascript" language="javascript" src="lib/jquery-3.6.0.min.js"></script>
+<script type="text/javascript" language="javascript" src="lib/datatables.min.js"></script>
+
+
 </head>
 
+
 <body>
+
 
 <header>
 
 <nav>
 <a href="index.html"><b>&#x1f3e0; Home</b></a>
-<a href="house.html" ><b>&#x2764; Play</b></a>
+<a href="house.html"><b>&#x2764; Play</b></a>
 <a href="market.html" class="current"><b>&#x1f6d2; Market</b></a>
 <a href="info.html"><b>&#x1f4d7; Info</b></a>
+&nbsp;<span id="button_connect"><button onclick="init_web3();" style="width:100px;">Connect</button></span>
 </nav>
 
-    <h1>
-        Item Marketplace
-    </h1>
-    <p><center>
-        You can purchase and trade crafted item NFTs on the marketplace.<br>
-        There is a <b>5%</b> platform fee and the currency token used is <b>$ASTR</b>.
-    </center></p>
+
+<h1>
+Item Marketplace
+</h1>
+<p><center>
+You can purchase and trade crafted item NFTs on the marketplace.<br>
+There is a <b>5%</b> platform fee and the currency token used is <b>$ASTR</b>.
+</center></p>
+
 </header>
+
 
 <main>
 
@@ -162,7 +182,8 @@ Donation:&nbsp;
 </body>
 
 <script>
-twemoji.parse(document.body);
+    twemoji.parse(document.body);
+    check_connected();
 </script>
 
 </html>

@@ -144,17 +144,6 @@ contract ERC721 is IERC721 {
                 ただし、これはマネジメントにカリスマとセンスが必要か。
             
 
-    item detailsの完成
-        STR系アイテム
-        DEX系アイテム
-        INT系アイテム
-        Fluffy系（概要）
-        bank/pouch
-        cat-mail
-        presentbox
-        twinkle系(comming soom)
-
-
     むらさきさんをアイコンで一覧閲覧できるページを作成する
         ランダムで10-20体のアイコンを表示する
             クリックでその家に飛べる
@@ -196,39 +185,10 @@ contract ERC721 is IERC721 {
             local_stroll_endable = 1;        
 
 
-    なぜアスターなのか
-        dapps stakingの利用
-            ユーザーの資金を目減りさせずに安全に保管できる
-            購入やトークン発行以外のみんなが得をする開発インセンティブ
-        XCM?XVM?の利用
-            EVMは成約が多いがライブラリと知見が充実している
-            一方で、数年後の近い将来はWASMが主流になると予想されている
-            EVM資産をシームレスにWASMへリンクできるのはAstarが唯一
-            我々の第一目標はweb3の技術をリアルタイムでキャッチアップすることであり、
-                次のPJはWASMで開発したいため。
-        ガス代が安いため
-            ガス代などでトークン価格を維持しようとする他のチェーンとは異なり、
-                ゲームをストレスなく行えるほどガス代が安いため。
-        Polkadotチェーンにおいて最も有望なため
-            我々はpolkadotのビジョンに共感している。
-            Astarはpolkadotのパラチェーンにおいて、
-            上記３つの理由から最もbuildに向いていると考えるため。
-
-
     Murasaki_Addressの修正
         Trial_Converterを追加で実装
         addressはjs側には極力保存せず、maを参照させる
         また、abiは別ファイルとする。
-
-
-    覚書：コントラ更新手順
-        remixでコントラを手動でデプロイ
-        murasaki/deploy/3_init.pyのaddressを修正
-        murasaki/deploy/3_init.pyのabiを必要に応じて修正
-        murasaki/deploy/3_init.pyのabiから該当行を抜き出して実行
-        share.jsのaddressを修正
-        share.jsのabiを必要に応じて修正
-        permitted_addressを設定していたコントラは、旧アドレスにfalseを代入
 
 
     修正案
@@ -330,14 +290,6 @@ contract ERC721 is IERC721 {
             散歩を思い出しながら寝ている
                 → クリックしてtx飛ばすと、吹き出しを出して散歩内容を飼い主に報告して
                 　 総歩行距離と友達人数が更新される。
-
-
-    Fluffyシステムについて情報を整理する
-        アップグレードの概念図のポンチ絵
-        fluffyがもらえる行動の一覧と詳細
-            crafting bonus, cat-mail, fluffy festival, staking bonus
-        festivalの詳細
-        dollのexp boostシステムの詳細
 
 
     経済について公開情報を整理する
@@ -1401,6 +1353,50 @@ contract ERC721 is IERC721 {
 
 
 //### 3rd
+
+ ok Fluffyシステムについて情報を整理する
+        アップグレードの概念図のポンチ絵
+        fluffyがもらえる行動の一覧と詳細
+            crafting bonus, cat-mail, fluffy festival, staking bonus
+        festivalの詳細
+        dollのexp boostシステムの詳細
+
+ ok item detailsの完成
+        STR系アイテム
+        DEX系アイテム
+        INT系アイテム
+        Fluffy系（概要）
+        bank/pouch
+        cat-mail
+        presentbox
+        twinkle系(comming soom)
+
+ ig 覚書：コントラ更新手順
+        remixでコントラを手動でデプロイ
+        murasaki/deploy/3_init.pyのaddressを修正
+        murasaki/deploy/3_init.pyのabiを必要に応じて修正
+        murasaki/deploy/3_init.pyのabiから該当行を抜き出して実行
+        share.jsのaddressを修正
+        share.jsのabiを必要に応じて修正
+        permitted_addressを設定していたコントラは、旧アドレスにfalseを代入
+
+ ok なぜアスターなのか
+        dapps stakingの利用
+            ユーザーの資金を目減りさせずに安全に保管できる
+            購入やトークン発行以外のみんなが得をする開発インセンティブ
+        XCM?XVM?の利用
+            EVMは成約が多いがライブラリと知見が充実している
+            一方で、数年後の近い将来はWASMが主流になると予想されている
+            EVM資産をシームレスにWASMへリンクできるのはAstarが唯一
+            我々の第一目標はweb3の技術をリアルタイムでキャッチアップすることであり、
+                次のPJはWASMで開発したいため。
+        ガス代が安いため
+            ガス代などでトークン価格を維持しようとする他のチェーンとは異なり、
+                ゲームをストレスなく行えるほどガス代が安いため。
+        Polkadotチェーンにおいて最も有望なため
+            我々はpolkadotのビジョンに共感している。
+            Astarはpolkadotのパラチェーンにおいて、
+            上記３つの理由から最もbuildに向いていると考えるため。
 
  ok functionコントラ群にサーキットブレイカーを実装する
         旧コントラはpermittedを削除するより、

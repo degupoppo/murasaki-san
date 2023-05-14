@@ -7,11 +7,11 @@ async function check_connected() {
     let _text = "";
     let target = document.getElementById("button_connect");
     if (accounts.length > 0) {
-        _text = '<button disabled>Connected</button>';
+        _text = '<button disabled style="width:100px;">Connected</button>';
         target.innerHTML = _text;
         init_web3();
     } else {
-        _text = '<button onclick="init_web3();">Connect</button>';
+        _text = '<button onclick="init_web3();" style="width:100px;">Connect</button>';
         target.innerHTML = _text;
         setTimeout(check_connected, 1000);
     }
