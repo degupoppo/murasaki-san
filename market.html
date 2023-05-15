@@ -5,7 +5,6 @@
 <script src="lib/web3.min.js"></script>
 <script src="src/js/array_item.js"></script>
 <script src="src/js/share.js"></script>
-<script> init_web3(); </script>
 <script src="src/js/market.js"></script>
 
 
@@ -15,6 +14,11 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=0.9">
+
+<link rel="stylesheet" type="text/css" href="lib/datatables.min.css"/>
+<link rel="stylesheet" href="src/css/datatable.css">
+<script type="text/javascript" language="javascript" src="lib/jquery-3.6.0.min.js"></script>
+<script type="text/javascript" language="javascript" src="lib/datatables.min.js"></script>
 
 <title>Murasaki-san Item Market</title>
 <meta name="description" content="Murasaki-san is a virtual pet that lives in your wallet on Astar Network." />
@@ -31,10 +35,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@twemoji/api@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
 
-<link rel="stylesheet" type="text/css" href="lib/datatables.min.css"/>
-<link rel="stylesheet" href="src/css/datatable.css">
-<script type="text/javascript" language="javascript" src="lib/jquery-3.6.0.min.js"></script>
-<script type="text/javascript" language="javascript" src="lib/datatables.min.js"></script>
 
 
 </head>
@@ -80,7 +80,8 @@ There is a <b>5%</b> platform fee and the currency token used is <b>$ASTR</b>.
 
 
 <h3>Item Market &#x1f6d2;</h3>
-<table id="table_onMarketItems" class="display">
+
+<table id="table_onMarketItems" class="display" style="width:100%;">
 	<thead><tr>
 		<th style="width:25px;"><center>ID</center></th>
 		<th><center>Type</center></th>
@@ -99,7 +100,7 @@ There is a <b>5%</b> platform fee and the currency token used is <b>$ASTR</b>.
 <br>
 
 <h3>Your Sellings on the Market &#127926;</h3>
-<table id="talbe_sellingItems" class="display">
+<table id="talbe_sellingItems" class="display" style="width:100%;">
 	<thead><tr>
 		<th style="width:25px;"><center>ID</center></th>
 		<th><center>Type</center></th>
@@ -117,7 +118,7 @@ There is a <b>5%</b> platform fee and the currency token used is <b>$ASTR</b>.
     Before listing, please approve the Market Contract:
     <button id="button_approve" onclick='approve();'>Approve</button><br>
 </code></p>
-<table id="table_userItems" class="display">
+<table id="table_userItems" class="display" style="width:100%;">
     <thead><tr>
         <th style="width:25px;"><center>ID</center></th>
         <th><center>Type</center></th>
@@ -149,9 +150,6 @@ NFT items can be sold for a fixed price at any time on the Buyback Market. Buyba
 </p>
 <button onclick="location.href='buyback.html'">Visit Buyback Market</a></button>    
 
-<script>
-    loading_in_html();
-</script>
 
 </main>
 
@@ -184,6 +182,7 @@ Donation:&nbsp;
 <script>
     twemoji.parse(document.body);
     check_connected();
+    loading_in_html();
 </script>
 
 </html>
