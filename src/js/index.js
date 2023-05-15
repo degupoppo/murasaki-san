@@ -416,7 +416,7 @@ async function _show_icon3() {
             _res = _res.split("base64,")[1];
             _res = _res.split('"')[0];
             _res = atob(_res);
-            _res = '<a href="house?summoner=' + _summoner + '">' + _res + '</a>';
+            _res = '<a href="house.html?summoner=' + _summoner + '">' + _res + '</a>';
             _res += "&nbsp;&nbsp;&nbsp;";
             // insert into html
             _text += _res;
