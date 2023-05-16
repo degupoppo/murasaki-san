@@ -170,7 +170,8 @@ async function balanceOfbt() {
     return Math.floor( Number(_res) / (10**18) * 100 )/100;
 }
 async function _show_onChain_parameters() {
-    if (typeof(wallet) != "undefined" && wallet != "") {
+    //if (typeof(wallet) != "undefined" && wallet != "") {
+    if (flag_web3Loaded) {
         let _text
         let _target
         //total_summoned_trial
@@ -327,7 +328,8 @@ async function _show_icon() {
 
 //show icon2
 async function _show_icon2() {
-    if (typeof(wallet) != "undefined" && wallet != "") {
+    //if (typeof(wallet) != "undefined" && wallet != "") {
+    if (flag_web3Loaded) {
         let _res;
         let _balance = await contract_mm.methods.balanceOf(wallet).call();
         if (_balance == 0) {    //when no token, call for trial
@@ -390,7 +392,8 @@ async function _show_icon2() {
 
 
 async function _show_icon3() {
-    if (typeof(wallet) != "undefined" && wallet != "") {
+    //if (typeof(wallet) != "undefined" && wallet != "") {
+    if (flag_web3Loaded) {
         //get random summoner
         let _tokenTotal = await contract_mm.methods.next_token().call();
         _tokenTotal = Number(_tokenTotal) -1;

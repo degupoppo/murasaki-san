@@ -86,22 +86,12 @@ contract ERC721 is IERC721 {
 //### 1st
 
 
-    html修正
-        脱ポンジのパラグラフを洗練させる
-        buyback systemの弱点をきちんと述べる
-            このシステムだけでは原資抜きに1-2年かかる
-            つまり、結局ユーザーはfeeを支払って2年かかって回収するだけになる。
-        この点をどう説明し、どう納得してもらうか
-            話が違う、となってしまうのは避けたい。
-            実際はdapps stakingの量がわからないのでなんとも言えないのだが。
-            一度、月3%を実現するために必要なtoken/userの値をきちんと計算してみる。
-
-
     散歩システムを詰める
         コントラから経過時間、終了までの時間、現在の歩行距離、の取得を実装する
         strolling windowに上記情報を表示させる
         strolling windowに現在までのmet summonerを表示させる
         帰宅の演出を完成させる
+        htmlの記事を完成させる
         Strollテスト
             flag_sync=0
             open_window_strolling(scene_main)
@@ -113,6 +103,19 @@ contract ERC721 is IERC721 {
             local_companion=1
 
             local_stroll_endable = 1;        
+
+
+    html修正
+        脱ポンジのパラグラフを洗練させる
+        buyback systemの弱点をきちんと述べる
+            このシステムだけでは原資抜きに1-2年かかる
+            つまり、結局ユーザーはfeeを支払って2年かかって回収するだけになる。
+        この点をどう説明し、どう納得してもらうか
+            話が違う、となってしまうのは避けたい。
+            実際はdapps stakingの量がわからないのでなんとも言えないのだが。
+            一度、月3%を実現するために必要なtoken/userの値をきちんと計算してみる。
+        Buyback Treasuryが目立たないので、どこにどの程度アピールするのかはっきりする
+            あまり目立たせすぎると混乱するので、マーケットとの棲み分けをどうするか。
 
 
     長期的な意味論の深慮
@@ -132,9 +135,6 @@ contract ERC721 is IERC721 {
             
 
     修正案
-        feedingやgroomingを短い間隔で連打すると効率が上がるバグの修正
-            98%以上では+0とするなど対策が必要だろうか。
-            mining/farmingは大丈夫だろうか。
         コストの引き上げ
             mint: 500, transfer fee: 50
         rugg-pullの実装
@@ -159,6 +159,9 @@ contract ERC721 is IERC721 {
         売買回数、平均購入価格などを集計したマーケット情報ページを作成する？
         フェスティバル前の演出の改善
         変数書き換え対策の実装, さてどうするか
+     ok feedingやgroomingを短い間隔で連打すると効率が上がるバグの修正
+     ok     98%以上では+0とするなど対策が必要だろうか。
+     ok     mining/farmingは大丈夫だろうか。
      ng depthをspriteのy下段に設定する？
      ng     マウスドラッグ時は前面に設定する？
      ok connectボタンの設置

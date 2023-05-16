@@ -2463,8 +2463,12 @@ contract Murasaki_Function_Share is Ownable {
         uint _satiety;
         if (_delta_sec >= _base) {
             _satiety = 0;
-        }else {
+        } else {
             _satiety = 100 * (_base - _delta_sec) / _base;
+        }
+        //prevent short interval botting
+        if (_satiety > 0 && _satiety < 100) {
+            _satiety += 1;
         }
         return _satiety;
     }
@@ -2482,8 +2486,12 @@ contract Murasaki_Function_Share is Ownable {
         uint _happy;
         if (_delta_sec >= _base) {
             _happy = 0;
-        }else {
+        } else {
             _happy = 100 * (_base - _delta_sec) / _base;
+        }
+        //prevent short interval botting
+        if (_happy > 0 && _happy < 100) {
+            _happy += 1;
         }
         return _happy;
     }
@@ -3297,14 +3305,6 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable, ReentrancyGuard, Pau
         require(ms.inHouse(_summoner));
         require(mfs.check_owner(_summoner, msg.sender));
         require(not_petrified(_summoner));
-        /*
-        require(
-            ms.mining_status(_summoner) == 0 
-            && ms.farming_status(_summoner) == 0 
-            && ms.crafting_status(_summoner) == 0
-            && ms.practice_status(_summoner) == 0
-        );
-        */
         require(ms.working_status(_summoner) == 0);
         uint _now = block.timestamp;
         uint _happy = _calc_happy_real(_summoner);
@@ -3349,6 +3349,10 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable, ReentrancyGuard, Pau
             _happy = 0;
         }else {
             _happy = 100 * (_base - _delta_sec) / _base;
+        }
+        //prevent short interval botting
+        if (_happy > 0 && _happy < 100) {
+            _happy += 1;
         }
         return _happy;
     }
@@ -8330,6 +8334,7 @@ contract Position_Storage is Ownable {
 
 
 //---Murasaki_Ranking
+//***TODO***
 /*
 
 contract Murasaki_Storage_Ranking is Ownable, ReentrancyGuard, Pausable {
@@ -8414,7 +8419,6 @@ contract Murasaki_Storage_Ranking is Ownable, ReentrancyGuard, Pausable {
         }
     }
 }
-*/
 
 
 contract Murasaki_Storage_Ranking is Ownable, ReentrancyGuard, Pausable {
@@ -8459,6 +8463,8 @@ contract Murasaki_Storage_Ranking is Ownable, ReentrancyGuard, Pausable {
         }
     }
 }
+*/
+
 
 
 //===Info==================================================================================================================

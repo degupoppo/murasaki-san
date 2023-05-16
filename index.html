@@ -43,11 +43,6 @@
 <a href="market.html"><b>&#x1f6d2; Market</b></a>
 <a href="info.html"><b>&#x1f4d7; Info</b></a>
 &nbsp;<span id="button_connect"><button onclick="init_web3();" style="width:100px;">Connect</button></span>
-
-<!---
-<a href="https://twitter.com/degupoppo" >Twitter</a>
-<a href="https://github.com/degupoppo/murasakisan/" >GitHub</a>
---->
 </nav>
 
 
@@ -191,7 +186,7 @@ Our main motivations for developing this project are:<br>
 <h3 id="howto">How to Play &#128216;</h3>
 <p>
 <ul>
-<li><b>Summon</b> your murasaki-san. Free trial are available.<br>
+<li><b>Summon</b> your murasaki-san (It's <b>SBT</b>, not NFT). Free trial are available.<br>
 <li>Care for your Murasaki-san by <b>Feeding</b> and <b>Grooming</b> them to gain EXP.<br>
 <li>Accumulate EXP to <b>Level up</b> your Murasaki-san.<br>
 <li>Your Murasaki-san can <b>Mining</b> to earn Coins or <b>Farming</b> to earn Leaves.<br>
@@ -248,53 +243,30 @@ Aside from <b><a href="#staking">the Dapps Staking Bonus</a></b>, we have not im
 <br>
 
 
-<!--- Attention --->
-
-<h3 id="attention">Attentions &#127775;</h3>
-
-<p>
-Before starting the game, please take note of the following precautions:
-</p>
-
-<ul>
-<li>Murasaki-san is a <b>SBT</b>, not a NFT, so you can <b>only summon once per wallet</b>, and you <b>cannot transfer or sell it.</b> On the other hand, you can buy and sell crafted item NFTs.
-<li>This project does not have plans for issuing a proprietary token. The coins and leaves obtained within the game are only usable within the game and do not follow the ERC-20 standard. $ASTR token is used for buying and selling of NFTs.
-<li>If you neglect to take care of your Murasaki-san for a long time (<b>about a month</b>), Murasaki-san will become petrified, and you will need some <b>additional cost</b> to cure.
-<li><b>Botting play using multi-wallets is profibited</b>. You will be penalized for violating the <b><a href="#tos">anti-bot policy</a></b>.
-</ul>
-
-<br>
-
-
-<!--- Staking Bonus --->
+<!--- dApps Staking --->
 
 <h3 id="staking">Dapps Staking Bonus! &#x1f973;</h3>
 
-<p>
-<b><font color="blue">--- We have not applied for Builder's Program yet ---<br>
---- These bonuses might be active in the future ---</font></b>
+<p class="notice">
+<b>&#127775; Attention &#127775;</b><br>
+The contents described below are applicable if this project is adopted for dApps Staking on the Astar Network
 </p>
-
-<font color="darkgray">
 
 <p>
 There are <b>in-game bonuses</b> depending on your dapps staking amount for this project.<br>
 </p>
 
-<ul>
-<li>Get an <b>extra presentbox</b> every interval period. The higher the staking amount, the shorter the interval until the next gift.<br>
-<li>Some items <b>change the picture or animation</b> according to your staking amount. Observe carefully, or spoiled below.<br>
-</ul>
-
 <p>
-The Murasaki-san living in the EVM wallet (Astar EVM address) linked with the Polkadot.js wallet (Astar Native address) that is staking on the House of Murasaki-san on the dapps staking can receive the above bonuses. You can link your Astar Native address and Astar EVM address on <b><a href="https://astarpass.astar.network/">AstarPass</a></b>.
+<img src="src/png/item_staking.png" width="80" height="80" class="textMiddle" style="float:left; margin-right:15px;margin-bottom:10px; margin-top:10px">When you stake $ASTR in dApps Staking, the construction of <b>a gingerbread house</b> will begin. <b>The more $ASTR you stake, the faster the construction will be</b>. Once the construction is complete, you will be able to mint <b>a random NFT</b>.
 </p>
 
 <p>
-Participation in dapps staking benefits both the individual and the product as a whole. Actually, 90% of staking rewards are spent on maintaining the product (see below for details; <b><a href="#economy">economy design</a></b>).
+The Murasaki-san living in the EVM wallet (Astar EVM H160 address) linked with the Polkadot.js wallet (Astar Native SS58 address) that is staking on the House of Murasaki-san on the dapps staking can receive the above bonuses. You can link your Astar Native address and Astar EVM address on <b><a href="https://astarpass.astar.network/">AstarPass</a></b>.
 </p>
 
-</font>
+<p>
+Participation in dapps staking benefits both the player and the product as a whole. Actually, 90% of staking rewards are spent on maintaining the product (see <b><a href="#detailedspecific">Economy Details</a></b> session).
+</p>
 
 <br>
 
@@ -328,6 +300,24 @@ Item NFTs listed in the marketplace will be moved out of your house and will no 
 <li><b>Wallets that have an active Murasaki-san SBT</b> can use this marketplace.
 <li><b>The Minimum listing price is set at the buyback price or 1.00 $ASTR</b>, whichever is higher. The buyback prices for each item can be found in <a href="buyback.html">Buyback Market</a>.
 <li>Dutch auction mechanism: Items <b>listed for less than 100 $ASTR will be pre-listed using the Dutch auction mechanism</b>. The auction will start at a price of 100 $ASTR and will decrease to the listing price over a 24 hr period. The item will then remain at the listing price unless the owner unlists it.
+</ul>
+
+<br>
+
+
+<!--- Attention --->
+
+<h3 id="attention">Attentions &#127775;</h3>
+
+<p>
+Before starting the game, please take note of the following precautions:
+</p>
+
+<ul>
+<li>Murasaki-san is a <b>SBT</b>, not a NFT, so you can <b>only summon once per wallet</b>, and you <b>cannot transfer or sell it.</b> On the other hand, you can buy and sell crafted item NFTs.
+<li>This project does not have plans for issuing a proprietary token. The coins and leaves obtained within the game are only usable within the game and do not follow the ERC-20 standard. $ASTR token is used for buying and selling of NFTs.
+<li>If you neglect to take care of your Murasaki-san for a long time (<b>about a month</b>), Murasaki-san will become petrified, and you will need some <b>additional cost</b> to cure.
+<li><b>Botting play using multi-wallets is profibited</b>. You will be penalized for violating the <b><a href="#tos">anti-bot policy</a></b>.
 </ul>
 
 <br>
@@ -677,9 +667,36 @@ The calculation formula regarding the effect of each status value on the results
 <b>Crafting efficacy:</b><br>
 <font size="-0.5">
 &nbsp;&nbsp;&nbsp;Crafting Sec = item_DC * (INT + Lv + INT_item - 400) / (item_Lv * 300) * 86400 / 1000<br>
-&nbsp;&nbsp;&nbsp;Crafting Sec >= [Sec Limit set for each item]
+&nbsp;&nbsp;&nbsp;Crafting Sec >= [Sec Limit set for each item]<br>
 </font>
 </p>
+
+<font size="-0.5">
+<table>
+  <thead>
+    <tr>
+      <th><center>Item Lv<sup>*</sup></center></th>
+      <th><center>Sec Limit</center></th>
+      <th></th>
+      <th><center>Item Lv</center></th>
+      <th><center>Sec Limit</center></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td><b><center>1</center></b></td><td><center>86400</center></td><td></td><td><b><center>9</center></b></td><td><center>345600</center></td></tr>
+    <tr><td><b><center>2</center></b></td><td><center>172800</center></td><td></td><td><b><center>10</center></b></td><td><center>345600</center></td></tr>
+    <tr><td><b><center>3</center></b></td><td><center>259200</center></td><td></td><td><b><center>11</center></b></td><td><center>345600</center></td></tr>
+    <tr><td><b><center>4</center></b></td><td><center>259200</center></td><td></td><td><b><center>12</center></b></td><td><center>345600</center></td></tr>
+    <tr><td><b><center>5</center></b></td><td><center>259200</center></td><td></td><td><b><center>13</center></b></td><td><center>432000</center></td></tr>
+    <tr><td><b><center>6</center></b></td><td><center>259200</center></td><td></td><td><b><center>14</center></b></td><td><center>432000</center></td></tr>
+    <tr><td><b><center>7</center></b></td><td><center>259200</center></td><td></td><td><b><center>15</center></b></td><td><center>518400</center></td></tr>
+    <tr><td><b><center>8</center></b></td><td><center>259200</center></td><td></td><td><b><center>16</center></b></td><td><center>604800</center></td></tr>
+  </tbody>
+</table>
+</font>
+<font size="-1">
+<sup>*</sup>The item Lv is equal to the order of craftable items.
+</font>
 
 <p>
 <b>Critical efficacy:</b><br>
@@ -700,10 +717,10 @@ The following exp point table has been set based on the Dungeons & Dragons 3.5e 
   <thead>
     <tr>
       <th><center>Lv</center></th>
-      <th>Exp required</th>
+      <th><center>Exp required</center></th>
       <th></th>
-      <th>Lv</th>
-      <th>Exp required</th>
+      <th><center>Lv</center></th>
+      <th><center>Exp required</center></th>
     </tr>
   </thead>
   <tbody>
@@ -721,6 +738,44 @@ The following exp point table has been set based on the Dungeons & Dragons 3.5e 
 </table>
 </font>
 
+<p>
+<b>Staking efficacy:</b><br>
+<font size="-0.5">
+&nbsp;&nbsp;&nbsp;Construction Progress (%) = SEC * Speed / 2592000<br>
+&nbsp;&nbsp;&nbsp;(Construction Progress will be updated when Feeding)
+</font>
+</p>
+
+<font size="-0.5">
+<table>
+  <thead>
+    <tr>
+      <th><center>Stakied $ASTR</center></th>
+      <th><center> Speed </center></th>
+      <th><center> Days to completion </center></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td><center><500</center></td><td><center>x0</center></td><td><center>---</center></td></tr>
+    <tr><td><center><1000</center></td><td><center>x1.00</center></td><td><center>30 days</center></td></tr>
+    <tr><td><center><2000</center></td><td><center>x1.25</center></td><td><center>24 days</center></td></tr>
+    <tr><td><center><4000</center></td><td><center>x1.50</center></td><td><center>20 days</center></td></tr>
+    <tr><td><center><8000</center></td><td><center>x2.00</center></td><td><center>15 days</center></td></tr>
+    <tr><td><center><16000</center></td><td><center>x2.50</center></td><td><center>12 days</center></td></tr>
+    <tr><td><center><32000</center></td><td><center>x3.00</center></td><td><center>10 days</center></td></tr>
+    <tr><td><center><64000</center></td><td><center>x3.50</center></td><td><center>8.6 days</center></td></tr>
+    <tr><td><center><128000</center></td><td><center>x4.00</center></td><td><center>7.5 days</center></td></tr>
+    <tr><td><center>>=128000</center></td><td><center>x4.28</center></td><td><center>7 days</center></td></tr>
+  </tbody>
+</table>
+</font>
+
+<p>
+<font size="-0.5">
+Reward NFT: Fluffy (61%), Fluffier (10%), Glitter (3%), Sparkle (3%), Twinkle (3%), Piggy Bank (10%), Leaf Pouch (10%)
+</font>
+</p>
+
 </details>
 
 
@@ -730,6 +785,11 @@ The following exp point table has been set based on the Dungeons & Dragons 3.5e 
 <details>
 
 <summary>Buyback Treasury</summary>
+
+<p class="notice">
+<b>&#127775; Attention &#127775;</b><br>
+The contents described below are applicable if this project is adopted for dApps Staking on the Astar Network
+</p>
 
 <p>
 The buyback system was designed to ensure that players can sell the NFTs of this project to the treasury at a fixed price at any time, thus <b>constantly guaranteeing the asset value of the NFTs</b> in this project.
@@ -790,8 +850,13 @@ This buyback system is somewhat experimental, and its acceptance by players will
 
 <summary>Economy Details</summary>
 
+<p class="notice">
+<b>&#127775; Attention &#127775;</b><br>
+The contents described below are applicable if this project is adopted for dApps Staking on the Astar Network
+</p>
+
 <p>
-Through the following mechanisms, we aim to create a low-stress economic system in the medium to long term. Our goal is to create a system where players can enjoy the gameplay for a longer period without the stress of incurring significant losses in the short term. Our focus is on fostering a relaxed and enjoyable experience over an extended period, rather than seeking quick and substantial profits.
+Through the Buyback Sysmte and following strategies, we aim to create a low-stress economic system in the medium to long term. Our goal is to create a system where players can enjoy the gameplay for a longer period without the stress of incurring significant losses in the short term. Our focus is on fostering a relaxed and enjoyable experience over an extended period, rather than seeking quick and substantial profits.
 </p>
 
 <p>
@@ -820,7 +885,11 @@ Here is an overview of the token flow:<br>
 
 
 <p>
-<b>Buyback Price Inflation<sup>1)</sup>:</b> All dApps staking rewards and in-game fees are collected in the Buffer Vault. The funds necessary to increase the total assets of the Buyback Treasury by 3% are transferred to the Buyback Treasury (X%). The remaining funds are sent to the Staking Treasury to increase the self-staking amount (Y%). 10% is allocated to developers. The appropriate inflation rate, currently planned to be around 3% per month, will be adjusted periodically based on the number of active users and dApps staking volume.
+<b>Buyback Price Inflation<sup>1)</sup>:</b> All dApps staking rewards and in-game fees are collected in the Buffer Vault. The funds necessary to increase the total assets of the Buyback Treasury by 3% are transferred to the Buyback Treasury (X%). The remaining funds are sent to the Staking Treasury to increase the self-staking amount (Y%). 10% is allocated to developers. The appropriate inflation rate, currently planned to be around 3% per month, will be adjusted periodically based on the number of active users and dApps staking volume. The aforementioned processes are automatically performed by smart contracts on the blockchain.
+</p>
+
+<p>
+<b>Self Staking:</b> After Buyback Price Inflating, any remaining funds are temporarily moved to the Staking Treasury on EVM (H160), then to the native Staking Treasury on Substrate (SS58), and finally self-staked in dApps Staking. Self-staking is a mechanism to secure funds for future inflation of the Buyback Price. These processes are currently done manually as there is no way to automate them, but they are planned to be automated using XVM or other methods in the future.
 </p>
 
 <p>
@@ -828,7 +897,7 @@ Here is an overview of the token flow:<br>
 </p>
 
 <p>
-In summary, the expansion of the Buyback Treasury, which secures the overall asset value of the project, is determined by the amount of value staked in dApps Staking per active player. Self-staking through the 45% of Starting Fee alone probably does not achieve an attractive inflation rate. The developers are committed to actively encouraging players to participate in dApps Staking through ongoing development efforts.
+In summary, the expansion of the Buyback Treasury, which secures the overall value of the project, is determined by the amount of value staked in dApps Staking by each active player. Self-staking through 45% of the Starting Fee alone is unlikely to achieve an attractive inflation rate. The developers are committed to actively encouraging players to participate in dApps Staking through ongoing development efforts.
 </p>
 
 <p>

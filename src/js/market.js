@@ -657,3 +657,15 @@ async function loading_in_html_buyback() {
     check_approve_buyback();
     //get_recent_activity();
 }
+
+//transfer fee
+async function show_transferFee() {
+    if (flag_web3Loaded) {
+        let _text = await contract_mc.methods.TRANSFER_FEE().call() 
+        _text = (Math.round(_text/10**18)).toFixed(2);
+        let _target = document.getElementById("transferFee");
+        _target.innerHTML = _text;
+    } else {
+        setTimeout(show_transferFee, 1000);
+    }
+}

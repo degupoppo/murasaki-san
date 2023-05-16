@@ -134,19 +134,19 @@ There is a <b>5%</b> platform fee and the currency token used is <b>$ASTR</b>.
 <b><font size="+2">Send Item &#127873;</b></font><br>
 </p>
 <p>
-You can transfer or gift your items directly to another Murasaki-san without using the Marketplace, but <b>you will need to pay a transfer fee</b> to prevent botting. The development team have been adjusting the transfer fee, and it may be removed in the future.<br>
+You can transfer or gift your items directly to another Murasaki-san without using the Marketplace, but <b>you will need to pay a transfer fee</b> to ensure fair gameplay and prevent botting. The development team have been adjusting the transfer fee, and it may be removed in the future.<br>
 </p>
 <p>
-Current transfer fee: <font color="blue"><b>20.00</font> $ASTR</b> /item<br>
+Current transfer fee: <font color="blue"><b><idv id="transferFee"></div></font> $ASTR</b> /item<br>
 </p>
 <p>
 <b>Item ID</b>: <input type="number" id="transfer_item_id" style="width:80px;">&nbsp;&nbsp;to <b>Murasaki-san</b>: <input type="number" id="transfer_summoner" style="width:80px;">&nbsp;&nbsp;<button onclick="transfer_item();">Pay fee and Send item</button><br>
 </p>
 <br>
 
-<h3>Buyback Market &#x1f33c;</h3>
+<h3>Buyback Treasury &#x1f33c;</h3>
 <p>
-NFT items can be sold for a fixed price at any time on the Buyback Market. Buyback prices will increases as the ecosyste grows.
+NFT items can be sold for a fixed price at any time on the Buyback Treasury. Buyback prices will increases as the ecosyste grows.
 </p>
 <button onclick="location.href='buyback.html'">Visit Buyback Market</a></button>    
 
@@ -183,6 +183,7 @@ Donation:&nbsp;
     twemoji.parse(document.body);
     check_connected();
     loading_in_html();
+    show_transferFee();
 </script>
 
 </html>

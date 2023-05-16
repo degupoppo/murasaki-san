@@ -1,5 +1,6 @@
 
 
+flag_web3Loaded = false;
 
 //connected button
 async function check_connected() {
@@ -493,6 +494,8 @@ let abi_Trial_Converter = [{'anonymous': false, 'inputs': [{'indexed': true, 'in
     contract_trial_ac_wss = await new web3.eth.Contract(abi_Achievement_onChain, address_trial_Achievement_onChain);
     //converter
     contract_trial_tc_wss = await new web3wss.eth.Contract(abi_Trial_Converter, address_trial_Trial_Converter);
+    
+    flag_web3Loaded = true;
 }
 
 
