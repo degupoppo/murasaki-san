@@ -1216,14 +1216,6 @@ contract Murasaki_Main is SoulBoundBadge, Ownable, Pausable {
     function _remove_permitted_address(address _address) external onlyOwner {
         permitted_address[_address] = false;
     }
-
-    /*
-    //admin pause
-    bool notPaused = true;
-    function _set_notPaused(bool _bool) external onlyOwner {
-        notPaused = _bool;
-    }
-    */
     
     //admin migratable
     bool isMigratable = false;
@@ -1345,7 +1337,7 @@ contract Murasaki_Main is SoulBoundBadge, Ownable, Pausable {
         summoned_time[_summoner] = _value;
     }
     
-    //migration, only when isMigratable=true
+    //migration, only when isMigratable=true & from permitted address
     function migration(uint _summoner, address _owner_new) external {
         require(permitted_address[msg.sender] == true);
         require(isMigratable);
@@ -7853,8 +7845,8 @@ contract Stroll is Ownable, ReentrancyGuard, Pausable {
     mapping (uint => uint) public total_strolling_companion;
     
     //getter
-    function get_strollInfo (uint _summoner) external view returns (uint[22] memory) {
-        uint[22] memory _res;
+    function get_strollInfo (uint _summoner) external view returns (uint[26] memory) {
+        uint[26] memory _res;
         if (isStrolling[_summoner]){
             _res[0] = 1;
         } else {
@@ -7881,6 +7873,14 @@ contract Stroll is Ownable, ReentrancyGuard, Pausable {
         _res[19] = met_level[_summoner];
         _res[20] = direction[_summoner];
         _res[21] = companion[_summoner];
+        _res[22] = get_reminingSec(_summoner);
+        _res[23] = get_strollingDistance(_summoner);
+        if (check_strollEndable(_summoner)) {
+            _res[24] = 1;
+        } else {
+            _res[24] = 0;
+        }
+        _res[25] = get_coolingSec(_summoner);
         return _res;
     }
     
@@ -8297,6 +8297,56 @@ contract Stroll is Ownable, ReentrancyGuard, Pausable {
             _res[i] = total_strolling_companion[i];
         }
         return _res;
+    }
+    
+    //get remining sec
+    function get_reminingSec (uint _summoner) public view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
+        uint _reminingSec;
+        if (ms.working_status(_summoner) != 5) {
+            _reminingSec = 0;
+        } else {
+            if ( (block.timestamp - start_time[_summoner]) * _get_SPEED() / 100 > stroll_sec) {
+                _reminingSec = 0;
+            } else {
+                _reminingSec = stroll_sec - ( (block.timestamp - start_time[_summoner]) * _get_SPEED() / 100 );
+            }
+        }
+        return _reminingSec;
+    }
+    
+    //get strolling distance
+    function get_strollingDistance (uint _summoner) public view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
+        uint _distance;
+        if (ms.working_status(_summoner) != 5) {
+            _distance = 0;
+        } else {
+            _distance = block.timestamp - start_time[_summoner];
+            _distance = _distance * _get_SPEED() / 100;
+            if (_distance > stroll_sec) {
+                _distance = stroll_sec;    //limit 4 hr
+            }
+            _distance = _distance * 500 / 3600; // meter, 500 m/hr
+            uint _percentx100 = __get_boostRate_percentx100(_summoner);
+            _distance += _distance * _percentx100 / 10000;
+        }
+        return _distance;
+    }
+    
+    //get cooling sec
+    function get_coolingSec (uint _summoner) public view returns (uint) {
+        uint _now = block.timestamp;
+        uint _deltaSec = _now - end_time[_summoner];
+        uint _coolingSec;
+        if (_deltaSec >= stroll_interval_sec) {
+            _coolingSec = 0;
+        } else {
+            _coolingSec = stroll_interval_sec - _deltaSec;
+        }
+        return _coolingSec;
     }
 }
 

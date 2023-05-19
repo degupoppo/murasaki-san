@@ -171,7 +171,7 @@ async function balanceOfbt() {
 }
 async function _show_onChain_parameters() {
     //if (typeof(wallet) != "undefined" && wallet != "") {
-    if (flag_web3Loaded) {
+    if (flag_web3Loaded && typeof(wallet) != "undefined") {
         let _text
         let _target
         //total_summoned_trial
@@ -329,7 +329,7 @@ async function _show_icon() {
 //show icon2
 async function _show_icon2() {
     //if (typeof(wallet) != "undefined" && wallet != "") {
-    if (flag_web3Loaded) {
+    if (flag_web3Loaded && typeof(wallet) != "undefined") {
         let _res;
         let _balance = await contract_mm.methods.balanceOf(wallet).call();
         if (_balance == 0) {    //when no token, call for trial
@@ -345,55 +345,20 @@ async function _show_icon2() {
         _res = atob(_res);
         // insert into html
         let _text = "";
-
-        //_text += "<style>.showIcon{display: inline-block; width: 64px; float: center; margin-right: 16px; margin-top: 0px;}</style>";
-        //_text += "<span class='showIcon' align='center'>";
         _text += _res;
-        //_text += "</span>";
+        _text = '<a href="house.html">' + _text + "</a>";
 
         let target = document.getElementById("output_murasakiIcon");
         target.innerHTML = _text;
     } else {
         setTimeout( _show_icon2, 1000);
     }
-    /*
-    try {
-        if (typeof(wallet) == "undefined") {
-            await init_web3();
-        }
-        let _res;
-        let _balance = await contract_mm.methods.balanceOf(wallet).call();
-        if (_balance == 0) {    //when no token, call for trial
-            _res = await contract_trial_mu.methods.tokenURI_fromWallet(wallet).call();
-        } else {
-            _res = await contract_mu.methods.tokenURI_fromWallet(wallet).call();
-        }
-        // get SVG
-        _res = _res.split("base64,")[1];
-        _res = atob(_res);
-        _res = _res.split("base64,")[1];
-        _res = _res.split('"')[0];
-        _res = atob(_res);
-        // insert into html
-        let _text = "";
-
-        //_text += "<style>.showIcon{display: inline-block; width: 64px; float: center; margin-right: 16px; margin-top: 0px;}</style>";
-        //_text += "<span class='showIcon' align='center'>";
-        _text += _res;
-        //_text += "</span>";
-
-        let target = document.getElementById("output_murasakiIcon");
-        target.innerHTML = _text;
-    } catch (err) {
-        setTimeout( _show_icon2, 5000);
-    }
-    */
 }
 
 
 async function _show_icon3() {
     //if (typeof(wallet) != "undefined" && wallet != "") {
-    if (flag_web3Loaded) {
+    if (flag_web3Loaded && typeof(wallet) != "undefined") {
         //get random summoner
         let _tokenTotal = await contract_mm.methods.next_token().call();
         _tokenTotal = Number(_tokenTotal) -1;
@@ -406,6 +371,7 @@ async function _show_icon3() {
                 li_summoner.push(_rnd);
             }
         }
+        li_summoner.sort();
         //get tokenURI
         let target = document.getElementById("output_murasakiIcon");
         let _text = "";

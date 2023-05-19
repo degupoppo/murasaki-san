@@ -86,36 +86,69 @@ contract ERC721 is IERC721 {
 //### 1st
 
 
+    構想：散歩中のミニゲーム
+        ちょっとしたもので良いので、気軽に楽しいものを。
+            一種のクリックゲームで良いだろうか。
+            クリックしてカラスを捕まえるゲームなど？
+            猟奇的ではなく、可愛くてほっこりするものが良いか。
+        頑張るとどんどん効率が上がってゆく拡大再生産要素があるとより楽しいだろうか
+            クリック時の得点が増える？
+            特典に応じて何かしらの絵が増える？
+        お散歩中に集めるものは何が良いか
+            お花はにゅいにゅいさんと競合する
+            葉っぱはleafと競合してわかりにくい
+            星で良いか。look and feelがちょっと弱いだろうか。
+                
+        念のため、暗号化してローカルに保存する
+        暗号・復号化関数例：
+            パッと見てbase64だとバレにくいよう、頭に任意の1文字を加えて
+                base64化を複数回行っている
+            soltText = "murasaki"
+            function toX (_input) {
+                for (let i=0; i<soltText.length; i++){
+                    _input = soltText[i] + btoa(_input);
+                }
+                return _input;
+            }
+            function fromX (_input) {
+                for (let i=0; i<soltText.length; i++){
+                    _input = atob(_input.substr(1));
+                }
+                return _input;
+            }
+
+
     散歩システムを詰める
-        コントラから経過時間、終了までの時間、現在の歩行距離、の取得を実装する
-        strolling windowに上記情報を表示させる
-        strolling windowに現在までのmet summonerを表示させる
-        帰宅の演出を完成させる
         htmlの記事を完成させる
+     ok 帰宅の演出を完成させる
+     ok     met summonerを表示させる
+     ok     報告しているふうの吹き出しを実装する
+     ok stroll開始のUIを深慮し実装する
+     ok     ボタンにするか、D&Dにするか。
+     ok コントラから経過時間、終了までの時間、現在の歩行距離、の取得を実装する
+     ok strolling windowに情報を表示させる
+     ok waterbottleアイテムを実装する
+     ok strolling windowに現在までのmet summonerを表示させる
+     ok     人数にするか、名前にするか
+     ok     → stroll中は人数のみにする
         Strollテスト
-            flag_sync=0
-            open_window_strolling(scene_main)
-
-            flag_sync=0
-            local_strolling_status=1
-            local_crafting_status=0
-            local_direction=1
-            local_companion=1
-
-            local_stroll_endable = 1;        
+            flag_sync=0; local_farming_status = 0; local_crafting_status = 0
+            local_strolling_status=1; local_crafting_status=0; local_direction=1; local_companion=1
+            local_stroll_endable = 1;
+            local_strolling_status=0
 
 
     html修正
-        脱ポンジのパラグラフを洗練させる
-        buyback systemの弱点をきちんと述べる
-            このシステムだけでは原資抜きに1-2年かかる
-            つまり、結局ユーザーはfeeを支払って2年かかって回収するだけになる。
-        この点をどう説明し、どう納得してもらうか
-            話が違う、となってしまうのは避けたい。
-            実際はdapps stakingの量がわからないのでなんとも言えないのだが。
-            一度、月3%を実現するために必要なtoken/userの値をきちんと計算してみる。
-        Buyback Treasuryが目立たないので、どこにどの程度アピールするのかはっきりする
-            あまり目立たせすぎると混乱するので、マーケットとの棲み分けをどうするか。
+     ok buyback systemの弱点をきちんと述べる
+     ok     このシステムだけでは原資抜きに1-2年かかる
+     ok     つまり、結局ユーザーはfeeを支払って2年かかって回収するだけになる。
+     ok この点をどう説明し、どう納得してもらうか
+     ok     話が違う、となってしまうのは避けたい。
+     ok     実際はdapps stakingの量がわからないのでなんとも言えないのだが。
+     ok     一度、月3%を実現するために必要なtoken/userの値をきちんと計算してみる。
+     ok Buyback Treasuryが目立たないので、どこにどの程度アピールするのかはっきりする
+     ok     あまり目立たせすぎると混乱するので、マーケットとの棲み分けをどうするか。
+     ok 脱ポンジのパラグラフを洗練させる
 
 
     長期的な意味論の深慮
@@ -124,14 +157,17 @@ contract ERC721 is IERC721 {
         DAOの一つの完成形は創設者・リーダーが不在でも存続し続ける状態
             文化、都市、言語、宗教、など。
         消費コンテンツ型だと、中央集権組織がbuildをやめてしまったら金銭的価値が霧散する
-        対して、組織が自己完結的に価値を創造・もしくは半永久的に維持できるなら、
-            中央集権チームが不在でも文化として存続し続けられる。
+        対して、組織が自己完結的に価値を創造・もしくは十分に長期間維持できるなら、
+            中央集権チームが不在でも「文化」として存続し続けられる。
         価値が目減りしにくいNFTとはなんであろうか。
             この価値とは、根っこの本質はお金ではない方が良い。
             つまり、根本的価値を創造するスタンスとしては、お金に換算できないベクトルが良い。
-            コミュニティの育成と居場所の提供、は非常に良い例だろうか。
-                ただし、これはマネジメントにカリスマとセンスが必要か。
+            コミュニティの育成と居場所の提供、は非常に良い例だろう。
+                ただし、これはマネジメントにカリスマとセンスが必要だろう。
         Buyback Treasuryによっていつでも売れるが持ってるほど価値が上昇するNFTはどうか
+            売ってしまえばコミュニティから脱落する
+            保持し続ける限りコミュニティに属しつつ将来の価値上昇が保証されている
+            また、ステーキングで自らも価値上昇に貢献することもできる。
             
 
     修正案
@@ -1270,6 +1306,14 @@ contract ERC721 is IERC721 {
 
 
 //### 3rd
+
+ ok SBTのNFT化を実装する
+        mmにトリガー管理可能なtransfer許可機構を実装する
+        permitted_address onlyにしておき、function側で
+            トリガーOn → transfer → トリガーOFFと一度に行う
+        よって、ユーザーの自由なtransferは抑制しつつ、
+            function側で条件を決めてtransferを許可できる。
+        → migrationとして実装済みだった
 
  ok Murasaki_Addressの修正
         Trial_Converterを追加で実装
@@ -3314,6 +3358,9 @@ async function init_global_variants() {
     local_met_level = 0;
     local_direction = 0;
     local_companion = 0;
+    local_strollingDistance = 0;
+    local_reminingSec = 0;
+    local_coolingSec = 0;
     
     //---local etc
     turn = 0;
@@ -3785,6 +3832,8 @@ async function contract_update_dynamic_status(_summoner) {
         }
         local_wallet_age = 20;
         local_score = 2200000;
+    } else if (flag_debug == 4) {
+        local_items[41] += 1;
     }
 
     //call dynamic status from chain
@@ -4194,6 +4243,10 @@ async function contract_update_stroll_info(_summoner) {
     local_met_level = Number(_stroll_info[19]);
     local_direction = Number(_stroll_info[20]);
     local_companion = Number(_stroll_info[21]);
+    local_strollingDistance = Number(_stroll_info[22]);
+    local_reminingSec = Number(_stroll_info[23]);
+    local_strollEndable = Number(_stroll_info[24]);
+    local_coolingSec = Number(_stroll_info[25]);
 }
 
 //---call
@@ -5822,27 +5875,55 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
     //### strolling_start
     strolling_start() {
         this.count += 1;
-        if (this.submode == 0) {    //waiting for pet
-            if (this.count == 1) {
-                //***TODO*** animation with waterbottle
+        if (this.submode == 0) {    //setup
+            this.waterbottle = this.scene.add.sprite(this.x, this.y, "stroll_waterbottle")
+                .setScale(0.45)
+                .setOrigin(0.5)
+                .setDepth(this.depth+1);
+            if (this.x >= strolling_companion.x) {
                 this.dist = "left";
-                if (this.dist == "right"){
-                    this.anims.play("murasaki_right", true);
-                }else if (this.dist == "left") {
-                    this.anims.play("murasaki_left", true);
-                }
-                strolling_companion.mode = "strolling_start";
-                strolling_companion.submode = 0;
-                this.waterbottle = this.scene.add.sprite(this.x, this.y, "stroll_waterbottle")
-                    .setScale(0.45)
-                    .setOrigin(0.5)
-                    .setDepth(this.depth+1);
+            } else {
+                this.dist = "right";
+                this.waterbottle.flipX = true;
             }
+            if (this.dist == "right"){
+                this.anims.play("murasaki_right", true);
+            }else if (this.dist == "left") {
+                this.anims.play("murasaki_left", true);
+            }
+            strolling_companion.mode = "strolling_start";
+            strolling_companion.submode = 0;
+            this.submode += 1;
+        } else if (this.submode == 1) { //movint to companion
+            //moving to companion
+            let delta_x = strolling_companion.x - this.x;
+            let delta_y = strolling_companion.y - this.y;
+            let delta_x2 = delta_x / (Math.abs(delta_x) + Math.abs(delta_y)) * 1.2;
+            let delta_y2 = delta_y / (Math.abs(delta_x) + Math.abs(delta_y)) * 1.2;
+            this.x += delta_x2;
+            this.y += delta_y2;
+            this.waterbottle.x = this.x;
+            this.waterbottle.y = this.y;
+            this.waterbottle.depth = this.depth + 1;
+            
             if (this.count % 200 == 0) {
                 sound_mining_during.play();
                 summon_heart(this.scene);
             }
-        } else if (this.submode == 1) { //interacting with pet
+
+            //check distance
+            if (
+                Math.abs(delta_x) <= 50 && Math.abs(delta_y) <= 50
+            ) {
+                this.submode += 1;
+            }
+
+        } else if (this.submode == 2) { //waiting for companion
+            if (this.count % 200 == 0) {
+                sound_mining_during.play();
+                summon_heart(this.scene);
+            }
+        } else if (this.submode == 3) { //interacting with pet
             if (this.count == 1){
                 this.anims.play("murasaki_click", true);
             }
@@ -5851,14 +5932,13 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             }
             if (this.count >= 300) {
                 this.count = 0;
-                this.submode = 2;
+                this.submode += 1;
                 strolling_companion.submode += 1;
             }
-        } else if (this.submode == 2) { //going out
+        } else if (this.submode == 4) { //going out
             if (this.count == 1){
                 this.speed_x = -0.8;
                 this.speed_y = Math.random() * 0.8;
-                //***TODO*** animation with waterbottle
                 this.anims.play("murasaki_left", true);
                 sound_mining.play();
             }
@@ -5873,13 +5953,13 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             }
             if (this.count > 200) {
                 this.count = 0;
-                this.submode = 3;
+                this.submode = 5;
             }
             if (this.x < -200 || this.y > 1100) {
                 this.count = 0;
-                this.submode = 4;
+                this.submode = 6;
             }
-        } else if (this.submode == 3) { //waiting
+        } else if (this.submode == 5) { //waiting
             this.anims.play("murasaki_click", true);
             this.flipX = true;
             this.waterbottle.flipX = true;
@@ -5887,16 +5967,16 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
                 sound_happy.play();
             }
             if (this.count > 300) {
-                this.submode = 2;
+                this.submode = 4;
                 this.count = 1;
                 this.anims.play("murasaki_left", true);
                 this.flipX = false;
                 this.waterbottle.flipX = false;
             }
-        } else if (this.submode == 4) { //open window
+        } else if (this.submode == 6) { //open window
             open_window_strollingDuring(this.scene);
-            this.submode = 5;
-        } else if (this.submode == 5) { //end
+            this.submode += 1;
+        } else if (this.submode == 7) { //end
             ;
         }
     }
@@ -5923,10 +6003,19 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
                 this.submode = 2;
                 this.subcount = 0;
             }
-        }else if (this.submode == 2) {
+        } else if (this.submode == 2) {
             this.subcount = 0;                    
             this.submode = 0;
             this.mode = "resting";
+            let _text = "Friends +3\nDistance +2000 m";
+            let _msg = this.scene.add.text(this.x, this.y-100, _text)
+                .setOrigin(0.5)
+                .setDepth(2000)
+                .setFontSize(20)
+                .setFontFamily("Arial")
+                .setFill("#FF4264");
+            setTimeout( () => {_msg.destroy()}, 5000);
+            this.on_click();
         }
     }
     
@@ -5942,6 +6031,8 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             || this.mode == "listning"
             || this.mode == "attenting"
             || this.mode == "meet_a_pet"
+            || this.mode == "strolling_start"
+            || this.mode == "strolling_end"
         ) {
             item_wearing_hat.x = this.x;
             item_wearing_hat.y = this.y - 65;
@@ -6461,6 +6552,37 @@ class Pet extends Phaser.GameObjects.Sprite{
         }
     }
     
+    //### strolling_end
+    strolling_end() {
+        if (this.submode == 0) {
+            this.dist = "right";
+            this.anims.play(this.sprite_right, true);
+            this.submode = 1;
+        } else if (this.submode == 1) {
+            let delta = murasakisan.x - this.x;
+            if (delta >0) {
+                this.dist = "right";
+                this.anims.play(this.sprite_right, true);
+            }else {
+                this.dist = "left";
+                this.anims.play(this.sprite_left, true);
+            }
+            let delta_x = murasakisan.x +30 - this.x;
+            let delta_y = murasakisan.y +30 - this.y;
+            let delta_x2 = delta_x / (Math.abs(delta_x) + Math.abs(delta_y)) * 0.6;
+            let delta_y2 = delta_y / (Math.abs(delta_x) + Math.abs(delta_y)) * 0.6;
+            this.x += delta_x2;
+            this.y += delta_y2;
+            if (this.x > 300 && this.y < 800) {
+                this.submode = 2;
+            }
+        } else if (this.submode == 2) {
+            this.subcount = 0;
+            this.submode = 0;
+            this.mode = "resting";
+        }
+    }
+    
     //### update wearing_hat
     update_item_wearing_hat() {
         if (this.type == "mining") {
@@ -6529,6 +6651,7 @@ class Pet extends Phaser.GameObjects.Sprite{
         else if (this.mode == "practice") {this.practice();}
         else if (this.mode == "meet") {this.meet();}
         else if (this.mode == "strolling_start") {this.strolling_start();}
+        else if (this.mode == "strolling_end") {this.strolling_end();}
         //depth
         this.depth = this.y;
         //draw item_wearing_hat
@@ -11352,20 +11475,21 @@ async function open_window_strolling(scene) {
     
 
     //create button
-    function create_button(_x, _y, _text, _color, _colorb, _type, _select, scene, _size) {
+    function create_button(_x, _y, _text, _color, _colorb, _type, _select, scene, _size, _isActive=true) {
         let obj = scene.add.text(_x, _y, _text)
             .setFontSize(_size)
             .setFontFamily("Arial")
-            .setFill(_color)
-            .setInteractive({useHandCursor: true})
-            .on("pointerover", () => {
-                obj.setStyle({ fontSize: _size, fontFamily: "Arial", fill: '#ffff00' });
-                sound_window_pointerover.play();
-            })
-            .on("pointerout", () => {
-                obj.setStyle({ fontSize: _size, fontFamily: "Arial", fill: _color });
-            })
-            .on("pointerdown", () => {
+            .setFill(_color);
+        if (_isActive) {
+            obj.setInteractive({useHandCursor: true});
+            obj.on("pointerover", () => {
+                    obj.setStyle({ fontSize: _size, fontFamily: "Arial", fill: '#ffff00' });
+                    sound_window_pointerover.play();
+            });
+            obj.on("pointerout", () => {
+                    obj.setStyle({ fontSize: _size, fontFamily: "Arial", fill: _color });
+            });
+            obj.on("pointerdown", () => {
                 //cancel button
                 if (_type == -1) {
                     group_window_strolling.destroy(true);
@@ -11388,6 +11512,7 @@ async function open_window_strolling(scene) {
                     }
                 }
             });
+        }
         group_window_strolling.add(obj);
     }
 
@@ -11482,7 +11607,7 @@ async function open_window_strolling(scene) {
 
     //msg2
     _text = "";
-    _text += "・Strolling takes 4 hours with a 20-hour interval. Murasaki-san walks 500m per hour.\n";
+    _text += "・Strolling takes 4 hours with a 16 hour cooll time. Murasaki-san walks 500m per hour.\n";
     _text += "・During the stroll, Murasaki-san has a chance to meet friends who have chosen the same direction and companion.\n";
     _text += "・Meeting friends makes Murasaki-san happy and slightly increases the distance of the stroll.\n";
     _text += "・Matching drinks with the friends met also makes Murasaki-san even happier.\n";
@@ -11619,8 +11744,15 @@ async function open_window_strolling(scene) {
     );
     
     //create button
-    create_button(750, 820, "Go for a Stroll", "#000000", "", 0, 0, scene, 36);
     create_button(1030, 820, "Cancel", "#000000", "", -1, 0, scene, 36);
+    if (local_coolingSec == 0) {
+        create_button(650, 820, ">> Go for a Stroll <<", "#000000", "", 0, 0, scene, 36);
+    } else {
+        let msg3 = scene.add.text(830, 815, "- Cooling Time: " + local_coolingSec + " sec -")
+                .setFontSize(16).setFontFamily("Arial").setFill("blue").setOrigin(0.5);
+        group_window_strolling.add(msg3);
+        create_button(650, 820, ">> Go for a Stroll <<", "#888888", "", 0, 0, scene, 36, false);
+    }
 
     //set depth
     group_window_strolling.setDepth(5000);
@@ -11754,6 +11886,16 @@ function open_window_strollingDuring(scene) {
     group_window_strollingDuring.add(_walking_summoner);
     group_update.add(_walking_summoner);
     
+    //hat
+    if (item_wearing_hat != 0) {
+        let _hat = scene.add.sprite(640-3, 640-55, item_wearing_hat.texture)
+            .setDepth(5004)
+            .setOrigin(0.5)
+            .setScale(0.22);
+        group_window_strollingDuring.add(_hat);
+        group_update.add(_hat);
+    }
+    
     //waterbottle
     let _bottle = scene.add.sprite(640, 640, "stroll_waterbottle")
         .setScale(0.4)
@@ -11771,18 +11913,34 @@ function open_window_strollingDuring(scene) {
     
     //create msg1
     _text = "";
-    _text += "⌛ 3h:59m\n";
-    _text += "🥾 800m\n";
+    let _hr = Math.floor(local_reminingSec % 86400 / 3600);
+    let _min = Math.floor(local_reminingSec % 3600 / 60);
+    _text += "⌛ " + _hr + "h:" + _min + "m" + "\n";
+    _text += "🥾 " + local_strollingDistance + "m\n";
+    //_text += "⌛ 3h:59m\n";
+    //_text += "🥾 800m\n";
     let _msg1 = scene.add.text(1150, 260, _text)
         .setDepth(5009)
         .setFontSize(24)
         .setFontFamily("Arial")
         .setFill("#1D2088");
     group_window_strollingDuring.add(_msg1);
+    
+    //keep updating msg1
+    function _update_msg1(scene, _msg1) {
+        let _text = "";
+        let _hr = Math.floor(local_reminingSec % 86400 / 3600);
+        let _min = Math.floor(local_reminingSec % 3600 / 60);
+        _text += "⌛ " + _hr + "h:" + _min + "m" + "\n";
+        _text += "🥾 " + local_strollingDistance + "m\n";
+        _msg1.setText(_text);
+        setTimeout(_update_msg1, 10000, scene, _msg1);
+    }
+    _update_msg1(scene, _msg1);
 
     //create msg2
     _text = "";
-    _text += "Kapico met Fumapo, Fumamo, Mogumogu\n";
+    _text = local_name_str + " is enjoying a leisurely stroll.";
     let _msg2 = scene.add.text(10, 260, _text)
         .setDepth(5009)
         .setFontSize(24)
@@ -11790,6 +11948,47 @@ function open_window_strollingDuring(scene) {
         .setFill("#1D2088");
     group_window_strollingDuring.add(_msg2);
     
+    //keep updating msg2
+    function _update_msg2(scene, _msg2) {
+        let _metCount = 0;
+        let _text = "";
+        if (local_metSummoners_01 > 0){
+            _metCount += 1;
+        }
+        if (local_metSummoners_02 > 0){
+            _metCount += 1;
+        }
+        if (local_metSummoners_03 > 0){
+            _metCount += 1;
+        }
+        if (local_metSummoners_04 > 0){
+            _metCount += 1;
+        }
+        if (local_metSummoners_05 > 0){
+            _metCount += 1;
+        }
+        if (_metCount == 0) {
+            _text = local_name_str + " is enjoying a leisurely stroll.";
+        } else {
+            _text = local_name_str + " already met " + _metCount + " friends!";
+        }
+        _msg2.setText(_text);
+        setTimeout(_update_msg2, 10000, scene, _msg2);
+    }
+    _update_msg2(scene, _msg2);
+    
+    //create msg3
+    _text = "";
+    _text += local_name_str + " has met "; 
+    _text += local_stroll_total_metSummoners + " friends and strolled a total of ";
+    _text += local_stroll_total_strolledDistance + " meters.";
+    let _msg3 = scene.add.text(950, 700, _text)
+        .setDepth(5009)
+        .setFontSize(12)
+        .setFontFamily("Arial")
+        .setFill("#FF4264");
+    group_window_strollingDuring.add(_msg3);
+
     //mogumogu
     let _mogumogu = scene.add.sprite(-200, 680, "mogumogu")
         .setDepth(5005)
@@ -15083,7 +15282,7 @@ function update_parametersWithAnimation(this_scene) {
         screen_coin_delta = local_coin - previous_local_coin;
         screen_coin_easing = 100;
         //earning text
-        if (count_sync > 5) {
+        if (count_sync > 3) {
             let _delta = local_coin - previous_local_coin;
             let _sign = "";
             if (_delta > 0) {
@@ -15116,7 +15315,7 @@ function update_parametersWithAnimation(this_scene) {
         screen_material_delta = local_material - previous_local_material;
         screen_material_easing = 100;
         //earning text
-        if (count_sync > 5) {
+        if (count_sync > 3) {
             let _delta = local_material - previous_local_material;
             let _sign = ""; //no need when minus
             if (_delta > 0) {
@@ -15156,7 +15355,7 @@ function update_parametersWithAnimation(this_scene) {
         }
         screen_exp_easing = 100;
         //earning text
-        if (count_sync > 5) {
+        if (count_sync > 3) {
             let _delta = local_exp - previous_local_exp;
             let _sign = ""; //no need when minus
             if (_delta > 0) {
@@ -15739,6 +15938,10 @@ function update_checkModeChange(this_scene) {
         murasakisan.setScale(0.45);
         murasakisan.submode = 0;
         murasakisan.count = 0;
+        murasakisan.delta_total_strolledDistance = local_total_strolledDistance - previous_local_total_strolledDistance;
+        murasakisan.delta_total_metSummoners = local_total_metSummoners - previous_local_total_metSummoners;
+        strolling_companion.mode = "strolling_end";
+        strolling_companion.submode = 0;
     }
 
     //### end
@@ -15746,6 +15949,8 @@ function update_checkModeChange(this_scene) {
     previous_local_last_grooming_time = local_last_grooming_time;
     previous_local_level = local_level;
     previous_local_practice_item_id = local_practice_item_id;
+    previous_local_total_strolledDistance = local_total_strolledDistance;
+    previous_local_total_metSummoners = local_total_metSummoners;
 }
 
 
@@ -18143,6 +18348,68 @@ function update_checkItem(this_scene) {
 
 
     //### 41:WaterBottle
+    //***TODO***
+    _item_name = "Water Bottle";
+    _item_id = dic_items[_item_name]["item_id"];
+    if (
+        (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+        && local_items_flag[_item_id] != true
+    ) {
+        local_items_flag[_item_id] = true;
+        let _x = dic_items[_item_name]["pos_x"];
+        let _y = dic_items[_item_name]["pos_y"];
+        let _pos_local = "pos_item_waterBottle"
+        //recover position from localStorage
+        if (localStorage.getItem(_pos_local) != null && local_owner == local_wallet) {
+            let _json = localStorage.getItem(_pos_local);
+            _pos = JSON.parse(_json);
+            _x = _pos[0];
+            _y = _pos[1];
+        }
+        item_waterBottle = this_scene.add.sprite(_x, _y, "item_waterbottle")
+            .setScale(0.45)
+            .setOrigin(0.5)
+            .setDepth(_y)
+            .setInteractive({ draggable: true, useHandCursor: true })
+            .on("pointerdown", () => {open_window_strolling(this_scene)});
+            /*
+            .setInteractive({ draggable: true, useHandCursor: true })
+            .on("drag", () => {
+                if (this_scene.sys.game.scale.gameSize._width == 1280) {
+                    item_waterBottle.x = game.input.activePointer.x;
+                    item_waterBottle.y = game.input.activePointer.y;
+                } else {
+                    item_waterBottle.x = game.input.activePointer.y;
+                    item_waterBottle.y = 960 - game.input.activePointer.x;
+                }
+                item_waterBottle.depth = item_waterBottle.y;
+            })
+            .on("dragend", () => {
+                let _pos = [item_waterBottle.x, item_waterBottle.y];
+                if (local_owner == local_wallet) {
+                    localStorage.setItem(_pos_local, JSON.stringify(_pos));
+                }
+            });
+            */
+        //uncommon
+        if (local_items[_item_id+64] != 0) {
+            draw_glitter(this_scene, item_waterBottle);
+        }
+        //draw flower3
+        if (count_sync > 3) {
+            draw_flower3(this_scene, item_waterBottle.x, item_waterBottle.y);
+            sound_hat.play();
+        }
+    } else if (
+        local_items[_item_id] == 0 
+        && local_items[_item_id+64] == 0 
+        && local_items[_item_id+128] == 0
+        && typeof item_waterBottle != "undefined"
+    ) {
+        item_waterBottle.destroy(true);
+        local_items_flag[_item_id] = false;
+    }
+    
 
     //### 42:DairyBook
     _item_name = "Diary Book";

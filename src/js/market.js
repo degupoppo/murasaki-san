@@ -1,9 +1,6 @@
 
 /*
-
 https://tky-advinfo.com/programing/datatables/
-jQueryのDataTablesプラグインを使用
-
 */
 
 
@@ -129,78 +126,7 @@ async function update_onMarketItems() {
        $('#table_onMarketItems').DataTable({lengthChange: false});
     });
 }
-/*
-async function update_onMarketItems() {
-    let ListLength = await contract_mmt_wss.methods.listLength().call();
-    let ListsAt = await contract_mmt_wss.methods.listsAt(0, ListLength).call();
-    let _html_all = "";
-    for (let i = 0; i < ListLength; i++) {
-        let _item = ListsAt[0][i];
-        let _price = ListsAt[1][i];
-        _price = web3.utils.fromWei(_price, "ether");
-        let _items = await contract_mc_wss.methods.items(_item).call();
-        let _item_type = _items[0];
-        let _item_name = dic_items_reverse[_item_type];
-        let _crafted_summoner = _items[2];
-        //summoner_name
-        let _crafted_summoner_name = await call_name_from_summoner(_crafted_summoner);
-        if (_crafted_summoner_name == "") {
-            _crafted_summoner_name = "#" + _crafted_summoner;
-        }
-        //item_rarity
-        let _item_rarity;
-        if (_item_type <= 64) {
-            _item_rarity = "<font color=green>common</font>";
-        } else if (_item_type <= 128) {
-            _item_rarity = "<font color=blue>uncommon</font>";
-        } else if (_item_type <= 192) {
-            _item_rarity = "<font color=orange>rare</font>";
-        } else if (_item_type == 197) {
-            let _score = await contract_msn_wss.methods.score(_item).call();
-            _item_rarity = "<font color=#E85298>score: " + _score + "</font>";
-        } else if (_item_type >= 201 && _item_type <= 212) {
-            _item_rarity = "<font color=black>common</font>";
-        } else if (_item_type >= 213 && _item_type <= 224) {
-            _item_rarity = "<font color=blue>uncommon</font>";
-        } else if (_item_type >= 225 && _item_type <= 236) {
-            _item_rarity = "<font color=orange>rare</font>";
-        } else {
-            _item_rarity = "<font color=black>---</font>";
-        }
-        let _html = "";
-        _html += "<tr><td><center>"
-        _html += _item;
-        _html += "</center></td><td><center>";
-        //_html += _item_type;
-        _html += "<img src='";
-        _html += "src/" + dic_items[_item_name]["icon_png"];
-        _html += "' width='32' height='32'> ";
-        _html += _item_name;
-        _html += "</center></td><td><center>";
-        _html += _item_rarity;
-        _html += "</center></td><td><center>";
-        _html += _crafted_summoner_name;
-        _html += "</center></td><td id='" + "input_price_" + _item + "'><center><b>";
-        _html += (Math.round(_price*100)/100).toFixed(2);
-        _html += "</b></center></td><td><center>";
-        _html += "<button onclick='buy_item(" + _item + "," + _price + ");'>";
-        _html += "Buy";
-        _html += "</button>";
-        _html += "</center></td></tr>";
-        //combine html
-        _html_all += _html;
-        //count-up loading
-        let _text = "&nbsp;Now&nbsp;Loading...&nbsp;" + i + "/" + ListLength;
-        tbody_sellingItems.innerHTML = _text;
-    }
-    //write html
-    tbody_sellingItems.innerHTML = _html_all;
-    //after loading, activate JQuery CSS
-    $(document).ready(function(){
-       $('#table_onMarketItems').DataTable({lengthChange: false});
-    });
-}
-*/
+
 
 //get selling items of listed
 async function update_sellingItems() {
@@ -608,7 +534,8 @@ async function get_recent_activity() {
             fromBlock: _block_from,
             toBlock: _block_latest
     })
-    if (events) {
+    console.log(events);
+    if (events.length > 0) {
         for (let event of events) {
             let _block = event.blockNumber;
             let _item_id = event.returnValues[0];
@@ -631,6 +558,9 @@ async function get_recent_activity() {
             let _text = "&nbsp;&nbsp;&nbsp;" + _block + " : <u>" + _name_buyer + "</u> bought <b>" + _item_name + "</b> from <u>" + _name_seller + "</u> for <b>" + _price + " $ASTR</b>.<br>"
             recentActivity.innerHTML += _text;
         }
+    } else {
+        let _text = "&nbsp;&nbsp;&nbsp;No recent sacles."
+        recentActivity.innerHTML = _text;
     }
 }
 
@@ -638,34 +568,32 @@ async function get_recent_activity() {
 async function loading_in_html() {
     //active JQuery Datatable
     //TOFIX: using JSON!
-    await init_web3();
-    update_onMarketItems();
-    update_sellingItems();
-    update_userItems();
-    check_approve();
-    check_approve_upgrade();
-    get_recent_activity();
+    //await init_web3();
+    if (flag_web3Loaded && typeof(wallet) != "undefined") {
+        update_onMarketItems();
+        update_sellingItems();
+        update_userItems();
+        check_approve();
+        check_approve_upgrade();
+        get_recent_activity();
+        show_transferFee();
+    } else {
+        tbody_sellingItems.innerHTML = "&nbsp;Waiting...";
+        tbody_listedItems.innerHTML = "&nbsp;Waiting...";
+        tbody_myItems.innerHTML = "&nbsp;Waiting...";
+        setTimeout(loading_in_html, 1000);
+    }
 }
 async function loading_in_html_buyback() {
-    //active JQuery Datatable
-    //TOFIX: using JSON!
     await init_web3();
-    //update_onMarketItems();
-    //update_sellingItems();
     update_buyback();
-    //check_approve();
     check_approve_buyback();
-    //get_recent_activity();
 }
 
 //transfer fee
 async function show_transferFee() {
-    if (flag_web3Loaded) {
-        let _text = await contract_mc.methods.TRANSFER_FEE().call() 
-        _text = (Math.round(_text/10**18)).toFixed(2);
-        let _target = document.getElementById("transferFee");
-        _target.innerHTML = _text;
-    } else {
-        setTimeout(show_transferFee, 1000);
-    }
+    let _text = await contract_mc.methods.TRANSFER_FEE().call() 
+    _text = (Math.round(_text/10**18)).toFixed(2);
+    let _target = document.getElementById("transferFee");
+    _target.innerHTML = _text;
 }
