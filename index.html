@@ -87,7 +87,7 @@ This is our fan project using <b>Astar Network</b> <img src="src/png/coin_color_
 <!--- News --->
 
 <p class="notice">
-<b>&#x2764; News! &#x2764;</b><br>
+<b>&#x2764; Notice! &#x2764;</b><br>
 We have released Murasaki-san <b><a href="https://store.line.me/stickershop/product/16670298/en">LINE sticker</a></b> and <b><a href="https://store.line.me/emojishop/product/644a021e1033b65e5ca8ff7d/en">LINE emoji</a></b>!<br>
 </p>
 
@@ -280,7 +280,11 @@ Participation in dApps staking benefits both the player and the product as a who
 <h3 id="market">Item Marketplace &#x1f6d2;</h3>
 
 <p>
-Item and fluffy NFTs can be bought and be listed to sell on the <b><a href="market.html">Marketplace</a></b>.
+Item and fluffy NFTs can be bought and be listed to sell on the <b>Marketplace</b>.
+</p>
+
+<p>
+&nbsp;&nbsp;&nbsp;<a href="market.html"><b>>> Visit the Marketplace <<</b></a>
 </p>
 
 <p>
@@ -353,7 +357,7 @@ Also see below for more detailed game specs.
 
 <!--- Details --->
 
-<h3 id="details">Game Details &#x1f52c;</h3>
+<h3 id="details">Game System Details &#x1f52c;</h3>
 
 <!---### actions --->
 <details>
@@ -570,12 +574,12 @@ Having the cat cushion is necessary to send cat-mail, but <b>even if you don't h
 
 
 <!---### stroll --->
-<details><summary>Strolling  -comming soon-</summary>
+<details><summary>Strolling</summary>
 
 &nbsp;&nbsp;&nbsp;<img src="src/png/item_waterbottle.png" width="124" height="124">
 
 <p>
-By crafting a Water Bottle and placing it at house, Murasaki-san will be able to go for a stroll. 
+By crafting a Water Bottle, Murasaki-san will be able to <b>go for a stroll</b>. The strolling system is a mechanism to make friends and acquire <b>special NFTs</b> that can only be obtained outside the house.
 </p>
 
 <p>
@@ -587,6 +591,16 @@ Rules for strolling:
 <li>There is a chance of meeting another Murasaki-san who has chosen <b>the same destination and companion</b>. When Murasaki-san meets many friends during the stroll, they become happy and <b>get bonus on the strolling distance</b>.
 <li>When the total strolling distance or total number of friends reach a certain level, Murasaki-san may <b>discover a random NFT</b>.
 </ul>
+
+&nbsp;&nbsp;&nbsp;<img src="src/icon/strolling.png" width="96" height="96" class="textMiddle">< Yaaay!<img src="src/png/icon_system_heart.png" width="24" height="24" class="textMiddle">
+
+<p>
+This mechanism was implemented not to speed up gameplay, but because the developers simply wanted to let Murasaki-san play outside of the house. Murasaki-san, who takes a leisurely walk with their favorite drink and companion, seems very happy :)
+</p>
+
+<p>
+Detailed calculation methods for strolling efficiency can be referenced in <b><a href="#detailedspecific">Calculation Formulas</a></b> session.
+</p>
 
 </details>
 
@@ -602,9 +616,9 @@ comming soon.
 <br>
 
 
-<!--- More Details --->
+<!--- Technical Details --->
 
-<h3 id="detailedspecific">More Details &#x1f9ec;</h3>
+<h3 id="detailedspecific">Technical Details &#x1f9ec;</h3>
 
 
 <!---### contracts --->
@@ -637,6 +651,14 @@ Function contracts are individually replaceable, and bug fixes, balance adjustme
 
 <p>
 Due to the complexity of the project's contract system, a viewer contract has been prepared to provide convenient access to major parameters of Murasaki-san. The viewer contract follows the concept of web3 and is available for anyone to use without any permissions. It is also designed to be referenced in the future endeavors, such as the upcomming next product that we plan to create using WASM. For more detailed information about the viewer contract, please refer to the "<a href="#developer">For the Developers</a>" session.
+</p>
+
+<p>
+<b>Security:</b> All contracts inherit ReentrancyGuard, Ownable, and Pausable from Openzeppelin. Almost all functions that players can execute require them to possess active Murasaki-san SBT in their wallet. Developers can quickly remove clearly harmful players such as botters and crackers from the community by deactivating their SBTs. Contracts that serve logical functions are upgradable and can be partially replaced to fix bugs or adjust gamebalances flexibly. Only two contracts hold token assets: BufferVault and BuybackTreasury. BufferVault has no functions that can be executed by someone other than the owner. BubackTreasury has a function that players can execute, but it has nonReentrant and whenNotPaused modifier and a transfer limit, making it impossible to exploit a bug to extract assets from the Treasury. Developers continuously monitor all contract activity and immediately remove any clearly harmful players.
+</p>
+
+<p>
+<b>Ownership:</b> All parameters and status of NFTs and SBTs in this project are recorded on Astar chain. Some solidity codes, which are only allowed to be used by the contract owner wallet, have a mechanism that can be used to rewrite user states, but at this time we believe it is necessary for game balance adjustment, bug fixes, contract upgrades, and preventing botting. After this product is sufficiently stable, we plan to gradually renounce ownership of each contract.
 </p>
 
 </details>
@@ -874,7 +896,7 @@ This buyback system is somewhat experimental, and its acceptance by players will
 
 <details>
 
-<summary>Economy Details</summary>
+<summary>Economy</summary>
 
 <center>
 <p class="notice" style="width:80%;">
@@ -888,11 +910,11 @@ Through the Buyback Sysmte and following strategies, we aim to create a low-stre
 </p>
 
 <p>
-<b>Sustainable Economy:</b> In this project, our goal is to establish a sustainable economic model where the value of assets (NFTs) gradually and steadily increases. While it's beneficial to have a consistent influx of new players and sustained interest in purchasing NFTs, we acknowledge the challenges of maintaining long-term sustainability. Our primary focus is on preserving the asset value of active players. We do not require players to continuously buy unique tokens or NFTs as a means to support the project's asset value. Instead, the overall asset value of the project is supported by the rewards generated through dApps Staking, where players stake their assets. The majority of dApps staking rewards (90%) will be used to inflate the Buyback Treasury, ensuring NFT values and increasing future rewards through self-staking. In this model, the generation of funds is not reliant on new player influx but rather on the dApps Staking activities of active players.
+<b>Sustainable Economy:</b> In this project, our goal is to establish a sustainable economic model where the value of assets (NFTs) gradually and steadily increases. While it's beneficial to have a consistent influx of new players and sustained interest in purchasing NFTs, we acknowledge the challenges of maintaining long-term sustainability. Our primary focus is on preserving the asset value of active players by Buyback Treasury System. We do not require players to continuously buy tokens or NFTs as a means to support the project's asset value. Instead, the overall asset value of the project (equal to Buyback Price) is supported by the rewards generated through dApps Staking, where players stake their assets. The majority of dApps staking rewards (90%) will be used to inflate the Buyback Treasury, ensuring NFT values and increasing future rewards through self-staking. In this model, the generation of funds is not reliant on new player influx but rather on the dApps Staking activities of active players. In other words, even if the number of active players decreases, the asset value per active player does not diminish.
 </p>
 
 <p>
-<b>Monetary Incentives for Continued Gameplay:</b> As one of our objectives, we believe it's essential for players to not only enjoy continuous gameplay but also experience a tangible increase in the value of their in-game assets. The majority of NFTs in this project are designed to enhance gameplay efficiency when owned in the player's wallet. Additionally, the minting of new NFTs is only possible through ongoing and efficient gameplay. Furthermore, the buyback price, which determines the value of NFTs, gradually and steadily increases over time. This means that players who engage in more consistent gameplay and own a larger number of NFTs will have their future asset value guaranteed to grow. We hope that these models serve as motivation for players to engage in continuous gameplay.
+<b>Monetary Incentives for Continued Gameplay:</b> As one of our objectives, we believe it's essential for players to not only enjoy continuous gameplay but also experience a tangible increase in the value of their in-game assets. The majority of NFTs in this project are designed to enhance gameplay efficiency when owned in the player's wallet. Additionally, the minting of new NFTs is only possible through ongoing and efficient gameplay. Furthermore, the buyback price, which determines the value of NFTs, gradually and steadily increases over time. This means that players who engage in more consistent gameplay and own a larger number of NFTs will have their future asset value guaranteed to grow. Players may sell their NFTs in the marketplace or burn them in the buyback treasury, but doing so will reduce their game efficiency and decrease the future value of their assets. From a financial incentive perspective, it is most rational to continue to own many NFTs and maintain efficient gameplay. We hope that these models serve as motivation for players to engage in continuous gameplay.
 </p>
 
 <p>
@@ -909,11 +931,11 @@ Here is an overview of the token flow:<br>
 </center>
 </p>
 
-<b>Starting Fee:</b> 45% of it is sent to the buyback treasury as the initial capital. However, the buyback price remains unchanged. 45% is sent to the staking treasury and self-staked in dApps staking to generate income for future inflation of the buyback treasury. The remaining 10% is sent to developers.
+<b>Starting Fee:</b> 45% of it is sent to the buyback treasury as the initial capital. However, the buyback price remains unchanged. 45% is sent to the staking treasury and self-staked in dApps staking to generate income for future inflation of the buyback treasury. The remaining 10% is sent to developers. This processes are automatically performed by smart contracts on the blockchain.
 
 
 <p>
-<b>Buyback Price Inflation<sup>1)</sup>:</b> All dApps staking rewards and in-game fees are collected in the Buffer Vault. The funds necessary to increase the total assets of the Buyback Treasury, for example, by 3% per month, are transferred to the Buyback Treasury (X%). The remaining funds are sent to the Staking Treasury to increase the self-staking amount (Y%). 10% is allocated to developers. The appropriate inflation rate, currently planned to be around 3% per month, will be adjusted periodically based on the number of active users and dApps staking volume. The aforementioned processes are automatically performed by smart contracts on the blockchain.
+<b>Buyback Price Inflation<sup>1)</sup>:</b> All dApps staking rewards and in-game fees are collected in the Buffer Vault. The funds necessary to increase the total assets of the Buyback Treasury, for example, by 3% per month, are transferred to the Buyback Treasury (X%). The remaining funds are sent to the Staking Treasury to increase the self-staking amount (Y%). 10% is allocated to developers. The appropriate inflation rate, currently planned to be around 3% per month, will be adjusted periodically based on the number of active users and dApps staking volume. This processes are automatically performed by smart contracts on the blockchain.
 </p>
 
 <p>
@@ -921,7 +943,7 @@ Here is an overview of the token flow:<br>
 </p>
 
 <p>
-<b>Inflation Rate:</b> The inflation rate of Buyback Price depends on the amount of capital inflow per active player. As the dApps Staking amount per active player increases, it creates inflationary pressure. On the other hand, a large influx of new players is expected to decrease the dApps Staking amount per active player, which inhibit inflation. Conversely, an increase in dropout players results in the reallocation of tokens previously allocated to dropout players to the current active players, creating inflationary pressure.
+<b>Inflation Rate:</b> The inflation rate of Buyback Price depends on the amount of capital inflow per active player. As the dApps Staking amount per active player increases, it creates inflationary pressure. On the other hand, a large influx of new players is expected to decrease the dApps Staking amount per active player, which inhibit inflation. Conversely, an increase in dropout players results in the reallocation of tokens previously allocated to dropout players to the current active players, creating inflationary pressure. In other words, an increase in new players does not affect the current asset value of active players, and a decrease in active players increases the future asset value of remaining players, providing an incentive for continuous gameplay.
 </p>
 
 <p>
@@ -932,7 +954,7 @@ In summary, the expansion of the Buyback Treasury, which secures the overall val
 <center>
 <img width="500" src="src/png/fig_inflation.png" />
 <figcaption>
-Projected graph of acceptable inflation rate and buyback price (NFT price) based on dApps Staking amount per active player. The dApps Staking Reward was assumed to be APR 11% and the calculation was made under the assumption that the number of active players and dApps Staking amount remain constant for a period of 2 years. Note that this calculation is based on a simplified model. IR: inflation rate, ST: staking amount per active player.
+Projected graph of acceptable inflation rate and buyback price (NFT price) based on dApps Staking amount per active player. The dApps Staking Reward was assumed to be APR 11% and the calculation was made under the assumption that the number of active players and dApps Staking amount remain constant for a period of 2 years. For example, if the average staking amount of all active players is 7,000 $ASTR, the buyback price of each NFT is expected to increase by approximately five times after two years. Furthermore, the rate of increase in the buyback price does not depend on the number of active players. Note that this calculation is based on a simplified model. IR: monthly inflation rate., ST: staking amount per active player.
 </figcaption>
 </center>
 </p>
@@ -1024,7 +1046,7 @@ Please feel free to use it :)
 <h3 id="future">Future Plan &#9203;</h3>
 
 <p>
-<b>Just after launch:</b>
+<b>After Launching:</b>
 </p>
 
 <p>
@@ -1039,7 +1061,7 @@ Our priority is to control inflation rate and keep the game going.<br>
 </ul>
 
 <p>
-<b>After that:</b>
+<b>Next Season:</b>
 </p>
 
 <p>
@@ -1056,23 +1078,6 @@ The concept of the next product is still undecided yet, but we would like to mak
 
 <p>
 One day, a grown your Murasaki-san may set off on a journey with their friends from your house.
-</p>
-
-<p>
-<b>Abount security:</b><br>
-</p>
-
-<p>
-All parameters and status of NFTs and SBTs in this project are recorded on Astar chain. Some solidity codes, which are only allowed to be used by the administrator wallet, have a mechanism that can be used to rewrite user states, but at this time we believe it is necessary for game balance adjustment, bug fixes, contract upgrades, and anti-bots.
-</p>
-
-<p>
-These permissions are only granted to the following administrator wallet:<br>
-&nbsp;&nbsp;&nbsp;<a href="https://blockscout.com/astar/address/0x6655B97171c8FA7dF052D95230951E80c5cB7e15"><b><font color="blue" size="-0.5">0x6655B97171c8FA7dF052D95230951E80c5cB7e15</font></b></a>
-</p>
-
-<p>
-After this product is sufficiently stable, we plan to gradually renounce ownership of each contract.
 </p>
 
 <br>
