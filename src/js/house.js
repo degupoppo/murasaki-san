@@ -102,6 +102,56 @@ contract ERC721 is IERC721 {
             stroll, met_level
     
 
+    修正案
+        楽器を3種類に減らす
+            かわりにキャンドルを追加
+            あとアイテム２つ。
+        おサボり中はミシンやスコップを残す
+        マーケット集計ページを作成する
+            総取引額、アイテムごとの取引回数・平均価格
+        マーケットコントラに統計情報を実装する
+            総取引量
+        コストの引き上げ
+            mint: 500, transfer fee: 50
+        rugg-pullの実装
+            ひとまず、右端をクリックでrugをスライドさせる
+            接触しているfluffyとむらさきさん, diceがon_clickされる
+        bgmの追加
+            カノン、むらさきさん
+        デモ用キャラの演出を考える
+            #1を晒してしまって大丈夫だろうか。ネタバレや楽しみの先取りになるだろうか。
+            お腹が減りやすく、経験値が得られにくい、demo用キャラを別途用意するか？
+            trial終了直後ぐらいの進行度が良いだろうか。
+            パラメータを弄った別コントラとするか？
+        かざぐるまと王冠を交換する
+        売買回数、平均購入価格などを集計したマーケット情報ページを作成する？
+        フェスティバル前の演出の改善
+        変数書き換え対策の実装, さてどうするか
+
+
+    散歩システムを詰める
+     ok 山海草原の実装
+     ok     絵の置換
+     ok     川の廃止
+     ok htmlの記事を完成させる
+     ok 帰宅の演出を完成させる
+     ok     met summonerを表示させる
+            報告しているふうの吹き出しを実装する
+     ok stroll開始のUIを深慮し実装する
+     ok     ボタンにするか、D&Dにするか。
+     ok コントラから経過時間、終了までの時間、現在の歩行距離、の取得を実装する
+     ok strolling windowに情報を表示させる
+     ok waterbottleアイテムを実装する
+     ok strolling windowに現在までのmet summonerを表示させる
+     ok     人数にするか、名前にするか
+     ok     → stroll中は人数のみにする
+     ok Strollテスト
+     ok     flag_sync=0; local_farming_status = 0; local_crafting_status = 0
+     ok     local_strolling_status=1; local_crafting_status=0; local_direction=1; local_companion=1
+     ok     local_stroll_endable = 1;
+     ok     local_strolling_status=0
+
+
     構想：散歩中のミニゲーム
         ちょっとしたもので良いので、気軽に楽しいものを。
             一種のクリックゲームで良いだろうか。
@@ -134,28 +184,6 @@ contract ERC721 is IERC721 {
             }
 
 
-    散歩システムを詰める
-        山海草原の実装
-            絵の置換
-     ok htmlの記事を完成させる
-     ok 帰宅の演出を完成させる
-     ok     met summonerを表示させる
-     ok     報告しているふうの吹き出しを実装する
-     ok stroll開始のUIを深慮し実装する
-     ok     ボタンにするか、D&Dにするか。
-     ok コントラから経過時間、終了までの時間、現在の歩行距離、の取得を実装する
-     ok strolling windowに情報を表示させる
-     ok waterbottleアイテムを実装する
-     ok strolling windowに現在までのmet summonerを表示させる
-     ok     人数にするか、名前にするか
-     ok     → stroll中は人数のみにする
-     ok Strollテスト
-     ok     flag_sync=0; local_farming_status = 0; local_crafting_status = 0
-     ok     local_strolling_status=1; local_crafting_status=0; local_direction=1; local_companion=1
-     ok     local_stroll_endable = 1;
-     ok     local_strolling_status=0
-
-
     長期的な意味論の深慮
         お金に換算できない価値（宗教・称号・勲章など）が
             PJの中心に厚い層で存在するほうが周りが安定する
@@ -177,210 +205,6 @@ contract ERC721 is IERC721 {
         担保金が確保できるまでインフレさせない
             担保金の確保は生産性（PJへの期待度？）に比例する
             
-            
-
-    修正案
-        おサボり中はミシンやスコップを残す
-        マーケット集計ページを作成する
-            総取引額、アイテムごとの取引回数・平均価格
-        マーケットコントラに統計情報を実装する
-            総取引量
-        コストの引き上げ
-            mint: 500, transfer fee: 50
-        rugg-pullの実装
-            ひとまず、右端をクリックでrugをスライドさせる
-            接触しているfluffyとむらさきさん, diceがon_clickされる
-        bgmの追加
-            カノン、むらさきさん
-        デモ用キャラの演出を考える
-            #1を晒してしまって大丈夫だろうか。ネタバレや楽しみの先取りになるだろうか。
-            お腹が減りやすく、経験値が得られにくい、demo用キャラを別途用意するか？
-            trial終了直後ぐらいの進行度が良いだろうか。
-            パラメータを弄った別コントラとするか？
-        かざぐるまと王冠を交換する
-        売買回数、平均購入価格などを集計したマーケット情報ページを作成する？
-        フェスティバル前の演出の改善
-        変数書き換え対策の実装, さてどうするか
-     ok strollコントラより情報抜き出し
-     ok     終了時間、現在の歩行距離を取得する
-     ok feedingやgroomingを短い間隔で連打すると効率が上がるバグの修正
-     ok     98%以上では+0とするなど対策が必要だろうか。
-     ok     mining/farmingは大丈夫だろうか。
-     ng depthをspriteのy下段に設定する？
-     ng     マウスドラッグ時は前面に設定する？
-     ok connectボタンの設置
-     ok diceコントラに20を出した回数を記録させる
-     ok festivalのvote回数を記録させる
-     ok info_fromWalletにcat-mailを追加する
-     ok infoにtokenURIとERC721も統合する
-     ok フェスティバルのvoteのevent確認
-     ig tokenURI用jsonの用意
-     ok イベントの再考、集計しやすいように修正
-     ok twinkleのbuyback priceを設定する
-     ok uncommonのbuyback priceがcommonと一緒な点を修正
-     ok glitterが表示されないバグの修正
-     ok クラフト完了時にサウンド鳴らす
-     ok フェスティバルのサウンド修正
-     ok 可能ならmetamaskにNFT画像を表示させたい
-     ok     → ERC721規格でないとmetamaskには表示できない模様
-     ok     諦めるか、ERC721規格で考えるか、要検討。
-     ok     → ERC165のsupportsInterfaceでERC721識別子を返すよう実装すれば認識された
-     ok     この際なので、openzeppelinのERC721をもとにERC2665を再実装する
-     ok crafting中以外でcompleteするとインジケーターが残るバグの修正
-     ok musicbox off時にむらさきさんのlistingもoffに
-     ok スイッチon/off時はmusic boxもoffに
-     ok jsのworking_status部分を更新する
-     ok 夜用BGMの実装
-     ok 積み木を置く時のサウンドを実装
-     ok tokenChestのバグ修正
-     os mcに90万個の発行上限を設定
-     os strollでpetやdirectionの制限を導入する, require
-     ok ビットコ、イーサ猫の接触絵を用意する
-     ok trial時に作成可能ではないアイテムはnot availableにでもする
-     ok すべてのアイテムはクラフト完了時にお花まきで知らせるよう修正
-     ok 晴れ以外の天気でwindowの朝/夜変換ができないバグの修正
-     ok item_windowのカーテン閉じた時の絵を天気ごとに用意する
-     ng ボタンオーバーラップ時にFeedingやStart Miningなどのメッセージを表示させる
-     ok inactive buttonにrequired levelを表示する
-     ok Buybackでfluffyが有効になっていることを確認する
-     ok 他色ウィンドウの透明度を下げる
-     ok デプロイコントラでERC20など設定項目を先頭にもってくる
-     ok stakingコントラにSPEED補正をかける
-     ok craft完了時に寝る条件が変
-     ok     帽子の位置も
-     ok stakingのNFT補正が1/10なので修整
-     ok resume cancel時luckyとなるのを修正
-
-
-    html修正II
-        メールアドレスの用意
-        githubの整理
-        
-
-    散歩システムUI実装：
-     ig 水筒を持って、お供を連れてお散歩に向かうむらさきさん絵
-            音符やハートを出しながら楽しそうに出発する
-            水筒を持って、喜びながらcompanionが来るのを待つ
-                一緒に連れ立って画面外に移動する
-                この時ハートや音符を出しながら移動する
-     ok 散歩条件を選択するウィンドウ
-            行き先、お供、水筒の中身を選択する
-            総歩行距離、総met数、現在のお散歩分布などを表示する
-            帰宅予定時間、インターバル残り時間、なども表示する？
-                → インターバル残り時間は水筒に表示
-                → 帰宅までの残り時間は散歩中ウィンドウに表示
-        散歩中のむらさきさんを眺める横長のウィンドウ
-            背景4パターン（山道、河川敷、海岸、草原）
-                ループ背景を用意する
-            お供を一緒に歩かせる
-            残り時間を数字と進行バーで表示させる
-            誰に会ったかのログを表示させる
-            何を拾ったかのNFTも表示させる（可能か？）
-        帰宅時の演出を考える
-            時間がすぎると、まだ帰ってないのか、もう帰ってるのか。
-            txを飛ばさなければならない事の必然性をうまく表現したい。
-                散歩から帰宅後は、ユーザーからの何かしらのアクションが必要な演出を考える
-                寝てる→お風呂はいる
-                水筒洗う、など
-            散歩を思い出しながら寝ている
-                → クリックしてtx飛ばすと、吹き出しを出して散歩内容を飼い主に報告して
-                　 総歩行距離と友達人数が更新される。
-
-    構想：散歩システムII
-     ok バランス調整：
-            報酬期間: 3d, 7d, 14d, 28d, 
-            補正値: 最大で+50% (新規meetで+10% x 5)
-            ハズレ補正値: 稀に+100%などのクリティカル（期待値110%程度）
-     ok ToDo:
-         ok 散歩時間の調整
-         ok 散歩インターバルの調整
-         ok total_metに応じたmintの実装
-         ok petごとの歩行距離の実装
-         ok 報酬がNFTだけではインセンティブが弱く調和が薄い、要検討
-         ok     mining, farming, expそれぞれでboostを分ける
-         ok twinkleSparkleGlitterへlevelcapの導入
-         ok もう少し報酬の補正を強くする
-                ベストマッチの条件を引いても精々+3%程度のboostだと頑張りがいがない
-                未補正値を少なめに設定して、+50%など報酬を多めにする。
-         ok 誰にも合わなかったときに、一定確率でfluffyをmintできるように
-         ok     gas代が変わるから難しいだろうか
-         ok     → 強めの補正をかけることにする
-        UX：
-            好きな行き先に、好きなお供と好きな飲物を持って散歩しに出かける。
-            散歩先で新しいsummonerに出会うと楽しくて散歩距離がちょっと伸びる。
-            会ったsummonerと飲み物が一緒だと嬉しくて散歩距離がさらにちょっと伸びる。
-            総散歩距離が一定値に達するとtwinkle NFTが入手できる。
-            新しいsummonerに会った回数が一定値に達してもtwinkle NFTが入手できる。
-        意味論：
-            時間資源の若干のsink
-            選択と報酬に重点を置いたゲーム性の提供
-            他のプレイヤーの動向が気になる相互作用要素を提供
-            手に入る報酬がランダムであるガチャ要素の提供
-     ok 実装：
-            独立した専用コントラを用意
-                StorageとFunctionの2つ用意したほうが良いだろうか。
-            mapping で start_time を記録
-            mapping で end_time を記録
-            mapping で total_stroll_distance を記録
-            mapping mapping で 各summoner-summoner 間の meet 時間を記録
-            mapping uint[5] で 現在の metSummoner を記録
-            start_stroll関数
-                end_timeチェック
-                (_summoner, _direction, _companion, _drink)
-                li_dist_and_companionに_summonerを加える
-                start_timeにnowを代入
-            end_stroll関数
-                start_timeチェック
-                該当するli_dist_and_companionからランダムでsummonerを選出
-                自分のli_metSummonerと相手のli_metSummonerをチェック
-                両方とも代入可能ならmet成功
-                自分と相手のli_metSummonerに互いを代入
-                歩行距離を算出
-                補正値を算出して歩行距離を補正
-                総歩行距離に今回の歩行距離を足して保存
-                総歩行距離をチェックし条件を満たせばtwinkle NFTをmintする
-                li_metSummonerをクリア
-                grooming time更新
-            _calc_boost関数
-                (_summoner)
-                li_metSummonerを順にチェック
-                summoner-summoner 間の meet 時間をチェック
-                一定期間以上（7日？30日？）空いていたら補正値+1.00
-                    それ以下なら補正値+0.50
-                _drinkが一致すれば補正値x1.2（+1.20か+0.60）
-                互いの総歩行距離の乖離度によって+補正値
-                    乖離しているほど有利
-            _try_mintNFT関数
-                総歩行距離をチェック
-                条件を満たせばNFTをmint
-                mcにpermittedしておく
-            _mint_twinkle
-                mcでtwinkle level 1をcraftする
-                crafterは自分とする
-        問題点：
-            ただの脇道ミニゲームと化してしまっている
-            本来は時間資源を別に費やすためのsinkのハズだったのだが。
-                かといって散歩時間を6-8時間とするのもfeelingと乖離するだろう。
-                時間資源のsinkであるならば、拘束時間を長くするしか無いのだが。
-                長めの4時間でも4/24=17%程度のsinkにしかならない。
-                時間資源のsinkならば8時間は拘束する設計にしなければならないだろう。
-                2時間の散歩を1日3回まで可能とするか（maxで6時間=25%のsink）。
-            イマイチ目的が分かりにくく、一日一回の作業と化しやすいだろうか。
-                他の行動と選択のジレンマが発生せず、
-                また報酬もほぼ予測可能で驚きが薄く、
-                かつ実行しないより実行したほうが有利なため、作業化してしまいがち。
-                UXとして満足たりうるだろうか。
-            「運」要素をもう少し強めに、ギャンブル性、結果の不確実性、
-                もしくは能動的な選択と納得しうる報酬、
-                の部分にもう少し強めのゲーム性を考えてみる。
-            総met数、drink一致回数をNFTの条件にする、など。
-                総散歩距離, 総drink一致回数, 総metSummoner数, 
-                それぞれで一定数に達したときにNFTを発見、などとするか。
-                基本は総歩行距離だが、それ以外のベクトル軸でも報酬が発生する。
-                できるだけ談合しにくように設計したい。
-         ok 買い占め対策
-                twinkleによるexp boostはlevel capか総歩行距離capを設ける
-
 
     構想：限定アイテム
         メインのアイテムとは別系統で、mint上限が決まった限定アイテムを考える
@@ -398,7 +222,7 @@ contract ERC721 is IERC721 {
                 exp変換効率は高くなく、おまけ程度のバランスで。
         代替リソースの取得条件はどうするか
             作業ではなく、集めるのが楽しい条件にしたい
-            このアイテムはあの時こうして手に入れたやつだ、と自然と愛着が湧くのが理想
+            このアイテムはあの時苦労して手に入れたやつだ、と自然と愛着が湧くのが理想
             また、大体のプレイヤーが必ず何かしらを手に入れられるよう配慮する。
         アイテムの効果
             強力でなくても良いので、必ず機能性を持たせる
@@ -509,7 +333,27 @@ contract ERC721 is IERC721 {
         おかしの家
             0%, 30%, 50%, 70%, 100%の5段階程度
         exp小物
-            自然物いろいろ
+            松ぼっくり
+            もみじ
+            どんぐり
+            イチョウの葉
+            クリ
+            くるみ
+            きのこ
+            かぼちゃ
+            ヒイラギの葉
+            桜の枝
+            野いちご
+            いい感じの木の棒
+            フウセンカズラ
+            セミの抜け殻
+            カタツムリのから
+            貝殻
+            ヤドカリの貝殻
+            クローバー
+            たけのこ
+            梅の枝
+            なにかの化石
         額縁
             もっと可愛く
         喜んでいるfluffy
@@ -519,28 +363,23 @@ contract ERC721 is IERC721 {
             目を光らせる
         neon fluffy
             dapps staking量によって豪華さを変える？
+        プレゼントボックス
+            色違いある程度
+        残りのアイテム
+            ニュースボード
+            クレヨン
+            チェロ
+            旅の扉
+            旅の鍵
+            旅行かばん
+            フラワーリース
+                豪華さが4段階程度
+         ok つみきのスコアメーター
      ok window
             summon用色違い
             upgrade用色違い
             voting用色違い
             convert用色違い
-        プレゼントボックス
-            色違いある程度
-        残りのアイテム
-         ok つみきのスコアメーター
-            ニュースボード
-            クレヨン
-            ティーセット
-            クラリネット
-            ホルン
-            ティンパニー
-            チェロ
-            旅の扉
-            旅の鍵
-            旅行かばん
-            水筒
-            フラワーリース
-                豪華さが4段階程度
 
 
     お菓子の家の実装
@@ -1314,6 +1153,181 @@ contract ERC721 is IERC721 {
 
 
 //### 3rd
+
+ ok 構想：散歩システムII
+     ok バランス調整：
+            報酬期間: 3d, 7d, 14d, 28d, 
+            補正値: 最大で+50% (新規meetで+10% x 5)
+            ハズレ補正値: 稀に+100%などのクリティカル（期待値110%程度）
+     ok ToDo:
+         ok 散歩時間の調整
+         ok 散歩インターバルの調整
+         ok total_metに応じたmintの実装
+         ok petごとの歩行距離の実装
+         ok 報酬がNFTだけではインセンティブが弱く調和が薄い、要検討
+         ok     mining, farming, expそれぞれでboostを分ける
+         ok twinkleSparkleGlitterへlevelcapの導入
+         ok もう少し報酬の補正を強くする
+                ベストマッチの条件を引いても精々+3%程度のboostだと頑張りがいがない
+                未補正値を少なめに設定して、+50%など報酬を多めにする。
+         ok 誰にも合わなかったときに、一定確率でfluffyをmintできるように
+         ok     gas代が変わるから難しいだろうか
+         ok     → 強めの補正をかけることにする
+        UX：
+            好きな行き先に、好きなお供と好きな飲物を持って散歩しに出かける。
+            散歩先で新しいsummonerに出会うと楽しくて散歩距離がちょっと伸びる。
+            会ったsummonerと飲み物が一緒だと嬉しくて散歩距離がさらにちょっと伸びる。
+            総散歩距離が一定値に達するとtwinkle NFTが入手できる。
+            新しいsummonerに会った回数が一定値に達してもtwinkle NFTが入手できる。
+        意味論：
+            時間資源の若干のsink
+            選択と報酬に重点を置いたゲーム性の提供
+            他のプレイヤーの動向が気になる相互作用要素を提供
+            手に入る報酬がランダムであるガチャ要素の提供
+     ok 実装：
+            独立した専用コントラを用意
+                StorageとFunctionの2つ用意したほうが良いだろうか。
+            mapping で start_time を記録
+            mapping で end_time を記録
+            mapping で total_stroll_distance を記録
+            mapping mapping で 各summoner-summoner 間の meet 時間を記録
+            mapping uint[5] で 現在の metSummoner を記録
+            start_stroll関数
+                end_timeチェック
+                (_summoner, _direction, _companion, _drink)
+                li_dist_and_companionに_summonerを加える
+                start_timeにnowを代入
+            end_stroll関数
+                start_timeチェック
+                該当するli_dist_and_companionからランダムでsummonerを選出
+                自分のli_metSummonerと相手のli_metSummonerをチェック
+                両方とも代入可能ならmet成功
+                自分と相手のli_metSummonerに互いを代入
+                歩行距離を算出
+                補正値を算出して歩行距離を補正
+                総歩行距離に今回の歩行距離を足して保存
+                総歩行距離をチェックし条件を満たせばtwinkle NFTをmintする
+                li_metSummonerをクリア
+                grooming time更新
+            _calc_boost関数
+                (_summoner)
+                li_metSummonerを順にチェック
+                summoner-summoner 間の meet 時間をチェック
+                一定期間以上（7日？30日？）空いていたら補正値+1.00
+                    それ以下なら補正値+0.50
+                _drinkが一致すれば補正値x1.2（+1.20か+0.60）
+                互いの総歩行距離の乖離度によって+補正値
+                    乖離しているほど有利
+            _try_mintNFT関数
+                総歩行距離をチェック
+                条件を満たせばNFTをmint
+                mcにpermittedしておく
+            _mint_twinkle
+                mcでtwinkle level 1をcraftする
+                crafterは自分とする
+        問題点：
+            ただの脇道ミニゲームと化してしまっている
+            本来は時間資源を別に費やすためのsinkのハズだったのだが。
+                かといって散歩時間を6-8時間とするのもfeelingと乖離するだろう。
+                時間資源のsinkであるならば、拘束時間を長くするしか無いのだが。
+                長めの4時間でも4/24=17%程度のsinkにしかならない。
+                時間資源のsinkならば8時間は拘束する設計にしなければならないだろう。
+                2時間の散歩を1日3回まで可能とするか（maxで6時間=25%のsink）。
+            イマイチ目的が分かりにくく、一日一回の作業と化しやすいだろうか。
+                他の行動と選択のジレンマが発生せず、
+                また報酬もほぼ予測可能で驚きが薄く、
+                かつ実行しないより実行したほうが有利なため、作業化してしまいがち。
+                UXとして満足たりうるだろうか。
+            「運」要素をもう少し強めに、ギャンブル性、結果の不確実性、
+                もしくは能動的な選択と納得しうる報酬、
+                の部分にもう少し強めのゲーム性を考えてみる。
+            総met数、drink一致回数をNFTの条件にする、など。
+                総散歩距離, 総drink一致回数, 総metSummoner数, 
+                それぞれで一定数に達したときにNFTを発見、などとするか。
+                基本は総歩行距離だが、それ以外のベクトル軸でも報酬が発生する。
+                できるだけ談合しにくように設計したい。
+         ok 買い占め対策
+                twinkleによるexp boostはlevel capか総歩行距離capを設ける
+
+ ok 散歩システムUI実装：
+     ig 水筒を持って、お供を連れてお散歩に向かうむらさきさん絵
+            音符やハートを出しながら楽しそうに出発する
+            水筒を持って、喜びながらcompanionが来るのを待つ
+                一緒に連れ立って画面外に移動する
+                この時ハートや音符を出しながら移動する
+     ok 散歩条件を選択するウィンドウ
+            行き先、お供、水筒の中身を選択する
+            総歩行距離、総met数、現在のお散歩分布などを表示する
+            帰宅予定時間、インターバル残り時間、なども表示する？
+                → インターバル残り時間は水筒に表示
+                → 帰宅までの残り時間は散歩中ウィンドウに表示
+        散歩中のむらさきさんを眺める横長のウィンドウ
+            背景4パターン（山道、河川敷、海岸、草原）
+                ループ背景を用意する
+            お供を一緒に歩かせる
+            残り時間を数字と進行バーで表示させる
+            誰に会ったかのログを表示させる
+            何を拾ったかのNFTも表示させる（可能か？）
+        帰宅時の演出を考える
+            時間がすぎると、まだ帰ってないのか、もう帰ってるのか。
+            txを飛ばさなければならない事の必然性をうまく表現したい。
+                散歩から帰宅後は、ユーザーからの何かしらのアクションが必要な演出を考える
+                寝てる→お風呂はいる
+                水筒洗う、など
+            散歩を思い出しながら寝ている
+                → クリックしてtx飛ばすと、吹き出しを出して散歩内容を飼い主に報告して
+                　 総歩行距離と友達人数が更新される。
+
+    修正案
+     ok strollコントラより情報抜き出し
+     ok     終了時間、現在の歩行距離を取得する
+     ok feedingやgroomingを短い間隔で連打すると効率が上がるバグの修正
+     ok     98%以上では+0とするなど対策が必要だろうか。
+     ok     mining/farmingは大丈夫だろうか。
+     ng depthをspriteのy下段に設定する？
+     ng     マウスドラッグ時は前面に設定する？
+     ok connectボタンの設置
+     ok diceコントラに20を出した回数を記録させる
+     ok festivalのvote回数を記録させる
+     ok info_fromWalletにcat-mailを追加する
+     ok infoにtokenURIとERC721も統合する
+     ok フェスティバルのvoteのevent確認
+     ig tokenURI用jsonの用意
+     ok イベントの再考、集計しやすいように修正
+     ok twinkleのbuyback priceを設定する
+     ok uncommonのbuyback priceがcommonと一緒な点を修正
+     ok glitterが表示されないバグの修正
+     ok クラフト完了時にサウンド鳴らす
+     ok フェスティバルのサウンド修正
+     ok 可能ならmetamaskにNFT画像を表示させたい
+     ok     → ERC721規格でないとmetamaskには表示できない模様
+     ok     諦めるか、ERC721規格で考えるか、要検討。
+     ok     → ERC165のsupportsInterfaceでERC721識別子を返すよう実装すれば認識された
+     ok     この際なので、openzeppelinのERC721をもとにERC2665を再実装する
+     ok crafting中以外でcompleteするとインジケーターが残るバグの修正
+     ok musicbox off時にむらさきさんのlistingもoffに
+     ok スイッチon/off時はmusic boxもoffに
+     ok jsのworking_status部分を更新する
+     ok 夜用BGMの実装
+     ok 積み木を置く時のサウンドを実装
+     ok tokenChestのバグ修正
+     os mcに90万個の発行上限を設定
+     os strollでpetやdirectionの制限を導入する, require
+     ok ビットコ、イーサ猫の接触絵を用意する
+     ok trial時に作成可能ではないアイテムはnot availableにでもする
+     ok すべてのアイテムはクラフト完了時にお花まきで知らせるよう修正
+     ok 晴れ以外の天気でwindowの朝/夜変換ができないバグの修正
+     ok item_windowのカーテン閉じた時の絵を天気ごとに用意する
+     ng ボタンオーバーラップ時にFeedingやStart Miningなどのメッセージを表示させる
+     ok inactive buttonにrequired levelを表示する
+     ok Buybackでfluffyが有効になっていることを確認する
+     ok 他色ウィンドウの透明度を下げる
+     ok デプロイコントラでERC20など設定項目を先頭にもってくる
+     ok stakingコントラにSPEED補正をかける
+     ok craft完了時に寝る条件が変
+     ok     帽子の位置も
+     ok stakingのNFT補正が1/10なので修整
+     ok resume cancel時luckyとなるのを修正
 
  ok html修正
      ok buyback systemの弱点をきちんと述べる
@@ -11647,9 +11661,9 @@ async function open_window_strolling(scene) {
 
     //create selection
 
-    let _x = 280;
+    let _x = 350;
     let _y = 260;
-    let _x_add = 230;
+    let _x_add = 250;
     let _y_add = 150;
     
     //direction
@@ -11661,6 +11675,7 @@ async function open_window_strolling(scene) {
         1, 1,
         _total_strolling_direction_01
     );
+    /*
     create_selection(
         scene, 
         _x+_x_add*1, _y+_y_add*0, 
@@ -11669,20 +11684,21 @@ async function open_window_strolling(scene) {
         1, 2,
         _total_strolling_direction_02
     );
+    */
     create_selection(
         scene, 
-        _x+_x_add*2, _y+_y_add*0, 
+        _x+_x_add*1, _y+_y_add*0, 
         "stroll_direction_03", 0.3, 0,
         "Seaside", 36, "#000000",
-        1, 3,
+        1, 2,
         _total_strolling_direction_03
     );
     create_selection(
         scene, 
-        _x+_x_add*3, _y+_y_add*0, 
+        _x+_x_add*2, _y+_y_add*0, 
         "stroll_direction_04", 0.3, 0,
         "Grassland", 36, "#000000",
-        1, 4,
+        1, 3,
         _total_strolling_direction_04
     );
 
@@ -11741,6 +11757,7 @@ async function open_window_strolling(scene) {
         "Water", 36, "#000000",
         3, 1
     );
+    /*
     create_selection(
         scene, 
         _x+_x_add*1, _y+_y_add*2, 
@@ -11748,19 +11765,20 @@ async function open_window_strolling(scene) {
         "Coffee", 36, "#000000",
         3, 2
     );
+    */
     create_selection(
         scene, 
-        _x+_x_add*2, _y+_y_add*2, 
+        _x+_x_add*1, _y+_y_add*2, 
         "stroll_drink_03", 0.2, 0,
         "Tea", 36, "#000000",
-        3, 3
+        3, 2
     );
     create_selection(
         scene, 
-        _x+_x_add*3, _y+_y_add*2, 
+        _x+_x_add*2, _y+_y_add*2, 
         "stroll_drink_04", 0.2, 0,
         "Juice", 36, "#000000",
-        3, 4
+        3, 3
     );
     
     //create button
@@ -11793,7 +11811,10 @@ async function open_window_strolling(scene) {
 function open_window_strollingDuring(scene, mode) {
 
     //create object
-    function _create_obj(scene, _x, _y, _img, _scale, _speed, _depth, flag_backgroundMoving=0) {
+    function _create_obj(
+        scene, _x, _y, _img, _scale, _speed, _depth, 
+        flag_backgroundMoving=0, frame=0, flag_spin=0
+    ) {
         let _obj = scene.add.sprite(_x, _y, _img)
             .setScale(_scale)
             .setDepth(_depth)
@@ -11809,6 +11830,17 @@ function open_window_strollingDuring(scene, mode) {
             if (this.x >= 1600) {
                 this.x = -200;
             }
+            //if (flag_spin == 1 && turn % 120 == this.spinSalt){
+            if (flag_spin == 1 && turn % 120 == 0){
+                this.angle += 30;
+            }
+        }
+        if (frame > 0) {
+            _obj.setFrame(frame);
+        }
+        if (flag_spin == 1) {
+            _obj.angle = Math.random()*360;
+            _obj.spinSalt = Math.round(Math.random()*120);
         }
         group_update.add(_obj);
         group_window_strollingDuring.add(_obj);
@@ -11909,6 +11941,39 @@ function open_window_strollingDuring(scene, mode) {
         _create_obj(scene, 108, 550, "stroll_during_02_yacht", 0.15, 0.1, 5002);
         _create_obj(scene, 982, 540, "stroll_during_02_fune", 0.15, 0.1, 5002);
 
+    } else if (mode == 3) { //grassland
+
+        //create background
+        let _img_back = scene.add.sprite(640, 480, "stroll_during_03_back")
+            .setDepth(5001)
+            .setScale(0.8)
+            .setInteractive();
+
+        //create cloud
+        _create_obj(scene, -300, 360, "stroll_during_01_cloud", 0.1+Math.random()*0.3, 0.1+Math.random()*0.3, 5001, 1);
+        _create_obj(scene, 200, 360, "stroll_during_01_cloud", 0.1+Math.random()*0.3, 0.1+Math.random()*0.3, 5001, 1);
+        _create_obj(scene, 400, 320, "stroll_during_01_cloud", 0.1+Math.random()*0.3, 0.1+Math.random()*0.3, 5001, 1);
+        _create_obj(scene, 600, 300, "stroll_during_01_cloud", 0.1+Math.random()*0.3, 0.1+Math.random()*0.3, 5001, 1);
+        _create_obj(scene, 1000, 350, "stroll_during_01_cloud", 0.1+Math.random()*0.3, 0.1+Math.random()*0.3, 5001, 1);
+
+        //create flower
+        let _li_x = [-400, -200, 0, 200, 400, 600, 800, 1000, 1200];
+        for (let i=0; i<_li_x.length; i++) {
+            let _x = _li_x[i];
+            let _y = 650 + Math.random()*40;
+            let _frame = Math.round(Math.random()*6);
+            _create_obj(scene, _x, _y+Math.random()*10, "par_flowers", 0.13, 0.4, 5002, 0, _frame, 1);
+            _create_obj(scene, _x+20, _y+Math.random()*10, "par_flowers", 0.13, 0.4, 5002, 0, _frame, 1);
+            _create_obj(scene, _x+40, _y+Math.random()*10, "par_flowers", 0.13, 0.4, 5002, 0, _frame, 1);
+        }
+        
+        //tree
+        _create_obj(scene, 108, 570, "stroll_during_03_tree1", 0.2, 0.1, 5002);
+        _create_obj(scene, 982, 570, "stroll_during_03_tree2", 0.2, 0.1, 5002);
+        
+        //baloon
+        _create_obj(scene, 200, 450, "stroll_during_03_baloon", 0.2, 0.2, 5002, 1);
+        
     }
     
     //create summoner
@@ -12016,7 +12081,7 @@ function open_window_strollingDuring(scene, mode) {
 
     //create msg2
     _text = "";
-    _text = local_name_str + " is enjoying a leisurely stroll.";
+    _text = local_name_str + " is enjoying stroll.";
     let _msg2 = scene.add.text(10, 260, _text)
         .setDepth(5009)
         .setFontSize(24)
@@ -12044,7 +12109,7 @@ function open_window_strollingDuring(scene, mode) {
             _metCount += 1;
         }
         if (_metCount == 0) {
-            _text = local_name_str + " is enjoying a leisurely stroll.";
+            _text = local_name_str + " is enjoying stroll.";
         } else {
             _text = local_name_str + " already met " + _metCount + " friends!";
         }
@@ -13023,6 +13088,10 @@ function preload(scene) {
     scene.load.image("stroll_during_02_shell", "src/png/stroll_during_02_shell.png");
     scene.load.image("stroll_during_02_yacht", "src/png/stroll_during_02_yacht.png");
     scene.load.image("stroll_during_02_fune", "src/png/stroll_during_02_fune.png");
+    scene.load.image("stroll_during_03_back", "src/png/stroll_during_03_back.png");
+    scene.load.image("stroll_during_03_tree1", "src/png/stroll_during_03_tree1.png");
+    scene.load.image("stroll_during_03_tree2", "src/png/stroll_during_03_tree2.png");
+    scene.load.image("stroll_during_03_baloon", "src/png/stroll_during_03_baloon.png");
 
 
     //---sounds

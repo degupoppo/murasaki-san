@@ -2361,6 +2361,65 @@ contract Murasaki_Storage_Nui is Ownable {
 }
 
 
+//---Murasaki_Storage_Extra
+
+contract Murasaki_Storage_Extra is Ownable {
+
+    //permitted address
+    mapping(address => bool) public permitted_address;
+
+    //admin, add or remove permitted_address
+    function _add_permitted_address(address _address) external onlyOwner {
+        permitted_address[_address] = true;
+    }
+    function _remove_permitted_address(address _address) external onlyOwner {
+        permitted_address[_address] = false;
+    }
+    
+    //modifier
+    modifier onlyPermitted {
+        require(permitted_address[msg.sender]);
+        _;
+    }
+
+    //storages
+    mapping(uint => mapping(uint => uint)) public storage;
+    mapping(uint => mapping(uint => mapping(uint => uint))) public storage_mapping;
+    
+    //setter
+    function set_storage (
+        uint _storageId, 
+        uint _summoner, 
+        uint _value
+    ) external onlyPermitted {
+        storage[_storageId][_summoner] = _value;
+    }
+    function set_storage_mapping (
+        uint _storageId, 
+        uint _summoner, 
+        uint _index, 
+        uint _value
+    ) external onlyPermitted {
+        storage_mapping[_storageId][_summoner][_index] = _value;
+    }
+    
+    //getter
+    function get_storage (
+        uint _storageId, 
+        uint _summoner,
+    ) external view return (uint) {
+        return storage_mapping[_storageId][_summoner];
+    }
+    function get_storage_mapping (
+        uint _storageId, 
+        uint _summoner,
+        uint _index
+    ) external view return (uint) {
+        return storage_mapping[_storageId][_summoner][_index];
+    }
+}
+
+
 //===Function==================================================================================================================
 
 
@@ -6527,7 +6586,7 @@ contract Trial_Converter is Ownable, ReentrancyGuard, Pausable {
 
 
 
-//===Independent==================================================================================================================
+//===Add-on==================================================================================================================
 
 
 //---Murasaki_Market_Item
@@ -6561,12 +6620,6 @@ contract Murasaki_Market_Item is Ownable, ReentrancyGuard, ERC721Holder, Pausabl
     event Unlist(uint indexed _summoner, uint _item);
     event Buy(uint indexed _summoner, uint _summonerSeller, uint _item, uint _price, uint _fee);
     event SetFeeBps(uint feeBps);
-    /*
-    event List(uint indexed id, address indexed lister, uint price);
-    event Unlist(uint indexed id, address indexed lister);
-    event Buy(uint indexed id, address indexed seller, address indexed buyer, uint price, uint fee);
-    event SetFeeBps(uint feeBps);
-    */
 
     //IERC721 public rarity;
     uint public feeBps = 500;
@@ -6575,6 +6628,7 @@ contract Murasaki_Market_Item is Ownable, ReentrancyGuard, ERC721Holder, Pausabl
     uint public dutchAuction_startPrice = 100 * 10**18;   //100 $ASTR
     EnumerableSet.UintSet private set;
     mapping(address => EnumerableSet.UintSet) private mySet;
+    uint public total_tradingVolume = 0;
 
     //mapping
     mapping(uint => uint) public prices;
@@ -6586,6 +6640,10 @@ contract Murasaki_Market_Item is Ownable, ReentrancyGuard, ERC721Holder, Pausabl
     // set lowestPrice
     function setLowestPrice(uint _value) external onlyOwner {
         lowestPrice = _value;
+    }
+    // set total_tradingVolume manually
+    function set_total_tradingVolume(uint _value) external onlyOwner {
+        total_tradingVolume = _value;
     }
 
     /// @dev Updates fee. Only callable by owner.
@@ -6674,6 +6732,8 @@ contract Murasaki_Market_Item is Ownable, ReentrancyGuard, ERC721Holder, Pausabl
             ( averageSoldPrice[_item_type] * soldCount[_item_type] + price ) / ( soldCount[_item_type] + 1 );
         averageSoldPrice[_item_type] = _newAverageSoldPrice;
         soldCount[_item_type] += 1;
+        //update total_tradingVolume
+        total_tradingVolume += price;
         //emit Buy(_item, lister, msg.sender, price, fee);
         emit Buy(mfs.get_summoner(msg.sender), mfs.get_summoner(lister), _item, price, fee);
     }
@@ -6816,6 +6876,26 @@ contract Murasaki_Market_Item is Ownable, ReentrancyGuard, ERC721Holder, Pausabl
 
 contract Murasaki_Dice is Ownable, ReentrancyGuard, Pausable {
 
+    /*
+    #calculation: moving average
+        rolled_dices = [a, b, c, d]
+        roll:
+            req(>=20)
+            now_dice = d20
+            >24*4: [0,0,0,now]
+            >24*3: [d,0,0,now]
+            >24*2: [c,d,0,now]
+            <=24*2: [b,c,d,now]
+        get:
+            >24*4: 0
+            >24*3: d/4
+            >24*2: c+d/4
+            >24*1: b+c+d/4
+            <=24: a+b+c+d/4
+        get_now:
+            rolled_dices[3]
+    */
+
     //pausable
     function pause() external onlyOwner {
         _pause();
@@ -6824,32 +6904,6 @@ contract Murasaki_Dice is Ownable, ReentrancyGuard, Pausable {
         _unpause();
     }
 
-    /*
-
-    <calculation: moving average>
-
-    rolled_dices = [a, b, c, d]
-
-    roll:
-        req(>=20)
-        now_dice = d20
-        >24*4: [0,0,0,now]
-        >24*3: [d,0,0,now]
-        >24*2: [c,d,0,now]
-        <=24*2: [b,c,d,now]
-
-    get:
-        >24*4: 0
-        >24*3: d/4
-        >24*2: c+d/4
-        >24*1: b+c+d/4
-        <=24: a+b+c+d/4
-
-    get_now:
-        rolled_dices[3]
-
-    */
-
     //address
     address public address_Murasaki_Address;
     function _set_Murasaki_Address(address _address) external onlyOwner {
@@ -6857,22 +6911,46 @@ contract Murasaki_Dice is Ownable, ReentrancyGuard, Pausable {
     }
 
     //variants
-    mapping(uint => uint[4]) public rolled_dice;
-    mapping(uint => uint) public last_dice_roll_time;
-    mapping(uint => uint) public critical_count;
-    mapping(uint => uint) public fumble_count;
-    //## item types
     uint public dice_item_type = 5;
     uint public buffer_sec = 14400;  //4 hr
+    mapping(uint => uint[4]) public rolled_dice;
+    mapping(uint => uint) public last_dice_roll_time;
+    //mapping(uint => uint) public critical_count;
+    //mapping(uint => uint) public fumble_count;
 
-    //set dice item_type
+    //## item types
+    //admin, set dice item_type
     function _set2_dice_item_type(uint _item_type) external onlyOwner {
         dice_item_type = _item_type;
     }
 
-    //set buffer_sec
+    //admin, set buffer_sec
     function _set3_buffer_sec(uint _sec) external onlyOwner {
         buffer_sec = _sec;
+    }
+    
+    //critical_count, mse:101
+    function _set_critical_count (uint _summoner, uint _value) internal {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage mse = Murasaki_Storage_Extra(ma.address_Murasaki_Storage_Extra());
+        mse.set_storage(101, _summoner, _value);
+    }
+    function get_critical_count (uint _summoner) public view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage mse = Murasaki_Storage_Extra(ma.address_Murasaki_Storage_Extra());
+        return mse.get_storage(101, _summoner);
+    }
+
+    //fumble_count, mse:102
+    function _set_fumble_count (uint _summoner, uint _value) internal {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage mse = Murasaki_Storage_Extra(ma.address_Murasaki_Storage_Extra());
+        mse.set_storage(102, _summoner, _value);
+    }
+    function get_fumble_count (uint _summoner) public view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage mse = Murasaki_Storage_Extra(ma.address_Murasaki_Storage_Extra());
+        return mse.get_storage(102, _summoner);
     }
 
     //calc elasped_time
@@ -6911,9 +6989,11 @@ contract Murasaki_Dice is Ownable, ReentrancyGuard, Pausable {
         //dice roll
         uint _dice_roll = (mfs.d20(_summoner) + 1) * 10;
         if (_dice_roll == 200) {
-            critical_count[_summoner] += 1;
+            //critical_count[_summoner] += 1;
+            _set_critical_count(_summoner, get_critical_count(_summoner)+1);
         } else if (_dice_roll == 10) {
-            fumble_count[_summoner] += 1;
+            //fumble_count[_summoner] += 1;
+            _set_fumble_count(_summoner, get_fumble_count(_summoner)+1);
         }
         //update rolled_dice, after 48hr, input 0 in each 24hr
         if (_elasped_time > BASE_SEC * 4) {
@@ -7050,8 +7130,8 @@ contract Murasaki_Mail is Ownable, ReentrancyGuard, Pausable {
     //mapping
     mapping(uint => uint) public sending;   //[_summoner_from] = mails;
     mapping(uint => uint) public receiving; //[_summoner_to] = mails;
-    mapping(uint => uint) public total_sent;
-    mapping(uint => uint) public total_opened;
+    //mapping(uint => uint) public total_sent;
+    //mapping(uint => uint) public total_opened;
     
     //variants
     //interval, both of sending interval & receving limit
@@ -7069,6 +7149,30 @@ contract Murasaki_Mail is Ownable, ReentrancyGuard, Pausable {
     }
     function set_item_type_of_cushion(uint _value) external onlyOwner {
         item_type_of_cushion = _value;
+    }
+
+    //total_sent, mse:201
+    function _set_total_sent (uint _summoner, uint _value) internal {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage mse = Murasaki_Storage_Extra(ma.address_Murasaki_Storage_Extra());
+        mse.set_storage(201, _summoner, _value);
+    }
+    function get_total_sent (uint _summoner) public view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage mse = Murasaki_Storage_Extra(ma.address_Murasaki_Storage_Extra());
+        return mse.get_storage(201, _summoner);
+    }
+
+    //total_opened, mse:202
+    function _set_total_opened (uint _summoner, uint _value) internal {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage mse = Murasaki_Storage_Extra(ma.address_Murasaki_Storage_Extra());
+        mse.set_storage(202, _summoner, _value);
+    }
+    function get_total_opened (uint _summoner) public view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage mse = Murasaki_Storage_Extra(ma.address_Murasaki_Storage_Extra());
+        return mse.get_storage(202, _summoner);
     }
         
     //check mail
@@ -7841,8 +7945,32 @@ contract Stroll is Ownable, ReentrancyGuard, Pausable {
     //global parameters
     using EnumerableSet for EnumerableSet.UintSet;
     mapping (uint => EnumerableSet.UintSet) private strolledSummoners;
-    mapping (uint => uint) public total_strolling_direction;
-    mapping (uint => uint) public total_strolling_companion;
+    //mapping (uint => uint) public total_strolling_direction;
+    //mapping (uint => uint) public total_strolling_companion;
+
+    //total_strolling_direction, mse:301
+    function _set_total_strolling_direction (uint _summoner, uint _value) internal {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage mse = Murasaki_Storage_Extra(ma.address_Murasaki_Storage_Extra());
+        mse.set_storage(301, _summoner, _value);
+    }
+    function get_total_strolling_direction (uint _summoner) public view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage mse = Murasaki_Storage_Extra(ma.address_Murasaki_Storage_Extra());
+        return mse.get_storage(301, _summoner);
+    }
+
+    //total_strolling_companion, mse:302
+    function _set_total_strolling_companion (uint _summoner, uint _value) internal {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage mse = Murasaki_Storage_Extra(ma.address_Murasaki_Storage_Extra());
+        mse.set_storage(302, _summoner, _value);
+    }
+    function get_total_strolling_companion (uint _summoner) public view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage mse = Murasaki_Storage_Extra(ma.address_Murasaki_Storage_Extra());
+        return mse.get_storage(302, _summoner);
+    }
     
     //getter
     function get_strollInfo (uint _summoner) external view returns (uint[26] memory) {

@@ -1100,6 +1100,20 @@ let _dic_items = {
         "img_name":"twinkle_01",
         "icon_png":"png/twinkle_01.png",
     },
+    "Sparkle":{
+        "item_id":256,
+        "item_id_uncommon":0,
+        "item_id_rare":0,
+        "img_name":"twinkle_01",
+        "icon_png":"png/twinkle_01.png",
+    },
+    "Glitter":{
+        "item_id":261,
+        "item_id_uncommon":0,
+        "item_id_rare":0,
+        "img_name":"twinkle_01",
+        "icon_png":"png/twinkle_01.png",
+    },
 }
 
 let _dic_items_reverse = {};
