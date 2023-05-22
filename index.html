@@ -452,7 +452,7 @@ You can take care of your Murasaki-san with these actions.
 <summary>Fluffy</summary>
 
 <p>
-Fluffy is a small housemate in your house who dreams of becomming Murasaki-san. The more fluffies that live in the house, <b>the more luck</b> your Murasaki-san will have (One fluffy score is equivalent to +0.01 LUK). You can <b>upgrade</b> your fluffy from a lower level to an upper level by burning fluffies of the same color.
+Fluffy is a small housemate in your house who dreams of becomming Murasaki-san. The more fluffies that live in the house, <b>the more luck</b> your Murasaki-san will have (100 fluffy score is equivalent to +1 LUK). You can <b>upgrade</b> your fluffy from a lower level to an upper level by burning fluffies of the same color.
 </p>
 
 <p>
@@ -460,6 +460,9 @@ Fluffy is a small housemate in your house who dreams of becomming Murasaki-san. 
 </p>
 
 <img width="700" src="src/png/fig_fluffy.png" />
+<figcaption>
+Summary chart of fluffy: acquisition method, effects, and upgrade methods. By collecting fluffy of the same color, you can upgrade to higher-tier fluffy. Higher-tier fluffy provides greater fluffy score efficiency. 100 fluffy score is equivalent to 1.00 LUK.
+</figcaption>
 
 <p>
 <b>Fluffy:</b> <img src="src/icon/fluffy_08.png" width="20" height="20"> It's a smallest fluffy. You can mainly obtain it by opening present boxes. There are a total of 12 colors available (gray<img src="src/icon/fluffy_01.png" width="20" height="20">, beige<img src="src/icon/fluffy_02.png" width="20" height="20">, limegreen<img src="src/icon/fluffy_03.png" width="20" height="20">, lightblue<img src="src/icon/fluffy_04.png" width="20" height="20">, blue<img src="src/icon/fluffy_05.png" width="20" height="20">, purple<img src="src/icon/fluffy_06.png" width="20" height="20">, redpurple<img src="src/icon/fluffy_07.png" width="20" height="20">, red<img src="src/icon/fluffy_08.png" width="20" height="20">, orange<img src="src/icon/fluffy_09.png" width="20" height="20">, pink<img src="src/icon/fluffy_10.png" width="20" height="20">, yellow<img src="src/icon/fluffy_11.png" width="20" height="20">, white<img src="src/icon/fluffy_12.png" width="20" height="20">). Fluffies love Murasaki-san and dream of becoming like Murasaki-san. By collecting five fluffies of the same color, you can upgrade them to a slightly larger fluffier.<br>
@@ -522,15 +525,18 @@ This is an experimental initiative aimed at increasing the on-chain activity of 
 </p>
 
 <p>
-<b>Corresponding tokens are:</b> $ACA, $ASTR, $BNB, $BTC, $BUSD, $DAI, $DOT, $ETH, $GMLR, $KSM, $LAY, $MATIC, $SDN, $USDC, $USDT
+<b>Corresponding tokens are:</b><br>
+$ACA, $ASTR, $BNB, $BTC, $BUSD, $DAI, $DOT, $ETH, $GMLR, $KSM, $LAY, $MATIC, $SDN, $USDC, $USDT
 </p>
 
 <p>
-<b>Corresponding NFT projects are:</b> AstarDegens, CandyGirl, AstarCats, AstarPunks, HEALTHREE
+<b>Corresponding NFT projects are:</b><br>
+AstarDegens, CandyGirl, AstarCats, AstarPunks, HEALTHREE
 </p>
 
 <p>
-<b>The step of Staking amount:</b> 500, 1000, 2000, 4000, 8000, 16000, 32000, 64000, 128000, >128000 $ASTR
+<b>The step of Staking amount:</b><br>
+500, 1000, 2000, 4000, 8000, 16000, 32000, 64000, 128000, >128000 $ASTR
 </p>
 
 <p>
@@ -817,6 +823,51 @@ The following exp point table has been set based on the Dungeons & Dragons 3.5e 
 Reward NFT: Fluffy (61%), Fluffier (10%), Glitter (3%), Sparkle (3%), Twinkle (3%), Piggy Bank (10%), Leaf Pouch (10%)
 </font>
 </p>
+
+<p>
+<b>Comfortable Score calculation:</b><br>
+<font size="-0.5">
+&nbsp;&nbsp;&nbsp;Comfortable Score = ItemScore + FluffyScore + TotalScore + Extra1 + Extra2<br>
+&nbsp;&nbsp;&nbsp;ItemScore = Common * 600 + Uncommon * 2400 + Rare * 9600<br>
+&nbsp;&nbsp;&nbsp;FluffyScore = Fluffy * 100 + Fluffier * 400 + Fluffiest * 1600 + Doll * 6400<br>
+&nbsp;&nbsp;&nbsp;TotalScore = TotalExpGained + TotalCoinMined + TotalLeavesFarmed<br>
+&nbsp;&nbsp;&nbsp;Extra1 = TotalItemCrafted * 3000 + TotalItemCrafted ** 2 * 300<br>
+&nbsp;&nbsp;&nbsp;Extra2 = TotalFluffyReceived * 500 + TotalFluffyReceived ** 2 * 50<br>
+</font>
+</p>
+
+<p>
+<b>Strolling efficacy:</b><br>
+<font size="-0.5">
+&nbsp;&nbsp;&nbsp;Strolling Distance = StrollingSec * 500 / 3600 * BoostRate<br>
+&nbsp;&nbsp;&nbsp;StrollingSec = 14400<br>
+&nbsp;&nbsp;&nbsp;BoostRate = 100% + [Sum of Friend Bonus]<br>
+</font>
+</p>
+
+<font size="-0.5">
+<table>
+  <thead>
+    <tr>
+      <th><center><b>[Friend Bonus]<b></center></th>
+      <th><center>First meeting</center></th>
+      <th><center>Not first meeting</center></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td><center><b>Drink matched</b></center></td><td><center>+15%</center></td><td><center>+10%</center></td></tr>
+    <tr><td><center><b>Not matched</b></center></td><td><center>+7.5%</center></td><td><center>+5%</center></td></tr>
+  </tbody>
+</table>
+</font>
+
+<p>
+<font size="-0.5">
+<sup>*</sup>The maximum number of friends meet during a stroll is 5.<br>
+<sup>*</sup>If Murasaki-san don't meet anyone, there is a low probability of receiving a large bonus (+100% chance at 1%, +50% chance at 3%, and +20% chance at 10%).<br>
+</font>
+</p>
+
 
 </details>
 

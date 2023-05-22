@@ -86,33 +86,18 @@ contract ERC721 is IERC721 {
 //### 1st
 
 
-    コントラクトの修正
-        add-onコントラクトのtotal系スコアなど、代替が効かないデータは
-            一元的に拡張可能なstorageコントラに格納することとする。
-        storageコントラはmapping mappingで重ねて将来的に拡張可能とする。
-            こうすることで、貯めたスコアを消滅させずにlogicをupgradeできる
-        対象：
-            dice, critical_count
-            dice, fumble_count
-            mail, total_sent
-            mail, total_opened
-            stroll, total_strolledDistance
-            stroll, total_strolledDistance_ofCompanion1,2,3
-            stroll, stroll_level
-            stroll, met_level
-    
-
     修正案
+        コントラクトのupgrade
+            ma, mse, dice, mail, stroll, ff, market
+        tokenURIをsatietyとhappyによって変化させる
+            tokenURI_codexを作製し参照する
         楽器を3種類に減らす
             かわりにキャンドルを追加
             あとアイテム２つ。
         おサボり中はミシンやスコップを残す
-        マーケット集計ページを作成する
+        売買回数、平均購入価格などを集計したマーケット情報ページを作成する？
+            マーケット集計ページを作成する?
             総取引額、アイテムごとの取引回数・平均価格
-        マーケットコントラに統計情報を実装する
-            総取引量
-        コストの引き上げ
-            mint: 500, transfer fee: 50
         rugg-pullの実装
             ひとまず、右端をクリックでrugをスライドさせる
             接触しているfluffyとむらさきさん, diceがon_clickされる
@@ -124,9 +109,15 @@ contract ERC721 is IERC721 {
             trial終了直後ぐらいの進行度が良いだろうか。
             パラメータを弄った別コントラとするか？
         かざぐるまと王冠を交換する
-        売買回数、平均購入価格などを集計したマーケット情報ページを作成する？
         フェスティバル前の演出の改善
         変数書き換え対策の実装, さてどうするか
+     ok マーケットコントラに統計情報を実装する
+     ok     総取引量
+     ok コストの引き上げ
+     ok     mint: 500, transfer fee: 50
+     ok お菓子の家の絵更新
+     ok     stakingなしの時の土台を用意する
+     ok     → グレースケールで
 
 
     散歩システムを詰める
@@ -201,9 +192,10 @@ contract ERC721 is IERC721 {
             売ってしまえばコミュニティから脱落する
             保持し続ける限りコミュニティに属しつつ将来の価値上昇が保証されている
             また、ステーキングで自らも価値上昇に貢献することもできる。
-            トラストレスなNFTとも言える
+            価値については、PJへの信頼や人気に依存しない「トラストレスなNFT」とも言える
+                システムとして、多かれ少なかれ必ず価値が上昇し、いつでも交換可能なため。
         担保金が確保できるまでインフレさせない
-            担保金の確保は生産性（PJへの期待度？）に比例する
+            担保金の拡大力は生産性（PJへの期待度？）に比例する
             
 
     構想：限定アイテム
@@ -380,44 +372,6 @@ contract ERC721 is IERC721 {
             upgrade用色違い
             voting用色違い
             convert用色違い
-
-
-    お菓子の家の実装
-     ok Solidity:
-            counterを返す関数
-            counter=0でmintする関数
-                NFTをランダムで送る
-            counterはfeeding時に減少する
-                0以下には減少しない
-       *実装案：
-            staking=0では土台だけ表示
-            staking>0で、量に応じたクッキー人形と進捗を表示
-            100%で、バンザイしているクッキー人形と完成した家を表示
-            クリックで家が消費されてNFTをランダムに取得する
-            完成した家を消費しないと次の進捗％は貯まり始めない
-        演出の深慮
-            お菓子の家が少しずつ完成してゆく
-                not stakingでは土台だけ
-                stakingすると作り始める
-                staking量と、進捗％を表示させる
-                staking量に応じて小人さんの人数が変わるとなお良いか
-            完成後はどうするか
-                別のお菓子の家がすぐ作られ始めるのか
-                    つまり、完成品2つは成り立つのか、または売れるのか
-                それとも、完成品を開けないと次の％がたまらないのか
-                NFTとして発行するのか、NFTを取得するコントラとして実装するのか
-        専用アニメーションの用意
-            棒の飴をふりふりしているクッキー人形
-            完成後は人形たちがバンザイしている
-        専用コントラクトの用意
-            presentboxと似ているが、取得できるアイテムと確率が異なる
-        中身案：
-            fluffy
-            fluffier
-            貯金箱
-            がま口お財布
-            散歩の宝物
-            発表会のトロフィー
 
 
    *楽器練習UIの改善
@@ -1154,6 +1108,63 @@ contract ERC721 is IERC721 {
 
 //### 3rd
 
+ ok お菓子の家の実装
+     ok Solidity:
+            counterを返す関数
+            counter=0でmintする関数
+                NFTをランダムで送る
+            counterはfeeding時に減少する
+                0以下には減少しない
+       *実装案：
+            staking=0では土台だけ表示
+            staking>0で、量に応じたクッキー人形と進捗を表示
+            100%で、バンザイしているクッキー人形と完成した家を表示
+            クリックで家が消費されてNFTをランダムに取得する
+            完成した家を消費しないと次の進捗％は貯まり始めない
+        演出の深慮
+            お菓子の家が少しずつ完成してゆく
+                not stakingでは土台だけ
+                stakingすると作り始める
+                staking量と、進捗％を表示させる
+                staking量に応じて小人さんの人数が変わるとなお良いか
+            完成後はどうするか
+                別のお菓子の家がすぐ作られ始めるのか
+                    つまり、完成品2つは成り立つのか、または売れるのか
+                それとも、完成品を開けないと次の％がたまらないのか
+                NFTとして発行するのか、NFTを取得するコントラとして実装するのか
+        専用アニメーションの用意
+            棒の飴をふりふりしているクッキー人形
+            完成後は人形たちがバンザイしている
+        専用コントラクトの用意
+            presentboxと似ているが、取得できるアイテムと確率が異なる
+        中身案：
+            fluffy
+            fluffier
+            貯金箱
+            がま口お財布
+            散歩の宝物
+            発表会のトロフィー
+
+ ok コントラクトの修正
+        add-onコントラクトのtotal系スコアなど、代替が効かないデータは
+            一元的に拡張可能なstorageコントラに格納することとする。
+        storageコントラはmapping mappingで重ねて将来的に拡張可能とする。
+            こうすることで、貯めたスコアを消滅させずにlogicをupgradeできる
+        対象：
+            #101-
+                dice, critical_count
+                dice, fumble_count
+            #201-
+                mail, total_sent
+                mail, total_opened
+            #301-
+                stroll, total_strolledDistance
+                stroll, total_strolledDistance_ofCompanion1,2,3
+                stroll, stroll_level
+                stroll, met_level
+            #401-
+                ff, voteCount
+    
  ok 構想：散歩システムII
      ok バランス調整：
             報酬期間: 3d, 7d, 14d, 28d, 
@@ -4566,6 +4577,7 @@ async function update_house_price() {
     if (gamemode == "trial") {return 0};
     let _buybackPrice_asArray = await contract_bt.methods.calc_buybackPrice_asArray().call();
     let _house_price = 0;
+    //basic item
     for (i=1; i<=16; i++) {
         _house_price += local_items[i] * _buybackPrice_asArray[i];
         _house_price += local_items[i+64] * _buybackPrice_asArray[i] *3;
@@ -4576,6 +4588,13 @@ async function update_house_price() {
         _house_price += local_items[i+16+16] * _buybackPrice_asArray[i];
         _house_price += local_items[i+16+16+64] * _buybackPrice_asArray[i] *3;
         _house_price += local_items[i+16+16+64+64] * _buybackPrice_asArray[i] *3 *3;
+    }
+    //fluffy
+    for (i=1; i<=12; i++) {
+        _house_price += local_items[200+i] * _buybackPrice_asArray[21];
+        _house_price += local_items[212+i] * _buybackPrice_asArray[22];
+        _house_price += local_items[224+i] * _buybackPrice_asArray[23];
+        _house_price += local_items[236+i] * _buybackPrice_asArray[24];
     }
     _house_price /= 10**18; //wei -> eth
     _house_price = Math.floor(_house_price*100)/100;    //2 decimal places
@@ -12962,6 +12981,16 @@ function preload(scene) {
     scene.load.image("item_woodcube", "src/png/item_woodcube.png");
     scene.load.image("item_pinwheel", "src/png/item_pinwheel.png");
     
+    //### item_staking
+    scene.load.image("item_staking_01", "src/png/item_staking_01.png");
+    scene.load.image("item_staking_02", "src/png/item_staking_02.png");
+    scene.load.image("item_staking_03", "src/png/item_staking_03.png");
+    scene.load.image("item_staking_04", "src/png/item_staking_04.png");
+    scene.load.image("item_staking_05", "src/png/item_staking_05.png");
+    scene.load.image("item_staking_06", "src/png/item_staking_06.png");
+    scene.load.image("item_staking_07", "src/png/item_staking_07.png");
+    scene.load.image("item_staking_08", "src/png/item_staking_08.png");
+    
     //### item_practice
     scene.load.image("item_clarinet", "src/png/item_clarinet.png");
     scene.load.image("item_timpani", "src/png/item_timpani.png");
@@ -19190,8 +19219,12 @@ function update_checkItem(this_scene) {
     
     //### 000:Staking
     if (
+        /*
         local_dapps_staking_amount > 0
         && (typeof item_staking == "undefined" || typeof item_staking.scene == "undefined")
+        && gamemode == "regular"
+        */
+        (typeof item_staking == "undefined" || typeof item_staking.scene == "undefined")
         && gamemode == "regular"
     ){
         let _x;
@@ -19205,7 +19238,7 @@ function update_checkItem(this_scene) {
             _y = _pos[1];
         } else {
             _x = 330;
-            _y = 900;
+            _y = 850;
         }
         let _text = "";
         _text += " Staking: " + local_dapps_staking_amount + " $ASTR \n";
@@ -19226,7 +19259,7 @@ function update_checkItem(this_scene) {
         item_staking = this_scene.add.sprite(
             _x,
             _y,
-            "item_staking",
+            "item_staking_00",
         ).setOrigin(0.5).setScale(0.18).setDepth(_y)
             .setInteractive({ draggable: true, useHandCursor: true })
             .on("pointerdown", () => {
@@ -19274,10 +19307,13 @@ function update_checkItem(this_scene) {
     } else if (
         local_dapps_staking_amount == 0 
     ){
+        item_staking.setTexture("item_staking_00");
+        /*
         try { 
             item_staking.destroy(true);
             item_staking_text.destroy(true);
         } catch {};
+        */
     } else if (
         typeof item_staking != "undefined" && typeof item_staking.scene != "undefined"
     ){
@@ -19287,6 +19323,23 @@ function update_checkItem(this_scene) {
         _text += " Complete: " + local_staking_reward_percent + "%";
         item_staking_text.setText(_text);
         item_staking_bar.scaleX = local_staking_reward_percent/100;
+        if (local_staking_reward_percent <= 15) {
+            item_staking.setTexture("item_staking_01");
+        } else if (local_staking_reward_percent <= 30) {
+            item_staking.setTexture("item_staking_02");
+        } else if (local_staking_reward_percent <= 45) {
+            item_staking.setTexture("item_staking_03");
+        } else if (local_staking_reward_percent <= 60) {
+            item_staking.setTexture("item_staking_04");
+        } else if (local_staking_reward_percent <= 75) {
+            item_staking.setTexture("item_staking_05");
+        } else if (local_staking_reward_percent <= 90) {
+            item_staking.setTexture("item_staking_06");
+        } else if (local_staking_reward_percent < 100) {
+            item_staking.setTexture("item_staking_07");
+        } else if (local_staking_reward_percent == 100) {
+            item_staking.setTexture("item_staking_08");
+        }
     }
         
     //### 000:VisitorCat

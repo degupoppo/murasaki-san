@@ -1622,7 +1622,7 @@ contract Murasaki_Craft is ERC2665, Ownable, Pausable {
     mapping(address => bool) private noFee_address;
     
     //set transfer fee
-    uint public TRANSFER_FEE = 20 * 10**18;   //wei
+    uint public TRANSFER_FEE = 50 * 10**18;   //wei
     
     //a wallet collecting fees
     address private bufferTreasury_address;
@@ -1771,6 +1771,7 @@ contract Murasaki_Address is Ownable {
     address public address_Murasaki_Market_Item;
     address public address_Murasakisan;
     address public address_Trial_Converter;
+    address public address_Murasaki_Storage_Extra;
     
     function set_Murasaki_Main(address _address) external onlyOwner {
         address_Murasaki_Main = _address;
@@ -1888,6 +1889,9 @@ contract Murasaki_Address is Ownable {
     function set_Trial_Converter(address _address) external onlyOwner {
         address_Trial_Converter = _address;
     }
+    function set_Murasaki_Storage_Extra(address _address) external onlyOwner {
+        address_Murasaki_Storage_Extra = _address;
+    }
     
     //all getter
     function get_addresses() external view returns (address[40] memory) {
@@ -1930,6 +1934,7 @@ contract Murasaki_Address is Ownable {
         _res[36] = address_Murasaki_Market_Item;
         _res[37] = address_Murasakisan;
         _res[38] = address_Trial_Converter;
+        _res[39] = address_Murasaki_Storage_Extra;
         return _res;
     }
 }
@@ -2383,7 +2388,7 @@ contract Murasaki_Storage_Extra is Ownable {
     }
 
     //storages
-    mapping(uint => mapping(uint => uint)) public storage;
+    mapping(uint => mapping(uint => uint)) public storage_uint;
     mapping(uint => mapping(uint => mapping(uint => uint))) public storage_mapping;
     
     //setter
@@ -2392,7 +2397,7 @@ contract Murasaki_Storage_Extra is Ownable {
         uint _summoner, 
         uint _value
     ) external onlyPermitted {
-        storage[_storageId][_summoner] = _value;
+        storage_uint[_storageId][_summoner] = _value;
     }
     function set_storage_mapping (
         uint _storageId, 
@@ -2402,19 +2407,36 @@ contract Murasaki_Storage_Extra is Ownable {
     ) external onlyPermitted {
         storage_mapping[_storageId][_summoner][_index] = _value;
     }
+
+    //adder
+    function add_storage (
+        uint _storageId, 
+        uint _summoner, 
+        uint _value
+    ) external onlyPermitted {
+        storage_uint[_storageId][_summoner] += _value;
+    }
+    function add_storage_mapping (
+        uint _storageId, 
+        uint _summoner, 
+        uint _index, 
+        uint _value
+    ) external onlyPermitted {
+        storage_mapping[_storageId][_summoner][_index] += _value;
+    }
     
     //getter
     function get_storage (
         uint _storageId, 
-        uint _summoner,
-    ) external view return (uint) {
-        return storage_mapping[_storageId][_summoner];
+        uint _summoner
+    ) external view returns (uint) {
+        return storage_uint[_storageId][_summoner];
     }
     function get_storage_mapping (
         uint _storageId, 
         uint _summoner,
         uint _index
-    ) external view return (uint) {
+    ) external view returns (uint) {
         return storage_mapping[_storageId][_summoner][_index];
     }
 }
@@ -6625,7 +6647,7 @@ contract Murasaki_Market_Item is Ownable, ReentrancyGuard, ERC721Holder, Pausabl
     uint public feeBps = 500;
     uint public lowestPrice = 1 * 10**18;   // 1 $ASTR
     uint public dutchAuction_interval = 24 * 60 * 60;   //24 hr
-    uint public dutchAuction_startPrice = 100 * 10**18;   //100 $ASTR
+    uint public dutchAuction_startPrice = 500 * 10**18;   //100 $ASTR
     EnumerableSet.UintSet private set;
     mapping(address => EnumerableSet.UintSet) private mySet;
     uint public total_tradingVolume = 0;
@@ -6729,7 +6751,8 @@ contract Murasaki_Market_Item is Ownable, ReentrancyGuard, ERC721Holder, Pausabl
         //update average price
         (uint _item_type, , , , ,) = mc.items(_item);
         uint _newAverageSoldPrice = 
-            ( averageSoldPrice[_item_type] * soldCount[_item_type] + price ) / ( soldCount[_item_type] + 1 );
+            ( averageSoldPrice[_item_type] * soldCount[_item_type] + price ) 
+            / ( soldCount[_item_type] + 1 );
         averageSoldPrice[_item_type] = _newAverageSoldPrice;
         soldCount[_item_type] += 1;
         //update total_tradingVolume
@@ -6932,25 +6955,41 @@ contract Murasaki_Dice is Ownable, ReentrancyGuard, Pausable {
     //critical_count, mse:101
     function _set_critical_count (uint _summoner, uint _value) internal {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
-        Murasaki_Storage mse = Murasaki_Storage_Extra(ma.address_Murasaki_Storage_Extra());
+        Murasaki_Storage_Extra mse = Murasaki_Storage_Extra(ma.address_Murasaki_Storage_Extra());
         mse.set_storage(101, _summoner, _value);
     }
-    function get_critical_count (uint _summoner) public view returns (uint) {
+    function _add_critical_count (uint _summoner, uint _value) internal {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
-        Murasaki_Storage mse = Murasaki_Storage_Extra(ma.address_Murasaki_Storage_Extra());
+        Murasaki_Storage_Extra mse = Murasaki_Storage_Extra(ma.address_Murasaki_Storage_Extra());
+        mse.add_storage(101, _summoner, _value);
+    }
+    function _get_critical_count (uint _summoner) internal view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage_Extra mse = Murasaki_Storage_Extra(ma.address_Murasaki_Storage_Extra());
         return mse.get_storage(101, _summoner);
+    }
+    function critical_count (uint _summoner) external view returns (uint) {
+        return _get_critical_count(_summoner);
     }
 
     //fumble_count, mse:102
     function _set_fumble_count (uint _summoner, uint _value) internal {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
-        Murasaki_Storage mse = Murasaki_Storage_Extra(ma.address_Murasaki_Storage_Extra());
+        Murasaki_Storage_Extra mse = Murasaki_Storage_Extra(ma.address_Murasaki_Storage_Extra());
         mse.set_storage(102, _summoner, _value);
     }
-    function get_fumble_count (uint _summoner) public view returns (uint) {
+    function _add_fumble_count (uint _summoner, uint _value) internal {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
-        Murasaki_Storage mse = Murasaki_Storage_Extra(ma.address_Murasaki_Storage_Extra());
+        Murasaki_Storage_Extra mse = Murasaki_Storage_Extra(ma.address_Murasaki_Storage_Extra());
+        mse.add_storage(102, _summoner, _value);
+    }
+    function _get_fumble_count (uint _summoner) internal view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage_Extra mse = Murasaki_Storage_Extra(ma.address_Murasaki_Storage_Extra());
         return mse.get_storage(102, _summoner);
+    }
+    function fumble_count (uint _summoner) external view returns (uint) {
+        return _get_fumble_count(_summoner);
     }
 
     //calc elasped_time
@@ -6990,10 +7029,12 @@ contract Murasaki_Dice is Ownable, ReentrancyGuard, Pausable {
         uint _dice_roll = (mfs.d20(_summoner) + 1) * 10;
         if (_dice_roll == 200) {
             //critical_count[_summoner] += 1;
-            _set_critical_count(_summoner, get_critical_count(_summoner)+1);
+            //_set_critical_count(_summoner, get_critical_count(_summoner)+1);
+            _add_critical_count(_summoner, 1);
         } else if (_dice_roll == 10) {
             //fumble_count[_summoner] += 1;
-            _set_fumble_count(_summoner, get_fumble_count(_summoner)+1);
+            //_set_fumble_count(_summoner, get_fumble_count(_summoner)+1);
+            _add_fumble_count(_summoner, 1);
         }
         //update rolled_dice, after 48hr, input 0 in each 24hr
         if (_elasped_time > BASE_SEC * 4) {
@@ -7154,25 +7195,41 @@ contract Murasaki_Mail is Ownable, ReentrancyGuard, Pausable {
     //total_sent, mse:201
     function _set_total_sent (uint _summoner, uint _value) internal {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
-        Murasaki_Storage mse = Murasaki_Storage_Extra(ma.address_Murasaki_Storage_Extra());
+        Murasaki_Storage_Extra mse = Murasaki_Storage_Extra(ma.address_Murasaki_Storage_Extra());
         mse.set_storage(201, _summoner, _value);
     }
-    function get_total_sent (uint _summoner) public view returns (uint) {
+    function _add_total_sent (uint _summoner, uint _value) internal {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
-        Murasaki_Storage mse = Murasaki_Storage_Extra(ma.address_Murasaki_Storage_Extra());
+        Murasaki_Storage_Extra mse = Murasaki_Storage_Extra(ma.address_Murasaki_Storage_Extra());
+        mse.add_storage(201, _summoner, _value);
+    }
+    function _get_total_sent (uint _summoner) internal view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage_Extra mse = Murasaki_Storage_Extra(ma.address_Murasaki_Storage_Extra());
         return mse.get_storage(201, _summoner);
+    }
+    function total_sent (uint _summoner) external view returns (uint) {
+        return _get_total_sent(_summoner);
     }
 
     //total_opened, mse:202
     function _set_total_opened (uint _summoner, uint _value) internal {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
-        Murasaki_Storage mse = Murasaki_Storage_Extra(ma.address_Murasaki_Storage_Extra());
+        Murasaki_Storage_Extra mse = Murasaki_Storage_Extra(ma.address_Murasaki_Storage_Extra());
         mse.set_storage(202, _summoner, _value);
     }
-    function get_total_opened (uint _summoner) public view returns (uint) {
+    function _add_total_opened (uint _summoner, uint _value) internal {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
-        Murasaki_Storage mse = Murasaki_Storage_Extra(ma.address_Murasaki_Storage_Extra());
+        Murasaki_Storage_Extra mse = Murasaki_Storage_Extra(ma.address_Murasaki_Storage_Extra());
+        mse.add_storage(202, _summoner, _value);
+    }
+    function _get_total_opened (uint _summoner) internal view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage_Extra mse = Murasaki_Storage_Extra(ma.address_Murasaki_Storage_Extra());
         return mse.get_storage(202, _summoner);
+    }
+    function total_opened (uint _summoner) external view returns (uint) {
+        return _get_total_opened(_summoner);
     }
         
     //check mail
@@ -7269,7 +7326,9 @@ contract Murasaki_Mail is Ownable, ReentrancyGuard, Pausable {
         //send mail
         sending[_summoner_from] = _item_mail;
         receiving[_summoner_to] = _item_mail;
-        total_sent[_summoner_from] += 1;
+        //total_sent[_summoner_from] += 1;
+        //_set_total_sent(_summoner_from, get_total_sent(_summoner) + 1);
+        _add_total_sent(_summoner_from, 1);
         //event
         emit Send_Mail(_summoner_from, _summoner_to, _item_mail);
     }
@@ -7338,7 +7397,8 @@ contract Murasaki_Mail is Ownable, ReentrancyGuard, Pausable {
         //mint precious
         //_mint_precious(_summoner_to, _mail.summoner_from);
         _mint_presentboxBoth(_summoner_to, _mail.summoner_from);
-        total_opened[_summoner_to] += 1;
+        //total_opened[_summoner_to] += 1;
+        _add_total_opened(_summoner_to, 1);
         //event
         emit Open_Mail(_summoner_to, _mail.summoner_from);
     }
@@ -7457,7 +7517,30 @@ contract Fluffy_Festival is Ownable, ReentrancyGuard, Pausable {
     uint[320] each_voting_count;
     mapping(uint => uint) public last_voting_block; //summoner => blocknumber
     mapping(uint => uint) public last_voting_type;  //summoner => fluffy_type
-    mapping(uint => uint) public voteCount;
+    //mapping(uint => uint) public voteCount;
+
+
+    //Storage Extra
+    
+    //voteCount, mse:401
+    function _set_voteCount (uint _summoner, uint _value) internal {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage_Extra mse = Murasaki_Storage_Extra(ma.address_Murasaki_Storage_Extra());
+        mse.set_storage(401, _summoner, _value);
+    }
+    function _add_voteCount (uint _summoner, uint _value) internal {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage_Extra mse = Murasaki_Storage_Extra(ma.address_Murasaki_Storage_Extra());
+        mse.add_storage(401, _summoner, _value);
+    }
+    function _get_voteCount (uint _summoner) internal view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage_Extra mse = Murasaki_Storage_Extra(ma.address_Murasaki_Storage_Extra());
+        return mse.get_storage(401, _summoner);
+    }
+    function voteCount (uint _summoner) external view returns (uint) {
+        return _get_voteCount(_summoner);
+    }
     
     //step
     uint next_step = 1;
@@ -7492,7 +7575,8 @@ contract Fluffy_Festival is Ownable, ReentrancyGuard, Pausable {
         last_voting_block[_summoner] = _block;
         last_voting_type[_summoner] = _select;
         each_voting_count[_select] += 1;
-        voteCount[_summoner] += 1;
+        //voteCount[_summoner] += 1;
+        _add_voteCount(_summoner, 1);
         next_vote += 1;
         //update winner in step
         winner_inStep[next_step] = _get_winner_inStep_now();
@@ -7924,11 +8008,11 @@ contract Stroll is Ownable, ReentrancyGuard, Pausable {
     //mapping
 
     //public summoner accumulated parameters
-    mapping (uint => uint) public total_strolledDistance;
-    mapping (uint => uint[4]) public total_strolledDistance_ofCompanion;
-    mapping (uint => uint) public total_metSummoners;
-    mapping (uint => uint) public stroll_level;
-    mapping (uint => uint) public met_level;
+    //mapping (uint => uint) public total_strolledDistance;
+    //mapping (uint => uint) public total_metSummoners;
+    //mapping (uint => uint) public stroll_level;
+    //mapping (uint => uint) public met_level;
+    //mapping (uint => uint[4]) public total_strolledDistance_ofCompanion;
 
     //public summoner dynamic parameters
     mapping (uint => bool) public isStrolling;
@@ -7945,32 +8029,127 @@ contract Stroll is Ownable, ReentrancyGuard, Pausable {
     //global parameters
     using EnumerableSet for EnumerableSet.UintSet;
     mapping (uint => EnumerableSet.UintSet) private strolledSummoners;
-    //mapping (uint => uint) public total_strolling_direction;
-    //mapping (uint => uint) public total_strolling_companion;
+    mapping (uint => uint) public total_strolling_direction;
+    mapping (uint => uint) public total_strolling_companion;
 
-    //total_strolling_direction, mse:301
-    function _set_total_strolling_direction (uint _summoner, uint _value) internal {
+
+    //Storage Extra
+
+    //wrapper, Murasaki_Storage_Extra
+    function __set_storage (uint _storageId, uint _summoner, uint _value) internal {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
-        Murasaki_Storage mse = Murasaki_Storage_Extra(ma.address_Murasaki_Storage_Extra());
-        mse.set_storage(301, _summoner, _value);
+        Murasaki_Storage_Extra mse = Murasaki_Storage_Extra(ma.address_Murasaki_Storage_Extra());
+        mse.set_storage(_storageId, _summoner, _value);
     }
-    function get_total_strolling_direction (uint _summoner) public view returns (uint) {
+    function __add_storage (uint _storageId, uint _summoner, uint _value) internal {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
-        Murasaki_Storage mse = Murasaki_Storage_Extra(ma.address_Murasaki_Storage_Extra());
-        return mse.get_storage(301, _summoner);
+        Murasaki_Storage_Extra mse = Murasaki_Storage_Extra(ma.address_Murasaki_Storage_Extra());
+        mse.add_storage(_storageId, _summoner, _value);
+    }
+    function __get_storage (uint _storageId, uint _summoner) internal view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage_Extra mse = Murasaki_Storage_Extra(ma.address_Murasaki_Storage_Extra());
+        return mse.get_storage(_storageId, _summoner);
     }
 
-    //total_strolling_companion, mse:302
-    function _set_total_strolling_companion (uint _summoner, uint _value) internal {
-        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
-        Murasaki_Storage mse = Murasaki_Storage_Extra(ma.address_Murasaki_Storage_Extra());
-        mse.set_storage(302, _summoner, _value);
+    //total_strolledDistance, mse:301
+    function _set_total_strolledDistance (uint _summoner, uint _value) internal {
+        __set_storage(301, _summoner, _value);
     }
-    function get_total_strolling_companion (uint _summoner) public view returns (uint) {
-        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
-        Murasaki_Storage mse = Murasaki_Storage_Extra(ma.address_Murasaki_Storage_Extra());
-        return mse.get_storage(302, _summoner);
+    function _add_total_strolledDistance (uint _summoner, uint _value) internal {
+        __add_storage(301, _summoner, _value);
     }
+    function _get_total_strolledDistance (uint _summoner) internal view returns (uint) {
+        return __get_storage(301, _summoner);
+    }
+    function total_strolledDistance (uint _summoner) public view returns (uint) {
+        return _get_total_strolledDistance(_summoner);
+    }
+
+    //total_metSummoners, mse:302
+    function _set_total_metSummoners (uint _summoner, uint _value) internal {
+        __set_storage(302, _summoner, _value);
+    }
+    function _add_total_metSummoners (uint _summoner, uint _value) internal {
+        __add_storage(302, _summoner, _value);
+    }
+    function _get_total_metSummoners (uint _summoner) internal view returns (uint) {
+        return __get_storage(302, _summoner);
+    }
+    function total_metSummoners (uint _summoner) public view returns (uint) {
+        return _get_total_metSummoners(_summoner);
+    }
+
+    //stroll_level, mse:303
+    function _set_stroll_level (uint _summoner, uint _value) internal {
+        __set_storage(303, _summoner, _value);
+    }
+    function _add_stroll_level (uint _summoner, uint _value) internal {
+        __add_storage(303, _summoner, _value);
+    }
+    function _get_stroll_level (uint _summoner) internal view returns (uint) {
+        return __get_storage(303, _summoner);
+    }
+    function stroll_level (uint _summoner) public view returns (uint) {
+        return _get_stroll_level(_summoner);
+    }
+
+    //met_level, mse:304
+    function _set_met_level (uint _summoner, uint _value) internal {
+        __set_storage(304, _summoner, _value);
+    }
+    function _add_met_level (uint _summoner, uint _value) internal {
+        __add_storage(304, _summoner, _value);
+    }
+    function _get_met_level (uint _summoner) internal view returns (uint) {
+        return __get_storage(304, _summoner);
+    }
+    function met_level (uint _summoner) public view returns (uint) {
+        return _get_met_level(_summoner);
+    }
+
+    //total_strolledDistance_ofCompanion_01, mse:305
+    function _set_total_strolledDistance_ofCompanion_01 (uint _summoner, uint _value) internal {
+        __set_storage(305, _summoner, _value);
+    }
+    function _add_total_strolledDistance_ofCompanion_01 (uint _summoner, uint _value) internal {
+        __add_storage(305, _summoner, _value);
+    }
+    function _get_total_strolledDistance_ofCompanion_01 (uint _summoner) internal view returns (uint) {
+        return __get_storage(305, _summoner);
+    }
+    function total_strolledDistance_ofCompanion_01 (uint _summoner) public view returns (uint) {
+        return _get_total_strolledDistance_ofCompanion_01(_summoner);
+    }
+
+    //total_strolledDistance_ofCompanion_02, mse:306
+    function _set_total_strolledDistance_ofCompanion_02 (uint _summoner, uint _value) internal {
+        __set_storage(306, _summoner, _value);
+    }
+    function _add_total_strolledDistance_ofCompanion_02 (uint _summoner, uint _value) internal {
+        __add_storage(306, _summoner, _value);
+    }
+    function _get_total_strolledDistance_ofCompanion_02 (uint _summoner) internal view returns (uint) {
+        return __get_storage(306, _summoner);
+    }
+    function total_strolledDistance_ofCompanion_02 (uint _summoner) public view returns (uint) {
+        return _get_total_strolledDistance_ofCompanion_02(_summoner);
+    }
+
+    //total_strolledDistance_ofCompanion_03, mse:307
+    function _set_total_strolledDistance_ofCompanion_03 (uint _summoner, uint _value) internal {
+        __set_storage(307, _summoner, _value);
+    }
+    function _add_total_strolledDistance_ofCompanion_03 (uint _summoner, uint _value) internal {
+        __add_storage(307, _summoner, _value);
+    }
+    function _get_total_strolledDistance_ofCompanion_03 (uint _summoner) internal view returns (uint) {
+        return __get_storage(307, _summoner);
+    }
+    function total_strolledDistance_ofCompanion_03 (uint _summoner) public view returns (uint) {
+        return _get_total_strolledDistance_ofCompanion_03(_summoner);
+    }
+
     
     //getter
     function get_strollInfo (uint _summoner) external view returns (uint[26] memory) {
@@ -7980,11 +8159,16 @@ contract Stroll is Ownable, ReentrancyGuard, Pausable {
         } else {
             _res[0] = 0;
         }
-        _res[1] = total_strolledDistance[_summoner];
-        _res[2] = total_strolledDistance_ofCompanion[_summoner][1];
-        _res[3] = total_strolledDistance_ofCompanion[_summoner][2];
-        _res[4] = total_strolledDistance_ofCompanion[_summoner][3];
-        _res[5] = total_metSummoners[_summoner];
+        //_res[1] = total_strolledDistance[_summoner];
+        _res[1] = total_strolledDistance(_summoner);
+        //_res[2] = total_strolledDistance_ofCompanion[_summoner][1];
+        //_res[3] = total_strolledDistance_ofCompanion[_summoner][2];
+        //_res[4] = total_strolledDistance_ofCompanion[_summoner][3];
+        _res[2] = total_strolledDistance_ofCompanion_01(_summoner);
+        _res[3] = total_strolledDistance_ofCompanion_02(_summoner);
+        _res[4] = total_strolledDistance_ofCompanion_03(_summoner);
+        //_res[5] = total_metSummoners[_summoner];
+        _res[5] = total_metSummoners(_summoner);
         _res[6] = metSummoners[_summoner][0];
         _res[7] = metSummoners[_summoner][1];
         _res[8] = metSummoners[_summoner][2];
@@ -7997,8 +8181,10 @@ contract Stroll is Ownable, ReentrancyGuard, Pausable {
         _res[15] = total_strolling_companion[1];
         _res[16] = total_strolling_companion[2];
         _res[17] = total_strolling_companion[3];
-        _res[18] = stroll_level[_summoner];
-        _res[19] = met_level[_summoner];
+        //_res[18] = stroll_level[_summoner];
+        _res[18] = stroll_level(_summoner);
+        //_res[19] = met_level[_summoner];
+        _res[19] = met_level(_summoner);
         _res[20] = direction[_summoner];
         _res[21] = companion[_summoner];
         _res[22] = get_reminingSec(_summoner);
@@ -8252,7 +8438,8 @@ contract Stroll is Ownable, ReentrancyGuard, Pausable {
                 _count_newMeet += 1;
             }
         }
-        total_metSummoners[_summoner] += _count_newMeet;
+        //total_metSummoners[_summoner] += _count_newMeet;
+        _add_total_metSummoners(_summoner, _count_newMeet);
     }
     function _update_totalDistance (uint _summoner) internal {
         uint _distance;
@@ -8264,8 +8451,20 @@ contract Stroll is Ownable, ReentrancyGuard, Pausable {
         _distance = _distance * 500 / 3600; // meter, 500 m/hr
         uint _percentx100 = __get_boostRate_percentx100(_summoner);
         _distance += _distance * _percentx100 / 10000;
-        total_strolledDistance[_summoner] += _distance;
-        total_strolledDistance_ofCompanion[_summoner][companion[_summoner]] += _distance;
+        //total_strolledDistance[_summoner] += _distance;
+        //_set_total_strolledDistance(_summoner, get_total_strolledDistance(_summoner) + _distance);
+        _add_total_strolledDistance(_summoner, _distance);
+        //total_strolledDistance_ofCompanion[_summoner][companion[_summoner]] += _distance;
+        if (companion[_summoner] == 1) {
+            //_set_total_strolledDistance_ofCompanion_01(_summoner, get_total_strolledDistance_ofCompanion_01(_summoner) + _distance);
+            _add_total_strolledDistance_ofCompanion_01(_summoner, _distance);
+        } else if (companion[_summoner] == 2) {
+            //_set_total_strolledDistance_ofCompanion_02(_summoner, get_total_strolledDistance_ofCompanion_02(_summoner) + _distance);
+            _add_total_strolledDistance_ofCompanion_02(_summoner, _distance);
+        } else if (companion[_summoner] == 3) {
+            //_set_total_strolledDistance_ofCompanion_03(_summoner, get_total_strolledDistance_ofCompanion_03(_summoner) + _distance);
+            _add_total_strolledDistance_ofCompanion_03(_summoner, _distance);
+        }
         emit End_Stroll(_summoner, _distance);
     }
     function __get_boostRate_percentx100 (uint _summoner) internal view returns (uint) {
@@ -8326,10 +8525,14 @@ contract Stroll is Ownable, ReentrancyGuard, Pausable {
         }
     }
     function _try_itemMinting (uint _summoner) internal {
-        uint _total_distance = total_strolledDistance[_summoner];
-        uint _total_metSummoners = total_metSummoners[_summoner];
-        uint _stroll_level = stroll_level[_summoner];
-        uint _met_level = met_level[_summoner];
+        //uint _total_distance = total_strolledDistance[_summoner];
+        uint _total_distance = _get_total_strolledDistance(_summoner);
+        //uint _total_metSummoners = total_metSummoners[_summoner];
+        uint _total_metSummoners = _get_total_metSummoners(_summoner);
+        //uint _stroll_level = stroll_level[_summoner];
+        uint _stroll_level = _get_stroll_level(_summoner);
+        //uint _met_level = met_level[_summoner];
+        uint _met_level = _get_met_level(_summoner);
         if (
             (_stroll_level <= 1 && _total_distance >= 6000)
             || (_stroll_level <= 2 && _total_distance >= 20000)
@@ -8348,7 +8551,8 @@ contract Stroll is Ownable, ReentrancyGuard, Pausable {
             || (_stroll_level <= 15 && _total_distance >= 989932)
             || (_stroll_level <= 16 && _total_distance >= 1203918)
         ) {
-            stroll_level[_summoner] += 1;
+            //stroll_level[_summoner] += 1;
+            _add_stroll_level(_summoner, 1);
             __mint_randomTwinkle(_summoner);
         } else if (
             (_met_level <= 1 && _total_metSummoners >= 10)
@@ -8364,7 +8568,8 @@ contract Stroll is Ownable, ReentrancyGuard, Pausable {
             || (_met_level <= 11 && _total_metSummoners >= 20470)
             || (_met_level <= 12 && _total_metSummoners >= 40950)
         ) {
-            met_level[_summoner] += 1;
+            //met_level[_summoner] += 1;
+            _add_met_level(_summoner, 1);
             __mint_randomTwinkle(_summoner);
         }
     }

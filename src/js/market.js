@@ -536,14 +536,18 @@ async function get_recent_activity() {
     })
     console.log(events);
     if (events.length > 0) {
+        recentActivity.innerHTML = "";
         for (let event of events) {
             let _block = event.blockNumber;
             let _item_id = event.returnValues[0];
-            let _wallet_seller = event.returnValues[1];
-            let _wallet_buyer = event.returnValues[2];
+            //let _wallet_seller = event.returnValues[1];
+            //let _wallet_buyer = event.returnValues[2];
+            let _summoner_seller = event.returnValues[1];
+            let _summoner_buyer = event.returnValues[2];
             let _price = web3.utils.fromWei(event.returnValues[3]);
-            let _summoner_seller = await contract_mm_wss.methods.tokenOf(_wallet_seller).call();  //have not summoned yet: 0
-            let _summoner_buyer = await contract_mm_wss.methods.tokenOf(_wallet_buyer).call();  //have not summoned yet: 0
+            _price = Math.round(_price*100)/100;
+            //let _summoner_seller = await contract_mm_wss.methods.tokenOf(_wallet_seller).call();  //have not summoned yet: 0
+            //let _summoner_buyer = await contract_mm_wss.methods.tokenOf(_wallet_buyer).call();  //have not summoned yet: 0
             let _name_seller = await call_name_from_summoner(_summoner_seller);
             if (_name_seller == "") {
                 _name_seller = "#" + _summoner_seller;
@@ -564,6 +568,16 @@ async function get_recent_activity() {
     }
 }
 
+
+//trading volume
+async function show_totalTradingVolume() {
+    let _volume = await contract_mmt.methods.total_tradingVolume().call();
+    _volume = web3.utils.fromWei(_volume, "ether");
+    _volume = Math.round(_volume*100)/100;
+    totalTradingVolume.innerHTML = _volume;
+}
+
+
 //load, for html
 async function loading_in_html() {
     //active JQuery Datatable
@@ -577,6 +591,7 @@ async function loading_in_html() {
         check_approve_upgrade();
         get_recent_activity();
         show_transferFee();
+        show_totalTradingVolume();
     } else {
         tbody_sellingItems.innerHTML = "&nbsp;Waiting...";
         tbody_listedItems.innerHTML = "&nbsp;Waiting...";
