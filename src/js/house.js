@@ -85,19 +85,115 @@ contract ERC721 is IERC721 {
 
 //### 1st
 
+    
+    on-chainに保存するステータスの追加
+        summonerごと
+            total_feeding
+            total_grooming
+            total_neglect_count
+                happy <= 0でgroomingした回数
+            total critical count
+                feeding, grooming, craftingでcriticalを出した回数
+        global
+            total_feeding_count
+            total_grooming_count
+            total_coin_mined
+            total_coin_spent
+            total_leaf_farmed
+            total_leaf_spent
+            total_item_crafted
+            total_fluffy_discovered
+            total_mail_sent
+            total_mail_opened
+            total_dice_rolled
+            total_dice_critical
+            total_dice_fumble
+            total_stroll_distance
+            total_stroll_friend
+            total_practiceTime_Clarinet
+            total_practiceTime_Piano
+            total_practiceTime_Violin
+            
+    
+
+    構想：SNSへの親和性を上げる
+        ワンクリックでtwitterへ投稿できるボタンを設置する。
+        投稿したくなるような小さな絵を実装する
+            canvasを使えば良さそう
+            tokenURIでもいいのだが。
+            ステータスウィンドウはちょっと情報多すぎるだろうか
+        ハッシュタグ案
+            #Astar #BCG #HoM #Murasaki-san
+        匿名性を担保する
+            リテラシーの高い層ほど、nameやidなど、
+                walletを特定可能な情報は安易にSNSに載せたくないだろう。
+            一方で、SNSへの投稿はゲームの進行を誇示することで自己顕示欲を満たしやすい。
+            よって、極めて特定しにくいが、進捗を端的に表す絵を用意して、
+                tweetボタンを設置しておく。
+            marimoNFTの水換え依頼などはwalletを追えるのではやりにくいだろう。
+                リテラシーの低い層か、捨てwalletの利用者か
+                捨てwalletからもメインwalletを追えるのでやはり投稿には勇気がいる。
+            気軽に投稿可能なアイコンや絵を用意する。
+        乗せる情報
+            Lv
+            Fluffyスコア
+            Comfortスコア（丸めた数字）
+            NFT数
+            happy, satietyに応じたアイコン
+
+
+    infoページの充実化
+        改善点
+         ok ageを表示する
+            コントラアップグレードしてtotal mail sentなどの表示を実装する
+         ok ボタン押したあとのloading...を実装する
+         ok     ボタンは何回も押せないように一度押したらdisableにする
+         ok web3Init前にボタン押したときのエラー対策を実装する
+            nameとstaking amountを非表示にするラジオボタンを実装する
+            twitter投稿ボタンを設置する？
+            他のパラメータの検討
+                total_feeding
+                total_grooming
+                neglect_count
+                total critical
+        売買回数、平均購入価格などを集計したマーケット情報ページを作成する？
+            マーケット集計ページを作成する?
+            総取引額、アイテムごとの取引回数・平均価格
+            info内にボタンで実装するか
+     ok むらさきさんのパラメータ詳細をinfoに追加する
+            取得可能なパラメータをすべて表示する
+            所有するNFTをアイコンでばらばらと表示する
+
 
     修正案
-        コントラクトのupgrade
-            ma, mse, dice, mail, stroll, ff, market
+        murasakisanコントラに一括call関数を実装する
+        お菓子の家の建設途中の修正
+            建設しているジンジャーマン
+            10～30%ではもう少しパーツを少なめに
+            staking=0の時の演出
+        全summoner合算のtotal countの実装
+            全d20カウント数
+            全mail open数
+            全make friend数
+            storage_extraに保存して、on-chain dataに表示させる
+        wrong chainのエラーの実装
+        散歩から帰ってきたら吹き出しを表示する？
+        upgradeウィンドウの説明編集
+        マーケットのlist price初期値にbuyback priceを記載する
+        お菓子の家が完成した時の演出の改善
+            glitter表示
+            メーターの色を変えるなどして100%をわかりやすく
+            click to mintなどを表示させる？
+        コントラクトの一括upgradeをmainで行う
+            replacableコントラの全入れ替え
+            contracts.pyのつじつま合わせ -> init.py実行
+        コントラクトマップのupgradable -> replacableへ編集
         tokenURIをsatietyとhappyによって変化させる
             tokenURI_codexを作製し参照する
         楽器を3種類に減らす
             かわりにキャンドルを追加
             あとアイテム２つ。
         おサボり中はミシンやスコップを残す
-        売買回数、平均購入価格などを集計したマーケット情報ページを作成する？
-            マーケット集計ページを作成する?
-            総取引額、アイテムごとの取引回数・平均価格
         rugg-pullの実装
             ひとまず、右端をクリックでrugをスライドさせる
             接触しているfluffyとむらさきさん, diceがon_clickされる
@@ -111,6 +207,13 @@ contract ERC721 is IERC721 {
         かざぐるまと王冠を交換する
         フェスティバル前の演出の改善
         変数書き換え対策の実装, さてどうするか
+     ok コントラクトの総入れ替えが可能か施行する
+     ng コントラクトモニターの初期化時にdeployから参照させる
+     ok コントラクト書き換え環境を整備する
+     ok コントラクトモニターを見直す
+     ok コントラクト全てにpausableを導入する
+     ok     実際にはpauseするfunctionはなくとも、生きか死にかをpauseで判断できるため
+     ok mmとmnのburnを実装
      ok マーケットコントラに統計情報を実装する
      ok     総取引量
      ok コストの引き上げ
@@ -120,27 +223,67 @@ contract ERC721 is IERC721 {
      ok     → グレースケールで
 
 
-    散歩システムを詰める
-     ok 山海草原の実装
-     ok     絵の置換
-     ok     川の廃止
-     ok htmlの記事を完成させる
-     ok 帰宅の演出を完成させる
-     ok     met summonerを表示させる
-            報告しているふうの吹き出しを実装する
-     ok stroll開始のUIを深慮し実装する
-     ok     ボタンにするか、D&Dにするか。
-     ok コントラから経過時間、終了までの時間、現在の歩行距離、の取得を実装する
-     ok strolling windowに情報を表示させる
-     ok waterbottleアイテムを実装する
-     ok strolling windowに現在までのmet summonerを表示させる
-     ok     人数にするか、名前にするか
-     ok     → stroll中は人数のみにする
-     ok Strollテスト
-     ok     flag_sync=0; local_farming_status = 0; local_crafting_status = 0
-     ok     local_strolling_status=1; local_crafting_status=0; local_direction=1; local_companion=1
-     ok     local_stroll_endable = 1;
-     ok     local_strolling_status=0
+    必要な絵
+        猫の立ち絵のアニメーション
+            しっぽがピコピコ
+        家猫と訪問猫の差別化
+            鈴つける？
+        むらさきさんびっくり
+        ないないさんアニメーション
+            移動時にピコピコ動く
+        おかしの家
+            0%～30%をもう少しパーツ少なく
+        exp小物
+            松ぼっくり
+            もみじ
+            どんぐり
+            イチョウの葉
+            クリ
+            くるみ
+            きのこ
+            かぼちゃ
+            ヒイラギの葉
+            桜の枝
+            野いちご
+            いい感じの木の棒
+            フウセンカズラ
+            セミの抜け殻
+            カタツムリのから
+            貝殻
+            ヤドカリの貝殻
+            クローバー
+            たけのこ
+            梅の枝
+            なにかの化石
+        額縁
+            もっと可愛く
+        喜んでいるfluffy
+            fluffier目を大きく
+            fluffiest目を><に, on_clickで使用
+        fortune statue
+            目を光らせる
+        neon fluffy
+            dapps staking量によって豪華さを変える？
+            土星や月のネオンなど、Astarの宇宙っぽさをもう少し演出する
+        プレゼントボックス
+            色違いある程度
+        残りのアイテム
+            ニュースボード
+            クレヨン
+            チェロ
+            旅の扉
+            旅の鍵
+            旅行かばん
+            フラワーリース
+                豪華さが4段階程度
+            アロマキャンドル
+            あと二つ何か
+         ok つみきのスコアメーター
+     ok window
+            summon用色違い
+            upgrade用色違い
+            voting用色違い
+            convert用色違い
 
 
     構想：散歩中のミニゲーム
@@ -155,27 +298,26 @@ contract ERC721 is IERC721 {
             お花はにゅいにゅいさんと競合する
             葉っぱはleafと競合してわかりにくい
             星で良いか。look and feelがちょっと弱いだろうか。
-                
         念のため、暗号化してローカルに保存する
-        暗号・復号化関数例：
-            パッと見てbase64だとバレにくいよう、頭に任意の1文字を加えて
-                base64化を複数回行っている
-            soltText = "murasaki"
-            function toX (_input) {
-                for (let i=0; i<soltText.length; i++){
-                    _input = soltText[i] + btoa(_input);
+            暗号・復号化関数例：
+                パッと見てbase64だとバレにくいよう、頭に任意の1文字を加えて
+                    base64化を複数回行っている
+                soltText = "murasaki"
+                function toX (_input) {
+                    for (let i=0; i<soltText.length; i++){
+                        _input = soltText[i] + btoa(_input);
+                    }
+                    return _input;
                 }
-                return _input;
-            }
-            function fromX (_input) {
-                for (let i=0; i<soltText.length; i++){
-                    _input = atob(_input.substr(1));
+                function fromX (_input) {
+                    for (let i=0; i<soltText.length; i++){
+                        _input = atob(_input.substr(1));
+                    }
+                    return _input;
                 }
-                return _input;
-            }
 
 
-    長期的な意味論の深慮
+    構想：長期的な意味論の深慮
         お金に換算できない価値（宗教・称号・勲章など）が
             PJの中心に厚い層で存在するほうが周りが安定する
         DAOの一つの完成形は創設者・リーダーが不在でも存続し続ける状態
@@ -312,66 +454,6 @@ contract ERC721 is IERC721 {
         合計+exp%の表示方法のUI実装
             どこに表示させるか
             ぬいちゃんboostをどうするか
-
-
-    必要な絵
-        猫の立ち絵のアニメーション
-            しっぽがピコピコ
-        家猫と訪問猫の差別化
-            鈴つける？
-        むらさきさんびっくり
-        ないないさんアニメーション
-            移動時にピコピコ動く
-        おかしの家
-            0%, 30%, 50%, 70%, 100%の5段階程度
-        exp小物
-            松ぼっくり
-            もみじ
-            どんぐり
-            イチョウの葉
-            クリ
-            くるみ
-            きのこ
-            かぼちゃ
-            ヒイラギの葉
-            桜の枝
-            野いちご
-            いい感じの木の棒
-            フウセンカズラ
-            セミの抜け殻
-            カタツムリのから
-            貝殻
-            ヤドカリの貝殻
-            クローバー
-            たけのこ
-            梅の枝
-            なにかの化石
-        額縁
-            もっと可愛く
-        喜んでいるfluffy
-            fluffier目を大きく
-            fluffiest目を><に, on_clickで使用
-        fortune statue
-            目を光らせる
-        neon fluffy
-            dapps staking量によって豪華さを変える？
-        プレゼントボックス
-            色違いある程度
-        残りのアイテム
-            ニュースボード
-            クレヨン
-            チェロ
-            旅の扉
-            旅の鍵
-            旅行かばん
-            フラワーリース
-                豪華さが4段階程度
-         ok つみきのスコアメーター
-     ok window
-            summon用色違い
-            upgrade用色違い
-            voting用色違い
-            convert用色違い
 
 
    *楽器練習UIの改善
@@ -1108,6 +1190,131 @@ contract ERC721 is IERC721 {
 
 //### 3rd
 
+ ok 散歩システムを詰める
+     ok 草原の実装
+     ok 山海草原の実装
+     ok     絵の置換
+     ok     川の廃止
+     ok htmlの記事を完成させる
+     ok 帰宅の演出を完成させる
+     ok     met summonerを表示させる
+            報告しているふうの吹き出しを実装する
+     ok stroll開始のUIを深慮し実装する
+     ok     ボタンにするか、D&Dにするか。
+     ok コントラから経過時間、終了までの時間、現在の歩行距離、の取得を実装する
+     ok strolling windowに情報を表示させる
+     ok waterbottleアイテムを実装する
+     ok strolling windowに現在までのmet summonerを表示させる
+     ok     人数にするか、名前にするか
+     ok     → stroll中は人数のみにする
+     ok Strollテスト
+     ok     flag_sync=0; local_farming_status = 0; local_crafting_status = 0
+     ok     local_strolling_status=1; local_crafting_status=0; local_direction=1; local_companion=1
+     ok     local_stroll_endable = 1;
+     ok     local_strolling_status=0
+
+
+ウォレットに住み着いてそこで生活しているバーチャルペットトークン
+
+ウォレットはweb3の世界で個人を表す重要な識別子である。このウォレットを「家」と見なして、この家に住み着いてそこで生活しているペットトークンを所有することで、web3における活動がより楽しいものになるのではないかと我々は考えた。
+
+「ウォレットに住み着く」ということを表現するため、むらさきさんトークンはSBT（untransfable ERC-721）で実装した。むらさきさんトークンには、mint時に、生まれた場所や性格、家の住所などが決定されるが、これらのパラメータはDom HofmannのLootの様にウォレットのアドレスに応じて決定される。これらの組み合わせパターンは約9,000通り存在し、ウォレットごとに異なる性質のむらさきさんトークンが住み着くわけである（これらのパラメータはゲームプレイへは今のところ直接の影響はないが）。
+
+「ウォレット内で生活している」ということを表現するため、むらさきさんの「満腹度」と「幸福度」は、時間経過とともに徐々に減少し、ウォレットのオーナーがお世話することで回復する。むらさきさんトークンはウォレットオーナーの継続的なお世話によって徐々に成長し、レベルやstrengthなどのステータスが増加してゆく。これらの処理は完全にon-chainでserverlessで処理されunstoppableであり、トークンのステータス値はブロックチェーン上にのみ保存される。
+
+家具やインテリアはNFTとして提供され、ウォレット内に所有することでむらさきさんの家に設置される。ウォレットのnonce値に応じて針が進む時計や、walletの年齢に応じて成長する金魚鉢の中の金魚、ウォレット内に所持している種類のトークンが飛び出すchest、ウォレット内に所持しているアート系NFTをランダムで表示する額縁など、ウォレットの状態を反映したアイテムがいくつか実装されている。使い込まれたウォレットほど、にぎやかな家とみなされるだろう。
+
+以上の様に、本プロジェクトの目的は、「ウォレットという「家」に一意に紐付けられ、時間経過と継続的なお世話によって成長するペットトークンを提供する」ことである。これは私達自身が所有してみたかったものそのものであり、それが開発の最大の動機と目的である。
+
+
+ ok BCGとして最も重きを置いているアピールポイントを明記する
+        より明確に、より丁寧に、より伝わりやすく明記する。
+        一言でいうと：
+            「人工生命」を表現したい
+        「電子生命」「人工生命」に興味があった。
+        ブロックチェーンの特性を利用
+            持続性、改竄耐性
+            人工生命を表現する上で、簡単にメモリ上のパラメタを書き換えられてしまうと良くない
+            また、単一のサーバー上に保存されて、そのサーバー上でしか生きられないのも違う
+            決して書き換えられず、かつ今後も半永久的に持続するブロックチェーンは、
+                私達が実現したい人工生命の特性に有用であると思った。
+        価値が劣化しないトークン
+            buyback treasuryによって常に裏付け資産があるtoken
+            人気の減少によって実質的に「死」んでしまうのは悲しいため
+            年齢の増加とともに、確実に価値が上昇するよう。
+        プロジェクトの目的と哲学
+            「人工生命」を表現する
+        「生命」のどの部分を表現したいのか
+            寿命と死：
+                生みの親である友人のたっての願いで、むらさきさんには寿命は設定していない
+                しかし、一定時間お世話されなかったトークンは石化してしまう
+            自己増殖：
+                増殖や世代などは考えていない。
+            成長と変化：
+            生きて住んでいる、生活している、を表現したい。
+                お世話した時間に応じて、確実に成長するトークン
+                課金によるブーストでは成長速度は変化せず、お世話した時間に応じて成長する。
+    
+        
+What we want to achieve in a blockchain game.
+
+ウォレットに住み着いてそこで生活しているバーチャルペットトークン
+
+ウォレットはweb3の世界で個人を表す重要な識別子である。このウォレットを「家」と見なして、この家に住み着いてそこで生活しているペットトークンを所有することで、web3における活動がより楽しいものになるのではないかと我々は考えた。
+        
+「ウォレットに住み着く」ということを表現するため、むらさきさんトークンはSBT（untransfable ERC-721）で実装した。むらさきさんトークンには、mint時に、生まれた場所や性格、家の住所などが決定されるが（これらのパラメータはゲームプレイへは今のところ直接の影響はないが）、これらのパラメータはDom HofmannのLootの様にウォレットのアドレスに応じて決定される。
+        
+「ウォレット内で生活している」ということを表現するため、むらさきさんの「満腹度」と「幸福度」は、時間経過とともに徐々に減少し、ウォレットのオーナーがお世話することで回復させることができる。むらさきさんトークンはウォレットオーナーの継続的なお世話によって徐々に成長し、レベルやstrengthなどのパラメーターが増加してゆく。これらの処理は完全にon-chainでserverlessで処理され、トークンの状態値はブロックチェーン上にのみ保存される。
+        
+家具やインテリアはNFTとして提供され、ウォレット内に所有することでむらさきさんの家に設置される。ウォレットのnonce値に応じて針が進む時計や、walletの年齢に応じて成長する金魚鉢の中の金魚、ウォレット内に所持している種類のトークンが飛び出すchest、ウォレット内に所持しているアート系NFTをランダムで表示する額縁など、ウォレットの状態を反映したUXを思いつく限り実装してみた。使い込まれたウォレットほど、にぎやかな家になるだろう。
+
+また、本プロジェクトの情報を統括したERC-721互換のコントラクトを用意した。このコントラクトにより、むらさきさんトークンは多数のパラメータを持つERC-721規格のトークンとして振る舞う。このコントラクトを利用することで、他のPJ（これは我々の次回作も含まれる）がむらさきさんのステータスやパラメータを容易に参照可能となった。
+        
+以上の様に、本プロジェクトの目的は、「ウォレットという「家」に一意に紐付けられ、時間経過と継続的なお世話によって成長するペットトークンを提供する」ことである。これは私達自身が欲しかったものであり、それが開発の最大の動機と目的である。
+
+ ok コントラクトのupgrade手順を整備する
+        upgradableをreplacableに修正
+        手動でaddressをセットするのか、スクリプトでinitializeするのか、
+            今後のためにupgradeスキームを確立しておく。
+        ABIの取得と更新が結構面倒か
+            コピペが可能な形式でabiを取得可能なスクリプトを用意しておく。
+        手順：
+            新しいコントラをデプロイ
+            share.jsのabiを部分修正
+            新しいコントラにmaをセット
+            mc, ms, mp, mss, msn, mseの必要なものへ新しいコントラのpermissionを追加
+                この時点で新しいコントラが動作可能になる
+            maのコントラを新しいコントラのアドレスへ書き換える
+            古いコントラのpauseフラグを立てて非活性化する
+        つまり、ソースファイルとコントラ名から、
+            コントラデプロイと、アドレスとABIの取得を行い、
+            mc, ms, mp, mss, msn, mseを指定してpermissionを書き込むスクリプトがあれば良い。
+                ["Stroll", ["ms", "mse"]]   など。
+            その後、古いアドレスと新しいアドレスを引数に、ma書き換えを行う。
+                ["Stroll", {old_address}, {new_address}]
+                    ma.Strollがold_addressであることをチェック
+                    ma.Strollをnew_addressへ書き換え
+                    old_addressのpauseをtrueへ書き込み
+        実装：
+            デプロイヤー:
+                デプロイするコントラクト名を指定する
+                ソースコードを読み込んでコントラクトをチェーン上へデプロイする
+                コントラクトのアドレスとabiを書き出す
+            イニシャライザー：
+                イニシャライズするコントラクト名を指定する
+                コントラクトのアドレスとabiを別ファイルから読み込む
+                コントラクト単位でトランザクション予約リストにappendする
+                トランザクション予約リストの重複を削除する
+                トランザクションを順に飛ばす
+
+ ng プレイヤーの「消費」行動を考える
+        楽しくて思わず「消費」してしまうメカニズムを組み入れたい。
+        「手数料」は望ましくない。
+            継続のための固定支出費、などはストレスだろう
+        「消費」すると、ワクワクするようなリターンが必ず得られ、
+            かつ少しばかりのランダム性（今回は何が起こるか楽しみ）要素がある行動
+        → coin/leafの消費がこれに該当するだろう。
+            
  ok お菓子の家の実装
      ok Solidity:
             counterを返す関数
@@ -5265,10 +5472,10 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
                         break;
                     }
                 }
-            } else if (tmp <= 30 && satiety <= 10 && count_sync > 3) {
+            } else if (tmp <= 30 && satiety <= 20 && count_sync > 3) {
                 this.mode = "hungry";
                 this.count = 0;
-            } else if (tmp <= 30 && happy <= 10 && count_sync > 3) {
+            } else if (tmp <= 30 && happy <= 20 && count_sync > 3) {
                 this.mode = "crying";
                 this.count = 0;
             } else if (tmp <= 30 && flag_music == 1 && count_sync > 3) {
@@ -11893,28 +12100,28 @@ function open_window_strollingDuring(scene, mode) {
         _create_obj(scene, 1000, 350, "stroll_during_01_cloud", 0.1+Math.random()*0.3, 0.1+Math.random()*0.3, 5001, 1);
 
         //create mountain
-        _create_obj(scene, -300, 540, "stroll_during_01_mountain", 1.2, 0.1, 5001);
-        _create_obj(scene, 100, 540, "stroll_during_01_mountain", 1.2, 0.1, 5001);
-        _create_obj(scene, 500, 540, "stroll_during_01_mountain", 1.2, 0.1, 5001);
-        _create_obj(scene, 800, 540, "stroll_during_01_mountain", 1.2, 0.1, 5001);
-        _create_obj(scene, 1200, 540, "stroll_during_01_mountain", 1.2, 0.1, 5001);
+        _create_obj(scene, -300, 570, "stroll_during_01_mountain", 1.2, 0.1, 5001);
+        _create_obj(scene, 100, 570, "stroll_during_01_mountain", 1.2, 0.1, 5001);
+        _create_obj(scene, 500, 570, "stroll_during_01_mountain", 1.2, 0.1, 5001);
+        _create_obj(scene, 800, 570, "stroll_during_01_mountain", 1.2, 0.1, 5001);
+        _create_obj(scene, 1200, 570, "stroll_during_01_mountain", 1.2, 0.1, 5001);
 
         //create grass
-        _create_obj(scene, -500, 640, "stroll_during_01_grass", 0.4, 0.4, 5002);
-        _create_obj(scene, -400, 640, "stroll_during_01_grass", 0.4, 0.4, 5002);
-        _create_obj(scene, -300, 640, "stroll_during_01_grass", 0.4, 0.4, 5002);
-        _create_obj(scene, -200, 640, "stroll_during_01_grass", 0.4, 0.4, 5002);
-        _create_obj(scene, -100, 640, "stroll_during_01_grass", 0.4, 0.4, 5002);
-        _create_obj(scene, 100, 640, "stroll_during_01_grass", 0.4, 0.4, 5002);
-        _create_obj(scene, 200, 640, "stroll_during_01_grass", 0.4, 0.4, 5002);
-        _create_obj(scene, 300, 640, "stroll_during_01_grass", 0.4, 0.4, 5002);
-        _create_obj(scene, 400, 640, "stroll_during_01_grass", 0.4, 0.4, 5002);
-        _create_obj(scene, 500, 640, "stroll_during_01_grass", 0.4, 0.4, 5002);
-        _create_obj(scene, 600, 640, "stroll_during_01_grass", 0.4, 0.4, 5002);
-        _create_obj(scene, 800, 640, "stroll_during_01_grass", 0.4, 0.4, 5002);
-        _create_obj(scene, 900, 640, "stroll_during_01_grass", 0.4, 0.4, 5002);
-        _create_obj(scene, 1000, 640, "stroll_during_01_grass", 0.4, 0.4, 5002);
-        _create_obj(scene, 1100, 640, "stroll_during_01_grass", 0.4, 0.4, 5002);
+        _create_obj(scene, -500, 625, "stroll_during_01_grass", 0.4, 0.4, 5002);
+        _create_obj(scene, -400, 625, "stroll_during_01_grass", 0.4, 0.4, 5002);
+        _create_obj(scene, -300, 625, "stroll_during_01_grass", 0.4, 0.4, 5002);
+        _create_obj(scene, -200, 625, "stroll_during_01_grass", 0.4, 0.4, 5002);
+        _create_obj(scene, -100, 625, "stroll_during_01_grass", 0.4, 0.4, 5002);
+        _create_obj(scene, 100, 625, "stroll_during_01_grass", 0.4, 0.4, 5002);
+        _create_obj(scene, 200, 625, "stroll_during_01_grass", 0.4, 0.4, 5002);
+        _create_obj(scene, 300, 625, "stroll_during_01_grass", 0.4, 0.4, 5002);
+        _create_obj(scene, 400, 625, "stroll_during_01_grass", 0.4, 0.4, 5002);
+        _create_obj(scene, 500, 625, "stroll_during_01_grass", 0.4, 0.4, 5002);
+        _create_obj(scene, 600, 625, "stroll_during_01_grass", 0.4, 0.4, 5002);
+        _create_obj(scene, 800, 625, "stroll_during_01_grass", 0.4, 0.4, 5002);
+        _create_obj(scene, 900, 625, "stroll_during_01_grass", 0.4, 0.4, 5002);
+        _create_obj(scene, 1000, 625, "stroll_during_01_grass", 0.4, 0.4, 5002);
+        _create_obj(scene, 1100, 625, "stroll_during_01_grass", 0.4, 0.4, 5002);
 
     } else if (mode == 2) { //seaside
 
@@ -11957,8 +12164,8 @@ function open_window_strollingDuring(scene, mode) {
         _create_obj(scene, 1110, 651, "stroll_during_02_shell", 0.08, 0.4, 5002);
         
         //yacht
-        _create_obj(scene, 108, 550, "stroll_during_02_yacht", 0.15, 0.1, 5002);
-        _create_obj(scene, 982, 540, "stroll_during_02_fune", 0.15, 0.1, 5002);
+        _create_obj(scene, 108, 550, "stroll_during_02_yacht", 0.15, 0.1, 5002, 1);
+        _create_obj(scene, 982, 540, "stroll_during_02_fune", 0.15, 0.1, 5002, 1);
 
     } else if (mode == 3) { //grassland
 
@@ -11975,6 +12182,12 @@ function open_window_strollingDuring(scene, mode) {
         _create_obj(scene, 600, 300, "stroll_during_01_cloud", 0.1+Math.random()*0.3, 0.1+Math.random()*0.3, 5001, 1);
         _create_obj(scene, 1000, 350, "stroll_during_01_cloud", 0.1+Math.random()*0.3, 0.1+Math.random()*0.3, 5001, 1);
 
+        //create mountain
+        _create_obj(scene, -200, 580, "stroll_during_03_mountain", 1.2, 0.025, 5001);
+        _create_obj(scene, 300, 580, "stroll_during_03_mountain", 1.2, 0.025, 5001);
+        _create_obj(scene, 600, 580, "stroll_during_03_mountain", 1.0, 0.025, 5001);
+        _create_obj(scene, 1100, 575, "stroll_during_03_mountain", 1.5, 0.025, 5001);
+
         //create flower
         let _li_x = [-400, -200, 0, 200, 400, 600, 800, 1000, 1200];
         for (let i=0; i<_li_x.length; i++) {
@@ -11987,7 +12200,7 @@ function open_window_strollingDuring(scene, mode) {
         }
         
         //tree
-        _create_obj(scene, 108, 570, "stroll_during_03_tree1", 0.2, 0.1, 5002);
+        _create_obj(scene, 50, 570, "stroll_during_03_tree1", 0.2, 0.1, 5002);
         _create_obj(scene, 982, 570, "stroll_during_03_tree2", 0.2, 0.1, 5002);
         
         //baloon
@@ -13121,6 +13334,7 @@ function preload(scene) {
     scene.load.image("stroll_during_03_tree1", "src/png/stroll_during_03_tree1.png");
     scene.load.image("stroll_during_03_tree2", "src/png/stroll_during_03_tree2.png");
     scene.load.image("stroll_during_03_baloon", "src/png/stroll_during_03_baloon.png");
+    scene.load.image("stroll_during_03_mountain", "src/png/stroll_during_03_mountain.png");
 
 
     //---sounds
@@ -14810,7 +15024,7 @@ function create(scene) {
         murasakisan.submode = 2;
         murasakisan.count = 0;
         murasakisan.target_x = 180;
-        murasakisan.target_y = 450;
+        murasakisan.target_y = 455;
         update_farming_perDay(summoner);
     } else if (local_crafting_status == 1) {
         murasakisan = new Murasakisan(scene, 950, 740)
@@ -15971,7 +16185,7 @@ function update_checkModeChange(this_scene) {
         murasakisan.submode = 0;
         murasakisan.count = 0;
         murasakisan.target_x = 180;
-        murasakisan.target_y = 450;
+        murasakisan.target_y = 455;
         sound_farming.play();
         update_farming_perDay(summoner);
     } else if (
@@ -16046,8 +16260,10 @@ function update_checkModeChange(this_scene) {
             let _x = item_indicator.x-20;
             let _y = item_indicator.y+item_indicator.height*item_indicator.scaleY*0.8/2;
             let _bar_back = makeMiniProgressBar(this_scene, _x-2, _y-2, 40+4, 10+4, 0xecd9ff);
+            //_bar_back.depth = 11;
             item_indicator_bar = makeMiniProgressBar(this_scene, _x, _y, 40, 10, 0xb872f4);
             item_indicator_bar.scaleX = 0.01;
+            //item_item_indicator.depth = 12;
             group_item_indicator.add(_bar_back);
             group_item_indicator.add(item_indicator_bar);
         }
@@ -19305,7 +19521,8 @@ function update_checkItem(this_scene) {
                 }
             });
     } else if (
-        local_dapps_staking_amount == 0 
+        typeof item_staking != "undefined" && typeof item_staking.scene != "undefined"
+        && local_dapps_staking_amount == 0 
     ){
         item_staking.setTexture("item_staking_00");
         /*

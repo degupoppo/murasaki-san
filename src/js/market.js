@@ -103,9 +103,9 @@ async function update_onMarketItems() {
             _html += "<td id='" + "input_price_" + _item + "'><center>";
             _html += "<font color='blue'><b>" + _auctionPrice + "</b></font><br>";
             _html += "<div style='line-height:100%'>";
-            _html += "<font size='2' color='blue'><b>" + "- prelisting -" + "</b></font><br>";
+            _html += "<font size='2' color='blue'>" + "- prelisting -" + "</font><br>";
             //_html += "(Listing price: <b>" + _listedPrice + "</b>)<br>";
-            _html += "<font size='2' color='blue'><b>&#x231b;" + _auctionRestingTime + "</b></font>";
+            _html += "<font size='2' color='blue'>&#x231b;" + _auctionRestingTime + "</font>";
             _html += "</div>";
             _html += "</center></td><td><center>";
             _html += "<button onclick='buy_item(" + _item + "," + _auctionPrice + ");'>";
@@ -539,11 +539,11 @@ async function get_recent_activity() {
         recentActivity.innerHTML = "";
         for (let event of events) {
             let _block = event.blockNumber;
-            let _item_id = event.returnValues[0];
+            let _item_id = event.returnValues[2];
             //let _wallet_seller = event.returnValues[1];
             //let _wallet_buyer = event.returnValues[2];
             let _summoner_seller = event.returnValues[1];
-            let _summoner_buyer = event.returnValues[2];
+            let _summoner_buyer = event.returnValues[0];
             let _price = web3.utils.fromWei(event.returnValues[3]);
             _price = Math.round(_price*100)/100;
             //let _summoner_seller = await contract_mm_wss.methods.tokenOf(_wallet_seller).call();  //have not summoned yet: 0

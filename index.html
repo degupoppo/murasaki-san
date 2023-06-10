@@ -4,6 +4,7 @@
 
 
 <script src="lib/web3.min.js"></script>
+<script src="src/js/contracts.js"></script>
 <script src="src/js/share.js"></script>
 <script src="src/js/index.js"></script>
 
@@ -99,7 +100,7 @@ We have released Murasaki-san <b><a href="https://store.line.me/stickershop/prod
 <h3 id="whats_this">What's This? &#127808;</h3>
 
 <p>
-<b>House of Murasaki-san</b> is a dApps game built on Astar Network. This fully on-chain game has a relaxed pace with low transactions and can be classified as <b>an idle game</b> or <b>a pet simulation caring game</b>.<br>
+<b>House of Murasaki-san</b> is a dApps game built on Astar Network. This fully on-chain game has a relaxed pace with low transactions and can be classified as <b>an idle game</b> or <b>a pet caring simulation game</b>.<br>
 </p>
 
 <p>
@@ -154,18 +155,23 @@ and this project adheres to [Semantic Versioning](http://semver.org/).<br>
 <!--- Concept --->
 
 <h3 id="concept">The Main Concept &#127800;</h3>
+
 <p>
 Murasaki-san is <b>the virtual pet</b> that lives in your Astar EVM wallet. Murasaki-san is a Soulbound token (SBT), not an NFT. <b>Only one Murasaki-san can live in a single wallet.</b>
 </p>
+
 <p>
 As time passes, Murasaki-san becomes hungry and lonely. As you attend to their needs by feeding and grooming them, they will gradually grow. By crafting various items together with your Murasaki-san, your House will become more vibrant and lively. Your Murasaki-san may even make a new friend along the way.
 </p>
+
 <p>
 Murasaki-san and House of Murasaki-san take a long long time to grow. Please take it easy and watch over them.
 </p>
+
 <p>
 <b>Motivation:</b>
 </p>
+
 <p>
 Our main motivations for developing this project are:<br>
 <font color="#E12E7D">
@@ -178,6 +184,41 @@ Our main motivations for developing this project are:<br>
 </font>
 </p>
 
+<p>
+
+And a little more about our purpose:<br>
+
+<details>
+<summary>What we want to achieve in this project:</summary>
+
+<p><font color="#E12E7D">
+<b>A virtual pet token that resides in and lives within a wallet.</b>
+</font></p>
+
+<p>
+The wallet is a crucial identifier that represents an individual in the web3 world. We thought it would be more fun to consider the wallet as a "house" and have a pet token residing in it and living within it.
+</p>
+
+<p>
+To express the idea of "residing in the wallet," the Murasaki-san token was implemented as an SBT (untransfable ERC-721 token). The Murasaki-san token determines the place of birth, personality, and address of the house when it is minted, and these parameters are determined based on the wallet address, similar to <a href="https://www.lootproject.com/synthloot">Synthetic Loot by Dom Hofmann</a>. There are approximately 9,000 combinations of these patterns, and different Murasaki-san tokens with unique characteristics reside in each wallet (although these parameters currently have no direct impact on gameplay).
+</p>
+
+<p>
+To express the idea of "living within the wallet," Murasaki-san's "Satiety" and "Happy" decrease over time and can be restored by the wallet owner taking care of them. Murasaki-san tokens gradually grow through the continuous care of the wallet owner, and their status values such as level and strength increase. These processes are fully on-chain, serverless, tamper-resistance, and unstoppable, and the token's status values are stored only on the blockchain.
+</p>
+
+<p>
+Furniture and interior decorations are provided as NFTs, and are placed in House of Murasaki-san by owning them within the wallet. Some items reflect the state of the Astar wallet, such as a clock whose hands move based on the nonce value of the wallet, a goldfish inside a fishbowl that grows with the wallet age, a chest from which tokens owned in the wallet pop out, and a photoframe randomly displaying NFTs owned within the wallet. The more the player uses their wallet on the Astar chain, the more their wallet will be considered a lively house.
+</p>
+
+<p>
+In summary, the purpose of this project is to provide a pet token that is uniquely bound to a "house" wallet and grows throught time and continuous care. This is exactly what we ourselves wanted to own, and it is our main motivation and purpose for development.
+</p>
+
+</details>
+
+</p>
+
 <br>
 
 
@@ -186,6 +227,7 @@ Our main motivations for developing this project are:<br>
 <h3 id="howto">How to Play &#128216;</h3>
 <p>
 <ul>
+<li>Clicking the <b>&#x2764;Play</b> button at the top of the page will start the game.
 <li><b>Summon</b> your murasaki-san (It's <b>SBT</b>, not NFT). Free trial are available.<br>
 <li>Care for your Murasaki-san by <b>Feeding</b> and <b>Grooming</b> them to gain EXP.<br>
 <li>Accumulate EXP to <b>Level up</b> your Murasaki-san.<br>
@@ -210,7 +252,7 @@ Our main motivations for developing this project are:<br>
 
 <!--- Cost --->
 
-<h3 id="cost">Cost to Play &#x1f4b0;</h3>
+<h3 id="cost">Cost to Play and Trial &#x1f4b0;</h3>
 
 <p>
 <u><i>Trial Fee:</i> <b>*FREE*</b></u><br>
@@ -306,7 +348,7 @@ Item NFTs listed in the marketplace will be moved out of your house and will no 
 
 <ul>
 <li><b>Wallets that have an active Murasaki-san SBT</b> can use this marketplace.
-<li><b>Dutch auction mechanism</b>: Items listed for less than <b>100 $ASTR</b> will be pre-listed using the Dutch auction mechanism. The auction will start at a price of 100 $ASTR and will decrease to the listing price over a 24 hr period. The item will then remain at the listing price unless the owner unlists it.
+<li><b>Dutch auction mechanism</b>: Items listed for less than <b>500 $ASTR</b> will be pre-listed using the Dutch auction mechanism. The auction will start at a price of 500 $ASTR and will decrease to the listing price over a 24 hr period. The item will then remain at the listing price unless the owner unlists it.
 <li><b><a href="buyback.html">Buyback Treasury</a>:</b> Players can choose to list their owned NFTs for auction on the Marketplace or burn them in the Buyback Treasury at a fixed price. The Minimum listing price is set at the buyback price or 1.00 $ASTR, whichever is higher.
 </ul>
 
@@ -331,6 +373,7 @@ Before starting the game, please take note of the following precautions:
 <br>
 
 
+
 <!--- Tips --->
 
 <h3 id="tips">And Then &#x1f4ac;</h3>
@@ -350,6 +393,36 @@ Here are some gameplay tips:
 <p>
 Also see below for more detailed game specs.
 </p>
+
+<br>
+
+
+
+<!--- FAQ --->
+
+<h3 id="faq">FAQ&#x2753;</h3>
+
+<details>
+<summary>How do I participate in dApps Staking?</summary>
+<p>
+***
+</p>
+</details>
+
+<details>
+<summary>I can't send my NFT to another wallet.</summary>
+<p>
+***
+</p>
+</details>
+
+<details>
+<summary>I can't get Fluffies of the same color!</summary>
+<p>
+***
+</p>
+</details>
+
 
 <br>
 
@@ -660,7 +733,7 @@ Due to the complexity of the project's contract system, a viewer contract has be
 </p>
 
 <p>
-<b>Security:</b> All contracts inherit ReentrancyGuard, Ownable, and Pausable from Openzeppelin. Almost all functions that players can execute require them to possess active Murasaki-san SBT in their wallet. Developers can quickly remove clearly harmful players such as botters and crackers from the community by deactivating their SBTs. Contracts that serve logical functions are upgradable and can be partially replaced to fix bugs or adjust gamebalances flexibly. Only two contracts hold token assets: BufferVault and BuybackTreasury. BufferVault has no functions that can be executed by someone other than the owner. BubackTreasury has a function that players can execute, but it has nonReentrant and whenNotPaused modifier and a transfer limit, making it impossible to exploit a bug to extract assets from the Treasury. Developers continuously monitor all contract activity and immediately remove any clearly harmful players.
+<b>Security:</b> All contracts inherit ReentrancyGuard, Ownable, and Pausable from Openzeppelin. Almost all functions that players can execute require them to possess active Murasaki-san SBT in their wallet. Developers can quickly remove clearly harmful players such as botters and crackers from the community by deactivating their SBTs. Contracts that serve logical functions are replaceable and can be partially replaced to fix bugs or adjust gamebalances flexibly. Only two contracts hold token assets: BufferVault and BuybackTreasury. BufferVault has no functions that can be executed by someone other than the contract owner. BubackTreasury has a function that players can execute, but it has nonReentrant modifier and a transfer limit, making it impossible to exploit a bug to extract assets from the Treasury. Developers continuously monitor all contract activity and immediately remove any clearly harmful players.
 </p>
 
 <p>
@@ -677,13 +750,14 @@ Due to the complexity of the project's contract system, a viewer contract has be
 <summary>Calculation Formulas</summary>
 
 <p>
-The calculation formula regarding the effect of each status value on the results of each action is as follows:
+The calculations of the effect of each status value on the result of each action is performed entirely within the contracts, and the summary of the calculation formulas is as follows:
 </p>
 
 <p>
 <b>Feeding efficacy:</b><br>
 <font size="-0.5">
 &nbsp;&nbsp;&nbsp;Exp Gained = (500 * (100 - Satiety) / 100) * ExpBoost<br>
+&nbsp;&nbsp;&nbsp;Satiety = 100 - SEC / 432<br>
 &nbsp;&nbsp;&nbsp;ExpBoost = Boost_from_FlowerWreath * Boost_from_FluffyDoll
 </font>
 </p>
@@ -692,6 +766,7 @@ The calculation formula regarding the effect of each status value on the results
 <b>Grooming efficacy:</b><br>
 <font size="-0.5">
 &nbsp;&nbsp;&nbsp;Exp Gained = (3000 * (100 - Happy * Coefficient) / 100) * ExpBoost<br>
+&nbsp;&nbsp;&nbsp;Happy = 100 - SEC / 2592<br>
 &nbsp;&nbsp;&nbsp;ExpBoost = Boost_from_FlowerWreath * Boost_from_FluffyDoll<br>
 &nbsp;&nbsp;&nbsp;Coefficient = (Now - LastGroomingTime - WorkingTime) / (Now - LastGroomingTime)
 &nbsp;&nbsp;&nbsp;Working: Mining, Farming, Crafting, Strolling, Practicing</font>
@@ -957,7 +1032,7 @@ The contents described below are applicable if this project is adopted for dApps
 </center>
 
 <p>
-Through the Buyback Sysmte and following strategies, we aim to create a low-stress economic system in the medium to long term. Our goal is to create a system where players can enjoy the gameplay for a longer period without the stress of incurring significant losses in the short term. Our focus is on fostering a relaxed and enjoyable experience over an extended period, rather than seeking quick and substantial profits.
+Through the Buyback Sysmte and following economic strategies, we aim to create a low-stress economic system in the medium to long term. Our goal is to create a system where players can enjoy the gameplay for a longer period without the stress of incurring significant losses in the short term. Our focus is on fostering a relaxed and enjoyable experience over an extended period, rather than seeking quick and substantial profits.
 </p>
 
 <p>

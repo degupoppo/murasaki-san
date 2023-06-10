@@ -1,0 +1,205 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<script src="lib/web3.min.js"></script>
+<script src="src/js/contracts.js"></script>
+<script src="src/js/share.js"></script>
+<script src="src/js/index.js"></script>
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=0.9">
+
+<title>On-Chain Informations</title>
+<meta name="description" content="Murasaki-san is a virtual pet that lives in your wallet on Astar Network." />
+<link rel="stylesheet" href="src/css/simple2.css">
+<link rel="stylesheet" href="src/css/style.css">
+
+<link rel="icon" href="src/png/favicon.png" />
+<link rel="apple-touch-icon" href="src/png/favicon.png">
+
+<meta property="og:title" content="On-Chain Informations">
+<meta property="og:image" content="src/png/favicon.png">
+<meta property="og:url" content="https://murasaki-san.com/">
+<meta property="og:description" content="Murasaki-san is a virtual pet that lives in your wallet on Astar Network.">
+
+<script src="https://cdn.jsdelivr.net/npm/@twemoji/api@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
+
+</head>
+
+<body>
+
+<header>
+
+<nav>
+<a href="index.html"><b>&#x1f3e0; Home</b></a>
+<a href="house.html" ><b>&#x2764; Play</b></a>
+<a href="market.html"><b>&#x1f6d2; Market</b></a>
+<a href="info.html" class="current"><b>&#x1f4d7; Info</b></a>
+&nbsp;<span id="button_connect"><button onclick="init_web3();" style="width:100px;">Connect</button></span>
+</nav>
+
+<h1>
+<p class="vertical-middle">
+On-Chain Informations
+</p>
+</h1>
+
+<p>
+<center>
+All the status and parameters of the House of Murasaki-san are<br>
+recorded on the Astar Network EVM blockchain.
+</center>
+</p>
+
+</header>
+
+
+<main>
+
+
+<!--- random --->
+
+<h3 id="random">Random Murasaki-san &#x1f33c;</h3>
+
+<p>
+Five random Murasaki-san icons will be displayed. By clicking on an icon, you can visit the corresponding House of Murasaki-san.
+</p>
+
+<div id="output_murasakiIcon" style="height:64px"><b>&nbsp;&nbsp;&nbsp;Loading...</b></div>
+
+<br>
+<br>
+
+
+<!--- visit --->
+
+<h3 id="visit">Visiting House &#x1f33c;</h3>
+
+<p>
+If you know friend's Murasaki-san ID, you can visit their house. You can feed their Murasaki-san and earn a little extra exp (2% of exp gained). However, you are not allowed to take any other actions in another user's house.
+</p>
+
+<p>
+&nbsp;&nbsp;&nbsp;<b>Murasaki-san ID:</b>&nbsp;
+<input type="number" id="summoner" style="width:100px;" text-align="center">&nbsp;&nbsp;
+<button onclick="button_select_summoner();">
+<b>Visit House</b>
+</button>
+</p>
+
+<br>
+
+
+
+<!--- log --->
+
+<h3 id="log">Realtime Event Log &#x1f33c;</h3>
+
+<p>
+Pressing the button will initiate real-time monitoring of events for each contract.
+</p>
+
+<p>
+<div id="realtimeLog">
+&nbsp;&nbsp;&nbsp;
+<button style="height:28px;font-size:80%" onclick="_show_realtimeLog();">
+&nbsp;<b>Start Monitoring</b>&nbsp;
+</button>
+</div>
+</p>
+
+<br>
+
+
+
+<!--- introduction --->
+
+<h3 id="introduction">Introduction &#x1f33c;</h3>
+
+<p>
+Please specify the Murasaki-san ID and press the button to generate a detailed introduction for Murasaki-san.
+</p>
+
+<p>
+&nbsp;&nbsp;&nbsp;<b>Murasaki-san ID:</b>&nbsp;
+<input type="number" id="input_summoner" style="width:100px;" text-align="center">&nbsp;&nbsp;
+<button style="height:28px;font-size:80%" onclick="show_murasakiInfo2();">
+<b>Hello Murasaki-san!</b>
+</button>
+</p>
+
+<p>
+<div id="output_murasakiInfo">
+&nbsp;&nbsp;&nbsp;---
+</div>
+</p>
+
+<br>
+
+
+
+<!--- parameter --->
+
+<h3 id="parameter">On-Chain Parameters &#x1f33c;</h3>
+
+<ul>
+<li>Total trial summoned:&nbsp;&nbsp;<b><idv id="info_total_trial_summoned"></div></b>
+<li>Total main summoned:&nbsp;&nbsp;<b><idv id="info_total_summoned"></div></b>
+<li>Total item NFT minted:&nbsp;&nbsp;<b><idv id="info_total_item_minted"></div></b>
+<br><br>
+<li>Current starting fee:&nbsp;&nbsp;<b><idv id="info_price"></div></b>
+<li>Balance of Buffer Vault:&nbsp;<b><idv id="info_balanceOf_bv"></div></b>
+<li>Balance of Buyback Treasury:&nbsp;<b><idv id="info_balanceOf_bt"></div></b>
+<br><br>
+<li>Fluffy Festival Winner:&nbsp;&nbsp;<b><idv id="info_festivalWinner"></div></b>
+<li>Next Fluffy Festival:&nbsp;&nbsp;<b><idv id="info_festivalBlock"></div></b>
+</ul>
+
+<br>
+
+
+
+<!--- end --->
+
+</main>
+
+<footer class="footer">
+
+Donation:&nbsp;
+<button style="height:26px;font-size:75%" onclick="donate(1);">
+<script type="text/javascript">write_icon(1)</script>&nbsp;1 $ASTR
+</button>
+&nbsp;
+<button style="height:26px;font-size:75%" onclick="donate(10);">
+<script type="text/javascript">write_icon(10)</script>&nbsp;10 $ASTR
+</button>
+&nbsp;
+<button style="height:26px;font-size:75%" onclick="donate(100);">
+<script type="text/javascript">write_icon(100)</script>&nbsp;100 $ASTR
+</button>
+
+<br>
+
+<label><input type="radio" name="donationWallet" value="0x2F7448B62134e52C2f46454d0089Ae21B5248805">For Coder&#x1f400;: <font size="-2">0x2F7448B62134e52C2f46454d0089Ae21B5248805</font></label><br>
+<label><input type="radio" name="donationWallet" checked value="0xe79d44309e4daD2CD7eaf3CA4CD1d80a6b8733f7">For Illustrator&#x1f408;: <font size="-2">0xe79d44309e4daD2CD7eaf3CA4CD1d80a6b8733f7</font></label><br>
+
+<br>
+
+</footer>
+
+
+</body>
+
+<script>
+    twemoji.parse(document.body);
+    check_connected();
+    _show_icon3();
+    _show_onChain_parameters();
+</script>
+
+</html>
+

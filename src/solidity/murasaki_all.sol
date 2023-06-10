@@ -6,29 +6,29 @@ pragma solidity 0.8.19;
 //=== Basic ==================================================================================================================
 
 
-import "github.com/OpenZeppelin/openzeppelin-contracts/contracts/security/ReentrancyGuard.sol";
-import "github.com/OpenZeppelin/openzeppelin-contracts/contracts/security/Pausable.sol";
-import "github.com/OpenZeppelin/openzeppelin-contracts/contracts/access/Ownable.sol";
-import "github.com/OpenZeppelin/openzeppelin-contracts/contracts/utils/structs/EnumerableSet.sol";
-import "github.com/OpenZeppelin/openzeppelin-contracts/contracts/utils/Base64.sol";
-import "github.com/OpenZeppelin/openzeppelin-contracts/contracts/token/ERC721/ERC721.sol";
-import "github.com/OpenZeppelin/openzeppelin-contracts/contracts/token/ERC721/IERC721.sol";
-import "github.com/OpenZeppelin/openzeppelin-contracts/contracts/token/ERC721/extensions/IERC721Metadata.sol";
-import "github.com/OpenZeppelin/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
-import "github.com/OpenZeppelin/openzeppelin-contracts/contracts/token/ERC721/IERC721Receiver.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v4.8/contracts/security/ReentrancyGuard.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v4.8/contracts/security/Pausable.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v4.8/contracts/access/Ownable.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v4.8/contracts/utils/structs/EnumerableSet.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v4.8/contracts/utils/Base64.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v4.8/contracts/token/ERC721/ERC721.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v4.8/contracts/token/ERC721/IERC721.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v4.8/contracts/token/ERC721/extensions/IERC721Metadata.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v4.8/contracts/token/ERC20/ERC20.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v4.8/contracts/token/ERC721/IERC721Receiver.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v4.8/contracts/utils/Address.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v4.8/contracts/utils/Context.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v4.8/contracts/utils/Strings.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v4.8/contracts/utils/introspection/ERC165.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v4.8/contracts/utils/introspection/IERC165.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v4.8/contracts/token/ERC721/utils/ERC721Holder.sol";
 import "github.com/AstarNetwork/astarbase/contract/example/IAstarBase.sol";
-import "github.com/OpenZeppelin/openzeppelin-contracts/contracts/utils/Address.sol";
-import "github.com/OpenZeppelin/openzeppelin-contracts/contracts/utils/Context.sol";
-import "github.com/OpenZeppelin/openzeppelin-contracts/contracts/utils/Strings.sol";
-import "github.com/OpenZeppelin/openzeppelin-contracts/contracts/utils/introspection/ERC165.sol";
-import "github.com/OpenZeppelin/openzeppelin-contracts/contracts/utils/introspection/IERC165.sol";
-import "github.com/OpenZeppelin/openzeppelin-contracts/contracts/token/ERC721/utils/ERC721Holder.sol";
 
 
 /* for solc
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts@4.8/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@openzeppelin/contracts/utils/Base64.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
@@ -36,13 +36,13 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
-import "@astarbase/contract/example/IAstarBase.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
+import "@astarbase/contract/example/IAstarBase.sol";
 */
 
 
@@ -1375,6 +1375,12 @@ contract Murasaki_Name is SoulBoundBadge, Ownable, Pausable {
         names[_name_id] = _name_str;
     }
 
+    //admin migratable
+    bool isMigratable = false;
+    function _set_isMigratable (bool _bool) external onlyOwner {
+        isMigratable = _bool;
+    }
+
     //names
     constructor() ERC721("Murasaki Name", "MN") {}
 
@@ -1404,6 +1410,14 @@ contract Murasaki_Name is SoulBoundBadge, Ownable, Pausable {
         string memory _name_str = names[_name_id];
         isMinted[_name_str] = false;
         ERC721._burn(_name_id);
+    }
+
+    //migration, only when isMigratable=true & from permitted address
+    function migration(uint _name_id, address _owner_new) external {
+        require(permitted_address[msg.sender] == true);
+        require(isMigratable);
+        _burn(_name_id);
+        _mint(_owner_new, _name_id);
     }
 }
 
@@ -1937,6 +1951,49 @@ contract Murasaki_Address is Ownable {
         _res[39] = address_Murasaki_Storage_Extra;
         return _res;
     }
+    
+    //all setter
+    function set_addresses(address[40] memory _addresses) external onlyOwner {
+        address_Murasaki_Main = _addresses[1];
+        address_Murasaki_Name = _addresses[2];
+        address_Murasaki_Craft = _addresses[3];
+        address_Murasaki_Parameter = _addresses[4];
+        address_Murasaki_Storage = _addresses[5];
+        address_Murasaki_Storage_Score = _addresses[6];
+        address_Murasaki_Storage_Nui = _addresses[7];
+        address_Murasaki_Function_Share = _addresses[8];
+        address_Murasaki_Function_Summon_and_LevelUp = _addresses[9];
+        address_Murasaki_Function_Feeding_and_Grooming = _addresses[10];
+        address_Murasaki_Function_Mining_and_Farming = _addresses[11];
+        address_Murasaki_Function_Crafting = _addresses[12];
+        address_Murasaki_Function_Crafting2 = _addresses[13];
+        address_Murasaki_Function_Crafting_Codex = _addresses[14];
+        address_Murasaki_Function_Name = _addresses[15];
+        address_Murasaki_Function_Achievement = _addresses[16];
+        address_Murasaki_Function_Staking_Reward = _addresses[17];
+        address_Murasaki_Dice = _addresses[18];
+        address_Murasaki_Mail = _addresses[19];
+        address_Fluffy_Festival = _addresses[20];
+        address_Murasaki_Info = _addresses[21];
+        //_res[22] = _addresses[22];
+        address_Murasaki_Lootlike = _addresses[23];
+        address_Murasaki_tokenURI = _addresses[24];
+        address_BufferVault = _addresses[25];
+        address_BuybackTreasury = _addresses[26];
+        address_AstarBase = _addresses[27];
+        address_Staking_Wallet = _addresses[28];
+        address_Coder_Wallet = _addresses[29];
+        address_Illustrator_Wallet = _addresses[30];
+        address_Achievement_onChain = _addresses[31];
+        address_Murasaki_Function_Music_Practice = _addresses[32];
+        address_Murasaki_Address_Regular = _addresses[33];
+        address_Murasaki_Address_Trial = _addresses[34];
+        address_Stroll = _addresses[35];
+        address_Murasaki_Market_Item = _addresses[36];
+        address_Murasakisan = _addresses[37];
+        address_Trial_Converter = _addresses[38];
+        address_Murasaki_Storage_Extra = _addresses[39];
+    }
 }
 
 
@@ -2257,6 +2314,12 @@ contract Murasaki_Storage_Score is Ownable {
     mapping(uint => uint) public total_material_farmed;
     mapping(uint => uint) public total_item_crafted;
     mapping(uint => uint) public total_precious_received;
+    
+    //230609 add
+    mapping(uint => uint) public total_feeding_count;
+    mapping(uint => uint) public total_grooming_count;
+    mapping(uint => uint) public total_neglect_count;
+    mapping(uint => uint) public total_critical_count;
 
     //modifier
     modifier onlyPermitted {
@@ -2447,7 +2510,15 @@ contract Murasaki_Storage_Extra is Ownable {
 
 //---Share
 
-contract Murasaki_Function_Share is Ownable {
+contract Murasaki_Function_Share is Ownable, Pausable {
+
+    //pausable
+    function pause() external onlyOwner {
+        _pause();
+    }
+    function unpause() external onlyOwner {
+        _unpause();
+    }
 
     //address
     address public address_Murasaki_Address;
@@ -2469,7 +2540,7 @@ contract Murasaki_Function_Share is Ownable {
     }
 
     //check owner of summoner
-    function check_owner(uint _summoner, address _wallet) external view returns (bool) {
+    function check_owner(uint _summoner, address _wallet) external view whenNotPaused returns (bool) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Main mm = Murasaki_Main(ma.address_Murasaki_Main());
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
@@ -2641,6 +2712,9 @@ contract Murasaki_Function_Share is Ownable {
 
     //calc_score
     function calc_score(uint _summoner) public view returns (uint) {
+        if (_summoner == 0) {
+            return 0;
+        }
         uint _score = 0;
         _score += _calc_score_total(_summoner);
         _score += _calc_score_nft(_summoner);
@@ -4510,7 +4584,15 @@ contract Murasaki_Function_Crafting2 is Ownable, ReentrancyGuard, Pausable {
 
 //---Crafting_Codex
 
-contract Murasaki_Function_Crafting_Codex is Ownable {
+contract Murasaki_Function_Crafting_Codex is Ownable, Pausable {
+
+    //pausable
+    function pause() external onlyOwner {
+        _pause();
+    }
+    function unpause() external onlyOwner {
+        _unpause();
+    }
 
     //address
     address public address_Murasaki_Address;
@@ -4526,7 +4608,7 @@ contract Murasaki_Function_Crafting_Codex is Ownable {
                1                 0            calc from item_dc
                1                 1            calc from resume_dc
     */
-    function calc_crafting(uint _summoner) public view returns (uint) {
+    function calc_crafting(uint _summoner) public view whenNotPaused returns (uint) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
         Murasaki_Parameter mp = Murasaki_Parameter(ma.address_Murasaki_Parameter());
@@ -5636,7 +5718,15 @@ contract Murasaki_Function_Name is Ownable, ReentrancyGuard, Pausable {
 
 //---Achievement
 
-contract Murasaki_Function_Achievement is Ownable {
+contract Murasaki_Function_Achievement is Ownable, Pausable {
+
+    //pausable
+    function pause() external onlyOwner {
+        _pause();
+    }
+    function unpause() external onlyOwner {
+        _unpause();
+    }
 
     //address
     address public address_Murasaki_Address;
@@ -5645,7 +5735,7 @@ contract Murasaki_Function_Achievement is Ownable {
     }
 
     //get_achv
-    function get_achievement (uint _summoner) external view returns (bool[32] memory) {
+    function get_achievement (uint _summoner) external view whenNotPaused returns (bool[32] memory) {
         bool[32] memory _achievements;
         for (uint _achv_id=1; _achv_id<32; _achv_id++) {
             _achievements[_achv_id] = _check_achievement(_summoner, _achv_id);
@@ -7801,7 +7891,15 @@ contract Fluffy_Festival is Ownable, ReentrancyGuard, Pausable {
 
 //---Achievement_onChain
 
-contract Achievement_onChain is Ownable {
+contract Achievement_onChain is Ownable, Pausable {
+
+    //pausable
+    function pause() external onlyOwner {
+        _pause();
+    }
+    function unpause() external onlyOwner {
+        _unpause();
+    }
 
     //address
     address public address_Murasaki_Address;
@@ -7853,7 +7951,7 @@ contract Achievement_onChain is Ownable {
     }
     
     //get_score
-    function get_score (uint _summoner) public view returns (uint) {
+    function get_score (uint _summoner) public view whenNotPaused returns (uint) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         address _owner = mfs.get_owner(_summoner);
@@ -8856,7 +8954,15 @@ contract Murasaki_Storage_Ranking is Ownable, ReentrancyGuard, Pausable {
 
 //---Murasaki_Info
 
-contract Murasaki_Info is Ownable {
+contract Murasaki_Info is Ownable, Pausable {
+
+    //pausable
+    function pause() external onlyOwner {
+        _pause();
+    }
+    function unpause() external onlyOwner {
+        _unpause();
+    }
 
     //address
     address public address_Murasaki_Address;
@@ -9445,7 +9551,7 @@ contract Murasaki_Info is Ownable {
     
     
     //### dynamic
-    function allDynamicStatus(uint _summoner) external view returns (uint[96] memory) {
+    function allDynamicStatus(uint _summoner) external view whenNotPaused returns (uint[96] memory) {
         uint[96] memory _res;
         _res[0] = block.number;
         _res[1] = age(_summoner);
@@ -9541,7 +9647,7 @@ contract Murasaki_Info is Ownable {
     }
     
     //### static
-    function allStaticStatus(uint _summoner) external view returns (
+    function allStaticStatus(uint _summoner) external view whenNotPaused returns (
         uint,
         address,
         string memory,
@@ -9589,7 +9695,15 @@ contract Murasaki_Info is Ownable {
 
 //---Murasaki_Lootlike
 
-contract Murasaki_Lootlike is Ownable {
+contract Murasaki_Lootlike is Ownable, Pausable {
+
+    //pausable
+    function pause() external onlyOwner {
+        _pause();
+    }
+    function unpause() external onlyOwner {
+        _unpause();
+    }
 
     //address
     address public address_Murasaki_Address;
@@ -9624,7 +9738,7 @@ contract Murasaki_Lootlike is Ownable {
     function get_city(uint _summoner) public view returns (string memory) {
         return pluckName(_summoner, "city", city);
     }
-    function get_allStatus(uint _summoner) public view returns (string[8] memory) {
+    function get_allStatus(uint _summoner) public view whenNotPaused returns (string[8] memory) {
         string[8] memory _status;
         _status[0] = get_birthplace(_summoner);
         _status[1] = get_personality(_summoner);
@@ -9816,7 +9930,15 @@ contract Murasaki_Lootlike is Ownable {
 
 //---Murasaki_tokenURI
 
-contract Murasaki_tokenURI is Ownable {
+contract Murasaki_tokenURI is Ownable, Pausable {
+
+    //pausable
+    function pause() external onlyOwner {
+        _pause();
+    }
+    function unpause() external onlyOwner {
+        _unpause();
+    }
 
     //address
     address public address_Murasaki_Address;
@@ -9890,16 +10012,16 @@ contract Murasaki_tokenURI is Ownable {
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
         if (_summoner == 0) {
             //token not found
-            return '<rect width="128" height="128" fill="#ffffff" rx="5" ry="5" fill-opacity="0.8"/><text x="64"  y="60" class="base" text-anchor="middle">Token</text><text x="64"  y="80" class="base" text-anchor="middle">Not Found</text></svg>';
+            return '<rect width="128" height="128" fill="#ffffff" rx="10" ry="10" fill-opacity="0.8"/><text x="64"  y="60" class="base" text-anchor="middle">Token</text><text x="64"  y="80" class="base" text-anchor="middle">Not Found</text></svg>';
         } else if (mp.isTrial()) {
             //trial
-            return '<rect width="128" height="128" fill="#ffffff" rx="5" ry="5" fill-opacity="0.8"/><text x="64"  y="60" class="base" text-anchor="middle">Trial</text><text x="64"  y="82" class="base" text-anchor="middle">Token</text></svg>';
+            return '<rect width="128" height="128" fill="#ffffff" rx="10" ry="10" fill-opacity="0.8"/><text x="64"  y="60" class="base" text-anchor="middle">Trial</text><text x="64"  y="82" class="base" text-anchor="middle">Token</text></svg>';
         } else if (!mfs.not_petrified(_summoner)) {
             //petrified
-            return '<rect width="128" height="128" fill="#ffffff" rx="5" ry="5" fill-opacity="0.8"/><text x="64"  y="60" class="base" text-anchor="middle">Petrified</text><text x="64"  y="82" class="base" text-anchor="middle">Token</text></svg>';
+            return '<rect width="128" height="128" fill="#ffffff" rx="10" ry="10" fill-opacity="0.8"/><text x="64"  y="60" class="base" text-anchor="middle">Petrified</text><text x="64"  y="82" class="base" text-anchor="middle">Token</text></svg>';
         } else if (!ms.isActive(_summoner)) {
             //petrified
-            return '<rect width="128" height="128" fill="#ffffff" rx="5" ry="5" fill-opacity="0.8"/><text x="64"  y="60" class="base" text-anchor="middle">Not Active</text><text x="64"  y="82" class="base" text-anchor="middle">Token</text></svg>';
+            return '<rect width="128" height="128" fill="#ffffff" rx="10" ry="10" fill-opacity="0.8"/><text x="64"  y="60" class="base" text-anchor="middle">Not Active</text><text x="64"  y="82" class="base" text-anchor="middle">Token</text></svg>';
         } else {
             return '</svg>';
         }
@@ -9950,7 +10072,7 @@ contract Murasaki_tokenURI is Ownable {
         );
     }
     
-    function tokenURI(uint _summoner) public view returns (string memory) {
+    function tokenURI(uint _summoner) public view whenNotPaused returns (string memory) {
         string memory output = _get_SVG(_summoner);
         string memory json = Base64.encode(bytes(string(abi.encodePacked(
             '{"name": "Murasaki-san #', 
@@ -10381,8 +10503,16 @@ contract Murasaki_Craft_Old {
     }
 }
 
-contract Admin_Convert is Ownable {
+contract Admin_Convert is Ownable, Pausable {
     
+    //pausable
+    function pause() external onlyOwner {
+        _pause();
+    }
+    function unpause() external onlyOwner {
+        _unpause();
+    }
+
     function mm_convert (
         address _old_address, 
         address _new_address, 
