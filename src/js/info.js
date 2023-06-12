@@ -598,7 +598,9 @@ async function drawStatus() {
         ctx.fillText("Loading...", 30, 30);
 
         //adjuste scale
-        let windowWidth = window.innerWidth;
+        //let windowWidth = window.innerWidth;
+        let windowWidth = Math.min(window.outerWidth, window.innerWidth, document.documentElement.clientWidth);
+        //console.log(windowWidth);
         if (windowWidth < canvas.width) {
             let _magni = windowWidth/canvas.width;
             ctx.scale(_magni, _magni);
