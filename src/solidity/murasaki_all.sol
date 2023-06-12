@@ -2320,6 +2320,17 @@ contract Murasaki_Storage_Score is Ownable {
     mapping(uint => uint) public total_grooming_count;
     mapping(uint => uint) public total_neglect_count;
     mapping(uint => uint) public total_critical_count;
+    
+    //global
+    uint public global_total_feeding_count;
+    uint public global_total_grooming_count;
+    uint public global_total_coin_mined;
+    uint public global_total_material_farmed;
+    uint public global_total_item_crafted;
+    uint public global_total_precious_received;
+    uint public global_total_practiceTime_clarinet;
+    uint public global_total_practiceTime_piano;
+    uint public global_total_practiceTime_violin;
 
     //modifier
     modifier onlyPermitted {
@@ -2342,6 +2353,78 @@ contract Murasaki_Storage_Score is Ownable {
     }
     function set_total_precious_received(uint _summoner, uint _value) external onlyPermitted {
         total_precious_received[_summoner] = _value;
+    }
+    
+    //230609 add
+    function set_total_feeding_count(uint _summoner, uint _value) external onlyPermitted {
+        total_feeding_count[_summoner] = _value;
+    }
+    function set_total_grooming_count(uint _summoner, uint _value) external onlyPermitted {
+        total_grooming_count[_summoner] = _value;
+    }
+    function set_total_neglect_count(uint _summoner, uint _value) external onlyPermitted {
+        total_neglect_count[_summoner] = _value;
+    }
+    function set_total_critical_count(uint _summoner, uint _value) external onlyPermitted {
+        total_critical_count[_summoner] = _value;
+    }
+    
+    //global, set
+    function set_global_total_feeding_count (uint _value) external onlyPermitted {
+        global_total_feeding_count = _value;
+    }
+    function set_global_total_grooming_count (uint _value) external onlyPermitted {
+        global_total_grooming_count = _value;
+    }
+    function set_global_total_coin_mined (uint _value) external onlyPermitted {
+        global_total_coin_mined = _value;
+    }
+    function set_global_total_material_farmed (uint _value) external onlyPermitted {
+        global_total_material_farmed = _value;
+    }
+    function set_global_total_item_crafted (uint _value) external onlyPermitted {
+        global_total_item_crafted = _value;
+    }
+    function set_global_total_precious_received (uint _value) external onlyPermitted {
+        global_total_precious_received = _value;
+    }
+    function set_global_total_practiceTime_clarinet (uint _value) external onlyPermitted {
+        global_total_practiceTime_clarinet = _value;
+    }
+    function set_global_total_practiceTime_piano (uint _value) external onlyPermitted {
+        global_total_practiceTime_piano = _value;
+    }
+    function set_global_total_practiceTime_violin (uint _value) external onlyPermitted {
+        global_total_practiceTime_violin = _value;
+    }
+    
+    //global, increment
+    function increment_global_total_feeding_count (uint _value) external onlyPermitted {
+        global_total_feeding_count += _value;
+    }
+    function increment_global_total_grooming_count (uint _value) external onlyPermitted {
+        global_total_grooming_count += _value;
+    }
+    function increment_global_total_coin_mined (uint _value) external onlyPermitted {
+        global_total_coin_mined += _value;
+    }
+    function increment_global_total_material_farmed (uint _value) external onlyPermitted {
+        global_total_material_farmed += _value;
+    }
+    function increment_global_total_item_crafted (uint _value) external onlyPermitted {
+        global_total_item_crafted += _value;
+    }
+    function increment_global_total_precious_received (uint _value) external onlyPermitted {
+        global_total_precious_received += _value;
+    }
+    function increment_global_total_practiceTime_clarinet (uint _value) external onlyPermitted {
+        global_total_practiceTime_clarinet += _value;
+    }
+    function increment_global_total_practiceTime_piano (uint _value) external onlyPermitted {
+        global_total_practiceTime_piano += _value;
+    }
+    function increment_global_total_practiceTime_violin (uint _value) external onlyPermitted {
+        global_total_practiceTime_violin += _value;
     }
 }
 
@@ -3322,6 +3405,7 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable, ReentrancyGuard, Pau
         if (mfs.luck_challenge(_summoner)) {
             _exp_add = _exp_add * 2;
             _critical = true;
+            _increment_criticalCount(_summoner);
         }
         uint _exp = ms.exp(_summoner) + _exp_add;
         ms.set_exp(_summoner, _exp);
@@ -3329,6 +3413,7 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable, ReentrancyGuard, Pau
         //update score
         uint _total_exp_gained = mss.total_exp_gained(_summoner);
         mss.set_total_exp_gained(_summoner, _total_exp_gained + _exp_add);
+        _increment_feedingCount(_summoner);
         //owner check, gain some exp when not your summoner
         uint _summoner_yours = mfs.get_summoner(msg.sender);
         bool _other;
@@ -3403,6 +3488,19 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable, ReentrancyGuard, Pau
         Murasaki_Function_Staking_Reward mfsl = Murasaki_Function_Staking_Reward(ma.address_Murasaki_Function_Staking_Reward());
         mfsl.update_staking_counter(_summoner);
     }
+    function _increment_feedingCount(uint _summoner) internal {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage_Score mss = Murasaki_Storage_Score(ma.address_Murasaki_Storage_Score());
+        uint _total_feeding_count = mss.total_feeding_count(_summoner);
+        mss.set_total_feeding_count(_summoner, _total_feeding_count + 1);
+        mss.increment_global_total_feeding_count(1);
+    }
+    function _increment_criticalCount(uint _summoner) internal {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage_Score mss = Murasaki_Storage_Score(ma.address_Murasaki_Storage_Score());
+        uint _total_critical_count = mss.total_critical_count(_summoner);
+        mss.set_total_critical_count(_summoner, _total_critical_count + 1);
+    }
 
     //petrification, debends on only feeding
     function not_petrified(uint _summoner) internal view returns (bool) {
@@ -3469,15 +3567,19 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable, ReentrancyGuard, Pau
         if (mfs.luck_challenge(_summoner)) {
             _exp_add = _exp_add * 2;
             _critical = true;
+            _increment_criticalCount(_summoner);
         }
         //add exp
         uint _exp = ms.exp(_summoner) + _exp_add;
         ms.set_exp(_summoner, _exp);
-        ms.set_last_grooming_time(_summoner, _now);
-        ms.set_last_grooming_time_plus_working_time(_summoner, _now);
         //update score
         uint _total_exp_gained = mss.total_exp_gained(_summoner);
         mss.set_total_exp_gained(_summoner, _total_exp_gained + _exp_add);
+        _increment_groomingCount(_summoner);
+        _increment_neglectCount(_summoner);
+        //update lastTime
+        ms.set_last_grooming_time(_summoner, _now);
+        ms.set_last_grooming_time_plus_working_time(_summoner, _now);
         //event
         emit Grooming(_summoner, _exp_add, _critical);
     }
@@ -3507,6 +3609,22 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable, ReentrancyGuard, Pau
         uint _happy = _calc_happy_real(_summoner);
         uint _exp_add = 3000 * (100 - _happy) / 100;
         return _exp_add;
+    }
+    function _increment_groomingCount(uint _summoner) internal {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage_Score mss = Murasaki_Storage_Score(ma.address_Murasaki_Storage_Score());
+        uint _total_grooming_count = mss.total_grooming_count(_summoner);
+        mss.set_total_grooming_count(_summoner, _total_grooming_count + 1);
+        mss.increment_global_total_grooming_count(1);
+    }
+    function _increment_neglectCount(uint _summoner) internal {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
+        Murasaki_Storage_Score mss = Murasaki_Storage_Score(ma.address_Murasaki_Storage_Score());
+        if (mfs.calc_happy(_summoner) == 0) {
+            uint _total_neglect_count = mss.total_neglect_count(_summoner);
+            mss.set_total_neglect_count(_summoner, _total_neglect_count + 1);
+        }
     }
 
     //luck challenge of mffg
@@ -3602,6 +3720,7 @@ contract Murasaki_Function_Mining_and_Farming is Ownable, ReentrancyGuard, Pausa
         //update score
         uint _total_coin_mined = mss.total_coin_mined(_summoner);
         mss.set_total_coin_mined(_summoner, _total_coin_mined + _delta);
+        mss.increment_global_total_coin_mined(_delta);
         //event
         emit Mining(_summoner, _delta, _critical);
     }
@@ -3700,6 +3819,7 @@ contract Murasaki_Function_Mining_and_Farming is Ownable, ReentrancyGuard, Pausa
         return _sparkles;   //percent x 100
     }
 
+
     //farming
     function start_farming(uint _summoner) external nonReentrant whenNotPaused {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
@@ -3761,6 +3881,7 @@ contract Murasaki_Function_Mining_and_Farming is Ownable, ReentrancyGuard, Pausa
         //update score
         uint _total_material_farmed = mss.total_material_farmed(_summoner);
         mss.set_total_material_farmed(_summoner, _total_material_farmed + _delta);
+        mss.increment_global_total_material_farmed(_delta);
         //event
         emit Farming(_summoner, _delta, _critical);
     }
@@ -4145,6 +4266,7 @@ contract Murasaki_Function_Crafting is Ownable, ReentrancyGuard, Pausable {
         if (mfs.luck_challenge(_summoner)) {
             _item_type += 64;
             _critical = true;
+            _increment_criticalCount(_summoner);
         }
         //mint
         uint _seed = mfs.seed(_summoner);
@@ -4163,9 +4285,16 @@ contract Murasaki_Function_Crafting is Ownable, ReentrancyGuard, Pausable {
             //update score
             uint _total_item_crafted = mss.total_item_crafted(_summoner);
             mss.set_total_item_crafted(_summoner, _total_item_crafted + 1);
+            mss.increment_global_total_item_crafted(1);
         }
         //event
         emit Crafting(_summoner, _item_type, mc.next_item()-1, _critical);
+    }
+    function _increment_criticalCount(uint _summoner) internal {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage_Score mss = Murasaki_Storage_Score(ma.address_Murasaki_Storage_Score());
+        uint _total_critical_count = mss.total_critical_count(_summoner);
+        mss.set_total_critical_count(_summoner, _total_critical_count + 1);
     }
     
     //internal, send random presentbox, when complete crafting
@@ -4576,6 +4705,7 @@ contract Murasaki_Function_Crafting2 is Ownable, ReentrancyGuard, Pausable {
         //update score
         uint _total_precious_received = mss.total_precious_received(_summoner_to);
         mss.set_total_precious_received(_summoner_to, _total_precious_received + 1);
+        mss.increment_global_total_precious_received(1);
         //event
         emit Fluffy(_summoner_to, _summoner_from, _item_type);
     }
@@ -5945,6 +6075,7 @@ contract Murasaki_Function_Music_Practice is Ownable, ReentrancyGuard, Pausable 
     function stop_practice(uint _summoner) external nonReentrant whenNotPaused {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
+        Murasaki_Storage_Score mss = Murasaki_Storage_Score(ma.address_Murasaki_Storage_Score());
         require(_check_summoner(_summoner, msg.sender));
         require(ms.working_status(_summoner) == 4);
         //require(ms.practice_status(_summoner) == 1);
@@ -5961,12 +6092,16 @@ contract Murasaki_Function_Music_Practice is Ownable, ReentrancyGuard, Pausable 
         if (_item_type == item_type_clarinet) {
             _exp = _get_exp_mod_ofClarinet(_summoner, _exp);
             ms.set_exp_clarinet(_summoner, ms.exp_clarinet(_summoner) + _exp);
+            mss.increment_global_total_practiceTime_clarinet(_exp);
         } else if (_item_type == item_type_piano) {
             _exp = _get_exp_mod_ofPiano(_summoner, _exp);
             ms.set_exp_piano(_summoner, ms.exp_piano(_summoner) + _exp);
+            mss.increment_global_total_practiceTime_piano(_exp);
         } else if (_item_type == item_type_violin) {
             _exp = _get_exp_mod_ofViolin(_summoner, _exp);
             ms.set_exp_violin(_summoner, ms.exp_violin(_summoner) + _exp);
+            mss.increment_global_total_practiceTime_violin(_exp);
+        /*
         } else if (_item_type == item_type_horn) {
             _exp = _get_exp_mod_ofHorn(_summoner, _exp);
             ms.set_exp_horn(_summoner, ms.exp_horn(_summoner) + _exp);
@@ -5976,6 +6111,7 @@ contract Murasaki_Function_Music_Practice is Ownable, ReentrancyGuard, Pausable 
         } else if (_item_type == item_type_harp) {
             _exp = _get_exp_mod_ofHarp(_summoner, _exp);
             ms.set_exp_harp(_summoner, ms.exp_harp(_summoner) + _exp);
+        */
         }
         //event
         emit Practice(_summoner, _item_type, _exp);
@@ -6395,6 +6531,7 @@ contract Murasaki_Function_Staking_Reward is Ownable, ReentrancyGuard, Pausable 
         //update score
         uint _total_precious_received = mss.total_precious_received(_summoner_to);
         mss.set_total_precious_received(_summoner_to, _total_precious_received + 1);
+        mss.increment_global_total_precious_received(1);
     }
     //mint fluffier
     function _mint_fluffier(uint _summoner_to) internal {
@@ -6411,6 +6548,7 @@ contract Murasaki_Function_Staking_Reward is Ownable, ReentrancyGuard, Pausable 
         //update score
         uint _total_precious_received = mss.total_precious_received(_summoner_to);
         mss.set_total_precious_received(_summoner_to, _total_precious_received + 5);
+        mss.increment_global_total_precious_received(5);
     }
     //mint bank
     function _mint_bank(uint _summoner_to) internal {
@@ -6741,6 +6879,7 @@ contract Murasaki_Market_Item is Ownable, ReentrancyGuard, ERC721Holder, Pausabl
     EnumerableSet.UintSet private set;
     mapping(address => EnumerableSet.UintSet) private mySet;
     uint public total_tradingVolume = 0;
+    uint public total_tradingCount = 0;
 
     //mapping
     mapping(uint => uint) public prices;
@@ -6847,6 +6986,7 @@ contract Murasaki_Market_Item is Ownable, ReentrancyGuard, ERC721Holder, Pausabl
         soldCount[_item_type] += 1;
         //update total_tradingVolume
         total_tradingVolume += price;
+        total_tradingCount += 1;
         //emit Buy(_item, lister, msg.sender, price, fee);
         emit Buy(mfs.get_summoner(msg.sender), mfs.get_summoner(lister), _item, price, fee);
     }
@@ -7081,6 +7221,30 @@ contract Murasaki_Dice is Ownable, ReentrancyGuard, Pausable {
     function fumble_count (uint _summoner) external view returns (uint) {
         return _get_fumble_count(_summoner);
     }
+    
+    //global_critical_count, mse:103
+    function _increment_global_critical_count () internal {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage_Extra mse = Murasaki_Storage_Extra(ma.address_Murasaki_Storage_Extra());
+        mse.add_storage(103, 0, 1);
+    }
+    function global_critical_count () external view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage_Extra mse = Murasaki_Storage_Extra(ma.address_Murasaki_Storage_Extra());
+        return mse.get_storage(103, 0);
+    }
+
+    //global_fumble_count, mse:104
+    function _increment_global_fumble_count () internal {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage_Extra mse = Murasaki_Storage_Extra(ma.address_Murasaki_Storage_Extra());
+        mse.add_storage(104, 0, 1);
+    }
+    function global_fumble_count () external view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage_Extra mse = Murasaki_Storage_Extra(ma.address_Murasaki_Storage_Extra());
+        return mse.get_storage(104, 0);
+    }
 
     //calc elasped_time
     function calc_elasped_time(uint _summoner) public view returns (uint) {
@@ -7121,10 +7285,12 @@ contract Murasaki_Dice is Ownable, ReentrancyGuard, Pausable {
             //critical_count[_summoner] += 1;
             //_set_critical_count(_summoner, get_critical_count(_summoner)+1);
             _add_critical_count(_summoner, 1);
+            _increment_global_critical_count();
         } else if (_dice_roll == 10) {
             //fumble_count[_summoner] += 1;
             //_set_fumble_count(_summoner, get_fumble_count(_summoner)+1);
             _add_fumble_count(_summoner, 1);
+            _increment_global_fumble_count();
         }
         //update rolled_dice, after 48hr, input 0 in each 24hr
         if (_elasped_time > BASE_SEC * 4) {
@@ -7270,6 +7436,10 @@ contract Murasaki_Mail is Ownable, ReentrancyGuard, Pausable {
     //## item types
     uint public item_type_of_mail = 196;
     uint public item_type_of_cushion = 23;
+    
+    //global
+    uint public global_total_mail_sent = 0;
+    uint public global_total_mail_opened = 0;
 
     //admin, set variants
     function set_interval_sec(uint _value) external onlyOwner {
@@ -7320,6 +7490,30 @@ contract Murasaki_Mail is Ownable, ReentrancyGuard, Pausable {
     }
     function total_opened (uint _summoner) external view returns (uint) {
         return _get_total_opened(_summoner);
+    }
+    
+    //global_total_sent, mse:203
+    function _increment_global_total_sent() internal {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage_Extra mse = Murasaki_Storage_Extra(ma.address_Murasaki_Storage_Extra());
+        mse.add_storage(203, 0, 1);
+    }
+    function global_total_sent () external view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage_Extra mse = Murasaki_Storage_Extra(ma.address_Murasaki_Storage_Extra());
+        return mse.get_storage(203, 0);
+    }
+    
+    //global_total_opened, mse:204
+    function _increment_global_total_opened() internal {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage_Extra mse = Murasaki_Storage_Extra(ma.address_Murasaki_Storage_Extra());
+        mse.add_storage(204, 0, 1);
+    }
+    function global_total_opened () external view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage_Extra mse = Murasaki_Storage_Extra(ma.address_Murasaki_Storage_Extra());
+        return mse.get_storage(204, 0);
     }
         
     //check mail
@@ -7419,6 +7613,7 @@ contract Murasaki_Mail is Ownable, ReentrancyGuard, Pausable {
         //total_sent[_summoner_from] += 1;
         //_set_total_sent(_summoner_from, get_total_sent(_summoner) + 1);
         _add_total_sent(_summoner_from, 1);
+        _increment_global_total_sent();
         //event
         emit Send_Mail(_summoner_from, _summoner_to, _item_mail);
     }
@@ -7489,6 +7684,7 @@ contract Murasaki_Mail is Ownable, ReentrancyGuard, Pausable {
         _mint_presentboxBoth(_summoner_to, _mail.summoner_from);
         //total_opened[_summoner_to] += 1;
         _add_total_opened(_summoner_to, 1);
+        _increment_global_total_opened();
         //event
         emit Open_Mail(_summoner_to, _mail.summoner_from);
     }
@@ -7630,6 +7826,18 @@ contract Fluffy_Festival is Ownable, ReentrancyGuard, Pausable {
     }
     function voteCount (uint _summoner) external view returns (uint) {
         return _get_voteCount(_summoner);
+    }
+    
+    //global_vote_count, mse:402
+    function _increment_global_voteCount () internal {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage_Extra mse = Murasaki_Storage_Extra(ma.address_Murasaki_Storage_Extra());
+        mse.add_storage(402, 0, 1);
+    }
+    function global_voteCount () external view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage_Extra mse = Murasaki_Storage_Extra(ma.address_Murasaki_Storage_Extra());
+        return mse.get_storage(402, 0);
     }
     
     //step
@@ -8247,6 +8455,22 @@ contract Stroll is Ownable, ReentrancyGuard, Pausable {
     function total_strolledDistance_ofCompanion_03 (uint _summoner) public view returns (uint) {
         return _get_total_strolledDistance_ofCompanion_03(_summoner);
     }
+    
+    //global_total_strolledDistance, mse:308
+    function _add_global_total_strolledDistance (uint _value) internal {
+        __add_storage(308, 0, _value);
+    }
+    function global_total_strolledDistance () external view returns (uint) {
+        return __get_storage(308, 0);
+    }
+
+    //global_total_metSummoners, mse:309
+    function _add_global_total_metSummoners (uint _value) internal {
+        __add_storage(309, 0, _value);
+    }
+    function global_total_metSummoners () external view returns (uint) {
+        return __get_storage(309, 0);
+    }
 
     
     //getter
@@ -8538,6 +8762,7 @@ contract Stroll is Ownable, ReentrancyGuard, Pausable {
         }
         //total_metSummoners[_summoner] += _count_newMeet;
         _add_total_metSummoners(_summoner, _count_newMeet);
+        _add_global_total_metSummoners(_count_newMeet);
     }
     function _update_totalDistance (uint _summoner) internal {
         uint _distance;
@@ -8552,6 +8777,7 @@ contract Stroll is Ownable, ReentrancyGuard, Pausable {
         //total_strolledDistance[_summoner] += _distance;
         //_set_total_strolledDistance(_summoner, get_total_strolledDistance(_summoner) + _distance);
         _add_total_strolledDistance(_summoner, _distance);
+        _add_global_total_strolledDistance(_distance);
         //total_strolledDistance_ofCompanion[_summoner][companion[_summoner]] += _distance;
         if (companion[_summoner] == 1) {
             //_set_total_strolledDistance_ofCompanion_01(_summoner, get_total_strolledDistance_ofCompanion_01(_summoner) + _distance);

@@ -296,174 +296,188 @@ async function show_murasakiInfo2() {
     //loading
     _text = '&nbsp;&nbsp;&nbsp;<b>Loading...</b>';
     _target.innerHTML = _text;
-    
-    //get web3
-    let web3 = await new Web3(window.ethereum);
-    //let web3 = await new Web3("wss://testnetwss.murasaki-san.com");
-    await window.ethereum.request({method: 'eth_requestAccounts'});
 
-    //get summoner
-    let _summoner = document.getElementById("input_summoner").value;
+    if (flag_web3Loaded && typeof(wallet) != "undefined") {
+        
+        //get web3
+        //let web3 = await new Web3(window.ethereum);
+        //let web3 = await new Web3("wss://testnetwss.murasaki-san.com");
+        //await window.ethereum.request({method: 'eth_requestAccounts'});
 
-    //get wallet
-    /*
-    let _wallets = await web3.eth.getAccounts();
-    let wallet = _wallets[0];
-    */
-    let wallet = await contract_mm.methods.ownerOf(_summoner).call();
-    
-    //prepare contract
-    let _abi = [{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"inputs":[{"internalType":"address","name":"_address","type":"address"}],"name":"_set_Murasaki_Address","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"address_Murasaki_Address","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"age","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"birthplace","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"character","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"city","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"clarinet_level","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"class","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"coin","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"countOf_achievement","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"critical_count","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"dexterity","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"dexterity_withItems","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"doing_now","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"exp","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"flower","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"fluffy","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"fumble_count","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"happy","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"harp_level","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"horn_level","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"inHouse","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"intelligence","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"intelligence_withItems","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"isActive","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"leaf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"level","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"luck","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"luck_withItems","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"luck_withItems_withDice","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"not_petrified","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"_tokenId","type":"uint256"}],"name":"ownerOf","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"personality","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"piano_level","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"satiety","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"scent","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"score","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"scoreOf_achievement_onChain","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"street","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"strength","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"strength_withItems","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"summoner","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"bytes4","name":"interfaceId","type":"bytes4"}],"name":"supportsInterface","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"pure","type":"function"},{"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"timpani_level","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"_tokenId","type":"uint256"}],"name":"tokenURI","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"total_coin_mined","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"total_exp_gained","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"total_fluffy_received","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"total_item_crafted","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"total_leaf_farmed","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"total_mail_opened","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"total_mail_sent","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"total_metSummoners","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"total_strolledDistance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"total_voted","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"violin_level","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"weakpoint","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"}];
-    let _address = "0x31d69b5125ce419a2948a58b7Aa0883D57c06850";
-    let contract = new web3.eth.Contract(_abi, _address);
+        //get summoner
+        let _summoner = document.getElementById("input_summoner").value;
 
-    //get summoner
-    //let _summoner = await contract.methods.summoner(wallet).call();
-    
-    //when token not possess, err text
-    if (_summoner == 0) {
-        _text = "";
-        _text += "&nbsp;&nbsp;&nbsp;";
-        _text += "You have not summoned your Murasaki-san yet.";
-    
-    //when token possess
+        //get wallet
+        /*
+        let _wallets = await web3.eth.getAccounts();
+        let wallet = _wallets[0];
+        */
+        let _wallet;
+        try {
+            _wallet = await contract_mm.methods.ownerOf(_summoner).call();
+        } catch (error) {
+            console.error(error);
+            _button.disabled = false;
+            _target.innerHTML = "";
+            return 0;
+        }
+
+        
+        //prepare contract
+        let _abi = [{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"inputs":[{"internalType":"address","name":"_address","type":"address"}],"name":"_set_Murasaki_Address","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"address_Murasaki_Address","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"age","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"birthplace","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"character","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"city","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"clarinet_level","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"class","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"coin","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"countOf_achievement","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"critical_count","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"dexterity","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"dexterity_withItems","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"doing_now","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"exp","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"flower","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"fluffy","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"fumble_count","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"happy","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"harp_level","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"horn_level","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"inHouse","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"intelligence","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"intelligence_withItems","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"isActive","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"leaf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"level","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"luck","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"luck_withItems","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"luck_withItems_withDice","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"not_petrified","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"_tokenId","type":"uint256"}],"name":"ownerOf","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"personality","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"piano_level","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"satiety","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"scent","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"score","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"scoreOf_achievement_onChain","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"street","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"strength","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"strength_withItems","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"summoner","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"bytes4","name":"interfaceId","type":"bytes4"}],"name":"supportsInterface","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"pure","type":"function"},{"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"timpani_level","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"_tokenId","type":"uint256"}],"name":"tokenURI","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"total_coin_mined","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"total_exp_gained","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"total_fluffy_received","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"total_item_crafted","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"total_leaf_farmed","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"total_mail_opened","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"total_mail_sent","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"total_metSummoners","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"total_strolledDistance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"total_voted","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"violin_level","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_wallet","type":"address"}],"name":"weakpoint","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"}];
+        let _address = "0x31d69b5125ce419a2948a58b7Aa0883D57c06850";
+        let contract = new web3.eth.Contract(_abi, _address);
+
+        //get summoner
+        //let _summoner = await contract.methods.summoner(wallet).call();
+        
+        //when token not possess, err text
+        if (_summoner == 0) {
+            _text = "";
+            _text += "&nbsp;&nbsp;&nbsp;";
+            _text += "You have not summoned your Murasaki-san yet.";
+        
+        //when token possess
+        } else {
+        
+            //prepare info
+            let _character = await contract.methods.character(_wallet).call();
+            let _personality = await contract.methods.personality(_wallet).call();
+            let _weakpoint = await contract.methods.weakpoint(_wallet).call();
+            let _name = await contract.methods.name(_wallet).call();
+            if (_name == "") {
+                _name = "#" + _summoner;
+            }
+            let _birthplace = await contract.methods.birthplace(_wallet).call();
+            let _flower = await contract.methods.flower(_wallet).call();
+            let _street = await contract.methods.street(_wallet).call();
+            let _city = await contract.methods.city(_wallet).call();
+            let _age = await contract.methods.age(_wallet).call();
+            _age = Math.floor(_age / 86400);    //sec -> days
+            let _str = await contract.methods.strength(_wallet).call();
+            let _dex = await contract.methods.dexterity(_wallet).call();
+            let _int = await contract.methods.intelligence(_wallet).call();
+            _str = Number(_str);
+            _dex = Number(_dex);
+            _int = Number(_int);
+            _str /= 100;    // x100 point -> x1 point
+            _dex /= 100;    // x100 point -> x1 point
+            _int /= 100;    // x100 point -> x1 point
+            let _total_coin_mined = await contract.methods.total_coin_mined(_wallet).call();
+            let _total_leaf_farmed = await contract.methods.total_leaf_farmed(_wallet).call();
+            let _total_item_crafted = await contract.methods.total_item_crafted(_wallet).call();
+            //let _total_metSummoners = await contract.methods.total_metSummoners(_wallet).call();
+            let _total_metSummoners = 0;
+            let _score = await contract.methods.score(_wallet).call();
+            let _happy = await contract.methods.happy(_wallet).call();
+            if (_happy >= 80) { //define happy degree
+                _happy = "Very Happy (" + _happy + "%)";
+            } else if (_happy >= 60) {
+                _happy = "Happy (" + _happy + "%)";
+            } else if (_happy >= 40) {
+                _happy = "Neutral (" + _happy + "%)";
+            } else if (_happy >= 20) {
+                _happy = "Sad (" + _happy + "%)";
+            } else {
+                _happy = "Very Sad (" + _happy + "%)";
+            }
+            let _doing_now = await contract.methods.doing_now(_wallet).call();
+            let _total_mail_opened = await contract.methods.total_mail_opened(_wallet).call();
+
+            //parepare tokenURI and extract SVG
+            let _tokenURI = await contract.methods.tokenURI(_summoner).call();
+            _tokenURI = _tokenURI.split("base64,")[1];
+            _tokenURI = atob(_tokenURI);
+            _tokenURI = _tokenURI.split("base64,")[1];
+            _tokenURI = _tokenURI.split('"')[0];
+            _tokenURI = atob(_tokenURI);
+
+            //prepare text
+
+            _text = "";
+            _text += "-------------------------------------------------------------------------";
+            _text += "<br>";
+
+            //icon
+            _text += "<style>.showIcon{display: inline-block; width: 64px; float: left; margin-right: 16px; margin-top: 8px;}</style>";
+            _text += "<span class='showIcon' align='left'>";
+            _text += _tokenURI;
+            _text += "</span>";
+
+            //text
+            _text += "Murasaki-san of ID <b><font color='blue'>#";
+            _text += _summoner;
+            _text += "</font></b> is a <b><font color='#ff7f50'>";
+            _text += _character;
+            _text += "</font></b>, <b><font color='#ff4500'>";
+            _text += _personality;
+            _text += "</font></b>, but <b><font color='#ff0000'>";
+            _text += _weakpoint;
+            _text += "</font></b> <b><font color='#ff1493'>";
+            _text += _name;
+            _text += "</font></b>. <b><font color='#ff1493'>";
+            _text += _name;
+            _text += "</font></b> was born from a <b><font color='#008080 '>";
+            _text += _birthplace;
+            _text += "</font></b> with a scent of <b><font color='#006400'>";
+            _text += _flower;
+            _text += "</font></b> and lives in a house on <b><font color='#8a2be2'>";
+            _text += _street;
+            _text += "</font></b> in <b><font color='#800080'>";
+            _text += _city;
+            _text += "</font></b> of State of Astar, Polkadot Union. At <b><font color='blue'>";
+            _text += _age;
+            _text += " days</font></b> old, <b><font color='#ff1493'>";
+            _text += _name;
+            _text += "</font></b> has earned <b><font color='blue'>";
+            if (_str >= _dex && _str >= _int) {
+                _text += _str;
+                _text += " STR</font></b> status";
+            } else if (_dex >= _str && _dex >= _int) {
+                _text += _dex;
+                _text += " DEX</font></b> status";
+            } else {
+                _text += _int;
+                _text += " INT</font></b> status";
+            }
+            if (Number(_total_coin_mined) >= Number(_total_leaf_farmed)) {
+                _text += ", mined a total of <b><font color='blue'>";
+                _text += _total_coin_mined;
+                _text += " coins</font></b>"; 
+            } else {
+                _text += ", farmed a total of <b><font color='blue'>";
+                _text += _total_leaf_farmed;
+                _text += " leaves</font></b>"; 
+            }
+            _text += ", crafted <b><font color='blue'>";
+            _text += _total_item_crafted;
+            _text += " items</font></b>, received <b><font color='blue'>";
+            _text += _total_mail_opened;
+            _text += " mails</font></b>, and made <b><font color='blue'>";
+            _text += _total_metSummoners;
+            _text += " friends</font></b> while strolling. <b><font color='#ff1493'>";
+            _text += _name;
+            _text += "</font></b> is currently <b><font color='#00bfff'>";
+            _text += _doing_now;
+            _text += "</font></b> and looks <b><font color='#ff0000'>";
+            _text += _happy;
+            _text += "</font></b> now. The current comfort score of <b><font color='#ff1493'>the house of ";
+            _text += _name;
+            _text += "</font></b> is <b><font color='#ffa500'>&#x273f;";
+            _text += _score;
+            _text += "</font></b>.";
+            _text += "<br>";
+            _text += "-------------------------------------------------------------------------";
+            _text += "<br>";
+        }
+        //override html
+        _target.innerHTML = _text;
+        
+        //activate button
+        _button.disabled = false;
     } else {
-    
-        //prepare info
-        let _character = await contract.methods.character(wallet).call();
-        let _personality = await contract.methods.personality(wallet).call();
-        let _weakpoint = await contract.methods.weakpoint(wallet).call();
-        let _name = await contract.methods.name(wallet).call();
-        if (_name == "") {
-            _name = "#" + _summoner;
-        }
-        let _birthplace = await contract.methods.birthplace(wallet).call();
-        let _flower = await contract.methods.flower(wallet).call();
-        let _street = await contract.methods.street(wallet).call();
-        let _city = await contract.methods.city(wallet).call();
-        let _age = await contract.methods.age(wallet).call();
-        _age = Math.floor(_age / 86400);    //sec -> days
-        let _str = await contract.methods.strength(wallet).call();
-        let _dex = await contract.methods.dexterity(wallet).call();
-        let _int = await contract.methods.intelligence(wallet).call();
-        _str = Number(_str);
-        _dex = Number(_dex);
-        _int = Number(_int);
-        _str /= 100;    // x100 point -> x1 point
-        _dex /= 100;    // x100 point -> x1 point
-        _int /= 100;    // x100 point -> x1 point
-        let _total_coin_mined = await contract.methods.total_coin_mined(wallet).call();
-        let _total_leaf_farmed = await contract.methods.total_leaf_farmed(wallet).call();
-        let _total_item_crafted = await contract.methods.total_item_crafted(wallet).call();
-        //let _total_metSummoners = await contract.methods.total_metSummoners(wallet).call();
-        let _total_metSummoners = 0;
-        let _score = await contract.methods.score(wallet).call();
-        let _happy = await contract.methods.happy(wallet).call();
-        if (_happy >= 80) { //define happy degree
-            _happy = "Very Happy (" + _happy + "%)";
-        } else if (_happy >= 60) {
-            _happy = "Happy (" + _happy + "%)";
-        } else if (_happy >= 40) {
-            _happy = "Neutral (" + _happy + "%)";
-        } else if (_happy >= 20) {
-            _happy = "Sad (" + _happy + "%)";
-        } else {
-            _happy = "Very Sad (" + _happy + "%)";
-        }
-        let _doing_now = await contract.methods.doing_now(wallet).call();
-        let _total_mail_opened = await contract.methods.total_mail_opened(wallet).call();
-
-        //parepare tokenURI and extract SVG
-        let _tokenURI = await contract.methods.tokenURI(_summoner).call();
-        _tokenURI = _tokenURI.split("base64,")[1];
-        _tokenURI = atob(_tokenURI);
-        _tokenURI = _tokenURI.split("base64,")[1];
-        _tokenURI = _tokenURI.split('"')[0];
-        _tokenURI = atob(_tokenURI);
-
-        //prepare text
-
-        _text = "";
-        _text += "-------------------------------------------------------------------------";
-        _text += "<br>";
-
-        //icon
-        _text += "<style>.showIcon{display: inline-block; width: 64px; float: left; margin-right: 16px; margin-top: 8px;}</style>";
-        _text += "<span class='showIcon' align='left'>";
-        _text += _tokenURI;
-        _text += "</span>";
-
-        //text
-        _text += "Murasaki-san of ID <b><font color='blue'>#";
-        _text += _summoner;
-        _text += "</font></b> is a <b><font color='#ff7f50'>";
-        _text += _character;
-        _text += "</font></b>, <b><font color='#ff4500'>";
-        _text += _personality;
-        _text += "</font></b>, but <b><font color='#ff0000'>";
-        _text += _weakpoint;
-        _text += "</font></b> <b><font color='#ff1493'>";
-        _text += _name;
-        _text += "</font></b>. <b><font color='#ff1493'>";
-        _text += _name;
-        _text += "</font></b> was born from a <b><font color='#008080 '>";
-        _text += _birthplace;
-        _text += "</font></b> with a scent of <b><font color='#006400'>";
-        _text += _flower;
-        _text += "</font></b> and lives in a house on <b><font color='#8a2be2'>";
-        _text += _street;
-        _text += "</font></b> in <b><font color='#800080'>";
-        _text += _city;
-        _text += "</font></b> of State of Astar, Polkadot Union. At <b><font color='blue'>";
-        _text += _age;
-        _text += " days</font></b> old, <b><font color='#ff1493'>";
-        _text += _name;
-        _text += "</font></b> has earned <b><font color='blue'>";
-        if (_str >= _dex && _str >= _int) {
-            _text += _str;
-            _text += " STR</font></b> status";
-        } else if (_dex >= _str && _dex >= _int) {
-            _text += _dex;
-            _text += " DEX</font></b> status";
-        } else {
-            _text += _int;
-            _text += " INT</font></b> status";
-        }
-        if (Number(_total_coin_mined) >= Number(_total_leaf_farmed)) {
-            _text += ", mined a total of <b><font color='blue'>";
-            _text += _total_coin_mined;
-            _text += " coins</font></b>"; 
-        } else {
-            _text += ", farmed a total of <b><font color='blue'>";
-            _text += _total_leaf_farmed;
-            _text += " leaves</font></b>"; 
-        }
-        _text += ", crafted <b><font color='blue'>";
-        _text += _total_item_crafted;
-        _text += " items</font></b>, received <b><font color='blue'>";
-        _text += _total_mail_opened;
-        _text += " mails</font></b>, and made <b><font color='blue'>";
-        _text += _total_metSummoners;
-        _text += " friends</font></b> while strolling. <b><font color='#ff1493'>";
-        _text += _name;
-        _text += "</font></b> is currently <b><font color='#00bfff'>";
-        _text += _doing_now;
-        _text += "</font></b> and looks <b><font color='#ff0000'>";
-        _text += _happy;
-        _text += "</font></b> now. The current comfort score of <b><font color='#ff1493'>the house of ";
-        _text += _name;
-        _text += "</font></b> is <b><font color='#ffa500'>&#x273f;";
-        _text += _score;
-        _text += "</font></b>.";
-        _text += "<br>";
-        _text += "-------------------------------------------------------------------------";
-        _text += "<br>";
+        setTimeout( show_murasakiInfo2, 1000);
     }
-    //override html
-    _target.innerHTML = _text;
-    
-    //activate button
-    _button.disabled = false;
 }
 
 
@@ -547,15 +561,19 @@ function drawCount(ctx, x, y, text1, color="blue") {
     ctx.fillText(text1, x, y);
 }
 
-function drawWindow(ctx, x, y, width, height, r, color="white", alpha=1) {
+//function drawWindow(ctx, x, y, width, height, r, color="white", alpha=1) {
+function drawWindow(ctx, x, y, width, height, r, color="#ee5495", alpha=0.1) {
     ctx.fillStyle = color;
-    ctx.strokeStyle = "#333333";
-    ctx.lineWidth = 4;
+    //ctx.strokeStyle = "#333333";
+    ctx.strokeStyle = "#ee5495";
+    ctx.lineWidth = 3;
     ctx.globalAlpha = alpha;
     fillRoundRect(ctx, x, y, width, height, r);
     ctx.globalAlpha = 1;
     strokeRoundRect(ctx, x, y, width, height, r);
 }
+
+
 
 async function drawStatus() {
 
@@ -579,13 +597,31 @@ async function drawStatus() {
         ctx.textAlign = "left";
         ctx.fillText("Loading...", 30, 30);
 
+        //adjuste scale
+        let windowWidth = window.innerWidth;
+        if (windowWidth < canvas.width) {
+            let _magni = windowWidth/canvas.width;
+            ctx.scale(_magni, _magni);
+        }
+
         //get summoner from input
         let _summoner = document.getElementById("input_summoner").value;
     
         //call on-chain data
-        let _all_static_status = await contract_info_wss.methods.allStaticStatus(_summoner).call({from:wallet});
-        let _all_dynamic_status = await contract_info_wss.methods.allDynamicStatus(_summoner).call({from:wallet});
-        let _wallet = await contract_mm.methods.ownerOf(_summoner).call();
+        let _all_static_status;
+        let _all_dynamic_status;
+        let _wallet;
+        try {
+            _all_static_status = await contract_info_wss.methods.allStaticStatus(_summoner).call({from:wallet});
+            _all_dynamic_status = await contract_info_wss.methods.allDynamicStatus(_summoner).call({from:wallet});
+            _wallet = await contract_mm.methods.ownerOf(_summoner).call();
+        } catch (error) {
+            console.error(error);
+            _button.disabled = false;
+            canvas.width = 0;
+            canvas.height = 0;
+            return 0;
+        }
 
         //prepare on-chain data
         let local_level =               Number(_all_dynamic_status[2]);
@@ -659,7 +695,7 @@ async function drawStatus() {
         let _width = 280;
         let _height = 260;
         let _space = 10;
-        let _r = 7;
+        let _r = 5;
         let _inside = 20;
         let _rawHeight = 20;
         let _xt;

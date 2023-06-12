@@ -85,36 +85,6 @@ contract ERC721 is IERC721 {
 
 //### 1st
 
-    
-    on-chainに保存するステータスの追加
-        summonerごと
-            total_feeding
-            total_grooming
-            total_neglect_count
-                happy <= 0でgroomingした回数
-            total critical count
-                feeding, grooming, craftingでcriticalを出した回数
-        global
-            total_feeding_count
-            total_grooming_count
-            total_coin_mined
-            total_coin_spent
-            total_leaf_farmed
-            total_leaf_spent
-            total_item_crafted
-            total_fluffy_discovered
-            total_mail_sent
-            total_mail_opened
-            total_dice_rolled
-            total_dice_critical
-            total_dice_fumble
-            total_stroll_distance
-            total_stroll_friend
-            total_practiceTime_Clarinet
-            total_practiceTime_Piano
-            total_practiceTime_Violin
-            
-    
 
     構想：SNSへの親和性を上げる
         ワンクリックでtwitterへ投稿できるボタンを設置する。
@@ -1190,6 +1160,34 @@ contract ERC721 is IERC721 {
 
 //### 3rd
 
+ ok on-chainに保存するステータスの追加
+     ok summonerごと
+            total_feeding
+            total_grooming
+            total_neglect_count
+                happy <= 0でgroomingした回数
+            total critical count
+                feeding, grooming, craftingでcriticalを出した回数
+     ok global
+            total_feeding_count
+            total_grooming_count
+            total_coin_mined
+            total_coin_spent
+            total_leaf_farmed
+            total_leaf_spent
+            total_item_crafted
+            total_fluffy_discovered
+            total_mail_sent
+            total_mail_opened
+            total_dice_rolled
+            total_dice_critical
+            total_dice_fumble
+            total_stroll_distance
+            total_stroll_friend
+            total_practiceTime_Clarinet
+            total_practiceTime_Piano
+            total_practiceTime_Violin
+            
  ok 散歩システムを詰める
      ok 草原の実装
      ok 山海草原の実装
