@@ -85,67 +85,43 @@ contract ERC721 is IERC721 {
 
 //### 1st
 
-
-    構想：SNSへの親和性を上げる
-        ワンクリックでtwitterへ投稿できるボタンを設置する。
-        投稿したくなるような小さな絵を実装する
-            canvasを使えば良さそう
-            tokenURIでもいいのだが。
-            ステータスウィンドウはちょっと情報多すぎるだろうか
-        ハッシュタグ案
-            #Astar #BCG #HoM #Murasaki-san
-        匿名性を担保する
-            リテラシーの高い層ほど、nameやidなど、
-                walletを特定可能な情報は安易にSNSに載せたくないだろう。
-            一方で、SNSへの投稿はゲームの進行を誇示することで自己顕示欲を満たしやすい。
-            よって、極めて特定しにくいが、進捗を端的に表す絵を用意して、
-                tweetボタンを設置しておく。
-            marimoNFTの水換え依頼などはwalletを追えるのではやりにくいだろう。
-                リテラシーの低い層か、捨てwalletの利用者か
-                捨てwalletからもメインwalletを追えるのでやはり投稿には勇気がいる。
-            気軽に投稿可能なアイコンや絵を用意する。
-        乗せる情報
-            Lv
-            Fluffyスコア
-            Comfortスコア（丸めた数字）
-            NFT数
-            happy, satietyに応じたアイコン
+    
+    /test/から以下をmainへ移動すること
+        info.html
+        info.js
 
 
     infoページの充実化
-        改善点
+        売買回数、平均購入価格などを集計したマーケット情報ページを作成する？
+            総取引額、アイテムごとの取引回数・平均価格
+            info内にボタンで実装するか
+     ok コントラアップグレードしてtotal mail sentなどの表示を実装する
+     ig twitter投稿ボタンを設置する？
+            nameとstaking amountを非表示にするラジオボタンを実装する
+     ok 改善点
          ok ageを表示する
-            コントラアップグレードしてtotal mail sentなどの表示を実装する
          ok ボタン押したあとのloading...を実装する
          ok     ボタンは何回も押せないように一度押したらdisableにする
          ok web3Init前にボタン押したときのエラー対策を実装する
-            nameとstaking amountを非表示にするラジオボタンを実装する
-            twitter投稿ボタンを設置する？
-            他のパラメータの検討
+         ok 他のパラメータの検討
                 total_feeding
                 total_grooming
                 neglect_count
                 total critical
-        売買回数、平均購入価格などを集計したマーケット情報ページを作成する？
-            マーケット集計ページを作成する?
-            総取引額、アイテムごとの取引回数・平均価格
-            info内にボタンで実装するか
      ok むらさきさんのパラメータ詳細をinfoに追加する
             取得可能なパラメータをすべて表示する
             所有するNFTをアイコンでばらばらと表示する
 
 
     修正案
-        murasakisanコントラに一括call関数を実装する
+        コントラクトの一括upgradeをmainで行う
+            replacableコントラの全入れ替え
+            contracts.pyのつじつま合わせ -> init.py実行
+        infoの取得にmurasakiのbatch getterを使って処理を軽減する
         お菓子の家の建設途中の修正
             建設しているジンジャーマン
             10～30%ではもう少しパーツを少なめに
             staking=0の時の演出
-        全summoner合算のtotal countの実装
-            全d20カウント数
-            全mail open数
-            全make friend数
-            storage_extraに保存して、on-chain dataに表示させる
         wrong chainのエラーの実装
         散歩から帰ってきたら吹き出しを表示する？
         upgradeウィンドウの説明編集
@@ -154,9 +130,6 @@ contract ERC721 is IERC721 {
             glitter表示
             メーターの色を変えるなどして100%をわかりやすく
             click to mintなどを表示させる？
-        コントラクトの一括upgradeをmainで行う
-            replacableコントラの全入れ替え
-            contracts.pyのつじつま合わせ -> init.py実行
         コントラクトマップのupgradable -> replacableへ編集
         tokenURIをsatietyとhappyによって変化させる
             tokenURI_codexを作製し参照する
@@ -177,6 +150,18 @@ contract ERC721 is IERC721 {
         かざぐるまと王冠を交換する
         フェスティバル前の演出の改善
         変数書き換え対策の実装, さてどうするか
+     ok 全summoner合算のtotal countの実装
+     ok     全d20カウント数
+     ok     全mail open数
+     ok     全make friend数
+     ok     storage_extraに保存して、on-chain dataに表示させる
+     ok trial_converterにmssの追加分を修正
+     ok     ガス代許容可能かチェック
+     ok murasakisanコントラに一括call関数を実装する
+     ok stroll中のfeedingをどうするか
+     ok     可能にするか
+     ok     その場合、ボタンの位置と演出はどうするか。
+     ok infoとmurasakisanコントラを最新のmssに対応させる
      ok コントラクトの総入れ替えが可能か施行する
      ng コントラクトモニターの初期化時にdeployから参照させる
      ok コントラクト書き換え環境を整備する
@@ -254,6 +239,32 @@ contract ERC721 is IERC721 {
             upgrade用色違い
             voting用色違い
             convert用色違い
+
+
+    構想：SNSへの親和性を上げる
+        ワンクリックでtwitterへ投稿できるボタンを設置する。
+        投稿したくなるような小さな絵を実装する
+            canvasを使えば良さそう
+            tokenURIでもいいのだが。
+            ステータスウィンドウはちょっと情報多すぎるだろうか
+        ハッシュタグ案
+            #Astar #BCG #HoM #Murasaki-san
+        匿名性を担保する
+            リテラシーの高い層ほど、nameやidなど、
+                walletを特定可能な情報は安易にSNSに載せたくないだろう。
+            一方で、SNSへの投稿はゲームの進行を誇示することで自己顕示欲を満たしやすい。
+            よって、極めて特定しにくいが、進捗を端的に表す絵を用意して、
+                tweetボタンを設置しておく。
+            marimoNFTの水換え依頼などはwalletを追えるのではやりにくいだろう。
+                リテラシーの低い層か、捨てwalletの利用者か
+                捨てwalletからもメインwalletを追えるのでやはり投稿には勇気がいる。
+            気軽に投稿可能なアイコンや絵を用意する。
+        乗せる情報
+            Lv
+            Fluffyスコア
+            Comfortスコア（丸めた数字）
+            NFT数
+            happy, satietyに応じたアイコン
 
 
     構想：散歩中のミニゲーム
@@ -4493,8 +4504,8 @@ async function contract_update_stroll_info(_summoner) {
     local_met_level = Number(_stroll_info[19]);
     local_direction = Number(_stroll_info[20]);
     local_companion = Number(_stroll_info[21]);
-    local_strollingDistance = Number(_stroll_info[22]);
-    local_reminingSec = Number(_stroll_info[23]);
+    local_reminingSec = Number(_stroll_info[22]);
+    local_strollingDistance = Number(_stroll_info[23]);
     local_strollEndable = Number(_stroll_info[24]);
     local_coolingSec = Number(_stroll_info[25]);
 }
@@ -6232,7 +6243,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
                 this.waterbottle.flipX = false;
             }
         } else if (this.submode == 6) { //open window
-            open_window_strollingDuring(this.scene, local_strollingDistance);
+            open_window_strollingDuring(this.scene, local_direction);
             this.submode += 1;
         } else if (this.submode == 7) { //end
             ;
@@ -6265,15 +6276,16 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             this.subcount = 0;                    
             this.submode = 0;
             this.mode = "resting";
-            let _text = "Friends +3\nDistance +2000 m";
-            let _msg = this.scene.add.text(this.x, this.y-100, _text)
+            let _text = "Friends +" + this.delta_total_metSummoners + "\nDistance +" + this.delta_total_strolledDistance + " m";
+            let _msg = this.scene.add.text(this.x, this.y-80, _text)
                 .setOrigin(0.5)
                 .setDepth(2000)
                 .setFontSize(20)
                 .setFontFamily("Arial")
                 .setFill("#FF4264");
-            setTimeout( () => {_msg.destroy()}, 5000);
+            setTimeout( () => {_msg.destroy()}, 10000);
             this.on_click();
+            item_waterBottle.visible = true;
         }
     }
     
@@ -6531,6 +6543,21 @@ class Pet extends Phaser.GameObjects.Sprite{
         this.on("pointerdown", function (pointer) {
             this.on_click();
         }, this);
+
+        //check strolling
+        if (local_strolling_status == 1) {
+            if (
+                (local_companion == 1 && this.type == "mining")
+                ||(local_companion == 2 && this.type == "farming")
+                ||(local_companion == 3 && this.type == "crafting")
+            ) {
+                this.mode = "strolling_start";
+                this.x = -150;
+                this.y = 900;
+                this.submode = 4;
+            }
+        }
+
     }
     set set_mode(mode){
         this.mode = mode;
@@ -11668,7 +11695,6 @@ function open_window_voting(scene) {
 //### strolling
 async function open_window_strolling(scene) {
 
-
     //functions
     
     //create selection
@@ -11801,6 +11827,7 @@ async function open_window_strolling(scene) {
     group_window_strolling.add(msg1);
 
     //get strollInfo
+    contract_update_stroll_info(summoner);
     let _strollInfo = await get_strollInfo(summoner);
     let _isStrolling = Number(_strollInfo[0]);
     let _total_strolledDistance = Number(_strollInfo[1]);
@@ -11822,6 +11849,7 @@ async function open_window_strolling(scene) {
     let _total_strolling_companion_03 = Number(_strollInfo[17]);
     let _stroll_level = Number(_strollInfo[18]);
     let _met_level = Number(_strollInfo[19]);
+    let _coolingSec = Number(_strollInfo[25]);
 
     //create selected square
     let _selected_direction = scene.add.graphics()
@@ -12017,7 +12045,7 @@ async function open_window_strolling(scene) {
                 .setFontSize(18).setFontFamily("Arial").setFill("red").setOrigin(0.5);
         group_window_strolling.add(msg3);
         create_button(650, 820, ">> Go for a Stroll <<", "#888888", "", 0, 0, scene, 36, false);
-    } else if (local_coolingSec > 0 ) {
+    } else if (_coolingSec > 0 ) {
         let msg3 = scene.add.text(830, 812, "- Cooling Time: " + local_coolingSec + " sec -")
                 .setFontSize(18).setFontFamily("Arial").setFill("red").setOrigin(0.5);
         group_window_strolling.add(msg3);
@@ -12086,7 +12114,7 @@ function open_window_strollingDuring(scene, mode) {
         //create background
         let _img_back = scene.add.sprite(640, 480, "stroll_during_01_back")
             .setDepth(5001)
-            .setScale(0.8)
+            .setScale(1.0)
             .setInteractive();
         group_window_strollingDuring.add(_img_back);
         
@@ -12126,8 +12154,9 @@ function open_window_strollingDuring(scene, mode) {
         //create background
         let _img_back = scene.add.sprite(640, 480, "stroll_during_02_back")
             .setDepth(5001)
-            .setScale(0.8)
+            .setScale(1)
             .setInteractive();
+        group_window_strollingDuring.add(_img_back);
 
         //wave
         let _img_wave1 = scene.add.sprite(320, 625, "stroll_during_02_wave")
@@ -12170,8 +12199,9 @@ function open_window_strollingDuring(scene, mode) {
         //create background
         let _img_back = scene.add.sprite(640, 480, "stroll_during_03_back")
             .setDepth(5001)
-            .setScale(0.8)
+            .setScale(1)
             .setInteractive();
+        group_window_strollingDuring.add(_img_back);
 
         //create cloud
         _create_obj(scene, -300, 360, "stroll_during_01_cloud", 0.1+Math.random()*0.3, 0.1+Math.random()*0.3, 5001, 1);
@@ -12216,7 +12246,7 @@ function open_window_strollingDuring(scene, mode) {
     _walking_summoner.countBuffer = 0;
     _walking_summoner.flag_endable = 0;
     _walking_summoner.update = function() {
-        if (local_stroll_endable == 1) {
+        if (local_strollEndable == 1) {
             if (this.flag_endable == 0) {
                 group_window_strollingDuring.flag_walk = 0;
                 this.anims.play("murasaki_sleeping", true);
@@ -14486,6 +14516,7 @@ function create(scene) {
     icon_rotate = scene.add.sprite(1235,915-15, "icon_rotate")
         .setOrigin(0.5)
         .setScale(0.075)
+        .setDepth(6000)
         .setInteractive({useHandCursor: true})
         .on('pointerdown', () => sound_system.play())
         .on("pointerdown", () => {
@@ -14505,6 +14536,7 @@ function create(scene) {
     icon_home = scene.add.sprite(1155,915-15, "icon_home")
         .setOrigin(0.5)
         .setScale(0.15)
+        .setDepth(6000)
         .setInteractive({useHandCursor: true})
         .on('pointerdown', () => sound_system.play())
         .on("pointerdown", () => {
@@ -15044,6 +15076,14 @@ function create(scene) {
         murasakisan.count = 0;
         murasakisan.target_x = 650;
         murasakisan.target_y = 650;
+    } else if (local_strolling_status == 1) {
+        murasakisan = new Murasakisan(scene, -150, 900)
+            .setOrigin(0.5)
+            .setScale(0.45);
+        murasakisan.set_mode = "strolling_start";
+        murasakisan.submode = 7;
+        murasakisan.count = 0;
+        open_window_strollingDuring(scene, local_direction);
     } else {
         murasakisan = new Murasakisan(scene, 500 + Math.random()*200, 640 + Math.random()*100)
             .setOrigin(0.5)
@@ -16310,6 +16350,7 @@ function update_checkModeChange(this_scene) {
         && murasakisan.mode != "strolling_start"
     ){
         murasakisan.set_mode = "strolling_start";
+        //item_waterBottle.visible = false;
         murasakisan.setScale(0.45);
         murasakisan.submode = 0;
         murasakisan.count = 0;
@@ -16332,8 +16373,23 @@ function update_checkModeChange(this_scene) {
         murasakisan.setScale(0.45);
         murasakisan.submode = 0;
         murasakisan.count = 0;
-        murasakisan.delta_total_strolledDistance = local_total_strolledDistance - previous_local_total_strolledDistance;
-        murasakisan.delta_total_metSummoners = local_total_metSummoners - previous_local_total_metSummoners;
+        if (local_companion == 1) {
+            strolling_companion = mr_astar;
+        } else if (local_companion == 2) {
+            strolling_companion = ms_ether;
+        } else if (local_companion == 3) {
+            strolling_companion = dr_bitco;
+        }
+        //get latest stroll info and calc delta
+        async function _do() {
+            await contract_update_stroll_info(summoner);
+            murasakisan.delta_total_strolledDistance = 
+                local_total_strolledDistance - previous_local_total_strolledDistance;
+            murasakisan.delta_total_metSummoners = 
+                local_total_metSummoners - previous_local_total_metSummoners;
+        }
+        _do();
+        //pet
         strolling_companion.mode = "strolling_end";
         strolling_companion.submode = 0;
     }
@@ -18802,6 +18858,12 @@ function update_checkItem(this_scene) {
     ) {
         item_waterBottle.destroy(true);
         local_items_flag[_item_id] = false;
+    }
+    //after possession
+    if (local_items_flag[_item_id] == true) {
+        if (murasakisan.mode == "strolling_start" || murasakisan.mode == "strolling_end") {
+            item_waterBottle.visible = false;
+        }
     }
     
 

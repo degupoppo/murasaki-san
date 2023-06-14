@@ -147,6 +147,10 @@ async function balanceOfbt() {
     let _res = await web3.eth.getBalance(contract_bt.options.address);
     return Math.floor( Number(_res) / (10**18) * 100 )/100;
 }
+async function feedingCount() {
+    let _res = await contract_mss.methods.global_total_feeding_count().call();
+    return _res;
+}
 async function _show_onChain_parameters() {
     //if (typeof(wallet) != "undefined" && wallet != "") {
     if (flag_web3Loaded && typeof(wallet) != "undefined") {
@@ -174,6 +178,7 @@ async function _show_onChain_parameters() {
         _target.innerHTML = _text + " block";
         //festival winner
         let _dic = {
+            0: "---",
             201: "Gray Fluffy",
             202: "Beige Fluffy",
             203: "Limegreen Fluffy",
@@ -198,6 +203,30 @@ async function _show_onChain_parameters() {
         _text = await balanceOfbt();
         _target = document.getElementById("info_balanceOf_bt");
         _target.innerHTML = _text + " $ASTR";
+        //feeding count
+        _text = await contract_mss.methods.global_total_feeding_count().call();
+        _target = document.getElementById("info_feedingCount");
+        _target.innerHTML = _text;
+        //grooming count
+        _text = await contract_mss.methods.global_total_grooming_count().call();
+        _target = document.getElementById("info_groomingCount");
+        _target.innerHTML = _text;
+        //coin
+        _text = await contract_mss.methods.global_total_coin_mined().call();
+        _target = document.getElementById("info_coinMined");
+        _target.innerHTML = _text;
+        //leaf
+        _text = await contract_mss.methods.global_total_material_farmed().call();
+        _target = document.getElementById("info_leafFarmed");
+        _target.innerHTML = _text;
+        //item
+        _text = await contract_mss.methods.global_total_item_crafted().call();
+        _target = document.getElementById("info_itemCrafted");
+        _target.innerHTML = _text;
+        //fluffy
+        _text = await contract_mss.methods.global_total_precious_received().call();
+        _target = document.getElementById("info_fluffyDiscovered");
+        _target.innerHTML = _text;
     } else {
         setTimeout(_show_onChain_parameters, 1000);
     }
@@ -675,6 +704,20 @@ async function drawStatus() {
         let _street = await contract_murasakisan.methods.street(_wallet).call();
         let _city = await contract_murasakisan.methods.city(_wallet).call();
         let _doing_now = await contract_murasakisan.methods.doing_now(_wallet).call();
+        let _feeding_count = await contract_murasakisan.methods.total_feeding_count(_wallet).call();
+        let _grooming_count = await contract_murasakisan.methods.total_grooming_count(_wallet).call();
+        let _critical_count = await contract_murasakisan.methods.total_critical_count(_wallet).call();
+        
+        //dice
+        let _dice_critical = await contract_md.methods.critical_count(_summoner).call();
+        let _dice_fumble = await contract_md.methods.fumble_count(_summoner).call();
+        
+        //mail
+        let _mail_sent = await contract_murasakisan.methods.total_mail_sent(_wallet).call();
+        let _mail_opened = await contract_murasakisan.methods.total_mail_opened(_wallet).call();
+        
+        //festival
+        let _total_voted = await contract_murasakisan.methods.total_voted(_wallet).call();
 
         //call tokenURI from murasakisan contract
         let _tokenURI = await contract_murasakisan.methods.tokenURI(_summoner).call();
@@ -715,8 +758,9 @@ async function drawStatus() {
         //text1
         _xt = _x + _width/2 -10;
         _yt = _y1 + 25;
-        drawText(ctx, _xt, _yt + _rawHeight*0, "Name :", _name + "#" + _summoner, "#ff1493");
-        _xt = _x + _width/2 -10;
+        //drawText(ctx, _xt, _yt + _rawHeight*0, "Name :", _name + "#" + _summoner, "#ff1493");
+        drawText(ctx, _xt, _yt + _rawHeight*0, "Name :", _name, "#ff1493");
+        _xt = _x + _width/2 -20;
         _yt = _y1 + 70;
         drawText(ctx, _xt, _yt + _rawHeight*0, "Flower :", _flower, "#006400");
         drawText(ctx, _xt, _yt + _rawHeight*1, "Personality :", _personality, "#006400");
@@ -808,23 +852,30 @@ async function drawStatus() {
         drawWindow(ctx, _x5, _y5, _width5, _height5, _r);
         
         //text5
-        _xt = _x5 + _width5/2 + 50;
+        _xt = _x5 + _width5/2 + 60;
         _yt = _y5 + 35;
-        drawText(ctx, _xt, _yt + _rawHeight*0, "Total Coin Mined :", local_total_coin_mined);
-        drawText(ctx, _xt, _yt + _rawHeight*1, "Total Leaf Farmed :", local_total_material_farmed);
-        drawText(ctx, _xt, _yt + _rawHeight*2, "Total Item Crafted :", local_total_item_crafted);        drawText(ctx, _xt, _yt + _rawHeight*3, "Total Exp Gained:", local_total_exp_gained);
+        drawText(ctx, _xt, _yt + _rawHeight*0, "Feeding Count :", _feeding_count);
+        drawText(ctx, _xt, _yt + _rawHeight*1, "Grooming Count :", _grooming_count);
 
-        drawText(ctx, _xt, _yt + _rawHeight*4, "Total Fluffy Received :", local_total_precious_received);
-        drawText(ctx, _xt, _yt + _rawHeight*6, "Total Dice Critical :", "---");
-        drawText(ctx, _xt, _yt + _rawHeight*7, "Total Dice Fumble :", "---");
-        drawText(ctx, _xt, _yt + _rawHeight*9, "Total Mail Sent :", "---");
-        drawText(ctx, _xt, _yt + _rawHeight*10, "Total Mail Opened :", "---");
-        drawText(ctx, _xt, _yt + _rawHeight*12, "Total Stroll Distance :", local_stroll_total_strolledDistance);
-        drawText(ctx, _xt, _yt + _rawHeight*13, "Total Stroll Friends :", local_stroll_total_metSummoners);
-        drawText(ctx, _xt, _yt + _rawHeight*15, "Clarinet Practice Lv :", local_practice_exp_clarinet);
-        drawText(ctx, _xt, _yt + _rawHeight*16, "Piano Practice Lv :", local_practice_exp_piano);
-        drawText(ctx, _xt, _yt + _rawHeight*17, "Violin Practice Lv :", local_practice_exp_violin);
-        drawText(ctx, _xt, _yt + _rawHeight*19, "Total Festival Voted :", "---");
+        drawText(ctx, _xt, _yt + _rawHeight*3, "Total Coin Mined :", local_total_coin_mined);
+        drawText(ctx, _xt, _yt + _rawHeight*4, "Total Leaf Farmed :", local_total_material_farmed);
+        drawText(ctx, _xt, _yt + _rawHeight*5, "Total Item Crafted :", local_total_item_crafted);        
+        drawText(ctx, _xt, _yt + _rawHeight*6, "Total Exp Gained:", local_total_exp_gained);
+        drawText(ctx, _xt, _yt + _rawHeight*7, "Total Fluffy Met :", local_total_precious_received);
+        drawText(ctx, _xt, _yt + _rawHeight*8, "Total Critical Count :", _critical_count);
+
+        drawText(ctx, _xt, _yt + _rawHeight*10, "Total Dice Critical :", _dice_critical);
+        drawText(ctx, _xt, _yt + _rawHeight*11, "Total Dice Fumble :", _dice_fumble);
+        drawText(ctx, _xt, _yt + _rawHeight*12, "Total Mail Sent :", _mail_sent);
+        drawText(ctx, _xt, _yt + _rawHeight*13, "Total Mail Opened :", _mail_opened);
+        drawText(ctx, _xt, _yt + _rawHeight*14, "Total Stroll Distance :", local_stroll_total_strolledDistance);
+        drawText(ctx, _xt, _yt + _rawHeight*15, "Total Stroll Friends :", local_stroll_total_metSummoners);
+
+        drawText(ctx, _xt, _yt + _rawHeight*17, "Clarinet Practice Lv :", local_practice_exp_clarinet);
+        drawText(ctx, _xt, _yt + _rawHeight*18, "Piano Practice Lv :", local_practice_exp_piano);
+        drawText(ctx, _xt, _yt + _rawHeight*19, "Violin Practice Lv :", local_practice_exp_violin);
+
+        drawText(ctx, _xt, _yt + _rawHeight*21, "Total Festival Voted :", _total_voted);
         
         //window6
         let _x6 = _x;
