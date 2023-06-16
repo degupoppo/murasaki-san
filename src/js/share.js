@@ -1,13 +1,20 @@
 
 
 flag_web3Loaded = false;
+flag_wrongChainId = false;
 
 //connected button
 async function check_connected() {
+    let chainId = await ethereum.request({ method: "eth_chainId"});
+    chainId = parseInt(chainId, 16);
     let accounts = await ethereum.request({ method: 'eth_accounts' });
     let _text = "";
     let target = document.getElementById("button_connect");
-    if (accounts.length > 0) {
+    if (chainId != 4369) {
+        _text = '<button disabled style="width:100px;">Wrong Network</button>';
+        target.innerHTML = _text;
+        setTimeout(check_connected, 1000);
+    } else if (accounts.length > 0) {
         _text = '<button disabled style="width:100px;">Connected</button>';
         target.innerHTML = _text;
         init_web3();
@@ -96,6 +103,13 @@ async function init_web3(){
     web3 = await connect();
     web3wss = await connect_wss();
     wallet = await get_wallet(web3);
+    
+    //check chainId
+    let _chainId = await web3.eth.getChainId();
+    if (_chainId != 4369) {
+        flag_wrongChainId = true;
+        return 0;
+    }
 
     //prepare ma
     //address_Murasaki_Address = '0xCf5731f51347beFE1D590ba9E037fEb015B04734';
