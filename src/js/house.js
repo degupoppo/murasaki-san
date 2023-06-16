@@ -85,15 +85,10 @@ contract ERC721 is IERC721 {
 
 //### 1st
 
-    
-    /test/から以下をmainへ移動すること
-        info.html
-        info.js
-
 
     infoページの充実化
         売買回数、平均購入価格などを集計したマーケット情報ページを作成する？
-            総取引額、アイテムごとの取引回数・平均価格
+            総取引回数、総取引額、アイテムごとの取引回数・平均価格
             info内にボタンで実装するか
      ok コントラアップグレードしてtotal mail sentなどの表示を実装する
      ig twitter投稿ボタンを設置する？
@@ -114,28 +109,23 @@ contract ERC721 is IERC721 {
 
 
     修正案
-        コントラクトの一括upgradeをmainで行う
-            replacableコントラの全入れ替え
-            contracts.pyのつじつま合わせ -> init.py実行
+        アイテム案
+            あと2つアイテム枠
+        お菓子の家が完成した時の演出の改善
+            glitter表示
+            メーターの色を変えるなどして100%をわかりやすく
+            click to mintなどを表示させる？
+        夜の演出改善
+            UFOや土星などを画面上部に表示させる
+            上からゆっくり降りてくる？
+        Alchemy WAGBIへアプライ
         infoの取得にmurasakiのbatch getterを使って処理を軽減する
         お菓子の家の建設途中の修正
             建設しているジンジャーマン
             10～30%ではもう少しパーツを少なめに
             staking=0の時の演出
-        wrong chainのエラーの実装
-        散歩から帰ってきたら吹き出しを表示する？
-        upgradeウィンドウの説明編集
-        マーケットのlist price初期値にbuyback priceを記載する
-        お菓子の家が完成した時の演出の改善
-            glitter表示
-            メーターの色を変えるなどして100%をわかりやすく
-            click to mintなどを表示させる？
-        コントラクトマップのupgradable -> replacableへ編集
         tokenURIをsatietyとhappyによって変化させる
             tokenURI_codexを作製し参照する
-        楽器を3種類に減らす
-            かわりにキャンドルを追加
-            あとアイテム２つ。
         おサボり中はミシンやスコップを残す
         rugg-pullの実装
             ひとまず、右端をクリックでrugをスライドさせる
@@ -147,9 +137,26 @@ contract ERC721 is IERC721 {
             お腹が減りやすく、経験値が得られにくい、demo用キャラを別途用意するか？
             trial終了直後ぐらいの進行度が良いだろうか。
             パラメータを弄った別コントラとするか？
-        かざぐるまと王冠を交換する
         フェスティバル前の演出の改善
+            お祭り帽子の実装
         変数書き換え対策の実装, さてどうするか
+     ok fluffy festivalのend_votingにcheck_endを組み込むバグ修正。
+     ok マーケットのlist price初期値にbuyback priceを記載する
+     ok     1.00未満は1.00として最低価格を表示する
+     ok コントラクトマップのupgradable -> replacableへ編集
+     ok     ついでにstorage_extraなども追加
+     ok     合計コントラ数を記載する
+     ok upgradeウィンドウの説明編集
+     ok 楽器を3種類に減らす
+     ok     かわりにキャンドルを追加
+     ok     あとアイテム２つ。
+     ok     かざぐるまと王冠を交換する
+     ok     その他アイテム順の微調整
+     ng 散歩から帰ってきたら吹き出しを表示する？
+     ok wrong chainのエラーの実装
+     ok コントラクトの一括upgradeをmainで行う
+     ok     replacableコントラの全入れ替え
+     ok     contracts.pyのつじつま合わせ -> init.py実行
      ok 全summoner合算のtotal countの実装
      ok     全d20カウント数
      ok     全mail open数
@@ -1170,6 +1177,10 @@ contract ERC721 is IERC721 {
 
 
 //### 3rd
+
+ ok /test/から以下をmainへ移動すること
+        info.html
+        info.js
 
  ok on-chainに保存するステータスの追加
      ok summonerごと
@@ -9129,7 +9140,7 @@ class Nyuinyui extends Phaser.GameObjects.Sprite{
         group_nyuinyui_ohana.clear(true);
         this.flowerCount = 0;
         this.movingMode = "resting";
-        this.anims.play("nyui_moving_right");
+        this.anims.play("nyui_moving_left");
         this.movingSubmode = 0;
         this.nyui_text.setVisible(false);
     }
@@ -11067,7 +11078,8 @@ function open_window_upgrade(scene) {
 
     let _text = "";
     _text += "[ Upgrade item ]\n";
-    _text += "  Mint a higher rarity item by burning 3-5 items with the same type and rarity.\n";
+    _text += "  Craft Item: Mint an item of one higher rarity by burning three items of the same rarity.\n";
+    _text += "  Fluffy: Mint a fluffy of one higher grade by burning 3-5 fluffies (Fluffy:5, Fluffier:4, Fluffiest:3).\n";
     _text += "\n";
     let msg_upgrade = scene.add.text(140, 110, _text)
             .setFontSize(24).setFontFamily("Arial").setFill("#333333")
@@ -11128,14 +11140,14 @@ function open_window_upgrade(scene) {
         //let _txt = "■ ";
         let _txt = "";
         _txt += _rarity_to + _item_name_to;
-        _txt += " (burning item_id: ";
+        _txt += " (burn itemId: ";
         for (i=0; i<upgradable_itemIds[_itemId].length; i++) {
             _txt += upgradable_itemIds[_itemId][i] + ", ";
         }
         _txt = _txt.slice(0,-2);
         _txt += ")";
         _txt += "\n";
-        let _msg = scene.add.text(200, 220 + 70*_num, _txt)
+        let _msg = scene.add.text(200 +20, 220 + 70*_num +20, _txt)
             .setFontSize(30)
             .setFontFamily("Arial")
             .setFill(_fontColor)
@@ -11183,13 +11195,13 @@ function open_window_upgrade(scene) {
             .on("pointerover", () => sound_window_pointerover.play())
             .on("pointerout", () => _msg.setStyle({ fontSize: 30, fontFamily: "Arial", fill: _fontColor }));
         //prepare cost text
-        let _cost_coin_text = scene.add.text(250, 223 + 70*_num + 30, _cost_coin)
+        let _cost_coin_text = scene.add.text(250 +20, 223 + 70*_num + 30 +20, _cost_coin)
             .setFontSize(24).setFontFamily("Arial").setFill("#000000");
-        let _cost_leaf_text = scene.add.text(340, 223 + 70*_num + 30, _cost_leaf)
+        let _cost_leaf_text = scene.add.text(340 +20, 223 + 70*_num + 30 +20, _cost_leaf)
             .setFontSize(24).setFontFamily("Arial").setFill("#000000");
-        let icon_upgrading_coin = scene.add.sprite(230, 235 + 70*_num + 30, "icon_ohana")
+        let icon_upgrading_coin = scene.add.sprite(230 +20, 235 + 70*_num + 30 +20, "icon_ohana")
             .setScale(0.07);
-        let icon_upgrading_leaf = scene.add.sprite(330, 235 + 70*_num + 30, "icon_kusa")
+        let icon_upgrading_leaf = scene.add.sprite(330 +20, 235 + 70*_num + 30 +20, "icon_kusa")
             .setScale(0.07);
         group_window_upgrade.add(_msg);
         group_window_upgrade.add(_cost_coin_text);
@@ -11201,7 +11213,7 @@ function open_window_upgrade(scene) {
             let _item_img = dic_items[_item_name_to]["img_name"];
             let _height = game.textures.get(_item_img).source[0].height;
             let _scale = 44 / _height;
-            let _icon = scene.add.image(170, 220+15 + 70*_num, _item_img)
+            let _icon = scene.add.image(170 +20, 220+15 + 70*_num +20, _item_img)
                 .setOrigin(0.5)
                 .setScale(_scale);
             group_window_upgrade.add(_icon);
@@ -11209,7 +11221,7 @@ function open_window_upgrade(scene) {
         } else if (_itemId >= 201) {
             let _item_img = dic_items[_item_name_to]["img_name"];
             let _frame = dic_items[_item_name_to]["frame_no"];
-            let _icon = scene.add.image(170, 220+15 + 70*_num, _item_img)
+            let _icon = scene.add.image(170 +20, 220+15 + 70*_num +20, _item_img)
                 .setOrigin(0.5)
                 .setScale(0.15)
                 .setFrame(_frame);
@@ -12113,54 +12125,54 @@ function open_window_strollingDuring(scene, mode) {
     if (mode == 1) {    //mountain
         //create background
         let _img_back = scene.add.sprite(640, 480, "stroll_during_01_back")
-            .setDepth(5001)
+            .setDepth(4001)
             .setScale(1.0)
             .setInteractive();
         group_window_strollingDuring.add(_img_back);
         
         //create cloud
-        _create_obj(scene, -300, 360, "stroll_during_01_cloud", 0.1+Math.random()*0.3, 0.1+Math.random()*0.3, 5001, 1);
-        _create_obj(scene, 200, 360, "stroll_during_01_cloud", 0.1+Math.random()*0.3, 0.1+Math.random()*0.3, 5001, 1);
-        _create_obj(scene, 400, 320, "stroll_during_01_cloud", 0.1+Math.random()*0.3, 0.1+Math.random()*0.3, 5001, 1);
-        _create_obj(scene, 600, 300, "stroll_during_01_cloud", 0.1+Math.random()*0.3, 0.1+Math.random()*0.3, 5001, 1);
-        _create_obj(scene, 1000, 350, "stroll_during_01_cloud", 0.1+Math.random()*0.3, 0.1+Math.random()*0.3, 5001, 1);
+        _create_obj(scene, -300, 360, "stroll_during_01_cloud", 0.1+Math.random()*0.3, 0.1+Math.random()*0.3, 4001, 1);
+        _create_obj(scene, 200, 360, "stroll_during_01_cloud", 0.1+Math.random()*0.3, 0.1+Math.random()*0.3, 4001, 1);
+        _create_obj(scene, 400, 320, "stroll_during_01_cloud", 0.1+Math.random()*0.3, 0.1+Math.random()*0.3, 4001, 1);
+        _create_obj(scene, 600, 300, "stroll_during_01_cloud", 0.1+Math.random()*0.3, 0.1+Math.random()*0.3, 4001, 1);
+        _create_obj(scene, 1000, 350, "stroll_during_01_cloud", 0.1+Math.random()*0.3, 0.1+Math.random()*0.3, 4001, 1);
 
         //create mountain
-        _create_obj(scene, -300, 570, "stroll_during_01_mountain", 1.2, 0.1, 5001);
-        _create_obj(scene, 100, 570, "stroll_during_01_mountain", 1.2, 0.1, 5001);
-        _create_obj(scene, 500, 570, "stroll_during_01_mountain", 1.2, 0.1, 5001);
-        _create_obj(scene, 800, 570, "stroll_during_01_mountain", 1.2, 0.1, 5001);
-        _create_obj(scene, 1200, 570, "stroll_during_01_mountain", 1.2, 0.1, 5001);
+        _create_obj(scene, -300, 570, "stroll_during_01_mountain", 1.2, 0.1, 4001);
+        _create_obj(scene, 100, 570, "stroll_during_01_mountain", 1.2, 0.1, 4001);
+        _create_obj(scene, 500, 570, "stroll_during_01_mountain", 1.2, 0.1, 4001);
+        _create_obj(scene, 800, 570, "stroll_during_01_mountain", 1.2, 0.1, 4001);
+        _create_obj(scene, 1200, 570, "stroll_during_01_mountain", 1.2, 0.1, 4001);
 
         //create grass
-        _create_obj(scene, -500, 625, "stroll_during_01_grass", 0.4, 0.4, 5002);
-        _create_obj(scene, -400, 625, "stroll_during_01_grass", 0.4, 0.4, 5002);
-        _create_obj(scene, -300, 625, "stroll_during_01_grass", 0.4, 0.4, 5002);
-        _create_obj(scene, -200, 625, "stroll_during_01_grass", 0.4, 0.4, 5002);
-        _create_obj(scene, -100, 625, "stroll_during_01_grass", 0.4, 0.4, 5002);
-        _create_obj(scene, 100, 625, "stroll_during_01_grass", 0.4, 0.4, 5002);
-        _create_obj(scene, 200, 625, "stroll_during_01_grass", 0.4, 0.4, 5002);
-        _create_obj(scene, 300, 625, "stroll_during_01_grass", 0.4, 0.4, 5002);
-        _create_obj(scene, 400, 625, "stroll_during_01_grass", 0.4, 0.4, 5002);
-        _create_obj(scene, 500, 625, "stroll_during_01_grass", 0.4, 0.4, 5002);
-        _create_obj(scene, 600, 625, "stroll_during_01_grass", 0.4, 0.4, 5002);
-        _create_obj(scene, 800, 625, "stroll_during_01_grass", 0.4, 0.4, 5002);
-        _create_obj(scene, 900, 625, "stroll_during_01_grass", 0.4, 0.4, 5002);
-        _create_obj(scene, 1000, 625, "stroll_during_01_grass", 0.4, 0.4, 5002);
-        _create_obj(scene, 1100, 625, "stroll_during_01_grass", 0.4, 0.4, 5002);
+        _create_obj(scene, -500, 625, "stroll_during_01_grass", 0.4, 0.4, 4002);
+        _create_obj(scene, -400, 625, "stroll_during_01_grass", 0.4, 0.4, 4002);
+        _create_obj(scene, -300, 625, "stroll_during_01_grass", 0.4, 0.4, 4002);
+        _create_obj(scene, -200, 625, "stroll_during_01_grass", 0.4, 0.4, 4002);
+        _create_obj(scene, -100, 625, "stroll_during_01_grass", 0.4, 0.4, 4002);
+        _create_obj(scene, 100, 625, "stroll_during_01_grass", 0.4, 0.4, 4002);
+        _create_obj(scene, 200, 625, "stroll_during_01_grass", 0.4, 0.4, 4002);
+        _create_obj(scene, 300, 625, "stroll_during_01_grass", 0.4, 0.4, 4002);
+        _create_obj(scene, 400, 625, "stroll_during_01_grass", 0.4, 0.4, 4002);
+        _create_obj(scene, 500, 625, "stroll_during_01_grass", 0.4, 0.4, 4002);
+        _create_obj(scene, 600, 625, "stroll_during_01_grass", 0.4, 0.4, 4002);
+        _create_obj(scene, 800, 625, "stroll_during_01_grass", 0.4, 0.4, 4002);
+        _create_obj(scene, 900, 625, "stroll_during_01_grass", 0.4, 0.4, 4002);
+        _create_obj(scene, 1000, 625, "stroll_during_01_grass", 0.4, 0.4, 4002);
+        _create_obj(scene, 1100, 625, "stroll_during_01_grass", 0.4, 0.4, 4002);
 
     } else if (mode == 2) { //seaside
 
         //create background
         let _img_back = scene.add.sprite(640, 480, "stroll_during_02_back")
-            .setDepth(5001)
+            .setDepth(4001)
             .setScale(1)
             .setInteractive();
         group_window_strollingDuring.add(_img_back);
 
         //wave
         let _img_wave1 = scene.add.sprite(320, 625, "stroll_during_02_wave")
-            .setDepth(5002).setScale(0.8);
+            .setDepth(4002).setScale(0.8);
         _img_wave1.update = function() {
             if (
                 group_window_strollingDuring.flag_walk == 1 ||
@@ -12176,45 +12188,45 @@ function open_window_strollingDuring(scene, mode) {
         group_window_strollingDuring.add(_img_wave1);
 
         //create cloud
-        _create_obj(scene, -300, 360, "stroll_during_01_cloud", 0.1+Math.random()*0.3, 0.1+Math.random()*0.3, 5001, 1);
-        _create_obj(scene, 200, 360, "stroll_during_01_cloud", 0.1+Math.random()*0.3, 0.1+Math.random()*0.3, 5001, 1);
-        _create_obj(scene, 400, 320, "stroll_during_01_cloud", 0.1+Math.random()*0.3, 0.1+Math.random()*0.3, 5001, 1);
-        _create_obj(scene, 600, 300, "stroll_during_01_cloud", 0.1+Math.random()*0.3, 0.1+Math.random()*0.3, 5001, 1);
-        _create_obj(scene, 1000, 350, "stroll_during_01_cloud", 0.1+Math.random()*0.3, 0.1+Math.random()*0.3, 5001, 1);
+        _create_obj(scene, -300, 360, "stroll_during_01_cloud", 0.1+Math.random()*0.3, 0.1+Math.random()*0.3, 4001, 1);
+        _create_obj(scene, 200, 360, "stroll_during_01_cloud", 0.1+Math.random()*0.3, 0.1+Math.random()*0.3, 4001, 1);
+        _create_obj(scene, 400, 320, "stroll_during_01_cloud", 0.1+Math.random()*0.3, 0.1+Math.random()*0.3, 4001, 1);
+        _create_obj(scene, 600, 300, "stroll_during_01_cloud", 0.1+Math.random()*0.3, 0.1+Math.random()*0.3, 4001, 1);
+        _create_obj(scene, 1000, 350, "stroll_during_01_cloud", 0.1+Math.random()*0.3, 0.1+Math.random()*0.3, 4001, 1);
                 
         //starfish
-        _create_obj(scene, -400, 675, "stroll_during_02_starfish", 0.08, 0.4, 5002);
-        _create_obj(scene, -200, 660, "stroll_during_02_shell", 0.08, 0.4, 5002);
-        _create_obj(scene, 200, 696, "stroll_during_02_starfish", 0.08, 0.4, 5002);
-        _create_obj(scene, 510, 661, "stroll_during_02_shell", 0.08, 0.4, 5002);
-        _create_obj(scene, 912, 691, "stroll_during_02_starfish", 0.08, 0.4, 5002);
-        _create_obj(scene, 1110, 651, "stroll_during_02_shell", 0.08, 0.4, 5002);
+        _create_obj(scene, -400, 675, "stroll_during_02_starfish", 0.08, 0.4, 4002);
+        _create_obj(scene, -200, 660, "stroll_during_02_shell", 0.08, 0.4, 4002);
+        _create_obj(scene, 200, 696, "stroll_during_02_starfish", 0.08, 0.4, 4002);
+        _create_obj(scene, 510, 661, "stroll_during_02_shell", 0.08, 0.4, 4002);
+        _create_obj(scene, 912, 691, "stroll_during_02_starfish", 0.08, 0.4, 4002);
+        _create_obj(scene, 1110, 651, "stroll_during_02_shell", 0.08, 0.4, 4002);
         
         //yacht
-        _create_obj(scene, 108, 550, "stroll_during_02_yacht", 0.15, 0.1, 5002, 1);
-        _create_obj(scene, 982, 540, "stroll_during_02_fune", 0.15, 0.1, 5002, 1);
+        _create_obj(scene, 108, 550, "stroll_during_02_yacht", 0.15, 0.1, 4002, 1);
+        _create_obj(scene, 982, 540, "stroll_during_02_fune", 0.15, 0.1, 4002, 1);
 
     } else if (mode == 3) { //grassland
 
         //create background
         let _img_back = scene.add.sprite(640, 480, "stroll_during_03_back")
-            .setDepth(5001)
+            .setDepth(4001)
             .setScale(1)
             .setInteractive();
         group_window_strollingDuring.add(_img_back);
 
         //create cloud
-        _create_obj(scene, -300, 360, "stroll_during_01_cloud", 0.1+Math.random()*0.3, 0.1+Math.random()*0.3, 5001, 1);
-        _create_obj(scene, 200, 360, "stroll_during_01_cloud", 0.1+Math.random()*0.3, 0.1+Math.random()*0.3, 5001, 1);
-        _create_obj(scene, 400, 320, "stroll_during_01_cloud", 0.1+Math.random()*0.3, 0.1+Math.random()*0.3, 5001, 1);
-        _create_obj(scene, 600, 300, "stroll_during_01_cloud", 0.1+Math.random()*0.3, 0.1+Math.random()*0.3, 5001, 1);
-        _create_obj(scene, 1000, 350, "stroll_during_01_cloud", 0.1+Math.random()*0.3, 0.1+Math.random()*0.3, 5001, 1);
+        _create_obj(scene, -300, 360, "stroll_during_01_cloud", 0.1+Math.random()*0.3, 0.1+Math.random()*0.3, 4001, 1);
+        _create_obj(scene, 200, 360, "stroll_during_01_cloud", 0.1+Math.random()*0.3, 0.1+Math.random()*0.3, 4001, 1);
+        _create_obj(scene, 400, 320, "stroll_during_01_cloud", 0.1+Math.random()*0.3, 0.1+Math.random()*0.3, 4001, 1);
+        _create_obj(scene, 600, 300, "stroll_during_01_cloud", 0.1+Math.random()*0.3, 0.1+Math.random()*0.3, 4001, 1);
+        _create_obj(scene, 1000, 350, "stroll_during_01_cloud", 0.1+Math.random()*0.3, 0.1+Math.random()*0.3, 4001, 1);
 
         //create mountain
-        _create_obj(scene, -200, 580, "stroll_during_03_mountain", 1.2, 0.025, 5001);
-        _create_obj(scene, 300, 580, "stroll_during_03_mountain", 1.2, 0.025, 5001);
-        _create_obj(scene, 600, 580, "stroll_during_03_mountain", 1.0, 0.025, 5001);
-        _create_obj(scene, 1100, 575, "stroll_during_03_mountain", 1.5, 0.025, 5001);
+        _create_obj(scene, -200, 580, "stroll_during_03_mountain", 1.2, 0.025, 4001);
+        _create_obj(scene, 300, 580, "stroll_during_03_mountain", 1.2, 0.025, 4001);
+        _create_obj(scene, 600, 580, "stroll_during_03_mountain", 1.0, 0.025, 4001);
+        _create_obj(scene, 1100, 575, "stroll_during_03_mountain", 1.5, 0.025, 4001);
 
         //create flower
         let _li_x = [-400, -200, 0, 200, 400, 600, 800, 1000, 1200];
@@ -12222,23 +12234,23 @@ function open_window_strollingDuring(scene, mode) {
             let _x = _li_x[i];
             let _y = 650 + Math.random()*40;
             let _frame = Math.round(Math.random()*6);
-            _create_obj(scene, _x, _y+Math.random()*10, "par_flowers", 0.13, 0.4, 5002, 0, _frame, 1);
-            _create_obj(scene, _x+20, _y+Math.random()*10, "par_flowers", 0.13, 0.4, 5002, 0, _frame, 1);
-            _create_obj(scene, _x+40, _y+Math.random()*10, "par_flowers", 0.13, 0.4, 5002, 0, _frame, 1);
+            _create_obj(scene, _x, _y+Math.random()*10, "par_flowers", 0.13, 0.4, 4002, 0, _frame, 1);
+            _create_obj(scene, _x+20, _y+Math.random()*10, "par_flowers", 0.13, 0.4, 4002, 0, _frame, 1);
+            _create_obj(scene, _x+40, _y+Math.random()*10, "par_flowers", 0.13, 0.4, 4002, 0, _frame, 1);
         }
         
         //tree
-        _create_obj(scene, 50, 570, "stroll_during_03_tree1", 0.2, 0.1, 5002);
-        _create_obj(scene, 982, 570, "stroll_during_03_tree2", 0.2, 0.1, 5002);
+        _create_obj(scene, 50, 570, "stroll_during_03_tree1", 0.2, 0.1, 4002);
+        _create_obj(scene, 982, 570, "stroll_during_03_tree2", 0.2, 0.1, 4002);
         
         //baloon
-        _create_obj(scene, 200, 450, "stroll_during_03_baloon", 0.2, 0.2, 5002, 1);
+        _create_obj(scene, 200, 450, "stroll_during_03_baloon", 0.2, 0.2, 4002, 1);
         
     }
     
     //create summoner
     let _walking_summoner = scene.add.sprite(640, 640, "murasaki_left")
-        .setDepth(5003)
+        .setDepth(4003)
         .setScale(0.4)
         .setOrigin(0.5)
         .anims.play("murasaki_left", true);
@@ -12253,7 +12265,7 @@ function open_window_strollingDuring(scene, mode) {
                 _bottle.setTexture("item_waterbottle");
                 _bottle.x = 570;
                 let _msg9 = scene.add.text(640, 600, ">> Click to End Stroll <<")
-                    .setDepth(5004)
+                    .setDepth(4004)
                     .setOrigin(0.5)
                     .setFontSize(24)
                     .setFontFamily("Arial")
@@ -12292,7 +12304,7 @@ function open_window_strollingDuring(scene, mode) {
     //hat
     if (item_wearing_hat != 0) {
         let _hat = scene.add.sprite(640-3, 640-55, item_wearing_hat.texture)
-            .setDepth(5004)
+            .setDepth(4004)
             .setOrigin(0.5)
             .setScale(0.22);
         group_window_strollingDuring.add(_hat);
@@ -12303,12 +12315,12 @@ function open_window_strollingDuring(scene, mode) {
     let _bottle = scene.add.sprite(640, 640, "stroll_waterbottle")
         .setScale(0.4)
         .setOrigin(0.5)
-        .setDepth(5004);
+        .setDepth(4004);
     group_window_strollingDuring.add(_bottle);
     
     //create companion
     let _walking_companion = scene.add.sprite(670, 660, "mr_astar_left")
-        .setDepth(5005)
+        .setDepth(4005)
         .setScale(0.1)
         .setOrigin(0.5)
         .anims.play("mr_astar_left", true);
@@ -12321,7 +12333,7 @@ function open_window_strollingDuring(scene, mode) {
     _text += "⌛ " + _hr + "h:" + _min + "m" + "\n";
     _text += "🥾 " + local_strollingDistance + "m\n";
     let _msg1 = scene.add.text(1150, 260, _text)
-        .setDepth(5009)
+        .setDepth(4009)
         .setFontSize(24)
         .setFontFamily("Arial")
         .setFill("#1D2088");
@@ -12343,7 +12355,7 @@ function open_window_strollingDuring(scene, mode) {
     _text = "";
     _text = local_name_str + " is enjoying stroll.";
     let _msg2 = scene.add.text(10, 260, _text)
-        .setDepth(5009)
+        .setDepth(4009)
         .setFontSize(24)
         .setFontFamily("Arial")
         .setFill("#1D2088");
@@ -12384,7 +12396,7 @@ function open_window_strollingDuring(scene, mode) {
     _text += local_stroll_total_metSummoners + " friends and strolled a total of ";
     _text += local_stroll_total_strolledDistance + " meters.";
     let _msg3 = scene.add.text(950, 700, _text)
-        .setDepth(5009)
+        .setDepth(4009)
         .setFontSize(12)
         .setFontFamily("Arial")
         .setFill("#FF4264");
@@ -12392,7 +12404,7 @@ function open_window_strollingDuring(scene, mode) {
 
     //mogumogu
     let _mogumogu = scene.add.sprite(-200, 680, "mogumogu")
-        .setDepth(5005)
+        .setDepth(4005)
         .setScale(0.2)
         .setOrigin(0.5)
         .anims.play("mogumogu", true);
@@ -12419,7 +12431,7 @@ function open_window_strollingDuring(scene, mode) {
 
     //create cat
     let _cat = scene.add.sprite(-200, 660, "cat_walking_right_withMail_fast")
-        .setDepth(5006)
+        .setDepth(4006)
         .setScale(0.3)
         .setOrigin(0.5)
         .anims.play("cat_walking_right_withMail_fast", true);
@@ -14516,7 +14528,7 @@ function create(scene) {
     icon_rotate = scene.add.sprite(1235,915-15, "icon_rotate")
         .setOrigin(0.5)
         .setScale(0.075)
-        .setDepth(6000)
+        .setDepth(4100)
         .setInteractive({useHandCursor: true})
         .on('pointerdown', () => sound_system.play())
         .on("pointerdown", () => {
@@ -14536,7 +14548,7 @@ function create(scene) {
     icon_home = scene.add.sprite(1155,915-15, "icon_home")
         .setOrigin(0.5)
         .setScale(0.15)
-        .setDepth(6000)
+        .setDepth(4100)
         .setInteractive({useHandCursor: true})
         .on('pointerdown', () => sound_system.play())
         .on("pointerdown", () => {

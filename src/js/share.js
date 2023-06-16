@@ -11,7 +11,7 @@ async function check_connected() {
     let _text = "";
     let target = document.getElementById("button_connect");
     if (chainId != 4369) {
-        _text = '<button disabled style="width:100px;">Wrong Network</button>';
+        _text = '<button disabled style="width:120px;">Wrong Chain</button>';
         target.innerHTML = _text;
         setTimeout(check_connected, 1000);
     } else if (accounts.length > 0) {
@@ -103,7 +103,7 @@ async function init_web3(){
     web3 = await connect();
     web3wss = await connect_wss();
     wallet = await get_wallet(web3);
-    
+
     //check chainId
     let _chainId = await web3.eth.getChainId();
     if (_chainId != 4369) {

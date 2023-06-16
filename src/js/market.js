@@ -203,6 +203,7 @@ async function update_sellingItems() {
 async function update_userItems() {
     let myListLength = await contract_mc_wss.methods.myListLength(wallet).call();
     let myListsAt = await contract_mc_wss.methods.myListsAt(wallet, 0, myListLength).call();
+    let buybackPrices = await contract_bt_wss.methods.calc_buybackPrice_asArray().call();
     let _html_all = "";
     let _dic_summoner_name = {};
     for (let i = 0; i < myListLength; i++) {
@@ -248,6 +249,43 @@ async function update_userItems() {
         } else {
             _item_rarity = "<font color=black>---</font>";
         }
+
+        //prepare buyback price
+        //item level
+        let _item_level = 0;
+        //craft item
+        if (_item_type <= 192) {
+            _item_level = _item_type % 16;
+            if (_item_level == 0) {
+                _item_level = 16;
+            }
+        //fluffy
+        } else if (_item_type >= 201 && _item_type <= 248) {
+            if (_item_type <= 212) {
+                _item_level = 21;
+            } else if (_item_type <= 224) {
+                _item_level = 22;
+            } else if (_item_type <= 236) {
+                _item_level = 23;
+            } else if (_item_type <= 248) {
+                _item_level = 24;
+            }
+        //twinkleSparkleGlitter
+        } else if (_item_type >= 251 && _item_type <= 256) {
+            _item_level = 22;
+        } else {
+            _item_level = 0;
+        }
+        let _item_buybackPrice = (buybackPrices[_item_level]/10**18).toFixed(2);
+        
+        //prepare min price
+        let _item_minPrice;
+        if (_item_buybackPrice < 1) {
+            _item_minPrice = (1).toFixed(2);
+        } else {
+            _item_minPrice = _item_buybackPrice;
+        }
+        
         //console.log(_item, _item_type, _crafted_time, _crafted_summoner, _crafted_wallet);
         let _html = "";
         _html += "<tr><td valign='middle' align='center'><center>"
@@ -267,7 +305,7 @@ async function update_userItems() {
         //_html += "</center></td><td><center>";
         //_html += _wallet1 + "..." + _wallet2;
         _html += "</center></td><td><center>";
-        _html += "<input type='number' style='width:70px;' id='" + "input_price_" + _item + "'>";
+        _html += "<input type='number' style='width:70px;' id='" + "input_price_" + _item + "'" + " placeholder=" + _item_minPrice + ">";
         _html += "&nbsp;&nbsp;";
         _html += "<button onclick='list_item(" + _item + ");'>";
         _html += "List";

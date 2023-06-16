@@ -6106,12 +6106,12 @@ contract Murasaki_Function_Music_Practice is Ownable, ReentrancyGuard, Pausable 
     }
     
     //## item types
-    uint item_type_clarinet = 12;
-    uint item_type_piano = 28;
-    uint item_type_violin = 44;
-    uint item_type_horn = 13;
-    uint item_type_timpani = 29;
-    uint item_type_harp = 45;
+    uint item_type_clarinet = 13;
+    uint item_type_piano = 29;
+    uint item_type_violin = 45;
+    uint item_type_horn = 999;
+    uint item_type_timpani = 999;
+    uint item_type_harp = 999;
     uint required_level = 5;
     
     //admin modify item types
@@ -7837,6 +7837,7 @@ contract Fluffy_Festival is Ownable, ReentrancyGuard, Pausable {
     uint public SATIETY_REQUIRED = 10;
     uint public HAPPY_REQUIRED = 10;
     uint public ELECTION_INTERVAL_BLOCK = 216000; //30 days, 12sec/block
+    uint public FESTIVAL_STARTABLE_BLOCK = 0;    //for contract replacement
     bool public inSession;
     bool public isActive = true;
     uint public elected_type = 0;
@@ -7863,6 +7864,15 @@ contract Fluffy_Festival is Ownable, ReentrancyGuard, Pausable {
     }
     function _setG_isActive(bool _bool) external onlyOwner {
         isActive = _bool;
+    }
+    function _setH_FESTIVAL_STARTABLE_BLOCK(uint _value) external onlyOwner {
+        FESTIVAL_STARTABLE_BLOCK = _value;
+    }
+    function _setI_elected_type(uint _value) external onlyOwner {
+        elected_type = _value;
+    }
+    function _setJ_previous_elected_type(uint _value) external onlyOwner {
+        previous_elected_type = _value;
     }
     
     //admin, modify subject parameters for maintenance
@@ -7962,7 +7972,7 @@ contract Fluffy_Festival is Ownable, ReentrancyGuard, Pausable {
         require(_select != elected_type);
         require(_select != previous_elected_type);
         require(_select >= 201 && _select <= 212);
-        //check fist voting
+        //check first voting
         if ( check_start_voting() ){
             emit Start_Voting(_summoner);
             _start_voting(msg.sender);
@@ -8056,7 +8066,11 @@ contract Fluffy_Festival is Ownable, ReentrancyGuard, Pausable {
     function check_start_voting() public view returns (bool) {
         //check blocknumber
         Subject memory _subject = subjects[subject_now];
-        if (block.number >= _subject.start_block + ELECTION_INTERVAL_BLOCK) {
+        if (
+            block.number >= _subject.start_block + ELECTION_INTERVAL_BLOCK
+            && block.number >= FESTIVAL_STARTABLE_BLOCK
+
+        ) {
             return true;
         } else {
             return false;
@@ -8088,7 +8102,10 @@ contract Fluffy_Festival is Ownable, ReentrancyGuard, Pausable {
     //end voting
     function check_end_voting() public view returns (bool) {
         //check blocknumber
-        if (block.number >= subjects[subject_now].end_block && inSession) {
+        if (
+            block.number >= subjects[subject_now].end_block 
+            && inSession 
+        ) {
             return true;
         } else {
             return false;
@@ -8101,6 +8118,7 @@ contract Fluffy_Festival is Ownable, ReentrancyGuard, Pausable {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         require(mfs.check_owner(_summoner, msg.sender));
         require(_check_summoner(_summoner));
+        require(check_end_voting());
         _end_voting(_summoner, msg.sender);
     }
     function _end_voting(uint _summoner, address _ender) internal {
@@ -8193,7 +8211,13 @@ contract Fluffy_Festival is Ownable, ReentrancyGuard, Pausable {
     function next_festival_block() public view returns (uint) {
         //in first festival, return past block number (0+INTERVAL)
         //for murasaki_info
-        return subjects[subject_now].start_block + ELECTION_INTERVAL_BLOCK;
+        uint _next_festival_block;
+        if (subjects[subject_now].start_block + ELECTION_INTERVAL_BLOCK <= FESTIVAL_STARTABLE_BLOCK) {
+            _next_festival_block = FESTIVAL_STARTABLE_BLOCK;
+        } else {
+            _next_festival_block = subjects[subject_now].start_block + ELECTION_INTERVAL_BLOCK;
+        }
+        return _next_festival_block;
     }
 }
 

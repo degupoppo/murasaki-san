@@ -106,13 +106,15 @@ function _show_realtimeLog() {
                 let _eventLog = li_eventLog[li_eventLog.length - 1 - i];
                 let _blockNumber = _eventLog[0];
                 let _event = _eventLog[1];
-                let _summoner = _eventLog[3];
-                let __text = "";
-                __text += "&nbsp;&nbsp;&nbsp;&nbsp;";
-                __text += 'block_no:<b><font color="blue">' + _blockNumber + "</font></b>, ";
-                __text += 'murasaki_id:<b><font color="blue">#' + _summoner + "</font></b>, ";
-                __text += 'action:<b><font color="blue">' + _event + "</font></b><br>";
-                _text += __text;
+                if ( !(["OwnershipTransferred"].includes(_event)) ) {
+                    let _summoner = _eventLog[3];
+                    let __text = "";
+                    __text += "&nbsp;&nbsp;&nbsp;&nbsp;";
+                    __text += 'block_no:<b><font color="blue">' + _blockNumber + "</font></b>, ";
+                    __text += 'murasaki_id:<b><font color="blue">#' + _summoner + "</font></b>, ";
+                    __text += 'action:<b><font color="blue">' + _event + "</font></b><br>";
+                    _text += __text;
+                }
             }
             _text += "</font></code>";
             _target.innerHTML = _text;
@@ -192,7 +194,7 @@ async function _show_onChain_parameters() {
             211: "Yellow Fluffy",
             212: "White Fluffy",
         }
-        _text = await contract_ff.methods.elected_type().call();
+        _text = await contract_mp.methods.ELECTED_FLUFFY_TYPE().call();
         _target = document.getElementById("info_festivalWinner");
         _target.innerHTML = _dic[_text];
         //balance of bv
@@ -860,7 +862,7 @@ async function drawStatus() {
         drawText(ctx, _xt, _yt + _rawHeight*3, "Total Coin Mined :", local_total_coin_mined);
         drawText(ctx, _xt, _yt + _rawHeight*4, "Total Leaf Farmed :", local_total_material_farmed);
         drawText(ctx, _xt, _yt + _rawHeight*5, "Total Item Crafted :", local_total_item_crafted);        
-        drawText(ctx, _xt, _yt + _rawHeight*6, "Total Exp Gained:", local_total_exp_gained);
+        drawText(ctx, _xt, _yt + _rawHeight*6, "Total Exp Gained :", local_total_exp_gained);
         drawText(ctx, _xt, _yt + _rawHeight*7, "Total Fluffy Met :", local_total_precious_received);
         drawText(ctx, _xt, _yt + _rawHeight*8, "Total Critical Count :", _critical_count);
 

@@ -134,11 +134,24 @@ let _dic_items = {
         "description":" Fluffy sticks (STR+1) ",
     },
     
-    //### Crown
-    "Crown":{
+    //### Pinwheel
+    "Pinwheel":{
         "item_id":11,
         "item_id_uncommon":11+64,
         "item_id_rare":11+128,
+        "img_name":"item_pinwheel",
+        "icon_png":"png/item_pinwheel.png",
+        "pos_x":350,
+        "pos_y":750,
+        "scale":0.13,
+        "description":" Spin by the on-chain tx counts (DEX+1) ",
+    },
+    
+    //### Crown
+    "Crown":{
+        "item_id":12,
+        "item_id_uncommon":12+64,
+        "item_id_rare":12+128,
         "img_name":"item_crown",
         "icon_png":"icon/item_crown.png",
         "pos_x":1050,
@@ -149,29 +162,15 @@ let _dic_items = {
 
     //### Clarinet
     "Clarinet":{
-        "item_id":12,
-        "item_id_uncommon":12+64,
-        "item_id_rare":12+128,
+        "item_id":13,
+        "item_id_uncommon":13+64,
+        "item_id_rare":13+128,
         "img_name":"item_clarinet",
         "img_name_inactive":"item_clarinet_inactive",
         "icon_png":"png/item_clarinet.png",
         "pos_x":500,
         "pos_y":650,
         "scale":0.25,
-        "description":" Start practice (STR+1) ",
-    },
-
-    //### Horn
-    "Horn":{
-        "item_id":13,
-        "item_id_uncommon":13+64,
-        "item_id_rare":13+128,
-        "img_name":"item_horn",
-        "img_name_inactive":"item_horn_inactive",
-        "icon_png":"png/item_horn.png",
-        "pos_x":500,
-        "pos_y":650,
-        "scale":0.3,
         "description":" Start practice (STR+1) ",
     },
 
@@ -359,9 +358,22 @@ let _dic_items = {
         "description":" Growing goldfish (DEX+1) ",
     },
 
+    //### Unknown1*
+    "Unknown1":{
+        "item_id":28,
+        "item_id_uncommon":28+64,
+        "item_id_rare":28+128,
+        "img_name":"icon_clock",
+        "icon_png":"icon/icon_clock.png",
+        "pos_x":640,
+        "pos_y":480,
+        "scale":0.2,
+        "description":" Comming soon (DEX+1) ",
+    },
+
     //### Piano
     "Piano":{
-        "item_id":28,
+        "item_id":29,
         "item_id_uncommon":28+64,
         "item_id_rare":28+128,
         "img_name":"item_piano",
@@ -372,32 +384,18 @@ let _dic_items = {
         "scale":0.4,
         "description":" Start practice (DEX+1) ",
     },
-    
-    //### Timpani
-    "Timpani":{
-        "item_id":29,
-        "item_id_uncommon":29+64,
-        "item_id_rare":29+128,
-        "img_name":"item_timpani",
-        "img_name_inactive":"item_timpani_inactive",
-        "icon_png":"png/item_timpani.png",
-        "pos_x":500,
-        "pos_y":650,
-        "scale":0.35,
-        "description":" Start practice (DEX+1) ",
-    },
-    
-    //### Pinwheel
-    "Pinwheel":{
+
+    //### Candle*
+    "Candle":{
         "item_id":30,
         "item_id_uncommon":30+64,
         "item_id_rare":30+128,
-        "img_name":"item_pinwheel",
-        "icon_png":"png/item_pinwheel.png",
-        "pos_x":350,
-        "pos_y":750,
-        "scale":0.13,
-        "description":" Spin by the on-chain tx counts (DEX+1) ",
+        "img_name":"icon_clock",
+        "icon_png":"icon/icon_clock.png",
+        "pos_x":640,
+        "pos_y":480,
+        "scale":0.2,
+        "description":" Comming soon (DEX+1) ",
     },
     
     //### Asnya
@@ -570,32 +568,31 @@ let _dic_items = {
         "scale":0.45,
         "description":" Room decoration (INT+1) ",
     },
-    
-    //### Violin
-    "Violin":{
+
+    //### Unknown2*
+    "Unknown2":{
         "item_id":44,
         "item_id_uncommon":44+64,
         "item_id_rare":44+128,
+        "img_name":"icon_clock",
+        "icon_png":"icon/icon_clock.png",
+        "pos_x":640,
+        "pos_y":480,
+        "scale":0.2,
+        "description":" Comming soon (INT+1) ",
+    },
+    
+    //### Violin
+    "Violin":{
+        "item_id":45,
+        "item_id_uncommon":45+64,
+        "item_id_rare":45+128,
         "img_name":"item_violin",
         "img_name_inactive":"item_violin_inactive",
         "icon_png":"png/item_violin.png",
         "pos_x":500,
         "pos_y":650,
         "scale":0.2,
-        "description":" Start practice (INT+1) ",
-    },
-    
-    //### Harp
-    "Harp":{
-        "item_id":45,
-        "item_id_uncommon":45+64,
-        "item_id_rare":45+128,
-        "img_name":"item_harp",
-        "img_name_inactive":"item_harp_inactive",
-        "icon_png":"png/item_harp.png",
-        "pos_x":500,
-        "pos_y":650,
-        "scale":0.3,
         "description":" Start practice (INT+1) ",
     },
     
@@ -1114,7 +1111,55 @@ let _dic_items = {
         "img_name":"twinkle_01",
         "icon_png":"png/twinkle_01.png",
     },
+    
 }
+
+    //---disabled
+/*
+    //### Timpani
+    "Timpani":{
+        "item_id":29,
+        "item_id_uncommon":29+64,
+        "item_id_rare":29+128,
+        "img_name":"item_timpani",
+        "img_name_inactive":"item_timpani_inactive",
+        "icon_png":"png/item_timpani.png",
+        "pos_x":500,
+        "pos_y":650,
+        "scale":0.35,
+        "description":" Start practice (DEX+1) ",
+    },
+    
+    //### Horn
+    "Horn":{
+        "item_id":13,
+        "item_id_uncommon":13+64,
+        "item_id_rare":13+128,
+        "img_name":"item_horn",
+        "img_name_inactive":"item_horn_inactive",
+        "icon_png":"png/item_horn.png",
+        "pos_x":500,
+        "pos_y":650,
+        "scale":0.3,
+        "description":" Start practice (STR+1) ",
+    },
+
+    //### Harp
+    "Harp":{
+        "item_id":45,
+        "item_id_uncommon":45+64,
+        "item_id_rare":45+128,
+        "img_name":"item_harp",
+        "img_name_inactive":"item_harp_inactive",
+        "icon_png":"png/item_harp.png",
+        "pos_x":500,
+        "pos_y":650,
+        "scale":0.3,
+        "description":" Start practice (INT+1) ",
+    },
+*/
+    
+//---end
 
 let _dic_items_reverse = {};
 for (let key in _dic_items) {
