@@ -110,7 +110,9 @@ contract ERC721 is IERC721 {
 
     修正案
         アイテム案
-            あと2つアイテム枠
+            アロマキャンドル
+            ルンバ
+            あと１つなにか
         お菓子の家が完成した時の演出の改善
             glitter表示
             メーターの色を変えるなどして100%をわかりやすく
@@ -140,6 +142,8 @@ contract ERC721 is IERC721 {
         フェスティバル前の演出の改善
             お祭り帽子の実装
         変数書き換え対策の実装, さてどうするか
+     ok タイトルロゴの微修正
+     ok ローディング画面でロゴの家が徐々に完成してゆくように実装
      ok fluffy festivalのend_votingにcheck_endを組み込むバグ修正。
      ok マーケットのlist price初期値にbuyback priceを記載する
      ok     1.00未満は1.00として最低価格を表示する
@@ -12963,6 +12967,11 @@ function preload(scene) {
 
     //---loading screen
     //https://gamedevacademy.org/creating-a-preloading-screen-in-phaser-3/?a=13
+
+    //logo
+    //scene.load.spritesheet("logolist", "src/icon/logolist.png", {frameWidth: 370, frameHeight: 320});
+    let logo = scene.add.image(640, 350, "logolist").setScale(0.3);
+
     let progressBar = scene.add.graphics();
     let progressBox = scene.add.graphics();
     progressBox.fillStyle(0xFDEFF5, 0.4);
@@ -13005,6 +13014,7 @@ function preload(scene) {
     ];
     progressText.setText(_arr[Math.floor(Math.random() * _arr.length)]);
     let _threthold = 0.25;
+    let _logoFrameNum = 0;
     scene.load.on("progress", function(value) {
         if (flag_loaded == 0) {
             progressBar.clear();
@@ -13014,6 +13024,9 @@ function preload(scene) {
             if (value > _threthold) {
                 progressText.setText(_arr[Math.floor(Math.random() * _arr.length)]);
                 _threthold += 0.25;
+                //increment logo frame number
+                _logoFrameNum += 1;
+                logo.setFrame(_logoFrameNum);
             }
         }
     });
@@ -19849,6 +19862,8 @@ class FirstCheck extends Phaser.Scene {
     preload() {
         this.load.image("icon_error", "src/png/icon_error.png");
         this.load.image("icon_wrong", "src/png/icon_wrong.png");
+        //this.load.image("logo", "src/png/logo.png");
+        this.load.spritesheet("logolist", "src/icon/logolist.png", {frameWidth: 370, frameHeight: 320});
     }
     
     create(){
@@ -19917,6 +19932,8 @@ class FirstCheck extends Phaser.Scene {
         //loop checking wallet and chain id
         runAll(this);
         const timerId = setInterval(runAll, 5000, this);
+
+        //this.logo = this.add.image(640, 350, "logo").setScale(0.15);
     }
 }
 
@@ -20062,6 +20079,7 @@ class Loading_overlap extends Phaser.Scene {
                     .setDepth(1000-1);
                 localStorage.setItem("flowerCount_inGame", JSON.stringify(localStorage_flowerCount));
             });
+        //this.logo = this.add.image(640, 350, "logo").setScale(0.15);
     }
     
     update() {

@@ -73,16 +73,21 @@ nav a.current {
 }
 
 .vertical-middle{
-  display: inline-block; /* インライン要素にすることで横に回り込む */
+  //display: inline-block; /* インライン要素にすることで横に回り込む */
+  display: flex;
   vertical-align: middle; /* 上下中央に寄せる */ 
+  text-align: center;
+  justify-content: center;
+  align-items: center;
 }
 
 .showIconTop{
     display: inline-block; 
     width: 64px; 
     float: center; 
-    margin-right: 16px; 
+    margin-right: 0px; 
     margin-top: 0px;
+    vertical-align: middle; /* 上下中央に寄せる */ 
 }
 
 .footer{
