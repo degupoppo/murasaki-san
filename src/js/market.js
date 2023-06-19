@@ -613,6 +613,8 @@ async function show_totalTradingVolume() {
     _volume = web3.utils.fromWei(_volume, "ether");
     _volume = Math.round(_volume*100)/100;
     totalTradingVolume.innerHTML = _volume;
+    let _count = await contract_mmt.methods.total_tradingCount().call();
+    totalTradingCount.innerHTML = _count;
 }
 
 

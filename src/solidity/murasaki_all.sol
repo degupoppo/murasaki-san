@@ -10691,6 +10691,11 @@ contract BuybackTreasury is Ownable, ReentrancyGuard, Pausable {
         payable(ma.address_BufferVault()).transfer(_value);
     }
 
+    //admin, set amountPaied
+    function set_amountPaied (uint _summoner, uint _value) external onlyOwner {
+        amountPaied[_summoner] = _value;
+    }
+    
     //onlyPermitted, set amount_per_summoner
     function set_amountPerSummoner(uint _value) external {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
@@ -10764,10 +10769,10 @@ contract BuybackTreasury is Ownable, ReentrancyGuard, Pausable {
         return _price;
     }
     
-    function calc_buybackPrice(uint _item) public view returns (uint) {
-        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
-        Murasaki_Craft mc = Murasaki_Craft(ma.address_Murasaki_Craft());
-        (uint _item_type, , , , ,) = mc.items(_item);
+    function calc_buybackPrice_from_itemType(uint _item_type) public view returns (uint) {
+        //Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        //Murasaki_Craft mc = Murasaki_Craft(ma.address_Murasaki_Craft());
+        //(uint _item_type, , , , ,) = mc.items(_item);
         uint _price = 0;
         uint _item_level = 0;
         //crafting items
@@ -10803,6 +10808,50 @@ contract BuybackTreasury is Ownable, ReentrancyGuard, Pausable {
             _price = _calc_itemPrice_fromLevel(_item_level);
         }
         return _price;
+    }
+    
+    function calc_buybackPrice(uint _item) public view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Craft mc = Murasaki_Craft(ma.address_Murasaki_Craft());
+        (uint _item_type, , , , ,) = mc.items(_item);
+        return calc_buybackPrice_from_itemType(_item_type);
+        /*
+        uint _price = 0;
+        uint _item_level = 0;
+        //crafting items
+        if (_item_type <= 192) {
+            _item_level = _item_type % 16;
+            if (_item_level == 0) {
+                _item_level = 16;
+            }
+            uint _item_rarity;
+            if (_item_type >= 129) {    //rare, x9
+                _item_rarity = 9;
+            } else if (_item_type >= 65) {  //uncommon, x3
+                _item_rarity = 3;
+            } else {    //common, x1
+                _item_rarity = 1;
+            }
+            _price = _calc_itemPrice_fromLevel(_item_level) * _item_rarity;
+        //fluffy
+        } else if (_item_type >= 201 && _item_type <= 248) {
+            if (_item_type <= 212) {    //fluffy
+                _item_level = 21;
+            } else if (_item_type <= 224) { //fluffier
+                _item_level = 22;
+            } else if (_item_type <= 236) { //fluffiest
+                _item_level = 23;
+            } else if (_item_type <= 248) { //doll
+                _item_level = 24;
+            }
+            _price = _calc_itemPrice_fromLevel(_item_level);
+        //twinkleSparkleGlitter
+        } else if (_item_type >= 251 && _item_type <= 265) {
+            _item_level = 22;   //=fluffier
+            _price = _calc_itemPrice_fromLevel(_item_level);
+        }
+        return _price;
+        */
     }
     
     function calc_buybackPrice_asArray() public view returns (uint[36] memory) {

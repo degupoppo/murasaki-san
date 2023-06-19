@@ -86,46 +86,40 @@ contract ERC721 is IERC721 {
 //### 1st
 
 
-    infoページの充実化
-        売買回数、平均購入価格などを集計したマーケット情報ページを作成する？
-            総取引回数、総取引額、アイテムごとの取引回数・平均価格
-            info内にボタンで実装するか
-     ok コントラアップグレードしてtotal mail sentなどの表示を実装する
-     ig twitter投稿ボタンを設置する？
-            nameとstaking amountを非表示にするラジオボタンを実装する
-     ok 改善点
-         ok ageを表示する
-         ok ボタン押したあとのloading...を実装する
-         ok     ボタンは何回も押せないように一度押したらdisableにする
-         ok web3Init前にボタン押したときのエラー対策を実装する
-         ok 他のパラメータの検討
-                total_feeding
-                total_grooming
-                neglect_count
-                total critical
-     ok むらさきさんのパラメータ詳細をinfoに追加する
-            取得可能なパラメータをすべて表示する
-            所有するNFTをアイコンでばらばらと表示する
+    Strollのテストプレイ
+        itemエアドロしてテストプレイを繰り返す。
+        絵の置換
+        お散歩時間の吟味
+            4時間で固定にするか
+            出発時に1, 2, 4時間を選択し、長いほうが効率よくするか
+            1時間以上経過でいつでも帰宅可能で、4時間経つと寝てしまうとするか。
+    
+
+    Practiceのテストプレイ
+        itemエアドロとテストプレイ
+        楽器絵の実装
+        紹介記事の用意
 
 
     修正案
-        アイテム案
-            アロマキャンドル
-            ルンバ
-            あと１つなにか
+        夜の演出改善
+            UFOや土星などを画面上部に表示させる
+            上からゆっくり降りてくる？
         お菓子の家が完成した時の演出の改善
             glitter表示
             メーターの色を変えるなどして100%をわかりやすく
             click to mintなどを表示させる？
-        夜の演出改善
-            UFOや土星などを画面上部に表示させる
-            上からゆっくり降りてくる？
-        Alchemy WAGBIへアプライ
-        infoの取得にmurasakiのbatch getterを使って処理を軽減する
         お菓子の家の建設途中の修正
             建設しているジンジャーマン
             10～30%ではもう少しパーツを少なめに
             staking=0の時の演出
+        market.jsのbuyback関数で最新のfluffy dollのitemTypeに対応するよう修正する
+        アイテム案
+            アロマキャンドル
+            ルンバ
+            あと１つなにか
+        Alchemy WAGBIへアプライ
+        infoの取得にmurasakiのbatch getterを使って処理を軽減する
         tokenURIをsatietyとhappyによって変化させる
             tokenURI_codexを作製し参照する
         おサボり中はミシンやスコップを残す
@@ -142,6 +136,8 @@ contract ERC721 is IERC721 {
         フェスティバル前の演出の改善
             お祭り帽子の実装
         変数書き換え対策の実装, さてどうするか
+     ok footerの修正
+     ok infoページのiconを吟味・修正する
      ok タイトルロゴの微修正
      ok ローディング画面でロゴの家が徐々に完成してゆくように実装
      ok fluffy festivalのend_votingにcheck_endを組み込むバグ修正。
@@ -1181,6 +1177,27 @@ contract ERC721 is IERC721 {
 
 
 //### 3rd
+
+ ok infoページの充実化
+     ok 売買回数、平均購入価格などを集計したマーケット情報ページを作成する？
+            総取引回数、総取引額、アイテムごとの取引回数・平均価格
+            info内にボタンで実装するか
+     ok コントラアップグレードしてtotal mail sentなどの表示を実装する
+     ig twitter投稿ボタンを設置する？
+            nameとstaking amountを非表示にするラジオボタンを実装する
+     ok 改善点
+         ok ageを表示する
+         ok ボタン押したあとのloading...を実装する
+         ok     ボタンは何回も押せないように一度押したらdisableにする
+         ok web3Init前にボタン押したときのエラー対策を実装する
+         ok 他のパラメータの検討
+                total_feeding
+                total_grooming
+                neglect_count
+                total critical
+     ok むらさきさんのパラメータ詳細をinfoに追加する
+            取得可能なパラメータをすべて表示する
+            所有するNFTをアイコンでばらばらと表示する
 
  ok /test/から以下をmainへ移動すること
         info.html

@@ -65,7 +65,7 @@ recorded on the Astar Network EVM blockchain.
 
 <!--- random --->
 
-<h3 id="random">Random Murasaki-san &#x1f33c;</h3>
+<h3 id="random">Random Murasaki-san &#x1f49e;</h3>
 
 <p>
 Five random Murasaki-san icons will be displayed. By clicking on an icon, you can visit the corresponding House of Murasaki-san.
@@ -80,7 +80,7 @@ Five random Murasaki-san icons will be displayed. By clicking on an icon, you ca
 
 <!--- Details --->
 
-<h3 id="details">Murasaki-san Details &#x1f33c;</h3>
+<h3 id="details">Murasaki-san Details &#x1F48E;</h3>
 
 <p>
 If you know friend's Murasaki-san ID, you can call status, read introduction, and visit their house. You can feed their Murasaki-san and earn a little extra exp (2% of exp gained).
@@ -112,7 +112,7 @@ If you know friend's Murasaki-san ID, you can call status, read introduction, an
 
 <!--- log --->
 
-<h3 id="log">Realtime Event Log &#x1f33c;</h3>
+<h3 id="log">Realtime Event Log &#x1fab5;</h3>
 
 <p>
 Pressing the button will initiate real-time monitoring of events for each contract.
@@ -131,9 +131,49 @@ Pressing the button will initiate real-time monitoring of events for each contra
 
 
 
+<!--- market --->
+
+<h3 id="market">Market Information &#x1f514;</h3>
+
+<p>
+
+<b>Select Item:</b>
+
+&nbsp;
+
+<font size="-0.8">
+<span id="itemSelector">
+<select id="itemPulldown">
+<option value="0">Loading...</option>
+</select>
+</span>
+</font>
+
+&nbsp;
+
+<button onclick="getMarketInfo();">
+Get Market Info
+</button>
+
+</p>
+
+<p>
+<ul>
+<li>Item Type:&nbsp;&nbsp;<b><idv id="itemType"></div></b>
+<li>Number of Mint:&nbsp;&nbsp;<b><idv id="numberOfMint"></div></b>
+<li>Number of Trade:&nbsp;&nbsp;<b><idv id="numberOfTrade"></div></b>
+<li>Average Trading Price:&nbsp;&nbsp;<b><idv id="averageTradingPrice"></div></b>
+<li>Current Buyback Price:&nbsp;&nbsp;<b><idv id="currentBuybackPrice"></div></b>
+</ul>
+</p>
+
+<br>
+
+
+
 <!--- parameter --->
 
-<h3 id="parameter">On-Chain Parameters &#x1f33c;</h3>
+<h3 id="parameter">On-Chain Parameters &#x1f517;</h3>
 
 <ul>
 <li>Total trial summoned:&nbsp;&nbsp;<b><idv id="info_total_trial_summoned"></div></b>
@@ -163,8 +203,13 @@ Pressing the button will initiate real-time monitoring of events for each contra
 
 </main>
 
+
+
+<!--- Footer--->
+
 <footer class="footer">
 
+<img src="logo_icon.png" width="18">
 Donation:&nbsp;
 <button style="height:26px;font-size:75%" onclick="donate(1);">
 <script type="text/javascript">write_icon(1)</script>&nbsp;1 $ASTR
@@ -188,6 +233,7 @@ Donation:&nbsp;
 </footer>
 
 
+
 </body>
 
 <script>
@@ -195,6 +241,7 @@ Donation:&nbsp;
     check_connected();
     _show_icon3();
     _show_onChain_parameters();
+    loadItemSelector();
 </script>
 
 </html>

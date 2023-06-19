@@ -1017,3 +1017,108 @@ async function drawStatus() {
         setTimeout(drawStatus, 1000);
     }
 }
+
+
+//---market
+
+//button function, call and show item infos
+//itemType, numberOfMint, numberOfTrade, averageTradingPrice, currentBuybackPrice
+async function getMarketInfo() {
+    let _itemType = document.getElementById("itemPulldown").value;
+    let _numberOfMint = await contract_mc.methods.count_of_mint(_itemType).call();
+    let _numberOfTrade = await contract_mmt.methods.soldCount(_itemType).call(); 
+    let _averageTradingPrice = await contract_mmt.methods.averageSoldPrice(_itemType).call(); 
+    _averageTradingPrice = Math.floor( Number(_averageTradingPrice) / (10**18) * 100 )/100;
+    _averageTradingPrice = _averageTradingPrice.toFixed(2);
+    //let _currentBuybackPrice = await contract_bt.methods.calc_buybackPrice(_itemType).call();
+    //_currentBuybackPrice = Math.floor( Number(_currentBuybackPrice) / (10**18) * 100 )/100;
+    //_currentBuybackPrice = _currentBuybackPrice.toFixed(2);
+    let _currentBuybackPrice = await getBuybackPrice(_itemType);
+    itemType.innerHTML = _itemType;    
+    numberOfMint.innerHTML = _numberOfMint;    
+    numberOfTrade.innerHTML = _numberOfTrade;    
+    averageTradingPrice.innerHTML = _averageTradingPrice + " $ASTR";    
+    currentBuybackPrice.innerHTML = _currentBuybackPrice + " $ASTR";    
+}
+
+//call current buyback price
+//***TODO*** dirty code
+//better: prepare get_itemPrice_from_itemType function in the buyback treasury contract
+async function getBuybackPrice(_item_type) {
+    let buybackPrices = await contract_bt_wss.methods.calc_buybackPrice_asArray().call();
+    //item level
+    let _item_level = 0;
+    //craft item
+    if (_item_type <= 192) {
+        _item_level = _item_type % 16;
+        if (_item_level == 0) {
+            _item_level = 16;
+        }
+    //fluffy
+    } else if (_item_type >= 201 && _item_type <= 248) {
+        if (_item_type <= 212) {
+            _item_level = 21;
+        } else if (_item_type <= 224) {
+            _item_level = 22;
+        } else if (_item_type <= 236) {
+            _item_level = 23;
+        } else if (_item_type <= 248) {
+            _item_level = 24;
+        }
+    //twinkleSparkleGlitter
+    } else if (_item_type >= 251 && _item_type <= 256) {
+        _item_level = 22;
+    } else {
+        _item_level = 0;
+    }
+    let _item_price = (buybackPrices[_item_level]/10**18).toFixed(2);
+    //rarity
+    if (_item_type <= 64) {
+        _item_price *= 1;
+    } else if (_item_type <= 128) {
+        _item_price *= 3;
+    } else if (_item_type <= 192) {
+        _item_price *= 9;
+    }
+    return _item_price;
+}
+
+//prepare pulldown menu from dic_items
+function loadItemSelector() {
+    /*
+        <select name="itemSelecter">
+        <option value="1">Mr.Astar</option>
+        <option value="2">Ms.Ether</option>
+        </select>
+    */
+    let _target = document.getElementById("itemSelector");
+    let _html = "";
+    _html += '<select id="itemPulldown">';
+    for (let _itemName in dic_items) {
+        let _itemId = dic_items[_itemName].item_id;
+        //for craftable items, care rarity
+        if (_itemId <= 192) {
+            /*
+            _html += '<option style="color:green" value="' + _itemId +'">' + _itemName + " (common)" + "</option>";
+            _html += '<option style="color:blue" value="' + (_itemId + 64) +'">' + _itemName + " (uncommon)" + "</option>";
+            _html += '<option style="color:orange" value="' + (_itemId + 128) +'">' + _itemName + " (rare)" + "</option>";
+            */
+            _html += '<option style="color:green" value="' + _itemId +'">' + _itemName + " [C]" + "</option>";
+            _html += '<option style="color:blue" value="' + (_itemId + 64) +'">' + _itemName + " [U]" + "</option>";
+            _html += '<option style="color:orange" value="' + (_itemId + 128) +'">' + _itemName + " [R]" + "</option>";
+        //for other items
+        } else if (_itemId >= 201 && _itemId <= 212) {
+            _html += '<option style="color:green" value="' + _itemId +'">' + _itemName + "</option>";
+        } else if (_itemId >= 213 && _itemId <= 224) {
+            _html += '<option style="color:blue" value="' + _itemId +'">' + _itemName + "</option>";
+        } else if (_itemId >= 225 && _itemId <= 236) {
+            _html += '<option style="color:orange" value="' + _itemId +'">' + _itemName + "</option>";
+        } else if (_itemId >= 237 && _itemId <= 248) {
+            _html += '<option style="color:#E85298" value="' + _itemId +'">' + _itemName + "</option>";
+        } else {
+            _html += '<option value="' + _itemId +'">' + _itemName + "</option>";
+        }
+    }
+    _html += "</select>";
+    _target.innerHTML = _html;
+}
