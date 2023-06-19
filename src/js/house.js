@@ -11977,7 +11977,7 @@ async function open_window_strolling(scene) {
         "stroll_direction_03", 0.3, 0,
         "Seaside", 36, "#000000",
         1, 2,
-        _total_strolling_direction_03
+        _total_strolling_direction_02
     );
     create_selection(
         scene, 
@@ -11985,7 +11985,7 @@ async function open_window_strolling(scene) {
         "stroll_direction_04", 0.3, 0,
         "Grassland", 36, "#000000",
         1, 3,
-        _total_strolling_direction_04
+        _total_strolling_direction_03
     );
 
     //companion
