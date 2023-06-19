@@ -3654,6 +3654,7 @@ async function init_global_variants() {
     local_strollingDistance = 0;
     local_reminingSec = 0;
     local_coolingSec = 0;
+    local_strollEndable = 0;
     
     //---local etc
     turn = 0;
@@ -12133,9 +12134,11 @@ function open_window_strollingDuring(scene, mode) {
 
     //start
     sound_nyui.play();
+    /*
     if (local_owner != local_wallet) {
         return 0;
     }
+    */
     let _text = "";
 
     //create group
