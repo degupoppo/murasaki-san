@@ -93,6 +93,7 @@ contract ERC721 is IERC721 {
             4時間で固定にするか
             出発時に1, 2, 4時間を選択し、長いほうが効率よくするか
             1時間以上経過でいつでも帰宅可能で、4時間経つと寝てしまうとするか。
+        片方ではmetとなっているのに、相手ではmetにならないバグの修正
     
 
     Practiceのテストプレイ
@@ -3654,6 +3655,7 @@ async function init_global_variants() {
     local_strollingDistance = 0;
     local_reminingSec = 0;
     local_coolingSec = 0;
+    local_strollEndable = 0;
     
     //---local etc
     turn = 0;
@@ -11976,7 +11978,7 @@ async function open_window_strolling(scene) {
         "stroll_direction_03", 0.3, 0,
         "Seaside", 36, "#000000",
         1, 2,
-        _total_strolling_direction_03
+        _total_strolling_direction_02
     );
     create_selection(
         scene, 
@@ -11984,7 +11986,7 @@ async function open_window_strolling(scene) {
         "stroll_direction_04", 0.3, 0,
         "Grassland", 36, "#000000",
         1, 3,
-        _total_strolling_direction_04
+        _total_strolling_direction_03
     );
 
     //companion
@@ -12133,9 +12135,11 @@ function open_window_strollingDuring(scene, mode) {
 
     //start
     sound_nyui.play();
+    /*
     if (local_owner != local_wallet) {
         return 0;
     }
+    */
     let _text = "";
 
     //create group
@@ -12318,11 +12322,22 @@ function open_window_strollingDuring(scene, mode) {
         if (this.countBuffer > 0) {
             this.countBuffer -= 1;
         }
+        //hat check for gamestart, after first item check
+        if (turn == 60) {
+            if (item_wearing_hat != 0) {
+                let _hat = scene.add.sprite(640-3, 640-55, item_wearing_hat.texture)
+                    .setDepth(4004)
+                    .setOrigin(0.5)
+                    .setScale(0.22);
+                group_window_strollingDuring.add(_hat);
+                group_update.add(_hat);
+            }
+        }
     }
     group_window_strollingDuring.add(_walking_summoner);
     group_update.add(_walking_summoner);
     
-    //hat
+    //hat for  window creation
     if (item_wearing_hat != 0) {
         let _hat = scene.add.sprite(640-3, 640-55, item_wearing_hat.texture)
             .setDepth(4004)
@@ -12429,7 +12444,7 @@ function open_window_strollingDuring(scene, mode) {
         .setScale(0.2)
         .setOrigin(0.5)
         .anims.play("mogumogu", true);
-    _mogumogu.count = Math.round( Math.random() * 3600 );
+    _mogumogu.count = Math.round( Math.random() * 18000 );
     _mogumogu.update = function() {
         this.count -= 1;
         if (this.count < 0) {
@@ -12441,7 +12456,7 @@ function open_window_strollingDuring(scene, mode) {
         }
         if (this.x >= 1600) {
             this.x = -200;
-            this.count = Math.random() * 3600;
+            this.count = Math.random() * 18000;
         }
         if (this.x >= 580 && this.x <= 581) {
             group_window_strollingDuring.flag_walk = 0;
@@ -12456,7 +12471,7 @@ function open_window_strollingDuring(scene, mode) {
         .setScale(0.3)
         .setOrigin(0.5)
         .anims.play("cat_walking_right_withMail_fast", true);
-    _cat.count = Math.round( Math.random() * 3600 );
+    _cat.count = Math.round( Math.random() * 18000 );
     _cat.update = function() {
         this.count -= 1;
         if (this.count < 0) {
@@ -12468,7 +12483,7 @@ function open_window_strollingDuring(scene, mode) {
         }
         if (this.x >= 1600) {
             this.x = -200;
-            this.count = Math.random() * 3600;
+            this.count = Math.random() * 18000;
         }
         if (this.x >= 580 && this.x <= 581) {
             group_window_strollingDuring.flag_walk = 0;

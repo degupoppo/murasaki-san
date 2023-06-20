@@ -8817,11 +8817,14 @@ contract Stroll is Ownable, ReentrancyGuard, Pausable {
         //get total number of summoners in the same direction and companion
         uint _direction_and_companion = direction[_summoner] * 1 + companion[_summoner] * 10;
         uint _total_strolling_inSame = strolledSummoners[_direction_and_companion].length();
+        uint _rnd;
         uint _summoner_met;
         //choose random summoner 5 times
         for (uint i=0; i<5; i++) {
             //select random summoner
-            _summoner_met = mfs.dn(_summoner + i, _total_strolling_inSame);
+            //_summoner_met = mfs.dn(_summoner + i, _total_strolling_inSame);
+            _rnd = mfs.dn(_summoner + i, _total_strolling_inSame);
+            _summoner_met = strolledSummoners[_direction_and_companion].at(_rnd);
             //check not exist in the list and the list is not full each other
             if (
                 _summoner != _summoner_met
@@ -8881,7 +8884,7 @@ contract Stroll is Ownable, ReentrancyGuard, Pausable {
             if (
                 _summoner_met != 0
                 && summoner2summoner_metTime[_summoner][_summoner_met] == 0
-                && summoner2summoner_metTime[_summoner_met][_summoner] == 0
+                //&& summoner2summoner_metTime[_summoner_met][_summoner] == 0
             ) {
                 _count_newMeet += 1;
             }
