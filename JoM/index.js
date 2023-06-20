@@ -487,6 +487,7 @@ class Main extends Phaser.Scene {
             2: "Mountain",
             3: "Plain",
             4: "Water",
+            5: "Sea",
         }
         hexMatrix = new Array(99);
         for (let i=0; i<=99; i++){
@@ -613,7 +614,7 @@ class Main extends Phaser.Scene {
                         _hexInfoText.setText(_text);
                         
                         // move button
-                        if (flag_moving == 0 && hex != hex_current) {
+                        if (flag_moving == 0 && hex != hex_current && hex.type != 5 && hex.type != 4) {
                             _hexInfoButton.x = _hexInfo.x+50;
                             _hexInfoButton.y = _hexInfo.y+65;
                             _hexInfoButton.visible = true;
