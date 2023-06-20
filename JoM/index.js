@@ -402,6 +402,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             hex_current = this.hex_targetted
             hex_current_indicator.x = hex_current.x;
             hex_current_indicator.y = hex_current.y;
+            this.hex_current = hex_current;
             this.hex_targetted = 0;
             hex_targetted_indicator.visible = false;
             this.mode = "happy";
@@ -613,6 +614,8 @@ class Main extends Phaser.Scene {
                             _hexInfoButton.x = _hexInfo.x+50;
                             _hexInfoButton.y = _hexInfo.y+65;
                             _hexInfoButton.visible = true;
+                        } else {
+                            _hexInfoButton.visible = false;
                         }
                     }
                 });
