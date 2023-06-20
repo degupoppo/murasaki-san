@@ -151,9 +151,11 @@ let group_update;
 let group_hex;
 
 //hex
-let hex_current;
 let hex_selected;
+let hex_current;
+let hex_current_indicator;
 let hex_targetted;
+let hex_targetted_indicator;
 let hex_current_posX = 19;
 let hex_current_posY = 20;
 
@@ -397,10 +399,11 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
                 this.submode += 1;
             }
         } else if (this.submode == 2) {
-            hex_current.x = this.hex_targetted.x;
-            hex_current.y = this.hex_targetted.y;
+            hex_current = this.hex_targetted
+            hex_current_indicator.x = hex_current.x;
+            hex_current_indicator.y = hex_current.y;
             this.hex_targetted = 0;
-            hex_targetted.visible = false;
+            hex_targetted_indicator.visible = false;
             this.mode = "happy";
             this.submode = 0;
             flag_moving = 0;
@@ -445,6 +448,7 @@ class Main extends Phaser.Scene {
         this.load.image("hex_99", "hex_99.png");
         this.load.image("coin", "coin.png");
         this.load.image("leaf", "leaf.png");
+        this.load.image("logo_icon", "logo_icon.png");
         this.load.spritesheet("murasaki_right", "murasaki_right.png", {frameWidth: 370, frameHeight: 320});
         this.load.spritesheet("murasaki_working_right", "murasaki_working_right.png", {frameWidth: 370, frameHeight: 320});
         this.load.spritesheet("murasaki_sleeping", "murasaki_sleeping2.png", {frameWidth: 370, frameHeight: 320});
@@ -502,10 +506,11 @@ class Main extends Phaser.Scene {
             .setVisible(false);
         _hexInfoButton.on("pointerdown", () => {
             murasakisan.hex_targetted = hex_selected;
+            hex_targetted = hex_selected;
             _hexInfoButton.visible = false;
-            hex_targetted.visible = true;
-            hex_targetted.x = hex_selected.x;
-            hex_targetted.y = hex_selected.y;
+            hex_targetted_indicator.visible = true;
+            hex_targetted_indicator.x = hex_selected.x;
+            hex_targetted_indicator.y = hex_selected.y;
             flag_moving = 1;
         });
         
@@ -513,7 +518,7 @@ class Main extends Phaser.Scene {
         group_hex = this.add.group();
         let _posX = 0 -1;
         let _posY = 0 -1;
-        let _pos = 0;
+        let _pos = 0 -1;
         for (let iy=0; iy<_numberY; iy++) {
             _posY += 1;
             _posX = 0 -1;
@@ -523,8 +528,8 @@ class Main extends Phaser.Scene {
                 let _x = _startPosX + ix * _hexagonWidth + (iy % 2) * _hexagonWidth/2;
                 let _y = _startPosY + iy * _hexagonWidth - iy * (_hexagonHeight/8 +_adjustHeight);
                 //map pos
-                let _map = map[_pos];
                 _pos += 1;
+                let _map = map[_pos];
 
                 // def hexagon
 
@@ -604,7 +609,7 @@ class Main extends Phaser.Scene {
                         _hexInfoText.setText(_text);
                         
                         // move button
-                        if (flag_moving == 0) {
+                        if (flag_moving == 0 && hex != hex_current) {
                             _hexInfoButton.x = _hexInfo.x+50;
                             _hexInfoButton.y = _hexInfo.y+65;
                             _hexInfoButton.visible = true;
@@ -672,25 +677,40 @@ class Main extends Phaser.Scene {
         
         //prepare hex_current
         //let hex_selected;
+        hex_current = hexMatrix[hex_current_posX][hex_current_posY];
+        hex_current_indicator = this.add.sprite(hex_current.x, hex_current.y, "hex_99")
+            .setAlpha(0.5)
+            .setOrigin(0.5)
+            .setDepth(102);
+        
+        /*
         {
             let ix = hex_current_posX;
             let iy = hex_current_posY;
             let _x = _startPosX + ix * _hexagonWidth + (iy % 2) * _hexagonWidth/2;
             let _y = _startPosY + iy * _hexagonWidth - iy * (_hexagonHeight/8 +_adjustHeight);
-            hex_current = this.add.sprite(_x, _y, "hex_99")
-            hex_current.setAlpha(0.5);
-            hex_current.setOrigin(0.5);
-            hex_current.depth = 102;
-            hex_current.posX = hex_current_posX;
-            hex_current.posY = hex_current_posY;
+            hex_current_indicator = this.add.sprite(_x, _y, "hex_99")
+                .setAlpha(0.5)
+                .setOrigin(0.5)
+                .depth = 102
+                .posX = hex_current_posX
+                .posY = hex_current_posY
         }
+        */
         
         //prepare hex_targetted
-        hex_targetted = this.add.sprite(0, 0, "hex_98")
+        hex_targetted_indicator = this.add.sprite(0, 0, "hex_98")
             .setAlpha(0.5)
             .setOrigin(0.5)
             .setDepth(102)
             .setVisible(false);
+        
+        
+        // show house icon
+        let _house = this.add.sprite(hex_current.x, hex_current.y, "logo_icon")
+            .setOrigin(0.5)
+            .setScale(0.05)
+            .setDepth(101);
         
 
         // detect mouse wheel
