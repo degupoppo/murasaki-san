@@ -716,7 +716,7 @@ class Main extends Phaser.Scene {
         });
         this.anims.create({
             key: "murasaki_sleeping",
-            frames: this.anims.generateFrameNumbers("murasaki_sleeping", {start:0, end:1}),
+            frames: this.anims.generateFrameNumbers("murasaki_sleeping", {frames:[0,0,0,1,1,1]}),
             frameRate: 2,
             repeat: -1
         });
