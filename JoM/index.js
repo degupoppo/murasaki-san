@@ -236,9 +236,16 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         this.setOrigin(0.5);
         group_update.add(this);
         this.hex_targetted = 0;
+        this.name = scene.add.text(this.x, this.y-37, "Kapico")
+            .setOrigin(0.5)
+            .setDepth(201)
+            .setColor("#000000")
+            .setVisible(false);
     }
     
     on_click() {
+        this.name.visible = true;
+        setTimeout( () => {this.name.visible = false}, 5000 );
     }
     
     happy() {
@@ -348,6 +355,8 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         } else if (this.submode == 1) {
             this.x += Math.cos(this.moving_degree * (Math.PI/180)) * this.moving_speed;
             this.y -= Math.sin(this.moving_degree * (Math.PI/180)) * this.moving_speed;
+            this.name.x = this.x;
+            this.name.y = this.y - 37;
             this.moving_count -= 1;
             if (this.moving_count <= 0) {
                 this.submode += 1;
@@ -377,6 +386,8 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             let _deltaY2 = _deltaY / (Math.abs(_deltaX) + Math.abs(_deltaY)) * 0.2;
             this.x += _deltaX2;
             this.y += _deltaY2;
+            this.name.x = this.x;
+            this.name.y = this.y -37;
             if (
                 this.x >= this.hex_targetted.x-10 
                 && this.x <= this.hex_targetted.x+10 
@@ -456,7 +467,7 @@ class Main extends Phaser.Scene {
 
         // set hexagon position parameters
         let _numberX = 50;
-        let _numberY = 49;
+        let _numberY = 50;
         let _startPosX = -2500;
         let _startPosY = -2500;
         let _hexagonWidth = 168;
@@ -512,8 +523,8 @@ class Main extends Phaser.Scene {
                 let _x = _startPosX + ix * _hexagonWidth + (iy % 2) * _hexagonWidth/2;
                 let _y = _startPosY + iy * _hexagonWidth - iy * (_hexagonHeight/8 +_adjustHeight);
                 //map pos
-                _pos += 1;
                 let _map = map[_pos];
+                _pos += 1;
 
                 // def hexagon
 
@@ -710,7 +721,7 @@ class Main extends Phaser.Scene {
         });
         this.anims.create({
             key: "murasaki_working_right",
-            frames: this.anims.generateFrameNumbers("murasaki_working_right", {start:0, end:1}),
+            frames: this.anims.generateFrameNumbers("murasaki_working_right", {frames:[0,0,1,1]}),
             frameRate: 2,
             repeat: -1
         });
