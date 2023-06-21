@@ -147,6 +147,8 @@ contract ERC721 is IERC721 {
                     https://github.com/RyanMarcus/perlin
         初期値の割当
             誰かに会うためには少なくとも1ヶ月程度かかる間隔でバラけさせる
+            近接する資源を固定化もしくは削除して優劣を軽減させる
+            もしくは、追加料金を支払って再ロール可能とする。
     
 
 */
@@ -154,14 +156,6 @@ contract ERC721 is IERC721 {
 
 //===Global==================================================================================
 
-/*
-let selected_hex;
-let selected_posX = 20;
-let selected_posY = 21;
-let targeted_posX;
-let targeted_posY;
-let hex_selected;
-*/
 
 //global
 let scene_main;
@@ -169,13 +163,11 @@ let turn = 0;
 let cameraTargetX = 0;
 let cameraTargetY = 0;
 let murasakisan;
-//let hexMatrix;
 let currentPos = [0,0];
 
 //flag
 let flag_drag = 0;
 let flag_moving = 0;
-
 
 //group
 let group_update;
@@ -187,8 +179,6 @@ let hex_current;
 let hex_current_indicator;
 let hex_targetted;
 let hex_targetted_indicator;
-//let hex_current_posX = 19;
-//let hex_current_posY = 20;
 
 
 
@@ -540,6 +530,7 @@ class Main extends Phaser.Scene {
         this.load.image("coin", "coin.png");
         this.load.image("leaf", "leaf.png");
         this.load.image("logo_icon", "logo_icon.png");
+        this.load.image("icon_zoomIn", "icon_home.png");
         this.load.spritesheet("murasaki_right", "murasaki_right.png", {frameWidth: 370, frameHeight: 320});
         this.load.spritesheet("murasaki_working_right", "murasaki_working_right.png", {frameWidth: 370, frameHeight: 320});
         this.load.spritesheet("murasaki_sleeping", "murasaki_sleeping2.png", {frameWidth: 370, frameHeight: 320});
@@ -556,7 +547,7 @@ class Main extends Phaser.Scene {
         group_update.runChildUpdate = true;
         
         // init
-        this.cameras.main.zoom = 1.8;
+        this.cameras.main.zoom = 1;
         scene_main = this;
         
         // call current pos
@@ -571,13 +562,11 @@ class Main extends Phaser.Scene {
             flag_drag = 0;  // reset dragging
             // increase/decrease camera zoom
             if (pointer.deltaY > 0) {
-                //this.cameras.main.zoom -= 0.1;
                 this.cameras.main.zoom *= 0.9;
-                if (this.cameras.main.zoom <= 0.2) {
-                    this.cameras.main.zoom = 0.2;   // zoomOut limit
+                if (this.cameras.main.zoom <= 0.3) {
+                    this.cameras.main.zoom = 0.3;   // zoomOut limit
                 }
             } else {
-                //this.cameras.main.zoom += 0.1;
                 this.cameras.main.zoom *= 1.1;
                 if (this.cameras.main.zoom >= 3) {
                     this.cameras.main.zoom = 3; // zoomIn limit
@@ -591,7 +580,6 @@ class Main extends Phaser.Scene {
         this.keys.keyS = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
         this.keys.keyD = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
         this.keys.keySPACE = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
-
         
         // prepare animation
         await this.load_anims(this);
@@ -604,6 +592,21 @@ class Main extends Phaser.Scene {
         
         // focus camera to summoner
         this.cameras.main.centerOn(murasakisan.x, murasakisan.y);
+        
+        // system icon
+        /*
+        let icon_zoomIn = this.add.sprite(1155, 915-15, "icon_zoomIn")
+            .setOrigin(0.5)
+            .setScale(0.15)
+            .setDepth(500)
+            .setInteractive({useHandCursor: true})
+            .on("pointerdown", () => {
+                this.cameras.main.zoom *= 1.1;
+                if (this.cameras.main.zoom >= 3) {
+                    this.cameras.main.zoom = 3; // zoomIn limit
+                }
+            });
+        */
     }
     
 
@@ -641,22 +644,17 @@ class Main extends Phaser.Scene {
 
         // set hexagon position parameters
         
-        let _numberX = 36;
-        let _numberY = 36;
+        let _numberX = 28;
+        let _numberY = 28;
         let _startHex = [currentPos[0]-_numberX/2, currentPos[1]-_numberY/2];
-        let _hexagonWidth = 168;
-        let _hexagonHeight = 196;
-        let _startPosX = 640 - _hexagonWidth*_numberX/2;
-        let _startPosY = 480 - _hexagonHeight*_numberY/2;
-        
-        //let _numberX = 50;
-        //let _numberY = 50;
-        //let _startPosX = -2500;
-        //let _startPosY = -2500;
+        let _hexagonWidth = game.textures.list["hex_00"].source[0].width;
+        let _hexagonHeight = game.textures.list["hex_00"].source[0].height;
         //let _hexagonWidth = 168;
         //let _hexagonHeight = 196;
+        let _startPosX = scene.sys.game.config.width/2 - _hexagonWidth*_numberX/2;
+        let _startPosY = scene.sys.game.config.height/2 - _hexagonHeight*_numberY/2;
 
-        let _adjustWidth = -5;
+        let _adjustWidth = -4;
         let _adjustHeight = -10;
         _hexagonWidth += _adjustWidth;
         
@@ -670,6 +668,7 @@ class Main extends Phaser.Scene {
             5: "Sea",
         }
         let _dicClimate = {
+            0: "Unknown",
             1: "Frigid",
             2: "Temperate",
         }
@@ -714,13 +713,11 @@ class Main extends Phaser.Scene {
         _num = -1;
         _countY = -1;
         for (let iy=0; iy<_numberY; iy++) {
-        //for (let iy=_startHex[1]; iy<(_startHex[1]+_numberY); iy++) {
             _countY += 1;
             _countX = -1;
             
             // for each x column
             for (let ix=0; ix<_numberX; ix++) {
-            //for (let ix=_startHex[0]; ix<(_startHex[0]+_numberX); ix++) {
                 _countX += 1;
                 _num += 1;
 
@@ -737,6 +734,17 @@ class Main extends Phaser.Scene {
                 
                 // call hex climate
                 let _climate = await get_mapClimate(_posX, _posY);
+
+                // override, out of range
+                /*
+                let __x = _startPosX + _numberX/2 * _hexagonWidth + (_numberY/2 % 2) * _hexagonWidth/2;
+                let __y = _startPosY + _numberY/2 * _hexagonWidth - _numberY/2 * (_hexagonHeight/8 +_adjustHeight);
+                let _dist = Math.sqrt( Math.pow(__x-_x,2) + Math.pow(__y-_y,2));
+                if (_dist >= 1800) {
+                    _type = 0;
+                    _climate = 0;
+                }
+                */
 
                 // generate hexagon sprite
 
@@ -800,7 +808,7 @@ class Main extends Phaser.Scene {
                             } else if (_matType == 2) {
                                 _material = scene.add.sprite(_x, _y, "coin");
                                 _material.setOrigin(0.5);
-                                _material.setScale(0.1);
+                                _material.setScale(0.07);
                                 _material.setDepth(101);
                                 hex.coin += 1;
                             } else if (_matType == 3) {
@@ -878,7 +886,7 @@ class Main extends Phaser.Scene {
                             && _dist <= _hexagonWidth*2.1
                         ) {
                             _hexInfoButton.x = _hexInfo.x+50;
-                            _hexInfoButton.y = _hexInfo.y+65;
+                            _hexInfoButton.y = _hexInfo.y+68;
                             _hexInfoButton.visible = true;
                         } else {
                             _hexInfoButton.visible = false;
