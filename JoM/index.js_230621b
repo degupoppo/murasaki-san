@@ -145,8 +145,10 @@ contract ERC721 is IERC721 {
                     https://github.com/josephg/noisejs
                 inkではないがrustのライブラリ
                     https://github.com/RyanMarcus/perlin
-        初期値の割当
-            誰かに会うためには少なくとも1ヶ月程度かかる間隔でバラけさせる
+    
+    
+    
+        
     
 
 */
@@ -169,8 +171,7 @@ let turn = 0;
 let cameraTargetX = 0;
 let cameraTargetY = 0;
 let murasakisan;
-//let hexMatrix;
-let currentPos = [0,0];
+let hexMatrix;
 
 //flag
 let flag_drag = 0;
@@ -187,8 +188,9 @@ let hex_current;
 let hex_current_indicator;
 let hex_targetted;
 let hex_targetted_indicator;
-//let hex_current_posX = 19;
-//let hex_current_posY = 20;
+let hex_current_posX = 19;
+let hex_current_posY = 20;
+noise.seed(5);
 
 
 
@@ -199,9 +201,7 @@ async function get_mapType (x, y) {
     noise.seed(1);
     let _perlin = noise.perlin2(x/10, y/10);
     let _type = 0;
-    if (_perlin <= -0.7) {
-        _type = 5;  //sea
-    } else if (_perlin <= -0.5) {
+    if (_perlin <= -0.5) {
         _type = 4;  //water
     } else if (_perlin <= -0.1) {
         _type = 3;  //plain
@@ -214,7 +214,7 @@ async function get_mapType (x, y) {
 }
 
 async function get_mapClimate (x, y) {
-    noise.seed(4);
+    noise.seed(2);
     let _perlin = noise.perlin2(x/50, y/50);
     let _climate;
     if (_perlin <= -0.2) {
@@ -225,50 +225,6 @@ async function get_mapClimate (x, y) {
     return _climate;
 }
 
-async function get_materials (x, y) {
-    let _mapType = await get_mapType(x, y);
-    noise.seed(3);
-    let _rnd = noise.simplex2(x, y)*50+50;
-    let _count = 0;
-    if (_rnd <= 3) {
-        _count = 3;
-    } else if (_rnd <= 10) {
-        _count = 2;
-    } else if (_rnd <= 30) {
-        _count = 1;
-    }
-    let _li_mat = [0,0,0,0]
-    if (_mapType == 3) {
-        _li_mat[3] += _count;
-    } else if (_mapType == 2) {
-        _li_mat[2] += _count;
-    } else if (_mapType == 1) {
-        _li_mat[1] += _count;
-    }
-    return _li_mat;
-}
-
-async function get_currentPos() {
-    let _currentPos = [4564, 1188966];
-    if (localStorage.getItem("currentPos") != null) {
-        let _json = localStorage.getItem("currentPos");
-        _currentPos = JSON.parse(_json);
-    }
-    return _currentPos;
-}
-
-async function write_currentPos(_currentPos) {
-    localStorage.setItem("currentPos", JSON.stringify(_currentPos));
-}
-
-async function update_dynamicStatus() {
-    //currentPos
-    //summoner mode
-    //moving: targetPos
-    //moving: percentase
-    //moving: reminingTime
-    ;
-}
 
 
 //===Class==================================================================================
@@ -551,116 +507,28 @@ class Main extends Phaser.Scene {
     //### create
     async create() {
     
-        // group
+        //$$$ group
         group_update = this.add.group();
         group_update.runChildUpdate = true;
         
-        // init
+
+        //$$$ init
         this.cameras.main.zoom = 1.8;
         scene_main = this;
-        
-        // call current pos
-        currentPos = await get_currentPos();
-
-        // generate hex map
-        await this.load_hex(this);
-
-        // def key
-        // detect mouse wheel
-        this.input.on("wheel", (pointer) => {
-            flag_drag = 0;  // reset dragging
-            // increase/decrease camera zoom
-            if (pointer.deltaY > 0) {
-                //this.cameras.main.zoom -= 0.1;
-                this.cameras.main.zoom *= 0.9;
-                if (this.cameras.main.zoom <= 0.2) {
-                    this.cameras.main.zoom = 0.2;   // zoomOut limit
-                }
-            } else {
-                //this.cameras.main.zoom += 0.1;
-                this.cameras.main.zoom *= 1.1;
-                if (this.cameras.main.zoom >= 3) {
-                    this.cameras.main.zoom = 3; // zoomIn limit
-                }
-            }
-        });
-        // detect keyboard
-        this.keys = {};
-        this.keys.keyW = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
-        this.keys.keyA = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
-        this.keys.keyS = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
-        this.keys.keyD = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
-        this.keys.keySPACE = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
-
-        
-        // prepare animation
-        await this.load_anims(this);
-
-        // create summoner
-        murasakisan = new Murasakisan(this, hex_current.x, hex_current.y, hex_current)
-            .setOrigin(0.5)
-            .setScale(0.2)
-            .setDepth(200);
-        
-        // focus camera to summoner
-        this.cameras.main.centerOn(murasakisan.x, murasakisan.y);
-    }
     
 
-    //$$$ fc: anims
-    async load_anims(scene) {
-        scene.anims.create({
-            key: "murasaki_right",
-            frames: scene.anims.generateFrameNumbers("murasaki_right", {start:0, end:3}),
-            frameRate: 2,
-            repeat: -1
-        });
-        scene.anims.create({
-            key: "murasaki_working_right",
-            frames: scene.anims.generateFrameNumbers("murasaki_working_right", {frames:[0,0,1,1]}),
-            frameRate: 2,
-            repeat: -1
-        });
-        scene.anims.create({
-            key: "murasaki_sleeping",
-            frames: scene.anims.generateFrameNumbers("murasaki_sleeping", {frames:[0,0,0,1,1,1]}),
-            frameRate: 2,
-            repeat: -1
-        });
-        scene.anims.create({
-            key: "murasaki_happy",
-            frames: scene.anims.generateFrameNumbers("murasaki_happy", {frames:[0,0,1,1]}),
-            frameRate: 2,
-            repeat: -1
-        });
-    }
-    
-
-    //$$$ fc: hex
-    async load_hex(scene) {
+        //$$$ hexagons
 
         // set hexagon position parameters
-        
-        let _numberX = 36;
-        let _numberY = 36;
-        let _startHex = [currentPos[0]-_numberX/2, currentPos[1]-_numberY/2];
+        let _numberX = 50;
+        let _numberY = 50;
+        let _startPosX = -2500;
+        let _startPosY = -2500;
         let _hexagonWidth = 168;
         let _hexagonHeight = 196;
-        let _startPosX = 640 - _hexagonWidth*_numberX/2;
-        let _startPosY = 480 - _hexagonHeight*_numberY/2;
-        
-        //let _numberX = 50;
-        //let _numberY = 50;
-        //let _startPosX = -2500;
-        //let _startPosY = -2500;
-        //let _hexagonWidth = 168;
-        //let _hexagonHeight = 196;
-
         let _adjustWidth = -5;
         let _adjustHeight = -10;
         _hexagonWidth += _adjustWidth;
-        
-        // prepare name dic
         let _dicHex = {
             0: "Unknown",
             1: "Forest",
@@ -673,98 +541,116 @@ class Main extends Phaser.Scene {
             1: "Frigid",
             2: "Temperate",
         }
-
-        // prepare hex matrix
-        //hexMatrix = new Array(65535);
-        //for (let i=0; i<=65535; i++){
-        //    hexMatrix[i] = new Array(63353);
-        //}
+        hexMatrix = new Array(50);
+        for (let i=0; i<=50; i++){
+            hexMatrix[i] = new Array(50);
+        }
         
         // prepare hex info window
-        let _hexInfo = scene.add.graphics();
+        let _hexInfo = this.add.graphics();
         _hexInfo.fillStyle(0xFFF100, 0.9).fillRect(0, 0, 162, 100);
         _hexInfo.depth = 300;
         _hexInfo.visible = false;
-        let _hexInfoText = scene.add.text(0, 0, "").setDepth(301).setColor("#000000");
+        let _hexInfoText = this.add.text(0, 0, "").setDepth(301).setColor("#000000");
         
         // prepare hex info button
-        let _hexInfoButton = scene.add.text(0, 0, "[Move]")
+        let _hexInfoButton = this.add.text(0, 0, "[Move]")
             .setDepth(301)
             .setColor("#000000")
             .setInteractive({useHandCursor: true})
             .setVisible(false);
         _hexInfoButton.on("pointerdown", () => {
-            murasakisan.hex_targetted = hex_selected;   //***TODO*** for onChain
+            murasakisan.hex_targetted = hex_selected;
             hex_targetted = hex_selected;
             _hexInfoButton.visible = false;
             hex_targetted_indicator.visible = true;
             hex_targetted_indicator.x = hex_selected.x;
             hex_targetted_indicator.y = hex_selected.y;
-            write_currentPos([hex_targetted.posX, hex_targetted.posY]);
             flag_moving = 1;
         });
         
-        // generate hexagons
-        group_hex = scene.add.group();
-        let _countX;
-        let _countY;
-        let _num;
-        
-        // for each y row
-        _num = -1;
-        _countY = -1;
+        // prepare hexagons
+        group_hex = this.add.group();
+        let _posX = 0 -1;
+        let _posY = 0 -1;
+        let _pos = 0 -1;
+        let _countHex = [0,0,0,0,0];
         for (let iy=0; iy<_numberY; iy++) {
-        //for (let iy=_startHex[1]; iy<(_startHex[1]+_numberY); iy++) {
-            _countY += 1;
-            _countX = -1;
-            
-            // for each x column
+            _posY += 1;
+            _posX = 0 -1;
             for (let ix=0; ix<_numberX; ix++) {
-            //for (let ix=_startHex[0]; ix<(_startHex[0]+_numberX); ix++) {
-                _countX += 1;
-                _num += 1;
-
-                // def pixel x, y
+                _posX += 1;
+                // def x, y
                 let _x = _startPosX + ix * _hexagonWidth + (iy % 2) * _hexagonWidth/2;
                 let _y = _startPosY + iy * _hexagonWidth - iy * (_hexagonHeight/8 +_adjustHeight);
-                
-                // recalc hex pos
-                let _posX = _startHex[0] + _countX;
-                let _posY = _startHex[1] + _countY;
 
-                // call hex type
+                //type
+                //_pos += 1;
+                //let _map = map[_pos];
+                
+                // def map type
+                //noise.seed(1);
+                //let _perlin = noise.perlin2(_posX/10, _posY/10);
+                
                 let _type = await get_mapType(_posX, _posY);
+                //console.log(_type);
+                /*
+                if (_perlin <= -0.5) {
+                    _type = 4;  //water
+                    _countHex[4] += 1;
+                } else if (_perlin <= -0.1) {
+                    _type = 3;  //plain
+                    _countHex[3] += 1;
+                } else if (_perlin <= 0.2) {
+                    _type = 1;  //forest
+                    _countHex[1] += 1;
+                } else if (_perlin <= 1.00) {
+                    _type = 2;  //mountain
+                    _countHex[2] += 1;
+                }
+                */
                 
-                // call hex climate
-                let _climate = await get_mapClimate(_posX, _posY);
+                // def map climate
+                //noise.seed(2);
+                //_perlin = noise.perlin2(_posX/50, _posY/50);
 
-                // generate hexagon sprite
+                let _climate = await get_mapClimate(_posX, _posY);
+                /*
+                if (_perlin <= -0.2) {
+                    _climate = 1;
+                } else {
+                    _climate = 2;
+                }
+                */
+
+                // def hexagon
 
                 let hex;
 
                 // set texture depends on map type
                 if (_type == 0) {
-                    hex = scene.add.sprite(_x, _y, "hex_00")
+                    hex = this.add.sprite(_x, _y, "hex_00")
                 } else if (_type == 1) {
-                    hex = scene.add.sprite(_x, _y, "hex_01")
+                    hex = this.add.sprite(_x, _y, "hex_01")
                 } else if (_type == 2) {
-                    hex = scene.add.sprite(_x, _y, "hex_02")
+                    hex = this.add.sprite(_x, _y, "hex_02")
                 } else if (_type == 3) {
-                    hex = scene.add.sprite(_x, _y, "hex_03")
+                    hex = this.add.sprite(_x, _y, "hex_03")
                 } else if (_type == 4) {
-                    hex = scene.add.sprite(_x, _y, "hex_04")
+                    hex = this.add.sprite(_x, _y, "hex_04")
                 } else if (_type == 5) {
-                    hex = scene.add.sprite(_x, _y, "hex_05")
+                    hex = this.add.sprite(_x, _y, "hex_05")
                 }
                 
                 // overshow biome hex
                 if (_climate == 1) {
-                    scene.add.sprite(_x, _y, "hex_10").setAlpha(0.2).setDepth(101);
+                    this.add.sprite(_x, _y, "hex_10").setAlpha(0.2).setDepth(101);
                 }
                 
                 // set hex variants
                 hex.climate = _climate
-                hex.num = _num;
+                hex.pos = _pos;
+                //hex.perlin = _perlin
                 hex.type = _type;
                 hex.posX = _posX;
                 hex.posY = _posY;
@@ -778,46 +664,6 @@ class Main extends Phaser.Scene {
                 hex.setAlpha(0.5);
                 hex.setOrigin(0.5);
                 hex.setInteractive({useHandCursor: true});
-
-                // show materials
-                // call mat
-                let _li_mats = await get_materials(_posX, _posY);
-                // put mat
-                for (let _matType=1; _matType<=3; _matType++) {
-                    let _count = _li_mats[_matType];
-                    if (_count > 0) {
-                        for (let i=0; i<_count; i++) {
-                            let _x = hex.x-40+Math.random()*80;
-                            let _y = hex.y-40+Math.random()*80;
-                            let _material;
-                            // put each materials
-                            if (_matType == 1) {
-                                _material = scene.add.sprite(_x, _y, "leaf");
-                                _material.setOrigin(0.5);
-                                _material.setScale(0.1);
-                                _material.setDepth(101);
-                                hex.leaf += 1;
-                            } else if (_matType == 2) {
-                                _material = scene.add.sprite(_x, _y, "coin");
-                                _material.setOrigin(0.5);
-                                _material.setScale(0.1);
-                                _material.setDepth(101);
-                                hex.coin += 1;
-                            } else if (_matType == 3) {
-                                _material = scene.add.sprite(_x, _y, "flowers");
-                                _material.setFrame(Math.round(Math.random()*5));
-                                _material.setAngle(360*Math.random());
-                                _material.setOrigin(0.5);
-                                _material.setScale(0.15);
-                                _material.setDepth(101);
-                                hex.flower += 1;
-                            }
-                        }
-                    }
-                }
-                
-                // insert into hex matrix
-                //hexMatrix[_posX][_posY] = hex;
                 
                 // prepare pointerdown fc
                 hex.on("pointerdown", () => {
@@ -848,8 +694,10 @@ class Main extends Phaser.Scene {
                         _hexInfoText.y = _hexInfo.y+5;
                         let _text = "";
                         _text += hex.posX + ", " + hex.posY + "\n";
-                        _text += _dicClimate[hex.climate] + "\n";
-                        _text += _dicHex[hex.type] + "\n";
+                        _text += _dicClimate[hex.climate] + " " + _dicHex[hex.type] + "\n";
+                        //_text += _dicHex[hex.type] + "\n";
+                        //_text += "Climate:" + _dicBiome[_biome] + "\n";
+                        //_text += hex.x + ", " + hex.y;
                         if (hex.coin > 0) {
                             _text += "Coin: " + hex.coin + "\n";
                         }
@@ -861,22 +709,10 @@ class Main extends Phaser.Scene {
                         }
                         
                         // update text
-                        _hexInfoText.visible = true;
                         _hexInfoText.setText(_text);
                         
-                        // calc distance
-                        let _dist = 
-                            Math.sqrt( Math.pow(hex_current.x-hex.x,2) 
-                            + Math.pow(hex_current.y-hex.y,2));
-                        
                         // move button
-                        if (
-                            flag_moving == 0 
-                            && hex != hex_current 
-                            && hex.type != 5 
-                            && hex.type != 4 
-                            && _dist <= _hexagonWidth*2.1
-                        ) {
+                        if (flag_moving == 0 && hex != hex_current && hex.type != 5 && hex.type != 4) {
                             _hexInfoButton.x = _hexInfo.x+50;
                             _hexInfoButton.y = _hexInfo.y+65;
                             _hexInfoButton.visible = true;
@@ -897,32 +733,143 @@ class Main extends Phaser.Scene {
                     }
                 });
                 
-                // check current hex
-                if (hex.posX == currentPos[0] && hex.posY == currentPos[1]) {
-                    hex_current = hex;
+                // put materials
+                // def count
+                let _rnd = Math.random()*100;
+                let _count = 0;
+                if (_rnd <= 1) {
+                    _count = 3;
+                } else if (_rnd <= 3) {
+                    _count = 2;
+                } else if (_rnd <= 10) {
+                    _count = 1;
                 }
+                // put depends on count
+                if (_count > 0) {
+                    for (let i=0; i<_count; i++) {
+                        let _x = hex.x-40+Math.random()*80;
+                        let _y = hex.y-40+Math.random()*80;
+                        let _material;
+                        // put each materials depends on map type
+                        if (hex.type == 1) {
+                            _material = this.add.sprite(_x, _y, "leaf");
+                            _material.setOrigin(0.5);
+                            _material.setScale(0.1);
+                            _material.setDepth(101);
+                            hex.leaf += 1;
+                        } else if (hex.type == 2) {
+                            _material = this.add.sprite(_x, _y, "coin");
+                            _material.setOrigin(0.5);
+                            _material.setScale(0.1);
+                            _material.setDepth(101);
+                            hex.coin += 1;
+                        } else if (hex.type == 3) {
+                            _material = this.add.sprite(_x, _y, "flowers");
+                            _material.setFrame(Math.round(Math.random()*5));
+                            _material.setAngle(360*Math.random());
+                            _material.setOrigin(0.5);
+                            _material.setScale(0.15);
+                            _material.setDepth(101);
+                            hex.flower += 1;
+                        }
+                    }
+                }
+                
+                // insert into hex matrix
+                hexMatrix[_posX][_posY] = hex;
             }
         }
         
+        //console.log("_countHex:", _countHex);
+        
         //prepare hex_current
-        //hex_current = hexMatrix[currentPos[0]][currentPos[1]];
-        hex_current_indicator = scene.add.sprite(hex_current.x, hex_current.y, "hex_99")
+        //let hex_selected;
+        hex_current = hexMatrix[hex_current_posX][hex_current_posY];
+        hex_current_indicator = this.add.sprite(hex_current.x, hex_current.y, "hex_99")
             .setAlpha(0.5)
             .setOrigin(0.5)
             .setDepth(102);
                 
         //prepare hex_targetted
-        hex_targetted_indicator = scene.add.sprite(0, 0, "hex_98")
+        hex_targetted_indicator = this.add.sprite(0, 0, "hex_98")
             .setAlpha(0.5)
             .setOrigin(0.5)
             .setDepth(102)
             .setVisible(false);
         
         // show house icon
-        let _house = scene.add.sprite(hex_current.x, hex_current.y, "logo_icon")
+        let _house = this.add.sprite(hex_current.x, hex_current.y, "logo_icon")
             .setOrigin(0.5)
             .setScale(0.05)
             .setDepth(101);
+        
+
+        //$$$ key
+
+        // detect mouse wheel
+        this.input.on("wheel", (pointer) => {
+            flag_drag = 0;  // reset dragging
+            // increase/decrease camera zoom
+            if (pointer.deltaY > 0) {
+                //this.cameras.main.zoom -= 0.1;
+                this.cameras.main.zoom *= 0.9;
+                if (this.cameras.main.zoom <= 0.2) {
+                    this.cameras.main.zoom = 0.2;   // zoomOut limit
+                }
+            } else {
+                //this.cameras.main.zoom += 0.1;
+                this.cameras.main.zoom *= 1.1;
+                if (this.cameras.main.zoom >= 3) {
+                    this.cameras.main.zoom = 3; // zoomIn limit
+                }
+            }
+        });
+
+        //key
+        this.keys = {};
+        this.keys.keyW = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
+        this.keys.keyA = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
+        this.keys.keyS = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
+        this.keys.keyD = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
+
+        
+        //$$$ animation
+
+        this.anims.create({
+            key: "murasaki_right",
+            frames: this.anims.generateFrameNumbers("murasaki_right", {start:0, end:3}),
+            frameRate: 2,
+            repeat: -1
+        });
+        this.anims.create({
+            key: "murasaki_working_right",
+            frames: this.anims.generateFrameNumbers("murasaki_working_right", {frames:[0,0,1,1]}),
+            frameRate: 2,
+            repeat: -1
+        });
+        this.anims.create({
+            key: "murasaki_sleeping",
+            frames: this.anims.generateFrameNumbers("murasaki_sleeping", {frames:[0,0,0,1,1,1]}),
+            frameRate: 2,
+            repeat: -1
+        });
+        this.anims.create({
+            key: "murasaki_happy",
+            frames: this.anims.generateFrameNumbers("murasaki_happy", {frames:[0,0,1,1]}),
+            frameRate: 2,
+            repeat: -1
+        });
+        
+
+        //$$$ summoner
+        murasakisan = new Murasakisan(this, hex_current.x, hex_current.y, hex_current)
+            .setOrigin(0.5)
+            .setScale(0.2)
+            .setDepth(200);
+    }
+    
+    //$$$ fc: hex
+    function load_hex(scene) {
     }
 
 
@@ -977,14 +924,6 @@ class Main extends Phaser.Scene {
                 let _cameraY = this.cameras.main.worldView.y + 480 / this.cameras.main.zoom;
                 this.cameras.main.centerOn(_cameraX, _cameraY+10);
             }
-            if (this.keys.keySPACE.isDown) {
-                this.cameras.main.centerOn(murasakisan.x, murasakisan.y);
-            }
-        }
-        
-        //$$$ update
-        if (turn % 200 == 0) {
-            update_dynamicStatus();
         }
     }
 }
