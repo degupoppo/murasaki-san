@@ -83,37 +83,99 @@ contract ERC721 is IERC721 {
 
 /*
 
-
     メインコンセプトはなにか
-        リアルタイム
+        リアルタイム多人数参加のmap開拓ゲーム
+        1st seasonのNFTを使用してさらにゲームを続ける
+        2nd seasonの資源を1st seasonに持っていくこともできる
+        2ndは1stのNFTがあると有利になり、
+            1stは2ndの資源を持ち込むことで有利になる。
+        つまり、2ndは1stの拡張版で、相互にメリットが有る設計にする。
     
     
     Web3的体験はなにか
+        1st NFTのユースケースを与える場
+        共通mapを利用したserverlessのリアルタイムゲーム
+        各hexとweb3要素をうまく融合させたいところだが、どうするか。
+            look & feelも重視し、直感的に理解し納得できるUI/UXにしたい
+            chain上の情報を可能な限りhexに対応させたい。
+        JoMでは土地=各hexがメカニズムの中心となる
+            1stではhouse=walletのコンセプトであった
+           *hexはweb3上の何に相当するのだろうか。
+           *何かしら意味のある、有限であるか、
+                唯一無二である意味論を各hexにもたせてみたい。
 
 
     旅の目的はなにか
-        お花を集める
         資源を集める
+            1stよりも高効率で収集可能になる
         地形改善
+            mining, farming, craftingの効率上昇施設
+                鉱山、農場、工房
+            groomingの効率上昇施設
+                テント
+        珍しいお花を集める
+            そのユースケースは？
+            mining, farming, craftingに対応する3色にするか。
+            持っていると恒常的に全体にブーストが掛かる。
 
 
     選択可能な行動
-        移動
-        開拓？
+        move
+        mining
+        farming
+        crafting
+        staking
+            petをhexにstakingすることでmining/farmingを委託できる
+            fluffyをhexにstakingすることでhexの効率が上昇する
+        migrating（引っ越し）
 
 
     土地の種類と属性
         種類
-            森
-            山
-            平原
+            森, farming
+            山, mining
+            平原, crafting
             水
         属性
-            
+            熱帯, +情熱, passion
+            温帯, +温厚, kindness
+            冷帯, +冷静, calmness
+
+
+    ゲームシステム案
+        手持ちのNFTを資源として配置可能
+            鉱山・農場にfluffyを配置する
+            3匹のペットは本体の50%程度の出力でmining/farming可能
+            crafting（開発）はむらさきさんしかできない？
+        hexの特性
+            資源の埋蔵量
+            土地の種類
+            気候（温暖・寒冷）
+        建造物
+            鉱山
+            農場
+            テント
+        育成
+            feeding：
+                常に可能
+                +100% exp
+            grooming: 
+                resting時に可能
+                拠点で+100% exp, 準拠点（テント）で+50%など効率低下
+        行動
+            mining
+            farming
+            crafting（建設）
         
     
     UIの実装
         移動
+        システムボタン
+            zoomIn
+            zoomOut
+            center
+            home(HP)
+            rotate
 
 
     コントラ実装
@@ -164,6 +226,20 @@ let cameraTargetX = 0;
 let cameraTargetY = 0;
 let murasakisan;
 let currentPos = [0,0];
+//let targetPos = [0,0];
+let summoner = 1;
+let summonerMode;
+let hexMatrix;
+let hexInfoWindow;
+let hexInfoText;
+let hexInfoButton;
+
+//local variants
+let local_currentPos;
+let local_targetPos;
+let local_summonerMode;
+let local_moving_reminingTime;
+let local_moving_reminingPercent;
 
 //flag
 let flag_drag = 0;
@@ -185,7 +261,7 @@ let hex_targetted_indicator;
 //===on-chain==================================================================================
 
 
-async function get_mapType (x, y) {
+async function onChain_call_mapType (x, y) {
     noise.seed(1);
     let _perlin = noise.perlin2(x/10, y/10);
     let _type = 0;
@@ -203,20 +279,22 @@ async function get_mapType (x, y) {
     return _type;
 }
 
-async function get_mapClimate (x, y) {
+async function onChain_call_mapClimate (x, y) {
     noise.seed(4);
     let _perlin = noise.perlin2(x/50, y/50);
     let _climate;
-    if (_perlin <= -0.2) {
+    if (_perlin <= -0.3) {
         _climate = 1;
+    } else if (_perlin >= 0.3) {
+        _climate = 3;
     } else {
         _climate = 2;
     }
     return _climate;
 }
 
-async function get_materials (x, y) {
-    let _mapType = await get_mapType(x, y);
+async function onChain_call_materials (x, y) {
+    let _mapType = await onChain_call_mapType(x, y);
     noise.seed(3);
     let _rnd = noise.simplex2(x, y)*50+50;
     let _count = 0;
@@ -229,36 +307,114 @@ async function get_materials (x, y) {
     }
     let _li_mat = [0,0,0,0]
     if (_mapType == 3) {
-        _li_mat[3] += _count;
+        //_li_mat[3] += _count;
     } else if (_mapType == 2) {
         _li_mat[2] += _count;
     } else if (_mapType == 1) {
         _li_mat[1] += _count;
     }
+    //flower
+    noise.seed(5);
+    _rnd = noise.simplex2(x, y)*50+50;
+    if (_rnd <= 3) {
+        //_li_mat[3] += 2;
+    } else if (_rnd <= 10) {
+        _li_mat[3] += 1;
+    }
     return _li_mat;
 }
 
-async function get_currentPos() {
-    let _currentPos = [4564, 1188966];
+async function onChain_call_currentPos(_summoner) {
+    let _currentPos = [1000, 1000];
     if (localStorage.getItem("currentPos") != null) {
         let _json = localStorage.getItem("currentPos");
         _currentPos = JSON.parse(_json);
     }
+    if (JSON.parse(localStorage.getItem("summonerMode")) == "moving"){
+        let _moving_reminingTime = _calc_movingReminintTime();
+        if (_moving_reminingTime == 0) {
+            _currentPos = JSON.parse(localStorage.getItem("targetPos"));
+            onChain_send_currentPos(summoner, _currentPos);
+            localStorage.setItem("summonerMode", JSON.stringify("resting"));
+        }
+    }
     return _currentPos;
 }
 
-async function write_currentPos(_currentPos) {
+async function onChain_call_summonerMode(_summoner) {
+    let _summonerMode = "resting";
+    if (localStorage.getItem("summonerMode") != null) {
+        _summonerMode = JSON.parse(localStorage.getItem("summonerMode"));
+    }
+    if (_summonerMode == "moving"){
+        let _moving_reminingTime = _calc_movingReminintTime();
+        if (_moving_reminingTime == 0) {
+            _summonerMode = "resting";
+        }
+    }
+    return _summonerMode;
+}
+
+async function onChain_send_currentPos(_summoner, _currentPos) {
     localStorage.setItem("currentPos", JSON.stringify(_currentPos));
 }
 
-async function update_dynamicStatus() {
-    //currentPos
-    //summoner mode
-    //moving: targetPos
-    //moving: percentase
-    //moving: reminingTime
-    ;
+async function onChain_send_startMoving(_summoner, _targetPos) {
+    localStorage.setItem("summonerMode", JSON.stringify("moving"));    
+    localStorage.setItem("targetPos", JSON.stringify(_targetPos)); 
+    localStorage.setItem("move_startTime", JSON.stringify(Math.round(Date.now()/1000)));
 }
+
+function _calc_movingReminintTime(){
+    let _reminingTime = 0;
+    if (JSON.parse(localStorage.getItem("summonerMode")) == "moving") {
+        let _json = localStorage.getItem("move_startTime");
+        let _startTime = JSON.parse(_json);
+        let _endTime = _startTime + 60;
+        _reminingTime = _endTime - Math.round(Date.now()/1000)
+        if (_reminingTime < 0) {
+            _reminingTime = 0;
+        }
+    }
+    return _reminingTime;
+}
+
+function _calc_movingReminingPercent() {
+    let _reminingTime = _calc_movingReminintTime();
+    let _percent = _reminingTime/60;
+    _percent = Math.round(_percent*100)/100;
+    return _percent;
+}
+
+async function onChain_update_dynamicStatus() {
+    local_currentPos = await onChain_call_currentPos(summoner);
+    local_targetPos = JSON.parse(localStorage.getItem("targetPos"));
+    local_summonerMode = await onChain_call_summonerMode(summoner);
+    local_moving_reminingTime = _calc_movingReminintTime();
+    local_moving_reminingPercent = _calc_movingReminingPercent();
+    console.log(
+        "currentPos:", local_currentPos,
+        "targetPos:", local_targetPos,
+        "summonerMode:", local_summonerMode,
+        "moving_reminingTime:", local_moving_reminingTime,
+        "moving_reminingPercent", local_moving_reminingPercent,
+    );
+}
+
+function _calc_summonerMode() {
+    let _summonerMode = JSON.parse(localStorage.getItem("summonerMode"));
+    if (_summonerMode == "moving") {
+        let _moving_reminingTime = _calc_movingReminintTime();
+        if (_moving_reminingTime == 0) {
+            return "resting";
+        }
+    }
+    return _summonerMode;
+}
+
+function onChain_reset() {
+}
+
 
 
 //===Class==================================================================================
@@ -302,23 +458,47 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         _text += "[Farming]\n";
         this.windowText = scene.add.text(0, 0, _text)
             .setDepth(301).setColor("#000000").setVisible(false);
+        this.buttonMining = scene.add.sprite(0, 0, "button_mining")
+            .setScale(0.08).setOrigin(0.5).setDepth(301).setVisible(false);
+        this.buttonFarming = scene.add.sprite(0, 0, "button_farming")
+            .setScale(0.2).setOrigin(0.5).setDepth(301).setVisible(false);
     }
-
-
-
-    //### on_click
-    on_click() {
-        this.name.visible = true;
+    
+    //### adjust_window
+    adjust_window() {
+        this.name.x = this.x;
+        this.name.y = this.y - 37;
         this.window.x = this.x +30;
         this.window.y = this.y -100;
         this.windowText.x = this.window.x +5;
         this.windowText.y = this.window.y +5;
+        this.buttonMining.x = this.window.x +25;
+        this.buttonMining.y = this.window.y +75;
+    }
+    
+    //### show_window
+    show_window() {
+        this.name.visible = true;
         this.window.visible = true;
         this.windowText.visible = true;
+        this.buttonMining.visible = true;
+    }
+    
+    
+    //### hide_window
+    hide_window() {
+        this.name.visible = false;
+        this.window.visible = false;
+        this.windowText.visible = false;
+        this.buttonMining.visible = false;
+    }
+
+    //### on_click
+    on_click() {
+        this.adjust_window();
+        this.show_window();
         setTimeout( () => {
-            this.name.visible = false;
-            this.window.visible = false;
-            this.windowText.visible = false;
+            this.hide_window();
         }, 5000 );
     }
     
@@ -364,10 +544,12 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             } else {
                 this.mode = "moving";
                 this.submode = 0;
+                /*
                 if (this.hex_targetted != 0) {
                     this.mode = "moving_toHex";
                     this.submode = 0;
                 }
+                */
             }
         }
     }
@@ -398,23 +580,23 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             let _hexX = this.hex_current.x;
             if (this.x < _hexX-25 && this.moving_degree > 90 && this.moving_degree < 270) {
                 this.moving_degree += 180;
-                console.log("limitX1")
+                //console.log("limitX1")
             }else if (this.x > _hexX+25 && (this.moving_degree < 90 || this.moving_degree > 270)) {
                 this.moving_degree += 180;
-                console.log("limitX2")
+                //console.log("limitX2")
             }
             //out of area check, y
             //let _hexY = hexMatrix[this.posX][this.posY].y;
             let _hexY = this.hex_current.y;
             if (this.y > _hexY+25 && this.moving_degree > 180) {
                 this.moving_degree = 360 - this.moving_degree;
-                console.log("limitY1")
+                //console.log("limitY1")
             }else if (this.y < _hexY-25 && this.moving_degree < 180) {
                 this.moving_degree = 360 - this.moving_degree;
-                console.log("limitY2")
+                //console.log("limitY2")
             }
 
-            console.log("_hexX:", _hexX, "_hexY:", _hexY, "x:", this.x, "y:", this.y);
+            //console.log("_hexX:", _hexX, "_hexY:", _hexY, "x:", this.x, "y:", this.y);
 
             //360 over check
             this.moving_degree = this.moving_degree % 360;
@@ -433,8 +615,6 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         } else if (this.submode == 1) {
             this.x += Math.cos(this.moving_degree * (Math.PI/180)) * this.moving_speed;
             this.y -= Math.sin(this.moving_degree * (Math.PI/180)) * this.moving_speed;
-            this.name.x = this.x;
-            this.name.y = this.y - 37;
             this.moving_count -= 1;
             if (this.moving_count <= 0) {
                 this.submode += 1;
@@ -459,19 +639,30 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             }
             this.submode += 1;
         } else if (this.submode == 1) {
+            let _deltaX = this.hex_targetted.x - this.hex_current.x;
+            let _deltaY = this.hex_targetted.y - this.hex_current.y;
+            let _deltaX2 = _deltaX * (1-local_moving_reminingPercent);
+            let _deltaY2 = _deltaY * (1-local_moving_reminingPercent);
+            this.x = this.hex_current.x + _deltaX2;
+            this.y = this.hex_current.y + _deltaY2;
+            /*
             let _deltaX = this.hex_targetted.x - this.x;
             let _deltaY = this.hex_targetted.y - this.y;
             let _deltaX2 = _deltaX / (Math.abs(_deltaX) + Math.abs(_deltaY)) * 0.2;
             let _deltaY2 = _deltaY / (Math.abs(_deltaX) + Math.abs(_deltaY)) * 0.2;
             this.x += _deltaX2;
             this.y += _deltaY2;
+            */
             this.name.x = this.x;
             this.name.y = this.y -37;
             if (
+                local_moving_reminingTime == 0
+                /*
                 this.x >= this.hex_targetted.x-10 
                 && this.x <= this.hex_targetted.x+10 
                 && this.y >= this.hex_targetted.y-10 
                 && this.y <= this.hex_targetted.y+10
+                */
             ) {
                 this.submode += 1;
             }
@@ -518,24 +709,44 @@ class Main extends Phaser.Scene {
 
     //### preload
     preload() {
-        this.load.image("hex_00", "hex_00.png");
-        this.load.image("hex_01", "hex_01.png");
-        this.load.image("hex_02", "hex_02.png");
-        this.load.image("hex_03", "hex_03.png");
-        this.load.image("hex_04", "hex_04.png");
-        this.load.image("hex_05", "hex_05.png");
-        this.load.image("hex_10", "hex_10.png");
-        this.load.image("hex_98", "hex_98.png");
-        this.load.image("hex_99", "hex_99.png");
-        this.load.image("coin", "coin.png");
-        this.load.image("leaf", "leaf.png");
-        this.load.image("logo_icon", "logo_icon.png");
-        this.load.image("icon_zoomIn", "icon_home.png");
-        this.load.spritesheet("murasaki_right", "murasaki_right.png", {frameWidth: 370, frameHeight: 320});
-        this.load.spritesheet("murasaki_working_right", "murasaki_working_right.png", {frameWidth: 370, frameHeight: 320});
-        this.load.spritesheet("murasaki_sleeping", "murasaki_sleeping2.png", {frameWidth: 370, frameHeight: 320});
-        this.load.spritesheet("murasaki_happy", "murasaki_happy.png", {frameWidth: 370, frameHeight: 320});
-        this.load.spritesheet("flowers", "flowers.png", {frameWidth: 370, frameHeight: 320});
+
+        // hex
+        this.load.image("hex_00", "png/hex_00.png");
+        this.load.image("hex_01", "png/hex_01.png");
+        this.load.image("hex_02", "png/hex_02.png");
+        this.load.image("hex_03", "png/hex_03.png");
+        this.load.image("hex_04", "png/hex_04.png");
+        this.load.image("hex_05", "png/hex_05.png");
+        this.load.image("hex_10", "png/hex_10.png");
+        this.load.image("hex_11", "png/hex_11.png");
+        this.load.image("hex_98", "png/hex_98.png");
+        this.load.image("hex_99", "png/hex_99.png");
+
+        // material
+        this.load.image("coin", "png/mat_coin.png");
+        this.load.image("leaf", "png/mat_leaf.png");
+        this.load.spritesheet("flowers", "png/mat_flowers.png", {frameWidth: 370, frameHeight: 320});
+
+        // etc
+        this.load.image("logo_icon", "png/logo_icon.png");
+        this.load.image("icon_zoomIn", "png/icon_zoomIn.png");
+        this.load.image("icon_zoomOut", "png/icon_zoomOut.png");
+        this.load.image("icon_zoomReset", "png/icon_zoomReset.png");
+
+        // murasakisan
+        this.load.spritesheet("murasaki_right", "png/murasaki_right.png", {frameWidth: 370, frameHeight: 320});
+        this.load.spritesheet("murasaki_working_right", "png/murasaki_working_right.png", {frameWidth: 370, frameHeight: 320});
+        this.load.spritesheet("murasaki_sleeping", "png/murasaki_sleeping2.png", {frameWidth: 370, frameHeight: 320});
+        this.load.spritesheet("murasaki_happy", "png/murasaki_happy.png", {frameWidth: 370, frameHeight: 320});
+
+        //craft
+        this.load.image("craft_mining", "png/craft_mining.png");
+        this.load.image("craft_farming", "png/craft_farming.png");
+        this.load.image("craft_crafting", "png/craft_crafting.png");
+        
+        //button
+        this.load.image("button_mining", "png/button_mining_enable.png");
+        this.load.image("button_farming", "png/button_farming_enable.png");
     }
 
 
@@ -551,7 +762,7 @@ class Main extends Phaser.Scene {
         scene_main = this;
         
         // call current pos
-        currentPos = await get_currentPos();
+        local_currentPos = await onChain_call_currentPos(summoner);
 
         // generate hex map
         await this.load_hex(this);
@@ -593,20 +804,8 @@ class Main extends Phaser.Scene {
         // focus camera to summoner
         this.cameras.main.centerOn(murasakisan.x, murasakisan.y);
         
-        // system icon
-        /*
-        let icon_zoomIn = this.add.sprite(1155, 915-15, "icon_zoomIn")
-            .setOrigin(0.5)
-            .setScale(0.15)
-            .setDepth(500)
-            .setInteractive({useHandCursor: true})
-            .on("pointerdown", () => {
-                this.cameras.main.zoom *= 1.1;
-                if (this.cameras.main.zoom >= 3) {
-                    this.cameras.main.zoom = 3; // zoomIn limit
-                }
-            });
-        */
+        // load scene
+        this.scene.launch("System");
     }
     
 
@@ -644,13 +843,11 @@ class Main extends Phaser.Scene {
 
         // set hexagon position parameters
         
-        let _numberX = 28;
+        let _numberX = 28;  // must be even number to calc _starHex
         let _numberY = 28;
-        let _startHex = [currentPos[0]-_numberX/2, currentPos[1]-_numberY/2];
+        let _startHex = [local_currentPos[0]-_numberX/2, local_currentPos[1]-_numberY/2];
         let _hexagonWidth = game.textures.list["hex_00"].source[0].width;
         let _hexagonHeight = game.textures.list["hex_00"].source[0].height;
-        //let _hexagonWidth = 168;
-        //let _hexagonHeight = 196;
         let _startPosX = scene.sys.game.config.width/2 - _hexagonWidth*_numberX/2;
         let _startPosY = scene.sys.game.config.height/2 - _hexagonHeight*_numberY/2;
 
@@ -671,36 +868,44 @@ class Main extends Phaser.Scene {
             0: "Unknown",
             1: "Frigid",
             2: "Temperate",
+            3: "tropical",
         }
 
         // prepare hex matrix
+        hexMatrix = new Array();
         //hexMatrix = new Array(65535);
         //for (let i=0; i<=65535; i++){
         //    hexMatrix[i] = new Array(63353);
         //}
         
         // prepare hex info window
-        let _hexInfo = scene.add.graphics();
-        _hexInfo.fillStyle(0xFFF100, 0.9).fillRect(0, 0, 162, 100);
-        _hexInfo.depth = 300;
-        _hexInfo.visible = false;
-        let _hexInfoText = scene.add.text(0, 0, "").setDepth(301).setColor("#000000");
+        hexInfoWindow = scene.add.graphics();
+        hexInfoWindow.fillStyle(0xFFF100, 0.9).fillRect(0, 0, 162, 100);
+        hexInfoWindow.depth = 300;
+        hexInfoWindow.visible = false;
+        hexInfoText = scene.add.text(0, 0, "").setDepth(301).setColor("#000000");
         
         // prepare hex info button
-        let _hexInfoButton = scene.add.text(0, 0, "[Move]")
+        hexInfoButton = scene.add.text(0, 0, "[Move]")
             .setDepth(301)
             .setColor("#000000")
             .setInteractive({useHandCursor: true})
             .setVisible(false);
-        _hexInfoButton.on("pointerdown", () => {
-            murasakisan.hex_targetted = hex_selected;   //***TODO*** for onChain
-            hex_targetted = hex_selected;
-            _hexInfoButton.visible = false;
-            hex_targetted_indicator.visible = true;
-            hex_targetted_indicator.x = hex_selected.x;
-            hex_targetted_indicator.y = hex_selected.y;
-            write_currentPos([hex_targetted.posX, hex_targetted.posY]);
-            flag_moving = 1;
+        hexInfoButton.on("pointerdown", () => {
+            if (this.cameras.main.zoom >= 0.8) { // only when zoomOut
+                onChain_send_startMoving(summoner, [hex_selected.posX, hex_selected.posY]);
+                hexInfoButton.visible = false;
+                /*
+                murasakisan.hex_targetted = hex_selected;   //***TODO*** for onChain
+                hex_targetted = hex_selected;
+                _hexInfoButton.visible = false;
+                hex_targetted_indicator.visible = true;
+                hex_targetted_indicator.x = hex_selected.x;
+                hex_targetted_indicator.y = hex_selected.y;
+                onChain_send_currentPos([hex_targetted.posX, hex_targetted.posY]);
+                flag_moving = 1;
+                */
+            }
         });
         
         // generate hexagons
@@ -710,14 +915,15 @@ class Main extends Phaser.Scene {
         let _num;
         
         // for each y row
+        // to adjust mergin, +1 in _numberX and _numberY
         _num = -1;
         _countY = -1;
-        for (let iy=0; iy<_numberY; iy++) {
+        for (let iy=0; iy<_numberY+1; iy++) {
             _countY += 1;
             _countX = -1;
             
             // for each x column
-            for (let ix=0; ix<_numberX; ix++) {
+            for (let ix=0; ix<_numberX+1; ix++) {
                 _countX += 1;
                 _num += 1;
 
@@ -730,21 +936,19 @@ class Main extends Phaser.Scene {
                 let _posY = _startHex[1] + _countY;
 
                 // call hex type
-                let _type = await get_mapType(_posX, _posY);
+                let _type = await onChain_call_mapType(_posX, _posY);
                 
                 // call hex climate
-                let _climate = await get_mapClimate(_posX, _posY);
+                let _climate = await onChain_call_mapClimate(_posX, _posY);
 
                 // override, out of range
-                /*
-                let __x = _startPosX + _numberX/2 * _hexagonWidth + (_numberY/2 % 2) * _hexagonWidth/2;
-                let __y = _startPosY + _numberY/2 * _hexagonWidth - _numberY/2 * (_hexagonHeight/8 +_adjustHeight);
-                let _dist = Math.sqrt( Math.pow(__x-_x,2) + Math.pow(__y-_y,2));
-                if (_dist >= 1800) {
+                let _dist = Math.sqrt( Math.pow(_countX-_numberX/2,2) + Math.pow(_countY-_numberY/2,2));
+                if (_dist >= 14) {
+                    continue;
+                } else if (_dist >= 12) {
                     _type = 0;
                     _climate = 0;
                 }
-                */
 
                 // generate hexagon sprite
 
@@ -768,6 +972,8 @@ class Main extends Phaser.Scene {
                 // overshow biome hex
                 if (_climate == 1) {
                     scene.add.sprite(_x, _y, "hex_10").setAlpha(0.2).setDepth(101);
+                } else if (_climate == 3) {
+                    scene.add.sprite(_x, _y, "hex_11").setAlpha(0.1).setDepth(101);
                 }
                 
                 // set hex variants
@@ -788,37 +994,39 @@ class Main extends Phaser.Scene {
                 hex.setInteractive({useHandCursor: true});
 
                 // show materials
-                // call mat
-                let _li_mats = await get_materials(_posX, _posY);
-                // put mat
-                for (let _matType=1; _matType<=3; _matType++) {
-                    let _count = _li_mats[_matType];
-                    if (_count > 0) {
-                        for (let i=0; i<_count; i++) {
-                            let _x = hex.x-40+Math.random()*80;
-                            let _y = hex.y-40+Math.random()*80;
-                            let _material;
-                            // put each materials
-                            if (_matType == 1) {
-                                _material = scene.add.sprite(_x, _y, "leaf");
-                                _material.setOrigin(0.5);
-                                _material.setScale(0.1);
-                                _material.setDepth(101);
-                                hex.leaf += 1;
-                            } else if (_matType == 2) {
-                                _material = scene.add.sprite(_x, _y, "coin");
-                                _material.setOrigin(0.5);
-                                _material.setScale(0.07);
-                                _material.setDepth(101);
-                                hex.coin += 1;
-                            } else if (_matType == 3) {
-                                _material = scene.add.sprite(_x, _y, "flowers");
-                                _material.setFrame(Math.round(Math.random()*5));
-                                _material.setAngle(360*Math.random());
-                                _material.setOrigin(0.5);
-                                _material.setScale(0.15);
-                                _material.setDepth(101);
-                                hex.flower += 1;
+                if (hex.type != 0) {
+                    // call mat
+                    let _li_mats = await onChain_call_materials(_posX, _posY);
+                    // put mat
+                    for (let _matType=1; _matType<=3; _matType++) {
+                        let _count = _li_mats[_matType];
+                        if (_count > 0) {
+                            for (let i=0; i<_count; i++) {
+                                let _x = hex.x-40+Math.random()*80;
+                                let _y = hex.y-40+Math.random()*80;
+                                let _material;
+                                // put each materials
+                                if (_matType == 1) {
+                                    _material = scene.add.sprite(_x, _y, "leaf");
+                                    _material.setOrigin(0.5);
+                                    _material.setScale(0.1);
+                                    _material.setDepth(101);
+                                    hex.leaf += 1;
+                                } else if (_matType == 2) {
+                                    _material = scene.add.sprite(_x, _y, "coin");
+                                    _material.setOrigin(0.5);
+                                    _material.setScale(0.07);
+                                    _material.setDepth(101);
+                                    hex.coin += 1;
+                                } else if (_matType == 3) {
+                                    _material = scene.add.sprite(_x, _y, "flowers");
+                                    _material.setFrame(Math.round(Math.random()*5));
+                                    _material.setAngle(360*Math.random());
+                                    _material.setOrigin(0.5);
+                                    _material.setScale(0.15);
+                                    _material.setDepth(101);
+                                    hex.flower += 1;
+                                }
                             }
                         }
                     }
@@ -826,6 +1034,10 @@ class Main extends Phaser.Scene {
                 
                 // insert into hex matrix
                 //hexMatrix[_posX][_posY] = hex;
+                if (hexMatrix[_posX] == null) {
+                    hexMatrix[_posX] = new Array();
+                }
+                hexMatrix[_posX][_posY] = hex;
                 
                 // prepare pointerdown fc
                 hex.on("pointerdown", () => {
@@ -843,17 +1055,18 @@ class Main extends Phaser.Scene {
                             flag_drag = 1;
                             cameraTargetX = hex.x;
                             cameraTargetY = hex.y;
-                            console.log("start dragging:", cameraTargetX, cameraTargetY);
+                            //console.log("start dragging:", cameraTargetX, cameraTargetY);
                         }
 
                         // move hexInfo window
-                        _hexInfo.visible = true;
-                        _hexInfo.x = hex.x + 40;
-                        _hexInfo.y = hex.y + 75;
+                        // only when zoomIn
+                        hexInfoWindow.visible = true;
+                        hexInfoWindow.x = hex.x + 40;
+                        hexInfoWindow.y = hex.y + 75;
 
                         // prepare text
-                        _hexInfoText.x = _hexInfo.x+5;
-                        _hexInfoText.y = _hexInfo.y+5;
+                        hexInfoText.x = hexInfoWindow.x+5;
+                        hexInfoText.y = hexInfoWindow.y+5;
                         let _text = "";
                         _text += hex.posX + ", " + hex.posY + "\n";
                         _text += _dicClimate[hex.climate] + "\n";
@@ -869,8 +1082,8 @@ class Main extends Phaser.Scene {
                         }
                         
                         // update text
-                        _hexInfoText.visible = true;
-                        _hexInfoText.setText(_text);
+                        hexInfoText.visible = true;
+                        hexInfoText.setText(_text);
                         
                         // calc distance
                         let _dist = 
@@ -885,11 +1098,11 @@ class Main extends Phaser.Scene {
                             && hex.type != 4 
                             && _dist <= _hexagonWidth*2.1
                         ) {
-                            _hexInfoButton.x = _hexInfo.x+50;
-                            _hexInfoButton.y = _hexInfo.y+68;
-                            _hexInfoButton.visible = true;
+                            hexInfoButton.x = hexInfoWindow.x+50;
+                            hexInfoButton.y = hexInfoWindow.y+68;
+                            hexInfoButton.visible = true;
                         } else {
-                            _hexInfoButton.visible = false;
+                            hexInfoButton.visible = false;
                         }
                     }
                 });
@@ -906,7 +1119,7 @@ class Main extends Phaser.Scene {
                 });
                 
                 // check current hex
-                if (hex.posX == currentPos[0] && hex.posY == currentPos[1]) {
+                if (hex.posX == local_currentPos[0] && hex.posY == local_currentPos[1]) {
                     hex_current = hex;
                 }
             }
@@ -917,14 +1130,16 @@ class Main extends Phaser.Scene {
         hex_current_indicator = scene.add.sprite(hex_current.x, hex_current.y, "hex_99")
             .setAlpha(0.5)
             .setOrigin(0.5)
-            .setDepth(102);
+            .setDepth(102)
+            .setScale(0.95);
                 
         //prepare hex_targetted
         hex_targetted_indicator = scene.add.sprite(0, 0, "hex_98")
             .setAlpha(0.5)
             .setOrigin(0.5)
             .setDepth(102)
-            .setVisible(false);
+            .setVisible(false)
+            .setScale(0.95);
         
         // show house icon
         let _house = scene.add.sprite(hex_current.x, hex_current.y, "logo_icon")
@@ -959,7 +1174,7 @@ class Main extends Phaser.Scene {
             // detect dragging end
             if (Math.abs(_deltaX) <= 5 && Math.abs(_deltaY) <= 5) {
                 flag_drag = 0;
-                console.log("end dragging", _cameraX, _cameraY);
+                //console.log("end dragging", _cameraX, _cameraY);
             }
         }
         
@@ -990,29 +1205,101 @@ class Main extends Phaser.Scene {
             }
         }
         
-        //$$$ update
+        //$$$ onChain update
         if (turn % 200 == 0) {
-            update_dynamicStatus();
+            onChain_update_dynamicStatus();
         }
+        
+        //$$$ mode
+        if (turn % 200 == 10) {
+        
+            // moving
+            if (murasakisan.mode != "moving" && local_summonerMode == "moving"){
+                hex_targetted = hexMatrix[local_targetPos[0]][local_targetPos[1]];
+                murasakisan.hex_targetted = hex_targetted;
+                murasakisan.mode = "moving_toHex";
+                murasakisan.submode = 0;
+                hexInfoButton.visible = false;
+                hex_targetted_indicator.visible = true;
+                hex_targetted_indicator.x = hex_targetted.x;
+                hex_targetted_indicator.y = hex_targetted.y;
+                flag_moving = 1;
+            }
+        }
+        
+        //$$$ icon
+        //this.icon_zoomIn.scale
     }
 }
 
+
+//---System
+
+class System extends Phaser.Scene {
+
+    constructor() {
+        super({ key:"System", active:false });
+    }
+
+    create() {
+        // system icon
+        this.icon_zoomIn = this.add.sprite(1080, 915-15, "icon_zoomIn")
+            .setOrigin(0.5)
+            .setScale(0.02)
+            .setDepth(500)
+            .setInteractive({useHandCursor: true})
+            .on("pointerdown", () => {
+                scene_main.cameras.main.zoom *= 1.2;
+                if (scene_main.cameras.main.zoom >= 3) {
+                    scene_main.cameras.main.zoom = 3; // zoomIn limit
+                }
+            });
+        this.icon_zoomOut = this.add.sprite(1080+75, 915-15, "icon_zoomOut")
+            .setOrigin(0.5)
+            .setScale(0.02)
+            .setDepth(500)
+            .setInteractive({useHandCursor: true})
+            .on("pointerdown", () => {
+                scene_main.cameras.main.zoom *= 0.8;
+                if (scene_main.cameras.main.zoom <= 0.3) {
+                    scene_main.cameras.main.zoom = 0.3; // zoomIn limit
+                }
+            });
+        this.icon_zoomReset = this.add.sprite(1080+75+75, 915-15, "icon_zoomReset")
+            .setOrigin(0.5)
+            .setScale(0.02)
+            .setDepth(500)
+            .setInteractive({useHandCursor: true})
+            .on("pointerdown", () => {
+                scene_main.cameras.main.zoom = 1;
+                scene_main.cameras.main.centerOn(murasakisan.x, murasakisan.y);
+            });
+    }
+    update() {
+    }
+}
 
 
 //===Phaser3==================================================================================
 
 
 var config = {
-    type: Phaser.AUTO,
-    parent: 'phaser-example',
+    //type: Phaser.AUTO,
+    //parent: 'phaser-example',
+    type: Phaser.CANVAS,
+    parent: 'canvas',
+    //backgroundColor: "E3E3E3",
     backgroundColor: "E3E3E3",
-    width: 1280,
-    height: 960,
     scale: {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH,
+        width: 1280,
+        height: 960,
     },
-    scene: Main,
+    scene: [
+        Main,
+        System,
+    ],
     fps: {
         target: 60,
     },
