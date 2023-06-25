@@ -83,6 +83,55 @@ contract ERC721 is IERC721 {
 
 /*
 
+    初期スポーン地点の考察
+        パーリンノイズで土地のレア度を割り当てて、
+            特殊な建造物はレア度の高い土地にしか出現しないようにする。
+        初期スポーン地点は乱数で選択して、
+            ノイズ値が十分に低い（＝レア度の高い土地まで十分に距離のある）
+            土地を選択する。
+        メインhex座標とは別に、高次元のスポーンhex座標を別に用意する。
+            スポーンはスポーンhex座標を中心から埋めていき、
+            スポーンhexに応じたメインhex座標からランダムで選択する。
+            埋まったスポーンhex座標には別のプレイヤーはスポーンできない。
+            1つのスポーンhex座標には、例えば64*64程度のメインhexを割り当てる。
+        
+
+    プレイのラフな段階
+        拠点の周辺で資源収集
+        拠点の周辺で建造物を建てて地形改善
+        資源に余裕ができてきたら、遠方のより効率的なhexからも資源収集
+        旅の準備を整えて、遠方へ出発、道の地形探索
+        引っ越しの準備を整えて、遠方へ移住、
+            余剰資源により効率的な立ち上げ
+    
+    
+    旅のシステム
+        旅のタイミング
+            JoM開始直後はHoM近傍の地形改善を行い、経済基盤を整える
+            どこかで余剰資源が生まれるので、道の地形探索のために旅に出れるようになる。
+        旅の目的
+            HoM周辺以外の外の地形の把握
+            珍しい建設物の発見
+            他のプレイヤーとの接触
+            より肥沃な地形の発見
+            プレイ目的にマッチした地形の発見
+                コイン多め、リーフ多め、温帯・冷帯、など。
+                みなが一つの最適解に収束するのではなく、
+                いくつかの選択肢が成立するように設計したい。
+        旅の条件
+            最初はHoMからあまり遠くへ離れられないペナルティが存在する
+                移動にコストがかかる、余剰食料がない、など。
+            余剰資源により長距離移動に耐えれること
+            長距離移動用の装備が整うこと
+                移動コストの軽減装備のクラフト
+                即時帰還アイテムの確保
+                    使用には例えば24時間の事前準備が必要だが、
+                    起動すればどこからでもHoMに帰還可能、など。
+        旅のペナルティ
+            移動中はむらさきさんが資源収集に従事できない
+            食料が底を尽きるなど、資源がなくなったときのペナルティをどうするか。
+
+
     メインコンセプトはなにか
         リアルタイム多人数参加のmap開拓ゲーム
         1st seasonのNFTを使用してさらにゲームを続ける
@@ -119,15 +168,30 @@ contract ERC721 is IERC721 {
             持っていると恒常的に全体にブーストが掛かる。
 
 
-    選択可能な行動
+    プレイヤー（＝むらさきさん）が選択可能な行動
         move
         mining
         farming
-        crafting
+        building
         staking
-            petをhexにstakingすることでmining/farmingを委託できる
+            petをhexにstakingすることでmining/farmingを委託する
             fluffyをhexにstakingすることでhexの効率が上昇する
         migrating（引っ越し）
+            HoMを別のhexに移動させる
+            もしくはHoMをたたんで移動可能にして持ってゆく
+            通常よりコストを高く設定する
+            また、全petの集合が必要など、資源的に不利にする
+            migration中は資源を全く得られず、
+                事前準備が必要なようにバランス調整する
+
+    食料資源について
+        HoMではプレイヤーが無制限に用意できた
+        JoMでは、マップからの回収が必要なルールとするか。
+        HoMは最低限＋aの食料を生産する
+            HoMがあれば、むらさきさんとpet 3匹が飢えることはない。
+        より効率的にmining/farming/craftingしようとすると、追加で食料が必要になる。
+            食料が0になるとworkingが中断される
+        食料＝おはな、とする。
 
 
     土地の種類と属性
@@ -140,6 +204,24 @@ contract ERC721 is IERC721 {
             熱帯, +情熱, passion
             温帯, +温厚, kindness
             冷帯, +冷静, calmness
+    
+    
+    建造物
+        ルールなど
+            HoMの影響範囲内しか建設できない
+        鉱山
+            mountainのhexに建設可能
+            そのhexのminingの効率上昇
+        農場
+            forrestのhexに建設可能
+            そのhexのfarming効率上昇
+        テント
+    
+    
+    HoMの成長
+        HoM周辺のhexで活動するとHoMのレベルが上昇して文化圏が広がる。
+            expの加算量、加算タイミング、必要expなどが明確に説明できるように。
+        HoMの文化圏内の地形しか建造物を建てることができない。
 
 
     ゲームシステム案
@@ -147,14 +229,6 @@ contract ERC721 is IERC721 {
             鉱山・農場にfluffyを配置する
             3匹のペットは本体の50%程度の出力でmining/farming可能
             crafting（開発）はむらさきさんしかできない？
-        hexの特性
-            資源の埋蔵量
-            土地の種類
-            気候（温暖・寒冷）
-        建造物
-            鉱山
-            農場
-            テント
         育成
             feeding：
                 常に可能
@@ -162,10 +236,6 @@ contract ERC721 is IERC721 {
             grooming: 
                 resting時に可能
                 拠点で+100% exp, 準拠点（テント）で+50%など効率低下
-        行動
-            mining
-            farming
-            crafting（建設）
         
     
     UIの実装
@@ -221,6 +291,7 @@ contract ERC721 is IERC721 {
 
 //global
 let scene_main;
+let scene_system;
 let turn = 0;
 let cameraTargetX = 0;
 let cameraTargetY = 0;
@@ -240,6 +311,8 @@ let local_targetPos;
 let local_summonerMode;
 let local_moving_reminingTime;
 let local_moving_reminingPercent;
+let local_coin = 0;
+let local_leaf = 0;
 
 //flag
 let flag_drag = 0;
@@ -392,12 +465,16 @@ async function onChain_update_dynamicStatus() {
     local_summonerMode = await onChain_call_summonerMode(summoner);
     local_moving_reminingTime = _calc_movingReminintTime();
     local_moving_reminingPercent = _calc_movingReminingPercent();
+    local_coin = JSON.parse(localStorage.getItem("coin"));
+    local_leaf = JSON.parse(localStorage.getItem("leaf"));
     console.log(
         "currentPos:", local_currentPos,
         "targetPos:", local_targetPos,
         "summonerMode:", local_summonerMode,
         "moving_reminingTime:", local_moving_reminingTime,
         "moving_reminingPercent", local_moving_reminingPercent,
+        "coin:", local_coin,
+        "leaf:", local_leaf,
     );
 }
 
@@ -413,6 +490,74 @@ function _calc_summonerMode() {
 }
 
 function onChain_reset() {
+}
+
+
+async function onChain_send_startMining(_summoner) {
+    local_currentPos = await onChain_call_currentPos(summoner);
+    _write_summonerMode(_summoner, "mining");
+    let _now = Math.round(Date.now()/1000);
+    localStorage.setItem("mining_startTime", JSON.stringify(_now));
+}
+
+async function onChain_call_calcMining(_summoner) {
+    let _mining_startTime = JSON.parse(localStorage.getItem("mining_startTime"));
+    let _now = Math.round(Date.now()/1000);
+    let _delta = _now - _mining_startTime;
+    let _calc = _delta/86400 * 3000;
+    let _boostRate = 1.00;
+    _calc *= _boostRate;
+    _calc = Math.round(_calc);
+    return _calc;
+}
+
+function _write_summonerMode(_summoner, mode){
+    localStorage.setItem("summonerMode", JSON.stringify(mode));
+}
+
+async function onChain_send_stopMining(_summoner) {
+    local_currentPos = await onChain_call_currentPos(summoner);
+    _write_summonerMode(_summoner, "resting");
+    let _calcMining = await onChain_call_calcMining(_summoner);
+    let _coin = 0;
+    if (JSON.parse(localStorage.getItem("coin")) != null) {
+        _coin = JSON.parse(localStorage.getItem("coin"));
+    }
+    localStorage.setItem("coin", JSON.stringify(_coin + _calcMining));
+}
+
+
+async function onChain_send_startFarming(_summoner) {
+    local_currentPos = await onChain_call_currentPos(summoner);
+    _write_summonerMode(_summoner, "farming");
+    let _now = Math.round(Date.now()/1000);
+    localStorage.setItem("farming_startTime", JSON.stringify(_now));
+}
+
+async function onChain_call_calcFarming(_summoner) {
+    let _farming_startTime = JSON.parse(localStorage.getItem("farming_startTime"));
+    let _now = Math.round(Date.now()/1000);
+    let _delta = _now - _farming_startTime;
+    let _calc = _delta/86400 * 3000;
+    let _boostRate = 1.00;
+    let _mapType = onChain_call_mapType(local_currentPos[0], local_currentPos[1]);
+    if (_mapType == 1) {
+        _boostRate += 0.5;
+    }
+    _calc *= _boostRate;
+    _calc = Math.round(_calc);
+    return _calc;
+}
+
+async function onChain_send_stopFarming(_summoner) {
+    local_currentPos = await onChain_call_currentPos(summoner);
+    _write_summonerMode(_summoner, "resting");
+    let _calcFarming = await onChain_call_calcFarming(_summoner);
+    let _leaf = 0;
+    if (JSON.parse(localStorage.getItem("leaf")) != null) {
+        _leaf = JSON.parse(localStorage.getItem("leaf"));
+    }
+    localStorage.setItem("leaf", JSON.stringify(_leaf + _calcFarming));
 }
 
 
@@ -459,9 +604,40 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         this.windowText = scene.add.text(0, 0, _text)
             .setDepth(301).setColor("#000000").setVisible(false);
         this.buttonMining = scene.add.sprite(0, 0, "button_mining")
-            .setScale(0.08).setOrigin(0.5).setDepth(301).setVisible(false);
+            .setScale(0.08).setOrigin(0.5).setDepth(301).setVisible(false)
+            .setInteractive({useHandCursor: true})
+            .on("pointerdown", () => {
+                onChain_send_startMining(summoner);
+                this.hide_window();
+            });
+        this.buttonMining_stop = scene.add.sprite(0, 0, "button_mining_stop")
+            .setScale(0.08).setOrigin(0.5).setDepth(301).setVisible(false)
+            .setInteractive({useHandCursor: true})
+            .on("pointerdown", () => {
+                onChain_send_stopMining(summoner);
+                this.hide_window();
+            });
         this.buttonFarming = scene.add.sprite(0, 0, "button_farming")
-            .setScale(0.2).setOrigin(0.5).setDepth(301).setVisible(false);
+            .setScale(0.08).setOrigin(0.5).setDepth(301).setVisible(false)
+            .setInteractive({useHandCursor: true})
+            .on("pointerdown", () => {
+                onChain_send_startFarming(summoner);
+                this.hide_window();
+            });
+        this.buttonFarming_stop = scene.add.sprite(0, 0, "button_farming_stop")
+            .setScale(0.08).setOrigin(0.5).setDepth(301).setVisible(false)
+            .setInteractive({useHandCursor: true})
+            .on("pointerdown", () => {
+                onChain_send_stopFarming(summoner);
+                this.hide_window();
+            });
+        this.buttonCrafting = scene.add.sprite(0, 0, "button_crafting")
+            .setScale(0.08).setOrigin(0.5).setDepth(301).setVisible(false)
+            .setInteractive({useHandCursor: true})
+            .on("pointerdown", () => {
+                onChain_send_startCrafting(summoner);
+                this.hide_window();
+            });
     }
     
     //### adjust_window
@@ -474,6 +650,14 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         this.windowText.y = this.window.y +5;
         this.buttonMining.x = this.window.x +25;
         this.buttonMining.y = this.window.y +75;
+        this.buttonMining_stop.x = this.window.x +25;
+        this.buttonMining_stop.y = this.window.y +75;
+        this.buttonFarming.x = this.window.x +25+50;
+        this.buttonFarming.y = this.window.y +75;
+        this.buttonFarming_stop.x = this.window.x +25+50;
+        this.buttonFarming_stop.y = this.window.y +75;
+        this.buttonCrafting.x = this.window.x +25+50+50;
+        this.buttonCrafting.y = this.window.y +75;
     }
     
     //### show_window
@@ -481,7 +665,15 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         this.name.visible = true;
         this.window.visible = true;
         this.windowText.visible = true;
-        this.buttonMining.visible = true;
+        if (this.mode == "mining") {
+            this.buttonMining_stop.visible = true;
+        } else if (this.mode == "farming") {
+            this.buttonFarming_stop.visible = true;
+        } else {
+            this.buttonMining.visible = true;
+            this.buttonFarming.visible = true;
+            this.buttonCrafting.visible = true;
+        }
     }
     
     
@@ -491,6 +683,10 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         this.window.visible = false;
         this.windowText.visible = false;
         this.buttonMining.visible = false;
+        this.buttonMining_stop.visible = false;
+        this.buttonFarming.visible = false;
+        this.buttonFarming_stop.visible = false;
+        this.buttonCrafting.visible = false;
     }
 
     //### on_click
@@ -679,6 +875,28 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         }
     }
     
+    //### mining
+    mining() {
+        if (this.submode == 0) {
+            this.anims.play("murasaki_mining", true);
+            this.dist = "left"
+            this.flipX = false;
+            this.submode += 1;
+        } else if (this.submode == 1) {
+        }
+    }
+
+    //### farming
+    farming() {
+        if (this.submode == 0) {
+            this.anims.play("murasaki_farming", true);
+            this.dist = "left"
+            this.flipX = false;
+            this.submode += 1;
+        } else if (this.submode == 1) {
+        }
+    }
+    
     //### update
     update() {
         this.count += 1;
@@ -687,6 +905,8 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         else if (this.mode == "moving_toHex") {this.moving_toHex();}
         else if (this.mode == "sleeping") {this.sleeping();}
         else if (this.mode == "happy") {this.happy();}
+        else if (this.mode == "mining") {this.mining();}
+        else if (this.mode == "farming") {this.farming();}
     }
 }
 
@@ -738,6 +958,8 @@ class Main extends Phaser.Scene {
         this.load.spritesheet("murasaki_working_right", "png/murasaki_working_right.png", {frameWidth: 370, frameHeight: 320});
         this.load.spritesheet("murasaki_sleeping", "png/murasaki_sleeping2.png", {frameWidth: 370, frameHeight: 320});
         this.load.spritesheet("murasaki_happy", "png/murasaki_happy.png", {frameWidth: 370, frameHeight: 320});
+        this.load.spritesheet("murasaki_mining", "png/murasaki_mining.png", {frameWidth: 370, frameHeight: 320});
+        this.load.spritesheet("murasaki_farming", "png/murasaki_farming.png", {frameWidth: 370, frameHeight: 320});
 
         //craft
         this.load.image("craft_mining", "png/craft_mining.png");
@@ -746,7 +968,10 @@ class Main extends Phaser.Scene {
         
         //button
         this.load.image("button_mining", "png/button_mining_enable.png");
+        this.load.image("button_mining_stop", "png/button_mining_pointerover_stop.png");
         this.load.image("button_farming", "png/button_farming_enable.png");
+        this.load.image("button_farming_stop", "png/button_farming_pointerover_stop.png");
+        this.load.image("button_crafting", "png/button_crafting_enable.png");
     }
 
 
@@ -832,6 +1057,18 @@ class Main extends Phaser.Scene {
         scene.anims.create({
             key: "murasaki_happy",
             frames: scene.anims.generateFrameNumbers("murasaki_happy", {frames:[0,0,1,1]}),
+            frameRate: 2,
+            repeat: -1
+        });
+        scene.anims.create({
+            key: "murasaki_mining",
+            frames: scene.anims.generateFrameNumbers("murasaki_mining", {frames:[0,0,1,1]}),
+            frameRate: 2,
+            repeat: -1
+        });
+        scene.anims.create({
+            key: "murasaki_farming",
+            frames: scene.anims.generateFrameNumbers("murasaki_farming", {frames:[0,0,1,1]}),
             frameRate: 2,
             repeat: -1
         });
@@ -1225,6 +1462,24 @@ class Main extends Phaser.Scene {
                 hex_targetted_indicator.y = hex_targetted.y;
                 flag_moving = 1;
             }
+
+            // mining
+            if (murasakisan.mode != "mining" && local_summonerMode == "mining"){
+                murasakisan.mode = "mining";
+                murasakisan.submode = 0;
+            }
+
+            // farming
+            if (murasakisan.mode != "farming" && local_summonerMode == "farming"){
+                murasakisan.mode = "farming";
+                murasakisan.submode = 0;
+            }
+            
+            // resting
+            if (murasakisan.mode != "resting" && local_summonerMode == "resting"){
+                murasakisan.mode = "resting";
+                murasakisan.submode = 0;
+            }
         }
         
         //$$$ icon
@@ -1242,6 +1497,19 @@ class System extends Phaser.Scene {
     }
 
     create() {
+        
+        //info
+        this.icon_coin = this.add.sprite(668, 25, "coin")
+            .setScale(0.07)
+            .setDepth(500);
+        this.text_coin = this.add.text(685, 15, "")
+            .setColor("#000000");
+        this.icon_leaf = this.add.sprite(815, 25, "leaf")
+            .setScale(0.07)
+            .setDepth(500);
+        this.text_leaf = this.add.text(830, 15, "")
+            .setColor("#000000");
+        
         // system icon
         this.icon_zoomIn = this.add.sprite(1080, 915-15, "icon_zoomIn")
             .setOrigin(0.5)
@@ -1274,8 +1542,14 @@ class System extends Phaser.Scene {
                 scene_main.cameras.main.zoom = 1;
                 scene_main.cameras.main.centerOn(murasakisan.x, murasakisan.y);
             });
+        
+        scene_system = this;
     }
     update() {
+        if (turn % 200 == 100) {
+            this.text_coin.setText(local_coin);
+            this.text_leaf.setText(local_leaf);
+        }
     }
 }
 

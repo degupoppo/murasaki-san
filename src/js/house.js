@@ -93,7 +93,7 @@ contract ERC721 is IERC721 {
             4時間で固定にするか
             出発時に1, 2, 4時間を選択し、長いほうが効率よくするか
             1時間以上経過でいつでも帰宅可能で、4時間経つと寝てしまうとするか。
-        片方ではmetとなっているのに、相手ではmetにならないバグの修正
+     ok 片方ではmetとなっているのに、相手ではmetにならないバグの修正
     
 
     Practiceのテストプレイ
@@ -103,6 +103,7 @@ contract ERC721 is IERC721 {
 
 
     修正案
+        rugのインジケーター表示させるとボタンが押せないバグの修正
         夜の演出改善
             UFOや土星などを画面上部に表示させる
             上からゆっくり降りてくる？
@@ -247,6 +248,60 @@ contract ERC721 is IERC721 {
             upgrade用色違い
             voting用色違い
             convert用色違い
+
+
+    構想：むらさきさんシリーズの構成案
+        HoM: House of Murasaki-san
+            生家でむらさきさんを育てる
+            安全で、すべての選択にはほぼリスクがなく、リターンは基本的にプラスになる。
+        JoM: Journey of Murasaki-san
+            むらさきさんと旅に出て外の世界を知る
+            HoMより高効率で資源を収集可能となる。
+            DoMに必要なダンジョンなどの建造物を探索する。
+            HoMでは時間が中心資源だったが、
+                JoMではcoin/leafなどの物質資源のウェイトが大きくなる
+                つまり、まめにケアしてリターンを得るHoMに比べて、
+                JoMは効率を計算する必要が出てくる。
+            他の人と出会う。
+                他の人との出会いは競争ではなくメリットとなるように。
+                かつ、メリットが強すぎると談合するので、一期一会程度のメリットに。
+                基本的には「一人旅」にインセンティブを向かせる。
+                一方で、知人同士で協力プレイもある程度可能にしたほうが面白いか。
+                特定の誰かと狙って出会えるシステムも必要になる。
+        DoM: Dungeon of Murasaki-san
+            生涯の大仕事としてむらさきさんが何かを成し遂げる物語
+            育成とは異なり、ある程度の困難と痛みが伴う。
+                育成では極力排除してきたが、選択によって結果がマイナスや後退にもなり得る。
+                そのリスクの見返りとして、「達成感」に重きを置く設計にしたい。
+            ハクスラ、自動生成、ボスなどのメリハリ、かつ十分な深度、を達成する。
+            一方で、例えば1階層の突破に3-5日必要などの進行速度にする。
+                仮に、2年間（730日）で100Fに到達するとすると、1階層は7日間。
+                実際は帰還や敗北などのtry & errorが必要なので、
+                    単純な計算とはならないだろう。
+        LoM: Legacy of Murasaki-san
+            輪廻転生。子孫へと経験と遺産が継承される。
+            名称は要検討。ポジティブな名詞にしたい。
+                Legacy（遺産・継承）はあくまで結果であるとすると、
+                過程を表す単語としてはTale of Murasaki-sanなども良いか。
+                本を書く？
+            子孫は親の遺産をすべて引き継ぎ、パラメータもある程度引き継ぎ、
+                最初から全シリーズを制限なくアクセス可能となる。
+            つまり、最初から旅に出て一発逆転を狙っても良いし、安全な家にこもっても良いし、
+                旅先のダンジョンにいきなり潜っても良い。
+                また、条件を満たせば好きなタイミングで子孫にバトンタッチも可能。
+            「別れ」をポジティブに表現したい
+                寿命が来て死んでお墓をつくる、よりは
+                例えば至福の地アマンなど、いつでも会える天国より近い天国、
+                    のような場所に旅立つUXにしたいところ。
+            形見の設定
+                特別なアクセサリーを付けたぬいちゃんで良いか。
+                expブーストは旅立ったときのスコアを受け継ぐ。
+            ゲーム性の設計
+                終末への準備に対して、どのようにゲーム性をもたせるか。
+                終末準備に2年も必要だと間延びするので、もう少し短いスパンで良いか。
+                もしくは、終末の到来はあくまで最終的な結果であり、
+                    その過程を2年間「楽しく（重要！）」見守れる設計を考える。
+                寂しさよりは、楽しんで進められるストーリー性を考える。
 
 
     構想：SNSへの親和性を上げる
@@ -13002,7 +13057,17 @@ function preload(scene) {
 
     //logo
     //scene.load.spritesheet("logolist", "src/icon/logolist.png", {frameWidth: 370, frameHeight: 320});
-    let logo = scene.add.image(640, 350, "logolist").setScale(0.3);
+    let _rnd = Math.random() * 100;
+    let logo;
+    if (_rnd <= 50) {
+        logo = scene.add.image(640, 350, "logolist").setScale(0.3);
+    } else if (_rnd <= 67) {
+        logo = scene.add.image(640, 350, "logolist2").setScale(0.3);
+    } else if (_rnd <= 84) {
+        logo = scene.add.image(640, 350, "logolist3").setScale(0.3);
+    } else {
+        logo = scene.add.image(640, 350, "logolist4").setScale(0.3);
+    }
 
     let progressBar = scene.add.graphics();
     let progressBox = scene.add.graphics();
@@ -19896,6 +19961,9 @@ class FirstCheck extends Phaser.Scene {
         this.load.image("icon_wrong", "src/png/icon_wrong.png");
         //this.load.image("logo", "src/png/logo.png");
         this.load.spritesheet("logolist", "src/icon/logolist.png", {frameWidth: 370, frameHeight: 320});
+        this.load.spritesheet("logolist2", "src/icon/logolist2.png", {frameWidth: 370, frameHeight: 320});
+        this.load.spritesheet("logolist3", "src/icon/logolist3.png", {frameWidth: 370, frameHeight: 320});
+        this.load.spritesheet("logolist4", "src/icon/logolist4.png", {frameWidth: 370, frameHeight: 320});
     }
     
     create(){
