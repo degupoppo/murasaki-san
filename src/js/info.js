@@ -171,9 +171,15 @@ async function _show_onChain_parameters() {
         _target = document.getElementById("info_total_item_minted");
         _target.innerHTML = _text + " NFTs";
         //price
-        _text = await getPrice();
+        let _price = await getPrice();
+        _text = _price + " $ASTR";
         _target = document.getElementById("info_price");
-        _target.innerHTML = _text + " $ASTR";
+        _target.innerHTML = _text;
+        //inflation
+        let _infle = Math.round(_price/500 * 100 * 100)/100 -100;
+        _text = "+" + _infle + "%";
+        _target = document.getElementById("info_inflation");
+        _target.innerHTML = _text;        
         //festival block
         _text = await contract_ff.methods.next_festival_block().call();
         _target = document.getElementById("info_festivalBlock");
@@ -1034,6 +1040,7 @@ async function getMarketInfo() {
     //_currentBuybackPrice = Math.floor( Number(_currentBuybackPrice) / (10**18) * 100 )/100;
     //_currentBuybackPrice = _currentBuybackPrice.toFixed(2);
     let _currentBuybackPrice = await getBuybackPrice(_itemType);
+    _currentBuybackPrice = _currentBuybackPrice.toFixed(2);
     itemType.innerHTML = _itemType;    
     numberOfMint.innerHTML = _numberOfMint;    
     numberOfTrade.innerHTML = _numberOfTrade;    

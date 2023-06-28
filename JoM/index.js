@@ -83,9 +83,270 @@ contract ERC721 is IERC721 {
 
 /*
 
+//### 1st
+
+
+    マップ上の移動物体
+        案：
+            行商人
+            にゅいにゅいさん
+            ないないさん
+        近くのプレイヤーの特定の行動でmove()して座標を移動し、
+            プレイヤーと重なると特定のイベントやボーナスが発生する
+        これらの機能を有する普遍的なコントラクトフレームワークを先に考えること。
+
+
+    現在のリソース状況を表示する
+        現在量　＝　直近リソース　＋　ワーキング中claim前　ー　前回からの消費分
+        リソース量の判定は上記の現在量を参照する
+        つまり、flower残量を参照する処理は、現在量が0になっていれば処理を変える。
+        上記ルールが適応されるのはflowerだけでよいだろうか。
+        coin/leafが継続的に支払われてゆく状況はあるだろうか。
+        食料＝flowerはリアルタイムで現在量を算出し、
+            基準値を下回ったら即座にペナルティを発生させる。
+        他の資源は能動的に前払いで消費し、
+            受け取るときも能動的にclaimで受け取る。
+            リアルタイムで現在量を算出する必要はないか。
+
+
+    行商人
+        マップをランダムでゆっくり移動する行商人の実装を考えてみる
+        ランダムウォークするx,y座標をトランザクション無しで実装可能だろうか。
+        summonerを引数で渡すと、最も近い行商人がいるhexのx,y座標を返す関数。
+            → 実装困難
+            やはり現在の座標を保持させて、何かしらの行動に応じてmove()させるか。
+            プレイヤーがなにかの行動をすると近くの行商人が移動する。
+        役割
+            行商人からしか買えないなにかがある。
+            もしくは各行商人はプレイヤー間を移動していて、
+                前のプレイヤーが売却したものを購入できる可能性がある。
+            行商人はmove()で直近のプレイヤーを目指す？
+    
+
+    アクション
+        むらさきさん
+            gardening
+            mining
+            farming
+            crafting
+            upgrading
+            moving
+            migration
+            flower plucking
+                埋蔵量を減少させて収集する
+            gardening
+                花園から収集する
+        ペット
+            gardening
+            mining
+            farming
+            ペットは移動しなくても良い。
+                文化圏内を適当に歩き回って待機している
+                stakingの命令を受けたら即座に移動してワークを始める
+                演出としては移動を表示するが、実際は即座に適応される。
+        hexタイル
+            staking
+        システム
+            claim all
+
+
+    建造物
+        炭鉱
+        畑
+        花壇
+        QuarryPlus
+        農場
+        花園
+        テント
+        
+    
+    文化圏
+        HoMから四方に広がる属性
+        いわゆる土地の所有に近い
+        テントを建設することで飛び石地にも展開可能
+            ただしテントは範囲が小さく効率が悪く、最大成長段階も小さい
+            隣接して建設する利用方法か
+        文化圏内のhexにのみfluffyをstaking可能
+            petもworkingできるのは文化圏内のhexのみ
+            ただしpetにmovingは必要ない
+        むらさきさんは文化圏内は移動コストが低い
+            文化圏外は時間がかかる
+        文化圏内の建造物は所有者のみが使用可能
+        HoMをupgradeすることで文化圏が広がる
+        文化圏外にも建造物を建設可能だが所有権は生じない。
+
+
+    on-chainの利用
+        HoMの資産の利用
+            wallet内のNFT資産がJoMにそのまま使える
+        NFT/SBTの利用
+            何をNFTとしてトレード可能とするか。
+            建造物はhexに紐付けられているため、walletには入らない。
+            特定の条件で取得する珍しいお花、はNFTとするか。
+            また、継続してfluffyはNFTとして発見する。
+                fluffyはhexにstakingするとboostされる。
+                fluffyの取得場所がHoMだけだと面白くないだろう。
+    
+
+    食料ジレンマとマネジメント
+        上位のHoMやペットの維持には単位時間あたりの食料消費が増加する
+        また、ペットをワークさせていると食料消費量が増加する
+        食料が０になるとワーク不可になる。
+        食料（＝おはな）を収集するfloweringは誰でもいつでも実行可能
+        flowerは生えているのを収集する以外にも、
+            自分でガーデニングして安定供給させることが必要になる。
+        品種改良によってより効率的なflowerを開発することも可能にしたい
+
+
+    ゲーム進行概要
+        序盤
+            むらさきさん本体がHoMタイルもしくはその周辺でmining, farmingする
+            マップに点在するflowerを消費しながら食料を確保する
+            HoM周辺の山や森を地形改善して効率増加させる
+            資源を支払ってHoMを改築する
+            HoM改築により3匹のペットを解禁することが短期目標
+        中盤
+            ペットをワークさせてより効率的にmining, farmingする
+            HoMをさらに改築
+            パッシブインカム用の建造物の建設・改築
+            ガーデニングにより食料を安定供給する
+            むらさきさん本体はmining/famingせずに、craftingに専念できる状態が短期目標
+        終盤
+            余剰リソースが十分蓄積したら、準備を整えて旅に出発することができる。
+            事前に、ペットやむらさきさんを帰還石を持たせてマップ開拓に送り出すことも可能。
+            引っ越しの準備には時間とリソースが必要で、気軽に準備・展開を繰り返せない。
+            また、地形改善はすべて引っ越し不可。
+            移動には継続的にリソース消費が伴うため、十分な蓄えがなければ遠くには移動できない。
+                テントを張って休息し、補給することは可能とする。
+                flowerが不足してきたらお花畑でテントを張り、みんなでガーデニングすることになる。
+                リソース切れのときのペナルティはどうするか。
+            新天地では改築済みHoMを展開し、ある程度の強くてニューゲームが可能となる。
+            プレイヤー同士が詰まってきたら、外周へ片道切符で転移する転移石も使用可能。
+
+
+    目指す地点
+        ワーカープレイスメント
+            ワーカーをプレイス先に複数の選択肢があること。
+            ワーカーをプレイスする場所とタイミングによって効果が異なること。
+            プレイスしたい場所にすべてプレイスはできない、常にかつかつのバランスであること。
+            発展を実感できること。
+        リソースマネジメント
+            リソースの消費先に複数の選択肢があること
+            選択肢をすべて満たすことは常に不可能なバランスであること
+                やりたいことは多いのに、常にカツカツ、というバランス。
+            リソースの取得タイミングと優先度をプレイヤーが選択できること。
+            リソースの種類が十分多いこと。
+                また、リソースの目的が競合しないこと。
+            限られたリソースを効果的に使わねばならない
+            すべてのアクションを同時に実行することはできない
+            その都度優先順位を決めてアクションを選択する必要があり、ここが面白い。
+        共通点のエッセンス
+            選択と制約：限られたリソースを多くの選択肢の中から選んで投資する。
+            戦略と計画：将来の方向性に対して戦略を立て、進行を見据えて行動する必要がある。
+            効率性：「効果的」に「適切」にリソースを消費する必要がある。また、それを実感できる。
+        相違点：
+            ワーカーの数に制約を設けるのか、
+            リソースの習得量に制約を設けるのか。
+            つまり、「カツカツ」感をワーカー数かリソース量のどちらで演出するのか。
+                どちらもは可能だろうか。
+                焦点をどちらか一方に絞ったほうが設計しやすいだろうか。
+        エッセンス要約：
+            ・限られたリソース
+            ・取捨選別を迫る選択肢
+                HoMのように段階的に高いものに手が届く、というよりは、取捨選別？
+                結局はすべて選択できるが、どの順番で選択するか、に戦略性を持たせても良いか。
+            ・拡大を実感できること
+        リプレイ性
+            なんらかの理由で新天地へ引っ越ししたくなる動機づけを考える
+                資源の枯渇
+                より良い立地の発見
+            新天地では、前の土地よりもっとうまく拡張できるはず、と思わせる。
+
+        
+    資源の収集方法の深慮
+        Claim制
+            ほっといても自動で加算されるUIはコントラクトだと難しい。
+            よって、現在の取得予想量を表示し、claimボタンで請求するUIにする
+        受動的インカムの有無
+            ワーカーをworkingさせる以外にも、
+                例えばマップに設置しまくればワーカー無しでインカムを発生させる設備はどうか
+                街コロの建造物のようなイメージ。
+            設置の数や方法によってインカム量が増加する。
+                果樹園：+10/day +果樹園総数*10, など。
+                監視小屋：果樹園+10%, など？
+            全設備のrewardsはestimated rewardsとして表示し、claimで一括取得する。
+            最初はむらさきさん自らworkingが必要だが、
+                どこかの分岐点で設備出力のほうが大きくなる。
+            つまり、むらさきさんのworkingをブーストさせる設備より、
+                受動的インカムをブーストさせる設備のほうが中長期的には伸びしろが大きい。
+            序盤は能動的working, 中盤以降は受動的インカムが良いか。
+            受動的インカムが十分に確保できたら、旅の準備が整う。
+                もしくは、基本的な仕事以外の高度労働に従事する余裕が生まれる。
+    
+
+    実装の中心アイデア
+        hexの設計が実装の肝
+            本作においては、HoMのむらさきさんコントラのように、
+                多数の動的・静的パラメータを有する中心単位はhexとなる。
+                座標、タイプ、バイオームなどの静的パラメータと、
+                埋蔵量、アクティブワーカー、所有者？などの動的パラメータを用意する。
+            hexには様々なパラメータを設定する
+                かつ、あとから拡張できるようにする
+            hex情報をcallするコントラはreplacableか要素をaddableにしたい。
+        hexの情報
+            パーリンノイズ
+                タイプ決定用
+                バイオーム決定用
+                レアリティ決定用
+            x, y座標
+            id
+            土地タイプ
+                高山、山、森、平原、水、海
+            土地バイオーム
+                熱帯、温帯、冷帯
+            coin, leaf, flowerの埋蔵量
+                mining/farmingなどによって徐々に減ってゆく
+            建造物の有無
+                拠点、炭鉱、農場、工房、テント
+                移動補助：街道・道路・鉄道？
+            ステーカーの有無
+                pet 3種
+                fluffy
+            特殊建造物の有無
+                ダンジョン、森の洋館、など
+                あとから新しい建造物を追加できるように
+            所有者はどうするか。
+                一度でも訪れたことがあるかどうかの訪問者、とするか？
+                訪問の有無をmapping => boolでプレイヤーごとに書き込む
+        レア土地の実装
+            互いに隣接せず、一定の間隔でマップ中に点在させる
+            1 chunk内の存在数が一定になるように配置する
+        hexの実態
+            訪問時に1 hexにつき1 contractがデプロイされる？
+            → hex=contractとするメリットはなにか。
+                NFTなどを所有することができる。
+                ERC20トークンは使用しないので意味無し。
+                ランダムなhex（mint済みhexからランダムに取得）にNFTをairdropして、
+                そのhexにcurrent hexとしたむらさきさんのownerにtransfer権限を与える、など。
+                fluffy rainでfluffy NFTをhexにairdropするなどに使えるか。
+                別にこれは、hex=contractとしなくても可能ではあるのだが。
+                あと、hex=contractとすると、upgradeがほぼ困難になってしまう。
+                    NFTステーキングなどはcontractめがけて行うため、replacableではなくなる。
+                メリットは、各コントラクトにアドレスが割り当てられててちょっとおもしろい。
+                    まだmintされていないhexはアドレス未割当となる。
+            
+
     初期スポーン地点の考察
         パーリンノイズで土地のレア度を割り当てて、
             特殊な建造物はレア度の高い土地にしか出現しないようにする。
+            もしくは、土地レア度0.7-0.75ならば建造物フラグを返す、などとする。
+            かつ、レアな建造物はまばらに散在するようにもしたい。
+                周辺5x5=25マスのレア度ノイズ値を参照して、
+                自マスが25マス中最も目標値に近ければフラグを返す実装でどうか。
+                つまり、目標値0.70ならば、
+                0.68-0.72以内で、かつ0.69, 0.68, 0.73などのうち0.69のみがフラグ1を返せる
+                このアルゴリズムだと、周囲5x5マス中には絶対に自マス以外にはフラグが立たない。
+                5x5の部分を7x7などにすれば、実質の最低距離を設定できる。
         初期スポーン地点は乱数で選択して、
             ノイズ値が十分に低い（＝レア度の高い土地まで十分に距離のある）
             土地を選択する。
@@ -94,6 +355,7 @@ contract ERC721 is IERC721 {
             スポーンhexに応じたメインhex座標からランダムで選択する。
             埋まったスポーンhex座標には別のプレイヤーはスポーンできない。
             1つのスポーンhex座標には、例えば64*64程度のメインhexを割り当てる。
+            64x64 hex = 1 chunkとするイメージ。
         
 
     プレイのラフな段階
@@ -302,8 +564,13 @@ let summoner = 1;
 let summonerMode;
 let hexMatrix;
 let hexInfoWindow;
-let hexInfoText;
-let hexInfoButton;
+let craftWindow;
+let speed = 1000 * 100;
+let _fontArg12 = {fontSize: 12,fontFamily: "Arial"};
+let _fontArg18 = {fontSize: 18,fontFamily: "Arial"};
+let _fontArg24 = {fontSize: 24,fontFamily: "Arial"};
+let _fontArg36 = {fontSize: 36,fontFamily: "Arial"};
+let _colorBlack = "#000000";
 
 //local variants
 let local_currentPos;
@@ -313,10 +580,14 @@ let local_moving_reminingTime;
 let local_moving_reminingPercent;
 let local_coin = 0;
 let local_leaf = 0;
+let local_flower = 0;
+let local_flower_additionPerHour = 0;
+let local_day;
 
 //flag
 let flag_drag = 0;
 let flag_moving = 0;
+let flag_isHouseExist = 0;
 
 //group
 let group_update;
@@ -329,10 +600,18 @@ let hex_current_indicator;
 let hex_targetted;
 let hex_targetted_indicator;
 
+// debug
+let dic_hexStructure = {};
+if (localStorage.getItem("dic_hexStructure") != null) {
+    dic_hexStructure = JSON.parse(localStorage.getItem("dic_hexStructure"));
+}
+
 
 
 //===on-chain==================================================================================
 
+
+//---call
 
 async function onChain_call_mapType (x, y) {
     noise.seed(1);
@@ -411,6 +690,13 @@ async function onChain_call_currentPos(_summoner) {
             localStorage.setItem("summonerMode", JSON.stringify("resting"));
         }
     }
+    // debug: insert home structure
+    if (Object.keys(dic_hexStructure).length == 0) {
+        dic_hexStructure[_currentPos[0]] = {};
+        dic_hexStructure[_currentPos[0]][_currentPos[1]] = {};
+        dic_hexStructure[_currentPos[0]][_currentPos[1]][0] = 111;
+        localStorage.setItem("dic_hexStructure", JSON.stringify(dic_hexStructure));
+    }
     return _currentPos;
 }
 
@@ -428,6 +714,56 @@ async function onChain_call_summonerMode(_summoner) {
     return _summonerMode;
 }
 
+function _calc_movingReminintTime(){
+    let _reminingTime = 0;
+    if (JSON.parse(localStorage.getItem("summonerMode")) == "moving") {
+        let _startTime = JSON.parse(localStorage.getItem("move_startTime"));
+        let _now = Math.round(Date.now()/1000);
+        let _deltaSec = _now - _startTime;
+        _deltaSec *= speed/100;
+        let _endTime = _startTime + 86400;
+        _reminingTime = _endTime - _startTime - _deltaSec;
+        if (_reminingTime < 0) {
+            _reminingTime = 0;
+        }
+    }
+    return _reminingTime;
+}
+function _calc_movingReminingPercent() {
+    let _reminingTime = _calc_movingReminintTime();
+    let _percent = _reminingTime/ (86400);
+    _percent = Math.round(_percent*100)/100;
+    return _percent;
+}
+
+async function onChain_call_hexStructure(_posX, _posY) {
+    let _dic;
+    let _res;
+    try {
+        _dic = dic_hexStructure[_posX][_posY];
+        _res = [_dic[0], _dic[1], _dic[2], _dic[3], _dic[4]];
+    } catch (error) {
+        _res = [0,0,0,0];
+    }
+    return _res;
+}
+
+async function onChain_call_day(_summoner) {
+    let _now = Math.round(Date.now()/1000);
+    let _startTime = JSON.parse(localStorage.getItem("game_startTime"));
+    if (_startTime == null) {
+        _startTime = _now;
+        localStorage.setItem("game_startTime", JSON.stringify(_startTime));    
+    }
+    let _deltaSec = _now - _startTime;
+    _deltaSec *= speed/100;
+    let _day = Math.round(_deltaSec/86400 * 100)/ 100;
+    return _day;
+}
+
+
+//---send
+
 async function onChain_send_currentPos(_summoner, _currentPos) {
     localStorage.setItem("currentPos", JSON.stringify(_currentPos));
 }
@@ -438,26 +774,19 @@ async function onChain_send_startMoving(_summoner, _targetPos) {
     localStorage.setItem("move_startTime", JSON.stringify(Math.round(Date.now()/1000)));
 }
 
-function _calc_movingReminintTime(){
-    let _reminingTime = 0;
-    if (JSON.parse(localStorage.getItem("summonerMode")) == "moving") {
-        let _json = localStorage.getItem("move_startTime");
-        let _startTime = JSON.parse(_json);
-        let _endTime = _startTime + 60;
-        _reminingTime = _endTime - Math.round(Date.now()/1000)
-        if (_reminingTime < 0) {
-            _reminingTime = 0;
-        }
+async function onChain_send_structure(posX, posY, structureType, structureId) {
+    if (dic_hexStructure[posX] == null) {
+        dic_hexStructure[posX] = {};
     }
-    return _reminingTime;
+    if (dic_hexStructure[posX][posY] == null) {
+        dic_hexStructure[posX][posY] = {};
+    }
+    dic_hexStructure[posX][posY][structureType] = structureId;
+    localStorage.setItem("dic_hexStructure", JSON.stringify(dic_hexStructure));
 }
 
-function _calc_movingReminingPercent() {
-    let _reminingTime = _calc_movingReminintTime();
-    let _percent = _reminingTime/60;
-    _percent = Math.round(_percent*100)/100;
-    return _percent;
-}
+
+//---dynamic status
 
 async function onChain_update_dynamicStatus() {
     local_currentPos = await onChain_call_currentPos(summoner);
@@ -466,7 +795,20 @@ async function onChain_update_dynamicStatus() {
     local_moving_reminingTime = _calc_movingReminintTime();
     local_moving_reminingPercent = _calc_movingReminingPercent();
     local_coin = JSON.parse(localStorage.getItem("coin"));
+    if (local_coin == null) {
+        local_coin = 0;
+    }
+    local_calcMining = await onChain_call_calcMining(summoner);
+    local_calcFarming = await onChain_call_calcFarming(summoner);
     local_leaf = JSON.parse(localStorage.getItem("leaf"));
+    if (local_leaf == null) {
+        local_leaf = 0;
+    }
+    local_flower = await onChain_call_currentFlower(summoner);
+    local_flower_additionPerHour = await onChain_call_flowerAdditionPerHour(summoner);
+    local_crafting_structureType = JSON.parse(localStorage.getItem("crafting_structureType"));
+    local_calcCrafting = await onChain_call_calcCrafting(summoner);
+    local_day = await onChain_call_day(summoner);
     console.log(
         "currentPos:", local_currentPos,
         "targetPos:", local_targetPos,
@@ -477,7 +819,6 @@ async function onChain_update_dynamicStatus() {
         "leaf:", local_leaf,
     );
 }
-
 function _calc_summonerMode() {
     let _summonerMode = JSON.parse(localStorage.getItem("summonerMode"));
     if (_summonerMode == "moving") {
@@ -489,23 +830,44 @@ function _calc_summonerMode() {
     return _summonerMode;
 }
 
-function onChain_reset() {
-}
 
+//---mining
 
 async function onChain_send_startMining(_summoner) {
     local_currentPos = await onChain_call_currentPos(summoner);
     _write_summonerMode(_summoner, "mining");
     let _now = Math.round(Date.now()/1000);
     localStorage.setItem("mining_startTime", JSON.stringify(_now));
+    // update flower
+    await onChain_send_updateCurrentFlower(_summoner);
 }
 
 async function onChain_call_calcMining(_summoner) {
+    if (local_summonerMode != "mining"){
+        return 0;
+    }
     let _mining_startTime = JSON.parse(localStorage.getItem("mining_startTime"));
     let _now = Math.round(Date.now()/1000);
     let _delta = _now - _mining_startTime;
+    _delta *= speed/100;
     let _calc = _delta/86400 * 3000;
     let _boostRate = 1.00;
+    // structure boost
+    let _currentPos = await onChain_call_currentPos(summoner);
+    let _structure = onChain_call_hexStructure(_currentPos[0], _currentPos[1]);
+    if (_structure[1] > 0) {
+        _boostRate += 0.5;
+    }
+    // map type boost
+    let _mapType = onChain_call_mapType(local_currentPos[0], local_currentPos[1]);
+    if (_mapType == 2) {
+        _boostRate += 0.5;
+    }
+    // map reserve boost
+    let _li_mat = await onChain_call_materials(_currentPos[0], _currentPos[1]);
+    let _matCount = _li_mat[2];
+    _boostRate += 0.25*_matCount;
+    // boost
     _calc *= _boostRate;
     _calc = Math.round(_calc);
     return _calc;
@@ -527,23 +889,43 @@ async function onChain_send_stopMining(_summoner) {
 }
 
 
+//---farming
+
 async function onChain_send_startFarming(_summoner) {
     local_currentPos = await onChain_call_currentPos(summoner);
     _write_summonerMode(_summoner, "farming");
     let _now = Math.round(Date.now()/1000);
     localStorage.setItem("farming_startTime", JSON.stringify(_now));
+    // update flower
+    await onChain_send_updateCurrentFlower(_summoner);
 }
 
 async function onChain_call_calcFarming(_summoner) {
+    if (local_summonerMode != "farming"){
+        return 0;
+    }
     let _farming_startTime = JSON.parse(localStorage.getItem("farming_startTime"));
     let _now = Math.round(Date.now()/1000);
     let _delta = _now - _farming_startTime;
+    _delta *= speed/100;
     let _calc = _delta/86400 * 3000;
     let _boostRate = 1.00;
+    // structure boost
+    let _currentPos = await onChain_call_currentPos(summoner);
+    let _structure = onChain_call_hexStructure(_currentPos[0], _currentPos[1]);
+    if (_structure[2] > 0) {
+        _boostRate += 0.5;
+    }
+    // map type boost
     let _mapType = onChain_call_mapType(local_currentPos[0], local_currentPos[1]);
     if (_mapType == 1) {
         _boostRate += 0.5;
     }
+    // map reserve boost
+    let _li_mat = await onChain_call_materials(_currentPos[0], _currentPos[1]);
+    let _matCount = _li_mat[2];
+    _boostRate += 0.25*_matCount;
+    // boost
     _calc *= _boostRate;
     _calc = Math.round(_calc);
     return _calc;
@@ -558,6 +940,102 @@ async function onChain_send_stopFarming(_summoner) {
         _leaf = JSON.parse(localStorage.getItem("leaf"));
     }
     localStorage.setItem("leaf", JSON.stringify(_leaf + _calcFarming));
+}
+
+
+//---crafting
+
+async function onChain_send_startCrafting(_summoner, _structureType) {
+    local_currentPos = await onChain_call_currentPos(summoner);
+    _write_summonerMode(_summoner, "crafting");
+    let _now = Math.round(Date.now()/1000);
+    localStorage.setItem("crafting_startTime", JSON.stringify(_now));
+    localStorage.setItem("crafting_structureType", JSON.stringify(_structureType));
+    // spent resource
+    let _cost = 100;
+    let _coin = JSON.parse(localStorage.getItem("coin"));
+    localStorage.setItem("coin", JSON.stringify(_coin - _cost));
+    let _leaf = JSON.parse(localStorage.getItem("leaf"));
+    localStorage.setItem("leaf", JSON.stringify(_leaf - _cost));
+    // update flower
+    await onChain_send_updateCurrentFlower(_summoner);
+}
+
+async function onChain_call_calcCrafting(_summoner) {
+    if (local_summonerMode != "crafting"){
+        return 0;
+    }
+    let _crafting_startTime = JSON.parse(localStorage.getItem("crafting_startTime"));
+    let _crafting_structureType = JSON.parse(localStorage.getItem("crafting_structureType"));
+    // def dc
+    let _dc = 86400;
+    // calc delta_sec
+    let _now = Math.round(Date.now()/1000);
+    let _deltaSec = _now - _crafting_startTime;
+    _deltaSec *= speed/100;
+    let _boostRate = 1.00;
+    _deltaSec *= _boostRate;
+    // calc reminingSec
+    _reminingSec = _dc - _deltaSec;
+    if (_reminingSec < 0) {
+        _reminingSec = 0;
+    }
+    _reminingSec = Math.round(_reminingSec);
+    return _reminingSec;
+}
+
+async function onChain_send_stopCrafting(_summoner) {
+    let _calcCrafting = await onChain_call_calcCrafting(_summoner);
+    if (_calcCrafting == 0) {
+        let _crafting_structureType = JSON.parse(localStorage.getItem("crafting_structureType"));
+        local_currentPos = await onChain_call_currentPos(summoner);
+        _write_summonerMode(_summoner, "resting");
+        onChain_send_structure(local_currentPos[0], local_currentPos[1], _crafting_structureType, 888);
+    }
+}
+
+
+//---flower
+
+async function onChain_call_currentFlower(_summoner) {
+    let _currentFlower = JSON.parse(localStorage.getItem("flower"));
+    if (_currentFlower == null) {
+        _currentFlower = 0;
+    }
+    let _lastUpdateTime = JSON.parse(localStorage.getItem("flower_lastUpdateTime"));
+    if (_lastUpdateTime == null) {
+        _lastUpdateTime = Math.round(Date.now()/1000);
+        localStorage.setItem("flower_lastUpdateTime", JSON.stringify(_lastUpdateTime));
+    }
+    let _now = Math.round(Date.now()/1000);
+    let _deltaSec = _now - _lastUpdateTime;
+    _deltaSec *= speed/100;
+    let _flowerAdditionPerHour = await onChain_call_flowerAdditionPerHour(_summoner);
+    let _flowerAddition = _deltaSec / 3600 * _flowerAdditionPerHour;
+    _currentFlower += _flowerAddition;
+    _currentFlower = Math.round(_currentFlower);
+    //console.log(_lastUpdateTime, _currentFlower, _flowerAddition);
+    return _currentFlower;
+}
+
+async function onChain_call_flowerAdditionPerHour(_summoner) {
+    let _flowerAdditionPerHour = 0;
+    if (flag_isHouseExist == 1) {
+        _flowerAdditionPerHour += 10;
+    }
+    if (murasakisan.mode == "mining" || murasakisan.mode == "farming") {
+        _flowerAdditionPerHour -= 20;
+    }
+    if (murasakisan.mode == "crafting") {
+        _flowerAdditionPerHour -= 40;
+    }
+    return _flowerAdditionPerHour;
+}
+
+async function onChain_send_updateCurrentFlower(_summoner) {
+    let _now = Math.round(Date.now()/1000);
+    localStorage.setItem("flower", JSON.stringify(local_flower));
+    localStorage.setItem("flower_lastUpdateTime", JSON.stringify(_now));
 }
 
 
@@ -584,25 +1062,24 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         this.mode = "resting";
         this.submode = 0;
         this.count = 0;
+        this.clickCount = 0;
         this.setOrigin(0.5);
         group_update.add(this);
         this.hex_targetted = 0;
-        this.name = scene.add.text(this.x, this.y-37, "Kapico")
+        this.name = scene.add.text(this.x, this.y-37, "Kapico", _fontArg18)
             .setOrigin(0.5)
             .setDepth(201)
-            .setColor("#000000")
+            .setColor(_colorBlack)
             .setVisible(false);
-        // summoner info window
+        //$$$ info window
         this.window = scene.add.graphics();
         this.window.fillStyle(0xFFF100, 0.9).fillRect(0, 0, 162, 100);
         this.window.depth = 300;
         this.window.visible = false;
         let _text = "";
-        _text += "[Mining]\n"
-        _text += "\n";
-        _text += "[Farming]\n";
-        this.windowText = scene.add.text(0, 0, _text)
-            .setDepth(301).setColor("#000000").setVisible(false);
+        _text += "Select action:";
+        this.windowText = scene.add.text(0, 0, _text, _fontArg18)
+            .setDepth(301).setColor(_colorBlack).setVisible(false);
         this.buttonMining = scene.add.sprite(0, 0, "button_mining")
             .setScale(0.08).setOrigin(0.5).setDepth(301).setVisible(false)
             .setInteractive({useHandCursor: true})
@@ -635,9 +1112,61 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             .setScale(0.08).setOrigin(0.5).setDepth(301).setVisible(false)
             .setInteractive({useHandCursor: true})
             .on("pointerdown", () => {
-                onChain_send_startCrafting(summoner);
                 this.hide_window();
+                this.adjust_window();
+                this.craftWindow.visible = true;
+                this.craftWindow.text.visible = true;
+                this.craftWindow.button_mining.visible = true;
+                this.craftWindow.button_farming.visible = true;
+                //onChain_send_startCrafting(summoner);
             });
+        this.buttonCrafting_mint = scene.add.sprite(0, 0, "button_crafting_mint")
+            .setScale(0.08).setOrigin(0.5).setDepth(301).setVisible(false)
+            .setInteractive({useHandCursor: true})
+            .on("pointerdown", () => {
+                this.hide_window();
+                onChain_send_stopCrafting(summoner);
+            });
+        
+        //$$$ craft window
+        this.craftWindow = scene.add.graphics()
+            .fillStyle(0x89BDDE, 0.9)
+            .fillRect(0, 0, 162, 100)
+            .setDepth(300)
+            .setVisible(false);
+        _text = "";
+        _text += "Mine, 100 10\n";
+        _text += "Farm, 10 100\n";
+        _text += "Workshop, 50, 50\n";
+        this.craftWindow.text = scene.add.text(0, 0, _text, _fontArg18)
+            .setDepth(301)
+            .setVisible(false)
+            .setColor(_colorBlack);
+        this.craftWindow.button_mining = scene.add.sprite(0, 0, "craft_mining")
+            .setInteractive({useHandCursor: true})
+            .setScale(0.015)
+            .setDepth(this.craftWindow.depth+1)
+            .setVisible(false);
+        this.craftWindow.button_mining.on("pointerdown", () => {
+            onChain_send_startCrafting(summoner, 1);
+            this.hide_window();
+        });
+        this.craftWindow.button_farming = scene.add.sprite(0, 0, "craft_farming")
+            .setInteractive({useHandCursor: true})
+            .setScale(0.015)
+            .setDepth(this.craftWindow.depth+1)
+            .setVisible(false);
+        this.craftWindow.button_farming.on("pointerdown", () => {
+            onChain_send_startCrafting(summoner, 2);
+            this.hide_window();
+        });
+        
+        //$$$ currentMeter
+        this.text_calc = scene.add.text(0, 0, "", _fontArg18)
+            .setColor(_colorBlack)
+            .setDepth(this.depth+1)
+            .setVisible(false)
+            .setOrigin(0.5);
     }
     
     //### adjust_window
@@ -658,6 +1187,16 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         this.buttonFarming_stop.y = this.window.y +75;
         this.buttonCrafting.x = this.window.x +25+50+50;
         this.buttonCrafting.y = this.window.y +75;
+        this.buttonCrafting_mint.x = this.window.x +25+50+50;
+        this.buttonCrafting_mint.y = this.window.y +75;
+        this.craftWindow.x = this.x +30;
+        this.craftWindow.y = this.y -100;
+        this.craftWindow.text.x = this.craftWindow.x +5;
+        this.craftWindow.text.y = this.craftWindow.y +5;
+        this.craftWindow.button_mining.x = this.craftWindow.x+30;
+        this.craftWindow.button_mining.y = this.craftWindow.y+50;
+        this.craftWindow.button_farming.x = this.craftWindow.x+30+50;
+        this.craftWindow.button_farming.y = this.craftWindow.y+50;
     }
     
     //### show_window
@@ -669,6 +1208,10 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             this.buttonMining_stop.visible = true;
         } else if (this.mode == "farming") {
             this.buttonFarming_stop.visible = true;
+        } else if (this.mode == "crafting") {
+            if (local_calcCrafting == 0) {
+                this.buttonCrafting_mint.visible = true;
+            }
         } else {
             this.buttonMining.visible = true;
             this.buttonFarming.visible = true;
@@ -687,10 +1230,17 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         this.buttonFarming.visible = false;
         this.buttonFarming_stop.visible = false;
         this.buttonCrafting.visible = false;
+        this.buttonCrafting_mint.visible = false;
+        this.craftWindow.visible = false;
+        this.craftWindow.text.visible = false;
+        this.craftWindow.button_mining.visible = false;
+        this.craftWindow.button_farming.visible = false;
     }
 
     //### on_click
     on_click() {
+        this.clickCount += 1;
+        this.clickCountNow = this.clickCount;
         this.adjust_window();
         this.show_window();
         setTimeout( () => {
@@ -881,8 +1431,11 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             this.anims.play("murasaki_mining", true);
             this.dist = "left"
             this.flipX = false;
+            this.text_calc.x = this.x;
+            this.text_calc.y = this.y-30;
             this.submode += 1;
         } else if (this.submode == 1) {
+            this.text_calc.setTexture(local_calcMining);
         }
     }
 
@@ -890,6 +1443,17 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
     farming() {
         if (this.submode == 0) {
             this.anims.play("murasaki_farming", true);
+            this.dist = "left"
+            this.flipX = false;
+            this.submode += 1;
+        } else if (this.submode == 1) {
+        }
+    }
+
+    //### crafting
+    crafting() {
+        if (this.submode == 0) {
+            this.anims.play("murasaki_crafting", true);
             this.dist = "left"
             this.flipX = false;
             this.submode += 1;
@@ -907,6 +1471,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         else if (this.mode == "happy") {this.happy();}
         else if (this.mode == "mining") {this.mining();}
         else if (this.mode == "farming") {this.farming();}
+        else if (this.mode == "crafting") {this.crafting();}
     }
 }
 
@@ -960,6 +1525,7 @@ class Main extends Phaser.Scene {
         this.load.spritesheet("murasaki_happy", "png/murasaki_happy.png", {frameWidth: 370, frameHeight: 320});
         this.load.spritesheet("murasaki_mining", "png/murasaki_mining.png", {frameWidth: 370, frameHeight: 320});
         this.load.spritesheet("murasaki_farming", "png/murasaki_farming.png", {frameWidth: 370, frameHeight: 320});
+        this.load.spritesheet("murasaki_crafting", "png/murasaki_crafting.png", {frameWidth: 370, frameHeight: 320});
 
         //craft
         this.load.image("craft_mining", "png/craft_mining.png");
@@ -972,6 +1538,7 @@ class Main extends Phaser.Scene {
         this.load.image("button_farming", "png/button_farming_enable.png");
         this.load.image("button_farming_stop", "png/button_farming_pointerover_stop.png");
         this.load.image("button_crafting", "png/button_crafting_enable.png");
+        this.load.image("button_crafting_mint", "png/button_crafting_complete_off.png");
     }
 
 
@@ -988,7 +1555,7 @@ class Main extends Phaser.Scene {
         
         // call current pos
         local_currentPos = await onChain_call_currentPos(summoner);
-
+        
         // generate hex map
         await this.load_hex(this);
 
@@ -1072,6 +1639,12 @@ class Main extends Phaser.Scene {
             frameRate: 2,
             repeat: -1
         });
+        scene.anims.create({
+            key: "murasaki_crafting",
+            frames: scene.anims.generateFrameNumbers("murasaki_crafting", {frames:[0,0,1,1]}),
+            frameRate: 2,
+            repeat: -1
+        });
     }
     
 
@@ -1110,38 +1683,27 @@ class Main extends Phaser.Scene {
 
         // prepare hex matrix
         hexMatrix = new Array();
-        //hexMatrix = new Array(65535);
-        //for (let i=0; i<=65535; i++){
-        //    hexMatrix[i] = new Array(63353);
-        //}
         
         // prepare hex info window
-        hexInfoWindow = scene.add.graphics();
-        hexInfoWindow.fillStyle(0xFFF100, 0.9).fillRect(0, 0, 162, 100);
-        hexInfoWindow.depth = 300;
-        hexInfoWindow.visible = false;
-        hexInfoText = scene.add.text(0, 0, "").setDepth(301).setColor("#000000");
+        hexInfoWindow = scene.add.graphics()
+            .fillStyle(0xFFF100, 0.9)
+            .fillRect(0, 0, 162, 100)
+            .setDepth(300)
+            .setVisible(false);
+        hexInfoWindow.text = scene.add.text(0, 0, "", _fontArg18)
+            .setDepth(301)
+            .setColor(_colorBlack);
         
         // prepare hex info button
-        hexInfoButton = scene.add.text(0, 0, "[Move]")
+        hexInfoWindow.button_move = scene.add.text(0, 0, "[Move]", _fontArg18)
             .setDepth(301)
-            .setColor("#000000")
+            .setColor(_colorBlack)
             .setInteractive({useHandCursor: true})
             .setVisible(false);
-        hexInfoButton.on("pointerdown", () => {
+        hexInfoWindow.button_move.on("pointerdown", () => {
             if (this.cameras.main.zoom >= 0.8) { // only when zoomOut
                 onChain_send_startMoving(summoner, [hex_selected.posX, hex_selected.posY]);
-                hexInfoButton.visible = false;
-                /*
-                murasakisan.hex_targetted = hex_selected;   //***TODO*** for onChain
-                hex_targetted = hex_selected;
-                _hexInfoButton.visible = false;
-                hex_targetted_indicator.visible = true;
-                hex_targetted_indicator.x = hex_selected.x;
-                hex_targetted_indicator.y = hex_selected.y;
-                onChain_send_currentPos([hex_targetted.posX, hex_targetted.posY]);
-                flag_moving = 1;
-                */
+                hexInfoWindow.button_move.visible = false;
             }
         });
         
@@ -1240,7 +1802,7 @@ class Main extends Phaser.Scene {
                         if (_count > 0) {
                             for (let i=0; i<_count; i++) {
                                 let _x = hex.x-40+Math.random()*80;
-                                let _y = hex.y-40+Math.random()*80;
+                                let _y = hex.y-40+Math.random()*30;
                                 let _material;
                                 // put each materials
                                 if (_matType == 1) {
@@ -1260,10 +1822,42 @@ class Main extends Phaser.Scene {
                                     _material.setFrame(Math.round(Math.random()*5));
                                     _material.setAngle(360*Math.random());
                                     _material.setOrigin(0.5);
-                                    _material.setScale(0.15);
+                                    _material.setScale(0.12);
                                     _material.setDepth(101);
                                     hex.flower += 1;
                                 }
+                            }
+                        }
+                    }
+                }
+                
+                // show structure
+                if (hex.type != 0) {
+                    let _hexStructure = await onChain_call_hexStructure(_posX, _posY);
+                    for (let _structureType=0; _structureType<=3; _structureType++) {
+                        let _id = _hexStructure[_structureType];
+                        if (_id > 0) {
+                            let _x = hex.x-35;
+                            let _y = hex.y+35;
+                            let _structure;
+                            if (_structureType == 1) {
+                                _structure = scene.add.sprite(_x, _y, "craft_mining")
+                                    .setOrigin(0.5)
+                                    .setScale(0.01)
+                                    .setDepth(102);
+                            }
+                            if (_structureType == 2) {
+                                _structure = scene.add.sprite(_x+35, _y, "craft_farming")
+                                    .setOrigin(0.5)
+                                    .setScale(0.01)
+                                    .setDepth(102);
+                            }
+                            if (_structureType == 0) {
+                                _structure = scene.add.sprite(hex.x, hex.y, "logo_icon")
+                                    .setOrigin(0.5)
+                                    .setScale(0.05)
+                                    .setDepth(102);
+                                flag_isHouseExist = 1;
                             }
                         }
                     }
@@ -1302,8 +1896,8 @@ class Main extends Phaser.Scene {
                         hexInfoWindow.y = hex.y + 75;
 
                         // prepare text
-                        hexInfoText.x = hexInfoWindow.x+5;
-                        hexInfoText.y = hexInfoWindow.y+5;
+                        hexInfoWindow.text.x = hexInfoWindow.x+5;
+                        hexInfoWindow.text.y = hexInfoWindow.y+5;
                         let _text = "";
                         _text += hex.posX + ", " + hex.posY + "\n";
                         _text += _dicClimate[hex.climate] + "\n";
@@ -1319,8 +1913,8 @@ class Main extends Phaser.Scene {
                         }
                         
                         // update text
-                        hexInfoText.visible = true;
-                        hexInfoText.setText(_text);
+                        hexInfoWindow.text.visible = true;
+                        hexInfoWindow.text.setText(_text);
                         
                         // calc distance
                         let _dist = 
@@ -1335,11 +1929,11 @@ class Main extends Phaser.Scene {
                             && hex.type != 4 
                             && _dist <= _hexagonWidth*2.1
                         ) {
-                            hexInfoButton.x = hexInfoWindow.x+50;
-                            hexInfoButton.y = hexInfoWindow.y+68;
-                            hexInfoButton.visible = true;
+                            hexInfoWindow.button_move.x = hexInfoWindow.x+50;
+                            hexInfoWindow.button_move.y = hexInfoWindow.y+68;
+                            hexInfoWindow.button_move.visible = true;
                         } else {
-                            hexInfoButton.visible = false;
+                            hexInfoWindow.button_move.visible = false;
                         }
                     }
                 });
@@ -1379,10 +1973,12 @@ class Main extends Phaser.Scene {
             .setScale(0.95);
         
         // show house icon
+        /*
         let _house = scene.add.sprite(hex_current.x, hex_current.y, "logo_icon")
             .setOrigin(0.5)
             .setScale(0.05)
             .setDepth(101);
+        */
     }
 
 
@@ -1391,7 +1987,7 @@ class Main extends Phaser.Scene {
     
         turn += 1;
         
-        //$$$ detect dragging
+        //$$$ drag
         if (flag_drag == 1) {
             // get current camera position
             let _cameraX = this.cameras.main.worldView.x + 640 / this.cameras.main.zoom;
@@ -1442,7 +2038,7 @@ class Main extends Phaser.Scene {
             }
         }
         
-        //$$$ onChain update
+        //$$$ onChain
         if (turn % 200 == 0) {
             onChain_update_dynamicStatus();
         }
@@ -1456,7 +2052,7 @@ class Main extends Phaser.Scene {
                 murasakisan.hex_targetted = hex_targetted;
                 murasakisan.mode = "moving_toHex";
                 murasakisan.submode = 0;
-                hexInfoButton.visible = false;
+                hexInfoWindow.button_move.visible = false;
                 hex_targetted_indicator.visible = true;
                 hex_targetted_indicator.x = hex_targetted.x;
                 hex_targetted_indicator.y = hex_targetted.y;
@@ -1474,16 +2070,22 @@ class Main extends Phaser.Scene {
                 murasakisan.mode = "farming";
                 murasakisan.submode = 0;
             }
+
+            // crafting
+            if (murasakisan.mode != "crafting" && local_summonerMode == "crafting"){
+                murasakisan.mode = "crafting";
+                murasakisan.submode = 0;
+            }
             
             // resting
-            if (murasakisan.mode != "resting" && local_summonerMode == "resting"){
+            if (
+                (murasakisan.mode != "resting" && murasakisan.mode != "sleeping")
+                 && local_summonerMode == "resting"
+             ){
                 murasakisan.mode = "resting";
                 murasakisan.submode = 0;
             }
         }
-        
-        //$$$ icon
-        //this.icon_zoomIn.scale
     }
 }
 
@@ -1492,23 +2094,30 @@ class Main extends Phaser.Scene {
 
 class System extends Phaser.Scene {
 
+    //### constructor
     constructor() {
         super({ key:"System", active:false });
     }
 
+    //### create
     create() {
         
         //info
         this.icon_coin = this.add.sprite(668, 25, "coin")
             .setScale(0.07)
             .setDepth(500);
-        this.text_coin = this.add.text(685, 15, "")
-            .setColor("#000000");
+        this.text_coin = this.add.text(685, 15, "0", _fontArg18)
+            .setColor(_colorBlack);
         this.icon_leaf = this.add.sprite(815, 25, "leaf")
             .setScale(0.07)
             .setDepth(500);
-        this.text_leaf = this.add.text(830, 15, "")
-            .setColor("#000000");
+        this.text_leaf = this.add.text(830, 15, "0", _fontArg18)
+            .setColor(_colorBlack);
+        this.icon_flower = this.add.sprite(962, 25, "flowers")
+            .setScale(0.07)
+            .setDepth(500);
+        this.text_flower = this.add.text(977, 15, "0", _fontArg18)
+            .setColor(_colorBlack);
         
         // system icon
         this.icon_zoomIn = this.add.sprite(1080, 915-15, "icon_zoomIn")
@@ -1543,12 +2152,46 @@ class System extends Phaser.Scene {
                 scene_main.cameras.main.centerOn(murasakisan.x, murasakisan.y);
             });
         
+        // debug info
+        let _text = "";
+        this.text_info = this.add.text(5, 900, "", _fontArg18)
+            .setColor(_colorBlack);
+        
         scene_system = this;
+        this.time_forFPS = Date.now();
+        this.turn_forFPS = 0;
     }
+    
+    //### update
     update() {
         if (turn % 200 == 100) {
             this.text_coin.setText(local_coin);
             this.text_leaf.setText(local_leaf);
+            // prepare flower count
+            let _sign = "+";
+            if ( local_flower_additionPerHour < 0) {
+                _sign = "-";
+            }
+            let _text = local_flower + " (" + _sign + Math.abs(local_flower_additionPerHour) + " /hr)";
+            this.text_flower.setText(_text);
+        }
+        if (turn % 200 == 110) {
+            let _text = "";
+            _text += "turn: " + turn + "\n";
+            _text += "day: " + local_day + "\n";
+            _text += "fps: " + this.fps + "\n";
+            this.text_info.setText(_text);
+        }
+        this.calc_fps();
+    }
+    
+    calc_fps() {
+        let _now = Date.now();
+        if (_now >= this.time_forFPS + 1000) {
+            this.time_forFPS = _now;
+            let _fps = (turn - this.turn_forFPS);
+            this.turn_forFPS = turn; 
+            this.fps = _fps;
         }
     }
 }
@@ -1557,12 +2200,9 @@ class System extends Phaser.Scene {
 //===Phaser3==================================================================================
 
 
-var config = {
-    //type: Phaser.AUTO,
-    //parent: 'phaser-example',
+let config = {
     type: Phaser.CANVAS,
     parent: 'canvas',
-    //backgroundColor: "E3E3E3",
     backgroundColor: "E3E3E3",
     scale: {
         mode: Phaser.Scale.FIT,
@@ -1576,6 +2216,7 @@ var config = {
     ],
     fps: {
         target: 60,
+        //forceSetTimeOut: true
     },
 };
 

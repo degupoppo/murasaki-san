@@ -374,8 +374,8 @@ let _dic_items = {
     //### Piano
     "Piano":{
         "item_id":29,
-        "item_id_uncommon":28+64,
-        "item_id_rare":28+128,
+        "item_id_uncommon":29+64,
+        "item_id_rare":29+128,
         "img_name":"item_piano",
         "img_name_inactive":"item_piano_inactive",
         "icon_png":"icon/item_piano.png",
@@ -385,17 +385,17 @@ let _dic_items = {
         "description":" Start practice (DEX+1) ",
     },
 
-    //### Candle*
+    //### Candle
     "Candle":{
         "item_id":30,
         "item_id_uncommon":30+64,
         "item_id_rare":30+128,
-        "img_name":"icon_clock",
-        "icon_png":"icon/icon_clock.png",
-        "pos_x":640,
-        "pos_y":480,
-        "scale":0.2,
-        "description":" Comming soon (DEX+1) ",
+        "img_name":"item_candle",
+        "icon_png":"icon/item_candle.png",
+        "pos_x":142,
+        "pos_y":683,
+        "scale":0.25,
+        "description":" Room decoration (DEX+1) ",
     },
     
     //### Asnya

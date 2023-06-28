@@ -138,6 +138,7 @@ contract ERC721 is IERC721 {
         フェスティバル前の演出の改善
             お祭り帽子の実装
         変数書き換え対策の実装, さてどうするか
+     ok Candleの実装
      ok footerの修正
      ok infoページのiconを吟味・修正する
      ok タイトルロゴの微修正
@@ -240,8 +241,9 @@ contract ERC721 is IERC721 {
             旅行かばん
             フラワーリース
                 豪華さが4段階程度
-            アロマキャンドル
-            あと二つ何か
+         ok アロマキャンドル
+            ルンバ
+            あと１つなにか
          ok つみきのスコアメーター
      ok window
             summon用色違い
@@ -13343,6 +13345,7 @@ function preload(scene) {
     scene.load.image("item_cushion", "src/png/item_cushion.png");
     scene.load.image("item_woodcube", "src/png/item_woodcube.png");
     scene.load.image("item_pinwheel", "src/png/item_pinwheel.png");
+    scene.load.spritesheet("item_candle", "src/png/item_candle.png", {frameWidth: 370, frameHeight: 320});
     
     //### item_staking
     scene.load.image("item_staking_01", "src/png/item_staking_01.png");
@@ -14055,6 +14058,12 @@ function create(scene) {
     scene.anims.create({
         key: "item_lantern",
         frames: scene.anims.generateFrameNumbers("item_lantern_list", {start:2, end:4}),
+        frameRate: 1,
+        repeat: -1
+    });
+    scene.anims.create({
+        key: "item_candle",
+        frames: scene.anims.generateFrameNumbers("item_candle", {frames:[0, 1]}),
         frameRate: 1,
         repeat: -1
     });
@@ -19362,6 +19371,66 @@ function update_checkItem(this_scene) {
     
     
     //### 48:TravelBag
+    
+    
+    //### 99:Candle
+    _item_name = "Candle";
+    _item_id = dic_items[_item_name]["item_id"];
+    if (
+        (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+        && local_items_flag[_item_id] != true
+    ) {
+        local_items_flag[_item_id] = true;
+        let _x = dic_items[_item_name]["pos_x"];
+        let _y = dic_items[_item_name]["pos_y"];
+        let _pos_local = "pos_item_candle";
+        //recover position from localStorage
+        if (localStorage.getItem(_pos_local) != null && local_owner == local_wallet) {
+            let _json = localStorage.getItem(_pos_local);
+            _pos = JSON.parse(_json);
+            _x = _pos[0];
+            _y = _pos[1];
+        }
+        item_candle = this_scene.add.sprite(_x, _y, "item_candle")
+            .anims.play("item_candle")
+            .setScale(0.25)
+            .setOrigin(0.5)
+            .setDepth(_y)
+            .setInteractive({ draggable: true, useHandCursor: true })
+            .on("drag", () => {
+                if (this_scene.sys.game.scale.gameSize._width == 1280) {
+                    item_candle.x = game.input.activePointer.x;
+                    item_candle.y = game.input.activePointer.y;
+                } else {
+                    item_candle.x = game.input.activePointer.y;
+                    item_candle.y = 960 - game.input.activePointer.x;
+                }
+                item_candle.depth = item_candle.y;
+            })
+            .on("dragend", () => {
+                let _pos = [item_candle.x, item_candle.y];
+                if (local_owner == local_wallet) {
+                    localStorage.setItem(_pos_local, JSON.stringify(_pos));
+                }
+            })
+        //uncommon
+        if (local_items[_item_id+64] != 0) {
+            draw_glitter(this_scene, item_candle);
+        }
+        //draw flower3
+        if (count_sync > 3) {
+            draw_flower3(this_scene, item_candle.x, item_candle.y);
+            sound_hat.play();
+        }
+    } else if (
+        local_items[_item_id] == 0 
+        && local_items[_item_id+64] == 0 
+        && local_items[_item_id+128] == 0
+        && typeof item_lantern != "undefined"
+    ) {
+        item_candle.destroy(true);
+        local_items_flag[_item_id] = false;
+    }
 
 
     //### 194:Ohana Bank
