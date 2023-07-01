@@ -86,6 +86,41 @@ contract ERC721 is IERC721 {
 //### 1st
 
 
+    基本設計概要
+        コンセプト
+            ワーカープレイスメントメカニクスおよび
+                リソースマネジメントメカニクスに焦点を当てた
+                ゆったりペースで進行するfull on-chain game
+                一日２～５回程度のtxで進行させたい。
+            HoMのNFT資産を利用可能であり、
+                またJoMの資産をHoMに持ち込むことも可能である拡張版の位置づけ
+        ワーカープレイスメント
+            ワーカー：
+                むらさきさん、ペット3匹、+aでfluffyたち
+            選択肢：
+                どのタイミングで、どのhexにワーカーを配置するか
+                fluffyによるブーストをどのhexにつけるか
+                また、ワーカーを取得するまでの戦略
+                    
+        リソースマネジメント
+            リソースの種類：
+                コイン、葉っぱ、お花
+            マネジメント：
+                お花の収支コントロール
+                    ワーカーやfluffyを配置してリソースを拡大させるアクションは支出を増加させる
+                    一方で、gardeningなどの収入を増加するアクションは拡大行動ではない
+                    つまり、拡大への投資と貯金は二者択一となる
+                コイン、葉っぱの拡大再生産の効率計算
+        その他の要素
+            リプレイ性：
+                hexの資源は枯渇するため、新天地への移動にインセンティブが働く
+                新天地ではより最適化された手順で立ち上げられる可能性がある
+            ランダム性：
+                
+        
+
+
+
     マップ上の移動物体
         案：
             行商人
@@ -565,7 +600,7 @@ let summonerMode;
 let hexMatrix;
 let hexInfoWindow;
 let craftWindow;
-let speed = 1000 * 100;
+let speed = 100 * 100;
 let _fontArg12 = {fontSize: 12,fontFamily: "Arial"};
 let _fontArg18 = {fontSize: 18,fontFamily: "Arial"};
 let _fontArg24 = {fontSize: 24,fontFamily: "Arial"};
@@ -1890,7 +1925,6 @@ class Main extends Phaser.Scene {
                         }
 
                         // move hexInfo window
-                        // only when zoomIn
                         hexInfoWindow.visible = true;
                         hexInfoWindow.x = hex.x + 40;
                         hexInfoWindow.y = hex.y + 75;
@@ -1971,14 +2005,6 @@ class Main extends Phaser.Scene {
             .setDepth(102)
             .setVisible(false)
             .setScale(0.95);
-        
-        // show house icon
-        /*
-        let _house = scene.add.sprite(hex_current.x, hex_current.y, "logo_icon")
-            .setOrigin(0.5)
-            .setScale(0.05)
-            .setDepth(101);
-        */
     }
 
 

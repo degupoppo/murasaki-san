@@ -103,6 +103,10 @@ contract ERC721 is IERC721 {
 
 
     修正案
+        AccountAbstractに対応するためmsg.senderを考察する。
+            EOAではなくCAがmsg.senderになる？
+            NFTやSBTの所有者がCAになりうるため、msg.senderをCAとみなさなければならない？
+            _senderへの書き換えが必要かもしれない。
         rugのインジケーター表示させるとボタンが押せないバグの修正
         夜の演出改善
             UFOや土星などを画面上部に表示させる
