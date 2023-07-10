@@ -86,11 +86,32 @@ contract ERC721 is IERC721 {
 //### 1st
 
 
+    建造物
+        炭鉱
+        畑
+        花壇
+        QuarryPlus
+        農場
+        花園
+        テント
+
+
+    UI設計概要
+        hexタイルをにぎやかに
+            1つのhexの重みを重くする
+            いくつもhexを専有していくのではなく、
+                1つのhexをちょっとずつ改良してにぎやかにしてゆくイメージ
+            HoM周辺の6 hex, 12 hexぐらいでちょうどよいようなバランスで。
+            とにかく要素をできるだけたくさん用意したほうが面白い。
+            かつ、崩壊しないバランスで。
+        
+
+
     基本設計概要
         コンセプト
             ワーカープレイスメントメカニクスおよび
                 リソースマネジメントメカニクスに焦点を当てた
-                ゆったりペースで進行するfull on-chain game
+                ゆったりペースで進行するfull on-chainの拡大再生産ゲーム
                 一日２～５回程度のtxで進行させたい。
             HoMのNFT資産を利用可能であり、
                 またJoMの資産をHoMに持ち込むことも可能である拡張版の位置づけ
@@ -100,24 +121,48 @@ contract ERC721 is IERC721 {
             選択肢：
                 どのタイミングで、どのhexにワーカーを配置するか
                 fluffyによるブーストをどのhexにつけるか
-                また、ワーカーを取得するまでの戦略
-                    
+                また、ワーカーを取得するタイミングの選択
         リソースマネジメント
             リソースの種類：
-                コイン、葉っぱ、お花
+                コイン（リソース）、葉っぱ（リソース）、お花（食料資源）
             マネジメント：
                 お花の収支コントロール
-                    ワーカーやfluffyを配置してリソースを拡大させるアクションは支出を増加させる
-                    一方で、gardeningなどの収入を増加するアクションは拡大行動ではない
-                    つまり、拡大への投資と貯金は二者択一となる
+                    ワーカーやfluffyを配置してリソースを拡大させるアクションは
+                        食料支出を増加させる
+                    一方で、gardeningなどの食料収入を増加するアクションは拡大行動ではない
+                    つまり、リソース拡大への投資と貯金は二者択一となる
                 コイン、葉っぱの拡大再生産の効率計算
+                    リソースを消費して建造物を建てたほうが、
+                        将来より多くのリソースを得られるようになる（＝拡大再生産）
+                    どの順番でどの建造物を建てると効率が良いかを考える戦略設計が必要
         その他の要素
             リプレイ性：
-                hexの資源は枯渇するため、新天地への移動にインセンティブが働く
-                新天地ではより最適化された手順で立ち上げられる可能性がある
+                hexの資源はいずれ枯渇するため、新天地への移動にインセンティブが働く
+                新天地ではより最適化された手順で立ち上げられる期待を持てる
+                新天地をどこにするかプレイヤーが選ぶことができる
+                また、レア度の高い土地を見出して移住する楽しみもある
             ランダム性：
-                
-        
+                マップの配置と気候はランダムとなる
+                それぞれ効果が異なり、互いに隣接しないレア度の高い土地を設定する
+                    見出したレア度の高い土地に応じて、
+                    最適な拡大戦略がある程度変化するように設計したい。
+                    例）高密度のお花畑：ガーデニングがしばらく不要になる
+                    例）金鉱脈：金のブースト系に寄せた立ち上げが効果的、など。
+        アイデア
+            天候：
+                オンチェーンで24時間前のASTR/USDT価格を取得し、
+                現在価格と24時間前価格の差で晴れ・雨・曇を決める。
+                晴れだとすべての行動に+5%のブースト、
+                雨だとすべての行動に-5%ブースト。
+            NPC：
+                プレイヤーの特定の行動に付随してhexを移動するNPCを設定する
+                    claim時に付近のNPCが1マス移動する、など。
+                    移動のクールダウンと成否の乱数を実装し、
+                        プレイヤーがNPCの行動を予測や操作しにくいように工夫する
+                むらさきさんとhexが重なるか、HoMの文化圏に重なった際に特定の効果を受ける
+                    ないないさん：flower取得+5%
+                    もぐらさん：mining+5%
+                    にゅいにゅいさん：farming+5%、など。
 
 
 
@@ -185,16 +230,6 @@ contract ERC721 is IERC721 {
             claim all
 
 
-    建造物
-        炭鉱
-        畑
-        花壇
-        QuarryPlus
-        農場
-        花園
-        テント
-        
-    
     文化圏
         HoMから四方に広がる属性
         いわゆる土地の所有に近い
@@ -328,6 +363,10 @@ contract ERC721 is IERC721 {
             hexには様々なパラメータを設定する
                 かつ、あとから拡張できるようにする
             hex情報をcallするコントラはreplacableか要素をaddableにしたい。
+        意味論
+            時間経過によって埋蔵量が回復する
+                最大埋蔵量、採掘済みリソース量、直近のclaimからの経過時間
+                claimからの経過時間に、回復量をかけた値を現在量とする？
         hexの情報
             パーリンノイズ
                 タイプ決定用
@@ -1207,7 +1246,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
     //### adjust_window
     adjust_window() {
         this.name.x = this.x;
-        this.name.y = this.y - 37;
+        this.name.y = this.y - 28;
         this.window.x = this.x +30;
         this.window.y = this.y -100;
         this.windowText.x = this.window.x +5;
@@ -1585,7 +1624,7 @@ class Main extends Phaser.Scene {
         group_update.runChildUpdate = true;
         
         // init
-        this.cameras.main.zoom = 1;
+        this.cameras.main.zoom = 2;
         scene_main = this;
         
         // call current pos
@@ -1606,8 +1645,8 @@ class Main extends Phaser.Scene {
                 }
             } else {
                 this.cameras.main.zoom *= 1.1;
-                if (this.cameras.main.zoom >= 3) {
-                    this.cameras.main.zoom = 3; // zoomIn limit
+                if (this.cameras.main.zoom >= 4) {
+                    this.cameras.main.zoom = 4; // zoomIn limit
                 }
             }
         });
@@ -1625,7 +1664,7 @@ class Main extends Phaser.Scene {
         // create summoner
         murasakisan = new Murasakisan(this, hex_current.x, hex_current.y, hex_current)
             .setOrigin(0.5)
-            .setScale(0.2)
+            .setScale(0.125)
             .setDepth(200);
         
         // focus camera to summoner
@@ -1823,7 +1862,7 @@ class Main extends Phaser.Scene {
 
                 // init hex
                 group_hex.add(hex);
-                hex.setAlpha(0.5);
+                hex.setAlpha(0.4);
                 hex.setOrigin(0.5);
                 hex.setInteractive({useHandCursor: true});
 
@@ -1910,7 +1949,7 @@ class Main extends Phaser.Scene {
                     if (flag_drag == 0) {   // ignore in mouse dragging
 
                         // reset map alpha
-                        group_hex.setAlpha(0.5);
+                        group_hex.setAlpha(0.4);
 
                         // select hex
                         hex.setAlpha(1);
@@ -1979,7 +2018,7 @@ class Main extends Phaser.Scene {
                 hex.on("pointerout", () => {
                     // when not selected, reset alpha
                     if (hex != hex_selected) {
-                        hex.setAlpha(0.5);
+                        hex.setAlpha(0.4);
                     }
                 });
                 
@@ -2146,20 +2185,20 @@ class System extends Phaser.Scene {
             .setColor(_colorBlack);
         
         // system icon
-        this.icon_zoomIn = this.add.sprite(1080, 915-15, "icon_zoomIn")
+        this.icon_zoomIn = this.add.sprite(1080, 930-15, "icon_zoomIn")
             .setOrigin(0.5)
-            .setScale(0.02)
+            .setScale(1.2)
             .setDepth(500)
             .setInteractive({useHandCursor: true})
             .on("pointerdown", () => {
                 scene_main.cameras.main.zoom *= 1.2;
-                if (scene_main.cameras.main.zoom >= 3) {
-                    scene_main.cameras.main.zoom = 3; // zoomIn limit
+                if (scene_main.cameras.main.zoom >= 4) {
+                    scene_main.cameras.main.zoom = 4; // zoomIn limit
                 }
             });
-        this.icon_zoomOut = this.add.sprite(1080+75, 915-15, "icon_zoomOut")
+        this.icon_zoomOut = this.add.sprite(1080+75, 930-15, "icon_zoomOut")
             .setOrigin(0.5)
-            .setScale(0.02)
+            .setScale(1.2)
             .setDepth(500)
             .setInteractive({useHandCursor: true})
             .on("pointerdown", () => {
@@ -2168,13 +2207,13 @@ class System extends Phaser.Scene {
                     scene_main.cameras.main.zoom = 0.3; // zoomIn limit
                 }
             });
-        this.icon_zoomReset = this.add.sprite(1080+75+75, 915-15, "icon_zoomReset")
+        this.icon_zoomReset = this.add.sprite(1080+75+75, 930-15, "icon_zoomReset")
             .setOrigin(0.5)
-            .setScale(0.02)
+            .setScale(1.2)
             .setDepth(500)
             .setInteractive({useHandCursor: true})
             .on("pointerdown", () => {
-                scene_main.cameras.main.zoom = 1;
+                scene_main.cameras.main.zoom = 2;
                 scene_main.cameras.main.centerOn(murasakisan.x, murasakisan.y);
             });
         

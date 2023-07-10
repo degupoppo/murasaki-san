@@ -1040,7 +1040,8 @@ async function getMarketInfo() {
     //_currentBuybackPrice = Math.floor( Number(_currentBuybackPrice) / (10**18) * 100 )/100;
     //_currentBuybackPrice = _currentBuybackPrice.toFixed(2);
     let _currentBuybackPrice = await getBuybackPrice(_itemType);
-    _currentBuybackPrice = _currentBuybackPrice.toFixed(2);
+    //console.log(_currentBuybackPrice);
+    //_currentBuybackPrice = _currentBuybackPrice.toFixed(2);
     itemType.innerHTML = _itemType;    
     numberOfMint.innerHTML = _numberOfMint;    
     numberOfTrade.innerHTML = _numberOfTrade;    
@@ -1078,7 +1079,8 @@ async function getBuybackPrice(_item_type) {
     } else {
         _item_level = 0;
     }
-    let _item_price = (buybackPrices[_item_level]/10**18).toFixed(2);
+    //let _item_price = (buybackPrices[_item_level]/10**18).toFixed(2);
+    let _item_price = (buybackPrices[_item_level]/10**18);
     //rarity
     if (_item_type <= 64) {
         _item_price *= 1;
@@ -1087,6 +1089,7 @@ async function getBuybackPrice(_item_type) {
     } else if (_item_type <= 192) {
         _item_price *= 9;
     }
+    _item_price = (Math.round(_item_price*100)/100).toFixed(2);
     return _item_price;
 }
 

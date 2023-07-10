@@ -10727,7 +10727,7 @@ function create_item_indicator(scene, _item_type) {
         .setScale(_scale)
         .setOrigin(0.5)
         .setAlpha(0.3)
-        .setDepth(10)
+        .setDepth(2)
         .setInteractive({useHandCursor: true})
         .on("pointerdown", () => {
             item_indicator_text.setVisible(true);
@@ -12741,6 +12741,7 @@ function draw_glitter(scene, _item) {
     };
     //const emitter = scene.add.particles(_item.x, _item.y, "par_glitter", emitterConfig);
     const emitter = scene.add.particles(0, 0, "par_glitter", emitterConfig);
+    emitter.depth = 3900;
 }
 
 
@@ -14285,6 +14286,7 @@ function create(scene) {
     _y = 870;
     button_feeding = scene.add.sprite(_x, _y, "button_feeding")
         .setScale(0.16)
+        .setDepth(11)
         .setInteractive({useHandCursor: true})
         .on('pointerdown', () => sound_button_on.play() )
         .on('pointerdown', () => contract_feeding(summoner) )
@@ -14298,6 +14300,7 @@ function create(scene) {
     _y = 400;
     button_grooming = scene.add.sprite(_x, _y, "button_grooming_unable")
         .setScale(0.16)
+        .setDepth(11)
         .setInteractive({useHandCursor: true})
         .on('pointerdown', () => sound_button_on.play() )
         .on('pointerdown', () => contract_grooming(summoner) )
@@ -14312,6 +14315,7 @@ function create(scene) {
     _y = 760;
     button_mining = scene.add.sprite(_x, _y, "button_mining_unable")
         .setScale(0.16)
+        .setDepth(11)
         .setInteractive({useHandCursor: true})
         .on('pointerdown', () => {
             sound_button_on.play();
@@ -14355,6 +14359,7 @@ function create(scene) {
     _y = 340;
     button_farming = scene.add.sprite(_x, _y, "button_farming_unable")
         .setScale(0.16)
+        .setDepth(11)
         .setInteractive({useHandCursor: true})
         .on('pointerdown', () => {
             sound_button_on.play();
@@ -14479,7 +14484,7 @@ function create(scene) {
             }
         })
         .setScale(0.16)
-        .setDepth(4)
+        .setDepth(11)
         .setInteractive({useHandCursor: true})
         .setVisible(false);
     group_info2.add(button_crafting_start);
@@ -14498,7 +14503,7 @@ function create(scene) {
             contract_pause_crafting(summoner);
         })
         .setScale(0.16)
-        .setDepth(5)
+        .setDepth(12)
         .setInteractive({useHandCursor: true})
         .setVisible(false);
     group_info2.add(button_crafting_pause);
@@ -14517,7 +14522,7 @@ function create(scene) {
             contract_complete_crafting(summoner);
         })
         .setScale(0.16)
-        .setDepth(6)
+        .setDepth(13)
         .setInteractive({useHandCursor: true})
         .setVisible(false);
     group_info2.add(button_crafting_complete);
@@ -14536,7 +14541,7 @@ function create(scene) {
             contract_resume_crafting(summoner);
         })
         .setScale(0.16)
-        .setDepth(7)
+        .setDepth(14)
         .setInteractive({useHandCursor: true})
         .setVisible(false);
     group_info2.add(button_crafting_resume);
@@ -14555,7 +14560,7 @@ function create(scene) {
             contract_cancel_crafting(summoner);
         })
         .setScale(0.16)
-        .setDepth(8)
+        .setDepth(15)
         .setInteractive({useHandCursor: true})
         .setVisible(false);
     group_info2.add(button_crafting_cancel);
