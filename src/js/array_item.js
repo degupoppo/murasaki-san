@@ -358,8 +358,8 @@ let _dic_items = {
         "description":" Growing goldfish (DEX+1) ",
     },
 
-    //### Unknown1*
-    "Unknown1":{
+    //### CleanerRobot*
+    "Cleaner Robot":{
         "item_id":28,
         "item_id_uncommon":28+64,
         "item_id_rare":28+128,
@@ -569,17 +569,17 @@ let _dic_items = {
         "description":" Room decoration (INT+1) ",
     },
 
-    //### Unknown2*
-    "Unknown2":{
+    //### RetroGame*
+    "Retro Game":{
         "item_id":44,
         "item_id_uncommon":44+64,
         "item_id_rare":44+128,
-        "img_name":"icon_clock",
-        "icon_png":"icon/icon_clock.png",
-        "pos_x":640,
-        "pos_y":480,
+        "img_name":"item_retrogame",
+        "icon_png":"png/item_retrogame.png",
+        "pos_x":977,
+        "pos_y":696,
         "scale":0.2,
-        "description":" Comming soon (INT+1) ",
+        "description":" Room decoration (INT+1) ",
     },
     
     //### Violin

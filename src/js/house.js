@@ -86,6 +86,15 @@ contract ERC721 is IERC721 {
 //### 1st
 
 
+    item_retrogameの実装
+        クリックでレトロゲーム系のキャラクターが飛び出すギミックを実装する
+            angband, @, J, P, g, DDD, j
+            cataclysm, @, ZZZ（みどり：ゾンビ、ピンク：boomer, &：ピンク
+            df, ☻, c, d, ドワーフが兵士に追いかけられているなど。Nに~:ネクロマンサー
+                tileをsheetとして読み込んでしまったら楽だと思われる
+            nethack, @, "
+
+
     Strollのテストプレイ
         itemエアドロしてテストプレイを繰り返す。
         絵の置換
@@ -13351,6 +13360,7 @@ function preload(scene) {
     scene.load.image("item_woodcube", "src/png/item_woodcube.png");
     scene.load.image("item_pinwheel", "src/png/item_pinwheel.png");
     scene.load.spritesheet("item_candle", "src/png/item_candle.png", {frameWidth: 370, frameHeight: 320});
+    scene.load.image("item_retrogame", "src/png/item_retrogame.png");
     
     //### item_staking
     scene.load.image("item_staking_01", "src/png/item_staking_01.png");
@@ -19256,9 +19266,65 @@ function update_checkItem(this_scene) {
     }
 
 
-    //### 45:Harp
+    //### 45?:RetroGame
     //***TODO***
-    
+    _item_name = "Retro Game";
+    _item_id = dic_items[_item_name]["item_id"];
+    if (
+        (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+        && local_items_flag[_item_id] != true
+    ) {
+        local_items_flag[_item_id] = true;
+        let _x = dic_items[_item_name]["pos_x"];
+        let _y = dic_items[_item_name]["pos_y"];
+        let _pos_local = "pos_item_retrogame"
+        //recover position from localStorage
+        if (localStorage.getItem(_pos_local) != null && local_owner == local_wallet) {
+            let _json = localStorage.getItem(_pos_local);
+            _pos = JSON.parse(_json);
+            _x = _pos[0];
+            _y = _pos[1];
+        }
+        item_retrogame = this_scene.add.sprite(_x, _y, "item_retrogame")
+            .setScale(0.2)
+            .setOrigin(0.5)
+            .setDepth(_y)
+            .setInteractive({ draggable: true, useHandCursor: true })
+            .on("drag", () => {
+                if (this_scene.sys.game.scale.gameSize._width == 1280) {
+                    item_retrogame.x = game.input.activePointer.x;
+                    item_retrogame.y = game.input.activePointer.y;
+                } else {
+                    item_retrogame.x = game.input.activePointer.y;
+                    item_retrogame.y = 960 - game.input.activePointer.x;
+                }
+                item_retrogame.depth = item_vase.y;
+            })
+            .on("dragend", () => {
+                let _pos = [item_retrogame.x, item_retrogame.y];
+                if (local_owner == local_wallet) {
+                    localStorage.setItem(_pos_local, JSON.stringify(_pos));
+                }
+            });
+        //uncommon
+        if (local_items[_item_id+64] != 0) {
+            draw_glitter(this_scene, item_retrogame);
+        }
+        //draw flower3
+        if (count_sync > 3) {
+            draw_flower3(this_scene, item_retrogame.x, item_retrogame.y);
+            sound_hat.play();
+        }
+    } else if (
+        local_items[_item_id] == 0 
+        && local_items[_item_id+64] == 0 
+        && local_items[_item_id+128] == 0
+        && typeof item_vase != "undefined"
+    ) {
+        item_retrogame.destroy(true);
+        local_items_flag[_item_id] = false;
+    }
+        
 
     //### 46:Flowerpot
     _item_name = "Flowerpot";
