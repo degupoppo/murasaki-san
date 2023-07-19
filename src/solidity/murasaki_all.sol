@@ -9923,6 +9923,11 @@ contract Murasaki_Info is Ownable, Pausable {
         Stroll s = Stroll(ma.address_Stroll());
         return s.total_metSummoners(_summoner);
     }
+    function strolling_remining_sec(uint _summoner) public view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Stroll s = Stroll(ma.address_Stroll());
+        return s.get_reminingSec(_summoner);
+    }
     
     
     //### dynamic
@@ -10022,6 +10027,7 @@ contract Murasaki_Info is Ownable, Pausable {
         _res[90] = total_grooming_count(_summoner);
         _res[91] = total_neglect_count(_summoner);
         _res[92] = total_critical_count(_summoner);
+        _res[93] = strolling_remining_sec(_summoner);
         return _res;
     }
     
