@@ -86,6 +86,13 @@ contract ERC721 is IERC721 {
 //### 1st
 
 
+    runpappaの実装
+        クリックで移動ON/OFF
+        アイテムを上にD&Dで乗せられる
+        fluffyと接触するとkickする
+        クリックしなくてもたまに移動OFF（寝る）になる
+
+
     item_retrogameの実装
         クリックでレトロゲーム系のキャラクターが飛び出すギミックを実装する
             angband, @, J, P, g, DDD, j
