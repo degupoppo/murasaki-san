@@ -96,7 +96,7 @@ contract ERC721 is IERC721 {
     item_retrogameの実装
         クリックでレトロゲーム系のキャラクターが飛び出すギミックを実装する
             angband, @, J, P, g, DDD, j
-            cataclysm, @, ZZZ（みどり：ゾンビ、ピンク：boomer, &：ピンク
+            cataclysm, @, ZZZ（みどり：ゾンビ、ピンク：boomer, &：ピンク, Mi-go
             df, ☻, c, d, ドワーフが兵士に追いかけられているなど。Nに~:ネクロマンサー
                 tileをsheetとして読み込んでしまったら楽だと思われる
             nethack, @, "
@@ -110,6 +110,7 @@ contract ERC721 is IERC721 {
             出発時に1, 2, 4時間を選択し、長いほうが効率よくするか
             1時間以上経過でいつでも帰宅可能で、4時間経つと寝てしまうとするか。
      ok 片方ではmetとなっているのに、相手ではmetにならないバグの修正
+        ms.etherでエラーとなるバグの修正
     
 
     Practiceのテストプレイ
