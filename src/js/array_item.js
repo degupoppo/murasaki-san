@@ -363,12 +363,12 @@ let _dic_items = {
         "item_id":28,
         "item_id_uncommon":28+64,
         "item_id_rare":28+128,
-        "img_name":"icon_clock",
-        "icon_png":"icon/icon_clock.png",
-        "pos_x":640,
-        "pos_y":480,
-        "scale":0.2,
-        "description":" Comming soon (DEX+1) ",
+        "img_name":"item_runpa",
+        "icon_png":"icon/runpa.png",
+        "pos_x":345,
+        "pos_y":550,
+        "scale":0.4,
+        "description":" The room may be cleaned (DEX+1) ",
     },
 
     //### Piano

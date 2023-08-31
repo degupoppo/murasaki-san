@@ -86,20 +86,134 @@ contract ERC721 is IERC721 {
 //### 1st
 
 
-    runpappaの実装
-        クリックで移動ON/OFF
-        アイテムを上にD&Dで乗せられる
-        fluffyと接触するとkickする
-        クリックしなくてもたまに移動OFF（寝る）になる
+    TBA用アイテム構想
+        お花
+        その日の誕生花からランダムで取得される
+        取得タイミング：
+            クラフト完了
+            メール開封
+            1000以上のcoin
+            1000以上のleaf
+            レベルアップ
+            トータル経験値
+            
 
 
-    item_retrogameの実装
-        クリックでレトロゲーム系のキャラクターが飛び出すギミックを実装する
-            angband, @, J, P, g, DDD, j
-            cataclysm, @, ZZZ（みどり：ゾンビ、ピンク：boomer, &：ピンク, Mi-go
-            df, ☻, c, d, ドワーフが兵士に追いかけられているなど。Nに~:ネクロマンサー
-                tileをsheetとして読み込んでしまったら楽だと思われる
-            nethack, @, "
+    用置換絵
+        クラリネット
+        かざぐるま
+        日記帳
+        クレヨン
+        ゲームボーイ
+        フラワーリース
+        額縁
+
+
+    限定アイテムの構想
+        発行数、もしくは発行期間が制限された限定NFTのmint構想
+        コストはcoin/leafにするか、特殊なリソースにするか。
+        金銭的価値というよりは、継続プレイの実感を目的としたい。
+            プレイ期間の歴史をひと目に感じられるように。
+            「これはあの時こうやって手に入れたNFTだー」と実感できるように。
+        効果としては、全てLuck+0.1とかにするか。
+        もしくは、TBAに入るお花が期間や季節によって異なるようにするか。
+            夏の花が多い、秋はレアなお花がもらえた、など。
+        
+
+    SNS戦略
+        情報発信用のキャラクター（ないないさん？）がtwitterで発信している風で行う
+        ディスコースを試す
+        
+
+    要修正
+        runpaのON/OFFに音をつける
+        retrogameの絵を用意する
+        retrogameの設置時に音をつける
+        strollでastar以外の実装
+        strollで麦わら帽子以外がずれるバグの修正
+
+
+    PoM
+        Pocket of Murasaki-san
+        むらさきさんの特定のactionに付随して、ランダムにアイテムが格納されるTBA
+            PoMをまだクラフトしていなくても該当アドレスに送ってしまう
+            ERC20は制御が難しいので、ERC721のみで考える
+            得られるERC721には金銭的価値を付与せず、また意識させない
+        得られるアイテム案
+            （接頭語）＋（素材）＋（アイテム名）＋（補正値）
+            例：Western Iron Amulet +1　など　+1はmasterpriceとかでもよいか
+            接頭語ごとか、最終的か、アイテムのrarityを設定する
+        アイテム案２
+            お花
+            tierでrarityを分けて、レアなお花などを表現する
+            接頭語、補正値などはつけるか？
+            １００種類など、とにかく数を多く
+            いくつか併せて「花束」をクラフト可能に？
+                素材にしたお花の数と種類で花束の性質やレアリティが決まる
+        実装
+            ERC721でseed値を割り振る
+                name()でcodexを参照してお花やレアリティを返す？
+                codex化することでreplacableにできるが。
+            あるいはmint時にstringとしてERC721に書き込んでしまう
+
+
+    野良猫の実装
+        意味論
+            色んな人の家（＝wallet）を渡り歩くERC721トークン
+            自分の宝物入れを持っていてそこに色々入れている
+            宝物を1つ受け取ると自分の宝物１つをランダムでくれる
+            運営のみが新たにmintできる
+                アクティブプレイヤー数に応じて総mint数を調節する
+        NFT実装
+            年齢、交換回数、をカウント
+            mmのownerをランダムで抽出して自身をtransferする関数を実装する
+            mmを有するwalletにしかtransferされない
+            通常の方法でtransferもできるがmm所有walletのみ
+                つまりマケプレで売ることもできない
+        TBA実装
+            現在のownerからNFTを1つ受け取って1つ返す関数を実装する
+                この方法で受け取ったNFTを記録させる
+                他の方法で送りつけられたNFTと差別化する
+            初期値としてfluffyをいくつか入れておく
+            TBA内のNFTは通常の方法では取り出せない
+                NFT側のexchange()関数でしか触れない
+        要対策
+            一人の人がずっと野良猫を放さない
+                放置されたHoMに行ってしまうとtransferされずに居座ってしまう
+                    猫の居場所一覧ページを作る。
+                    滞在時間が一定日数以上で誰でもretransfer()関数を叩けるようにする
+            ゴミNFTで溢れかえってしまう
+                ERC721ならばなんでも宝物として認識されてしまうか
+                性善説、つまり価値のあるNFTをくれる人が多いかどうか
+                mcのbalanceOfが0になったら消滅させるか
+        野良猫トークンのownerはTBA内のfluffyを取り出せる
+            TBAは野良猫トークンownerからのtransferしか受け付けない
+        雑記
+            TBAに渡したいNFTを猫トークンに個別にapproveする
+            NFTをTBAにtransferして保持リストに登録、猫トークンに関数を実装
+                所持NFTから1つ選択してmsg.senderへtransferする
+                自分（猫トークン）をランダムにmmのownerへtransferする
+                    safetransferではなくapprove不要でtransferできるか。
+            TBAのexecuteCall()は猫トークンからしか受け付けない
+                猫トークンのownerからは実行できない
+                猫トークン内の関数でのみ実行できる
+            admin機能
+                猫トークンをadmin walletへ返す（transfer）関数
+                admin walletから無条件でTBAのexecuteCallを叩く関数（executeCall_admin()）
+                burn機能？
+            intervalの設定
+                猫トークンが新しい家にtransfer()されてから、しばらくは関数を叩けない
+                連続してNFT交換が行われて、一瞬で初期fluffyがなくなることを防ぐため。
+            NFT制限
+                total supplyが100以上のNFTのみTBAにtransferできる
+                即席発行のゴミNFTを防ぐため。
+            UI:
+                TBA内のNFTの一覧
+                    猫トークンに保持されている保持NFTリストを利用する
+                接続wallet内のNFTの一覧
+                    tofuNFTのapiなどが使えないだろうか
+                select -> approve -> exchange!
+                attensiionでexchangeすると該当NFTを失うことを明記する
 
 
     Strollのテストプレイ
@@ -1256,6 +1370,27 @@ contract ERC721 is IERC721 {
 
 
 //### 3rd
+
+ ok runpappaの実装
+        クリックで移動ON/OFF
+        アイテムを上にD&Dで乗せられる
+        fluffyと接触するとkickする
+        クリックしなくてもたまに移動OFF（寝る）になる
+
+ ok item_retrogameの実装
+        クリックでレトロゲーム系のキャラクターが飛び出すギミックを実装する
+            angband, @, J, P, g, DDD, j
+            cataclysm, @, ZZZ（みどり：ゾンビ、ピンク：boomer, &：ピンク, Mi-go
+            df, ☻, c, d, ドワーフが兵士に追いかけられているなど。Nに~:ネクロマンサー
+                tileをsheetとして読み込んでしまったら楽だと思われる
+            nethack, @, "
+        必要アスキー
+            D: 赤、白、灰色、水色、ピンク、黄色、緑、
+            j
+            J
+            Z: 緑、ピンク、
+            &: ピンク
+            N~: 緑
 
  ok infoページの充実化
      ok 売買回数、平均購入価格などを集計したマーケット情報ページを作成する？
@@ -4208,6 +4343,9 @@ async function contract_update_dynamic_status(_summoner) {
     } else if (flag_debug == 4) {
         local_items[41] += 1;
     }
+    //***debug2***
+    local_items[28] += 1;
+    local_items[44] += 1;
 
     //call dynamic status from chain
     let _all_dynamic_status = 0;
@@ -10139,6 +10277,424 @@ class Pinwheel extends Phaser.GameObjects.Sprite{
 }
 
 
+//---RetroAlphabet
+class RetroAlphabet extends Phaser.GameObjects.Sprite{
+
+    constructor(scene, x, y, direction, scale, frame, delay, speedMod_y, img){
+        super(scene, x, y, img);
+        this.scene.add.existing(this);
+        this.speed_x = 0;
+        this.speed_y = 0;
+        this.line_y = 0;
+        this.count = 0;
+        this.x = x;
+        this.y = y;
+        this.direction = direction;
+        this.scale = scale;
+        this.setFrame(frame);
+        this.delay = delay;
+        this.speedMod_y = speedMod_y;
+        this.depth = this.y;
+        group_update.add(this);
+        this.on_summon();
+    }
+    
+    //### on_summon
+    on_summon() {
+        this.line_y = this.y;
+        if (this.line_y < 510) {
+            this.line_y = 510;
+        }
+        this.speed_x = 1.5 * this.direction;
+        this.speed_y = 2 + Math.random() * 4;
+        this.count = 0;
+    }
+    
+    //### update()
+    update(){
+        this.count += 1;
+        if (this.delay > 0) {
+            this.delay -= 1;
+            this.depth = -1;
+            return 0;
+        }
+        //check alive time
+        if (this.count >= 500) {
+            this.destroy();
+        }
+        this.setDepth(this.line_y);
+        //reduction of y speed
+        this.speed_y -= 0.6;
+        //position moving
+        this.x += this.speed_x;
+        this.y -= this.speed_y;
+        //increase angle
+        //this.angle += this.speed_x * 5;
+        //refrection y
+        if (this.y >= this.line_y) {
+            this.y = this.line_y;
+            this.speed_y = 0;
+            //this.speed_y *= -0.3;   //y bounce
+            //this.speed_x *= 0.9;    //x friction
+        }
+        //mod y pos
+        if (this.count % this.speedMod_y == 0){
+            this.line_y += 1;
+        }
+    }
+}
+
+
+// shuffle array as random
+// https://zenn.dev/k_kazukiiiiii/articles/cf3256ef6cbd84
+const shuffleArray = (array) => {
+    const cloneArray = [...array]
+    for (let i = cloneArray.length - 1; i >= 0; i--) {
+      let rand = Math.floor(Math.random() * (i + 1))
+      // 配列の要素の順番を入れ替える
+      let tmpStorage = cloneArray[i]
+      cloneArray[i] = cloneArray[rand]
+      cloneArray[rand] = tmpStorage
+    }
+    return cloneArray
+}
+
+
+// summon retro ascii characters
+function summon_retroAlphabet (scene, x, y){
+
+    // determine direction
+    let _direction = 1;
+    if (Math.random()*100 <= 50) {
+        _direction = -1;
+    }
+    
+    // determine y pos speed
+    let _ys = [0,0,0,0,0,0,8,9,10,11,12,13,14,15];
+    let _speedMod_y = _ys[Math.floor(Math.random()*_ys.length)];
+    
+    // set scale
+    let _scale = 0.2;
+    
+    // determine mode
+    let _modes = [
+        "band1",
+        "band2",
+        "band3",
+        "band4",
+        "df1",
+        "df2",
+        "df3",
+        "dda1",
+        "dda2",
+        "dda3",
+    ];
+    let _mode = _modes[Math.floor(Math.random()*_modes.length)];
+    
+    // execute each mode
+    if (_mode == "band1"){  // DDD @
+        let _enes = [0,1,2,3,4,5,6,7,8];
+        let _num = 4 + Math.floor(Math.random()*6);
+        let _count = 0;
+        new RetroAlphabet(scene, x, y, _direction, _scale, 30, 0, _speedMod_y,  "retro_ascii");
+        for (i=0; i<=_num; i++) {
+            _count += 1;
+            let _ene = _enes[Math.floor(Math.random()*_enes.length)];
+            new RetroAlphabet(scene, x, y, _direction, _scale, _ene, 20+10*_count, _speedMod_y,"retro_ascii");
+        }
+    } else if (_mode == "band2") {  // jjjjj @
+        let _enes = [9];
+        let _num = 6 + Math.floor(Math.random()*4);
+        let _count = 0;
+        new RetroAlphabet(scene, x, y, _direction, _scale, 30, 0, _speedMod_y, "retro_ascii");
+        for (i=0; i<=_num; i++) {
+            _count += 1;
+            let _ene = _enes[Math.floor(Math.random()*_enes.length)];
+            new RetroAlphabet(scene, x, y, _direction, _scale, _ene, 30+5*_count, _speedMod_y,"retro_ascii");
+        }
+    } else if (_mode == "band3") {  // @ h
+        //let _enes = [39, 47, 48, 49];
+        let _enes = [39, 47, 48, 49];
+        _enes = shuffleArray(_enes);
+        let _num = 1 + Math.floor(Math.random()*2);
+        let _count = 0;
+        for (i=0; i<_num; i++) {
+            let _ene = _enes.pop();
+            new RetroAlphabet(scene, x, y, _direction, _scale, _ene, 10*_count, _speedMod_y,"retro_ascii");
+            _count += 1;
+        }
+        new RetroAlphabet(scene, x, y, _direction, _scale, 30, 20+10*_count, _speedMod_y,"retro_ascii");
+    } else if (_mode == "band4") {  // gG @
+        let _enes = [40,41,42,43,44,45,46];
+        let _num = 2 + Math.floor(Math.random()*2);
+        let _count = 0;
+        new RetroAlphabet(scene, x, y, _direction, _scale, 30, 0, _speedMod_y, "retro_ascii");
+        for (i=0; i<_num; i++) {
+            _count += 1;
+            let _ene = _enes[Math.floor(Math.random()*_enes.length)];
+            new RetroAlphabet(scene, x, y, _direction, _scale, _ene, 30+10*_count, _speedMod_y,"retro_ascii");
+        }
+    } else if (_mode == "df1") {    // NNNN @@@
+        let _count = 0;
+        let _charas = [32,32,32,32,32,33,34,35,36];
+        let _num = 1 + Math.floor(Math.random()*2);
+        for (i=0; i<=_num; i++) {
+            let _chara = _charas[Math.floor(Math.random()*_charas.length)];
+            new RetroAlphabet(scene, x, y, _direction, _scale, _chara, 10*_count, _speedMod_y,"retro_ascii");
+            _count += 1;
+        }
+        let _enes = [20,21,21,21,21,21,21,21,22];
+        _num = 4 + Math.floor(Math.random()*4);
+        for (i=0; i<=_num; i++) {
+            _count += 1;
+            let _ene = _enes[Math.floor(Math.random()*_enes.length)];
+            new RetroAlphabet(scene, x, y, _direction, _scale, _ene, 10+10*_count, _speedMod_y,"retro_ascii");
+        }
+    } else if (_mode == "df2") {    // @@@@ NNN
+        let _count = 0;
+        let _enes = [20,21,21,21,21,21,21,21,22];
+        let _num = 2 + Math.floor(Math.random()*2);
+        for (i=0; i<=_num; i++) {
+            let _ene = _enes[Math.floor(Math.random()*_enes.length)];
+            new RetroAlphabet(scene, x, y, _direction, _scale, _ene, 10*_count, _speedMod_y,"retro_ascii");
+            _count += 1;
+        }
+        let _charas = [37, 38];
+        _num = 2 + Math.floor(Math.random()*2);
+        for (i=0; i<=_num; i++) {
+            _count += 1;
+            let _chara = _charas[Math.floor(Math.random()*_charas.length)];
+            new RetroAlphabet(scene, x, y, _direction, _scale, _chara, 15*_count, _speedMod_y,"retro_ascii");
+        }
+    } else if (_mode == "df3") {    // H @@@@
+        let _count = 0;
+        let _charas = [32,32,32,32,32,33,34,35,36];
+        let _num = 3 + Math.floor(Math.random()*3);
+        for (i=0; i<=_num; i++) {
+            let _chara = _charas[Math.floor(Math.random()*_charas.length)];
+            new RetroAlphabet(scene, x, y, _direction, _scale, _chara, 10*_count, _speedMod_y,"retro_ascii");
+            _count += 1;
+        }
+        let _enes = [25,26,27,28,29];
+        _num = 1;
+        for (i=0; i<_num; i++) {
+            _count += 1;
+            let _ene = _enes[Math.floor(Math.random()*_enes.length)];
+            new RetroAlphabet(scene, x, y, _direction, _scale, _ene, 10+10*_count, _speedMod_y,"retro_ascii");
+        }
+    } else if (_mode == "dda1") {   // ZZZZZZ @
+        let _enes = [10,10,10,10,10,10,10,11,12,13,14,15,15,15];
+        let _num = 4 + Math.floor(Math.random()*6);
+        let _count = 0;
+        new RetroAlphabet(scene, x, y, _direction, _scale, 30, 0, _speedMod_y,"retro_ascii");
+        for (i=0; i<=_num; i++) {
+            _count += 1;
+            let _ene = _enes[Math.floor(Math.random()*_enes.length)];
+            new RetroAlphabet(scene, x, y, _direction, _scale, _ene, 10+10*_count, _speedMod_y,"retro_ascii");
+        }
+    } else if (_mode == "dda2") {   // && @
+        let _enes = [16,17];
+        let _num = 1 + Math.floor(Math.random()*2);
+        let _count = 0;
+        new RetroAlphabet(scene, x, y, _direction, _scale, 30, 0, _speedMod_y,"retro_ascii");
+        for (i=0; i<=_num; i++) {
+            _count += 1;
+            let _ene = _enes[Math.floor(Math.random()*_enes.length)];
+            new RetroAlphabet(scene, x, y, _direction, _scale, _ene, 20+10*_count, _speedMod_y,"retro_ascii");
+        }
+    } else if (_mode == "dda3") {   // FFF @
+        let _enes = [18,19];
+        let _num = 2 + Math.floor(Math.random()*2);
+        let _count = 0;
+        new RetroAlphabet(scene, x, y, _direction, _scale, 30, 0, _speedMod_y,"retro_ascii");
+        for (i=0; i<=_num; i++) {
+            _count += 1;
+            let _ene = _enes[Math.floor(Math.random()*_enes.length)];
+            new RetroAlphabet(scene, x, y, _direction, _scale, _ene, 20+10*_count, _speedMod_y,"retro_ascii");
+        }
+    }
+}
+
+
+
+//---Runpa
+
+class Runpa extends Phaser.GameObjects.Sprite{
+    constructor(scene, x, y, scale, img){
+        super(scene, x, y, img);
+        this.scene.add.existing(this);
+        this.anims.play("item_runpa", true);
+    	this.mode = "resting";
+        this.submode = 0;
+        this.count = 0;
+        this.dist = "right";
+        this.target_x = 0;
+        this.target_y = 0;
+        this.scale = scale;
+        this.setInteractive({ useHandCursor: true });
+        this.on("pointerdown", function (pointer) {
+            this.on_click();
+        }, this);
+        group_update.add(this);
+    }
+
+    checkOverlap(spriteA, spriteB) {
+        var boundsA = spriteA.getBounds();
+        boundsA.x += boundsA.width/2;
+        boundsA.y += boundsA.height*(3/4);
+        boundsA.width /= 2;
+        boundsA.height /= 6;
+        var boundsB = spriteB.getBounds();
+        return Phaser.Geom.Intersects.RectangleToRectangle(boundsA, boundsB);
+    }
+
+    //### on_click
+    on_click() {
+        if (this.mode == "moving" | this.mode == "resting") {
+            this.mode = "sleeping";
+            this.count = 0;
+            this.submode = 0;
+            this.anims.play("item_runpa_sleeping", true);
+        } else if (this.mode == "sleeping") {
+            this.mode = "resting";
+            this.count = 0;
+            this.submode = 0;
+            this.anims.play("item_runpa", true);
+        }
+    }
+
+    //### resting
+    resting(){
+	    this.count += 1;
+        if (this.submode == 0) {
+            this.resting_count = 150 + Math.random() * 50;
+            this.submode = 1;
+	    } else if (this.submode == 1){
+	        if (this.count >= this.resting_count){
+                this.mode = "moving";
+                this.count = 0;
+                this.submode = 0;
+            }
+        }
+    }
+
+    //### moving
+    moving() {
+        this.count += 1;
+        //determine direction
+        if (this.count == 1){
+            //determine degree, 0-30, 150-210, 330-360
+            var li = [0,10,20,30,150,160,170,180,190,200,210,330,340,350]
+            this.moving_degree = li[Math.floor(Math.random() * li.length)];
+            //out of area check
+            if (this.x < 100 && this.moving_degree > 90 && this.moving_degree <270) {
+                this.moving_degree -= 180;
+            }else if (this.x > 1100 && (this.moving_degree < 90 || this.moving_degree > 270)) {
+                this.moving_degree -= 180;
+            }
+            //360 over check
+            this.moving_degree = this.moving_degree % 360;
+            //out of area check, y
+            if (this.y > 860 && this.moving_degree > 180) {
+                this.moving_degree = 360 - this.moving_degree;
+            }else if (this.y < 500 && this.moving_degree < 180) {
+                this.moving_degree = 360 - this.moving_degree;
+            }
+            //minus check
+            if (this.moving_degree < 0) {
+                this.moving_degree += 360;
+            }
+            //determine speed, count
+            //this.moving_speed = 0.3 + Math.random() * 0.2;  //0.3-0.5
+            this.moving_speed = 0.5;
+            this.moving_count = 150 + Math.random() * 50;    //70-100
+            //determine left or right
+            if (this.moving_degree > 90 && this.moving_degree <= 270) {
+                this.dist = "left";
+            }else {
+                this.dist = "right";
+            }
+        //moving
+        }else if (this.count < this.moving_count) {
+            this.x += Math.cos(this.moving_degree * (Math.PI/180)) * this.moving_speed;
+            this.y -= Math.sin(this.moving_degree * (Math.PI/180)) * this.moving_speed;
+            //out of area check
+            if (this.y < 500) { this.y = 500; }
+            if (this.x < 50) { this.x = 50; }
+
+
+            //collision
+
+            //tokenBall
+            if (
+                flag_tokenBall == 2
+                && this.count == 2 
+                && Math.random()*100 >= 0
+            ) {
+                for (let i = 0; i < group_tokenBall.getLength(); i++) {
+                    if (this.checkOverlap(this, group_tokenBall.getChildren()[i])){
+                        group_tokenBall.getChildren()[i].on_click();
+                        break;
+                    }
+                }
+            }
+
+            //fluffy
+            if (
+                this.count == 3
+                && Math.random()*100 >= 0
+            ) {
+                for (let i = 0; i < group_star.getLength(); i++) {
+                    if (this.checkOverlap(this, group_star.getChildren()[i])){
+                        group_star.getChildren()[i].on_kick();
+                        break;
+                    }
+                }
+            }
+            
+            //woodcube
+            if (
+                this.count == 4
+                && Math.random()*100 >= 0
+            ) {
+                for (let i = 0; i < group_scoreMeter.getLength(); i++) {
+                    if (this.checkOverlap(this, group_scoreMeter.getChildren()[i])){
+                        group_scoreMeter.getChildren()[i].on_kick();
+                        break;
+                    }
+                }
+            }
+
+        //return to resting
+        }else if (this.count >= this.moving_count) {
+            this.mode = "resting";
+            this.count = 0;
+        }
+    }
+
+    //### sleeping
+    sleeping() {
+        ;
+    }
+    
+    //### update()
+    update(){
+        if (this.mode == "resting") {this.resting();}
+        else if (this.mode == "moving") {this.moving();}
+        else if (this.mode == "sleeping") {this.sleeping();}
+        //depth
+        this.depth = this.y;
+    }
+}
+
+function summon_runpa (scene, x, y) {
+    let _runpa = new Runpa(scene, x, y, 0.4, "item_runpa");
+    return _runpa;
+}
+
+
+
+
 //===[ FUNCTION ]=============================================================================
 
 
@@ -13369,6 +13925,8 @@ function preload(scene) {
     scene.load.image("item_pinwheel", "src/png/item_pinwheel.png");
     scene.load.spritesheet("item_candle", "src/png/item_candle.png", {frameWidth: 370, frameHeight: 320});
     scene.load.image("item_retrogame", "src/png/item_retrogame.png");
+    scene.load.spritesheet("retro_ascii", "src/png/retro_ascii.png", {frameWidth: 100, frameHeight: 100});
+    scene.load.spritesheet("item_runpa", "src/png/item_runpa.png", {frameWidth: 370, frameHeight: 320});
     
     //### item_staking
     scene.load.image("item_staking_01", "src/png/item_staking_01.png");
@@ -14090,7 +14648,19 @@ function create(scene) {
         frameRate: 1,
         repeat: -1
     });
-    
+    scene.anims.create({
+        key: "item_runpa",
+        frames: scene.anims.generateFrameNumbers("item_runpa", {frames:[0,0,1,1]}),
+        frameRate: 1,
+        repeat: -1
+    });
+    scene.anims.create({
+        key: "item_runpa_sleeping",
+        frames: scene.anims.generateFrameNumbers("item_runpa", {frames:[2,2,3,3]}),
+        frameRate: 1,
+        repeat: -1
+    });
+        
     //### cat
     scene.anims.create({
         key: "cat_sleeping",
@@ -19306,13 +19876,18 @@ function update_checkItem(this_scene) {
                     item_retrogame.x = game.input.activePointer.y;
                     item_retrogame.y = 960 - game.input.activePointer.x;
                 }
-                item_retrogame.depth = item_vase.y;
+                item_retrogame.depth = item_retrogame.y;
             })
             .on("dragend", () => {
                 let _pos = [item_retrogame.x, item_retrogame.y];
                 if (local_owner == local_wallet) {
                     localStorage.setItem(_pos_local, JSON.stringify(_pos));
                 }
+                summon_retroAlphabet(this_scene, item_retrogame.x, item_retrogame.y);
+                item_retrogame.disableInteractive();
+                setTimeout( () => {
+                    item_retrogame.setInteractive({ draggable: true, useHandCursor: true });
+                }, 5000);
             });
         //uncommon
         if (local_items[_item_id+64] != 0) {
@@ -19327,7 +19902,7 @@ function update_checkItem(this_scene) {
         local_items[_item_id] == 0 
         && local_items[_item_id+64] == 0 
         && local_items[_item_id+128] == 0
-        && typeof item_vase != "undefined"
+        && typeof item_retrogame != "undefined"
     ) {
         item_retrogame.destroy(true);
         local_items_flag[_item_id] = false;
@@ -19454,8 +20029,47 @@ function update_checkItem(this_scene) {
     
     
     //### 48:TravelBag
+
+
+    //### 98:Cleaner Robot
+    _item_name = "Cleaner Robot";
+    _item_id = dic_items[_item_name]["item_id"];
+    if (
+        (local_items[_item_id] != 0 || local_items[_item_id+64] != 0 || local_items[_item_id+128] != 0)
+        && local_items_flag[_item_id] != true
+    ) {
+        local_items_flag[_item_id] = true;
+        let _x = dic_items[_item_name]["pos_x"];
+        let _y = dic_items[_item_name]["pos_y"];
+        let _pos_local = "pos_item_runpa";
+        //recover position from localStorage
+        if (localStorage.getItem(_pos_local) != null && local_owner == local_wallet) {
+            let _json = localStorage.getItem(_pos_local);
+            _pos = JSON.parse(_json);
+            _x = _pos[0];
+            _y = _pos[1];
+        }
+        let item_runpa = summon_runpa(this_scene, _x, _y);
+        //uncommon
+        if (local_items[_item_id+64] != 0) {
+            draw_glitter(this_scene, item_runpa);
+        }
+        //draw flower3
+        if (count_sync > 3) {
+            draw_flower3(this_scene, item_runpa.x, item_runpa.y);
+            sound_hat.play();
+        }
+    } else if (
+        local_items[_item_id] == 0 
+        && local_items[_item_id+64] == 0 
+        && local_items[_item_id+128] == 0
+        && typeof item_runpa != "undefined"
+    ) {
+        item_runpa.destroy(true);
+        local_items_flag[_item_id] = false;
+    } 
     
-    
+       
     //### 99:Candle
     _item_name = "Candle";
     _item_id = dic_items[_item_name]["item_id"];
