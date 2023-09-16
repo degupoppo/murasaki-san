@@ -108,3 +108,16 @@ img.emoji {
   margin: 0 .05em 0 .1em;
   vertical-align: -0.1em;
 }
+
+/*
+スマホで改行
+https://labo.webis.co.jp/2021/04/br-sp/
+*/
+.br-sp {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  .br-sp {
+    display: block;
+}

@@ -16,10 +16,10 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=0.9">
 
-<link rel="stylesheet" type="text/css" href="lib/datatables.min.css"/>
-<link rel="stylesheet" href="src/css/datatable.css">
+<link rel="stylesheet" type="text/css" href="lib/DataTables/datatables.min.css"/>
+<link rel="stylesheet" type="text/css" href="src/css/datatable.css"/>
 <script type="text/javascript" language="javascript" src="lib/jquery-3.6.0.min.js"></script>
-<script type="text/javascript" language="javascript" src="lib/datatables.min.js"></script>
+<script type="text/javascript" language="javascript" src="lib/DataTables/datatables.min.js"></script>
 
 <title>Murasaki-san Item Market</title>
 <meta name="description" content="Murasaki-san is a virtual pet that lives in your wallet on Astar Network." />
@@ -82,14 +82,14 @@ There is a <b>5%</b> platform fee and the currency token used is <b>$ASTR</b>.
 
 <h3>Item Market &#x1f6d2;</h3>
 
-<table id="table_onMarketItems" class="display" style="width:100%;">
+<table id="table_onMarketItems" class="display responsive" style="width:100%;">
 	<thead><tr>
-		<th style="width:25px;"><center>ID</center></th>
-		<th><center>Type</center></th>
+		<th><center>ID</center></th>
+		<th data-priority="1"><center>Type</center></th>
         <th><center>Rarity</center></th>
 		<th><center>Crafter</center></th>
-		<th><center>Price<br>($ASTR)</center></th>
-		<th><center>Action</center></th>
+		<th data-priority="2"><center>Price<br>($ASTR)</center></th>
+		<th data-priority="3"><center>Action</center></th>
 	</tr></thead>
 	<tbody id="tbody_sellingItems"></tbody>
 </table>
@@ -107,15 +107,15 @@ Total Trading Count: <b><span id="totalTradingCount"></span></b><br>
 
 <br>
 
-<h3>Your Sellings on the Market &#127926;</h3>
-<table id="talbe_sellingItems" class="display" style="width:100%;">
+<h3>Your Sellings on Market &#127926;</h3>
+<table id="talbe_sellingItems" class="display responsive nowrap" style="width:100%;">
 	<thead><tr>
-		<th style="width:25px;"><center>ID</center></th>
-		<th><center>Type</center></th>
+		<th><center>ID</center></th>
+		<th data-priority="1"><center>Type</center></th>
         <th><center>Rarity</center></th>
 		<th><center>Crafter</center></th>
-		<th><center>Price<br>($ASTR)</center></th>
-		<th><center>Action</center></th>
+		<th data-priority="2"><center>Price<br>($ASTR)</center></th>
+		<th data-priority="3"><center>Action</center></th>
 	</tr></thead>
 	<tbody id="tbody_listedItems"></tbody>
 </table>
@@ -126,13 +126,13 @@ Total Trading Count: <b><span id="totalTradingCount"></span></b><br>
     Before listing, please approve the Market Contract:
     <button id="button_approve" onclick='approve();'>Approve</button><br>
 </code></p>
-<table id="table_userItems" class="display" style="width:100%;">
+<table id="table_userItems" class="display responsive nowrap" style="width:100%;">
     <thead><tr>
-        <th style="width:25px;"><center>ID</center></th>
-        <th><center>Type</center></th>
+        <th><center>ID</center></th>
+        <th data-priority="1"><center>Type</center></th>
         <th><center>Rarity</center></th>
         <th><center>Crafter</center></th>
-        <th><center>Listing Price<br>($ASTR)</center></th>
+        <th data-priority="2"><center>Listing Price<br>($ASTR)</center></th>
     </tr></thead>
     <tbody id="tbody_myItems"></tbody>
 </table>
@@ -148,7 +148,7 @@ The player can transfer or gift their items directly to another Murasaki-san wit
 Current transfer fee: <font color="blue"><b><idv id="transferFee">***</div></font> $ASTR</b> /item<br>
 </p>
 <p>
-<b>Item ID</b>: <input type="number" id="transfer_item_id" style="width:80px;">&nbsp;&nbsp;to <b>Murasaki-san</b>: <input type="number" id="transfer_summoner" style="width:80px;">&nbsp;&nbsp;<button onclick="transfer_item();">Pay fee and Send item</button><br>
+<b>Item ID</b>: <input type="number" id="transfer_item_id" style="width:80px;">&nbsp;&nbsp;<br class="br-sp">to <b>Murasaki-san</b>: <input type="number" id="transfer_summoner" style="width:80px;">&nbsp;&nbsp;<br class="br-sp"><button onclick="transfer_item();">Pay fee and Send item</button><br>
 </p>
 <br>
 
@@ -166,7 +166,7 @@ NFT items can be burned for a fixed price at any time on the Buyback Treasury. B
 <footer class="footer">
 
 <img src="logo_icon.png" width="18">
-Donation:&nbsp;
+Donation:&nbsp;<br class="br-sp">
 <button style="height:26px;font-size:75%" onclick="donate(1);">
 <script type="text/javascript">write_icon(1)</script>&nbsp;1 $ASTR
 </button>
@@ -181,8 +181,8 @@ Donation:&nbsp;
 
 <br>
 
-<label><input type="radio" name="donationWallet" value="0x2F7448B62134e52C2f46454d0089Ae21B5248805">For Coder&#x1f400;: <font size="-2">0x2F7448B62134e52C2f46454d0089Ae21B5248805</font></label><br>
-<label><input type="radio" name="donationWallet" checked value="0xe79d44309e4daD2CD7eaf3CA4CD1d80a6b8733f7">For Illustrator&#x1f408;: <font size="-2">0xe79d44309e4daD2CD7eaf3CA4CD1d80a6b8733f7</font></label><br>
+<label><input type="radio" name="donationWallet" value="0x2F7448B62134e52C2f46454d0089Ae21B5248805">For Coder&#x1f400;: <br class="br-sp"><font size="-2">0x2F7448B62134e52C2f46454d0089Ae21B5248805</font></label><br>
+<label><input type="radio" name="donationWallet" checked value="0xe79d44309e4daD2CD7eaf3CA4CD1d80a6b8733f7">For Illustrator&#x1f408;: <br class="br-sp"><font size="-2">0xe79d44309e4daD2CD7eaf3CA4CD1d80a6b8733f7</font></label><br>
 
 <br>
 

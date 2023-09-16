@@ -86,17 +86,172 @@ contract ERC721 is IERC721 {
 //### 1st
 
 
+    Pippel実装
+        NFT
+            construct
+                mint_time
+                mint_summoner
+                mint_type
+                flower_type
+                rarity_type
+                flower_name
+            function
+                tokenURI(_tokenId)
+            afterTransfer()
+                count_of_type更新
+                count_of_rarity更新
+                
+        Function
+            call_luckBoost(_summoner)
+            calc_pippelScore(_summoner)
+            
+        Codex
+        UIUX
+            ぴっぺる出現とmint
+                何が得られたかわかるように
+            所持pippel NFTの一覧ウィンドウ
+                取得した順に並べる
+            pippel scoreの表示
+                ウィンドウ内に表記
+            pippel bagクリック時の演出
+                花びらが飛び出して一覧ウィンドウが開く、など。
+    
+
+    ピッペルNFTの実装
+        block.timestampをUTFの日付（1-365）に変換する
+        日付ごとの誕生花を取得する
+            ランダム？
+        接頭語決定
+        部位決定
+        変数
+            mint_time
+            mint_summonerId
+            mint_summonerName
+            mint_type
+            flower_type
+            rarity_type
+                bud, opening, blossoming, blooming, bloomed
+            flower_name
+                rarity + flowerのstring
+            seed
+        集計方法
+            コントラ側
+                wallet内のNFTの総数
+                    balanceOfでOK
+                wallet内のrarityごとの総数
+                    balanceOfRarityを実装
+                wallet内のNFTの種類数（1以上のflower_type数）
+                    balanceOfTypeを実装
+                最終的なpippel score (= +luk)
+                    Pippel_Functionにスコアを計算する関数を実装
+            web側
+                wallet内の全NFT情報の一覧
+                    id, month, day, flowerName, rarity
+                    もしくはuint[367]として取得して、
+                        js側で文字列に変換するか。
+                    個数とrarityを判別する必要があるため、
+                        例えばcommon=1, uncoomon=10などを利用するか
+                        例：1 -> common x1
+                            11 -> comon x1, uncoomon x1
+                            12410 -> uncommon x1, rare x4, epic x2, leg x1
+                        これをuint[367]に格納して一度のcallで返す関数を実装する
+                        その都度計算するよりは、
+                            afterTransfer()内でwalletごとのスコアを随時更新するほうが良いだろうか。
+                    必要な表記は
+                        例：003 blossoming Tulip
+                        id, rarity, flowerTypeの3つがあればひとまずOKか
+                        idも表記しないほうが面白いだろうか。
+        関数
+            tokenURI
+                文字だけ情報で良いか
+                背景にpippelのsvg絵を透かしで入れる
+                前面に、mint日時、mint summoner名、rarity + flowerNameを表示する
+                可能であれば、rarityや月に対応して背景pippel絵を変化させる
+                    背景色でrarity、pippel絵で月、あるいは季節（春夏秋冬）を表せればよいか
+                    背景色は、薄めで
+                        common: 白
+                        uncommon: 緑
+                        rare:   青
+                        epic:   紫
+                        legend: オレンジ
+                    季節は、以下の色が多めのpippel花
+                        春：    ピンク、淡い赤
+                        夏：    青、濃い黄色
+                        秋：    オレンジ、茶
+                        冬：    白
+        web側UIの実装
+            お花バッグの実装
+            所持お花一覧ウィンドウの実装
+                366
+            rarity x seasonの全pippel絵の用意
+                背景色5 x 絵4種類 = 20 種類
+                アイコンに使用する、文字は入れない
+        ユースケース
+            バッグの達成度に応じてLukにブーストが掛かる
+            平均して1年で+3.00程度のブーストに。
+        rarity出現率
+            closedばかりでは面白くないので、中間のblossomingを基本とする
+            closed:     10% 補正-40%    6
+            opening:    20% 補正-20%    8
+            blossoming: 40% 基準100%    10
+            blooming:   20% 補正+20     12
+            bloomed:    10% 補正+40%    14
+            期待値: 100
+            Lukブースト:    分かりやすく, blooming x1 = 10point = 0.001 luck
+                blossoming pippel 1個がfluffy score 1点に相当する。
+                rarityを加味するためfluffy scoreより10倍単位に設定する
+                    10 pippel point = 1 fluffy score = 0.01 LUK
+                全種類blossoming集めると366 pippel point = +3.66 LUK
+
+
+    ランダム出現キャラの実装
+        クリックでtx飛ばしてTBAにお花を得る
+        直近5ブロックの判定が1なら実行可能とする
+        12sec/blockとすると、7200block/day
+        1日に1回出現とすると、7200d1
+        過去150block=30min以内に7200d1が1となるblockがあればmint関数の実行可とする
+            150blockのチェックが不可だろう。
+            せいぜいが30block=6minぐらいだろうか。
+            → solidityで過去のblock.timestampなどを取得することはできないようだ
+        乱数戦略
+            mfsのdnは過去のblock情報を取得できずに使えない
+            となると、7200block/dayのうち、例えば特定の100blockを返す乱数を考えるか
+            この方法だと解析していつpippelが出現するか逆算できてしまうが、まあ良いか。
+            d72で*100することで出現blockを決められる
+            d72の引数はsummonerIdのみにする。
+                つまり、summoner毎にその日のどこで出現するかが異なる。
+
+
     TBA用アイテム構想
         お花
+            ピッペル
         その日の誕生花からランダムで取得される
         取得タイミング：
             クラフト完了
             メール開封
-            1000以上のcoin
-            1000以上のleaf
+            トータルcoin
+            トータルleaf
             レベルアップ
             トータル経験値
-            
+        NFT情報
+            お花の名前（string）
+            取得理由（string）
+            取得日時
+            取得者（summoner）
+            seed
+            接頭語などの修飾語
+                rarityを演出する？
+                きれいな、かわいい、良い匂いのする、など？
+            部位？
+                つぼみ
+                お花
+                種
+        用途
+            何からのメカニズムで要求し消費させる？
+            トレードや売買の可否は？
+            所持NFT全体をスコア化する？
+                レア度計算は？
+            単純にLUKにプラスにするか
 
 
     用置換絵
@@ -1370,6 +1525,30 @@ contract ERC721 is IERC721 {
 
 
 //### 3rd
+
+ ok EVM経由のdapps stakingに対応する
+        https://astar.subscan.io/address/0x0000000000000000000000000000000000005001?tab=contract
+        これの
+        read_staked_amount_on_contract
+        に、
+            contract_id = コントラのEVMアドレス
+            staker = ユーザーのEVMアドレス
+        で、対象コントラへのステーク量を参照できる
+        また、EVMからステーキング可能となったため、
+            self staking vaultから自動でセルフステーキングも可能となると思われる
+            コントラクトからステーキング可能か試す
+        ローカルで0x0000000000000000000000000000000000005001が有効になる条件を試す
+            コードが見当たらない
+            astar collatorプログラムを更新すればよいのか？
+        → stakingReword関数を修正し、EVM+WASMの合計値をreturnするよう修正した
+           5001にbyte変換したownerアドレスを渡せばおそらくOKだと思われる。
+           230911, 動作確認OK。EVMステーキング量の反映はshibuyaデプロイ後にでも。
+        EVM stakeについてHPに追記する。
+
+ ok スマホ画面での最適化
+        少なくともiphoneSE2である程度快適に見えるようにHPを修正する
+        JQueryテーブルのレスポンシブ設定
+            https://beginners-hp.com/create_smartphone_table.html
 
  ok runpappaの実装
         クリックで移動ON/OFF

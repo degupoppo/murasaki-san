@@ -84,7 +84,7 @@ async function update_onMarketItems() {
         _html += "</center></td><td><center>";
         _html += "<img src='";
         _html += "src/" + _itemPng;
-        _html += "' width='32' height='32'> ";
+        _html += "' width='32' height='32'> <br class='br-sp'>";
         _html += _itemName;
         _html += "</center></td><td><center>";
         _html += _item_rarity;
@@ -172,7 +172,7 @@ async function update_sellingItems() {
         _html += '</center></td><td><center>';
         _html += "<img src='";
         _html += "src/" + dic_items[_item_name]["icon_png"];
-        _html += "' width='32' height='32'> ";
+        _html += "' width='32' height='32'> <br class='br-sp'>";
         _html += _item_name;
         _html += "</center></td><td><center>";
         _html += _item_rarity;

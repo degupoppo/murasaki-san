@@ -1,6 +1,6 @@
 
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.19;
+pragma solidity =0.8.13;
 
 
 //=== Basic ==================================================================================================================
@@ -23,6 +23,8 @@ import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v4.8
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v4.8/contracts/utils/introspection/IERC165.sol";
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v4.8/contracts/token/ERC721/utils/ERC721Holder.sol";
 import "github.com/AstarNetwork/astarbase/contract/example/IAstarBase.sol";
+import "github.com/BuildBearLabs/Tutorials/ERC-6551/contracts/interface/IERC6551Account.sol";
+import "github.com/BuildBearLabs/Tutorials/ERC-6551/contracts/interface/IERC6551Registry.sol";
 
 
 /* for solc, v4.8.0
@@ -43,6 +45,8 @@ import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
 import "@astarbase/contract/example/IAstarBase.sol";
+import "@Tutorials/ERC-6551/contracts/interface/IERC6551Account.sol";
+import "@Tutorials/ERC-6551/contracts/interface/IERC6551Registry.sol";
 */
 
 
@@ -3129,7 +3133,7 @@ contract Murasaki_Function_Share is Ownable, Pausable {
 }
 
 
-//---Summon_and_LevelUp
+//---Summon_and_LevelUp*
 
 contract Murasaki_Function_Summon_and_LevelUp is Ownable, ReentrancyGuard, Pausable {
 
@@ -3262,7 +3266,7 @@ contract Murasaki_Function_Summon_and_LevelUp is Ownable, ReentrancyGuard, Pausa
     }
 
     //level-up
-    event Level_up(uint indexed _summoner, uint _level);
+    event Level_up(uint indexed _summoner, uint _level, str_add, dex_add, int_add, luk_add);
     function level_up (uint _summoner) external nonReentrant whenNotPaused {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
@@ -3391,7 +3395,14 @@ contract Murasaki_Function_Summon_and_LevelUp is Ownable, ReentrancyGuard, Pausa
             _mint_presentbox(uint(0), msg.sender);
         }
         //event
-        emit Level_up(_summoner, _next_level);
+        emit Level_up(
+            _summoner, 
+            _next_level, 
+            _percent_mining, 
+            _percent_farming, 
+            _percent_crafting, 
+            _percent_resting
+        );
     }
     
     function _check_trial(uint _summoner) internal view returns (bool) {
@@ -6437,7 +6448,15 @@ contract Murasaki_Function_Music_Practice is Ownable, ReentrancyGuard, Pausable 
 }
 
 
-//---Staking_Reward
+//---Staking_Reward*
+
+// DappsStaking interface for EVM
+// 0x0000000000000000000000000000000000005001
+interface IDappsStaking {
+    function read_contract_stake (address) external view returns (uint128);
+    function read_staked_amount (bytes memory) external view returns (uint128);
+    function read_staked_amount_on_contract (address, bytes memory) external view returns (uint128);
+}
 
 contract Murasaki_Function_Staking_Reward is Ownable, ReentrancyGuard, Pausable {
 
@@ -6455,8 +6474,13 @@ contract Murasaki_Function_Staking_Reward is Ownable, ReentrancyGuard, Pausable 
         address_Murasaki_Address = _address;
     }
     
-    //get staking amount
+    //get staking amount WASM + EVM
     function get_staking_amount (uint _summoner) public view returns (uint) {
+        return (get_staking_amount_wasm(_summoner) + get_staking_amount_evm(_summoner));
+    }
+    
+    //get staking amount WASM
+    function get_staking_amount_wasm (uint _summoner) public view returns (uint) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         //trial limit, no amount
@@ -6470,6 +6494,29 @@ contract Murasaki_Function_Staking_Reward is Ownable, ReentrancyGuard, Pausable 
         return _staker;
     }
     
+    // 230911: support for EVM dapps staking
+    //get staking amount EVM
+    function get_staking_amount_evm (uint _summoner) public view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
+        //trial limit, no amount
+        if (mfs.isTrial()) {
+            return 0;
+        }
+        address _owner = mfs.get_owner(_summoner);
+        IDappsStaking DappsStaking = IDappsStaking(0x0000000000000000000000000000000000005001);
+        uint _staker_raw = DappsStaking.read_staked_amount_on_contract(
+            ma.address_Murasaki_Main(), 
+            _addressToBytes(_owner)
+        );
+        uint _staker = _staker_raw / (10 ** 18);
+        return _staker;
+    }
+    function _addressToBytes(address _address) internal pure returns (bytes memory) {
+        bytes20 convertedBytes = bytes20(_address);
+        return abi.encodePacked(convertedBytes);
+    }
+       
     //get staking counter speed
     function get_staking_counter_speed (uint _summoner) public view returns (uint) {
         uint _staker = get_staking_amount(_summoner);
@@ -9133,6 +9180,889 @@ contract Stroll is Ownable, ReentrancyGuard, Pausable {
             _coolingSec = stroll_interval_sec - _deltaSec;
         }
         return _coolingSec;
+    }
+}
+
+
+//---Pippel_Function
+
+contract Pippel_Function is Ownable, ReentrancyGuard, Pausable {
+
+    //pausable
+    function pause() external onlyOwner {
+        _pause();
+    }
+    function unpause() external onlyOwner {
+        _unpause();
+    }
+
+    // address
+    address public address_Murasaki_Address;
+    function _set_Murasaki_Address(address _address) external onlyOwner {
+        address_Murasaki_Address = _address;
+    }
+    
+    // varinat
+    uint public blockNumber_per_day = 7200;
+    uint private salt = 6539;
+    function _set_blockNumber_per_day(uint _val) external onlyOwner {
+        blockNumber_per_day = _val;
+    }
+    function _update_salt(uint _summoner) external onlyOwner {
+        salt = _seed(_summoner);
+    }
+    
+    // check pippel appearance
+    function check_pippel (uint _summoner) public view returns (bool) {        
+        bool _bool;
+        if (
+            // random hour resets every day == current hour converted from block.number
+            _dn(_summoner, 24) == block.number % blockNumber_per_day / (blockNumber_per_day/24)
+        ) {
+            _bool = true;
+        }
+        return _bool;
+    }
+    
+    // mint daily flower from pippel
+    function mint_pippel (uint _summoner) external nonReentrant whenNotPaused {
+        // check pippel appearance
+        require(check_pippel(_summoner));
+        // check _summoner, msg.sender
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
+        Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
+        Murasaki_Parameter mp = Murasaki_Parameter(ma.address_Murasaki_Parameter());
+        require(mp.isPaused() == false);
+        require(ms.inHouse(_summoner));
+        require(mfs.check_owner(_summoner, msg.sender));
+        // mint random flower
+        _mint_pippel(_summoner);
+    }
+    function _mint_pippel (uint _summoner) internal {
+        IERC6551Registry ERC6551Registry = IERC6551Registry();
+        address _tba = ERC6551Registry.account(
+            {address},
+            {chainId},
+            {tokenContract},
+            {tokenId},
+            {salt}
+        );
+        // ***TODO*** mint
+        // mint daily flower NFT into TBA
+    }
+
+
+    // UNIX -> UTC+0, supported by ChatGPT
+    function parseTimestamp(uint256 timestamp) public pure returns (
+            uint16 year, uint8 month, uint8 day, uint8 hour, uint8 minute, uint8 second
+    ) {
+        uint256 secondsInDay = 86400;
+        uint256 secondsInHour = 3600;
+        uint256 secondsInMinute = 60;
+
+        // sec from 1970/01/01
+        uint256 secondsElapsed = timestamp;
+
+        // check leap year
+        bool isLeapYear = isLeap(uint256(1970));
+
+        // calc year
+        uint256 secondsInYear = isLeapYear ? 31622400 : 31536000;
+        year = 1970;
+        while (secondsElapsed >= secondsInYear) {
+            secondsElapsed -= secondsInYear;
+            year++;
+            isLeapYear = isLeap(uint256(year));
+            secondsInYear = isLeapYear ? 31622400 : 31536000;
+        }
+
+        // calc month and day
+        uint256[] memory daysInMonth = new uint256[](12);
+        daysInMonth[0] = 2678400; // 31日
+        daysInMonth[1] = isLeapYear ? 2505600 : 2419200; // 28d or 29d
+        daysInMonth[2] = 2678400; // 31日
+        daysInMonth[3] = 2592000; // 30日
+        daysInMonth[4] = 2678400; // 31日
+        daysInMonth[5] = 2592000; // 30日
+        daysInMonth[6] = 2678400; // 31日
+        daysInMonth[7] = 2678400; // 31日
+        daysInMonth[8] = 2592000; // 30日
+        daysInMonth[9] = 2678400; // 31日
+        daysInMonth[10] = 2592000; // 30日
+        daysInMonth[11] = 2678400; // 31日
+
+        for (month = 0; month < 12; month++) {
+            if (secondsElapsed < daysInMonth[month]) {
+                month++;
+                break;
+            }
+            secondsElapsed -= daysInMonth[month];
+        }
+
+        // calc day
+        day = uint8(secondsElapsed / secondsInDay) + 1;
+        secondsElapsed %= secondsInDay;
+
+        // calc hr, min, sec
+        hour = uint8(secondsElapsed / secondsInHour);
+        secondsElapsed %= secondsInHour;
+        minute = uint8(secondsElapsed / secondsInMinute);
+        second = uint8(secondsElapsed % secondsInMinute);
+    }
+    function isLeap(uint256 year) internal pure returns (bool) {
+        return (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0));
+    }
+    
+    
+    // month/day -> id[1-366], supported by ChatGPT
+    function day2id(uint256 month, uint256 day) public pure returns (uint256) {
+        require(month >= 1 && month <= 12, "Invalid month");
+        require(day >= 1 && day <= 31, "Invalid day");
+
+        uint8[12] memory daysInMonth = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+        uint256 dayCount = 0;
+
+        for (uint256 i = 0; i < month - 1; i++) {
+            require(day <= daysInMonth[i], "Invalid day for the given month");
+            dayCount += daysInMonth[i];
+        }
+
+        return dayCount + day;
+    }
+
+
+    // id[1-366] -> month/day, supported by ChatGPT
+    function id2day(uint256 id) public pure returns (uint256 month, uint256 day) {
+        require(id >= 1 && id <= 366, "Invalid id");
+
+        uint8[12] memory daysInMonth = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+        
+        uint256 currentMonth = 0;
+        uint256 remainingDays = id;
+        
+        while (remainingDays > daysInMonth[currentMonth]) {
+            remainingDays -= daysInMonth[currentMonth];
+            currentMonth++;
+        }
+        
+        // Add 1 to month and day to convert from 0-based index to 1-based index
+        month = currentMonth + 1;
+        day = remainingDays;
+        
+        return (month, day);
+    }
+
+
+    // random
+    // reset per a day, depneds on summonerId and msg.sender, and salt
+    function _dn(uint _summoner, uint _number) internal view returns (uint) {
+        return _seed(_summoner) % _number;
+    }
+    function _random(string memory input) internal pure returns (uint256) {
+        return uint256(keccak256(abi.encodePacked(input)));
+    }
+    function _seed(uint _summoner) internal view returns (uint rand) {
+        rand = _random(
+            string(
+                abi.encodePacked(
+                    _summoner,
+                    msg.sender,
+                    (block.number / blockNumber_per_day),
+                    salt
+                )
+            )
+        );
+    }    
+}
+
+
+//---Pippel_NFT
+//***TODO*** overwhole
+
+contract Pippel_NFT is ERC2665, Ownable, Pausable {
+
+    //pausable
+    function pause() external onlyOwner {
+        _pause();
+    }
+    function unpause() external onlyOwner {
+        _unpause();
+    }
+
+    //permitted address
+    mapping(address => bool) public permitted_address;
+
+    //admin, add or remove permitted_address
+    function _add_permitted_address(address _address) external onlyOwner {
+        permitted_address[_address] = true;
+    }
+    function _remove_permitted_address(address _address) external onlyOwner {
+        permitted_address[_address] = false;
+    }
+
+    //admin. withdraw
+    function withdraw(address rec)public onlyOwner{
+        payable(rec).transfer(address(this).balance);
+    }
+
+    using EnumerableSet for EnumerableSet.UintSet;
+    mapping(address => EnumerableSet.UintSet) private mySet;
+
+    //name
+    constructor() ERC2665("Murasaki Pippel", "MP") {}
+
+    //global variants
+    uint public next_item = 1;
+    struct item {
+        uint item_type;
+        uint crafted_time;
+        uint crafted_summoner;
+        address crafted_wallet;
+        string memo;
+        uint item_subtype;
+    }
+    mapping(uint => item) public items;
+    mapping(address => uint[320]) public balance_of_type;
+    mapping(uint => uint) public seed;
+    mapping(uint => uint) public count_of_mint; //item_type => count_of_mint
+    
+    //mint limit
+    uint public mintLimit_perItemType = 900000;
+    function _set_mintLimit_perItemType(uint _value) external onlyOwner {
+        mintLimit_perItemType = _value;
+    }
+
+    //override ERC721 transfer, 
+    function _transfer(
+        address from,
+        address to,
+        uint256 tokenId
+    ) internal virtual override {
+        ERC2665._transfer(from, to, tokenId);
+        uint _item_type = items[tokenId].item_type;
+        balance_of_type[from][_item_type] -= 1;
+        balance_of_type[to][_item_type] += 1;
+        mySet[from].remove(tokenId);
+        mySet[to].add(tokenId);
+    }
+
+    //override ERC721 burn
+    function _burn(uint256 tokenId) internal virtual override {
+        uint _item_type = items[tokenId].item_type;
+        address _owner = ERC2665.ownerOf(tokenId);
+        balance_of_type[_owner][_item_type] -= 1;
+        mySet[_owner].remove(tokenId);
+        //ERC721._burn(tokenId);
+        ERC2665._transfer(_owner, address(this), tokenId);
+    }
+
+    //burn
+    function burn(uint256 tokenId) external whenNotPaused {
+        require(permitted_address[msg.sender] == true);
+        _burn(tokenId);
+    }
+
+    //craft
+    function craft(
+        uint _item_type, 
+        uint _summoner, 
+        address _wallet, 
+        uint _seed, 
+        string memory _memo,
+        uint _item_subtype
+    ) external whenNotPaused {
+        require(permitted_address[msg.sender] == true);
+        require(count_of_mint[_item_type] < mintLimit_perItemType);
+        uint _now = block.timestamp;
+        uint _crafting_item = next_item;
+        items[_crafting_item] = item(
+            _item_type, 
+            _now, 
+            _summoner, 
+            _wallet, 
+            _memo, 
+            _item_subtype
+        );
+        balance_of_type[_wallet][_item_type] += 1;  //balanceOf each item type
+        count_of_mint[_item_type]++;
+        seed[_crafting_item] = _seed;
+        mySet[_wallet].add(_crafting_item);
+        next_item++;
+        _safeMint(_wallet, _crafting_item);
+    }
+    
+    /// @dev Returns list the total number of listed summoners of the given user.
+    function myListLength(address user) external view returns (uint) {
+        return mySet[user].length();
+    }
+
+    /// @dev Returns the ids and the prices of the listed summoners of the given user.
+    function myListsAt(
+        address user,
+        uint start,
+        uint count
+    ) external view returns (uint[] memory rIds) {
+        rIds = new uint[](count);
+        for (uint idx = 0; idx < count; idx++) {
+            rIds[idx] = mySet[user].at(start + idx);
+        }
+    }
+
+    /// @dev Returns the ids and the prices of the listed summoners of the given user.
+    function myListsAt_withItemType(
+        address user,
+        uint start,
+        uint count
+    ) external view returns (uint[] memory rIds) {
+        rIds = new uint[](count*2);
+        for (uint idx = 0; idx < count; idx++) {
+            uint _id = mySet[user].at(start + idx);
+            rIds[idx*2] = _id;
+            item memory _item = items[_id];
+            rIds[idx*2+1] = _item.item_type;
+        }
+    }
+    function myListsAt_withItemTypeAndSubtype(
+        address user,
+        uint start,
+        uint count
+    ) external view returns (uint[] memory rIds) {
+        rIds = new uint[](count*3);
+        for (uint idx = 0; idx < count; idx++) {
+            uint _id = mySet[user].at(start + idx);
+            rIds[idx*3] = _id;
+            item memory _item = items[_id];
+            rIds[idx*3+1] = _item.item_type;
+            rIds[idx*3+2] = _item.item_subtype;
+        }
+    }
+
+    //URI
+    string public baseURI = "https://murasaki-san.com/src/json/";
+    string public tailURI = ".json";
+    function set_baseURI(string memory _string) external onlyOwner {
+        baseURI = _string;
+    }
+    function set_tailURI(string memory _string) external onlyOwner {
+        tailURI = _string;
+    }
+    function toString(uint256 value) internal pure returns (string memory) {
+        if (value == 0) {
+            return "0";
+        }
+        uint256 temp = value;
+        uint256 digits;
+        while (temp != 0) {
+            digits++;
+            temp /= 10;
+        }
+        bytes memory buffer = new bytes(digits);
+        while (value != 0) {
+            digits -= 1;
+            buffer[digits] = bytes1(uint8(48 + uint256(value % 10)));
+            value /= 10;
+        }
+        return string(buffer);
+    }
+    //override tokenURI
+    function tokenURI (uint _tokenId) public view override returns (string memory) {
+        require(_exists(_tokenId), "token must exist");
+        uint _item_type = items[_tokenId].item_type;
+        return string(
+            abi.encodePacked(
+                baseURI,
+                toString(_item_type),
+                tailURI
+            )
+        );
+    }
+
+    //call items as array, need to write in Craft contract
+    function get_balance_of_type(address _wallet) public view returns (uint[320] memory) {
+        return balance_of_type[_wallet];
+    }
+    function balanceOfType(address _wallet, uint _item_type) external view returns (uint) {
+        return balance_of_type[_wallet][_item_type];
+    }
+
+    // Transfer fees
+    
+    //noFee address
+    mapping(address => bool) private noFee_address;
+    
+    //set transfer fee
+    uint public TRANSFER_FEE = 50 * 10**18;   //wei
+    
+    //a wallet collecting fees
+    address private bufferTreasury_address;
+    
+    //admin
+    function _add_noFee_address(address _address) external onlyOwner {
+        noFee_address[_address] = true;
+    }
+    function _remove_noFee_address(address _address) external onlyOwner {
+        noFee_address[_address] = false;
+    }
+    function _set_transfer_fee(uint _value) external onlyOwner {
+        TRANSFER_FEE = _value;
+    }
+    function _set_bufferTreasury_address(address _address) external onlyOwner {
+        bufferTreasury_address = _address;
+    }
+    
+    //override ERC2665
+    //function getTransferFee(uint256 _tokenId) external view override returns (uint256) {
+    function getTransferFee(uint256) external view override returns (uint256) {
+        return TRANSFER_FEE;
+    }
+    //function getTransferFee(uint256 _tokenId, string calldata _currencySymbol) external view override returns (uint256) {
+    function getTransferFee(uint256, string calldata) external view override returns (uint256) {
+        return TRANSFER_FEE;
+    }
+    
+    //override transfer functions
+    function transferFrom(
+        address from,
+        address to,
+        uint256 tokenId
+    ) public virtual override payable whenNotPaused {
+        //added code, when not noFee address, require transfer fee
+        if (noFee_address[from] == false && noFee_address[to] == false) {
+            require(msg.value >= TRANSFER_FEE);
+            payable(bufferTreasury_address).transfer(address(this).balance);
+        }
+        require(_isApprovedOrOwner(msg.sender, tokenId), "ERC721: transfer caller is not owner nor approved");
+        _transfer(from, to, tokenId);
+    }
+
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 tokenId
+    ) public virtual override payable whenNotPaused {
+        if (noFee_address[from] == false && noFee_address[to] == false) {
+            require(msg.value >= TRANSFER_FEE);
+            payable(bufferTreasury_address).transfer(address(this).balance);
+        }
+        safeTransferFrom(from, to, tokenId, "");
+    }
+
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 tokenId,
+        bytes memory _data
+    ) public virtual override payable whenNotPaused {
+        if (noFee_address[from] == false && noFee_address[to] == false) {
+            require(msg.value >= TRANSFER_FEE);
+            payable(bufferTreasury_address).transfer(address(this).balance);
+        }
+        require(_isApprovedOrOwner(msg.sender, tokenId), "ERC721: transfer caller is not owner nor approved");
+        _safeTransfer(from, to, tokenId, _data);
+    }
+}
+
+
+//---Pippel_Codex
+
+contract Pippel_Codex is Ownable, Pausable {
+
+    //pausable
+    function pause() external onlyOwner {
+        _pause();
+    }
+    function unpause() external onlyOwner {
+        _unpause();
+    }
+
+    // daily flower name, daily_flowers[_month][_day]
+    string[367] public daily_flower_names;
+    string[6] public flower_rarity;
+    
+    function call_dailyFlowerName (uint _id) external view returns (string memory) {
+        return daily_flower_names[_id];
+    }
+    
+    // prepare dictionary of dailyFlowerName
+    constructor() {
+        flower_rarity = [
+            "",
+            "closed",
+            "opening",
+            "blossoming",
+            "blooming",
+            "bloomed"
+        ];
+        daily_flower_names = [
+            "",
+            "Snow Drop",
+            "Camellia",
+            "Forsythia",
+            "Hyacinth",
+            "Hepatica",
+            "Violet",
+            "Plum",
+            "Purple Violet",
+            "Yellow Violet",
+            "Box Tree",
+            "Arbor Vitae",
+            "Spring Camellia",
+            "Cattleya",
+            "Cyclamen",
+            "Thorn",
+            "Yellow Hyacinth",
+            "Shepherd's-Purse",
+            "Indian Mallow",
+            "Thunberg Spirea",
+            "Pot Marigold",
+            "Ivy",
+            "Caraway",
+            "Bullrusb",
+            "Saffron Crocus ",
+            "Cerastium",
+            "Mimosa",
+            "Rowan",
+            "Black poplar",
+            "Boronia",
+            "Mash Marigold",
+            "Spring Crocus",
+            "Primrose",
+            "Snowdrop",
+            "Winter Aconite",
+            "Blue Daisy",
+            "Pulsatilla Cernua",
+            "Rock Pine",
+            "Winter Jasmine",
+            "Strawberry Begonia",
+            "Myrtle",
+            "Pussy Willow",
+            "Melissa",
+            "Justica Procumbens",
+            "Canary Grass",
+            "Chamomile",
+            "Edgeworthia",
+            "Victor's Laurel",
+            "Wild Flower",
+            "Marsh Marigold",
+            "Oak",
+            "Kalmia",
+            "Japanese cornel",
+            "Hibiscus Syriacus",
+            "Leucojum Aestivum",
+            "Iceland Poppy",
+            "Musk Rose",
+            "Skunk Cabbage",
+            "Star Of Arabia",
+            "Barley",
+            "Armeria",
+            "Narcissus",
+            "Alstroemeria",
+            "Astragalus",
+            "Raspberry",
+            "Corn Flower",
+            "Japanese snowball",
+            "Wavy Bittercress",
+            "Castanea",
+            "Larch",
+            "Canola Flower",
+            "Ixeris",
+            "Wax Flower",
+            "Day Lily",
+            "Sweet Alyssum",
+            "Conium Macutatum",
+            "Hall crabapple",
+            "Bean Flower",
+            "Asparagus",
+            "Cape Jasmine",
+            "Purple Tulip",
+            "Magnolia",
+            "Candytuft",
+            "Gladiolus",
+            "California Poppy",
+            "Climbing Plant",
+            "White Primrose",
+            "Foxglove",
+            "Robinia Hispida",
+            "Burdock",
+            "Sweet Pea",
+            "Nigella Damascena",
+            "Cherry Blossom",
+            "Anemone",
+            "Daffodil",
+            "Red Anemone",
+            "Fig Tree",
+            "Adonis",
+            "Nemophila",
+            "Broom",
+            "Cherry",
+            "Periwinkle",
+            "Jacob's Ladder",
+            "Peach",
+            "Golden Wave",
+            "Peony",
+            "Fen Orchid",
+            "Catchfly",
+            "German Iris",
+            "Astragalus Sinicus",
+            "Larspur",
+            "Pear",
+            "Forget-Me-Not",
+            "Easter Cactus",
+            "Balloon Flower",
+            "Calceolaria",
+            "Bluebell",
+            "Japanese Cress",
+            "Water Lily",
+            "Red Primrose",
+            "Gardenia",
+            "Golden Chain",
+            "Cowslip",
+            "Buttercup",
+            "Dandelion",
+            "Garden Strawberry",
+            "Lily Of The Valley",
+            "Chinese Redbud",
+            "Strawberry Leaf",
+            "Rhododendron",
+            "Prunus",
+            "Flag Iris",
+            "Apple",
+            "Lilac",
+            "Hawthorn",
+            "Columbine",
+            "Fish Mint",
+            "Bridal Wreath",
+            "Yellow Tulip",
+            "Oxlip",
+            "Aristata",
+            "Wood Sorrel",
+            "Red Larkspur",
+            "Fuchsia",
+            "Leaf Buds",
+            "Heliotrope",
+            "Pansy",
+            "Olive",
+            "Daisy",
+            "Peppermint",
+            "Coumbine",
+            "Purple Lilac",
+            "Lupine",
+            "Old Rose",
+            "Red Columbine",
+            "Flax",
+            "Damask Rose",
+            "Bletilla",
+            "Korean Iris",
+            "Azalea",
+            "Jasmine",
+            "Aster",
+            "Sweet William",
+            "African Lily",
+            "Mignonette",
+            "Fox Glove",
+            "Pimpernel",
+            "Carnation",
+            "Tube Rose",
+            "Clover",
+            "Thyme",
+            "Sweet Brier",
+            "Speedwell",
+            "Evening Primrose",
+            "Feverfew",
+            "Holy Hock",
+            "Garden Verbena",
+            "Drumstick",
+            "White Lilac",
+            "Passion Flower",
+            "Geranium",
+            "Red Geranium",
+            "Honey Suckle",
+            "Astilbe",
+            "Snap Dragon",
+            "White Poppy",
+            "Lily Magnolia",
+            "Beard-Tongue",
+            "Morning Glory",
+            "Gooseberry",
+            "Birdfoot",
+            "Ivy Geranium",
+            "Bellflower",
+            "Asphodel",
+            "Solanum",
+            "Flower of Grass",
+            "Phlox",
+            "Briar Rose",
+            "Stock Flower",
+            "White Rose",
+            "Moss Rose",
+            "Aconite",
+            "Eggplant",
+            "Yellow Rose",
+            "Rainbow Pink",
+            "Rose",
+            "Trillum",
+            "Elder",
+            "Wormwood",
+            "Viburnum",
+            "Fringed Pink",
+            "Cactus",
+            "Lime Tree",
+            "Pumpkin",
+            "Red Poppy",
+            "Cornflower",
+            "Flower of an Hour",
+            "Corn",
+            "Heath",
+            "Torenia",
+            "Tall Stewartia",
+            "Spider Flower",
+            "Cistus",
+            "Mealy Sage",
+            "Zonal Geranium",
+            "Sweet Oleander",
+            "Goldenrod",
+            "Mallow",
+            "Sunflower",
+            "Tamarind",
+            "Tulip Tree",
+            "Holly Hock",
+            "Rosa Campion",
+            "Freesia",
+            "Red Passionflower",
+            "Spirea",
+            "Linden Tree",
+            "Calendula",
+            "Flaming Flower",
+            "Hypoxis Aurea",
+            "Osmunda",
+            "Eryngium",
+            "Crape Myrtle",
+            "Wall Germander",
+            "Trumpet Creeper",
+            "Tiger Flower",
+            "Mexican Ivy",
+            "Marguerite",
+            "Geum",
+            "Moonflower",
+            "Nasturtium",
+            "Orange",
+            "Mustard",
+            "Michaelmas Daisy",
+            "Hyssop",
+            "Aloe",
+            "Clematis",
+            "Butterfly bush",
+            "Lycoris",
+            "Dahlia",
+            "Gentiana",
+            "Erica",
+            "Thistle",
+            "Carex",
+            "Rosemary",
+            "Saffron",
+            "Quaking Grass",
+            "Yew Tree",
+            "Buckwheat",
+            "Animated Oat",
+            "Date Plum",
+            "Oak Tree",
+            "Amaranthus",
+            "Green Purslane",
+            "Cedar",
+            "Red Chrysanthemum",
+            "Apricot",
+            "Maple Tree",
+            "Common Hop",
+            "Palm Tree",
+            "Hazel Tree",
+            "Fir Tree",
+            "Parsley",
+            "Fennel",
+            "Melon",
+            "Lythrum",
+            "Lingonberry",
+            "Vanda",
+            "Cosmos",
+            "Sweet Basil",
+            "Bur Marigold",
+            "Grape",
+            "Cranberry",
+            "Balsam",
+            "Yam",
+            "Carlet Rose Mallow",
+            "Arrowhead",
+            "Thom Apple",
+            "Protea",
+            "Red Emperor Maple",
+            "Den Phal",
+            "Zinnia",
+            "Rose of Sharon",
+            "Crab Apple",
+            "Lobelia",
+            "Calla",
+            "Medlar",
+            "Lupin",
+            "Bryony",
+            "Crossandra",
+            "Oncidium",
+            "Common Agrimony",
+            "Marigold",
+            "Ragged Robin",
+            "Myrrh",
+            "Confederate Rose",
+            "White Camellia",
+            "Lemon",
+            "Lemon Verbena",
+            "Pine Immortality",
+            "Crown Vetch",
+            "Luculia",
+            "Butterbur",
+            "Hill Lily",
+            "Aaron's Beard",
+            "Bugloss",
+            "Lantern Flower",
+            "Korean Barberry",
+            "Fern",
+            "Pyracanth",
+            "Rhus Continus",
+            "Yarrow",
+            "Phus",
+            "China Aster",
+            "Baccharis",
+            "Reed ",
+            "Tansy",
+            "Moss",
+            "Lavender",
+            "Rumex",
+            "Ambrosia",
+            "Saxifraga",
+            "Kalanchoe",
+            "Reed",
+            "Chrysanthemum",
+            "Red Camellia",
+            "Fig Marigold",
+            "Cotton",
+            "Pin Cushion",
+            "Pine",
+            "Winter Daphne",
+            "Alder Tree",
+            "Honey Plant",
+            "Sage",
+            "Gypsophila",
+            "Pineapple",
+            "Mint",
+            "White Ash",
+            "Platanus",
+            "Mistletoe",
+            "Holly",
+            "Christmas Rose",
+            "Chinese Plum",
+            "Pomegranate",
+            "Winter Cherry",
+            "Carolina Allspice",
+            "Chamaecyparis"
+        ];
     }
 }
 
