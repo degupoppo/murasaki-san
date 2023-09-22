@@ -121,3 +121,14 @@ https://labo.webis.co.jp/2021/04/br-sp/
   .br-sp {
     display: block;
 }
+
+
+/* support iOS */
+html{
+  height: -webkit-fill-available;
+}
+body{
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+}
+
