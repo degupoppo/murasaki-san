@@ -1,18 +1,11 @@
 
-
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity =0.8.13;
 
 
-// 230921
-// House of Murasaki-san ver. 0.1.1a
+//=== Basic ==================================================================================================================
 
 
-//===Basic==================================================================================================================
-
-// for remix
-
-// openzeppelin v4.8 for solidity 0.8.13
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v4.8/contracts/security/ReentrancyGuard.sol";
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v4.8/contracts/security/Pausable.sol";
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v4.8/contracts/access/Ownable.sol";
@@ -30,14 +23,6 @@ import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v4.8
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v4.8/contracts/utils/introspection/IERC165.sol";
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v4.8/contracts/token/ERC721/utils/ERC721Holder.sol";
 import "github.com/AstarNetwork/astarbase/contract/example/IAstarBase.sol";
-
-// for ERC6551 from openzeppelin
-import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v4.8/contracts/interfaces/IERC1271.sol";
-import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v4.8/contracts/utils/cryptography/SignatureChecker.sol";
-import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v4.8/contracts/utils/Create2.sol";
-
-// for ERC6551 from https://github.com/BuildBearLabs/Tutorials
-import "github.com/BuildBearLabs/Tutorials/ERC-6551/contracts/lib/Bytecode.sol";
 import "github.com/BuildBearLabs/Tutorials/ERC-6551/contracts/interface/IERC6551Account.sol";
 import "github.com/BuildBearLabs/Tutorials/ERC-6551/contracts/interface/IERC6551Registry.sol";
 
@@ -60,12 +45,6 @@ import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
 import "@astarbase/contract/example/IAstarBase.sol";
-
-import "@openzeppelin/contracts/interfaces/IERC1271.sol";
-import "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
-import "@openzeppelin/contracts/utils/Create2.sol";
-
-import "@Tutorials/ERC-6551/contracts/lib/Bytecode.sol";
 import "@Tutorials/ERC-6551/contracts/interface/IERC6551Account.sol";
 import "@Tutorials/ERC-6551/contracts/interface/IERC6551Registry.sol";
 */
@@ -754,7 +733,7 @@ abstract contract SoulBoundBadge is ERC721 {
 }
 
 
-//===All-in==================================================================================================================
+//=== All-in ==================================================================================================================
 
 
 //---Murasakisan
@@ -1307,7 +1286,7 @@ contract Murasakisan is Ownable, IMurasakisan {
 }
 
 
-//===SBT/NFT==================================================================================================================
+//=== SBT/NFT ==================================================================================================================
 
 
 //---Murasaki_Main
@@ -1856,161 +1835,6 @@ contract Murasaki_Craft is ERC2665, Ownable, Pausable {
 }
 
 
-//===TBA==================================================================================================================
-
-
-//---Murasaki_TBAAccount
-contract Murasaki_TBAAccount is IERC165, IERC1271, IERC6551Account {
-    uint256 private _nonce;
-
-    receive() external payable {}
-
-    function executeCall(
-        address to,
-        uint256 value,
-        bytes calldata data
-    ) external payable returns (bytes memory result) {
-        require(msg.sender == owner(), "Not token owner");
-
-        bool success;
-        (success, result) = to.call{value: value}(data);
-
-        if (!success) {
-            assembly {
-                revert(add(result, 32), mload(result))
-            }
-        }
-
-        _nonce++;
-    }
-
-    function token()
-        public
-        view
-        returns (uint256 chainId, address tokenContract, uint256 tokenId)
-    {
-        uint256 length = address(this).code.length;
-        return
-            abi.decode(
-                Bytecode.codeAt(address(this), length - 0x60, length),
-                (uint256, address, uint256)
-            );
-    }
-
-    function owner() public view returns (address) {
-        (uint256 chainId, address tokenContract, uint256 tokenId) = this
-            .token();
-        if (chainId != block.chainid) return address(0);
-
-        return IERC721(tokenContract).ownerOf(tokenId);
-    }
-
-    function nonce() external view returns (uint256) {
-        return _nonce;
-    }
-
-    function supportsInterface(bytes4 interfaceId) public pure returns (bool) {
-        return (interfaceId == type(IERC165).interfaceId ||
-            interfaceId == type(IERC6551Account).interfaceId);
-    }
-
-    function isValidSignature(
-        bytes32 hash,
-        bytes memory signature
-    ) external view returns (bytes4 magicValue) {
-        bool isValid = SignatureChecker.isValidSignatureNow(
-            owner(),
-            hash,
-            signature
-        );
-
-        if (isValid) {
-            return IERC1271.isValidSignature.selector;
-        }
-
-        return "";
-    }
-}
-
-
-//---Murasaki_TBARegistry
-contract Murasaki_TBARegistry is IERC6551Registry {
-    error InitializationFailed();
-
-    function createAccount(
-        address implementation,
-        uint256 chainId,
-        address tokenContract,
-        uint256 tokenId,
-        uint256 salt,
-        bytes calldata initData
-    ) external returns (address) {
-        bytes memory code = _creationCode(
-            implementation,
-            chainId,
-            tokenContract,
-            tokenId,
-            salt
-        );
-
-        address _account = Create2.computeAddress(
-            bytes32(salt),
-            keccak256(code)
-        );
-
-        if (_account.code.length != 0) return _account;
-
-        _account = Create2.deploy(0, bytes32(salt), code);
-
-        if (initData.length != 0) {
-            (bool success, ) = _account.call(initData);
-            if (!success) revert InitializationFailed();
-        }
-
-        emit AccountCreated(
-            _account,
-            implementation,
-            chainId,
-            tokenContract,
-            tokenId,
-            salt
-        );
-
-        return _account;
-    }
-
-    function account(
-        address implementation,
-        uint256 chainId,
-        address tokenContract,
-        uint256 tokenId,
-        uint256 salt
-    ) external view returns (address) {
-        bytes32 bytecodeHash = keccak256(
-            _creationCode(implementation, chainId, tokenContract, tokenId, salt)
-        );
-
-        return Create2.computeAddress(bytes32(salt), bytecodeHash);
-    }
-
-    function _creationCode(
-        address implementation_,
-        uint256 chainId_,
-        address tokenContract_,
-        uint256 tokenId_,
-        uint256 salt_
-    ) internal pure returns (bytes memory) {
-        return
-            abi.encodePacked(
-                hex"3d60ad80600a3d3981f3363d3d373d3d3d363d73",
-                implementation_,
-                hex"5af43d82803e903d91602b57fd5bf3",
-                abi.encode(salt_, chainId_, tokenContract_, tokenId_)
-            );
-    }
-}
-
-
 //===Storage==================================================================================================================
 
 
@@ -2182,19 +2006,19 @@ contract Murasaki_Address is Ownable {
     function set_Murasaki_Storage_Extra(address _address) external onlyOwner {
         address_Murasaki_Storage_Extra = _address;
     }
-    function set_Pippel_NFT(address _address) external onlyOwner {
+    function set_address_Pippel_NFT(address _address) external onlyOwner {
         address_Pippel_NFT = _address;
     }
-    function set_Pippel_Function(address _address) external onlyOwner {
+    function set_address_Pippel_Function(address _address) external onlyOwner {
         address_Pippel_Function = _address;
     }
-    function set_Pippel_Codex(address _address) external onlyOwner {
+    function set_address_Pippel_Codex(address _address) external onlyOwner {
         address_Pippel_Codex = _address;
     }
-    function set_Murasaki_TBARegistry(address _address) external onlyOwner {
+    function set_address_Murasaki_TBARegistry(address _address) external onlyOwner {
         address_Murasaki_TBARegistry = _address;
     }
-    function set_Murasaki_TBAAccount(address _address) external onlyOwner {
+    function set_address_Murasaki_TBAAccount(address _address) external onlyOwner {
         address_Murasaki_TBAAccount = _address;
     }
     
@@ -9483,8 +9307,8 @@ contract Pippel_Function is Ownable, ReentrancyGuard, Pausable {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         //***TODO*** debug
-        Pippel_NFT pn = Pippel_NFT(ma.address_Pippel_NFT());
-        //Pippel_NFT pn = Pippel_NFT(0x5B6FbbAF55F8F54E63Ee42A97F4bbD5265f756bb);
+        //Pippel_NFT pn = Pippel_NFT(ma.address_Pippel_NFT());
+        Pippel_NFT pn = Pippel_NFT(0x5B6FbbAF55F8F54E63Ee42A97F4bbD5265f756bb);
 
         // prepare tba
         address _tba = _call_tba(_summoner);
@@ -9511,9 +9335,10 @@ contract Pippel_Function is Ownable, ReentrancyGuard, Pausable {
     }
     // prepare tba
     function _call_tba (uint _summoner) internal view returns (address) {
+        /*
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
-        IERC6551Registry _ERC6551Registry = IERC6551Registry(ma.address_Murasaki_TBARegistry());
-        address _tba = _ERC6551Registry.account(
+        IERC6551Registry ERC6551Registry = IERC6551Registry(ma.address_Murasaki_TBARegistry());
+        address _tba = ERC6551Registry.account(
             ma.address_Murasaki_TBAAccount(), // ERC6551Account address
             //***TODO*** testnet
             4369,  // chain id
@@ -9521,18 +9346,17 @@ contract Pippel_Function is Ownable, ReentrancyGuard, Pausable {
             _summoner,  // token id
             6539    // salt
         );
+        */
         //***TODO*** debug
-        /*
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
-        IERC6551Registry _ERC6551Registry = IERC6551Registry(0x1f00990eFfd45A496f7c7ECD7EF29622b225Dda0);
-        address _tba = _ERC6551Registry.account(
+        IERC6551Registry ERC6551Registry = IERC6551Registry(0x1f00990eFfd45A496f7c7ECD7EF29622b225Dda0);
+        address _tba = ERC6551Registry.account(
             0xEAF42da7683896F5DC625ad09BA0950b33e2FF18, // ERC6551Account address
             4369,  // chain id
             ma.address_Murasaki_Main(), // token contract address, ma
             _summoner,  // token id
             6539    // salt
         );
-        */
         return _tba;
     }
     // prepare daily flower type
@@ -10454,8 +10278,7 @@ contract Pippel_Codex is Ownable, Pausable {
 
 
 //---Position_Storage*
-//***TODO*** suspended
-/*
+//***TODO***
 
 contract Position_Storage is Ownable {
 
@@ -10481,7 +10304,6 @@ contract Position_Storage is Ownable {
         return positions[_summoner];
     }
 }
-*/
 
 
 

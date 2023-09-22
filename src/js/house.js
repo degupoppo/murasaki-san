@@ -86,6 +86,134 @@ contract ERC721 is IERC721 {
 //### 1st
 
 
+    fluffy scoreの表記にpippelを追加する
+
+
+    デプロイ方法の改善
+        murasaki_addressコントラの更新時の動きを確認
+        全コントラのmurasaki_addressアドレスを書き換える方法とタイミングを整理する
+
+
+    HPの更新
+        NFTの最低価格に対して"trustless"なシステムを目指す
+            dapps stakingとbuyback systemでコントラクトでtrustされている
+            
+        
+
+
+    walletの整理
+        coder_wallet        summoner=1, 普段遣いのwallet
+        illustator_wallet   summoner=2, 普段遣いのwallet
+        staking_wallet      EVMへのdApps Staking専用wallet
+        admin_wallet        全コントラをdeployし管理するowner wallet
+        
+
+    投機活動の想定
+        破壊的活動、アービトラージ、利益をかすめ取る活動の想定は？
+            性悪説に則って考えてみる。
+            すべての悪意を想定することはできないので、
+                金銭的動機を中心に考える。
+        早乗り・早抜け
+            mmがSBTであるため、初期の値上がりを期待して購入品を直接売ることはできない
+            発行上限が小さく初期参加者しか入手できないNFTが殆どない
+            早乗りのメリットは人より長くプレイできることが大きい
+        原資回収と恩株化
+            mm購入額に対して、初期段階で入手できるNFTの価値がかなり低い
+            原資回収には普通のプレイでは１年以上必要と思われる
+        マルチアカウント運用
+            NFTや資産をアカウント間で移動するコストが高い
+            タイミングを図って市場を介してNFTを移動することも難しい
+            mmを大量にmintするには購入額が少し高い
+            総じて、マルチアカウント運用する旨味がそれほど大きくない
+                効率プレイ目的の2-3アカウント運用なら許容範囲かもしれない
+                効率プレイすればするほど金銭的には不利になるバランスで。
+                効率性と金銭的インセンティブを二律背反させる
+        コントラクトからの窃盗
+            
+        
+
+
+    TBAについて詰めるII
+        Registryのaccount()に情報を入力すれば該当のTBAアドレスが参照できる
+        Registryでcreate()することでTBAを対象にnonce()やexecuteCall()が可能になる
+        TBAの操作は、account()で入手したアドレスを、AccountのABIで読み込む。
+        Accountはcreate()の前にデプロイしてアドレスを入手しておく。
+        このAccountのアドレスを用いてRegistryでcreate()することになる。
+        create()で生成された、あるいはaccount()で取得できるアドレスは、
+            AccountのABIで読み込むことができる。
+        Registryのcreate()はいつ行うか。
+            TBA内のNFTを動かさなければ行わなくても良いのだが。
+            create()の許可はどうするか。
+            permitted_addressのみ許可すると、別にfunctionコントラを作成可能
+            ある一定の進捗でTBAをmint可能で操作できるようになる、なども可能。
+
+
+    新mm
+        address_Murasaki_Address = '0xDde958185fe000D41132eA084187b91be0e43484'
+        address_trial_Murasaki_Address = '0xc8cB8de3631C768b41Bf8ECaA350Ec941Bc8f280'
+
+
+    dApps Stakingの改善
+        staking walletをコントラクト化できる？
+            staking2.0に対応して84d毎に自動でセルフステーキングできるか。
+        もしくは、EOAでスクリプトにより定期的にEVM側に預ける。
+
+
+    TBAについて詰める
+        TBAはregistryでcreateAccountしないと使えない？
+        TBAのアドレス自体はaccountに必要情報を入れればcreate前でも参照できる
+        ERC6551AccountでexecuteCallするためにはRegistryでcreateが必要？
+        とすると、createはいつのタイミングで行わせるか。
+        また、create済みかどうかはどうやって判定するか。
+        create自体は何回でもエラーなくtx飛ばせるようだ。
+
+
+    ERC6551
+        ERC6551Registry
+            0x1f00990eFfd45A496f7c7ECD7EF29622b225Dda0
+        ERC6551Account
+            0xEAF42da7683896F5DC625ad09BA0950b33e2FF18
+        mmのTBA
+            summoner=1
+                0x738ADfBA566d3D2Ac511f9E5959e80Bc0a151309
+            summoner=2
+                0x7721B7871Fd35d076cdA7C25306980b509f3101c
+        Registryのaccount情報
+            implementation: 0xEAF42da7683896F5DC625ad09BA0950b33e2FF18 //ERC6551Account
+            chainId:        4369
+            tokenContract:  0x4925561b0a524B98F950F07A40F6DFc70B64CaD5  //mm
+            tokenId:        (summoner id)
+            salt:           6539
+
+
+    init更新
+        ERC6551の用意
+            maを対象にデプロイ
+            saltは6539
+        maに以下を追加
+            address public address_Pippel_NFT;
+            address public address_Pippel_Function;
+            address public address_Pippel_Codex;
+            address public address_Murasaki_TBARegistry;
+            address public address_Murasaki_TBAAccount;
+        maに制御関数を用意
+            一括登録、一括callのつじつま合わせを行う。
+            どこで使ってたっけ？
+        python iniの更新
+            上記5コントラの更新コードの整備
+            pn
+                pfをpermit
+                pcを登録
+
+    コントラクトからEVMステーキングが可能か調べる。
+    
+
+    zkEVMコントラクトからwalletのdApps Staking量を参照可能か調べる。
+
+
+    mcへのbufferTreasuryへの登録をinitで登録したことのテスト。
+
+
     Pippel実装
         NFT
             construct
@@ -100,11 +228,12 @@ contract ERC721 is IERC721 {
             afterTransfer()
                 count_of_type更新
                 count_of_rarity更新
-                
         Function
             call_luckBoost(_summoner)
             calc_pippelScore(_summoner)
-            
+                rarity scoreに係数をかけて算出する
+                面倒なので、重複OKとする
+                獲得itemに応じたrarity scoreを加減させる
         Codex
         UIUX
             ぴっぺる出現とmint
@@ -144,6 +273,7 @@ contract ERC721 is IERC721 {
                     balanceOfTypeを実装
                 最終的なpippel score (= +luk)
                     Pippel_Functionにスコアを計算する関数を実装
+                    rarityごとの所持数を集計したcount値を参照する
             web側
                 wallet内の全NFT情報の一覧
                     id, month, day, flowerName, rarity

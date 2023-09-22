@@ -293,7 +293,7 @@ async function update_userItems() {
         _html += "</center></td><td valign='middle' align='center'><center>";
         _html += "<img src='";
         _html += "src/" + dic_items[_item_name]["icon_png"];
-        _html += "' width='32' height='32'> ";
+        _html += "' width='32' height='32'> <br class='br-sp'>";
         _html += _item_name;
         _html += "</center></td><td><center>";
         //_html += _crafted_time;

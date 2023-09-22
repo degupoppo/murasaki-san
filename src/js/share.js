@@ -166,6 +166,15 @@ async function init_web3(){
     address_Stroll = _addresses[35];
     address_Murasaki_Market_Item = _addresses[36];
     address_Murasakisan = _addresses[37];
+    
+    address_Murasaki_Storage_Extra = _addresses[39];
+    
+    address_Pippel_NFT = _addresses[40];
+    address_Pippel_Function = _addresses[41];
+    address_Pippel_Codex = _addresses[42];
+    address_Murasaki_TBARegistry = _addresses[43];
+    address_Murasaki_TBAAccount = _addresses[44];
+    
 
     address_trial_Murasaki_Main = _addresses_trial[1];
     address_trial_Murasaki_Name = _addresses_trial[2];
@@ -261,6 +270,13 @@ async function init_web3(){
 
     //market
     contract_mmt = await new web3.eth.Contract(abi_Murasaki_Market_Item, address_Murasaki_Market_Item);
+    
+    //230922, TBA, pippel
+    contract_pn = await new web3.eth.Contract(abi_Pippel_NFT, address_Pippel_NFT);
+    contract_pf = await new web3.eth.Contract(abi_Pippel_Function, address_Pippel_Function);
+    contract_pc = await new web3.eth.Contract(abi_Pippel_Codex, address_Pippel_Codex);
+    contract_tbar = await new web3.eth.Contract(abi_Murasaki_TBARegistry, address_Murasaki_TBARegistry);
+    contract_tbaa = await new web3.eth.Contract(abi_Murasaki_TBAAccount, address_Murasaki_TBAAccount);
     
 
     //contract, web3wss, for calling

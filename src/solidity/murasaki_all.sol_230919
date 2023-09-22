@@ -1,18 +1,11 @@
 
-
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity =0.8.13;
 
 
-// 230921
-// House of Murasaki-san ver. 0.1.1a
+//=== Basic ==================================================================================================================
 
 
-//===Basic==================================================================================================================
-
-// for remix
-
-// openzeppelin v4.8 for solidity 0.8.13
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v4.8/contracts/security/ReentrancyGuard.sol";
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v4.8/contracts/security/Pausable.sol";
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v4.8/contracts/access/Ownable.sol";
@@ -30,14 +23,6 @@ import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v4.8
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v4.8/contracts/utils/introspection/IERC165.sol";
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v4.8/contracts/token/ERC721/utils/ERC721Holder.sol";
 import "github.com/AstarNetwork/astarbase/contract/example/IAstarBase.sol";
-
-// for ERC6551 from openzeppelin
-import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v4.8/contracts/interfaces/IERC1271.sol";
-import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v4.8/contracts/utils/cryptography/SignatureChecker.sol";
-import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v4.8/contracts/utils/Create2.sol";
-
-// for ERC6551 from https://github.com/BuildBearLabs/Tutorials
-import "github.com/BuildBearLabs/Tutorials/ERC-6551/contracts/lib/Bytecode.sol";
 import "github.com/BuildBearLabs/Tutorials/ERC-6551/contracts/interface/IERC6551Account.sol";
 import "github.com/BuildBearLabs/Tutorials/ERC-6551/contracts/interface/IERC6551Registry.sol";
 
@@ -60,12 +45,6 @@ import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
 import "@astarbase/contract/example/IAstarBase.sol";
-
-import "@openzeppelin/contracts/interfaces/IERC1271.sol";
-import "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
-import "@openzeppelin/contracts/utils/Create2.sol";
-
-import "@Tutorials/ERC-6551/contracts/lib/Bytecode.sol";
 import "@Tutorials/ERC-6551/contracts/interface/IERC6551Account.sol";
 import "@Tutorials/ERC-6551/contracts/interface/IERC6551Registry.sol";
 */
@@ -754,7 +733,7 @@ abstract contract SoulBoundBadge is ERC721 {
 }
 
 
-//===All-in==================================================================================================================
+//=== All-in ==================================================================================================================
 
 
 //---Murasakisan
@@ -1307,7 +1286,7 @@ contract Murasakisan is Ownable, IMurasakisan {
 }
 
 
-//===SBT/NFT==================================================================================================================
+//=== SBT/NFT ==================================================================================================================
 
 
 //---Murasaki_Main
@@ -1856,165 +1835,10 @@ contract Murasaki_Craft is ERC2665, Ownable, Pausable {
 }
 
 
-//===TBA==================================================================================================================
-
-
-//---Murasaki_TBAAccount
-contract Murasaki_TBAAccount is IERC165, IERC1271, IERC6551Account {
-    uint256 private _nonce;
-
-    receive() external payable {}
-
-    function executeCall(
-        address to,
-        uint256 value,
-        bytes calldata data
-    ) external payable returns (bytes memory result) {
-        require(msg.sender == owner(), "Not token owner");
-
-        bool success;
-        (success, result) = to.call{value: value}(data);
-
-        if (!success) {
-            assembly {
-                revert(add(result, 32), mload(result))
-            }
-        }
-
-        _nonce++;
-    }
-
-    function token()
-        public
-        view
-        returns (uint256 chainId, address tokenContract, uint256 tokenId)
-    {
-        uint256 length = address(this).code.length;
-        return
-            abi.decode(
-                Bytecode.codeAt(address(this), length - 0x60, length),
-                (uint256, address, uint256)
-            );
-    }
-
-    function owner() public view returns (address) {
-        (uint256 chainId, address tokenContract, uint256 tokenId) = this
-            .token();
-        if (chainId != block.chainid) return address(0);
-
-        return IERC721(tokenContract).ownerOf(tokenId);
-    }
-
-    function nonce() external view returns (uint256) {
-        return _nonce;
-    }
-
-    function supportsInterface(bytes4 interfaceId) public pure returns (bool) {
-        return (interfaceId == type(IERC165).interfaceId ||
-            interfaceId == type(IERC6551Account).interfaceId);
-    }
-
-    function isValidSignature(
-        bytes32 hash,
-        bytes memory signature
-    ) external view returns (bytes4 magicValue) {
-        bool isValid = SignatureChecker.isValidSignatureNow(
-            owner(),
-            hash,
-            signature
-        );
-
-        if (isValid) {
-            return IERC1271.isValidSignature.selector;
-        }
-
-        return "";
-    }
-}
-
-
-//---Murasaki_TBARegistry
-contract Murasaki_TBARegistry is IERC6551Registry {
-    error InitializationFailed();
-
-    function createAccount(
-        address implementation,
-        uint256 chainId,
-        address tokenContract,
-        uint256 tokenId,
-        uint256 salt,
-        bytes calldata initData
-    ) external returns (address) {
-        bytes memory code = _creationCode(
-            implementation,
-            chainId,
-            tokenContract,
-            tokenId,
-            salt
-        );
-
-        address _account = Create2.computeAddress(
-            bytes32(salt),
-            keccak256(code)
-        );
-
-        if (_account.code.length != 0) return _account;
-
-        _account = Create2.deploy(0, bytes32(salt), code);
-
-        if (initData.length != 0) {
-            (bool success, ) = _account.call(initData);
-            if (!success) revert InitializationFailed();
-        }
-
-        emit AccountCreated(
-            _account,
-            implementation,
-            chainId,
-            tokenContract,
-            tokenId,
-            salt
-        );
-
-        return _account;
-    }
-
-    function account(
-        address implementation,
-        uint256 chainId,
-        address tokenContract,
-        uint256 tokenId,
-        uint256 salt
-    ) external view returns (address) {
-        bytes32 bytecodeHash = keccak256(
-            _creationCode(implementation, chainId, tokenContract, tokenId, salt)
-        );
-
-        return Create2.computeAddress(bytes32(salt), bytecodeHash);
-    }
-
-    function _creationCode(
-        address implementation_,
-        uint256 chainId_,
-        address tokenContract_,
-        uint256 tokenId_,
-        uint256 salt_
-    ) internal pure returns (bytes memory) {
-        return
-            abi.encodePacked(
-                hex"3d60ad80600a3d3981f3363d3d373d3d3d363d73",
-                implementation_,
-                hex"5af43d82803e903d91602b57fd5bf3",
-                abi.encode(salt_, chainId_, tokenContract_, tokenId_)
-            );
-    }
-}
-
-
 //===Storage==================================================================================================================
 
 
-//---Murasaki_Address*
+//---Murasaki_Address
 
 contract Murasaki_Address is Ownable {
 
@@ -2057,11 +1881,6 @@ contract Murasaki_Address is Ownable {
     address public address_Murasakisan;
     address public address_Trial_Converter;
     address public address_Murasaki_Storage_Extra;
-    address public address_Pippel_NFT;
-    address public address_Pippel_Function;
-    address public address_Pippel_Codex;
-    address public address_Murasaki_TBARegistry;
-    address public address_Murasaki_TBAAccount;
     
     function set_Murasaki_Main(address _address) external onlyOwner {
         address_Murasaki_Main = _address;
@@ -2182,25 +2001,10 @@ contract Murasaki_Address is Ownable {
     function set_Murasaki_Storage_Extra(address _address) external onlyOwner {
         address_Murasaki_Storage_Extra = _address;
     }
-    function set_Pippel_NFT(address _address) external onlyOwner {
-        address_Pippel_NFT = _address;
-    }
-    function set_Pippel_Function(address _address) external onlyOwner {
-        address_Pippel_Function = _address;
-    }
-    function set_Pippel_Codex(address _address) external onlyOwner {
-        address_Pippel_Codex = _address;
-    }
-    function set_Murasaki_TBARegistry(address _address) external onlyOwner {
-        address_Murasaki_TBARegistry = _address;
-    }
-    function set_Murasaki_TBAAccount(address _address) external onlyOwner {
-        address_Murasaki_TBAAccount = _address;
-    }
     
     //all getter
-    function get_addresses() external view returns (address[50] memory) {
-        address[50] memory _res;
+    function get_addresses() external view returns (address[40] memory) {
+        address[40] memory _res;
         _res[1] = address_Murasaki_Main;
         _res[2] = address_Murasaki_Name;
         _res[3] = address_Murasaki_Craft;
@@ -2240,16 +2044,11 @@ contract Murasaki_Address is Ownable {
         _res[37] = address_Murasakisan;
         _res[38] = address_Trial_Converter;
         _res[39] = address_Murasaki_Storage_Extra;
-        _res[40] = address_Pippel_NFT;
-        _res[41] = address_Pippel_Function;
-        _res[42] = address_Pippel_Codex;
-        _res[43] = address_Murasaki_TBARegistry;
-        _res[44] = address_Murasaki_TBAAccount;
         return _res;
     }
     
     //all setter
-    function set_addresses(address[50] memory _addresses) external onlyOwner {
+    function set_addresses(address[40] memory _addresses) external onlyOwner {
         address_Murasaki_Main = _addresses[1];
         address_Murasaki_Name = _addresses[2];
         address_Murasaki_Craft = _addresses[3];
@@ -2289,11 +2088,6 @@ contract Murasaki_Address is Ownable {
         address_Murasakisan = _addresses[37];
         address_Trial_Converter = _addresses[38];
         address_Murasaki_Storage_Extra = _addresses[39];
-        address_Pippel_NFT = _addresses[40];
-        address_Pippel_Function = _addresses[41];
-        address_Pippel_Codex = _addresses[42];
-        address_Murasaki_TBARegistry = _addresses[43];
-        address_Murasaki_TBAAccount = _addresses[44];
     }
 }
 
@@ -2892,7 +2686,7 @@ contract Murasaki_Storage_Extra is Ownable {
 //===Function==================================================================================================================
 
 
-//---Share*
+//---Share
 
 contract Murasaki_Function_Share is Ownable, Pausable {
 
@@ -3065,13 +2859,12 @@ contract Murasaki_Function_Share is Ownable, Pausable {
                 }
             }
         }
-        
-        // 230920
-        // pippe score addition
-        // 10 pippel score = 1 fluffy score = 0.01 LUK
-        Pippel_Function pf = Pippel_Function(ma.address_Pippel_Function());
-        _precious_score += pf.calc_pippelScore(_summoner) / 10;
-        
+        /*
+        //nui, fluffy * 60
+        if (_balance_of_type[197] > 0) {
+            _precious_score += _balance_of_type[197] * 2*60 +30 +2;
+        }
+        */
         //level cap, 800/Lv20 = 40/Lv
         uint _lv = ms.level(_summoner);
         if (_precious_score > _lv*40) {
@@ -3473,7 +3266,7 @@ contract Murasaki_Function_Summon_and_LevelUp is Ownable, ReentrancyGuard, Pausa
     }
 
     //level-up
-    event Level_up(uint indexed _summoner, uint _level, uint str_add, uint dex_add, uint int_add, uint luk_add);
+    event Level_up(uint indexed _summoner, uint _level, str_add, dex_add, int_add, luk_add);
     function level_up (uint _summoner) external nonReentrant whenNotPaused {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
@@ -6655,7 +6448,7 @@ contract Murasaki_Function_Music_Practice is Ownable, ReentrancyGuard, Pausable 
 }
 
 
-//---Staking_Reward
+//---Staking_Reward*
 
 // DappsStaking interface for EVM
 // 0x0000000000000000000000000000000000005001
@@ -9391,7 +9184,7 @@ contract Stroll is Ownable, ReentrancyGuard, Pausable {
 }
 
 
-//---Pippel_Function*
+//---Pippel_Function
 
 contract Pippel_Function is Ownable, ReentrancyGuard, Pausable {
 
@@ -9409,54 +9202,26 @@ contract Pippel_Function is Ownable, ReentrancyGuard, Pausable {
         address_Murasaki_Address = _address;
     }
     
-    // variant
+    // varinat
+    uint public blockNumber_per_day = 7200;
     uint private salt = 6539;
+    function _set_blockNumber_per_day(uint _val) external onlyOwner {
+        blockNumber_per_day = _val;
+    }
     function _update_salt(uint _summoner) external onlyOwner {
         salt = _seed(_summoner);
     }
     
-    // interval
-    mapping (uint => uint) private lastMintTime;
-    uint public mintInterval = 3600 + 300;   //sec, 1hr + 5min
-    function _set_mintInterval(uint _val) external onlyOwner {
-        mintInterval = _val;
-    }    
-    
-    // flag, enable calling next hour of pippel appearing
-    bool private flag_enableCallPippelHour;
-    function _set_enableCallPippelHour(bool _bool) external onlyOwner {
-        flag_enableCallPippelHour = _bool;
-    }
-    
     // check pippel appearance
     function check_pippel (uint _summoner) public view returns (bool) {        
-        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
-        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         bool _bool;
-        // prepare interval
-        uint _interval = block.timestamp - lastMintTime[_summoner];
-        // current hour converted from block.number, 0-23
-        (,,,uint _current_hr,,) = parseTimestamp(block.timestamp);
-        // random hour resets every day, 0-23
-        uint _random_hr = _dn(_summoner, 24);
-        // when current hr == random hr, pippel appearing for 1 hr
-        // when trial version, no pippel
         if (
-            _random_hr == _current_hr 
-            && _interval >= mintInterval
-            && mfs.isTrial() == false
+            // random hour resets every day == current hour converted from block.number
+            _dn(_summoner, 24) == block.number % blockNumber_per_day / (blockNumber_per_day/24)
         ) {
             _bool = true;
         }
         return _bool;
-    }
-
-    // call next pippel hour
-    // require flag
-    function call_nextPippelHour(uint _summoner) external view returns (uint) {
-        require(flag_enableCallPippelHour);
-        uint _random_hr = _dn(_summoner, 24);
-        return _random_hr;
     }
     
     // mint daily flower from pippel
@@ -9473,94 +9238,20 @@ contract Pippel_Function is Ownable, ReentrancyGuard, Pausable {
         require(mfs.check_owner(_summoner, msg.sender));
         // mint random flower
         _mint_pippel(_summoner);
-        // update last mint time
-        lastMintTime[_summoner] = block.timestamp;
     }
-
-    // internal
-    // mint daily flower NFT into TBA
     function _mint_pippel (uint _summoner) internal {
-        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
-        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
-        //***TODO*** debug
-        Pippel_NFT pn = Pippel_NFT(ma.address_Pippel_NFT());
-        //Pippel_NFT pn = Pippel_NFT(0x5B6FbbAF55F8F54E63Ee42A97F4bbD5265f756bb);
-
-        // prepare tba
-        address _tba = _call_tba(_summoner);
-
-        // get daily flower id
-        uint _flower_type = _call_dailyFlowerType();
-
-        // prepare other parameters
-        uint _flowerSeed = mfs.seed(_summoner);
-        string memory _memo = "meet a pippel";
-
-        // define rarity
-        uint _rarity_type = _get_flowerRarity(_summoner);
-
-        // mint pippel NFT
-        pn.mint(
-            _flower_type,
-            _summoner,
-            _tba,
-            _flowerSeed,
-            _memo,
-            _rarity_type
+        IERC6551Registry ERC6551Registry = IERC6551Registry();
+        address _tba = ERC6551Registry.account(
+            {address},
+            {chainId},
+            {tokenContract},
+            {tokenId},
+            {salt}
         );
+        // ***TODO*** mint
+        // mint daily flower NFT into TBA
     }
-    // prepare tba
-    function _call_tba (uint _summoner) internal view returns (address) {
-        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
-        IERC6551Registry _ERC6551Registry = IERC6551Registry(ma.address_Murasaki_TBARegistry());
-        address _tba = _ERC6551Registry.account(
-            ma.address_Murasaki_TBAAccount(), // ERC6551Account address
-            //***TODO*** testnet
-            4369,  // chain id
-            ma.address_Murasaki_Main(), // token contract address, ma
-            _summoner,  // token id
-            6539    // salt
-        );
-        //***TODO*** debug
-        /*
-        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
-        IERC6551Registry _ERC6551Registry = IERC6551Registry(0x1f00990eFfd45A496f7c7ECD7EF29622b225Dda0);
-        address _tba = _ERC6551Registry.account(
-            0xEAF42da7683896F5DC625ad09BA0950b33e2FF18, // ERC6551Account address
-            4369,  // chain id
-            ma.address_Murasaki_Main(), // token contract address, ma
-            _summoner,  // token id
-            6539    // salt
-        );
-        */
-        return _tba;
-    }
-    // prepare daily flower type
-    function _call_dailyFlowerType () internal view returns (uint) {
-        uint _now = block.timestamp;
-        (,uint _month, uint _day,,,) = parseTimestamp(_now);
-        uint _flower_type = day2id(_month, _day);
-        return _flower_type;
-    }
-    // define flower rarity
-    function _get_flowerRarity (uint _summoner) internal view returns (uint) {
-        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
-        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
-        uint _rnd = mfs.dn(_summoner, 100);
-        uint _rarity_type;
-        if (_rnd < 10) {        // 10%, closed
-            _rarity_type = 1;
-        } else if (_rnd < 30) { // 20%, opening
-            _rarity_type = 2;
-        } else if (_rnd < 70) { // 40%, blossoming
-            _rarity_type = 3;
-        } else if (_rnd < 90) { // 20%, blooming
-            _rarity_type = 4;
-        } else if (_rnd < 100) { // 10% bloomed
-            _rarity_type = 5;
-        }
-        return _rarity_type;
-    }
+
 
     // UNIX -> UTC+0, supported by ChatGPT
     function parseTimestamp(uint256 timestamp) public pure returns (
@@ -9623,6 +9314,7 @@ contract Pippel_Function is Ownable, ReentrancyGuard, Pausable {
         return (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0));
     }
     
+    
     // month/day -> id[1-366], supported by ChatGPT
     function day2id(uint256 month, uint256 day) public pure returns (uint256) {
         require(month >= 1 && month <= 12, "Invalid month");
@@ -9638,6 +9330,7 @@ contract Pippel_Function is Ownable, ReentrancyGuard, Pausable {
 
         return dayCount + day;
     }
+
 
     // id[1-366] -> month/day, supported by ChatGPT
     function id2day(uint256 id) public pure returns (uint256 month, uint256 day) {
@@ -9660,10 +9353,9 @@ contract Pippel_Function is Ownable, ReentrancyGuard, Pausable {
         return (month, day);
     }
 
-    // random number
+
+    // random
     // reset per a day, depneds on summonerId and msg.sender, and salt
-    // update: ignore msg.sender to check pippel from other player
-    // depends on summonerId and salt
     function _dn(uint _summoner, uint _number) internal view returns (uint) {
         return _seed(_summoner) % _number;
     }
@@ -9675,36 +9367,18 @@ contract Pippel_Function is Ownable, ReentrancyGuard, Pausable {
             string(
                 abi.encodePacked(
                     _summoner,
-                    //msg.sender,
-                    (block.timestamp / 86400),
+                    msg.sender,
+                    (block.number / blockNumber_per_day),
                     salt
                 )
             )
         );
-    }
-
-    // calc pippel score
-    // 10 pippel score = 1 fluffy score = 0.01 LUK
-    function calc_pippelScore (uint _summoner) public view returns (uint) {
-        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
-        Pippel_NFT pn = Pippel_NFT(ma.address_Pippel_NFT());
-        // call tba of summoner and call number of rarity flowers of tba
-        // *not owner's wallet, but summoner's tba
-        address _tba = _call_tba(_summoner);
-        uint[10] memory _scores = pn.get_balance_of_rarity(_tba);
-        uint _score;
-        _score += _scores[1] * 6;   // closed, -40%, +6
-        _score += _scores[2] * 8;   // opening, -20%, +8
-        _score += _scores[3] * 10;  // blossoming, 0%, +10
-        _score += _scores[4] * 12;  // blooming, +20%, +12
-        _score += _scores[5] * 14;  // bloomed, +40%, +14
-        return _score;
-    }
+    }    
 }
 
 
 
-//---Pippel_NFT*
+//---Pippel_NFT
 
 contract Pippel_NFT is ERC2665, Ownable, Pausable {
 
@@ -9757,7 +9431,7 @@ contract Pippel_NFT is ERC2665, Ownable, Pausable {
     mapping(uint => flower) public flowers;
     
     // wallet info
-    mapping(address => uint[500]) public balance_of_type;
+    mapping(address => uint[400]) public balance_of_type;
     mapping(address => uint[10]) public balance_of_rarity;
 
     // flower statics
@@ -9838,7 +9512,7 @@ contract Pippel_NFT is ERC2665, Ownable, Pausable {
     // count number of flower types
     function number_of_flowerTypes (address _wallet) external view returns (uint) {
         uint _sum = 0;
-        for (uint i = 0; i < 500; i++) {
+        for (uint i = 0; i < 400; i++) {
             if (balance_of_type[_wallet][i] > 0) {
                 _sum += 1;
             }
@@ -9949,14 +9623,11 @@ contract Pippel_NFT is ERC2665, Ownable, Pausable {
     }
 
     //call items as array, need to write in Craft contract
-    function get_balance_of_type(address _wallet) public view returns (uint[500] memory) {
+    function get_balance_of_type(address _wallet) public view returns (uint[400] memory) {
         return balance_of_type[_wallet];
     }
     function balanceOfType(address _wallet, uint _item_type) external view returns (uint) {
         return balance_of_type[_wallet][_item_type];
-    }
-    function get_balance_of_rarity(address _wallet) public view returns (uint[10] memory) {
-        return balance_of_rarity[_wallet];
     }
 
     // ### Transfer fees ###
@@ -10038,7 +9709,7 @@ contract Pippel_NFT is ERC2665, Ownable, Pausable {
 
 
 
-//---Pippel_Codex*
+//---Pippel_Codex
 
 contract Pippel_Codex is Ownable, Pausable {
 
@@ -10453,10 +10124,10 @@ contract Pippel_Codex is Ownable, Pausable {
 }
 
 
-//---Position_Storage*
-//***TODO*** suspended
-/*
+//---Position_Storage
+//***TODO***
 
+/*
 contract Position_Storage is Ownable {
 
     //address
@@ -10479,6 +10150,140 @@ contract Position_Storage is Ownable {
     //get positions
     function get_positions (uint _summoner) external view returns (string memory) {
         return positions[_summoner];
+    }
+}
+*/
+
+
+
+//---Murasaki_Ranking
+//***TODO***
+/*
+
+contract Murasaki_Storage_Ranking is Ownable, ReentrancyGuard, Pausable {
+    
+    //pausable
+    function pause() external onlyOwner {
+        _pause();
+    }
+    function unpause() external onlyOwner {
+        _unpause();
+    }
+
+    //address
+    address public address_Murasaki_Address;
+    function _set_Murasaki_Address(address _address) external onlyOwner {
+        address_Murasaki_Address = _address;
+    }
+
+    //ranking summoner
+    uint[10] public ranking_exp;
+    uint[10] public ranking_mining;
+    uint[10] public ranking_farming;
+    uint[10] public ranking_crafting;
+    uint[10] public ranking_fluffy;
+    uint[10] public ranking_strolling;
+    uint[10] public ranking_mail;
+    uint[10] public ranking_score;
+    uint[10] public ranking_practicing;
+
+    //ranking value
+    uint[10] public ranking_exp_value;
+    uint[10] public ranking_mining_value;
+    uint[10] public ranking_farming_value;
+    uint[10] public ranking_crafting_value;
+    uint[10] public ranking_fluffy_value;
+    uint[10] public ranking_strolling_value;
+    uint[10] public ranking_mail_value;
+    uint[10] public ranking_score_value;
+    uint[10] public ranking_practicing_value;
+
+    //getter
+    function get_ranking () external view returns (
+        uint[10] memory,
+        uint[10] memory,
+        uint[10] memory,
+        uint[10] memory,
+        uint[10] memory,
+        uint[10] memory,
+        uint[10] memory,
+        uint[10] memory,
+        uint[10] memory
+    ) {
+        return (
+            ranking_exp,
+            ranking_mining,
+            ranking_farming,
+            ranking_crafting,
+            ranking_fluffy,
+            ranking_strolling,
+            ranking_mail,
+            ranking_score,
+            ranking_practicing
+        );
+    }
+
+    //update ranking
+    function update_ranking (uint _summoner) external {
+        _update_ranking_exp(_summoner);
+    }
+    
+    //internal functions
+    function _update_ranking_exp (uint _summoner) internal {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage_Score mss = Murasaki_Storage_Score(ma.address_Murasaki_Storage_Score());
+        uint _total_exp_challenger = mss.total_exp_gained(_summoner);
+        uint _total_exp_ranker;
+        for (let i=9; i>=0; i--) {
+            _total_exp_ranker = ranking_exp_value[i];
+            if (_total_exp_challenger > _total_exp_ranker) {
+                ranking_exp[i] = _summoner;
+            }
+        }
+    }
+}
+
+
+contract Murasaki_Storage_Ranking is Ownable, ReentrancyGuard, Pausable {
+
+    //pausable
+    function pause() external onlyOwner {
+        _pause();
+    }
+    function unpause() external onlyOwner {
+        _unpause();
+    }
+
+    //address
+    address public address_Murasaki_Address;
+    function _set_Murasaki_Address(address _address) external onlyOwner {
+        address_Murasaki_Address = _address;
+    }
+
+    //define struct
+    struct Player {
+        uint256 _summoner;
+        uint256 _score;
+    }
+
+    //storage
+    Player[5] public topPlayers_exp;
+
+    //update ranking
+    function updateRanking_exp(uint _summoner, uint _score) public {
+        Player memory newPlayer = Player(_summoner, _score);
+        // Check if the new score is higher than any of the existing scores
+        for (uint256 i = 0; i < topPlayers_exp.length; i++) {
+            if (newPlayer._score > topPlayers_exp[i]._score) {
+                // Shift the lower scores down the ranking
+                for (uint256 j = topPlayers_exp.length - 1; j > i; j--) {
+                    topPlayers_exp[j] = topPlayers_exp[j - 1];
+                }
+                // Update the new score at the appropriate position
+                topPlayers_exp[i] = newPlayer;
+                break;
+            }
+        }
     }
 }
 */
