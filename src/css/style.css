@@ -123,3 +123,8 @@ https://labo.webis.co.jp/2021/04/br-sp/
 }
 
 
+// 長い単語対策
+body {
+overflow-wrap:break-word;
+word-wrap:break-word;
+}
