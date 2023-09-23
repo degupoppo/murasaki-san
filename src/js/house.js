@@ -20901,7 +20901,8 @@ function calc_fps() {
         time_forFPS = _now;
         let _fps = (turn - turn_forFPS);
         turn_forFPS = turn; 
-        text_fps.setText(_fps + " fps");
+        //text_fps.setText(_fps + " fps");
+        text_fps.setText(_fps + " fps" + ", " + turn);
     }
 }
 
