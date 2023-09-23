@@ -4587,6 +4587,12 @@ async function contract_update_dynamic_status(_summoner) {
         count_sync += 1;
         return 0;
     }
+    
+    // check wallet unlock
+    let _walletNow = await web3.eth.getAccounts();
+    if (_walletNow.length == 0) {
+        return 0;
+    }
 
     let _res;
 
@@ -4630,7 +4636,7 @@ async function contract_update_dynamic_status(_summoner) {
     }
     local_fluffy_count = _count;
 
-    //***TODO*** debug
+    //***TODO*** debug flag
     if (flag_debug == 1) {
         for (let i = 1; i <= 64; i++) {
             local_items[i] += 1;
@@ -4652,7 +4658,8 @@ async function contract_update_dynamic_status(_summoner) {
     } else if (flag_debug == 4) {
         local_items[41] += 1;
     }
-    //***debug2***
+    
+    //***todo*** debug item
     local_items[28] += 1;
     local_items[44] += 1;
 
