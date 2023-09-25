@@ -19826,12 +19826,19 @@ function update_checkItem(this_scene) {
             .setDepth(3300+2)
             .setAlpha(1)
             .setScale(0.3)
-            .setAngle(-20)
+            .setAngle(0)
             .setVisible(false);
+        neon_ufo.angleAdd = 1;
         neon_ufo.update = () => {
             neon_ufo.x -= 0.5;
             if (neon_ufo.x < -500) {
                 neon_ufo.x = 2000;
+            }
+            neon_ufo.angle += neon_ufo.angleAdd;
+            if (neon_ufo.angle >= 10) {
+                neon_ufo.angleAdd = -0.25;
+            } else if (neon_ufo.angle <= -20) {
+                neon_ufo.angleAdd = 0.25;
             }
         };
         group_update.add(neon_ufo);
@@ -21385,6 +21392,7 @@ class Loading_overlap extends Phaser.Scene {
         this.load.spritesheet("nyui_loading", "src/png/nyui_moving.png", {frameWidth: 370, frameHeight: 320});
         this.load.spritesheet("nyui_loading2", "src/png/nyui_happy.png", {frameWidth: 370, frameHeight: 320});
         this.load.spritesheet("ohana_loading", "src/particle/flowers.png", {frameWidth: 370, frameHeight: 320});
+        this.load.image("opening_logo", "src/png/opening_logo.jpg");
     }
     
     create() {
@@ -21457,7 +21465,7 @@ class Opeaning extends Phaser.Scene {
 
     preload() {
         console.log("scene: Opeaning");
-        this.load.image("opening_logo", "src/png/opening_logo.jpg");
+        //this.load.image("opening_logo", "src/png/opening_logo.jpg");
     }
     
     create(){
