@@ -1,5 +1,4 @@
 
-
 //===Header==================================================================================
 
 /*
@@ -87,6 +86,40 @@ contract ERC721 is IERC721 {
 //### 1st
 
 
+    UFOの音
+    月の猫の音
+    ゲームボーイの音
+    ルンバの音
+    風車の音
+
+
+    NFT売買に対するゲーム性の付与について考える
+        NFTのマーケットは、リタイアプレイヤーの資産整理や、
+            効率プレイヤーの課金の場にしかならないだろうか。
+        NFTの売買自体に、何かしらのゲーム性や動機づけがあるとよいだろうか。
+        fluffyのトレードはその一例か。
+        craft itemのトレード自体は余り動機がつかず、リタイア時の売却が主だろうか。
+        craft itemに何かしらの差別化ができれば、良いだろうか。
+            属性が異なるなど？
+            属性によって効率が異なるなど。
+            seedから計算できる何かしらの、4～12種程度の属性。
+
+
+    Braveでチェーンデータが取得できないことへの対策を検討
+        turnは進む
+        walletを認証すればtxも飛ばせる
+        しかしなぜかチェーンデータの取得だけ停止している
+        能動的な取得なら可能なのか？
+        awaitが遅延しているのか？
+        あとから復旧させる方法は？
+        開きっぱなしで、wallet再認証のみでプレイを継続できれば、
+            かなりUIは改善するのだが。
+        現状、walletロックは関係なく、一度ブラウザが非アクティブになれば、
+            その後sync countが99のまま更新されなくなってしまう。
+        例えばfirefoxではフォーカスを戻せばsyncされるのだが、何が違うのだろうか。
+        braveでエラーメッセージを見る方法は？
+    
+
     fluffy scoreの表記にpippelを追加する
 
 
@@ -98,8 +131,6 @@ contract ERC721 is IERC721 {
     HPの更新
         NFTの最低価格に対して"trustless"なシステムを目指す
             dapps stakingとbuyback systemでコントラクトでtrustされている
-            
-        
 
 
     walletの整理
@@ -4590,10 +4621,12 @@ async function contract_update_dynamic_status(_summoner) {
     }
     
     // check wallet unlock
+    /*
     let _walletNow = await web3.eth.getAccounts();
     if (_walletNow.length == 0) {
         return 0;
     }
+    */
 
     let _res;
 
@@ -4663,6 +4696,8 @@ async function contract_update_dynamic_status(_summoner) {
     //***todo*** debug item
     local_items[28] += 1;
     local_items[44] += 1;
+    local_items[11] += 1;
+    local_items[42] += 1;
 
     //call dynamic status from chain
     let _all_dynamic_status = 0;
@@ -5940,6 +5975,7 @@ function update_astarPrice() {
 async function update_txCount() {
     tx_counts.shift();
     let _last_txCount = await web3.eth.getBlockTransactionCount(local_blockNumber);
+    //_last_txCount = Math.random()*10;
     tx_counts.push(_last_txCount);
     if (tx_counts_forPinwheel <= 0) {
         tx_counts_forPinwheel = tx_counts.reduce((a,b)=>Math.max(a,b));
@@ -7051,7 +7087,7 @@ class Neon extends Phaser.GameObjects.Sprite{
             //out of area check, y
             if (this.y > 450 && this.moving_degree > 180) {
                 this.moving_degree = 360 - this.moving_degree;
-            }else if (this.y < 100 && this.moving_degree < 180) {
+            }else if (this.y < 200 && this.moving_degree < 180) {
                 this.moving_degree = 360 - this.moving_degree;
             }
             //minus check
@@ -9181,7 +9217,7 @@ class PresentBox extends Phaser.GameObjects.Sprite{
         _text += " from " + this.summoner_from + " ";
         this.text = scene.add.text(
             this.x, 
-            this.y-40,
+            this.y-55,
             _text, 
             {font: "20px Arial", fill: "#000000", backgroundColor: "#ffffff"}
         ).setOrigin(0.5).setDepth(2000).setVisible(false);
@@ -9190,9 +9226,11 @@ class PresentBox extends Phaser.GameObjects.Sprite{
                 this.text.visible = true;
             }
             sound_button_select.play();
+            this.setFrame(1);
         })
         this.on("pointerout", () => {
             this.text.visible = false;
+            this.setFrame(0);
         });
     }
     
@@ -10258,20 +10296,51 @@ class WoodCube extends Phaser.GameObjects.Sprite{
 function summon_twinkles(scene, _mode, _num, _x=500, _y=600){
     //***TODO*** img
     let _img;
+    // 0-11
     let _li_twinkle = [
-        "dummy",
+        "twinkle_01",
+        "twinkle_01",
+        "twinkle_01",
+        "twinkle_01",
+        "twinkle_01",
+        "twinkle_01",
+        "twinkle_01",
+        "twinkle_01",
+        "twinkle_01",
+        "twinkle_01",
+        "twinkle_01",
         "twinkle_01",
     ];
     let _li_sparkle = [
-        "dummy",
+        "sparkle_01",
+        "sparkle_01",
+        "sparkle_01",
+        "sparkle_01",
+        "sparkle_01",
+        "sparkle_01",
+        "sparkle_01",
+        "sparkle_01",
+        "sparkle_01",
+        "sparkle_01",
+        "sparkle_01",
         "sparkle_01",
     ];
     let _li_glitter = [
-        "dummy",
+        "glitter_01",
+        "glitter_01",
+        "glitter_01",
+        "glitter_01",
+        "glitter_01",
+        "glitter_01",
+        "glitter_01",
+        "glitter_01",
+        "glitter_01",
+        "glitter_01",
+        "glitter_01",
         "glitter_01",
     ];
     //debug
-    _num = 1;
+    //_num = 1;
     if (_mode == "twinkle"){
         _img = _li_twinkle[_num];
     } else if (_mode == "sparkle") {
@@ -10464,7 +10533,8 @@ function summon_pinwheel (scene, _x=350, _y=750) {
         0.7+Math.random()*0.25, 
         0.05+Math.random()*0.2, 
         3+Math.random()*3,
-        1
+        1,
+        0
     );
     let _pin2 = new Pinwheel(
         scene, _x, _y, "item_pinwheel", 
@@ -10473,7 +10543,8 @@ function summon_pinwheel (scene, _x=350, _y=750) {
         0.7+Math.random()*0.25, 
         0.05+Math.random()*0.2, 
         3+Math.random()*3,
-        0
+        0,
+        1
     );
     let _pin3 = new Pinwheel(
         scene, _x, _y, "item_pinwheel", 
@@ -10482,7 +10553,8 @@ function summon_pinwheel (scene, _x=350, _y=750) {
         0.7+Math.random()*0.25, 
         0.05+Math.random()*0.2, 
         3+Math.random()*3,
-        0
+        0,
+        2
     );
     group_pinwheel.add(_pin1);
     group_pinwheel.add(_pin2);
@@ -10501,7 +10573,8 @@ class Pinwheel extends Phaser.GameObjects.Sprite{
         _dynamic_friction, 
         _static_friction,
         _coff,
-        _flag_primary
+        _flag_primary,
+        _frameNo
     ){
         super(scene, _x, _y, _img);
         this.x = _x + _delta_x;
@@ -10531,17 +10604,24 @@ class Pinwheel extends Phaser.GameObjects.Sprite{
                 let _pos = [group_pinwheel.x, group_pinwheel.y];
                 localStorage.setItem("pos_item_pinwheel", JSON.stringify(_pos));
             }
+            // when dragend, spin all wheels
+            group_pinwheel.children.iterate(function(child){
+                child.tx_counts_forPinwheel = 1 + Math.random()*3;
+            });
+            //this.tx_counts_forPinwheel = 3+Math.random()*7;
         });
         this.on("pointerdown", () => {
+            /*
             if (group_pinwheel.flag_spin == 0) {
                 group_pinwheel.flag_spin = 1;
             } else {
                 group_pinwheel.flag_spin = 0;
             }
+            */
         });
-        this.flag_spin = 0;
+        this.flag_spin = 1;
         this.count = 0;
-        this.scale = 0.13;
+        this.scale = 0.2;
         this.flag_drag = 0;
         group_update.add(this);
         this.depth = this.y;
@@ -10551,6 +10631,7 @@ class Pinwheel extends Phaser.GameObjects.Sprite{
         this.tx_counts_forPinwheel = -1;
         this.previous_tx_counts_forPinwheel = -1;
         this.flag_primary = _flag_primary;
+        this.setFrame(_frameNo);
     }    
     //### update()
     update(){
@@ -14219,6 +14300,8 @@ function preload(scene) {
     scene.load.image("item_window_night_closed", "src/png/item_window_night_closed.png");
     scene.load.image("item_newspaper", "src/png/item_newspaper.png");
     scene.load.image("item_book", "src/png/item_book.png");
+    scene.load.spritesheet("item_presentboxes", "src/png/item_presentboxes.png", {frameWidth: 370, frameHeight: 320});
+    /*
     scene.load.image("item_presentbox_01", "src/png/item_presentbox_01.png");
     scene.load.image("item_presentbox_02", "src/png/item_presentbox_02.png");
     scene.load.image("item_presentbox_03", "src/png/item_presentbox_03.png");
@@ -14227,6 +14310,7 @@ function preload(scene) {
     scene.load.image("item_presentbox_06", "src/png/item_presentbox_06.png");
     scene.load.image("item_presentbox_07", "src/png/item_presentbox_07.png");
     scene.load.image("item_presentbox_08", "src/png/item_presentbox_08.png");
+    */
     scene.load.image("item_box", "src/png/item_box.png");
     scene.load.image("item_crayon", "src/png/item_crayon.png");
     scene.load.spritesheet("item_fishbowl_list", "src/png/item_fishbowl_list.png", {frameWidth: 370, frameHeight: 320});
@@ -14239,7 +14323,7 @@ function preload(scene) {
     scene.load.image("item_wreath", "src/png/item_wreath.png");    
     scene.load.image("item_cushion", "src/png/item_cushion.png");
     scene.load.image("item_woodcube", "src/png/item_woodcube.png");
-    scene.load.image("item_pinwheel", "src/png/item_pinwheel.png");
+    scene.load.spritesheet("item_pinwheel", "src/png/item_pinwheel.png", {frameWidth: 370, frameHeight: 320});
     scene.load.spritesheet("item_candle", "src/png/item_candle.png", {frameWidth: 370, frameHeight: 320});
     scene.load.image("item_retrogame", "src/png/item_retrogame.png");
     scene.load.spritesheet("retro_ascii", "src/png/retro_ascii.png", {frameWidth: 100, frameHeight: 100});
@@ -14386,6 +14470,12 @@ function preload(scene) {
     scene.load.image("stroll_during_03_tree2", "src/png/stroll_during_03_tree2.png");
     scene.load.image("stroll_during_03_baloon", "src/png/stroll_during_03_baloon.png");
     scene.load.image("stroll_during_03_mountain", "src/png/stroll_during_03_mountain.png");
+
+
+    //### neon
+    scene.load.spritesheet("neon_ufo", "src/png/neon_ufo.png", {frameWidth: 370, frameHeight: 320});
+    scene.load.spritesheet("neon_moon", "src/png/neon_moon.png", {frameWidth: 370, frameHeight: 320});
+    scene.load.image("neon_saturn", "src/png/neon_saturn.png");
 
 
     //---sounds
@@ -15179,6 +15269,14 @@ function create(scene) {
         repeat: -1
     });
     
+    //### neon
+    scene.anims.create({
+        key: "neon_ufo",
+        frames: scene.anims.generateFrameNumbers("neon_ufo", {frames:[0,1]}),
+        frameRate: 1,
+        repeat: -1
+    });
+    
     
     //---buttons
     
@@ -15886,7 +15984,7 @@ function create(scene) {
 	    .setInteractive({useHandCursor: true})
 	    //.on('pointerdown', () => {scene.rexUI.edit(text_kanban);}, scene)
 	    .on('pointerdown', () => {game.scene.scenes[1].rexUI.edit(text_kanban);}, scene)
-        .setDepth(2000);
+        .setDepth(3301);
     text_mint_name = scene.add.text(_x+80, _y-5, "[MINT NAME]", {font: "17px Arial", fill: "#000000"})
         .setInteractive({useHandCursor: true})
         .on("pointerover", () => text_mint_name.setStyle({ fontSize: 17, fontFamily: "Arial", fill: '#ffff00' }))
@@ -16578,8 +16676,8 @@ function create(scene) {
             }
         }
         //***TODO*** test
-        summon_twinkles(scene, "twinkle", 1, 200 + Math.random() * 800, 520 + Math.random() * 200);
-        summon_twinkles(scene, "glitter", 1, 200 + Math.random() * 800, 520 + Math.random() * 200);
+        //summon_twinkles(scene, "twinkle", 1, 200 + Math.random() * 800, 520 + Math.random() * 200);
+        //summon_twinkles(scene, "glitter", 1, 200 + Math.random() * 800, 520 + Math.random() * 200);
         //summon_twinkles(scene, "glitter", 1, 150+2*20, 560);
     }
 }
@@ -17072,7 +17170,7 @@ function update_parametersWithoutAnimation(this_scene) {
         _text += _owner1 + "..." + _owner2 + ", ";
         _text += local_street + ", " + local_city + ", ";
         //_text += "Astar EVM, United Parachains of Polkadot, WEB3.";
-        _text += "Astar EVM, Polkadot, WEB3." + " (" + local_house_price + " $ASTR)";
+        _text += "Astar Substrate EVM, Polkadot, Web3." + " (" + local_house_price + " $ASTR)";
         text_wallet.setText(_text);
         if (gamemode == "regular") {
             text_wallet.setColor("#FF4264");
@@ -17084,7 +17182,7 @@ function update_parametersWithoutAnimation(this_scene) {
         _text += _owner1 + "..." + _owner2 + ", ";
         _text += local_street + ", " + local_city + ", ";
         //_text += "Astar EVM, United Parachains of Polkadot, WEB3.";
-        _text += "Astar EVM, Polkadot, WEB3." + " (" + local_house_price + " $ASTR)";
+        _text += "Astar Substrate EVM, Polkadot, Web3." + " (" + local_house_price + " $ASTR)";
         _text += " (not owner)";
         text_wallet.setText(_text);
         text_wallet.setColor("blue");
@@ -19440,7 +19538,7 @@ function update_checkItem(this_scene) {
         item_wreath_click = 0;
         item_wreath = this_scene.add.sprite(_x, _y, "item_wreath")
             .setOrigin(0.5)
-            .setScale(0.2)
+            .setScale(0.275)
             .setInteractive({ useHandCursor: true, draggable: true })
             .on("pointerdown", () => {
                 item_wreath_text1.setVisible(true);
@@ -19582,7 +19680,7 @@ function update_checkItem(this_scene) {
         murasaki_neon = new Neon(
             this_scene, 
             50 + Math.random()*900, 
-            50 + Math.random()*350, 
+            200 + Math.random()*200, 
             "murasaki_neon_right", 
             "murasaki_neon_left"
         ).setVisible(false)
@@ -19645,6 +19743,23 @@ function update_checkItem(this_scene) {
                 if (typeof item_wall_sticker != "undefined" && local_score >= 1800000) {
                     item_wall_sticker_neon.setVisible(true);
                 }
+                if (local_dapps_staking_amount >0) {
+                    neon_moon.setVisible(true);
+                }
+                if (local_dapps_staking_amount >1000) {
+                    neon_saturn.setVisible(true);
+                }
+                if (local_dapps_staking_amount >3000) {
+                    let _tmp = Math.random()*100;
+                    if (_tmp >= 70) {
+                        neon_moon.setFrame(1);
+                    } else {
+                        neon_moon.setFrame(0);
+                    }
+                }
+                if (local_dapps_staking_amount >5000) {
+                    neon_ufo.setVisible(true);
+                }
                 flag_onLight = false;
             //when light off -> light on
             } else {
@@ -19680,10 +19795,41 @@ function update_checkItem(this_scene) {
                 if (typeof item_wall_sticker != "undefined" && local_score >= 1800000) {
                     item_wall_sticker_neon.setVisible(false);
                 }
+                neon_ufo.setVisible(false);
+                neon_moon.setVisible(false);
+                neon_saturn.setVisible(false);
                 flag_onLight = true;
             }
         });
         item_switch.depth = item_switch.y;
+        //ufo
+        neon_ufo = this_scene.add.sprite(2000, 100, "neon_ufo")
+            .anims.play("neon_ufo", true)
+            .setDepth(3300+2)
+            .setAlpha(1)
+            .setScale(0.3)
+            .setAngle(-20)
+            .setVisible(false);
+        neon_ufo.update = () => {
+            neon_ufo.x -= 0.5;
+            if (neon_ufo.x < -500) {
+                neon_ufo.x = 2000;
+            }
+        };
+        group_update.add(neon_ufo);
+            
+        //moon
+        neon_moon = this_scene.add.sprite(1200, 80, "neon_moon")
+            .setDepth(3300+1)
+            .setAlpha(1)
+            .setScale(0.4)
+            .setVisible(false);
+        //saturn
+        neon_saturn = this_scene.add.sprite(180, 60, "neon_saturn")
+            .setDepth(3300+1)
+            .setAlpha(1)
+            .setScale(0.2)
+            .setVisible(false);
         //uncommon
         if (local_items[_item_id+64] != 0) {
             draw_glitter(this_scene, item_switch);
@@ -19950,7 +20096,7 @@ function update_checkItem(this_scene) {
             _x, 
             _y, 
             "item_book"
-        ).setScale(0.1).setOrigin(0.5)
+        ).setScale(0.22).setOrigin(0.5)
             .setInteractive({ draggable: true, useHandCursor: true })
             .on("pointerdown", () => {
                 if (flag_info == 1) {
@@ -20567,6 +20713,8 @@ function update_checkItem(this_scene) {
         _itemIds.forEach( async (_itemId) => {
             if (!summoned_presentbox.includes(_itemId)) {
                 let _array = [
+                    "item_presentboxes",
+                    /*
                     "item_presentbox_01",
                     "item_presentbox_02",
                     "item_presentbox_03",
@@ -20575,6 +20723,7 @@ function update_checkItem(this_scene) {
                     "item_presentbox_06",
                     "item_presentbox_07",
                     "item_presentbox_08",
+                    */
                 ];
                 let _img = _array[Math.floor(Math.random() * _array.length)];
                 let _x = 170 + Math.random() * 830;
@@ -20595,7 +20744,7 @@ function update_checkItem(this_scene) {
                      _memo
                  )
                     .setOrigin(0.5)
-                    .setScale(0.1)
+                    .setScale(0.3)
                     .setAlpha(1)
                     .setDepth(_y);
                 summoned_presentbox.push(_itemId);
@@ -20909,8 +21058,8 @@ function calc_fps() {
         time_forFPS = _now;
         let _fps = (turn - turn_forFPS);
         turn_forFPS = turn; 
-        //text_fps.setText(_fps + " fps");
-        text_fps.setText(_fps + " fps" + ", " + turn);
+        text_fps.setText(_fps + " fps");
+        //text_fps.setText(_fps + " fps" + ", " + turn);
     }
 }
 

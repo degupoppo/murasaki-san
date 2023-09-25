@@ -315,7 +315,7 @@ let _dic_items = {
         "icon_png":"png/item_frame.png",
         "pos_x":890,
         "pos_y":300,
-        "scale":0.25,
+        "scale":0.3,
         "description":" Display your NFTs (DEX+1) ",
     },
     
