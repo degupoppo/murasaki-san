@@ -18854,6 +18854,24 @@ function update_checkItem(this_scene) {
         item_window.destroy(true);
         local_items_flag[_item_id] = false;
     }
+    
+    //when possess 
+    if (local_items_flag[_item_id] == true) {
+        //check astar price and define textures
+        if (local_astar_priceChange_h24 > 1) {
+            item_window.texture_opened = "item_window_sunny";
+            item_window.texture_closed = "item_window_sunny_closed";
+            item_window.setTexture(item_window.texture_opened);
+        } else if (local_astar_priceChange_h24 < -1) {
+            item_window.texture_opened = "item_window_rain";
+            item_window.texture_closed = "item_window_rain_closed";
+            item_window.setTexture(item_window.texture_opened);
+        } else {
+            item_window.texture_opened = "item_window_cloudy";
+            item_window.texture_closed = "item_window_cloudy_closed";
+            item_window.setTexture(item_window.texture_opened);
+        }
+    }
 
 
     //### 23:Cat Cushion
@@ -21439,15 +21457,27 @@ class Opeaning extends Phaser.Scene {
 
     preload() {
         console.log("scene: Opeaning");
+        this.load.image("opening_logo", "src/png/opening_logo.jpg");
     }
     
     create(){
         //fade out
         //contract_update_all();
+        this.add.image(640, 480, "opening_logo").setScale(0.75);
+
+        setTimeout( () => {
+            this.cameras.main.fadeOut(300, 255, 255, 255);
+            this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+                this.scene.start("Main");
+            });
+        }, 500);
+
+        /*
         this.cameras.main.fadeOut(300, 255, 255, 255);
         this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
             this.scene.start("Main");
         });
+        */
     }
 }
 

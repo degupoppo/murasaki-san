@@ -693,7 +693,7 @@ let _dic_items = {
         "item_id_uncommon":0,
         "item_id_rare":0,
         "img_name":"item_presentbox_01",
-        "icon_png":"png/item_presentbox_01.png",
+        "icon_png":"icon/presentbox.png",
     },
     
     //---fluffy
