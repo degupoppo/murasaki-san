@@ -18856,7 +18856,7 @@ function update_checkItem(this_scene) {
     }
     
     //when possess 
-    if (local_items_flag[_item_id] == true) {
+    if (local_items_flag[_item_id] == true && flag_onLight == true) {
         //check astar price and define textures
         if (local_astar_priceChange_h24 > 1) {
             item_window.texture_opened = "item_window_sunny";
