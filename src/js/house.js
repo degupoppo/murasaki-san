@@ -86,6 +86,20 @@ contract ERC721 is IERC721 {
 //### 1st
 
 
+    pippel UIの実装
+        決まった時間にpippelが出現する
+        出現時間でも起動直後は出現させず、1-2サイクル後に出現させる
+        何かしらの目立つ演出を実装する
+        flower mint時に何を入手したか分かりやすく表示する
+        ただクリックするのではなく、珍しさを演出したい
+            タイマーを表示する？
+        クリックで開く、集めたお花を入れておくふくろを実装する
+
+
+    frameの縦横比を1:1に修正する
+    loading絵を別途用意する
+
+
     UFOの音
     月の猫の音
     ゲームボーイの音
@@ -4258,6 +4272,7 @@ async function init_global_variants() {
     gamemode = "";
     tx_counts = [0,0,0];
     tx_counts_forPinwheel = 0;
+    local_check_pippel = 0;
 
     //---flag
     flag_music = 0;
@@ -4905,6 +4920,9 @@ async function contract_update_dynamic_status(_summoner) {
     local_stroll_total_strolledDistance = Number(_all_dynamic_status[87]);
     local_stroll_total_metSummoners = Number(_all_dynamic_status[88]);
     //local_stroll_endable = Number(_all_dynamic_status[89]);
+    
+    //pippel
+    local_check_pippel = Number(_all_dynamic_status[94]);
     
     //update last_sync_time
     last_sync_time = Date.now();
@@ -5986,6 +6004,15 @@ async function update_txCount() {
 async function get_strollInfo(_summoner) {
     let _res = await contract_st.methods.get_strollInfo(_summoner).call();
     return _res;
+}
+
+//---pippel
+async function contract_mint_pippel(_summoner) {
+    if (gamemode == "regular") {
+        contract_pf.methods.mint_pippel(_summoner).send({from:wallet})
+            .on("transactionHash", (transactionHash) => update_tx_text("sending", transactionHash))
+            .on("receipt", (receipt) => update_tx_text("done", receipt.transactionHash));
+    }
 }
 
 
@@ -7926,8 +7953,13 @@ class Dice extends Phaser.GameObjects.Sprite{
         }, this);
         this.speed_x = 0;
         this.speed_y = 0;
-        this.text_rolled_number = scene.add.text(x, y, "88", {font: "bold 20px Arial", fill: "#ffffff"}).setOrigin(0.5);
-        this.text_next_time = scene.add.text(x, y+40, "---", {font: "14px Arial", fill: "#000000"}).setOrigin(0.5);
+        this.text_rolled_number = 
+            scene.add.text(x, y, "88", {font: "bold 20px Arial", fill: "#ffffff"})
+                .setOrigin(0.5);
+        this.text_next_time = 
+            scene.add.text(x, y+40, "---", {font: "14px Arial", fill: "#000000"})
+                .setOrigin(0.5)
+                .setDepth(3);
         group_info.add(this.text_next_time);
         this.flag_tx = 0;
         this.count = 0;
@@ -14471,11 +14503,13 @@ function preload(scene) {
     scene.load.image("stroll_during_03_baloon", "src/png/stroll_during_03_baloon.png");
     scene.load.image("stroll_during_03_mountain", "src/png/stroll_during_03_mountain.png");
 
-
     //### neon
     scene.load.spritesheet("neon_ufo", "src/png/neon_ufo.png", {frameWidth: 370, frameHeight: 320});
     scene.load.spritesheet("neon_moon", "src/png/neon_moon.png", {frameWidth: 370, frameHeight: 320});
     scene.load.image("neon_saturn", "src/png/neon_saturn.png");
+    
+    //### pippel
+    scene.load.image("pippel_basic", "src/png/pippel_basic.png");
 
 
     //---sounds
@@ -15658,7 +15692,7 @@ function create(scene) {
     //### icon_rotate
     icon_rotate = scene.add.sprite(1235,915-15, "icon_rotate")
         .setOrigin(0.5)
-        .setScale(0.075)
+        .setScale(0.12)
         .setDepth(4100)
         .setInteractive({useHandCursor: true})
         .on('pointerdown', () => sound_system.play())
@@ -15676,7 +15710,7 @@ function create(scene) {
     group_info.add(icon_rotate);
 
     //### icon_home
-    icon_home = scene.add.sprite(1155,915-15, "icon_home")
+    icon_home = scene.add.sprite(1160,915-15, "icon_home")
         .setOrigin(0.5)
         .setScale(0.15)
         .setDepth(4100)
@@ -16680,6 +16714,16 @@ function create(scene) {
         //summon_twinkles(scene, "glitter", 1, 200 + Math.random() * 800, 520 + Math.random() * 200);
         //summon_twinkles(scene, "glitter", 1, 150+2*20, 560);
     }
+    
+    //---pippel
+    pippel_basic = scene.add.sprite(200, 600, "pippel_basic")
+        .setOrigin(0.5)
+        .setScale(0.25)
+        .setDepth(3000)
+        .setInteractive({useHandCursor: true})
+        .on("pointerdown", () => {
+            contract_mint_pippel(summoner);
+        });
 }
 
 
@@ -16743,6 +16787,9 @@ function update_syncTime(this_scene) {
             text_sync_time.setColor("#ff0000");
         } else {
             text_sync_time.setColor("#727171");
+        }
+        if (_delta > 300) {
+            scene.scene.start("SomethingWrong");
         }
     }
 }
@@ -18976,17 +19023,20 @@ function update_checkItem(this_scene) {
         let _y2 = dic_items[_item_name]["pos_y"];
         item_frame = this_scene.add.image(_x2, _y2, "item_frame")
             .setOrigin(0.5)
-            .setScale(0.25)
+            .setScale(0.35)
             .setDepth(10);
-        item_frame_inside = this_scene.add.sprite(_x2, _y2, "item_frame_inside_loading")
+        item_frame_inside = this_scene.add.sprite(_x2, _y2)
             .setOrigin(0.5)
-            .setScale(0.25)
+            //.setScale(0.35)
             .setDepth(11)
+            //.setDisplaySize(60, 93)
             .setInteractive({useHandCursor: true})
             .on("pointerdown", async () => {
                 sound_hat.play();
-                item_frame_inside.setTexture("item_frame_inside_loading");
-                item_frame_inside.setScale(0.25);
+                //item_frame_inside.setTexture("item_frame_inside_loading");
+                item_frame_inside.setTexture("");
+                //item_frame_inside.setDisplaySize(60, 93);
+                //item_frame_inside.setScale(0.35);
                 let _url = await get_nft_url();
                 this_scene.textures.remove("pic_nft");
                 this_scene.load.image("pic_nft", _url);
@@ -18995,7 +19045,7 @@ function update_checkItem(this_scene) {
                     "complete", 
                     () => {
                         item_frame_inside.setTexture("pic_nft");
-                        item_frame_inside.setDisplaySize(67, 82);
+                        item_frame_inside.setDisplaySize(60, 93);
                     });
             });
         async function _do() {
@@ -19006,7 +19056,7 @@ function update_checkItem(this_scene) {
                 "complete", 
                 () => {
                     item_frame_inside.setTexture("pic_nft");
-                    item_frame_inside.setDisplaySize(67, 82);
+                        item_frame_inside.setDisplaySize(60, 93);
                 });
         }
         _do();
@@ -21060,6 +21110,13 @@ function update_checkItem(this_scene) {
         flag_mogumogu = 0;
     }
     
+    //###pippel
+    if (local_check_pippel == 1) {
+        pippel_basic.visible = true;
+    } else {
+        pippel_basic.visible = false;
+    }
+    
     //### end
     previous_local_items = local_items;
     previous_local_item194 = local_items[194];
@@ -21367,7 +21424,16 @@ class Loading extends Phaser.Scene {
         if (this.flag_start == 1) {
             this._msg1.setText("");
             this.scene.stop("Loading_overlap");
-            this.scene.start("Opeaning");
+            
+            //this.scene.start("Opeaning");
+
+            this.cameras.main.fadeOut(250, 255, 255, 255);
+            this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+                this.scene.start("Opeaning");
+            });
+            this.flag_start = 2;
+
+
         } else {
             let _text = "Loading On-Chain Data... (";
             _text += this.count_web3Loading + "/6)";
@@ -21438,7 +21504,6 @@ class Loading_overlap extends Phaser.Scene {
                     .setDepth(1000-1);
                 localStorage.setItem("flowerCount_inGame", JSON.stringify(localStorage_flowerCount));
             });
-        //this.logo = this.add.image(640, 350, "logo").setScale(0.15);
     }
     
     update() {
@@ -21465,20 +21530,23 @@ class Opeaning extends Phaser.Scene {
 
     preload() {
         console.log("scene: Opeaning");
-        //this.load.image("opening_logo", "src/png/opening_logo.jpg");
     }
     
     create(){
-        //fade out
-        //contract_update_all();
-        this.add.image(640, 480, "opening_logo").setScale(0.75);
 
+        //fade in
+        this.cameras.main.fadeIn(500, 255, 255, 255);
+
+        //opening logo
+        this.add.image(640, 480, "opening_logo").setScale(0.8);
+
+        //wait and fade out
         setTimeout( () => {
-            this.cameras.main.fadeOut(300, 255, 255, 255);
+            this.cameras.main.fadeOut(250, 255, 255, 255);
             this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
                 this.scene.start("Main");
             });
-        }, 500);
+        }, 1000);
 
         /*
         this.cameras.main.fadeOut(300, 255, 255, 255);
@@ -21501,22 +21569,29 @@ class SomethingWrong extends Phaser.Scene {
 
     create(){
         //system messages
-        let _msg1 = this.add.text(640, 480, '')
-            .setFontSize(80)
-            .setFontFamily("Arial")
-            .setOrigin(0.5)
-            .setFill("#ff1694");
-        let _msg2 = this.add.text(640, 560, '')
-            .setFontSize(40)
-            .setFontFamily("Arial")
-            .setOrigin(0.5)
-            .setFill("#ffebf7");
         let _errImg = this.add.image(640, 360, "icon_wrong")
             .setOrigin(0.5)
             .setScale(0.5)
             .setVisible(false);
-        _msg1.setText("Something Wrong");
-        _msg2.setText("Please reload the page.");
+        let _msg1 = this.add.text(640, 480, 'Something Wrong')
+            .setFontSize(80)
+            .setFontFamily("Arial")
+            .setOrigin(0.5)
+            .setFill("#ff1694");
+        let _msg2 = this.add.text(640, 560, 'Please reload the page.')
+            .setFontSize(40)
+            .setFontFamily("Arial")
+            .setOrigin(0.5)
+            .setFill("#ffebf7");
+        let _msg3 = this.add.text(640, 660, '>> Click Here <<')
+            .setFontSize(40)
+            .setFontFamily("Arial")
+            .setOrigin(0.5)
+            .setFill("#0000FF")
+            .setInteractive({useHandCursor: true })
+            .on("pointerdown", () => {
+                window.location.reload();
+            });
         _errImg.setVisible(true);
     }
 }
@@ -21542,7 +21617,7 @@ class Main extends Phaser.Scene {
     update(){
         //fade in
         if (flag_fadein == 0) {
-            this.cameras.main.fadeIn(600, 255, 255, 255);
+            this.cameras.main.fadeIn(500, 255, 255, 255);
             flag_fadein = 1;
         }
         update(this);

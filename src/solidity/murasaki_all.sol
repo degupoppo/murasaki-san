@@ -11111,6 +11111,18 @@ contract Murasaki_Info is Ownable, Pausable {
         return s.get_reminingSec(_summoner);
     }
     
+    //pippel
+    function check_pippel(uint _summoner) public view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Pippel_Function pf = Pippel_Function(ma.address_Pippel_Function());
+        bool _pippelAppear = pf.check_pippel(_summoner);
+        if (_pippelAppear == true) {
+            return uint(1);
+        } else {
+            return uint(0);
+        }        
+    }
+    
     
     //### dynamic
     function allDynamicStatus(uint _summoner) external view whenNotPaused returns (uint[96] memory) {
@@ -11210,6 +11222,7 @@ contract Murasaki_Info is Ownable, Pausable {
         _res[91] = total_neglect_count(_summoner);
         _res[92] = total_critical_count(_summoner);
         _res[93] = strolling_remining_sec(_summoner);
+        _res[94] = check_pippel(_summoner);
         return _res;
     }
     
