@@ -4,11 +4,13 @@
 pragma solidity =0.8.13;
 
 
-// 230921
-// House of Murasaki-san ver. 0.1.1a
+// 230927
+// House of Murasaki-san ver. 0.1.4a
 
 
-//===Basic==================================================================================================================
+//===Import==================================================================================================================
+
+
 
 // for remix
 
@@ -42,7 +44,11 @@ import "github.com/BuildBearLabs/Tutorials/ERC-6551/contracts/interface/IERC6551
 import "github.com/BuildBearLabs/Tutorials/ERC-6551/contracts/interface/IERC6551Registry.sol";
 
 
-/* for solc, v4.8.0
+
+
+/*
+// for solc, 0.8.13
+
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -69,6 +75,10 @@ import "@Tutorials/ERC-6551/contracts/lib/Bytecode.sol";
 import "@Tutorials/ERC-6551/contracts/interface/IERC6551Account.sol";
 import "@Tutorials/ERC-6551/contracts/interface/IERC6551Registry.sol";
 */
+
+
+
+//===Basic==================================================================================================================
 
 
 //---IERC2665
@@ -2892,7 +2902,7 @@ contract Murasaki_Storage_Extra is Ownable {
 //===Function==================================================================================================================
 
 
-//---Share*
+//---Share
 
 contract Murasaki_Function_Share is Ownable, Pausable {
 
@@ -3029,6 +3039,7 @@ contract Murasaki_Function_Share is Ownable, Pausable {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
         Murasaki_Parameter mp = Murasaki_Parameter(ma.address_Murasaki_Parameter());
+        Pippel_Function pf = Pippel_Function(ma.address_Pippel_Function());
         uint[320] memory _balance_of_type = get_balance_of_type_array_from_summoner(_summoner);
         uint _precious_score = 0;
         //fluffy
@@ -3068,9 +3079,10 @@ contract Murasaki_Function_Share is Ownable, Pausable {
         
         // 230920
         // pippe score addition
-        // 10 pippel score = 1 fluffy score = 0.01 LUK
-        Pippel_Function pf = Pippel_Function(ma.address_Pippel_Function());
-        _precious_score += pf.calc_pippelScore(_summoner) / 10;
+        // 1 pippel NFT = 10 pippel score = 1 fluffy score = 0.01 LUK
+        if (mp.isTrial() == false) {
+            _precious_score += pf.calc_pippelScore(_summoner) / 10;
+        }
         
         //level cap, 800/Lv20 = 40/Lv
         uint _lv = ms.level(_summoner);
@@ -3340,7 +3352,7 @@ contract Murasaki_Function_Share is Ownable, Pausable {
 }
 
 
-//---Summon_and_LevelUp*
+//---Summon_and_LevelUp
 
 contract Murasaki_Function_Summon_and_LevelUp is Ownable, ReentrancyGuard, Pausable {
 
@@ -9391,7 +9403,7 @@ contract Stroll is Ownable, ReentrancyGuard, Pausable {
 }
 
 
-//---Pippel_Function*
+//---Pippel_Function
 
 contract Pippel_Function is Ownable, ReentrancyGuard, Pausable {
 
@@ -9420,7 +9432,10 @@ contract Pippel_Function is Ownable, ReentrancyGuard, Pausable {
     uint public mintInterval = 3600 + 300;   //sec, 1hr + 5min
     function _set_mintInterval(uint _val) external onlyOwner {
         mintInterval = _val;
-    }    
+    }
+    
+    // store last mint pippel type for each player
+    mapping (uint => uint) private lastMintType;
     
     // flag, enable calling next hour of pippel appearing
     bool private flag_enableCallPippelHour;
@@ -9439,10 +9454,13 @@ contract Pippel_Function is Ownable, ReentrancyGuard, Pausable {
         (,,,uint _current_hr,,) = parseTimestamp(block.timestamp);
         // random hour resets every day, 0-23
         uint _random_hr = _dn(_summoner, 24);
+        // call daily flower type
+        uint _dailyType = _call_dailyFlowerType();
         // when current hr == random hr, pippel appearing for 1 hr
         // when trial version, no pippel
         if (
             _random_hr == _current_hr 
+            && lastMintType[_summoner] != _dailyType
             && _interval >= mintInterval
             && mfs.isTrial() == false
         ) {
@@ -9460,6 +9478,7 @@ contract Pippel_Function is Ownable, ReentrancyGuard, Pausable {
     }
     
     // mint daily flower from pippel
+    event Mint_Pippel (uint indexed _summoner, uint _flower_type, uint _rarity_type);
     function mint_pippel (uint _summoner) external nonReentrant whenNotPaused {
         // check pippel appearance
         require(check_pippel(_summoner));
@@ -9482,9 +9501,7 @@ contract Pippel_Function is Ownable, ReentrancyGuard, Pausable {
     function _mint_pippel (uint _summoner) internal {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
-        //***TODO*** debug
         Pippel_NFT pn = Pippel_NFT(ma.address_Pippel_NFT());
-        //Pippel_NFT pn = Pippel_NFT(0x5B6FbbAF55F8F54E63Ee42A97F4bbD5265f756bb);
 
         // prepare tba
         address _tba = _call_tba(_summoner);
@@ -9508,6 +9525,12 @@ contract Pippel_Function is Ownable, ReentrancyGuard, Pausable {
             _memo,
             _rarity_type
         );
+        
+        // event
+        emit Mint_Pippel(_summoner, _flower_type, _rarity_type);
+
+        // store last mint type
+        lastMintType[_summoner] = _flower_type;
     }
     // prepare tba
     function _call_tba (uint _summoner) internal view returns (address) {
@@ -9521,18 +9544,6 @@ contract Pippel_Function is Ownable, ReentrancyGuard, Pausable {
             _summoner,  // token id
             6539    // salt
         );
-        //***TODO*** debug
-        /*
-        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
-        IERC6551Registry _ERC6551Registry = IERC6551Registry(0x1f00990eFfd45A496f7c7ECD7EF29622b225Dda0);
-        address _tba = _ERC6551Registry.account(
-            0xEAF42da7683896F5DC625ad09BA0950b33e2FF18, // ERC6551Account address
-            4369,  // chain id
-            ma.address_Murasaki_Main(), // token contract address, ma
-            _summoner,  // token id
-            6539    // salt
-        );
-        */
         return _tba;
     }
     // prepare daily flower type
@@ -9704,7 +9715,7 @@ contract Pippel_Function is Ownable, ReentrancyGuard, Pausable {
 
 
 
-//---Pippel_NFT*
+//---Pippel_NFT
 
 contract Pippel_NFT is ERC2665, Ownable, Pausable {
 
@@ -10038,7 +10049,7 @@ contract Pippel_NFT is ERC2665, Ownable, Pausable {
 
 
 
-//---Pippel_Codex*
+//---Pippel_Codex
 
 contract Pippel_Codex is Ownable, Pausable {
 
@@ -11122,6 +11133,11 @@ contract Murasaki_Info is Ownable, Pausable {
             return uint(0);
         }        
     }
+    function pippel_score(uint _summoner) public view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Pippel_Function pf = Pippel_Function(ma.address_Pippel_Function());
+        return pf.calc_pippelScore(_summoner);
+    }
     
     
     //### dynamic
@@ -11223,6 +11239,7 @@ contract Murasaki_Info is Ownable, Pausable {
         _res[92] = total_critical_count(_summoner);
         _res[93] = strolling_remining_sec(_summoner);
         _res[94] = check_pippel(_summoner);
+        _res[95] = pippel_score(_summoner);
         return _res;
     }
     

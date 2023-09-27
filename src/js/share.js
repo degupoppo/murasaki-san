@@ -211,6 +211,12 @@ async function init_web3(){
     address_trial_Murasaki_Market_Item = _addresses_trial[36];
     address_trial_Murasakisan = _addresses_trial[37];
 
+    address_trial_Pippel_NFT = _addresses_trial[40];
+    address_trial_Pippel_Function = _addresses_trial[41];
+    address_trial_Pippel_Codex = _addresses_trial[42];
+    address_trial_Murasaki_TBARegistry = _addresses_trial[43];
+    address_trial_Murasaki_TBAAccount = _addresses_trial[44];
+
     address_trial_Trial_Converter = '0x2a372b36197085d9899AE1C7Ed253bEA4EE7bAf8';
 
     
@@ -326,6 +332,13 @@ async function init_web3(){
 
     //market
     contract_mmt_wss = await new web3wss.eth.Contract(abi_Murasaki_Market_Item, address_Murasaki_Market_Item);
+
+    //230922, TBA, pippel
+    contract_pn_wss = await new web3wss.eth.Contract(abi_Pippel_NFT, address_Pippel_NFT);
+    contract_pf_wss = await new web3wss.eth.Contract(abi_Pippel_Function, address_Pippel_Function);
+    contract_pc_wss = await new web3wss.eth.Contract(abi_Pippel_Codex, address_Pippel_Codex);
+    contract_tbar_wss = await new web3wss.eth.Contract(abi_Murasaki_TBARegistry, address_Murasaki_TBARegistry);
+    contract_tbaa_wss = await new web3wss.eth.Contract(abi_Murasaki_TBAAccount, address_Murasaki_TBAAccount);
     
 
     //## admin ##

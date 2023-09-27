@@ -85,6 +85,23 @@ contract ERC721 is IERC721 {
 
 //### 1st
 
+    
+    ツイートボタンの設置
+        ハッシュタグと、進捗を端的に表す一枚絵をツイートするボタン。
+        一枚絵の案
+            匿名性を担保しつつ、自己顕示欲を満たせる情報を入れる
+                summonerId      ng
+                summonerName    ng
+            svgかcanvasを用いて賑やかさを演出する
+                mint済みのNFTは基本的に盛り込みたい
+                家の基本背景にどんどん上から追加描写してゆく感じで
+                fluffy, pippelもポコポコ追加する
+
+
+ ok pippelがtrialに対応していないので修正する
+        特にmurasaki_infoが値を返せない。
+        また、pippelコントラ群のtrial版をデプロイしていない。
+
 
     pippel UIの実装
         決まった時間にpippelが出現する
@@ -97,7 +114,8 @@ contract ERC721 is IERC721 {
 
 
     frameの縦横比を1:1に修正する
-    loading絵を別途用意する
+    frame_loading絵を別途用意する
+    ダンボールの絵を用意する
 
 
     UFOの音
@@ -134,7 +152,7 @@ contract ERC721 is IERC721 {
         braveでエラーメッセージを見る方法は？
     
 
-    fluffy scoreの表記にpippelを追加する
+ ok fluffy scoreの表記にpippelを追加する
 
 
     デプロイ方法の改善
@@ -4273,6 +4291,7 @@ async function init_global_variants() {
     tx_counts = [0,0,0];
     tx_counts_forPinwheel = 0;
     local_check_pippel = 0;
+    local_pippel_score = 0;
 
     //---flag
     flag_music = 0;
@@ -4923,6 +4942,7 @@ async function contract_update_dynamic_status(_summoner) {
     
     //pippel
     local_check_pippel = Number(_all_dynamic_status[94]);
+    local_pippel_score = Number(_all_dynamic_status[95]);
     
     //update last_sync_time
     last_sync_time = Date.now();
@@ -20917,7 +20937,8 @@ function update_checkItem(this_scene) {
         _text += " fluffy x " + _count_fluffy + "\n";
         _text += " fluffier x " + _count_fluffier + "\n";
         _text += " fluffiest x " + _count_fluffiest + "\n";
-        _text += " fluffy doll x " + _count_nui + " ";
+        _text += " fluffy doll x " + _count_nui + "\n";
+        _text += " pippel x " + local_pippel_score/10 + " ";
         text_fluffy.setText(_text);
     }
 
