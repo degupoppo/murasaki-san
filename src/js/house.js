@@ -16744,6 +16744,31 @@ function create(scene) {
         .on("pointerdown", () => {
             contract_mint_pippel(summoner);
         });
+    
+    //---twitter
+    /*
+    // 画像をBase64形式に変換    
+    function imageToBase64(imageData) {
+        const canvas = document.createElement('canvas');
+        canvas.width = imageData.width;
+        canvas.height = imageData.height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(imageData, 0, 0);
+        return canvas.toDataURL('image/png');
+    }
+    twitterButton = scene.add.text(640, 100, "Post", {
+        fontSize: "36px",
+        fill: "#000"
+    }).setDepth(9999).setInteractive({useHandCursor: true});
+    twitterButton.on("pointerdown", () => {
+        game.renderer.snapshot( function(camera) {
+            const base64Image = imageToBase64(camera);
+            const tweetText = 'https://murasaki-san.com/';
+            const hashtags = 'Astar,HoM';
+            window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}&hashtags=${encodeURIComponent(hashtags)}&url=${encodeURIComponent(base64Image)}`, '_blank');
+        });
+    });
+    */
 }
 
 
