@@ -4292,6 +4292,7 @@ async function init_global_variants() {
     tx_counts_forPinwheel = 0;
     local_check_pippel = 0;
     local_pippel_score = 0;
+    previous_local_pippel_score = 0;
 
     //---flag
     flag_music = 0;
@@ -6362,6 +6363,15 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             this.count = 0;
         }
     }
+    sleeping_continue() {
+        this.count += 1;
+        if (this.count == 1){
+            this.anims.play("murasaki_sleeping", true);
+        }else if (this.count >= 9999999999) {
+            this.mode = "resting";
+            this.count = 0;
+        }
+    }
 
 
     //### sleeping with Hammock
@@ -6677,6 +6687,11 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
                     this.mode = "resting";
                     this.exemption_resting_count = 18000;   //frame, 5min
                 }
+                // when complete, sleeping
+                if (local_crafting_calc == 0) {
+                    this.count = 0;
+                    this.mode = "sleeping_continue";
+                }
             }
         }
     }
@@ -6956,7 +6971,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
         ) {
             item_wearing_hat.x = this.x;
             item_wearing_hat.y = this.y - 65;
-        }else if (this.mode == "sleeping") {
+        }else if (this.mode == "sleeping" || this.mode == "sleeping_continue") {
             item_wearing_hat.x = this.x - 26;
             item_wearing_hat.y = this.y - 22;
         }else if (this.mode == "hammock") {
@@ -7042,6 +7057,7 @@ class Murasakisan extends Phaser.GameObjects.Sprite{
             else if (this.mode == "feeding") {this.feeding();}
             else if (this.mode == "crying") {this.crying();}
             else if (this.mode == "sleeping") {this.sleeping();}
+            else if (this.mode == "sleeping_continue") {this.sleeping_continue();}
             else if (this.mode == "grooming") {this.grooming();}
             else if (this.mode == "mining") {this.mining();}
             else if (this.mode == "hugging") {this.hugging();}
@@ -20877,7 +20893,10 @@ function update_checkItem(this_scene) {
 
 
     //### 201-236:Fluffy
-    if (local_fluffy_count != previous_local_fluffy_count) {
+    if (
+        local_fluffy_count != previous_local_fluffy_count
+        || local_pippel_score != previous_local_pippel_score
+    ) {
     //if (local_precious > previous_local_precious2) {
         let _timeout = 0;
         let _count_fluffy = 0;
@@ -21175,6 +21194,7 @@ function update_checkItem(this_scene) {
     previous_local_score = local_score;
     //previous_local_precious2 = local_precious;
     previous_local_fluffy_count = local_fluffy_count;
+    previous_local_pippel_score = local_pippel_score;
 }
 
 
