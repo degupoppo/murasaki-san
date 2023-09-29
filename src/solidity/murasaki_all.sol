@@ -9421,10 +9421,16 @@ contract Pippel_Function is Ownable, ReentrancyGuard, Pausable {
         address_Murasaki_Address = _address;
     }
     
-    // variant
+    // salt
     uint private salt = 6539;
     function _update_salt(uint _summoner) external onlyOwner {
         salt = _seed(_summoner);
+    }
+    
+    // pippel appearance hr
+    uint public pippel_hr = 3;
+    function _set_pippel_hr (uint _val) external onlyOwner {
+        pippel_hr = _val;
     }
     
     // interval
@@ -9454,6 +9460,9 @@ contract Pippel_Function is Ownable, ReentrancyGuard, Pausable {
         (,,,uint _current_hr,,) = parseTimestamp(block.timestamp);
         // random hour resets every day, 0-23
         uint _random_hr = _dn(_summoner, 24);
+        // modify hours by pippel_hr, / (appearancing hr)
+        _current_hr /= pippel_hr;
+        _random_hr /= pippel_hr;
         // call daily flower type
         uint _dailyType = _call_dailyFlowerType();
         // when current hr == random hr, pippel appearing for 1 hr

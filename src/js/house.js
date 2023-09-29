@@ -85,6 +85,10 @@ contract ERC721 is IERC721 {
 
 //### 1st
 
+
+ ok ピッペルの出現時間を、流石に3時間程度に伸ばす。
+        また、_setであとから変えれるように修正する。
+
     
     ツイートボタンの設置
         ハッシュタグと、進捗を端的に表す一枚絵をツイートするボタン。
@@ -96,6 +100,13 @@ contract ERC721 is IERC721 {
                 mint済みのNFTは基本的に盛り込みたい
                 家の基本背景にどんどん上から追加描写してゆく感じで
                 fluffy, pippelもポコポコ追加する
+            → 画像をツイートする敷居が高いので保留とする
+        現時点では、ツイッターカードでホームページのサムネイルを表示させるに留めるか
+        自動ツイートはできなくとも、
+            「◯◯のhashtag付けてツイートに使ってね」
+            のメッセージとともに、ツイートに使いたくなる絵を表示し、
+            クリップボードへコピーするボタンを設置しておくのもよいだろうか。
+            
 
 
  ok pippelがtrialに対応していないので修正する
@@ -6030,9 +6041,11 @@ async function get_strollInfo(_summoner) {
 //---pippel
 async function contract_mint_pippel(_summoner) {
     if (gamemode == "regular") {
-        contract_pf.methods.mint_pippel(_summoner).send({from:wallet})
-            .on("transactionHash", (transactionHash) => update_tx_text("sending", transactionHash))
-            .on("receipt", (receipt) => update_tx_text("done", receipt.transactionHash));
+        if(wallet == local_owner) {
+            contract_pf.methods.mint_pippel(_summoner).send({from:wallet})
+                .on("transactionHash", (transactionHash) => update_tx_text("sending", transactionHash))
+                .on("receipt", (receipt) => update_tx_text("done", receipt.transactionHash));
+        }
     }
 }
 
@@ -16758,6 +16771,7 @@ function create(scene) {
         .setDepth(3000)
         .setInteractive({useHandCursor: true})
         .on("pointerdown", () => {
+            sound_button_select.play();
             contract_mint_pippel(summoner);
         });
     
@@ -21176,8 +21190,11 @@ function update_checkItem(this_scene) {
     }
     
     //###pippel
-    if (local_check_pippel == 1) {
-        pippel_basic.visible = true;
+    if (local_check_pippel == 1 && count_sync >= 2) {
+        if (pippel_basic.visible == false) {
+            pippel_basic.visible = true;
+            draw_flower3(this_scene, pippel_basic.x, pippel_basic.y);
+        }
     } else {
         pippel_basic.visible = false;
     }
