@@ -1,8 +1,4 @@
 
-
-version = "v0.1.15";
-
-
 //===Header==================================================================================
 
 /*
@@ -88,10 +84,6 @@ contract ERC721 is IERC721 {
 
 
 //### 1st
-
-
-    額縁、ブランケット、チェスト、水筒、を移動できるように。
-        setTimeout使ってクリックとドラッグを判別させる
 
 
     pippel入れの実装
@@ -14153,7 +14145,7 @@ async function contract_get_flowerList_withType (_summoner) {
 
 
 //### pippel summary
-async function draw_pippelSummary (scene) {
+async function draw_pippelSummary2 (scene) {
 
     // create global group
     group_pippelSummary = scene.add.group();
@@ -14168,14 +14160,6 @@ async function draw_pippelSummary (scene) {
     let msg1 = scene.add.text(140, 110, "Loading...")
             .setFontSize(24).setFontFamily("Arial").setFill("#333333").setDepth(5001);
     group_pippelSummary.add(msg1);
-    
-    // draw stem
-    let _stem = scene.add.image(652, 340, "pippel_stem")
-        .setOrigin(0.5)
-        .setScale(2.8)
-        .setAlpha(0.6)
-        .setDepth(5001);
-    group_pippelSummary.add(_stem);
     
     // prepare button creating function
     function create_button(_x, _y, _text, _color, _colorb, _type, _select, scene, _size, _isActive=true) {
@@ -14222,7 +14206,7 @@ async function draw_pippelSummary (scene) {
     
     // debug, push random flowers
     /*
-    for (let i=0; i<150; i++) {
+    for (let i=0; i<350; i++) {
         _pippelList.push([0,Math.floor(Math.random()*300),Math.floor(Math.random()*5+1)]);
     }
     */
@@ -14320,6 +14304,167 @@ async function draw_pippelSummary (scene) {
         msg1.setText("");   //// clear loading msg
     }, _intervalMSec*(_count-1));
 }
+
+
+//### on chain
+async function contract_call_tba(_summoner) {
+    let _tba = await contract_pf.methods.call_tba(_summoner).call();
+    return _tba;
+}
+
+async function contract_get_balance_of_flower(_address) {
+    let _balance_of_flower = await contract_pn.methods.get_balance_of_type(_address).call();
+    return _balance_of_flower;
+}
+
+//### pippel summary
+// pippel position list, 12x12, 1-397, need to slide odd number raws
+// [col, raw]
+async function draw_pippelSummary(scene){
+
+    // create button function
+    function create_button(_x, _y, _text, _color, _colorb, _type, _select, scene, _size, _isActive=true) {
+        let obj = scene.add.text(_x, _y, _text)
+            .setFontSize(_size)
+            .setFontFamily("Arial")
+            .setFill(_color)
+            .setDepth(5200);
+        if (_isActive) {
+            obj.setInteractive({useHandCursor: true});
+            obj.on("pointerover", () => {
+                    obj.setStyle({ fontSize: _size, fontFamily: "Arial", fill: '#ffff00' });
+                    sound_window_pointerover.play();
+            });
+            obj.on("pointerout", () => {
+                    obj.setStyle({ fontSize: _size, fontFamily: "Arial", fill: _color });
+            });
+            obj.on("pointerdown", () => {
+                //cancel button
+                if (_type == -1) {
+                    group_pippelSummary.destroy(true);
+                    sound_window_select.play();
+                }
+            });
+        }
+        group_pippelSummary.add(obj);
+    }
+
+    // create global group
+    group_pippelSummary = scene.add.group();
+    
+    // x=0, y=0 corner of summary
+    let _pippel_start_x = 300;
+    let _pippel_start_y = 100;
+    
+    // define pippel distance
+    let _pippel_width = 28;
+    let _pippel_height = Math.sqrt(_pippel_width**2 - (_pippel_width/2)**2);
+    
+    // call balance of each pippel flower type
+    let _tba = await contract_call_tba(summoner);
+    let _balance_of_flower = await contract_get_balance_of_flower(_tba);
+    
+    // draw window
+    let window_pippelSummary = scene.add.sprite(640, 480, "window2")
+        .setInteractive()
+        .setDepth(5000);
+    group_pippelSummary.add(window_pippelSummary);
+    
+    // loading msg
+    let msg1 = scene.add.text(140, 110, "Loading...")
+            .setFontSize(24).setFontFamily("Arial").setFill("#333333").setDepth(5001);
+    group_pippelSummary.add(msg1);
+    
+    // create cancel button
+    //create_button(1030, 820, "Close", "#000000", "", -1, 0, scene, 36);
+    
+    // define drawing function, require i
+    function _do(i) {
+    
+        // prepare x, y pos
+        let _xRaw = dic_pippel[i]["pos"][0];
+        let _yRaw = dic_pippel[i]["pos"][1];
+        let _x = _pippel_start_x + _xRaw * _pippel_width;
+        let _y = _pippel_start_y + _yRaw * _pippel_height;
+        
+        // slide width/2 at odd raws
+        if (_yRaw % 2 == 1){
+            _x += _pippel_width/2;
+        }
+
+        // prepare color
+        let _color = dic_pippel[i]["color"];
+        let _colorHex = Phaser.Display.Color.ComponentToHex(_color);
+        _colorHex = "#" + ("000000" + _colorHex).slice(-6); // zero padding
+        let _colorRGB = Phaser.Display.Color.IntegerToRGB(_color);
+        
+        // prepare text fill color
+        let _colorFill = "#000000";
+        if (_colorRGB["r"] + _colorRGB["g"] + _colorRGB["b"] < 100*3) {
+            _colorFill = "#FFFFFF";
+        }
+        
+        // set alpha by rarity
+        let _li_alpha_byRarity = [0, 0.2, 0.3, 0.3, 0.4, 0.4, 0.4, 0.5, 0.5, 0.6];
+        let _alpha = _li_alpha_byRarity[Math.floor(Math.random() * (_li_alpha_byRarity.length-1) +1)];
+
+        // create sprite
+        let _pippel = scene.add.circle(_x, _y, _pippel_width/10*8, _color)
+            .setOrigin(0.5)
+            .setDepth(5000+i)
+            .setAlpha(_alpha);
+        
+        // prepare text
+        let _msg = " " + dic_pippel[i]["name"] + " (" + dic_pippel[i]["day"] + ") ";
+        _pippel.msg = scene.add.text(
+            _x + _pippel_width/10*7,
+            _y,
+            _msg,
+            {font: "24px Arial", fill: _colorFill, backgroundColor: _colorHex}
+        ).setVisible(false).setDepth(5500).setOrigin(0,0.5);
+        
+        // define on click
+        _pippel.setInteractive({useHandCursor: true})
+            .on('pointerover', () => {
+                _pippel.msg.visible = true;
+            })
+            .on("pointerout", () => {
+                _pippel.msg.visible = false;
+            });
+            
+        // add group
+        group_pippelSummary.add(_pippel);
+    }
+    
+    // calc total pippel type
+    let _countTotal = 0;
+    for (let i=1; i<=_balance_of_flower.length; i++) {
+        if (Number(_balance_of_flower[i]) > 0){
+            _countTotal += 1;
+        }
+    }
+
+    // check all pippel types (i=1~365)
+    let _count = 0;
+    let _intervalMSec = 2000 / _countTotal; // draw all in 2 sec
+    for (let i=1; i<=366; i++) {
+
+        // check flower possession
+        if (Number(_balance_of_flower[i]) > 0) {
+        
+            // draw pippel with timeOut
+            setTimeout( () => {_do(i)}, _intervalMSec*_count);
+            _count += 1;
+        }
+    }
+    
+    // create close button at the end
+    setTimeout( () => {
+        create_button(1030, 820, "Close", "#000000", "", -1, 0, scene, 36);
+        msg1.setText("");   //// clear loading msg
+    }, _intervalMSec*(_count-1));
+}
+    
     
 
 
@@ -14777,8 +14922,6 @@ function preload(scene) {
     
     //### pippel
     scene.load.image("pippel_basic", "src/png/pippel_basic.png");
-    scene.load.image("pippel_house", "src/png/pippel_house.png");
-    scene.load.image("pippel_stem", "src/png/pippel_stem.png");
 
 
     //---sounds
@@ -16994,7 +17137,7 @@ function create(scene) {
         .setDepth(3000)
         .setInteractive({useHandCursor: true})
         .on("pointerdown", () => {
-            sound_button_on.play();
+            sound_button_select.play();
             contract_mint_pippel(summoner);
         });
 
@@ -21422,52 +21565,9 @@ function update_checkItem(this_scene) {
         pippel_basic.visible = false;
     }
     
-    //### pippel house
+    //### pippel box
     //***TODO***
-    if (local_pippel_score > 0 && typeof pippel_house == "undefined") {
-        let _x = 460;
-        let _y = 170;
-        //recover position from localStorage
-        let _pos_local = "pos_pippel_house"
-        if (localStorage.getItem(_pos_local) != null && local_owner == local_wallet) {
-            let _json = localStorage.getItem(_pos_local);
-            _pos = JSON.parse(_json);
-            _x = _pos[0];
-            _y = _pos[1];
-        }
-        pippel_house = this_scene.add.sprite(_x, _y, "pippel_house")
-            .setOrigin(0.5)
-            .setScale(0.25)
-            .setInteractive({draggable: true, useHandCursor: true });
-        pippel_house.flag_drag = 0;
-        pippel_house
-            .on("pointerdown", () => {
-                setTimeout( () => {
-                    if (pippel_house.flag_drag != 1) {
-                        draw_pippelSummary(this_scene);
-                    }
-                }, 250);
-            })
-            .on("drag", () => {
-                pippel_house.flag_drag = 1;
-                if (this_scene.sys.game.scale.gameSize._width == 1280) {
-                    pippel_house.x = game.input.activePointer.x;
-                    pippel_house.y = game.input.activePointer.y;
-                } else {
-                    pippel_house.x = game.input.activePointer.y;
-                    pippel_house.y = 960 - game.input.activePointer.x;
-                }
-                pippel_house.depth = pippel_house.y;
-            })
-            .on("dragend", () => {
-                let _pos = [pippel_house.x, pippel_house.y];
-                if (local_owner == local_wallet) {
-                    localStorage.setItem(_pos_local, JSON.stringify(_pos));
-                }
-                pippel_house.flag_drag = 0;
-            });
-    }
-
+    //if (
     
     //### end
     previous_local_items = local_items;
@@ -21815,12 +21915,6 @@ class Loading_overlap extends Phaser.Scene {
     }
     
     create() {
-
-        // version text
-        this.version_text = this.add.text(1275, 955, version, {font: "16px Arial", fill: "#3D3D3D"})
-            .setOrigin(1)
-            .setDepth(2000);
-
         let _x = 400 + Math.random()*300;
         let _y = 800 + Math.random()*20;
         this.nyui_text = this.add.text(_x, _y-50, "")

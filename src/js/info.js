@@ -235,6 +235,10 @@ async function _show_onChain_parameters() {
         _text = await contract_mss.methods.global_total_precious_received().call();
         _target = document.getElementById("info_fluffyDiscovered");
         _target.innerHTML = _text;
+        //pippel
+        _text = await contract_pn.methods.next_item().call();
+        _target = document.getElementById("info_pippelDiscovered");
+        _target.innerHTML = Number(_text)-1;
     } else {
         setTimeout(_show_onChain_parameters, 1000);
     }
@@ -727,6 +731,10 @@ async function drawStatus() {
         
         //festival
         let _total_voted = await contract_murasakisan.methods.total_voted(_wallet).call();
+        
+        //pippel
+        let _tba = await contract_pf.methods.call_tba(_summoner).call();
+        let local_total_pippel_discovered = await contract_pn.methods.balanceOf(_tba).call();
 
         //call tokenURI from murasakisan contract
         let _tokenURI = await contract_murasakisan.methods.tokenURI(_summoner).call();
@@ -871,20 +879,21 @@ async function drawStatus() {
         drawText(ctx, _xt, _yt + _rawHeight*5, "Total Item Crafted :", local_total_item_crafted);        
         drawText(ctx, _xt, _yt + _rawHeight*6, "Total Exp Gained :", local_total_exp_gained);
         drawText(ctx, _xt, _yt + _rawHeight*7, "Total Fluffy Met :", local_total_precious_received);
-        drawText(ctx, _xt, _yt + _rawHeight*8, "Total Critical Count :", _critical_count);
+        drawText(ctx, _xt, _yt + _rawHeight*8, "Total Pippel Met :", local_total_pippel_discovered);
+        drawText(ctx, _xt, _yt + _rawHeight*9, "Total Critical Count :", _critical_count);
+        drawText(ctx, _xt, _yt + _rawHeight*10, "Total Festival Voted :", _total_voted);
 
-        drawText(ctx, _xt, _yt + _rawHeight*10, "Total Dice Critical :", _dice_critical);
-        drawText(ctx, _xt, _yt + _rawHeight*11, "Total Dice Fumble :", _dice_fumble);
-        drawText(ctx, _xt, _yt + _rawHeight*12, "Total Mail Sent :", _mail_sent);
-        drawText(ctx, _xt, _yt + _rawHeight*13, "Total Mail Opened :", _mail_opened);
-        drawText(ctx, _xt, _yt + _rawHeight*14, "Total Stroll Distance :", local_stroll_total_strolledDistance);
-        drawText(ctx, _xt, _yt + _rawHeight*15, "Total Stroll Friends :", local_stroll_total_metSummoners);
+        drawText(ctx, _xt, _yt + _rawHeight*12, "Total Dice Critical :", _dice_critical);
+        drawText(ctx, _xt, _yt + _rawHeight*13, "Total Dice Fumble :", _dice_fumble);
+        drawText(ctx, _xt, _yt + _rawHeight*14, "Total Mail Sent :", _mail_sent);
+        drawText(ctx, _xt, _yt + _rawHeight*15, "Total Mail Opened :", _mail_opened);
+        drawText(ctx, _xt, _yt + _rawHeight*16, "Total Stroll Distance :", local_stroll_total_strolledDistance);
+        drawText(ctx, _xt, _yt + _rawHeight*17, "Total Stroll Friends :", local_stroll_total_metSummoners);
 
-        drawText(ctx, _xt, _yt + _rawHeight*17, "Clarinet Practice Lv :", local_practice_exp_clarinet);
-        drawText(ctx, _xt, _yt + _rawHeight*18, "Piano Practice Lv :", local_practice_exp_piano);
-        drawText(ctx, _xt, _yt + _rawHeight*19, "Violin Practice Lv :", local_practice_exp_violin);
+        drawText(ctx, _xt, _yt + _rawHeight*19, "Clarinet Practice Lv :", local_practice_exp_clarinet);
+        drawText(ctx, _xt, _yt + _rawHeight*20, "Piano Practice Lv :", local_practice_exp_piano);
+        drawText(ctx, _xt, _yt + _rawHeight*21, "Violin Practice Lv :", local_practice_exp_violin);
 
-        drawText(ctx, _xt, _yt + _rawHeight*21, "Total Festival Voted :", _total_voted);
         
         //window6
         let _x6 = _x;

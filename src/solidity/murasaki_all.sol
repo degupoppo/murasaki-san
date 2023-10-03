@@ -4,8 +4,8 @@
 pragma solidity =0.8.13;
 
 
-// 230927
-// House of Murasaki-san ver. 0.1.4a
+// 231003
+// House of Murasaki-san ver. 0.1.5a
 
 
 //===Import==================================================================================================================
@@ -2024,7 +2024,7 @@ contract Murasaki_TBARegistry is IERC6551Registry {
 //===Storage==================================================================================================================
 
 
-//---Murasaki_Address*
+//---Murasaki_Address
 
 contract Murasaki_Address is Ownable {
 
@@ -9504,6 +9504,11 @@ contract Pippel_Function is Ownable, ReentrancyGuard, Pausable {
         // update last mint time
         lastMintTime[_summoner] = block.timestamp;
     }
+    
+    // call tba
+    function call_tba (uint _summoner) external view returns (address) {
+        return _call_tba(_summoner);
+    }
 
     // internal
     // mint daily flower NFT into TBA
@@ -9652,7 +9657,7 @@ contract Pippel_Function is Ownable, ReentrancyGuard, Pausable {
         uint256 dayCount = 0;
 
         for (uint256 i = 0; i < month - 1; i++) {
-            require(day <= daysInMonth[i], "Invalid day for the given month");
+            //require(day <= daysInMonth[i], "Invalid day for the given month");
             dayCount += daysInMonth[i];
         }
 
