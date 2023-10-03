@@ -14148,12 +14148,15 @@ async function contract_get_flowerList_withType (_summoner) {
         let _flowerRarity = _myListsAt_withItemTypeAndSubtype[i+2];
         _li.push([_flowerId, _flowerType, _flowerRarity]);
     }
-    return _li;
+    return [_tba, _li];
 }
 
 
 //### pippel summary
 async function draw_pippelSummary (scene) {
+
+    // sound
+    sound_window_open.play();
 
     // create global group
     group_pippelSummary = scene.add.group();
@@ -14218,7 +14221,7 @@ async function draw_pippelSummary (scene) {
     let _posList = [[12,12],[11,12],[12,11],[12,13],[13,12],[11,11],[11,13],[13,11],[13,13],[10,12],[12,10],[12,14],[14,12],[10,11],[10,13],[11,10],[11,14],[13,10],[13,14],[14,11],[14,13],[10,10],[10,14],[14,10],[14,14],[9,12],[12,9],[12,15],[15,12],[9,11],[9,13],[11,9],[11,15],[13,9],[13,15],[15,11],[15,13],[9,10],[9,14],[10,9],[10,15],[14,9],[14,15],[15,10],[15,14],[8,12],[12,8],[12,16],[16,12],[8,11],[8,13],[11,8],[11,16],[13,8],[13,16],[16,11],[16,13],[9,9],[9,15],[15,9],[15,15],[8,10],[8,14],[10,8],[10,16],[14,8],[14,16],[16,10],[16,14],[7,12],[12,7],[12,17],[17,12],[8,9],[8,15],[9,8],[9,16],[15,8],[15,16],[16,9],[16,15],[7,11],[7,13],[11,7],[11,17],[13,7],[13,17],[17,11],[17,13],[7,10],[7,14],[10,7],[10,17],[14,7],[14,17],[17,10],[17,14],[8,8],[8,16],[16,8],[16,16],[7,9],[7,15],[9,7],[9,17],[15,7],[15,17],[17,9],[17,15],[6,12],[12,6],[12,18],[18,12],[6,11],[6,13],[11,6],[11,18],[13,6],[13,18],[18,11],[18,13],[6,10],[6,14],[10,6],[10,18],[14,6],[14,18],[18,10],[18,14],[7,8],[7,16],[8,7],[8,17],[16,7],[16,17],[17,8],[17,16],[6,9],[6,15],[9,6],[9,18],[15,6],[15,18],[18,9],[18,15],[5,12],[12,5],[12,19],[19,12],[5,11],[5,13],[11,5],[11,19],[13,5],[13,19],[19,11],[19,13],[7,7],[7,17],[17,7],[17,17],[6,8],[6,16],[8,6],[8,18],[16,6],[16,18],[18,8],[18,16],[5,10],[5,14],[10,5],[10,19],[14,5],[14,19],[19,10],[19,14],[5,9],[5,15],[9,5],[9,19],[15,5],[15,19],[19,9],[19,15],[6,7],[6,17],[7,6],[7,18],[17,6],[17,18],[18,7],[18,17],[4,12],[12,4],[12,20],[20,12],[4,11],[4,13],[11,4],[11,20],[13,4],[13,20],[20,11],[20,13],[5,8],[5,16],[8,5],[8,19],[16,5],[16,19],[19,8],[19,16],[4,10],[4,14],[10,4],[10,20],[14,4],[14,20],[20,10],[20,14],[6,6],[6,18],[18,6],[18,18],[4,9],[4,15],[9,4],[9,20],[15,4],[15,20],[20,9],[20,15],[5,7],[5,17],[7,5],[7,19],[17,5],[17,19],[19,7],[19,17],[4,8],[4,16],[8,4],[8,20],[16,4],[16,20],[20,8],[20,16],[3,12],[12,3],[12,21],[21,12],[3,11],[3,13],[11,3],[11,21],[13,3],[13,21],[21,11],[21,13],[3,10],[3,14],[10,3],[10,21],[14,3],[14,21],[21,10],[21,14],[5,6],[5,18],[6,5],[6,19],[18,5],[18,19],[19,6],[19,18],[4,7],[4,17],[7,4],[7,20],[17,4],[17,20],[20,7],[20,17],[3,9],[3,15],[9,3],[9,21],[15,3],[15,21],[21,9],[21,15],[3,8],[3,16],[8,3],[8,21],[16,3],[16,21],[21,8],[21,16],[5,5],[5,19],[19,5],[19,19],[2,12],[12,2],[12,22],[22,12],[4,6],[4,18],[6,4],[6,20],[18,4],[18,20],[20,6],[20,18],[2,11],[2,13],[11,2],[11,22],[13,2],[13,22],[2,10],[2,14],[10,2],[10,22],[14,2],[14,22],[22,10],[22,14],[3,7],[3,17],[7,3],[7,21],[17,3],[17,21],[2,9],[2,15],[9,2],[9,22],[15,2],[15,22],[4,5],[4,19],[5,4],[5,20],[19,4],[19,20],[8,2],[8,22],[16,2],[16,22],[6,3],[6,21],[18,3],[18,21],[12,1],[12,23],[11,1],[11,23],[13,1],[13,23],[10,1],[10,23],[14,1],[14,23],[7,2],[7,22],[17,2],[17,22],[9,1],[9,23],[15,1],[15,23],[5,3],[5,21],[8,1],[8,23],];
     
     // call posessing pippel list
-    let _pippelList = await contract_get_flowerList_withType(summoner);
+    let [_tba, _pippelList] = await contract_get_flowerList_withType(summoner);
     
     // debug, push random flowers
     /*
@@ -14239,6 +14242,9 @@ async function draw_pippelSummary (scene) {
         5:"Bloomed",
     }
     
+    // prepare rarity list
+    let _li_rarity = [0,0,0,0,0,0];
+    
     // define drawing function, require i
     function _do(i) {
     
@@ -14246,6 +14252,9 @@ async function draw_pippelSummary (scene) {
         let _flowerId = _pippelList[i][0];
         let _flowerType = _pippelList[i][1];
         let _flowerRarity = _pippelList[i][2];
+        
+        // count rarity
+        _li_rarity[_flowerRarity] += 1;
         
         // prepare x, y pos
         let _xRaw = _posList[i][0];
@@ -14296,6 +14305,7 @@ async function draw_pippelSummary (scene) {
         _pippel.setInteractive({useHandCursor: true})
             .on('pointerover', () => {
                 _pippel.msg.visible = true;
+                sound_window_pointerover.play();
             })
             .on("pointerout", () => {
                 _pippel.msg.visible = false;
@@ -14314,10 +14324,51 @@ async function draw_pippelSummary (scene) {
         _count += 1;
     }
 
-    // create close button at the end
+    // end
     setTimeout( () => {
+
+        // create button
         create_button(1030, 820, "Close", "#000000", "", -1, 0, scene, 36);
-        msg1.setText("");   //// clear loading msg
+
+        // update msg1
+        let _text = "";
+        _text += "Pippel NFTs in Token Bound Account of your Murasaki-san.\n";
+        msg1.setText(_text);
+
+        // create msg2
+        _text = "";
+        _text += "TBA address: " + _tba;
+        let msg2 = scene.add.text(140, 140, _text)
+                .setFontSize(16).setFontFamily("Arial").setFill("#0000FF").setDepth(5001);
+        group_pippelSummary.add(msg2);
+        
+        // update msg3
+        _text = "";
+        _text += "Total Pippels: " + _countTotal + "\n";
+        _text += "  - Closed: " + _li_rarity[1] + "\n";
+        _text += "  - Opening: " + _li_rarity[2] + "\n";
+        _text += "  - Blossoming: " + _li_rarity[3] + "\n";
+        _text += "  - Blooming: " + _li_rarity[4] + "\n";
+        _text += "  - Bloomed: " + _li_rarity[5] + "\n";
+        //_text += "(Closed: " + _li_rarity[1] + ", Opening: " + _li_rarity[2] + ", Blossoming: " + _li_rarity[3] + ", Blooming: " + _li_rarity[4] + ", Bloomed: " + _li_rarity[5] + ")\n";
+        let msg3 = scene.add.text(720, 680, _text)
+                .setFontSize(16).setFontFamily("Arial").setFill("#005731").setDepth(5001);
+        group_pippelSummary.add(msg3);
+
+        // update msg4
+        _text = "";
+        _text += "✿ Pippel blooms for only 3 hours a day.\n";
+        _text += "    Clicking on it will mint an NFT in TBA.\n";
+        _text += "\n";
+        _text += "✿ You can mint a different type of flower every day.\n";
+        _text += "    There are a total of 366 varieties.\n";
+        _text += "\n";
+        _text += "✿ Pippels will increase fluffy score by an average of 1.\n";
+        _text += "    (depending on its rarity)";
+        let msg4 = scene.add.text(130, 620, _text)
+                .setFontSize(16).setFontFamily("Arial").setFill("#0000FF").setDepth(5001);
+        group_pippelSummary.add(msg4);
+
     }, _intervalMSec*(_count-1));
 }
     
