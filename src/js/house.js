@@ -1,6 +1,6 @@
 
 
-version = "v0.1.15";
+version = "v0.1.16 ";
 
 
 //===Header==================================================================================
@@ -90,12 +90,24 @@ contract ERC721 is IERC721 {
 //### 1st
 
 
+    HP上のエコノミーの区分に加筆
+        ポンジ型なのか、バイバック型なのか、原資回収について記載
+        全員が儲かるモデル
+        ただし、原資回収には1年以上かかる
+        原資を超えるタイミングをグラフで計算してみる
+
+
+    HP上にpippelの説明文を記載する
+        fomulraに出現率とスコア補正値を記載
+
+
     額縁、ブランケット、チェスト、水筒、を移動できるように。
         setTimeout使ってクリックとドラッグを判別させる
 
 
-    pippel入れの実装
-        
+ ig pippel入れの実装
+        茎をもう少し細めに修正
+        ウィンドウ色を適切に修正
 
 
  ok クラフト後に寝てしまう
@@ -10707,6 +10719,7 @@ class Pinwheel extends Phaser.GameObjects.Sprite{
             group_pinwheel.flag_drag = 1;
         });
         this.on("dragend", () => {
+            sound_wheel.play();
             group_pinwheel.flag_drag = 0;
             if (local_owner == local_wallet) {
                 let _pos = [group_pinwheel.x, group_pinwheel.y];
@@ -11066,6 +11079,7 @@ class Runpa extends Phaser.GameObjects.Sprite{
             this.count = 0;
             this.submode = 0;
             this.anims.play("item_runpa", true);
+            sound_pad.play();
         }
     }
 
@@ -14223,6 +14237,7 @@ async function draw_pippelSummary (scene) {
     // call posessing pippel list
     let [_tba, _pippelList] = await contract_get_flowerList_withType(summoner);
     
+
     // debug, push random flowers
     /*
     for (let i=0; i<150; i++) {
@@ -14247,6 +14262,9 @@ async function draw_pippelSummary (scene) {
     
     // define drawing function, require i
     function _do(i) {
+    
+        // sound
+        sound_nyui.play();
     
         // prepare id, type, rarity
         let _flowerId = _pippelList[i][0];
@@ -14326,6 +14344,9 @@ async function draw_pippelSummary (scene) {
 
     // end
     setTimeout( () => {
+    
+        // sound
+        sound_hat.play();
 
         // create button
         create_button(1030, 820, "Close", "#000000", "", -1, 0, scene, 36);
@@ -14902,6 +14923,8 @@ function preload(scene) {
     scene.load.audio("alp_flipping", "src/sound/alp_flipping.mp3");
     scene.load.audio("alp_shrinking", "src/sound/alp_shrinking.mp3");
     scene.load.audio("woodcube", "src/sound/woodcube.mp3");
+    scene.load.audio("ufo", "src/sound/ufo.mp3");
+    scene.load.audio("wheel", "src/sound/wheel.mp3");
 
     //---particles
     //https://codepen.io/samme/pen/eYEearb
@@ -16115,6 +16138,8 @@ function create(scene) {
     sound_flipping = scene.sound.add("alp_flipping", {volume:0.1});
     sound_shrinking = scene.sound.add("alp_shrinking", {volume:0.1});
     sound_woodcube = scene.sound.add("woodcube", {volume:0.4});
+    sound_ufo = scene.sound.add("ufo", {volume:0.1});
+    sound_wheel = scene.sound.add("wheel", {volume:0.1});
 
 
     //---system message
@@ -20227,17 +20252,24 @@ function update_checkItem(this_scene) {
             .setScale(0.3)
             .setAngle(0)
             .setVisible(false);
+        neon_ufo.isSound = 1;
         neon_ufo.angleAdd = 1;
         neon_ufo.update = () => {
             neon_ufo.x -= 0.5;
             if (neon_ufo.x < -500) {
                 neon_ufo.x = 2000;
+                neon_ufo.isSound = 1;
             }
             neon_ufo.angle += neon_ufo.angleAdd;
             if (neon_ufo.angle >= 10) {
                 neon_ufo.angleAdd = -0.25;
             } else if (neon_ufo.angle <= -20) {
                 neon_ufo.angleAdd = 0.25;
+            }
+            //sound
+            if (neon_ufo.x < 1280 && neon_ufo.isSound == 1 && neon_ufo.visible == true) {
+                sound_ufo.play();
+                neon_ufo.isSound = 0;
             }
         };
         group_update.add(neon_ufo);
@@ -20771,6 +20803,7 @@ function update_checkItem(this_scene) {
                     localStorage.setItem(_pos_local, JSON.stringify(_pos));
                 }
                 summon_retroAlphabet(this_scene, item_retrogame.x, item_retrogame.y);
+                sound_pad.play();
                 item_retrogame.disableInteractive();
                 setTimeout( () => {
                     item_retrogame.setInteractive({ draggable: true, useHandCursor: true });
