@@ -1,6 +1,6 @@
 
 
-version = "v0.1.16 ";
+version = "v0.1.17 ";
 
 
 //===Header==================================================================================
@@ -20267,7 +20267,12 @@ function update_checkItem(this_scene) {
                 neon_ufo.angleAdd = 0.25;
             }
             //sound
-            if (neon_ufo.x < 1280 && neon_ufo.isSound == 1 && neon_ufo.visible == true) {
+            if (
+                neon_ufo.x < 1280 
+                && neon_ufo.x > 50
+                && neon_ufo.isSound == 1 
+                && neon_ufo.visible == true
+            ) {
                 sound_ufo.play();
                 neon_ufo.isSound = 0;
             }
