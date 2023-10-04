@@ -1,6 +1,6 @@
 
 
-version = "v0.1.17 ";
+version = "v0.1.18";
 
 
 //===Header==================================================================================
@@ -90,34 +90,99 @@ contract ERC721 is IERC721 {
 //### 1st
 
 
-    HP上のエコノミーの区分に加筆
-        ポンジ型なのか、バイバック型なのか、原資回収について記載
-        全員が儲かるモデル
-        ただし、原資回収には1年以上かかる
-        原資を超えるタイミングをグラフで計算してみる
+    要修正・検討
+        pippelにレベルキャップを導入
+            Lv5以上など、特定の条件を決める
+            コントラのpippel_appearanceチェックに導入する
+        pippelのmint数をカウントさせる
+            pfかpn本体に、walletごとのmint数を記録させる
+            mint=0の時、初mint時にaccountをcreate()できるだろうか。
+                とすると、pfのほうが適当だろうか。
+        ツイッターカードの実装
+            1:1.91サイズ、800x418px
+        額縁、ブランケット、チェスト、水筒、を移動できるように。
+            setTimeout使ってクリックとドラッグを判別させる
+        pippel入れの実装
+            茎をもう少し細めに修正
+            ウィンドウ色を適切に修正
+        pippelの修正
+            フローリングから直に生えてしまっているので、適当な絵に修正
+        frame修正
+            frameの縦横比を1:1に修正する
+            frame_loading絵を別途用意する
+            最初はloading絵で、クリックするとNFTを読み込むように修正
+        ダンボールの絵を用意する
+        デプロイ方法の改善
+            murasaki_addressコントラの更新時の動きを確認
+            全コントラのmurasaki_addressアドレスを書き換える方法とタイミングを整理する
+        ぴっぺる出現とmintの演出改善
+            mint時に何が得られたかわかるように
+        ピッペルの改善
+            tokenURIの実装
+            SVGにするかjson+pngにするか
+        ぴっぺる出現時間の取得をトライしてみる
+            js側で可能かどうか
+            private変数の読み込み方法
+        SNS戦略
+            情報発信用のキャラクター（ないないさん？）がtwitterで発信している風で行う
+            ディスコースを試す
+        stroll修正
+            strollでastar以外の実装
+            strollで麦わら帽子以外がずれるバグの修正
+        AccountAbstractに対応するためmsg.senderを考察する。
+            EOAではなくCAがmsg.senderになる？
+            NFTやSBTの所有者がCAになりうるため、msg.senderをCAとみなさなければならない？
+            _senderへの書き換えが必要かもしれない。
+        rugのインジケーター表示させるとボタンが押せないバグの修正
+        夜の演出改善
+            UFOや土星などを画面上部に表示させる
+            上からゆっくり降りてくる？
+        お菓子の家が完成した時の演出の改善
+            glitter表示
+            メーターの色を変えるなどして100%をわかりやすく
+            click to mintなどを表示させる？
+        お菓子の家の建設途中の修正
+            建設しているジンジャーマン
+            10～30%ではもう少しパーツを少なめに
+            staking=0の時の演出
+        market.jsのbuyback関数で最新のfluffy dollのitemTypeに対応するよう修正する
+        アイテム案
+            アロマキャンドル
+            ルンバ
+            あと１つなにか
+        Alchemy WAGBIへアプライ
+        infoの取得にmurasakiのbatch getterを使って処理を軽減する
+        tokenURIをsatietyとhappyによって変化させる
+            tokenURI_codexを作製し参照する
+        おサボり中はミシンやスコップを残す
+        rugg-pullの実装
+            ひとまず、右端をクリックでrugをスライドさせる
+            接触しているfluffyとむらさきさん, diceがon_clickされる
+        bgmの追加
+            カノン、むらさきさん
+        デモ用キャラの演出を考える
+            #1を晒してしまって大丈夫だろうか。ネタバレや楽しみの先取りになるだろうか。
+            お腹が減りやすく、経験値が得られにくい、demo用キャラを別途用意するか？
+            trial終了直後ぐらいの進行度が良いだろうか。
+            パラメータを弄った別コントラとするか？
+        フェスティバル前の演出の改善
+            お祭り帽子の実装
+        変数書き換え対策の実装, さてどうするか
 
 
-    HP上にpippelの説明文を記載する
-        fomulraに出現率とスコア補正値を記載
+    HP修正
+        エコノミーの区分に加筆
+            ポンジ型なのか、バイバック型なのか、原資回収について記載
+                全員が儲かるモデル
+                ただし、原資回収には1年以上かかる
+            原資を超えるタイミングをグラフで計算してみる
+                まず-500でスタートし、通常プレイでどのあたりで原資回復できるのかのイメージグラフ
+            NFTの最低価格に対して"trustless"なシステムを目指す
+                dapps stakingとbuyback systemでコントラクトでtrustされている
+        pippelの説明文を記載する
+            fomulraに出現率とスコア補正値を記載
 
 
-    額縁、ブランケット、チェスト、水筒、を移動できるように。
-        setTimeout使ってクリックとドラッグを判別させる
-
-
- ig pippel入れの実装
-        茎をもう少し細めに修正
-        ウィンドウ色を適切に修正
-
-
- ok クラフト後に寝てしまう
-        textureとhat位置に齟齬が内容修正
-
-
- ok ピッペルの出現時間を、流石に3時間程度に伸ばす。
-        また、_setであとから変えれるように修正する。
-
-    
     ツイートボタンの設置
         ハッシュタグと、進捗を端的に表す一枚絵をツイートするボタン。
         一枚絵の案
@@ -134,34 +199,33 @@ contract ERC721 is IERC721 {
             「◯◯のhashtag付けてツイートに使ってね」
             のメッセージとともに、ツイートに使いたくなる絵を表示し、
             クリップボードへコピーするボタンを設置しておくのもよいだろうか。
-            
+        mcへのbufferTreasuryへの登録をinitで登録したことのテスト。
 
 
- ok pippelがtrialに対応していないので修正する
-        特にmurasaki_infoが値を返せない。
-        また、pippelコントラ群のtrial版をデプロイしていない。
-
-
-    pippel UIの実装
-        決まった時間にpippelが出現する
-        出現時間でも起動直後は出現させず、1-2サイクル後に出現させる
-        何かしらの目立つ演出を実装する
-        flower mint時に何を入手したか分かりやすく表示する
-        ただクリックするのではなく、珍しさを演出したい
-            タイマーを表示する？
-        クリックで開く、集めたお花を入れておくふくろを実装する
-
-
-    frameの縦横比を1:1に修正する
-    frame_loading絵を別途用意する
-    ダンボールの絵を用意する
-
-
-    UFOの音
-    月の猫の音
-    ゲームボーイの音
-    ルンバの音
-    風車の音
+    構想：SNSへの親和性を上げる
+        ワンクリックでtwitterへ投稿できるボタンを設置する。
+        投稿したくなるような小さな絵を実装する
+            canvasを使えば良さそう
+            tokenURIでもいいのだが。
+            ステータスウィンドウはちょっと情報多すぎるだろうか
+        ハッシュタグ案
+            #Astar #BCG #HoM #Murasaki-san
+        匿名性を担保する
+            リテラシーの高い層ほど、nameやidなど、
+                walletを特定可能な情報は安易にSNSに載せたくないだろう。
+            一方で、SNSへの投稿はゲームの進行を誇示することで自己顕示欲を満たしやすい。
+            よって、極めて特定しにくいが、進捗を端的に表す絵を用意して、
+                tweetボタンを設置しておく。
+            marimoNFTの水換え依頼などはwalletを追えるのではやりにくいだろう。
+                リテラシーの低い層か、捨てwalletの利用者か
+                捨てwalletからもメインwalletを追えるのでやはり投稿には勇気がいる。
+            気軽に投稿可能なアイコンや絵を用意する。
+        乗せる情報
+            Lv
+            Fluffyスコア
+            Comfortスコア（丸めた数字）
+            NFT数
+            happy, satietyに応じたアイコン
 
 
     NFT売買に対するゲーム性の付与について考える
@@ -189,22 +253,9 @@ contract ERC721 is IERC721 {
             その後sync countが99のまま更新されなくなってしまう。
         例えばfirefoxではフォーカスを戻せばsyncされるのだが、何が違うのだろうか。
         braveでエラーメッセージを見る方法は？
-    
-
- ok fluffy scoreの表記にpippelを追加する
 
 
-    デプロイ方法の改善
-        murasaki_addressコントラの更新時の動きを確認
-        全コントラのmurasaki_addressアドレスを書き換える方法とタイミングを整理する
-
-
-    HPの更新
-        NFTの最低価格に対して"trustless"なシステムを目指す
-            dapps stakingとbuyback systemでコントラクトでtrustされている
-
-
-    walletの整理
+    walletの整理と準備
         coder_wallet        summoner=1, 普段遣いのwallet
         illustator_wallet   summoner=2, 普段遣いのwallet
         staking_wallet      EVMへのdApps Staking専用wallet
@@ -225,15 +276,34 @@ contract ERC721 is IERC721 {
             原資回収には普通のプレイでは１年以上必要と思われる
         マルチアカウント運用
             NFTや資産をアカウント間で移動するコストが高い
-            タイミングを図って市場を介してNFTを移動することも難しい
-            mmを大量にmintするには購入額が少し高い
+            タイミングを図って市場を介してウォレット間でNFTを移動することは、
+                ダッチオークションのルールため難しい
+            mmを大量にmintするにはmmの購入額が少し高い
             総じて、マルチアカウント運用する旨味がそれほど大きくない
                 効率プレイ目的の2-3アカウント運用なら許容範囲かもしれない
                 効率プレイすればするほど金銭的には不利になるバランスで。
                 効率性と金銭的インセンティブを二律背反させる
         コントラクトからの窃盗
-            
-        
+            アセットを有するコントラはbuffer vaultとbuyback treasuryのみ
+            このうち、viewではなく、
+                onlyOwnerがついていないexternal/public functionを持つのはbuyback treasuryのみ
+            想定1: アイテム無限mintしてからbuyback
+                buyback上限が設定されているので原資回収+aが精々
+                buybackのインターバルを設ける？
+            想定2: リエントラシー
+                guardのmodiferを付けている
+                また、payの前にbuyback上限をチェックするよう修正する
+        アービトラージャー
+            アービトラージが成功すればするだけ、プレイヤーの誰かが必ず損をしている
+            アービトラージによって取引回数が増えて手数料収入が入ることよりも、
+                プレイヤーの誰かが損をしたという心理的損害のほうが大きいだろう。
+            本PJの目標は、大きく儲かる明らかな機会が少ないかわりに、
+                大きな損をする（損を感じる）プレイヤーを可能な限り減らし、
+                すべてのプレイヤーが中長期的にはプラス（を実感できる）ことを目指す
+            よって、アービトラージの機会は極力排除したい。
+            マーケットプレイスはSBTを持つwalletしか使用できず、
+                アービトラージをするにしても初期費用の支払と継続プレイが求められる。
+            保護・閉じた経済が成功しにくい点は、どうするか。
 
 
     TBAについて詰めるII
@@ -249,301 +319,27 @@ contract ERC721 is IERC721 {
             create()の許可はどうするか。
             permitted_addressのみ許可すると、別にfunctionコントラを作成可能
             ある一定の進捗でTBAをmint可能で操作できるようになる、なども可能。
-
-
-    新mm
-        address_Murasaki_Address = '0xDde958185fe000D41132eA084187b91be0e43484'
-        address_trial_Murasaki_Address = '0xc8cB8de3631C768b41Bf8ECaA350Ec941Bc8f280'
-
-
-    dApps Stakingの改善
-        staking walletをコントラクト化できる？
-            staking2.0に対応して84d毎に自動でセルフステーキングできるか。
-        もしくは、EOAでスクリプトにより定期的にEVM側に預ける。
-
-
-    TBAについて詰める
-        TBAはregistryでcreateAccountしないと使えない？
-        TBAのアドレス自体はaccountに必要情報を入れればcreate前でも参照できる
-        ERC6551AccountでexecuteCallするためにはRegistryでcreateが必要？
-        とすると、createはいつのタイミングで行わせるか。
-        また、create済みかどうかはどうやって判定するか。
-        create自体は何回でもエラーなくtx飛ばせるようだ。
-
-
-    ERC6551
-        ERC6551Registry
-            0x1f00990eFfd45A496f7c7ECD7EF29622b225Dda0
-        ERC6551Account
-            0xEAF42da7683896F5DC625ad09BA0950b33e2FF18
-        mmのTBA
-            summoner=1
-                0x738ADfBA566d3D2Ac511f9E5959e80Bc0a151309
-            summoner=2
-                0x7721B7871Fd35d076cdA7C25306980b509f3101c
+       *Registryでcreate()済みかどうかはどのように判定するのか
+            最初のpippelをmintする時に、TBAの有無をチェックしてcreate()させるか。
+        現在のアドレス
+            ERC6551Registry
+                0x0fc20b4D97778d74De766DA7009Cf25B86b8F078
+            ERC6551Account
+                0x19A7865f181F18Af789D19BA1A3f5797945b64DF
         Registryのaccount情報
-            implementation: 0xEAF42da7683896F5DC625ad09BA0950b33e2FF18 //ERC6551Account
+            implementation: 0x19A7865f181F18Af789D19BA1A3f5797945b64DF //ERC6551Account
             chainId:        4369
             tokenContract:  0x4925561b0a524B98F950F07A40F6DFc70B64CaD5  //mm
             tokenId:        (summoner id)
             salt:           6539
 
 
-    init更新
-        ERC6551の用意
-            maを対象にデプロイ
-            saltは6539
-        maに以下を追加
-            address public address_Pippel_NFT;
-            address public address_Pippel_Function;
-            address public address_Pippel_Codex;
-            address public address_Murasaki_TBARegistry;
-            address public address_Murasaki_TBAAccount;
-        maに制御関数を用意
-            一括登録、一括callのつじつま合わせを行う。
-            どこで使ってたっけ？
-        python iniの更新
-            上記5コントラの更新コードの整備
-            pn
-                pfをpermit
-                pcを登録
-
-    コントラクトからEVMステーキングが可能か調べる。
-    
-
-    zkEVMコントラクトからwalletのdApps Staking量を参照可能か調べる。
-
-
-    mcへのbufferTreasuryへの登録をinitで登録したことのテスト。
-
-
-    Pippel実装
-        NFT
-            construct
-                mint_time
-                mint_summoner
-                mint_type
-                flower_type
-                rarity_type
-                flower_name
-            function
-                tokenURI(_tokenId)
-            afterTransfer()
-                count_of_type更新
-                count_of_rarity更新
-        Function
-            call_luckBoost(_summoner)
-            calc_pippelScore(_summoner)
-                rarity scoreに係数をかけて算出する
-                面倒なので、重複OKとする
-                獲得itemに応じたrarity scoreを加減させる
-        Codex
-        UIUX
-            ぴっぺる出現とmint
-                何が得られたかわかるように
-            所持pippel NFTの一覧ウィンドウ
-                取得した順に並べる
-            pippel scoreの表示
-                ウィンドウ内に表記
-            pippel bagクリック時の演出
-                花びらが飛び出して一覧ウィンドウが開く、など。
-    
-
-    ピッペルNFTの実装
-        block.timestampをUTFの日付（1-365）に変換する
-        日付ごとの誕生花を取得する
-            ランダム？
-        接頭語決定
-        部位決定
-        変数
-            mint_time
-            mint_summonerId
-            mint_summonerName
-            mint_type
-            flower_type
-            rarity_type
-                bud, opening, blossoming, blooming, bloomed
-            flower_name
-                rarity + flowerのstring
-            seed
-        集計方法
-            コントラ側
-                wallet内のNFTの総数
-                    balanceOfでOK
-                wallet内のrarityごとの総数
-                    balanceOfRarityを実装
-                wallet内のNFTの種類数（1以上のflower_type数）
-                    balanceOfTypeを実装
-                最終的なpippel score (= +luk)
-                    Pippel_Functionにスコアを計算する関数を実装
-                    rarityごとの所持数を集計したcount値を参照する
-            web側
-                wallet内の全NFT情報の一覧
-                    id, month, day, flowerName, rarity
-                    もしくはuint[367]として取得して、
-                        js側で文字列に変換するか。
-                    個数とrarityを判別する必要があるため、
-                        例えばcommon=1, uncoomon=10などを利用するか
-                        例：1 -> common x1
-                            11 -> comon x1, uncoomon x1
-                            12410 -> uncommon x1, rare x4, epic x2, leg x1
-                        これをuint[367]に格納して一度のcallで返す関数を実装する
-                        その都度計算するよりは、
-                            afterTransfer()内でwalletごとのスコアを随時更新するほうが良いだろうか。
-                    必要な表記は
-                        例：003 blossoming Tulip
-                        id, rarity, flowerTypeの3つがあればひとまずOKか
-                        idも表記しないほうが面白いだろうか。
-        関数
-            tokenURI
-                文字だけ情報で良いか
-                背景にpippelのsvg絵を透かしで入れる
-                前面に、mint日時、mint summoner名、rarity + flowerNameを表示する
-                可能であれば、rarityや月に対応して背景pippel絵を変化させる
-                    背景色でrarity、pippel絵で月、あるいは季節（春夏秋冬）を表せればよいか
-                    背景色は、薄めで
-                        common: 白
-                        uncommon: 緑
-                        rare:   青
-                        epic:   紫
-                        legend: オレンジ
-                    季節は、以下の色が多めのpippel花
-                        春：    ピンク、淡い赤
-                        夏：    青、濃い黄色
-                        秋：    オレンジ、茶
-                        冬：    白
-        web側UIの実装
-            お花バッグの実装
-            所持お花一覧ウィンドウの実装
-                366
-            rarity x seasonの全pippel絵の用意
-                背景色5 x 絵4種類 = 20 種類
-                アイコンに使用する、文字は入れない
-        ユースケース
-            バッグの達成度に応じてLukにブーストが掛かる
-            平均して1年で+3.00程度のブーストに。
-        rarity出現率
-            closedばかりでは面白くないので、中間のblossomingを基本とする
-            closed:     10% 補正-40%    6
-            opening:    20% 補正-20%    8
-            blossoming: 40% 基準100%    10
-            blooming:   20% 補正+20     12
-            bloomed:    10% 補正+40%    14
-            期待値: 100
-            Lukブースト:    分かりやすく, blooming x1 = 10point = 0.001 luck
-                blossoming pippel 1個がfluffy score 1点に相当する。
-                rarityを加味するためfluffy scoreより10倍単位に設定する
-                    10 pippel point = 1 fluffy score = 0.01 LUK
-                全種類blossoming集めると366 pippel point = +3.66 LUK
-
-
-    ランダム出現キャラの実装
-        クリックでtx飛ばしてTBAにお花を得る
-        直近5ブロックの判定が1なら実行可能とする
-        12sec/blockとすると、7200block/day
-        1日に1回出現とすると、7200d1
-        過去150block=30min以内に7200d1が1となるblockがあればmint関数の実行可とする
-            150blockのチェックが不可だろう。
-            せいぜいが30block=6minぐらいだろうか。
-            → solidityで過去のblock.timestampなどを取得することはできないようだ
-        乱数戦略
-            mfsのdnは過去のblock情報を取得できずに使えない
-            となると、7200block/dayのうち、例えば特定の100blockを返す乱数を考えるか
-            この方法だと解析していつpippelが出現するか逆算できてしまうが、まあ良いか。
-            d72で*100することで出現blockを決められる
-            d72の引数はsummonerIdのみにする。
-                つまり、summoner毎にその日のどこで出現するかが異なる。
-
-
-    TBA用アイテム構想
-        お花
-            ピッペル
-        その日の誕生花からランダムで取得される
-        取得タイミング：
-            クラフト完了
-            メール開封
-            トータルcoin
-            トータルleaf
-            レベルアップ
-            トータル経験値
-        NFT情報
-            お花の名前（string）
-            取得理由（string）
-            取得日時
-            取得者（summoner）
-            seed
-            接頭語などの修飾語
-                rarityを演出する？
-                きれいな、かわいい、良い匂いのする、など？
-            部位？
-                つぼみ
-                お花
-                種
-        用途
-            何からのメカニズムで要求し消費させる？
-            トレードや売買の可否は？
-            所持NFT全体をスコア化する？
-                レア度計算は？
-            単純にLUKにプラスにするか
-
-
-    用置換絵
-        クラリネット
-        かざぐるま
-        日記帳
-        クレヨン
-        ゲームボーイ
-        フラワーリース
-        額縁
-
-
-    限定アイテムの構想
-        発行数、もしくは発行期間が制限された限定NFTのmint構想
-        コストはcoin/leafにするか、特殊なリソースにするか。
-        金銭的価値というよりは、継続プレイの実感を目的としたい。
-            プレイ期間の歴史をひと目に感じられるように。
-            「これはあの時こうやって手に入れたNFTだー」と実感できるように。
-        効果としては、全てLuck+0.1とかにするか。
-        もしくは、TBAに入るお花が期間や季節によって異なるようにするか。
-            夏の花が多い、秋はレアなお花がもらえた、など。
+    dApps Stakingの改善
+        staking walletをコントラクト化できる？
+            staking2.0に対応して84d毎に自動でセルフステーキングできるか。
+        もしくは、EOAでスクリプトにより定期的にEVM側に預ける。
+        コントラクトからEVMステーキングが可能か調べる。
         
-
-    SNS戦略
-        情報発信用のキャラクター（ないないさん？）がtwitterで発信している風で行う
-        ディスコースを試す
-        
-
-    要修正
-        runpaのON/OFFに音をつける
-        retrogameの絵を用意する
-        retrogameの設置時に音をつける
-        strollでastar以外の実装
-        strollで麦わら帽子以外がずれるバグの修正
-
-
-    PoM
-        Pocket of Murasaki-san
-        むらさきさんの特定のactionに付随して、ランダムにアイテムが格納されるTBA
-            PoMをまだクラフトしていなくても該当アドレスに送ってしまう
-            ERC20は制御が難しいので、ERC721のみで考える
-            得られるERC721には金銭的価値を付与せず、また意識させない
-        得られるアイテム案
-            （接頭語）＋（素材）＋（アイテム名）＋（補正値）
-            例：Western Iron Amulet +1　など　+1はmasterpriceとかでもよいか
-            接頭語ごとか、最終的か、アイテムのrarityを設定する
-        アイテム案２
-            お花
-            tierでrarityを分けて、レアなお花などを表現する
-            接頭語、補正値などはつけるか？
-            １００種類など、とにかく数を多く
-            いくつか併せて「花束」をクラフト可能に？
-                素材にしたお花の数と種類で花束の性質やレアリティが決まる
-        実装
-            ERC721でseed値を割り振る
-                name()でcodexを参照してお花やレアリティを返す？
-                codex化することでreplacableにできるが。
-            あるいはmint時にstringとしてERC721に書き込んでしまう
-
 
     野良猫の実装
         意味論
@@ -619,96 +415,6 @@ contract ERC721 is IERC721 {
         itemエアドロとテストプレイ
         楽器絵の実装
         紹介記事の用意
-
-
-    修正案
-        AccountAbstractに対応するためmsg.senderを考察する。
-            EOAではなくCAがmsg.senderになる？
-            NFTやSBTの所有者がCAになりうるため、msg.senderをCAとみなさなければならない？
-            _senderへの書き換えが必要かもしれない。
-        rugのインジケーター表示させるとボタンが押せないバグの修正
-        夜の演出改善
-            UFOや土星などを画面上部に表示させる
-            上からゆっくり降りてくる？
-        お菓子の家が完成した時の演出の改善
-            glitter表示
-            メーターの色を変えるなどして100%をわかりやすく
-            click to mintなどを表示させる？
-        お菓子の家の建設途中の修正
-            建設しているジンジャーマン
-            10～30%ではもう少しパーツを少なめに
-            staking=0の時の演出
-        market.jsのbuyback関数で最新のfluffy dollのitemTypeに対応するよう修正する
-        アイテム案
-            アロマキャンドル
-            ルンバ
-            あと１つなにか
-        Alchemy WAGBIへアプライ
-        infoの取得にmurasakiのbatch getterを使って処理を軽減する
-        tokenURIをsatietyとhappyによって変化させる
-            tokenURI_codexを作製し参照する
-        おサボり中はミシンやスコップを残す
-        rugg-pullの実装
-            ひとまず、右端をクリックでrugをスライドさせる
-            接触しているfluffyとむらさきさん, diceがon_clickされる
-        bgmの追加
-            カノン、むらさきさん
-        デモ用キャラの演出を考える
-            #1を晒してしまって大丈夫だろうか。ネタバレや楽しみの先取りになるだろうか。
-            お腹が減りやすく、経験値が得られにくい、demo用キャラを別途用意するか？
-            trial終了直後ぐらいの進行度が良いだろうか。
-            パラメータを弄った別コントラとするか？
-        フェスティバル前の演出の改善
-            お祭り帽子の実装
-        変数書き換え対策の実装, さてどうするか
-     ok Candleの実装
-     ok footerの修正
-     ok infoページのiconを吟味・修正する
-     ok タイトルロゴの微修正
-     ok ローディング画面でロゴの家が徐々に完成してゆくように実装
-     ok fluffy festivalのend_votingにcheck_endを組み込むバグ修正。
-     ok マーケットのlist price初期値にbuyback priceを記載する
-     ok     1.00未満は1.00として最低価格を表示する
-     ok コントラクトマップのupgradable -> replacableへ編集
-     ok     ついでにstorage_extraなども追加
-     ok     合計コントラ数を記載する
-     ok upgradeウィンドウの説明編集
-     ok 楽器を3種類に減らす
-     ok     かわりにキャンドルを追加
-     ok     あとアイテム２つ。
-     ok     かざぐるまと王冠を交換する
-     ok     その他アイテム順の微調整
-     ng 散歩から帰ってきたら吹き出しを表示する？
-     ok wrong chainのエラーの実装
-     ok コントラクトの一括upgradeをmainで行う
-     ok     replacableコントラの全入れ替え
-     ok     contracts.pyのつじつま合わせ -> init.py実行
-     ok 全summoner合算のtotal countの実装
-     ok     全d20カウント数
-     ok     全mail open数
-     ok     全make friend数
-     ok     storage_extraに保存して、on-chain dataに表示させる
-     ok trial_converterにmssの追加分を修正
-     ok     ガス代許容可能かチェック
-     ok murasakisanコントラに一括call関数を実装する
-     ok stroll中のfeedingをどうするか
-     ok     可能にするか
-     ok     その場合、ボタンの位置と演出はどうするか。
-     ok infoとmurasakisanコントラを最新のmssに対応させる
-     ok コントラクトの総入れ替えが可能か施行する
-     ng コントラクトモニターの初期化時にdeployから参照させる
-     ok コントラクト書き換え環境を整備する
-     ok コントラクトモニターを見直す
-     ok コントラクト全てにpausableを導入する
-     ok     実際にはpauseするfunctionはなくとも、生きか死にかをpauseで判断できるため
-     ok mmとmnのburnを実装
-     ok マーケットコントラに統計情報を実装する
-     ok     総取引量
-     ok コストの引き上げ
-     ok     mint: 500, transfer fee: 50
-     ok お菓子の家の絵更新
-     ok     stakingなしの時の土台を用意する
-     ok     → グレースケールで
 
 
     必要な絵
@@ -827,32 +533,6 @@ contract ERC721 is IERC721 {
                 もしくは、終末の到来はあくまで最終的な結果であり、
                     その過程を2年間「楽しく（重要！）」見守れる設計を考える。
                 寂しさよりは、楽しんで進められるストーリー性を考える。
-
-
-    構想：SNSへの親和性を上げる
-        ワンクリックでtwitterへ投稿できるボタンを設置する。
-        投稿したくなるような小さな絵を実装する
-            canvasを使えば良さそう
-            tokenURIでもいいのだが。
-            ステータスウィンドウはちょっと情報多すぎるだろうか
-        ハッシュタグ案
-            #Astar #BCG #HoM #Murasaki-san
-        匿名性を担保する
-            リテラシーの高い層ほど、nameやidなど、
-                walletを特定可能な情報は安易にSNSに載せたくないだろう。
-            一方で、SNSへの投稿はゲームの進行を誇示することで自己顕示欲を満たしやすい。
-            よって、極めて特定しにくいが、進捗を端的に表す絵を用意して、
-                tweetボタンを設置しておく。
-            marimoNFTの水換え依頼などはwalletを追えるのではやりにくいだろう。
-                リテラシーの低い層か、捨てwalletの利用者か
-                捨てwalletからもメインwalletを追えるのでやはり投稿には勇気がいる。
-            気軽に投稿可能なアイコンや絵を用意する。
-        乗せる情報
-            Lv
-            Fluffyスコア
-            Comfortスコア（丸めた数字）
-            NFT数
-            happy, satietyに応じたアイコン
 
 
     構想：散歩中のミニゲーム
@@ -1094,19 +774,6 @@ contract ERC721 is IERC721 {
                     直接コントラクトとすることは可能か
 
 
- ok かざぐるまの物理演算の改善
-        txCountを風と見立てて
-        それぞれのかざぐるまごとに別々の動的摩擦係数、静的摩擦係数を設定する
-        風は時間経過とともに減ってゆく
-        ブロックが更新されると新しい風力に書き換えられる
-
- ok Strollコントラをstorageとfunctionに分割する
-        functioni部分はまだまだ粗削りで調整が必要だろう
-        Stroll本体とは別に、ロジック部分をCodexとして別コントラを用意する
-        → working_statusを別途用意
-        → コントラ移植時はaccumulated parametersのみをconvertすることとする
-        terminate_workingでworking_status=0とすれば、実質restingしていたと同等の扱いになる。
-
  ig 散歩システムの実装検討
         ストーリー性の重視230405
             ゲーム理論が成り立つほどガチガチのゲーム性ではなく、
@@ -1287,27 +954,6 @@ contract ERC721 is IERC721 {
             これには乱数生成コードの秘匿化が必要だろう
                 privateにsoltを保存するだけでは読み込めてしまうらしい
 
- ig migrationメカニズムの実装
-        今後のAstar walletのupdateに対応するためmigrationを可能にしておく
-        mmには最低限の機構のみを組み込んでおき、permitted functionでコントロールする
-        function側で以下をチェック：
-            owner_newがtokenOf==0
-            msg.sender==ownerOf(_summoner) (=owner_old)
-        また、Astar walletの移行などの理由でない限り、migrationにはコストを要求する
-            walletの移行にはNFTの移動も必要なため、簡単ではないが。
-        → ERC721を使用している限り, 継承先でprivateなmappingに触れないため
-           migrationは極めて困難だった。
-           仕方がないので、外部functionとして「転生」を必要になったら実装することとする。
-           場面としては、ハッキングなどでwalletをどうしても変えたい、などの申し出時
-           新しいsummoner idを割り振り、ステータスを引き継ぐ
-           summonerのburn, nameのburn, NFTの移動などかなり煩雑になるが。
-           ガス代が足りるだろうか。
-       → _burn & _mintで行けるっぽい
-          internalの_mintはnext_token無視してtransfer可能な模様
-       *あとは、NFTのmigrationを実装する
-            freeFeeに指定したtransferableなコントラクトを用意し、
-            これを経由してoldからnewへ全NFTを移動させるか。
-            
     ぬいちゃん貸し出しシステムの実装検討
         ぬいちゃんは他の人が所持した際の効果が大きい
             しかし、売りに出すのは愛着が湧くため、なかなかにハードルが高い
@@ -1406,51 +1052,12 @@ contract ERC721 is IERC721 {
             Twitter
             Discord
 
- ig 砂時計アイテムの再実装
-        条件
-            staking=0でも表示されるが、寂しい感じ
-            何かが溜まってゆくor成長してゆくのが楽しい要素
-            かつ、1週間～1ヶ月程度の時間が必要そうなもの
-            100%になったときになにかhappyな演出が可能
-            毎回、たまるものが違うとより楽しいだろうか
-        案
-            小さな盆栽、最大成長で実を収穫する、なんの実が成るかは毎回違う
-            小さな植木鉢、最大成長で花が咲く、何が咲くか毎回違う
-            ペットボトルロケット、最大成長で発射、星が降ってくる演出
-        絵の深慮
-            砂時計で良いか？
-        ステーキング量>0でのみ表示させる
-        あるいはステーキング量=0では非アクティブを表す絵とする
-            ステーキングしてアクティブ化したくなるような楽しい絵にしたい。
-        ステーキング量が多いほど豪華になり、
-            カウンターが進むと何かが溜まってゆく・成長してゆく絵を考える。
-
     NFTの希少性の深慮
         NFTの希少性について考える
             BCGのインフレし続けるNFTは価値が希釈され続けていく
             何かしらの希少価値はメカニズムとして組み込みたい
         バイバックシステムにより最小の金額は担保されている
             無限希釈による無価値化は防がれている
-
- ig 補正の種類の深慮
-        Luck
-            Fluffyで上昇
-        +exp
-            ぬいちゃんで加算
-            Astarスコアで加算
-            お散歩の宝物で加算
-                item_typeは一定で、seed値で内容を変化させるか
-                もしくは、itemsを512まで拡張させるか
-            発表会のトロフィーで加算
-        farming/mining/crafting効率
-            それぞれのステータス値で上昇
-            それぞれのアイテム所持で上昇
-        staking
-            なにか特別な加算を考えるか
-            いろいろなものが出現する専用のプレゼント箱など
-            進捗に応じて少しずつ作られるようにするか
-                むらさきさん型の貯金箱など？
-                おもちゃのカンヅメのような位置づけ
 
  ig NFT絵の表示の実装
         walletからnftの取得
@@ -1759,2331 +1366,6 @@ contract ERC721 is IERC721 {
 
 //### 3rd
 
- ok EVM経由のdapps stakingに対応する
-        https://astar.subscan.io/address/0x0000000000000000000000000000000000005001?tab=contract
-        これの
-        read_staked_amount_on_contract
-        に、
-            contract_id = コントラのEVMアドレス
-            staker = ユーザーのEVMアドレス
-        で、対象コントラへのステーク量を参照できる
-        また、EVMからステーキング可能となったため、
-            self staking vaultから自動でセルフステーキングも可能となると思われる
-            コントラクトからステーキング可能か試す
-        ローカルで0x0000000000000000000000000000000000005001が有効になる条件を試す
-            コードが見当たらない
-            astar collatorプログラムを更新すればよいのか？
-        → stakingReword関数を修正し、EVM+WASMの合計値をreturnするよう修正した
-           5001にbyte変換したownerアドレスを渡せばおそらくOKだと思われる。
-           230911, 動作確認OK。EVMステーキング量の反映はshibuyaデプロイ後にでも。
-        EVM stakeについてHPに追記する。
-
- ok スマホ画面での最適化
-        少なくともiphoneSE2である程度快適に見えるようにHPを修正する
-        JQueryテーブルのレスポンシブ設定
-            https://beginners-hp.com/create_smartphone_table.html
-
- ok runpappaの実装
-        クリックで移動ON/OFF
-        アイテムを上にD&Dで乗せられる
-        fluffyと接触するとkickする
-        クリックしなくてもたまに移動OFF（寝る）になる
-
- ok item_retrogameの実装
-        クリックでレトロゲーム系のキャラクターが飛び出すギミックを実装する
-            angband, @, J, P, g, DDD, j
-            cataclysm, @, ZZZ（みどり：ゾンビ、ピンク：boomer, &：ピンク, Mi-go
-            df, ☻, c, d, ドワーフが兵士に追いかけられているなど。Nに~:ネクロマンサー
-                tileをsheetとして読み込んでしまったら楽だと思われる
-            nethack, @, "
-        必要アスキー
-            D: 赤、白、灰色、水色、ピンク、黄色、緑、
-            j
-            J
-            Z: 緑、ピンク、
-            &: ピンク
-            N~: 緑
-
- ok infoページの充実化
-     ok 売買回数、平均購入価格などを集計したマーケット情報ページを作成する？
-            総取引回数、総取引額、アイテムごとの取引回数・平均価格
-            info内にボタンで実装するか
-     ok コントラアップグレードしてtotal mail sentなどの表示を実装する
-     ig twitter投稿ボタンを設置する？
-            nameとstaking amountを非表示にするラジオボタンを実装する
-     ok 改善点
-         ok ageを表示する
-         ok ボタン押したあとのloading...を実装する
-         ok     ボタンは何回も押せないように一度押したらdisableにする
-         ok web3Init前にボタン押したときのエラー対策を実装する
-         ok 他のパラメータの検討
-                total_feeding
-                total_grooming
-                neglect_count
-                total critical
-     ok むらさきさんのパラメータ詳細をinfoに追加する
-            取得可能なパラメータをすべて表示する
-            所有するNFTをアイコンでばらばらと表示する
-
- ok /test/から以下をmainへ移動すること
-        info.html
-        info.js
-
- ok on-chainに保存するステータスの追加
-     ok summonerごと
-            total_feeding
-            total_grooming
-            total_neglect_count
-                happy <= 0でgroomingした回数
-            total critical count
-                feeding, grooming, craftingでcriticalを出した回数
-     ok global
-            total_feeding_count
-            total_grooming_count
-            total_coin_mined
-            total_coin_spent
-            total_leaf_farmed
-            total_leaf_spent
-            total_item_crafted
-            total_fluffy_discovered
-            total_mail_sent
-            total_mail_opened
-            total_dice_rolled
-            total_dice_critical
-            total_dice_fumble
-            total_stroll_distance
-            total_stroll_friend
-            total_practiceTime_Clarinet
-            total_practiceTime_Piano
-            total_practiceTime_Violin
-            
- ok 散歩システムを詰める
-     ok 草原の実装
-     ok 山海草原の実装
-     ok     絵の置換
-     ok     川の廃止
-     ok htmlの記事を完成させる
-     ok 帰宅の演出を完成させる
-     ok     met summonerを表示させる
-            報告しているふうの吹き出しを実装する
-     ok stroll開始のUIを深慮し実装する
-     ok     ボタンにするか、D&Dにするか。
-     ok コントラから経過時間、終了までの時間、現在の歩行距離、の取得を実装する
-     ok strolling windowに情報を表示させる
-     ok waterbottleアイテムを実装する
-     ok strolling windowに現在までのmet summonerを表示させる
-     ok     人数にするか、名前にするか
-     ok     → stroll中は人数のみにする
-     ok Strollテスト
-     ok     flag_sync=0; local_farming_status = 0; local_crafting_status = 0
-     ok     local_strolling_status=1; local_crafting_status=0; local_direction=1; local_companion=1
-     ok     local_stroll_endable = 1;
-     ok     local_strolling_status=0
-
-
-ウォレットに住み着いてそこで生活しているバーチャルペットトークン
-
-ウォレットはweb3の世界で個人を表す重要な識別子である。このウォレットを「家」と見なして、この家に住み着いてそこで生活しているペットトークンを所有することで、web3における活動がより楽しいものになるのではないかと我々は考えた。
-
-「ウォレットに住み着く」ということを表現するため、むらさきさんトークンはSBT（untransfable ERC-721）で実装した。むらさきさんトークンには、mint時に、生まれた場所や性格、家の住所などが決定されるが、これらのパラメータはDom HofmannのLootの様にウォレットのアドレスに応じて決定される。これらの組み合わせパターンは約9,000通り存在し、ウォレットごとに異なる性質のむらさきさんトークンが住み着くわけである（これらのパラメータはゲームプレイへは今のところ直接の影響はないが）。
-
-「ウォレット内で生活している」ということを表現するため、むらさきさんの「満腹度」と「幸福度」は、時間経過とともに徐々に減少し、ウォレットのオーナーがお世話することで回復する。むらさきさんトークンはウォレットオーナーの継続的なお世話によって徐々に成長し、レベルやstrengthなどのステータスが増加してゆく。これらの処理は完全にon-chainでserverlessで処理されunstoppableであり、トークンのステータス値はブロックチェーン上にのみ保存される。
-
-家具やインテリアはNFTとして提供され、ウォレット内に所有することでむらさきさんの家に設置される。ウォレットのnonce値に応じて針が進む時計や、walletの年齢に応じて成長する金魚鉢の中の金魚、ウォレット内に所持している種類のトークンが飛び出すchest、ウォレット内に所持しているアート系NFTをランダムで表示する額縁など、ウォレットの状態を反映したアイテムがいくつか実装されている。使い込まれたウォレットほど、にぎやかな家とみなされるだろう。
-
-以上の様に、本プロジェクトの目的は、「ウォレットという「家」に一意に紐付けられ、時間経過と継続的なお世話によって成長するペットトークンを提供する」ことである。これは私達自身が所有してみたかったものそのものであり、それが開発の最大の動機と目的である。
-
-
- ok BCGとして最も重きを置いているアピールポイントを明記する
-        より明確に、より丁寧に、より伝わりやすく明記する。
-        一言でいうと：
-            「人工生命」を表現したい
-        「電子生命」「人工生命」に興味があった。
-        ブロックチェーンの特性を利用
-            持続性、改竄耐性
-            人工生命を表現する上で、簡単にメモリ上のパラメタを書き換えられてしまうと良くない
-            また、単一のサーバー上に保存されて、そのサーバー上でしか生きられないのも違う
-            決して書き換えられず、かつ今後も半永久的に持続するブロックチェーンは、
-                私達が実現したい人工生命の特性に有用であると思った。
-        価値が劣化しないトークン
-            buyback treasuryによって常に裏付け資産があるtoken
-            人気の減少によって実質的に「死」んでしまうのは悲しいため
-            年齢の増加とともに、確実に価値が上昇するよう。
-        プロジェクトの目的と哲学
-            「人工生命」を表現する
-        「生命」のどの部分を表現したいのか
-            寿命と死：
-                生みの親である友人のたっての願いで、むらさきさんには寿命は設定していない
-                しかし、一定時間お世話されなかったトークンは石化してしまう
-            自己増殖：
-                増殖や世代などは考えていない。
-            成長と変化：
-            生きて住んでいる、生活している、を表現したい。
-                お世話した時間に応じて、確実に成長するトークン
-                課金によるブーストでは成長速度は変化せず、お世話した時間に応じて成長する。
-    
-        
-What we want to achieve in a blockchain game.
-
-ウォレットに住み着いてそこで生活しているバーチャルペットトークン
-
-ウォレットはweb3の世界で個人を表す重要な識別子である。このウォレットを「家」と見なして、この家に住み着いてそこで生活しているペットトークンを所有することで、web3における活動がより楽しいものになるのではないかと我々は考えた。
-        
-「ウォレットに住み着く」ということを表現するため、むらさきさんトークンはSBT（untransfable ERC-721）で実装した。むらさきさんトークンには、mint時に、生まれた場所や性格、家の住所などが決定されるが（これらのパラメータはゲームプレイへは今のところ直接の影響はないが）、これらのパラメータはDom HofmannのLootの様にウォレットのアドレスに応じて決定される。
-        
-「ウォレット内で生活している」ということを表現するため、むらさきさんの「満腹度」と「幸福度」は、時間経過とともに徐々に減少し、ウォレットのオーナーがお世話することで回復させることができる。むらさきさんトークンはウォレットオーナーの継続的なお世話によって徐々に成長し、レベルやstrengthなどのパラメーターが増加してゆく。これらの処理は完全にon-chainでserverlessで処理され、トークンの状態値はブロックチェーン上にのみ保存される。
-        
-家具やインテリアはNFTとして提供され、ウォレット内に所有することでむらさきさんの家に設置される。ウォレットのnonce値に応じて針が進む時計や、walletの年齢に応じて成長する金魚鉢の中の金魚、ウォレット内に所持している種類のトークンが飛び出すchest、ウォレット内に所持しているアート系NFTをランダムで表示する額縁など、ウォレットの状態を反映したUXを思いつく限り実装してみた。使い込まれたウォレットほど、にぎやかな家になるだろう。
-
-また、本プロジェクトの情報を統括したERC-721互換のコントラクトを用意した。このコントラクトにより、むらさきさんトークンは多数のパラメータを持つERC-721規格のトークンとして振る舞う。このコントラクトを利用することで、他のPJ（これは我々の次回作も含まれる）がむらさきさんのステータスやパラメータを容易に参照可能となった。
-        
-以上の様に、本プロジェクトの目的は、「ウォレットという「家」に一意に紐付けられ、時間経過と継続的なお世話によって成長するペットトークンを提供する」ことである。これは私達自身が欲しかったものであり、それが開発の最大の動機と目的である。
-
- ok コントラクトのupgrade手順を整備する
-        upgradableをreplacableに修正
-        手動でaddressをセットするのか、スクリプトでinitializeするのか、
-            今後のためにupgradeスキームを確立しておく。
-        ABIの取得と更新が結構面倒か
-            コピペが可能な形式でabiを取得可能なスクリプトを用意しておく。
-        手順：
-            新しいコントラをデプロイ
-            share.jsのabiを部分修正
-            新しいコントラにmaをセット
-            mc, ms, mp, mss, msn, mseの必要なものへ新しいコントラのpermissionを追加
-                この時点で新しいコントラが動作可能になる
-            maのコントラを新しいコントラのアドレスへ書き換える
-            古いコントラのpauseフラグを立てて非活性化する
-        つまり、ソースファイルとコントラ名から、
-            コントラデプロイと、アドレスとABIの取得を行い、
-            mc, ms, mp, mss, msn, mseを指定してpermissionを書き込むスクリプトがあれば良い。
-                ["Stroll", ["ms", "mse"]]   など。
-            その後、古いアドレスと新しいアドレスを引数に、ma書き換えを行う。
-                ["Stroll", {old_address}, {new_address}]
-                    ma.Strollがold_addressであることをチェック
-                    ma.Strollをnew_addressへ書き換え
-                    old_addressのpauseをtrueへ書き込み
-        実装：
-            デプロイヤー:
-                デプロイするコントラクト名を指定する
-                ソースコードを読み込んでコントラクトをチェーン上へデプロイする
-                コントラクトのアドレスとabiを書き出す
-            イニシャライザー：
-                イニシャライズするコントラクト名を指定する
-                コントラクトのアドレスとabiを別ファイルから読み込む
-                コントラクト単位でトランザクション予約リストにappendする
-                トランザクション予約リストの重複を削除する
-                トランザクションを順に飛ばす
-
- ng プレイヤーの「消費」行動を考える
-        楽しくて思わず「消費」してしまうメカニズムを組み入れたい。
-        「手数料」は望ましくない。
-            継続のための固定支出費、などはストレスだろう
-        「消費」すると、ワクワクするようなリターンが必ず得られ、
-            かつ少しばかりのランダム性（今回は何が起こるか楽しみ）要素がある行動
-        → coin/leafの消費がこれに該当するだろう。
-            
- ok お菓子の家の実装
-     ok Solidity:
-            counterを返す関数
-            counter=0でmintする関数
-                NFTをランダムで送る
-            counterはfeeding時に減少する
-                0以下には減少しない
-       *実装案：
-            staking=0では土台だけ表示
-            staking>0で、量に応じたクッキー人形と進捗を表示
-            100%で、バンザイしているクッキー人形と完成した家を表示
-            クリックで家が消費されてNFTをランダムに取得する
-            完成した家を消費しないと次の進捗％は貯まり始めない
-        演出の深慮
-            お菓子の家が少しずつ完成してゆく
-                not stakingでは土台だけ
-                stakingすると作り始める
-                staking量と、進捗％を表示させる
-                staking量に応じて小人さんの人数が変わるとなお良いか
-            完成後はどうするか
-                別のお菓子の家がすぐ作られ始めるのか
-                    つまり、完成品2つは成り立つのか、または売れるのか
-                それとも、完成品を開けないと次の％がたまらないのか
-                NFTとして発行するのか、NFTを取得するコントラとして実装するのか
-        専用アニメーションの用意
-            棒の飴をふりふりしているクッキー人形
-            完成後は人形たちがバンザイしている
-        専用コントラクトの用意
-            presentboxと似ているが、取得できるアイテムと確率が異なる
-        中身案：
-            fluffy
-            fluffier
-            貯金箱
-            がま口お財布
-            散歩の宝物
-            発表会のトロフィー
-
- ok コントラクトの修正
-        add-onコントラクトのtotal系スコアなど、代替が効かないデータは
-            一元的に拡張可能なstorageコントラに格納することとする。
-        storageコントラはmapping mappingで重ねて将来的に拡張可能とする。
-            こうすることで、貯めたスコアを消滅させずにlogicをupgradeできる
-        対象：
-            #101-
-                dice, critical_count
-                dice, fumble_count
-            #201-
-                mail, total_sent
-                mail, total_opened
-            #301-
-                stroll, total_strolledDistance
-                stroll, total_strolledDistance_ofCompanion1,2,3
-                stroll, stroll_level
-                stroll, met_level
-            #401-
-                ff, voteCount
-    
- ok 構想：散歩システムII
-     ok バランス調整：
-            報酬期間: 3d, 7d, 14d, 28d, 
-            補正値: 最大で+50% (新規meetで+10% x 5)
-            ハズレ補正値: 稀に+100%などのクリティカル（期待値110%程度）
-     ok ToDo:
-         ok 散歩時間の調整
-         ok 散歩インターバルの調整
-         ok total_metに応じたmintの実装
-         ok petごとの歩行距離の実装
-         ok 報酬がNFTだけではインセンティブが弱く調和が薄い、要検討
-         ok     mining, farming, expそれぞれでboostを分ける
-         ok twinkleSparkleGlitterへlevelcapの導入
-         ok もう少し報酬の補正を強くする
-                ベストマッチの条件を引いても精々+3%程度のboostだと頑張りがいがない
-                未補正値を少なめに設定して、+50%など報酬を多めにする。
-         ok 誰にも合わなかったときに、一定確率でfluffyをmintできるように
-         ok     gas代が変わるから難しいだろうか
-         ok     → 強めの補正をかけることにする
-        UX：
-            好きな行き先に、好きなお供と好きな飲物を持って散歩しに出かける。
-            散歩先で新しいsummonerに出会うと楽しくて散歩距離がちょっと伸びる。
-            会ったsummonerと飲み物が一緒だと嬉しくて散歩距離がさらにちょっと伸びる。
-            総散歩距離が一定値に達するとtwinkle NFTが入手できる。
-            新しいsummonerに会った回数が一定値に達してもtwinkle NFTが入手できる。
-        意味論：
-            時間資源の若干のsink
-            選択と報酬に重点を置いたゲーム性の提供
-            他のプレイヤーの動向が気になる相互作用要素を提供
-            手に入る報酬がランダムであるガチャ要素の提供
-     ok 実装：
-            独立した専用コントラを用意
-                StorageとFunctionの2つ用意したほうが良いだろうか。
-            mapping で start_time を記録
-            mapping で end_time を記録
-            mapping で total_stroll_distance を記録
-            mapping mapping で 各summoner-summoner 間の meet 時間を記録
-            mapping uint[5] で 現在の metSummoner を記録
-            start_stroll関数
-                end_timeチェック
-                (_summoner, _direction, _companion, _drink)
-                li_dist_and_companionに_summonerを加える
-                start_timeにnowを代入
-            end_stroll関数
-                start_timeチェック
-                該当するli_dist_and_companionからランダムでsummonerを選出
-                自分のli_metSummonerと相手のli_metSummonerをチェック
-                両方とも代入可能ならmet成功
-                自分と相手のli_metSummonerに互いを代入
-                歩行距離を算出
-                補正値を算出して歩行距離を補正
-                総歩行距離に今回の歩行距離を足して保存
-                総歩行距離をチェックし条件を満たせばtwinkle NFTをmintする
-                li_metSummonerをクリア
-                grooming time更新
-            _calc_boost関数
-                (_summoner)
-                li_metSummonerを順にチェック
-                summoner-summoner 間の meet 時間をチェック
-                一定期間以上（7日？30日？）空いていたら補正値+1.00
-                    それ以下なら補正値+0.50
-                _drinkが一致すれば補正値x1.2（+1.20か+0.60）
-                互いの総歩行距離の乖離度によって+補正値
-                    乖離しているほど有利
-            _try_mintNFT関数
-                総歩行距離をチェック
-                条件を満たせばNFTをmint
-                mcにpermittedしておく
-            _mint_twinkle
-                mcでtwinkle level 1をcraftする
-                crafterは自分とする
-        問題点：
-            ただの脇道ミニゲームと化してしまっている
-            本来は時間資源を別に費やすためのsinkのハズだったのだが。
-                かといって散歩時間を6-8時間とするのもfeelingと乖離するだろう。
-                時間資源のsinkであるならば、拘束時間を長くするしか無いのだが。
-                長めの4時間でも4/24=17%程度のsinkにしかならない。
-                時間資源のsinkならば8時間は拘束する設計にしなければならないだろう。
-                2時間の散歩を1日3回まで可能とするか（maxで6時間=25%のsink）。
-            イマイチ目的が分かりにくく、一日一回の作業と化しやすいだろうか。
-                他の行動と選択のジレンマが発生せず、
-                また報酬もほぼ予測可能で驚きが薄く、
-                かつ実行しないより実行したほうが有利なため、作業化してしまいがち。
-                UXとして満足たりうるだろうか。
-            「運」要素をもう少し強めに、ギャンブル性、結果の不確実性、
-                もしくは能動的な選択と納得しうる報酬、
-                の部分にもう少し強めのゲーム性を考えてみる。
-            総met数、drink一致回数をNFTの条件にする、など。
-                総散歩距離, 総drink一致回数, 総metSummoner数, 
-                それぞれで一定数に達したときにNFTを発見、などとするか。
-                基本は総歩行距離だが、それ以外のベクトル軸でも報酬が発生する。
-                できるだけ談合しにくように設計したい。
-         ok 買い占め対策
-                twinkleによるexp boostはlevel capか総歩行距離capを設ける
-
- ok 散歩システムUI実装：
-     ig 水筒を持って、お供を連れてお散歩に向かうむらさきさん絵
-            音符やハートを出しながら楽しそうに出発する
-            水筒を持って、喜びながらcompanionが来るのを待つ
-                一緒に連れ立って画面外に移動する
-                この時ハートや音符を出しながら移動する
-     ok 散歩条件を選択するウィンドウ
-            行き先、お供、水筒の中身を選択する
-            総歩行距離、総met数、現在のお散歩分布などを表示する
-            帰宅予定時間、インターバル残り時間、なども表示する？
-                → インターバル残り時間は水筒に表示
-                → 帰宅までの残り時間は散歩中ウィンドウに表示
-        散歩中のむらさきさんを眺める横長のウィンドウ
-            背景4パターン（山道、河川敷、海岸、草原）
-                ループ背景を用意する
-            お供を一緒に歩かせる
-            残り時間を数字と進行バーで表示させる
-            誰に会ったかのログを表示させる
-            何を拾ったかのNFTも表示させる（可能か？）
-        帰宅時の演出を考える
-            時間がすぎると、まだ帰ってないのか、もう帰ってるのか。
-            txを飛ばさなければならない事の必然性をうまく表現したい。
-                散歩から帰宅後は、ユーザーからの何かしらのアクションが必要な演出を考える
-                寝てる→お風呂はいる
-                水筒洗う、など
-            散歩を思い出しながら寝ている
-                → クリックしてtx飛ばすと、吹き出しを出して散歩内容を飼い主に報告して
-                　 総歩行距離と友達人数が更新される。
-
-    修正案
-     ok strollコントラより情報抜き出し
-     ok     終了時間、現在の歩行距離を取得する
-     ok feedingやgroomingを短い間隔で連打すると効率が上がるバグの修正
-     ok     98%以上では+0とするなど対策が必要だろうか。
-     ok     mining/farmingは大丈夫だろうか。
-     ng depthをspriteのy下段に設定する？
-     ng     マウスドラッグ時は前面に設定する？
-     ok connectボタンの設置
-     ok diceコントラに20を出した回数を記録させる
-     ok festivalのvote回数を記録させる
-     ok info_fromWalletにcat-mailを追加する
-     ok infoにtokenURIとERC721も統合する
-     ok フェスティバルのvoteのevent確認
-     ig tokenURI用jsonの用意
-     ok イベントの再考、集計しやすいように修正
-     ok twinkleのbuyback priceを設定する
-     ok uncommonのbuyback priceがcommonと一緒な点を修正
-     ok glitterが表示されないバグの修正
-     ok クラフト完了時にサウンド鳴らす
-     ok フェスティバルのサウンド修正
-     ok 可能ならmetamaskにNFT画像を表示させたい
-     ok     → ERC721規格でないとmetamaskには表示できない模様
-     ok     諦めるか、ERC721規格で考えるか、要検討。
-     ok     → ERC165のsupportsInterfaceでERC721識別子を返すよう実装すれば認識された
-     ok     この際なので、openzeppelinのERC721をもとにERC2665を再実装する
-     ok crafting中以外でcompleteするとインジケーターが残るバグの修正
-     ok musicbox off時にむらさきさんのlistingもoffに
-     ok スイッチon/off時はmusic boxもoffに
-     ok jsのworking_status部分を更新する
-     ok 夜用BGMの実装
-     ok 積み木を置く時のサウンドを実装
-     ok tokenChestのバグ修正
-     os mcに90万個の発行上限を設定
-     os strollでpetやdirectionの制限を導入する, require
-     ok ビットコ、イーサ猫の接触絵を用意する
-     ok trial時に作成可能ではないアイテムはnot availableにでもする
-     ok すべてのアイテムはクラフト完了時にお花まきで知らせるよう修正
-     ok 晴れ以外の天気でwindowの朝/夜変換ができないバグの修正
-     ok item_windowのカーテン閉じた時の絵を天気ごとに用意する
-     ng ボタンオーバーラップ時にFeedingやStart Miningなどのメッセージを表示させる
-     ok inactive buttonにrequired levelを表示する
-     ok Buybackでfluffyが有効になっていることを確認する
-     ok 他色ウィンドウの透明度を下げる
-     ok デプロイコントラでERC20など設定項目を先頭にもってくる
-     ok stakingコントラにSPEED補正をかける
-     ok craft完了時に寝る条件が変
-     ok     帽子の位置も
-     ok stakingのNFT補正が1/10なので修整
-     ok resume cancel時luckyとなるのを修正
-
- ok html修正
-     ok buyback systemの弱点をきちんと述べる
-     ok     このシステムだけでは原資抜きに1-2年かかる
-     ok     つまり、結局ユーザーはfeeを支払って2年かかって回収するだけになる。
-     ok この点をどう説明し、どう納得してもらうか
-     ok     話が違う、となってしまうのは避けたい。
-     ok     実際はdapps stakingの量がわからないのでなんとも言えないのだが。
-     ok     一度、月3%を実現するために必要なtoken/userの値をきちんと計算してみる。
-     ok Buyback Treasuryが目立たないので、どこにどの程度アピールするのかはっきりする
-     ok     あまり目立たせすぎると混乱するので、マーケットとの棲み分けをどうするか。
-     ok 脱ポンジのパラグラフを洗練させる
-
- ok SBTのNFT化を実装する
-        mmにトリガー管理可能なtransfer許可機構を実装する
-        permitted_address onlyにしておき、function側で
-            トリガーOn → transfer → トリガーOFFと一度に行う
-        よって、ユーザーの自由なtransferは抑制しつつ、
-            function側で条件を決めてtransferを許可できる。
-        → migrationとして実装済みだった
-
- ok Murasaki_Addressの修正
-        Trial_Converterを追加で実装
-        addressはjs側には極力保存せず、maを参照させる
-        また、abiは別ファイルとする。
-
- ok 経済雑記
-        持続可能な経済、穏やかだが確実に価値が上昇してゆくモデル
-            価値の裏付けに独自トークンの購入を促したり、NFTを継続的に購入させたりはしない
-            dApps StakingのRewardをプロジェクトの価値拡大へと当てる
-        継続的なゲームプレイとNFTのホールディングがインセンティブとなるモデル
-            NFTの最低限の価値はbuyback systemによって担保される
-            このbuyback priceは緩やかにインフレしてゆく
-            よって、継続的にプレイし、多くのNFTを所持し、
-            保持し続けるほど、プレイヤーの資産価値は上昇してゆく
-        ポンジスキームの否定
-            ここでのポンジスキームの定義：
-                「後のりのプレイヤーが支払った価値が先乗りのプレイヤーへと支払われる強力な先行者利益」
-            新規プレイヤーの参入は、プレイヤー１人当りに割り当てられた資産を増やしも減らしもしない
-            先行者利益は継続的なゲームプレイによってもたらされる
-            ただし、starting feeはbuyback priceのインフレと同率で緩やかに上昇してゆき、
-                マイルドな先行者利益を生じさせる。
-        以上のメカニズムを通して、中長期的にストレスの少ない経済システムを目指す。
-            つまり、短期間で大きな利益を取ることよりも、
-            中長期的に損をするストレスが少なく、ゲームプレイをのんびり楽しめるシステムを目指す。
-        Starting Fee：
-            45%はbuyback treasuryの初期資産と送られる
-            45%はstaking treasuryへ送られ、dApps Stakingへself stakeされることで、
-                将来のbuyback treasuryのインフレのための金利を得る
-            残りの10%はdeveloperへ送られる
-        Buyback Price Inflation：
-            dApps Staking Rewardとゲーム内のfeeはすべてBuffer Vaultへと集められる
-            Buyback TreasuryをX%上昇させる分の資金を送る
-            残った資金はstaking treasuryへと送られ、self staking量を増やす。
-            10%がdeveloperへと送られる
-        Inflation Rate:
-            Inflationをどのくらいの速度でおこせるかは、新しいinflowの量に依存する。
-            playerが多額の資金をdApps Stakinへと預けてくれればinflation圧力となる。
-            一方で、新規プレイヤーの参入は、アクティブプレイヤー当りの資金量を低下させるため、
-                インフレ抑制圧力となる。
-            アクティブユーザー数の減少、つまりドロップアウトプレイヤーの増加は、
-                残ったアクティブプレイヤー全員でドロッププレイヤーに
-                割り当てられたトークンを山分けするため、インフレ圧力となる。
-        総じて、本プロジェクトの資産価値の増加はdApps Staking量によって決定される。
-            Starting FeeはあくまでNFTの初期の値段を決定するに過ぎず、
-            またStarting Feeの45%を集めたself stakingだけでは、
-            僅かな将来のインフレ率しか担保できない。
-            developerは、アクティブプレイヤーあたりのdapps staking量ができるだけ多くなるよう、
-            プレイヤーのストレスを減らし、より良いUXをもたらせられるよう務める。    
-
- ok html修正
-        NFTのtransfer feeについてどこかに記載
-            規制か規約かanti-botかに記載。
-            専用の区分を設けてもよいか？
-            item NFTがERC721拡張のERC2665であることも明記する。
-                「時間が資源の中心であるため、初期では特にマルチキャラ運用が有利である
-                そのため、マーケットを介さないNFTの直接のtransferにはfeeを設定する
-                feeはユーザー行動を監視して調節される
-                エコシステムの成熟を待って、
-                将来的にはtransfer feeを0にして制限なく移動できるようにする
-                また、feeはすべてbuffer vaultへ即座に送金され、
-                エコシステムの保持に使われる」
-        全アイテムリストの別ページを用意
-        経済について記載
-            feeはNFTの最低限の価値の担保とanti-botのために導入
-            合うか合わないかのtrialを用意
-            feeはエコシステムの拡大には直接使用されない
-                殆どはユーザー資産に回される
-            エコシステムの拡大（買取価格の上昇）は
-                主にはdapps stakinの金利収入によって賄われる
-        githubの整備
-        未執筆記事の整備
-        メールアドレスの用意
-        NFT transferのUIを修正する
-        イベント監視を修正
-        なぜAstarなのかを記載
-            課金メカニズムを入れたくない
-                dapps stakingを利用
-            dapps stakingを利用することで：
-                ・playerは自分の資産をハッキングリスクなどに晒すことない
-                ・課金せずにゲーム内インセンティブを得られる
-        for developer更新
-            greetingボタンのソース公開
-            NFTアイコンを表示するソース公開
-     ok anti-bod policyの整備
-     ok jsのminity化
-     ok privacy policyの整備
-     ok trialモードについて記載
-     ok 利用規約に法律対策の規約を明記
-     ok     「各NFTの発行上限はitem_type毎に90万個」
-     ok     「SBTの価格は1500円以上」
-     ok     「SBTの所持による金融資産の配当は一切無い（ASTRエアドロなど）」
-     ok     「NFTをいかなる決算手段としても使用してはならない（流動性の提供など）」
-     ok     「ERC20規格の独自トークンは一切発行しない」
-     ok 利用規約にプライバシーポリシーを明記
-     ok 注意事項の整理
-     ok     むらさきさんはSBTで売れない
-     ok     放置ペナルティがある
-     ok     マルチウォレットは禁止
-            
- ok 経済について公開情報を整理する
-        実現したいこと
-            pump & dumpの抑制
-            持続可能な経済モデル
-            確実に価値が上昇してゆくモデル
-            継続プレイが有利になるモデル
-        ポンジスキームの否定
-            starting feeは直接の選考者利益には回されない
-        NFT価格の担保方法
-            バイバックシステムの位置づけと
-            担保資金の確保方法
-        価値の分配方法のポンチ絵
-        dapps stakingの位置づけ
-            なぜdapps stakingなのか
-                ハッキングリスクが小さい
-                資金を目減りさせるリスクがない
-                一方でin gameリターンを得られる楽しみがある
-                得られたstaking金利はすべてvaultへ格納される
-        継続プレイの有利性と価値上昇のメカニズム
-            脱落者が出るとその分の金融価値は残りのプレイヤーに分配される
-            新規プレイヤーの参入は現在の金融価値を増やしも減らしもしない
-            1ユーザーあたりのstaking量が減ると、エコシステムの拡大が遅くなる
-            ユーザー数が減り、1ユーザーあたりのstaking量が増えると、拡大が早くなる
-
- ok むらさきさんをアイコンで一覧閲覧できるページを作成する
-        ランダムで10-20体のアイコンを表示する
-            クリックでその家に飛べる
-        ランキングも表示する
-            total_coin, total_leaf, total_exp, score, total_craft, critical
-            数値と順位と一緒にアイコンを表示する
-            ランキングはオフチェーンで行うか、オンチェーンで行うか
-                例えば、feeding時にupdate_ranking()を動かす、など
-                ランキング用コントラが別途必要だろう
-            また、murasakisanコントラにsummoner id -> address変換の関数を実装する
-                もしくは普通にinfoコントラを使えばよいか。
-            ランキングはちょっとストレスなのでNGとするか。
-        リアルタイムログもここに表示する
-            直近のログを予め表示する
-            新たなeventを監視してリアルタイムで更新していく
-        in-game infoもここに表示する
-            trial summoner数
-            main summoner数
-            total nft mint数
-            インフレ率
-                starting feeの初期値からの増加率を表示（currentry +3%など）
-            vault内のtoken量は生々しいので非表示とするか
-
- ok Fluffyシステムについて情報を整理する
-        アップグレードの概念図のポンチ絵
-        fluffyがもらえる行動の一覧と詳細
-            crafting bonus, cat-mail, fluffy festival, staking bonus
-        festivalの詳細
-        dollのexp boostシステムの詳細
-
- ok item detailsの完成
-        STR系アイテム
-        DEX系アイテム
-        INT系アイテム
-        Fluffy系（概要）
-        bank/pouch
-        cat-mail
-        presentbox
-        twinkle系(comming soom)
-
- ig 覚書：コントラ更新手順
-        remixでコントラを手動でデプロイ
-        murasaki/deploy/3_init.pyのaddressを修正
-        murasaki/deploy/3_init.pyのabiを必要に応じて修正
-        murasaki/deploy/3_init.pyのabiから該当行を抜き出して実行
-        share.jsのaddressを修正
-        share.jsのabiを必要に応じて修正
-        permitted_addressを設定していたコントラは、旧アドレスにfalseを代入
-
- ok なぜアスターなのか
-        dapps stakingの利用
-            ユーザーの資金を目減りさせずに安全に保管できる
-            購入やトークン発行以外のみんなが得をする開発インセンティブ
-        XCM?XVM?の利用
-            EVMは成約が多いがライブラリと知見が充実している
-            一方で、数年後の近い将来はWASMが主流になると予想されている
-            EVM資産をシームレスにWASMへリンクできるのはAstarが唯一
-            我々の第一目標はweb3の技術をリアルタイムでキャッチアップすることであり、
-                次のPJはWASMで開発したいため。
-        ガス代が安いため
-            ガス代などでトークン価格を維持しようとする他のチェーンとは異なり、
-                ゲームをストレスなく行えるほどガス代が安いため。
-        Polkadotチェーンにおいて最も有望なため
-            我々はpolkadotのビジョンに共感している。
-            Astarはpolkadotのパラチェーンにおいて、
-            上記３つの理由から最もbuildに向いていると考えるため。
-
- ok functionコントラ群にサーキットブレイカーを実装する
-        旧コントラはpermittedを削除するより、
-        サーキットブレイカーをONにして凍結するほうが良いだろう
-        onlyOwnerのmodifierをつけているものはstoppableにしなくても良い
-
-
- ok いらすとやの規約クリア
-        20点までの使用
-        アルファベットだけで20点を越えてしまっている。
-            アルファベット  まとめて1点
-            きらきら    3点
-            星  まとめて1点
-            本  置換予定
-            楽器　置換予定
-            ダンボール　1点
-            プレゼントボックス　1点
-            額縁
-            フラワーリース
-
- ok info_walletの公開情報の整備
-        PJ外で有用なパラメータにできるだけ網羅的にアクセス可能とする
-            外部で使用するときに有用と思われる値を吟味する
-            各パラメータの簡単な説明を掲載する
-        interfaceとabiを公開する
-            コントラインポートへのリンクも明記する
-        jsを用いた使用例を公開する
-            greeting例、icon表示例のjsを公開する
-            lootlineな楽しみ方を紹介する
-
- ok 新コントラのテストプレイ
-        other summoner feeding
-        market
-
- ok マーケットプレイスの改善
-       *UIの実装
-            平均priceを表示する
-            ダッチオークションのルールを明記する
-            listPriceに達するまでの残り時間を表示する
-            マーケットコントラのget_itemInfoを使って情報取得を軽量化する
-        ダッチオークション形式にする
-        最低価格を決めてリストし、100 $Astarか最低価格x3の価格の
-            どちらか大きい値段を始値としてオークションを開始する
-        24時間かけて価格は下落し最低価格となる
-            その後は最低価格でリスティングされ続ける
-        また、売買成立時に平均落札価格を記録する
-            item typeごとに回数と平均値を記録しておき、
-            新しい落札価格を得るたびに回数と平均値を更新する
-
- ok イベント監視システムの実装
-        pythonを用いて全eventを記録し続けるスクリプトを実装する
-        snapshotとは別に運用する
-        → node.jsで実装した
-        share.jsやindex.jsから読み込むスキームを確立したいところ。
-
- ok bot対策の深慮
-        スタンス
-            手動でいちいち排除するよりは、
-            そもそもbotが有利になりにくいメカニズムをonChainに組み込んでおきたい。
-        考えられる有害行動：
-         ok マーケットプレイスのスナイピング
-                ダッチオークションの導入で耐性を持たせる
-                生身のプレイヤーに対する監視botの優位性を下げる
-         ok マーケットプレイスを利用したアイテム移動
-                listing→即buyによる実質の無料transfer
-                これもダッチオークションを導入することでほぼ不可能とする
-         ig フロントエンドを用いない直コン
-                スクリプトを用いたfeeding, groomingの定期実行化
-                必ずしも有害とはいえないか
-                saltをコントラ内に保持し、正しいsaltを渡したときのみfeed可能とする、
-                    などの対策は取れるが、過剰防衛だろう。
-                また、保母さんbotなどを公式で提供しても良いだろうか。
-                event監視により手動で監視し、他のユーザーに迷惑がかかっていれば対策を考える。
-         ok 直コンによる広範囲feeding
-                event監視により手動で監視する
-                あまりにも目に余るようなら手動でペナルティを課す
-                もしくは、他のsummonerに対するfeedingにインターバルを設けるか
-                対策済：追加expに24時間ごとの上限を設けて防ぐ。
-         ok マルチウォレットによる多キャラプレイ
-                1 summoner $20程度なので100体運用などは現実的ではないだろう。
-                1人が2-3体運用は許容範囲とするか。
-                キャラ間のアイテムの融通（fluffyの色合わせなど）は多少有利に働く。
-                また、植民地summonerとメインsummonerの分担プレイも有利だろう。
-                NFT transferに料金を設定することで抑制する
-        以上を踏まえた規約
-            単一ノードにつき4を超えるようなマルチsummonerの運用
-                1人がマルチウォレットで複数のsummonerを所有することは
-                推奨されないが禁止ではない
-                ただし、エコノミーを破壊しうるほど過剰なマルチウォレット運用は
-                ペナルティを受ける
-                現在の制限として、4体以上の基準を設定するが、
-                この基準とルールは今後変更になる可能性がある。
-            フロントエンドを介さない過剰な直コン（基準は明記しない）
-                このゲームはfull on-chainであるため、
-                直コンがゲームプレイに特に有利になる設計ではない。
-                そのため禁止はされないが、しかしエコシステムに有害な行動と
-                dev teamが判断した場合はペナルティを受ける可能性がある。
-            その他有害であると判断されたすべての行動
-                スクリプトや自動化が通常プレイより明らかに有利となり、
-                またはエコシステムに有害であるとdev teamが判断した行動は、
-                summonerの停止や石化と言ったペナルティを受ける可能性がある。
-    
- ok working系ステータスをuint isWorkingへ統合する
-        0: notWorking, 1:Mining, 2:Farming, 3:Crafting, 4:Practice, 5:Strolling
-        各workingは開始時にisWorking==0を要求し, end時にisWorking==[該当No]を要求する
-        また、start時に各動的パラメータをリセットする
-        さらに、強制終了functionを用意しておく
-            forcedTermination(uint _summoner)
-            summonerのownerとadminのみが実行可能
-            isWorkingに0を入力する
-            つまり、その時点で行っているworkingを強制終了する
-            craftingでは払ったコストは帰ってこない
-            mining/farmingは溜まっていたcalc_coin/materialは得られない
-            次回start時は動的パラメータは0にリセットされる。
-
- ok UI実装：Twinkle, Sparkle, Glitter
-     ok 当て絵を仮実装する
-            小さめの自然物
-            D&Dで自由に移動可能
-     ok むらさきさんとの何かしらのギミックを考える？
-            松ぼっくりを持って歩ける、など
-            むらさきさんに重ねるとくっつく、など。
-        所持twinkleリストの取得関数の実装
-        summon_twinkleの完成
-        
- ok 開始後のUI/UXチェック
-        等速でのテストプレイ
-        最初の1日、3日、7日のUXは十分か
-        trial終了のタイミングは適切か
-
- ok ウッドキューブの再実装
-        ユーザーがD&Dで並べて遊べる
-        むらさきさんが蹴って遊べる
-        1個に1桁スコアを表示する
-        1桁スコアはあとから更新可能にする
-
- ok ゲーム開始時のバランス再調整
-        やはりまだ開始時のUXが悪い
-            Lv1ではまず何ができるのかさっぱりわからない
-            なにもできないつまらない画面に見えてしまう。
-        Lv2まですることがない
-            最初のlevel-upに数時間かかると大体のプレイヤーはやめてしまうだろう。
-            せめて30分程度でLv2が可能となり、mining/farming解禁としたい。
-            また、アイテムリストは最初から公開しておいたほうが良いだろうか。
-        Lv2までは、アイテムを眺めたり、feeding/groomingを試したりする時間とする。
-            その間にLv2に挙げられるタイミングが来るバランスで。
-            Lv2になるとminingとfarmingが解禁される。
-        Lv3は24hr程度かかっても良いか。
-            mining/farmingしてresourceをためつつ、作るアイテムを考える時間。
-            mining/farmingの出力が正確であるほうが望ましい。
-        メインのユーザー体験は何か：
-            継続したプレイによって、お部屋が少しずつ賑やかになっていくこと。
-            つまり、アイテムNFTの獲得がUXの中心だろうか。
-            ステータスアップはあくまでcraftの前提条件という位置づけ。
-            お世話によってレベルアップし、
-                レベルアップすると新しいアイテムNFTがクラフト可能となり、
-                NFTをクラフトするとお部屋がより賑やかになる。
-            お世話→レベルアップ→解禁→クラフト→賑やかに
-                これがプレイの中心となるUXだろう。
-                少なくともはじめの2-3日以内に上記サイクルを1回は体験できるように。
-
- ok 最初の演出をもう少し頑張る
-        何もない部屋に全部作って足してゆく、感じを初めから演出する
-        くま、作業台、ちゃぶ台、砂場、植木鉢、は最初は無いようにしたい。
-        UXのみで良いので、大きな宝箱をクリックしたら展開されて配置される
-            お部屋のものは全部これから作ってゆく、というのを演出する。
-        プレゼントボックスから出現して、規定位置に収まる動作を定義する
-            もしくはシンプルにvisible=trueかつsummon_flowerでも良いか。
-        砂場のsprite化が必要
-                    
- ok workingのUI改良
-        たまに勝手に休憩するように修正する
-        プレイヤーが「命令を出す」と言うよりは、
-            ふわっと「これやってほしいなー」程度の印象にする。
-        気が向いたらcoinほってほしいなー程度で。
-        むらさきさんは適度に休んで、適度に寝ちゃう感じに修正する。
-        よって、+XXXのテキスト表示は常に表示させておく。
-
- ok lootlike要素の再考
-        わかりやすく、ロールプレイたりうるパラメータに改善する
-        引きあたった要素がもっとイメージしやすく、かつ要素間で大きな優劣が無いように。
-        十人十色な要素を3つほど考えたい。
-            性格（長所）
-            出身場所
-            weakpoint
-                寂しがり屋
-        もしくはpersonalityを3つとかにするか
-        https://mysuki.jp/english-personality-5486
-            birthplace:
-            personality: 外見・行動、客観性
-                "Friendly"：友好的
-                "Reliable"：信頼できる
-                "Frisky"：元気な、活発な
-                "Thoughtful"：思いやりがある
-                "Easygoing"：のんびりとした、気楽な
-                "Tolerant"：寛容な
-                "Affectionate"：愛情深い
-                "Intelligent"：知的な
-                "Faithful"：忠実な
-                "Innocent"：無邪気な、純真な
-                "Gentle"：穏やかな、優しい              
-                cheerful, 陽気な
-            character: 深層心理・価値観、主観的な信念
-                diligent, 努力家
-                optimist, 楽天家
-                realist, 現実主義者
-                ethical, 理論屋
-                sensitive, 多感
-                adventurous, 冒険家
-                compassionate, 同情的
-                empathetic, 共感的
-                patient, 我慢強い
-                courageous, 勇気のある
-                "Honest"：正直な
-
-            weakpoint: a bitをつけて愛嬌程度の弱点
-                気分屋,
-                寂しがり屋,
-                お寝坊,
-                神経質,
-                負けず嫌い,
-                頑固,
-                忘れっぽい,
-                完璧主義,
-                内気
-                おてんば
-            Scent:
-                華やかな香り (floral scent)
-                爽やかな香り (refreshing scent)
-                優しい香り (gentle scent)
-                穏やかな香り (mild scent)
-                フルーティーな香り (fruity scent)
-                お日様の香り（sunshine scent）
-                甘い香り（sweet scent）
-                ふんわりした香り (soft scent)
-                エキゾチックな香り (exotic scent)
-
- ok demo→regularのテストプレイ
-
- ok アイテム順の決定
-        クラフト、ダイス、猫メール、散歩、楽器練習、の順で解禁する
-
- ok マーケットの改善
-        最低価格の導入
-            バイバックコントラを参照する
-            pouch/bankなど最低価格が存在しないものは決め打ちで設定できるようにしておく
-            スクリプトによるマーケットを利用したアイテム移動への対策
-     ng 可能なら、オークションの導入
-
- ok フラワーリースの実装
-        クラフト後にのみ表示する
-        クラフト後にのにスコアによる補正を有効にする
-    
-    
- ok 天気を実装する
-       *UI側だけの演出
-            ASTR価格が前日比プラスなら晴れ
-            前日比マイナスなら雨
-            基準はUTC0で（日本時間朝9時）
-            これぐらいのさりげない演出で良いだろう
-            あるいは、+10%>, 1-10%, -1~-10%, -10%<の5段階とかでも良いか。
-                大雨(<-10%)、小雨(-10%~-3%)、曇(-3%~+3%)、晴れ(+3%~+10%)、快晴(>+10%)、など
-        dexscreener API:
-            https://api.dexscreener.com/latest/dex/pairs/astar/0x806f746a7c4293092ac7aa604347be123322df1e
-     ok ASTR/USDT価格取得コード：
-            let request = new XMLHttpRequest();
-            astar_price_data = "";
-            request.open("GET", "https://api.dexscreener.com/latest/dex/pairs/astar/0x806f746a7c4293092ac7aa604347be123322df1e", URL, true);
-            request.onload = function () {
-                astar_price_data = this.response;
-                console.log(astar_price_data);
-            };
-            request.send();
-            let _json = JSON.parse(astar_price_data);
-            let _astar_priceChange_h24 = _json.pair.priceChange.h24
-
-
- ok exp補正のUI実装
-        expをクリックで補正一覧を表示
-        現状：
-            ぬいちゃん
-            +exp小物
-            walletステータス
-        足し算ではなく掛け算になっているが、どうするか。
-
-
- ok レベルアップの演出の改善
-        もう少し豪華に
-        新レベル値を大きく表示、など
-        付随して、文字表示の機構を実装する
-            happy new yearなどにも使えそう
-            文字が一つずつ可愛く出現する演出を考える
-        文字クラス
-            演出
-                真下に自由落下
-                真上に加速度上昇
-                小さくなって消える
-       *音の実装
-
-
- ok Trialモードの修正
-     ok convert直後の挙動確認
-            適切なタイミングでcontract_update_summoner_of_wallet()を走らせて
-                gamemodeをtrialからregularへと変更させる
-            トリガーを何にするか。
-            切り替わり時の演出も考える
-            リロードを促す専用ウィンドウとリロードボタンを表示させる
-                初回起動時の演出とトリガーをどうするか
-                トリガーはローカル変数でよいか
-                flag_convertCelebration = 1など
-                flag=1のときだけ演出を行い、すぐflagを寝かせる
-                if (gamemode=="regular" && flag_convertCelebration==1) {
-                    //演出
-                    flag_convertCelebration=0;
-                }
-     ** trial表記の深慮
-            ひと目でtrialモードだとわかる表現を実装する
-            「TRIAL」の壁看板を表示させるか
-     ok level capの修正
-            クラフト可能なLv3以降にexpが全く入らないのはちょっとおもしろくない
-            expは貯まるがLevel-upができないように修正する
-     ok first craft bonusの導入
-            最初にクラフト完了したときにpresentboxを得る
-     ok trialではstaking bonusを表示させない
-
- ok index.htmlのweb3周りのjs修正
-        walletを多重で読みに行っているのでエラーになっている
-        まずwallet接続を要求して待機し、
-            接続され次第onChainデータを読んで反映させるよう修正する
-
- ok Depth整理
-        1-100:      background
-        200-1000:   sprites
-        2000:       system icon, text
-        3000:       staging1, 
-            3100:   draw_flower
-            3200:   fireworks
-            3300:   night
-        5000:       window
-        6000:       stating2
-            6100:   fallingFlower
-        9000:       pointer
-
- ok Trial ConverterのUI実装
-        js実装
-            scene内でsummoner取得しに行くときにregularとtrialを両方取得しモード分岐させる
-            他のコントラは、
-            1:
-                share内ですべてtrialもコントラを作っておく
-                web3絡みはすべてflag_trialで通常コントラかtrialコントラか
-                    どちらを読みに行くか分岐させる
-            2:
-                メインコード内ではコントラは変化させない
-                shareなりどこかで、trialとregularで全コントラを入れ替える分岐を行う
-            また、trial→regularへとコンバートした直後の挙動も実装する必要あり
-                やはり、flag_trialと、各コントラ2重用意で分岐、が受けが広いだろうか。
-        運用
-            いつでもコンバート可能にするか
-            特定の条件を満たした後コンバート可能とするか
-            コンバート無しで正規mint可能とするか
-            → Trialで開始し, Lv3以上でいつでもregularへconvert可能、とする
-        UI実装
-            Lv3以上でconverting_summonボタンを表示する
-                ないないさんを使うか
-                もぐもぐさんを使うか
-     ok 開始画面のUI分岐を実装する
-            trialあり/正規なし　→　trial summonerで開始
-            trialあり正規あり　→　(ありえない)
-            trialなし/正規あり　→　正規summonerで開始
-            trialなし/正規なし　→　summon画面
-            つまり：
-                trial summoner own → trialコントラで開始
-                trial summoner not own → regular summoner own → regularコントラで開始
-                trial, regular summoner いずれもnot own → trial summon画面
-            また、visitはregular summonerのみとする
-                trial summonerはvisitできない
-                コントラとしてはfeeding可能だが、UIは実装せず想定しない
-     ok init
-            maは独立したコントラ
-            ただしmnだけは正規コントラと共通
-            mcのtransfer feeは巨大な数字
-            mp.PRICE=0
-            mp.isTrial=true
-            trialのma.address_Murasaki_Address_Regularに正規版のmaを格納する
-            regularのma.addressにはTrialのmaアドレスを格納する
-            mc_regにはtrialのconverterをpermitしておく
-            trialのffにはintervalを多めに設定しておく
-
- ok クリック時の挙動統一
-        cat, festivalor, presentboxの仕様も統一する
-        現状これらはマウスオーバーとマウスクリックで挙動が異なるが、さてどうするか
-        クリックでtx飛ばしてしまうため、情報表示のUI設定がちょっと難しい
-        item_indicatorはどうするか
-            同時に、ステータス補正値の表示方法も考える
-
- ig 体験summonerの設計II
-     ok コントラ群を別にすべて用意する
-            token, functionなどすべて
-            if(isTrial)トリガーを実装しコード自体はtrialと正式で共通とする
-     ok 制限をかける
-            mcのtransfer_feeを10000000など大きな数字に設定して事実上禁止
-            mfslのlevelup関数でrequire(level<=2): Lv3までしかあげれないよう制限
-            mfcでrequire(mss.total_item_crafted <=2): itemは3つまでしかcraftできないよう制限
-            mfcで、trialではfluffyが発生しないよう修正
-            そのかわり、mfslでLv2, Lv3などでpresentboxをもらえるよう修正
-            mpにisTrial変数を用意しtrueを代入する
-                他のmfも自前のisTrial()を持ち、中身はmp.isTrialを参照する
-                mf内ではif(isTrial){require()}で制限を実装する
-     ok 制限II
-         ok Lv>=3でfeeding, groomingのexp=0
-                Lv4にあげられないのではなく、expを得られなくする
-         ok start_crafting時にrequire(total_item_craft<3)
-                3個以上はクラフト開始できなくする
-         ok coin bank, leaf pouch, cat mailはtrialではクラフト不可とする
-                もしくは、クラフト可能品を絞る
-                require(_item_type==1 || _item_type==17 || _item_type==33)など
-         ok mc_trialはtransfer_fee=10000000000
-         ok 1ヶ月間放置されると再summonが必要なように設計する
-                isActive()を用意するか？
-                isPetrified & isTrialでresummon()とするか？
-                シンプルな設計を考える
-                → 石化し、cure cost=0とする（mint cost=0なのでそのままで良い）
-         ok coin, leafの取得上限も検討する
-                延々とcoin/leafを取得し続けるbotが成り立ってしまうため
-         ok onChain_Scoreによるexp boostは無効
-                item_wreathも表示させない
-         ok staking bonusも無効
-                メーターを貯めない
-                item_stakingも表示させない
-         ok uriで"Trial"と表示させる
-         ok presentboxはランダム送信しない
-                自分で作ったら自分でもらえる
-                → trialでは送らないこととする
-         ok summon時の条件の整備
-                trial, regularのsummonerのpossess条件に応じて、
-                trial, regularのsummonを許可・不許可する条件を整備する
-                いきなりregular summonerのsummonは許可するか？
-                trial所持 → convert許可
-                trial未所持・regular所持 → trial summon不許可・trial convert不許可
-     ** init
-            maは独立したコントラ
-            ただしmnだけは正規コントラと共通
-            mcのtransfer feeは巨大な数字
-            mp.PRICE=0
-            mp.isTrial=true
-            trialのma.address_Murasaki_Address_Regularに正規版のmaを格納する
-            regularのma.addressにはTrialのmaアドレスを格納する
-            mc_regにはtrialのconverterをpermitしておく
-            trialのffにはintervalを多めに設定しておく
-     ok コンバーターを用意する
-            mfslにconverting_summon()関数を実装する
-            まずsummonし新IDを割り振る
-            その後trialから正式へmm, ms, mssをコンバートする
-            所有trial_mcをすべて取得し、正式mcをmint、コンバートする
-        共通の情報
-            mnはtrial上で正式版をmintさせる
-                つまり、ma_trialには正規mnのアドレスを登録する
-            弊害としては、大量mintでnameが枯渇することだが、まあ大丈夫だろうか
-     ok 要修正
-            lootlike系はwalletアドレスとclassのみを参照するよう修正
-        要対策・要検討
-         ok coin/leafをひたすら掘り続けるtrial summoner
-         ok coin bank/leaf pouchを溜め込むtrial summoner
-            → 時間の制限か、total_coin/leafの制限を検討する
-         ok 長期間放置されたtrial summoner
-                石化する？
-                そのwalletで再開したいときはどうするか
-                trial summonerは石化しないようにするか
-                もしくは石化のタイミングで再mint必要にするか
-                正規summonerは石化し、trial summonerはリセットされる
-                普通に石化でも良いかもしれない
-                    trialではcureコストが0である、とする
-            trialを示すUI演出を考える
-                鬱陶しくなく、しかし変化がわかりやすく、かつ嬉しいUIが必要
-                → mogumoguさんを使う
-         ** 開始画面のUI分岐を実装する
-                trialあり/正規なし　→　trial summonerで開始
-                trialあり正規あり　→　(ありえない)
-                trialなし/正規あり　→　正規summonerで開始
-                trialなし/正規なし　→　summon画面
-            summonは必ずtrialからか、直接正規mint可とするか
-                条件を満たさないと正規へconvertできないのか、
-                feeを払えば初期から、もしくは度のタイミングでも正規summonerへconvert可能とするか
-                → Lv3でmogumoguさん出現とする
-
- ig 体験SBTの設計
-        別のmmを用意する
-            summoner IDに紐付いたms, mss, mnも別コントラが必要
-            admin converterのようなコントラでパラメータをコンバートする必要がある
-            かなり複雑になるが、エラーなく実装できるだろうか
-        mint関数と、convert関数を別に用意する
-            convert関数は引数はsummoner IDのみとする
-                でないと引数上限に引っかかるだろうか
-            require(flag_convert=0)
-            require(owner check)
-        mint関数
-            正式mmでmintする
-            正式summoner idが割り振られる
-        convert関数
-            mint関数に続いて同一tx内でconvertする
-            convert_mm(summoner_trial, summoner)
-            convert_ms(summoner_trial, summoner)
-            convert_mss(summoner_trial, summoner)
-
- ig free2play機構の検討、体験版機能の検討
-        いきなり$10-20払ってくれというのは参入障壁が高すぎる
-            加えて、NFTではなく移動できないSBTなので気軽に購入しにくいだろう
-            ape inした層から売れない移動できない、といった苦情やトラブルが多いと思われる
-        そのため、例えばLv3程度、最初の1週間程度は機能制限ありの体験summonerとする
-            気に入れば、正式SBTを購入して継続してプレイできる
-            このほうが、将来的な利益が大きいだろう
-        体験SBTの時は機能制限を付ける：
-            マーケットの使用不可
-                バイバックも使用不可
-            Lv4以上へあげられない
-            アイテムクラフトやfluffy NFTはどうするか
-                体験NFTとし、正式summoner mint時に正式NFTに変換される
-                正式NFTをmint可能とする
-            名前SBTはどうするか
-                特に弊害はないので正式SBTでよいだろうか
-            クラフト回数に制限をかける
-                3回、など。
-            fluffyはどうするか
-                3匹までしか得られない、など。
-        bot対策
-            体験summonerがfree mintの場合、大量にmintし運用することで
-                正式summoner側の経済が破壊されることは避けなければならない
-            例えば、正式NFTをmint可としておくと、
-                大量の体験summonerから低レベルとはいえ大量の正式NFTが放出されうる
-                bankやpouchなどが大量に出回るとまずい
-                これは公式マーケットを使用不可としていても、裏マーケットなどで起こりうること
-            また、体験summonerでひたすらcoinを掘り続けるというプレイも可能になる
-                どこかで蓄積coin<mint feeとなったところで正式summonerをmintし
-                profitを得るという力技が可能になってしまう。
-            かといって制限をかけすぎると面白くない体験playとなってしまうだろう
-                例えばNFTは一切mint/craftできない、などはつまらなさそう
-
- ig 開始直後の調整の本質
-        初日中にゲーム性を体験できるイベントを発生させる
-            盛りすぎない、期待させすぎない
-            低頻度・長期間ほのぼのプレイであることを理解してもらう
-        3日目までは毎日新しい体験を提供する
-            1日目：
-                数回のお世話でレベルアップ
-                    Lv1 → Lv2
-                mining, farming解禁
-            2日目
-                Lv3へレベルアップ
-                crafting解禁
-                fluffyと出会う
-                    Lv3の特別報酬とするか
-            3日目
-                最初のクラフト品完成
-                    最初は低コスト、24 hrなどで完了とする
-            7日目までに
-                最低限のアイテムのクラフト完了
-                    iPad, Nameplate, MusicBoxの3つぐらい
-                    すべて資源1d, クラフト1d程度の難易度調整にする
-                    craft, 1d, coin or material: 1000程度
-        7日目までに一通りゲーム性が理解できるよう設計する
-            この7日目ぐらいで正式SBTのmintを促す
-        体験SBTの制限
-            マーケット不可
-            バイバック不可
-            Lv3上限
-        体験SBTの許可
-            名前SBTのmint
-            正式NFTのmint
-        問題点
-            体験SBTと正式SBTのIDが異なるため、lootlikeの属性が変わってしまう
-                lootlikeはwalletのみに依存させるよう修正が必要
-            無料なため、大量の体験SBTで大量のアイテムNFTをmintできてしまう
-            最初のクラフト時は低コストにする必要があるが、簡単にupgrade可能になってしまう
-                first ticketなどの別の機構が必要
-            体験SBT→正式SBTへのパラメータ引き継ぎが可能だろうか
-                msやmssなどもsummoner IDが変わるのですべてtransferする必要がある
-
- ig mint直後の立ち上がりのバランス調整
-        流石にゲーム開始時の楽しみが弱すぎるだろう
-        初日中に何かしらのイベントを発生させる
-        1週間以内に必須のアイテムぐらいはクラフト可能にする
-        どこかのタイミングで正式SBTへの移行を促す
-        最も大事な、ゲーム開始から1-2週間のバランスを試行錯誤する
-        その後はmint feeがある意味人質になる
-            mint後は脱落者が増えるほど継続者の利益が増えるシステム
-        スタート直後：
-            presentboxを1つ同時にmintさせる
-            ないないさんを使って各種ボタンの説明を表示させる
-            24時間以内にLv2へレベルアップ可能にする
-        スタート3日後：
-            Lv3へレベルアップ可能にする
-        スタート7日後：
-            初期の1-2個のアイテムNFTをcraft完了可能にする
-            name plate, iPad, Musicbox
-        ゲーム性の中心はなにか
-            できるだけ早いタイミングで推しのゲーム性を体験してもらう
-            毎日継続してお世話することで少しずつ成長するNFT（SBT）
-                「成長」と「蓄積」を実感できる体験はなにか
-                    レベル？
-                    ステータス？
-                    資源の増加？
-            得た資源を支払って新しいNFTをmintする拡大再生産
-                拡大再生産を実感できる体験はなにか
-            目減りしない資産価値
-                バイバックで担保されたNFTの価値
-                「時価総額」としてUI内に表示させる
-
- ig バランス調整の再考
-        優先ルール
-            2年程度で最大成長に達する
-            平均的なプレイで1週間に1個程度のitemがクラフト可能となる
-            1年で効率が2倍（+100%）程度のステータス上昇率に調整する
-        開始直後のバランス補正
-            7日間程度で一通りのゲーム性体験ができるように補正する
-            最初の3アイテムは24時間以内の難易度に設定する
-            資源あつめ1日 + クラフト1日 x 3 = 6日間、程度のバランスに補正する
-            1-2個のfluffyもボーナスでもらえる
-        バイバック調整
-            fluffy, fluffier, fluffiest, dollにも値段をつける
-            初期アイテムのコストを下げる
-                これに伴って、バイバック値段も引き下げる
-
- ok インフォメーションの表示形式を統一する
-        クリックで表示させるのか、オーバーラップで表示させるのか
-        時間経過で消えるのか、オーバーラップ時のみ表示させるのか
-        マウスとタップで利便性が異なる
-            さて、どうするか
-        クリックで一定秒表示、が無難だろうか
-            マウスでもタップでも操作性が悪くはない
-
- ok Buybackシステムの修正
-        fluffy NFTのbuyback価格の設定
-            fluffyは不可で、estやdollあたりからpriceを付けるか
-            どのitem levelが妥当だろうか。Lv10あたり？
-            ちゃんと計算して設定する。
-        fluffyやflyffierにも採算取れない程度に小さくて良いので価格を設定するか
-        fluffy系列分の割当も計算する
-        現在の時価総額を表示する
-            今すべてを売り切ったらいくらになるか
-            自分のHoMの金銭的価値の位置づけ
-            そしてこの最低時価総額は決して下がらず、未来に向けて必ず上昇してゆく
-        むらさきさんをburnしたらいくらか返金されるシステムはどうだろうか
-            決して目減りしないオンチェーン資産、を表現したい
-            そしてこの資産価格は継続的なゲームプレイで価値が上がってゆく
-
- ok 初期アイテムのコスト減弱とバイバック値の減弱
-        同時にfluffyのバイバックコストの設定
-
-  ok Philandライクな戦略の検討
-        やはり何かしらのオブジェクトとしたい
-            移動可能なオブジェクト
-            おかしの家とは異なり、普遍的に発展/成長してゆく小物
-            小さな植木鉢？
-            お花のリーフはどうか
-       *独立したオブジェクトのitem_wrethとして実装させる
-            trialでは無いならば初期から所持する
-    	オンチェーンアクティビティに応じたオブジェクトを得る
-    		onChainAchievementコントラクト
-    	NFTではなくとも、落書きなど何かしらの表現を行いたい
-    	    落書きはin-gameアクティビティの表現で実装済みなので、バッティングするだろうか
-    		各PJのトレースデフォルメアイコンを用意するか
-    		    どこに表示するか
-    	また、インセンティブとしてはExp Boostボーナスを導入する
-        *よつば案：
-            1つ, 2つ, 3つ, 4つ葉の4段階
-            葉っぱが薄いor透明で現在の段階を表すか
-            もしくは、4つの別のイラストとするか
-                0-1%: 1つ葉
-                1-2%: 2つ葉
-                2-3%: 3つ葉
-                3-4%: 4つ葉
-                4%max: 4つ葉＋てんとう虫
-            マウスオーバーラップでスコア内訳を表示させる
-        スタンプ案
-            壁の空いているところにNFTをデフォルメしたスタンプを貼る
-
- ok スナップショットスクリプトを実装する
-        pythonなどで、mm, mn, ms, mss, mns, mcの状態をローカルに記録するスクリプト
-            可能ならば、スナップショットからの回復コードの実装も検討する
-        また、ローカルに保存したデータの解析方法にも慣れておく
-
- ok Petとのふれあい機能の実装
-        Petと当たり判定したときに専用の演出を実装する
-        ハマらないようクールタイムを用意する
-
- ok working時にemitterを表示させる
-        mining: コインが飛び出す
-        farming: 葉っぱが降ってくる
-        crafing: ?
-
- ok crafting UIの改善
-        item indicatorの下に進捗バーを表示させる
-        → 残り時間を％に変換するのが困難
-        → また、3日とかなので、％表記は不適切だろうか
-        → 解決した。導入OK
-    
- ok random presentのコード修正
-        mailと同様に5回ループで候補を探すよう修正する
-        5回施行ならば：
-            active user 80%で失敗率0.032%
-            active user 50%で失敗率3.125%
-            active user 20%で失敗率32.76%
-        これならば、体験SBTと正式SBTをms内のフラグ管理しても大丈夫だろうか
-            体験SBTの20%が正式SBTに移行したとすると、成功率70%程度
-        しかし、やはり正式IDが汚染されるのは何かとコントロールが面倒そうなので、
-            正式IDを割り振るのはmint fee払ったwallet数にすべきか
-
- ng free mintの可能性を考えてみる
-        → 体験play機構を実装することとする
-        現在の流行はfee 2 playのフリーミアムモデルが主流
-            mint feeをかけさせて2-3ヶ月で原資回収するモデルは主流ではない
-            課金しないライトユーザーは無視して、
-                ハマってくれたヘビーユーザーに青空天井の課金を促すモデル
-            また、本作品は原資回収を計算すると1年以上必要で魅力が少ない
-        よって、資金集めはdapps staking rewardを主軸とし、
-            mint feeを小さく抑えることで参入障壁を限りなく低くするモデルを考えてみる。
-            廃課金機構はつくらずに、有利に進めたい人はstaking量を多くしてもらう
-                Astarエコシステムにも良いだろう
-        デメリット：
-            dapps stakingインセンティブが現状では不十分
-                自発的にdapps stakingしてくれないと資金が入らない
-                現状、ステーキングによる恩恵が弱く、また分かりにくい
-            bot対策が弱くなる
-                mint feeを下げると大量のmulti-walletを利用したbotに脆弱になる
-                分散してstakingするのは手間ではあるのだが。
-                    しかし、stakingによるreward効率は量が増えると鈍化する設計なので、
-                    multi-walletによって分散させたstakingが最大効率になってしまうか。
-            バイバック資金の消失
-                staking rewardが貯まるには時間を要するので、
-                バイバックシステムでPJの価値を下支えすることが難しくなる。
-                参入人数が多くなればstaking報酬のみでバイバック資金を賄うのが難しくなる
-                多額のstakingをする人だけ集められればよいが、そうもいかないだろう
-                staking/wallet値はどのくらいになるのだろうか。
-                    500ぐらい行けば御の字だろうか。
-                単純な人気によってNFTの価値が決まるが、その分逃げ足も早くなるだろう
-            金銭的インセンティブの低下
-                無から有を生み出す必要があるため難易度が高くなる
-                最初の人質金が無いため、参入しやすく離れやすい
-            課金要素が貧弱
-                ヘビーユーザーからの集金機構が今のままでは弱いと思われる
-                完全なフリーミアムは課金機構とセットで考えるべきだろう。
-        メリット：
-            金たかり層を排除できる可能性
-                無料であるため、mint feeとリターンのバランスに対する不満などが出にくい
-                    原資抜きに時間がかかって怒られる、といったことが少ない
-                気楽にプレイしてもらえる
-            セキュリティ周り
-                コントラクト上にお金をプールしないので狙われにくい
-            金融性の低下
-                ユーザー側の金融要素はdapps stakingにステーキングするだけ
-                    持金を直接預けず、目減りもしないのでほぼノーリスク
-                ユーザーが原資抜きを考えなくて良い
-                開発側はdapps stakingに入れて欲しくなるシステムを作り続けるだけ
-                    staking rewardをゲーム性の中心に持ってくる改革が必要
-                トーケノミクスなどにあまり頭を悩ませなくても良いと予想される
-                総じて、のんびりプレイ可能なバランスに設計できる
-        設計：
-            mint fee
-                10 $ASTRなど少額に設定する
-                すべてdev報酬とする
-                    もしくは全てバイバックトレジャリーに入れる
-            stakingインセンティブ
-                dapps stakingをゲーム性の中心に据える必要がある
-                staking=0だと如実に不利にする
-                staking量に応じてrewardと演出が良くなる
-                ただし、継続的なgameplayが最もreward効率が高くする
-                    stakingはあくまで継続的なplayの「効率」を上昇させる
-            bot対策
-                少額でも良いのでmint feeを設定する
-                NFTのtransferにはfeeをかける
-                明らかなmulti-walletは監視して手動でbanする
-            ユーザーのearn設計
-                主な手段はcraftしたNFTの売却益となる
-                100%市場任せだと買い手がつかずにすぐに無価値化するだろうか
-                mint回数にlimitを設定し希少価値を付けるのも手だが、設計上不適切だろう
-                やはり、treasury資金によるバイバックが安定するだろうか
-                mint feeを少し多めに設定し、全額treasuryに入れるか
-            Staking Treasuryの使用方法
-                従来設計ではバイバックtreasuryに入れていた
-                ユーザーに還元したいが、適切な方法はなんだろうか
-                ユーザーとdevが同時にearnできるシステム設計にしたい
-
- ig クラフトUIの改善
-        未クラフトアイテムをセレクトした時に、グレースケールのアイテムを表示させる
-            → 半透明とする
-        アイテム初期位置の調整
-
- ok exp増加アイテムのsolidity実装
-        発表会、お散歩報酬、おもちゃのカンヅメ報酬などに使用する
-        一つ一つは+0.1%exp程度と小さな上昇率に留める
-        solidity実装案
-            種類ごとに別のitem_typeを用意するか？
-                countが大変なので、exp上昇率ごとに1種類にしたいところであるが
-            mcにsubtypeを実装してしまうか
-                exp補正率ごとに別typeで、その中での種類はsubtypeを参照する
-            例：
-                小さなきれいな石: すべてexp+0.03%, 色が12色ある
-                中くらいのきれいな石: すべてexp+0.05%, 色が6色ある、など
-            石シリーズ以外でも、exp+0.03%のアイテムはすべてこのitem_typeで処理する
-            amountOf * 0.03で補正率が算出しやすい
-        取得のタイミング
-            なにか特別なアクションの報酬としたい
-                散歩の報酬
-                    何も得られなかったら悲しいのでこれ以外の報酬も考える
-                発表会の報酬
-                    飾って楽しいトロフィー, シーズンごとに異なる
-
- ok practice中のfeeding中にpracticeを抜けるとinstrumentが残っちゃうバグの修正
-
- ok マーケットページの改善
-        → 実際の実装はdapps stakingの目処が立った後、かつローンチ後1ヶ月程度
-            よって、現時点で公開はできない。
-        情報取得のバッチ処理化
-       *バイバックシステムの組み込み
-            市場で売りに出すかバイバックするかを選択できるように
-            バイバックは気軽にはできないようにする
-        upgradeボタンの廃止
-        transfer機能はどうしようか。
-            present機能として残す。
-        transferに警告文を表示しておく。
-            「友人とのアイテムのやり取りに使用できます」
-            「present eventは監視されています」
-            「明らかにbotと思われるmulti-walletを用いたtransferは即座にbanされます」
-
- ok バイバックシステムのUI実装
-        専用ページの用意
-            現在のバイバック価格の表示
-            バイバックボタンの実装
-            マーケットlistページと統合する？
-        意味論
-            アクティブユーザーが増えればインフレしにくくなる
-            ユーザー数に対してステーキング量が大きければインフレしやすくなる
-            脱落ユーザーはアクティブユーザーにカウントせず、
-                その分アクティブユーザー用のインフレに資金を回す
-                ただし、いきなりアクティブユーザー数で割らずに、
-                あくまで月ごとのインフレ率は小さく保つ
-            月ごとは3%-6%程度。
-                様子を見ながら調整する。
-                理想はdapps stakingで利益をとった上での定常状態化
-                アクティブユーザー数が多すぎるとインフレしにくいだろうか。
-
- ok バイバックシステムのUIの実装
-        専用ページとするか、マーケットページに統合するか
-        マーケット売値はバイバック価格を下回れないよう修正する
-
- ok バイバックコントラクトのテスト
-        バイバックのテスト
-        bufferVaultの挙動テスト
-        バイバックボタンの実装
-        マーケットでバイバック価格以下で売れないよう設定
-        バイバックコントラへのapproveボタンの実装
-       *必要なアマウント量で、ばいばっく済み量を考慮するよう修正する
-        コントラ内の必要量に関する考察：
-            btコントラには、active_summoner * amountPerSummoner - total_paied_amountがあれば良い
-            しかし、deactiveされたsummonerのpaied_amountを合算することが困難なため、
-            total_paied_amountを計算することができない
-            そのため、厳密には多いが、active_summoner * 現在のamountPerSummoner分だけ
-                常に入っているように計算してbufferからtransferさせる
-            active_summonerがbuyback済みであるほど、過剰量がbtに格納されることになる
-            また、各summonerはamountPerSummoner x2までbuybackすることができる
-                x2にする意味もあまりないので、ハッキング対策としてx1とする
-            bt内の量としては、active_summoner全員がamountPerSummoner x1売れるだけの量に相当する
-            もう少し減らしてstakingへ回しても良いかもしれないが、
-                蓄積金が多いのもそれはそれで良いだろうか
-            50%程度の量でも良いかもしれない。要検討。
-                しかし、ユーザーからの預り金という位置づけなので、十分量を公開する意味はあるか。
-
- ok Practiceバグ修正
-        practice中にfeedingするとinstrumentが増殖するバグの修正
-
- ok 楽器rarityを加味する
-        uncommon +10%
-        rare +20%
-
- ok summonerクラスにpracticeモードを実装する
-        ルールは他のworkingと同様
-        ターゲットは部屋の中心あたり
-        practice中のアニメーションの用意
-            楽器を擬人化して一緒に遊んでいるイメージの絵
-            ランダムで歌いながら寝てしまう、など
-       *practice中のサウンドエフェクトの用意
-            楽器毎に変えずに、共通の明るいSEをあてがう
-       *終わったときの演出の検討
-            +expを表示させるか
-        
- ok 楽器練習のUI実装
-        専用ボタンの実装
-        楽器選択のUIをどうするか。
-        習熟レベル：
-            beginner
-            talented
-            skilled
-            intermediate
-            skillful
-            seasoned
-            proficient
-            advanced
-            expert
-            master
-
- ok 楽器練習の実装
-        意味論
-            むらさきさんの一人遊び用趣味
-            3種類の楽器ごとに異なる習熟レベルを設定する
-            楽器を指定した「れんしゅう」で習熟レベルを上げられる
-                習熟レベルの増加は遅くするか、MAXレベルをかなり大きくする
-            「れんしゅう」中の経験値はすべて楽器経験値へ転換される
-                れんしゅうした分は本体のExpが全く増えない仕様とする
-                Feedingはどうするか
-                → Feeding時はExpは増えず、れんしゅうが終わったら楽器経験値に加算する
-            Happy, Satietyが10以上でないと寝るようにする
-                寝てる間の練習時間は何も生じない
-                楽器expも本体expも加算されない
-            STR, DEX, INTの値ごとに楽器exp取得量に係数をかける
-                ステータスが小さいときはあまり楽器expが入らない
-                比例ではなくlogXグラフ
-                    ステータスが大きいほど寄与率が小さくなるモデル
-                しかし、「時間」が最も大きい資源となるバランスに設定する
-        練習実装
-            練習中のFeedingのexpは楽器expへ加算する
-            luck補正はなし
-            fluffyスコアとSTR/DEX/INT値でわずかに補正する？
-        実装未
-            ステータス補正をどこにどのくらいかけるか
-            EXPからLvを計算する計算式の決定
-                シグモイド？
-        init実装
-            init.htmlの修正
-        練習曲線
-            シグモイド曲線とする
-                Bottom	1.762
-                Hillslope	3.491
-                Top	20.46
-                EC50	15597275
-                Y=Bottom + (X^Hillslope)*(Top-Bottom)/(X^HillSlope + EC50^HillSlope)
-        パラメータ補正
-            単純に、対応するパラメータ分だけ+%ととする
-                例：STR 15 = Clarinetのdelta_sec +15%
-        楽器候補
-            ピアノ
-            バイオリン
-            クラリネット
-            トランペット/トロンボーン/チューバ/ホルン/サックス
-            チェロ/ウクレレ
-            小太鼓
-            
- ok Practice expの加算修正
-        practice sec分はfeeding, groomingのsecとして加算しない
-        コードの実装が大変か
-        → 他のworkingと同様に、groomingのみ加算させない
-            Feedingは影響を与えない
-
- ok バグ修正
-        ぬいちゃんクラフトのアイコン修正
-
- ok fluffy festivalのUI改善
-        問題点：
-            festival後に結果がわからない
-            現在のfluffy所持数がわかりにくい
-        さて、どうするか。
-            もぐらさんを使うか？            
-
- ok Astar Walletを所有する意味論の付加
-        Walletのパラメータによってin-gameインセンティブを付与する
-            保有tokenの種類, 上限1%, 0.1%/PJ
-                SDN, DOT, LAY, BAI, ARSW, ACA, MATIC, GLMR, JPYC, WETH, WBTC, aUSD, 
-            保有NFTの種類, 上限1%, 0.2%/PJ
-                CANDYGIRL, DGENE, ANAUT, ASTRJP, CAT, WITCH, Punks
-            dapps staking量, 上限1%, 0.1%/step
-                1, 500, 1000, 2000, 4000, 8000, 16000, 32000, 64000, 128000, 
-            オリジナルNFT, 上限1%, 0.1%/個
-                1-10個
-        すべてmaxとして+5%程度のEXP補正をかける
-            1項目100点で、4項目400点、+4%程度か
-            最後の1項目は、オリジナルな運営が発行するNFTとするか。
-                1日1枚発行されるAoAのむらさきさんやAstarなど。
-        現在のExp補正値を表示させる
-            クリックで補正値内訳を表示させる
-        また、Exp補正値を反映するアイテムか、落書きを表示させる        
-
- ok クレヨンの実装
-        クレヨンクラフト後に実績落書きが表示されるように実装する
-        アイテム順を再考する
-
- ok Murasaki_info_fromWalletの更新
-        achievementの実装
-            必要ない？
-
- ok 集計情報
-        ユーザー数
-        石化ユーザー数
-        await web3.eth.getBalance(contract_bt.options.address) 
-        await web3.eth.getBalance(contract_bv.options.address) 
-        await web3.eth.getBalance(address_Staking_Wallet) 
-
- ok イベント監視システムを構築する
-        眺めるようと、bot監視ように。
-        event垂れ流しを一般公開するかどうかは難しいところ。
-            テキストのストリーミング公開が難しそう
-            アクティビティが如実にわかるので冷めそうであるし
-        監視対象のコントラクト
-            mfsl
-            mffg
-            mfmf
-            mfc
-            mfn
-            mml
-            wd
-            (ff)
-
- ok nuichanのitemIdの再実装検討
-        12種類の種類が設けられる場合、237-248を使用して別々のitemIdを当てたほうが良いか
-        あるいは, msnにtypeOfSourceパラメータを実装するか
- ok nuiちゃんにclassパラメータを実装する？
-        mcのmemoを使うか、storage_nuiに追加するか。
-        class値は合成元のfluffyのtypeを継承する
-        → memoを実装
-        classパラメータに応じてリボンの色を変える
-    
- ok ぬいちゃんの再実装
-        item id 197から240番台への修正
-
- ok fluffy upgradeバグの修正
-
- ok nyuinyuiさんのカウンターの統合
-        ロード画面とクラフト画面でカウンターを同じにする
-
- ok bed中に行動させるとでっかくなるバグの修正
-        bedも消えてしまう
-        
- ok ステーキング量反映アイテムの修正
-        以下のアイテムは現在のステーキング量を反映するものとする
-            鳩時計
-            金魚鉢
-            ネオンちゃん
-                ねおんふるっふぃーが必要
-            花瓶
-        それぞれ３～５段階とする
-        → *ネオンちゃんの画面を充実させる
-
- ok wallet反映アイテムの実装
-        age反映アイテム：
-            なに？
-            → 金魚鉢
-        nonce反映アイテム：
-            時計の針を進める？
-            → 時計
-
- ok 時計の実装
-        nonceの数に応じて長針と短針を動かす
-        長針・短針をプログラムで動かす機構を実装する
-        
- ok fluffy houseの実装
-        fluffyとの接触処理
-        クリックでfluffyが飛び出してくる演出
-        くっついているfluffyの数に応じた段階絵
-
- ok fishbowlの実装
-        wallet ageに応じて成長させる
-
- ok fluffyのupgradeの実装
-        5アイテムのupgradeの実装
-
- ok バイバックコントラの洗練
-       *アクティブユーザーのカウント方法の深慮
-            mm.next_summoner() - 1ではなく、not petrified summonersを
-                amount per summonerの分母に使用する
-            しかし、petrifiedは受動的な状態変化なので、
-                例えばpetrified時にカウントアップさせることはできない。
-            別でlast feeding timeを集計するバッチコントラを用意して、
-                adminコントラとして用意し、定期的に実行させるか。
-            last feedingよりpetrified summonerを割り出し、
-                msかmpのactive_summonersに有効summoner数を代入する関数。
-            これをbufferTreajuryのtransfer関数に組み込めればベストだが。
-            for関数のリミットはいくつだろうか。
-        あるいは, feeding時にpetrified summonerをカウント可能な機構を組み入れる
-            ある時間においてnow_time - last_feeding_time > 30dのsummonerをカウントしたい
-
- ok 記念撮影用小物
-        むらさきさん本体
-        おにぎり
-       *さつまいも
-        ダイス
-        バイオリンバッグチャーム
-        小さなお花たくさん
-        くまさん
-        フローリングの床
-        ピンクのラグ
-        ビットコイン、イーサリアムのレプリカ
-        折り紙の本
-        アスタートークン
-        wallet
-        fluffys
-        ないないさん
-        プレゼントボックス
-
- ok walletの状態を反映するギミックをもう少し実装する
-        所持NFT：photo frame内に表示される
-        所持token：tokenChestから出てくる
-        nonce：nonceが多いほど変化する何かを考える
-            wall stickerはやはりnonceを参照させるか。
-
- ok fluffyシステムの個数調整
-        upgradeの個数調整
-            x3 -> x1は安すぎるか？
-            fluffy dollがあまりに量産されすぎるのも良くない
-            x3 , x4, x5と段階的に上げていっても良いか。
-        いずれにしても、要調整だろうか
-
- ok tokenURIの実装
-        svg型tokenURIの解説：
-            https://qiita.com/hakumai-iida/items/c96d7c053379f42ba9b8
-        svg形式で絵を表示する方法を調べる
-        パラメータなどを表示したいが、クラスなどがせいぜいだろうか。
-        pngからsvgへの変換、カラー可能
-            https://onlineconvertfree.com/ja/convert/png/
-        むらさきさんの背景に、Lvやflowerなどを表示させる
-            アイコン絵をtokenURIで実装してみたい。
-            フルオンチェーンのSBT絵となる。
-        jsでwebでそのまま使用可能なコードも併せて用意する。
-        2パターン用意する
-         ok 1: mmのみで完結するtokenURI
-                むらさきさんのsvgにオーバーラップさせて最低限の情報を表示する
-                summoner ID, classのみを表示させる
-                classはflower名に置換するか
-                背景をflower colorにしても良いかもしれない
-            2: infoを反映した専用コントラのtokenURI
-                成長度を反映させたtokenURI
-                パット見てむらさきさんの成長度を視認できる情報はなんであろうか
-                    Name, Lv, age, scoreあたりだろうか。
-        svg化の手順を把握する：
-            https://qiita.com/hakumai-iida/items/c96d7c053379f42ba9b8
-            too deep stackをどうやって回避するか。
-
- ok 実績システムのUI検討
-        一旦ボツにしたが、称号や勲章の様にあっても良いだろうか。
-        実績によって増える小さななにかを考える。
-            ちょうちょ？
-            お花？
-            小さな宝石？
-            壁にくっつくなにか？
-        これを見ることでゲームの進捗がすぐわかるように。
-            
- ok 実績コントラクトの設計
-        実績達成をtrue/falseで判定するfunction
-            1つの実績につき1 function
-        達成済み実績をtrue/falseで記憶するstorage
-            achievement uint32[256]のようなarray
-        新たに達成した実績の数をuint32でreturnするfunction
-            もしくはarrayでreturnする
-            達成時は項目を表示させたいため
-        実績判定のタイミングをどうするか
-            mining/farmin時などにいちいち行っていたらgas代かさむか
-            level-up時にまとめて行うか
-        実績案
-            coin/material:max 500,000
-                gain 1,000
-                gain 10,000
-                gain 100,000...
-            craft:0-48
-                4,8,12,16,20,24
-                craft 10
-                craft 30
-                craft 100...
-            heart
-                received 10
-                received 30
-                received 100...
-            level-up:1-20
-                3,6,9,12,15,18
-
- ok 動作軽量化対策
-        fpsを120などに上昇させ、何が重いのか調査する
-            全画面画像は重い？
-            透過処理画像が重い？
-        → 全画面画像が重かった
-            phaser3をupdateし、
-            かつachvをアイコン化した
-
- ok バランス調整
-     ok item_dcテーブルの調整
-            後半のアイテムほど最低dcを大きくする
-     ok catインターバルの調整
-            5日 → 7日
-     ok fluffy必要量の調整
-            3個, 4個, 5個？
-     ok coin/materialの必要量の調整
-            後半のアイテムは3日分→5日分程度へ計算して調整
-     ng ffの補正修正
-            x2ではなくx1.5程度にする
-            → 割り算が困難なため保留
-     ok fluffy供給量の調整
-            現在のバランスだと0.5日に1個で多すぎるか
-            → cat-mailを7dに変更、stakingはmaxは出ないので大丈夫だろうか
-            また、fluffy合成コストを上昇、estができにくくなった。
-
- ok marketコントラクトの修正
-        新maに対応させる
-
- ok priceの係数計算
-        10**18で取得されるので整数化する
-
- ok tokenURIの再実装
-        mcのuriにpngへのURLを返すように設定する
-
- ok Treasuryシステムの刷新
-        mint feeの取り扱いと脱ポンジ
-            old userのbuybackTreajury分をnew userのmint feeで賄う構図は避ける
-            mint feeはbufferVaultへは入れない
-            即座にdev wallet, staking wallet, buybackTreasuryへ分割送金する
-        資金場所
-            BufferVault：コントラクト
-                全ての資金は一旦ここに集められる
-                Mint feeもここに入れることとする
-            BuybackTreajury：コントラクト
-                月に1回、資金量を増減させて調整する
-                常にactive user数 * amount per user量を確保する
-            StakingWallet：EOA
-                残りの資金はここに格納される
-                dApps stakingへ全額ステークする
-                余計なtxは飛ばさないように注意する
-            Administrator Wallet：EOA
-                全コントラクトの所有権を有する
-                必要な時だけ、コントラクトのメンテナンスを行う
-                余計なtxは飛ばさないように注意する
-            Developer wallet：EOA
-                BufferVaultから5% * 2を2つのプライベートwalletへ移動する            
-        BufferVaultからの資金移動を関数化する
-            Staking wallet -> BufferVaultは事前に手動で行う
-            BufferVault <-> BuybackTreajury, 相互移動
-            BufferVault -> Developer wallets, 5% x 2
-            BufferVault -> Staking Wallet, 残った資金全部, bufferをカラにする
-        手順：
-            手動でbuybackTreajuryにnot active user数を設定する
-                all user - not active user = active user数を算出する
-            手動でbufferTreajuryにインフレ率を設定する
-                関数でそのインフレ率を達成するために必要なamountを算出する
-            手動で不足amount分をstaking walletからbufferTreajuryへ送金する
-                不足しないようにインフレ率を設定したいところ
-                あるいはインフレ率を達成するamountがbufferに貯まるまで待つ
-            コントラで、buffer -> buyback, dev wallets, staking walletへの送金を一度に行う。
-                dev wallet: 5%
-                buyback: インフレ率を達成する分
-                staking: 残り全て
-            buybackに余剰資金がある場合は資金を逆流させる
-                not active userを設定した直後はbuyback価格が上昇してしまうので、
-                このタイミングでbuybackされない機構を考える。
-
- ok buybackTreajuryの改善
-        active userの増減によってはbuyback -> bufferへと移動させることも必要になる
-        active user数を取得した上でインフレ率を計算するよう修正する
-        手順としては：
-            インフレ率を手動で設定
-            脱落ユーザー数を手動で集計して設定
-            インフレ率に基づいて、buybackTreajury <-> BufferTreajuryの資金移動を行う
-                これはコントラクトコードで実装する
-            続く処理でbufferTreajuryに残った資金はteamTreajuryへと移動する
-
- ok コントラクトのuint32修正
-        エラーのもとで煩わしいので、全てuintへ置換する
-        コードとabiの全置換が必要
-    
- ok wallet infoコントラの実装
-        web3精神を表すため
-        summoner infoとは異なり、情報はある程度吟味してもよいか
-        システムがほぼ完成してからで良いだろうか
-
- ok winner fluffyの演出の実装
-        お花つける？
-        パーティー帽子？
-        パーティクルを使用する？
-
- ok マーケットルールの改善
-        transfer fee導入後はsell即buyのitem移動が発生しうる
-        最低listing価格を決めておくか？
-            この場合、最低価格よりbuyback価格が低ければ印象が悪いだろう
-        0.1 $ASTRぐらいか？
-            しかし、0.1 * 0.05 $ASTRでアイテムの移動ができてしまうので、
-            list&buyを利用したmulti-walletは防げないだろうか。
-        offeringシステムを実装できれば、市場に最低価格を決めてもらうことができる。
-        summonerを有するwalletしかマーケットコントラを使えないので、
-            コントラをつかったlist&buyボットは使用することはできない。
-            手動でも十分だろうが。
-        つまり、event監視型の防衛botは運用可能
-            最低価格でlistされたものを監視して即座に買い取る防衛型bot
-            伝統金融では市場操作になって違法なのだろうが。
-
- ok crafting windowのUI整理
-        crafting中itemの表示周りが弱い
-            ウィンドウを閉じるときしか更新しないので、
-            なにかの表紙にselect itemになるとずっとそのまま。
-            今何を作っているか不明なこともママある。
-        crafting中は定期的にselect itemをチェックして書き換える機構を実装する
-        また、resumeがあるときは残り時間とアイテム名を表示し続ける
-            itemをセレクトしても反映させない
-        cancelボタンの配置場所が難しい。
-
- ok Fluffiestの動作バグ修正
-        画面外へ逃げていってしまう。
-
- ok 発行上限を実装する
-        事故防止と、何かしらの希少価値をつけるため。
-        初期にadminのみmintする時など。
-
- ok transfer feeの導入
-        https://github.com/ethereum/EIPs/issues/2665
-        やはりtransfer feeで複アカの効率をコントロールする戦略が、
-            UI的にもわかりやすいだろう
-        activationはUIの作り込みが少し面倒。
-            あとitem calculationが大変。
-            別にactivated count_of_typeの実装が必要
-            また、着払いはなんか嫌であるし。
-        複アカ使ってでもプレイしたい人は手数料を落としてもらう。
-            普通のプレイでは障害にならないfeeであるし。
-            もちろん、過剰な複アカのbottingは処罰する
-        将来的にopean seaやtofu NFT等を使えるよう、noFee addressの機構を組み込む
-        noFee address:
-            buybackTreasury
-            Market
-
- ok murasaki_craftのitem移行関数の実装
-        next_itemの書き換えの実装
-        旧コントラからidを指定して新コントラにmintさせる関数の実装
-            制限をゆるくしたcraftを用意する
-            この際、item_idは異なっても仕方ないとする
-            item_idを指定してこのrecraft関数を叩く関数も用意する
-        すべてrecraftし終えたら、最後にnext_itemを修正して完了
-
- ok msg.sender周りのコードの修正
-        もしかしたら、msg.senderはpublic, internal, externalで挙動が変わるのかも
-        同じコントラ内でも関数から呼び出される場合は、internalとpublicで中身が違う？
-        mining/farmingの数がtx前後で一致しないのはこれが原因だったのか？
-            msg.senderをつかってitem_countingしているため。
-        実験して把握すること。
-        どうやら、viewはmsg.senderが0になってしまうようだ！
-            https://medium.com/nayuta-inc/ethereum-solidity%E3%81%AEmsg-sender-f8c34c5653a4
-        これを回避するために、ownerはsummonerから逆引きを徹底する
-        むしろ、mining/farmingでmsg.senderを使ってしまうと、
-            他人のsummonerに自分のwalletのitem補正がかかってしまう。
-        一度msg.sender周りのコードを丁寧に洗い出すこと。
-            msg.senderの使用はcheck_summoner時以外は極力避ける。
-            また、check_summoner時もweb3js側でfrom:walletしていないとmsg.senderが0になる。
-            Remixのcallは自動的にfrom:walletが付くためわかりにくかった。
-        無用なエラーを避けるため、summoner主体のコードに修正する。
-            owner walletから直接叩くfunctionでのみmsg.senderを使う
-            むしろ、msg.senderはcheckOwner以外には使わない。
-
- ok fluffy festivalのバグ修正
-        2人目が投票できないバグあり
-        isVotableがtrueにならない模様
-        msg.senderが原因か？要究明
-
- ok SBTの規格合わせ
-        あまり有名ではないBadgeコードを使っている
-        これを所持上限1, non-transferableなERC721とする。
-        ERC721を利用したSBT例：
-            https://docs.chainstack.com/tutorials/gnosis/simple-soulbound-token-with-remix-and-openzeppelin#create-and-compile-the-soulbound-contract
-            _beforeTokenTransferを利用してnon-transferableを実装している
-            あとはこれにpossession limit = 1を組み込めば行けるか
-        ERC721に実装されていなtokenOfも実装する
-            現状、他で使用しているbadge由来のインターフェイスはtokenOfのみ。
-            tokenOfさえ実装しておけば、ERC721由来だろうがBadgeだろうが問題なし。
-
- ok 移行戦略
-        mm, ms, mc, mss
-        一度新コントラで完全に動作を確認してから、
-        旧mm -> 新mmなどとパラメータをコピーする
-        mnは再ミントしてもらうこととする。
-        手順：
-            mcは1つもmintしてはいけない。
-            mcはaddress(0)もコンバート可能。何も考えずに1からコンバートする。
-            contract_adminを用意
-            contract_adminをmcとmsへadd_permitted
-            msとmcをコンバート
-
- ok 新craftボタンの実装
-        start, pause, resume, cancel, completeの5つのtxを飛ばす
-        start/resume button
-            このときcancel buttonを少し離して表示
-        pause/complete button
-
- ok craftingのレジューム機能の実装
-        craftカウンターはstart時にのみ決定される
-            statusによってカウンターの多さが異なる
-        中断時にレベルアップしたとしても、カウンターには影響しない
-        カウンターの進みは単純に秒数で減らす
-        start時に大量にアイテムを抱えてブーストすることもできるが、
-            transfer feeがあるのであまり問題にはならないだろうか。
-        calc_craftingは_dcからdelta_secを引いて残り時間を計算している
-            つまり、_toResume_dcをmsに記録しておき、
-            _toResume_dc>0ならばクラフト途中ということになる。
-            あとはstart_craft時に元の_dcの代わりに、
-            目減りした_toResume_dcを代入すれば良い。
-        上記の機構を実装する。
-            また、start -> 中断 -> cancel or resumeを選択させるUIとする。
-            つまり、中断中はcancelとresumeの2つのボタンを表示させる。
-
- ok 存在しないsummoner指定時のバグ修正
-        isActive = falseのパターンと
-        まだsummonされていないパターンとある
-        また、petrifiedの動作もうまくいくか確認する
-
- ok presentboxを開いた時に少しExpを得られるようにするか
-        ちょっとだけ嬉しいように。+50ぐらい。
-        1日のEXP量が+1000～2000, 平均+1500ぐらい。
-        +50で3%, +100で6%程度。
-        +50程度が妥当か。
-        presentboxは...
-            staking: 1/7d
-            mail: 2/5d
-            craft: 1/7d
-            festival: 1/30d
-            = 4/7d, 0.5/dぐらい
-        こまめに受け取れば、平均して+1-2% EXP効率がupする程度。
-        +100にすると、+3% up程度。
-        mpに記録して可変とする。
-            ひとまず+50で運用する
-
- ok summon時の演出の改善
-        花火
-        on_click()
-
- ok Level<3でvotingできないことの表示
-        →むしろできるようにするか
-        Level制限撤廃
-    
- ok select itemはlevel 3から表示とする
-
- ok Fluffy DollのLUK補正の実装
-        +0%だった。
-        LUK補正　＋　Exp補正　にするか。
-        EXP補正+3%はLUK+3.00相当で強力だが、
-            クラフトによってLUKが下がるのはあまりよろしくないだろう。
-        fluffy dollはfluffy x27個分
-        1ヶ月で10-15個とすると、2ヶ月で作成可能
-        また、市場で買えばもっと早めに作成可能
-            流石に安すぎるだろうか。
-            Lvキャップがあるのでバランス崩壊とはならないだろうが。
-                +0.4/Lv, +8/20Lvが上限
-        x3でup-gradeではなく、x4でup-gradeとするか？
-        x3で+33%は破格か？
-
- ok Fluffy FestivalコントラのEvent実装
-        全く作っていなかった
-        start_voting
-        voting
-        end_voting
-
- ok マーケットルールの改善
-        coin/leaf bagは70%しかearnできないようにする
-            移動手数料30%
-            miner/farmerキャラの抑制
-            自分でmining/farmingするインセンティブを大きくする
-     ng crafter royaltyの導入を検討する
-            platform feeとcrafter royaltyを別に設定する
-            しかし、upgrade素材に使われるとcrafter royaltyは消滅するのだが。
-            upgradeで生じたitemのcrafterはupgradeしたキャラとなるため。
-            fluffy dollについてはcrafter royaltyはある程度有効に働くだろうか。
-
- ok ランダム住所の導入
-        lootlikeの拡張
-            320 Martin Ave/St, Tucson, AZ, USA
-            house #1, 0x2F7...8805, (Xxx) Ave/St, (Yyy), Astar Network EVM, United Chains of Polkadot, Web3.
-        通りの名前と、町の名前の2箇所を考える。
-
- ig burn周りのコード改善
-        burnはpermitted addressなら自由に行えてしまう
-            NFTとSBTはユーザーの資産で、運営が全くタッチできない機構にするべき。
-            故に設計はシンプルかつ慎重に。
-        NFTとSBTについては、ユーザーの資産なので
-            ユーザーの許可がないとtransfer, burnできない設計にすることが望ましい。
-            運営側がいつでもburn可能な機構を残しておくのは印象が良くない。
-            仮に、将来高額の値段がついた際にネックになるし、
-            そもそもこういったユーザーがコントロールできない機構のNFTは
-            信用が低く価値が上がりにくいだろう。
-        ユーザーの許可を必要とするapprove & transferへと改善したいところだが。
-            しかしそうすると、upgradeにapproveが必要になってしまう。
-            approveのUIをどうするか。
-        改善が必要な機構：
-            ★ upgrade時のapprove不要のburn
-            しかしapproveが必要なfunctionが複数ありUIが阻害される
-        ひとまず、add permissionが可能なownerの権限を将来破棄する、という宣言で許してもらうか。
-        しかし、やはりNFTが勝手にburnされるのは良くないだろうか。
-            一応funcionコントラクトではowner checkはしているのだが。
-        別に一点物の絵画のような価値を付与したいのではなく、
-            あくまで運営の箱庭内の価値を担保できれば良いと考えるか。
-
- ok change logの書き方
-        https://blog.yux3.net/entry/2017/05/04/035811
-
- ok SummonページのUIの改善
-        最初は寝ている？表示させない？
-        summon直後の演出
-        Summonウィンドウでの選択はcolorのままで良いか？
-
- ok Concepts
-        What's This?
-            Game Dapp on the Astar Network using NTT (SBT, Soul Bound Token) and NFT. 
-        What's the Concept?
-            Murasaki-san is the digital pet living in your wallet.
-            Murasaki-san and the house 
-        What is Murasaki-san?
-            One day, when I asked a friend to "create an original character that doesn't exist anywhere else", murasaki-san was born on the edge of our sketchbook.
-            Well, we all know that the name, Murasaki-san, is a bit strange: murasaki-san means "Mr. Purple" in Japanese.
-            My friend first painted this little character purple so we could only call it murasaki-san and we finally ended up naming it "Murasaki-san", even though it's actually a little pink.
-            That's why I started creating on a game to move, take care of, and grow murasaki-san. It was just two weeks after Astar Network launched.
-            After about a year of development, we are happy to launch House of Murasaki-san on Astar Network :). Cheers to ASTAR!
-        How to Play?
-            ・Mint your murasaki-san. Attention, it's NOT NFT but or SBT(NTT).
-            ・Feeding and Grooming your murasaki-san to ean EXP.
-            ・You can Level up your murasaki-san by accumulating EXP.
-            ・Work your murasaki-san for Mining to earn Coin or Farming to earn Leaf.
-            ・Murasaki-san can Crafting to mint item NFT.
-            ・House of murasaki-san will become more and more lively as you continue to take care of your murasaki-san diligently.
-        What's the Cost to Start?
-            200 $ASTR to mint your murasaki-san.
-            The mint price will inflate little by little as the game economy expands.
-            (Example: 3% inflation after a month, 206 $ASTR)
-        Dapps Staking Bonus!
-            There are in-game bonuses depending on the dapps staking amount!
-            ・You will get an extra presentbox. The higher the staking amount, the shorter the interval until the gift.
-            ・Some items change the picture or animation according to your staking amount.
-              Observe carefully, or spoiled below.
-        Attention Please!
-            Murasaki-san is not NFT but SBT. Cannot be transferred or sold.
-            If you leave your character alone for too long, you will receive a penalty.It will cost you to restart.
-        Item Market
-            Items can be freely bought and sold on the market with 5% commision.
-            We have not own token and $ASTR is used as trading currency.
-        Easy to Earn?
-            
-        Game Specifications
-            Status Details
-            Item Upgrading
-            All Item Details
-            Lucky Dice System
-            Buyback System
-            Taking care of other murasaki-san
-            About Fluffy: Overview
-            About Fluffy: Cat-mail Communication
-            About Fluffy: Crafting Bonus
-            About Fluffy: Fluffy Festival
-            About Fluffy: Dapps Staking Bonus
-        More Detailed Specifications
-            calculation methods
-        Economy Design
-            
-        Future Plan
-            Our top priority is to fix bags and control inflation rate.
-            It takes about two years for House of Murasaki-san to reach maximum growth.
-            Before that, we planed to create the next product using information of your murasaki-san SBT.
-            Since Astar Network supports both EVM and WASM, we are planning to create the next game on WASM with Rust, and interacting this House of Murasaki-san through XCM.
-            (Well, the coder is studying rust right now :) )
-        Who Are You?
-            Ordinary people who like Astar Network and Web3.
-            This is our fan project to support Astar blockchain.
-            Coder: degupoppo (wallet, twitter)
-            Illustrator: fumamo (wallet, twitter)
-            Any donation is greatly appreciated :)
-        Terms of Service
-            botting
-            multi-wallet
-        Special Thanks
-            Kokaon Lab      https://soundeffect-lab.info/
-            OtoLogic        https://otologic.jp/
-            Simple.css      https://simplecss.org/
-            DOVA-SYNDROME   https://dova-s.jp/
-        要検討
-            ２～３の複数アカウントは制限するか
-            直コンは制限するか
-
- ok コンセプトの整理：簡潔にわかりやすく
-        これはなに？ What's This?
-            Astar Networkを利用したgame dapps
-            NTT（SBT）とNFTを利用した育成ゲーム
-        コンセプトはなに？ What's the concept?
-            あなたのwalletに住む電子ペットがコンセプト
-            また、私達製作者自身が遊んでて楽しいと思えるものを作っています。
-        どうやってあそぶの？ How to Play?
-            ゲームはゆっくり進みます。最も価値のある資源は「時間」です。
-            1日2回はご飯を上げる
-            3日に1回はなでてあげる
-            coin/leafを貯めさせて, item NFTをcraftさせる
-            忘れず献身的にお世話してあげると、あなたのHoMはどんどんにぎやかになってゆきます。
-        値段は What's the Cost?
-            200 $ASTR
-            priceはごく緩やかにインフレしていきます。
-            （1ヶ月後予定：210 $ASTR, +5%）
-        ステーキングをよろしく！ Dapps staking bonus!
-            presentboxがもらえます
-                より多くstakingすると短いスパンでもらえます
-            一部のアイテムの表現が変化します
-                よーく見てみてください。あるいは以下でスポイルされています。
-        ご注意ください, Attention Please
-            ・murasaki-san自体はNFTではなくNTT/SBTです。譲渡・売買は一切できません。
-            ・クラフトしたitem NFTはマーケットで自由に移動できます。
-            ・長く放置するとペナルティを受け、再開にコストが必要です。
-            ・
-        稼げる？ Easy to Earn ?
-            Don't expect too much.
-            ★かんたんに稼ぐ方法はありません★
-            できるだけゆるく長く続けたいと思っています。
-            独自トークンなし
-            ゲームの中心のキャラクターはNFTではないため売買不可
-            バイバックシステムの価格は絶対に下がらず、ゆっくりとインフレしてゆきます。
-                つまり、gameをexitするときは、
-                バイバックシステムですべて最低価格で売り切れることが確約されています。
-            この作品が注目されればNFTの価格が一時的に上昇することもあるかもしれませんし、
-                運良く儲かるかも知れませんが、一時的なものだと思われます。
-        仕様について Game Specifications
-            4つのステータスとNFT itemによる補正について
-            アイテムのアップグレードについて
-            presentboxとfluffyについて：概要
-            fluffyについて：cat mailについて
-            fluffyについて：festivalについて
-            fluffyについて：craft bonusについて
-            fluffyについて：ぬいちゃんについて
-            fluffyについて：dapps stakingボーナスについて
-            アイテムマーケットについて
-            全アイテムの詳細について
-            他のmurasaki-sanのお世話について
-        より詳しい仕様について more detailed game specifications
-            レベルとアイテムによるSTR, DEXの補正式
-            LUKによるクリティカルの補正式
-            INTによるクラフトレベルの補正式
-            バイバックトレジャリーの計算式
-                Mint priceとインフレ率について
-                作品は一般的にその価格で評価されがちです。
-                そのため、低いながらも緩やかに上昇し続ける価格メカニズムを導入しました。
-            コントラクト構成について
-            dapps stakingボーナスの計算式
-                影響を受けるアイテムについて
-            生誕秘話
-            キャラクター紹介
-                murasaki-san
-                fluffy
-                nainai-san
-                nyuinyui-san
-                    illustratorがアンニュイな気分で描いた子
-                neon-san
-                    コーダーが息抜きで描いた子
-                nayon-san
-                    illustratorが昔飼ってた猫がモデル
-                Astar/Ether/Bitco
-                    コーディングの合間に描いた生物たち
-        今後は？, future plan?
-            ゲームが最大成長するまでおよそ2年で設計しています
-            その時間の間に、この作品を更に拡張させるか、
-            あるいはmurasaki-san SBTの情報を使った次の作品を作りたいと思っています。
-            （進捗度：1%）
-            AstarはXCMが使える予定のため、次回作はWASMで作成予定です。
-                WASM環境は構築済み、現在coderはrustを勉強中です
-                フロントエンドエンジンは未定ですが、Bevyエンジンに興味を持っています
-        あなたはだれ？ Who are you?
-            ただのAstarファンの一般人2人です。
-            個人の趣味プロジェクトのため、マンパワーには限りがあります。
-            生暖かく見守ってください。
-            どんなトークンの寄付も大歓迎です。
-            Coder address:
-            Illustrator address:
-
 */
 
 
@@ -4332,6 +1614,7 @@ async function init_global_variants() {
     local_check_pippel = 0;
     local_pippel_score = 0;
     previous_local_pippel_score = 0;
+    local_tba = "";
 
     //---flag
     flag_music = 0;
@@ -4672,6 +1955,9 @@ async function contract_update_static_status(_summoner) {
     
     //call wallet age
     update_wallet_age(local_owner);
+    
+    //tba
+    local_tba = await contract_pf.methods.call_tba(_summoner).call();
 }
 
 
@@ -14353,7 +11639,7 @@ async function draw_pippelSummary (scene) {
 
         // update msg1
         let _text = "";
-        _text += "Pippel NFTs in Token Bound Account of your Murasaki-san.\n";
+        _text += "Pippel NFTs in the Token Bound Account of your Murasaki-san.\n";
         msg1.setText(_text);
 
         // create msg2
@@ -14372,8 +11658,8 @@ async function draw_pippelSummary (scene) {
         _text += "  - Blooming: " + _li_rarity[4] + "\n";
         _text += "  - Bloomed: " + _li_rarity[5] + "\n";
         //_text += "(Closed: " + _li_rarity[1] + ", Opening: " + _li_rarity[2] + ", Blossoming: " + _li_rarity[3] + ", Blooming: " + _li_rarity[4] + ", Bloomed: " + _li_rarity[5] + ")\n";
-        let msg3 = scene.add.text(720, 680, _text)
-                .setFontSize(16).setFontFamily("Arial").setFill("#005731").setDepth(5001);
+        let msg3 = scene.add.text(720, 670, _text)
+                .setFontSize(20).setFontFamily("Arial").setFill("#005731").setDepth(5001);
         group_pippelSummary.add(msg3);
 
         // update msg4
@@ -14386,13 +11672,12 @@ async function draw_pippelSummary (scene) {
         _text += "\n";
         _text += "✿ Pippels will increase fluffy score by an average of 1.\n";
         _text += "    (depending on its rarity)";
-        let msg4 = scene.add.text(130, 620, _text)
-                .setFontSize(16).setFontFamily("Arial").setFill("#0000FF").setDepth(5001);
+        let msg4 = scene.add.text(120, 600, _text)
+                .setFontSize(18).setFontFamily("Arial").setFill("#0000FF").setDepth(5001);
         group_pippelSummary.add(msg4);
 
     }, _intervalMSec*(_count-1));
 }
-    
 
 
 //===<Phaser3>:preload=============================================================================
@@ -21308,7 +18593,7 @@ function update_checkItem(this_scene) {
         _text += " fluffier x " + _count_fluffier + "\n";
         _text += " fluffiest x " + _count_fluffiest + "\n";
         _text += " fluffy doll x " + _count_nui + "\n";
-        _text += " pippel x " + local_pippel_score/10 + " ";
+        _text += " pippel +" + local_pippel_score/10 + " ";
         text_fluffy.setText(_text);
     }
 
@@ -21506,6 +18791,7 @@ function update_checkItem(this_scene) {
         if (pippel_basic.visible == false) {
             pippel_basic.visible = true;
             draw_flower3(this_scene, pippel_basic.x, pippel_basic.y);
+            murasakisan.on_click();
         }
     } else {
         pippel_basic.visible = false;
@@ -22109,6 +19395,2712 @@ game = new Phaser.Game(config);
 
 //===end=================================================================
 /*
+
+ ig 補正の種類の深慮
+        Luck
+            Fluffyで上昇
+        +exp
+            ぬいちゃんで加算
+            Astarスコアで加算
+            お散歩の宝物で加算
+                item_typeは一定で、seed値で内容を変化させるか
+                もしくは、itemsを512まで拡張させるか
+            発表会のトロフィーで加算
+        farming/mining/crafting効率
+            それぞれのステータス値で上昇
+            それぞれのアイテム所持で上昇
+        staking
+            なにか特別な加算を考えるか
+            いろいろなものが出現する専用のプレゼント箱など
+            進捗に応じて少しずつ作られるようにするか
+                むらさきさん型の貯金箱など？
+                おもちゃのカンヅメのような位置づけ
+
+ ig 砂時計アイテムの再実装
+        条件
+            staking=0でも表示されるが、寂しい感じ
+            何かが溜まってゆくor成長してゆくのが楽しい要素
+            かつ、1週間～1ヶ月程度の時間が必要そうなもの
+            100%になったときになにかhappyな演出が可能
+            毎回、たまるものが違うとより楽しいだろうか
+        案
+            小さな盆栽、最大成長で実を収穫する、なんの実が成るかは毎回違う
+            小さな植木鉢、最大成長で花が咲く、何が咲くか毎回違う
+            ペットボトルロケット、最大成長で発射、星が降ってくる演出
+        絵の深慮
+            砂時計で良いか？
+        ステーキング量>0でのみ表示させる
+        あるいはステーキング量=0では非アクティブを表す絵とする
+            ステーキングしてアクティブ化したくなるような楽しい絵にしたい。
+        ステーキング量が多いほど豪華になり、
+            カウンターが進むと何かが溜まってゆく・成長してゆく絵を考える。
+
+ ig migrationメカニズムの実装
+        今後のAstar walletのupdateに対応するためmigrationを可能にしておく
+        mmには最低限の機構のみを組み込んでおき、permitted functionでコントロールする
+        function側で以下をチェック：
+            owner_newがtokenOf==0
+            msg.sender==ownerOf(_summoner) (=owner_old)
+        また、Astar walletの移行などの理由でない限り、migrationにはコストを要求する
+            walletの移行にはNFTの移動も必要なため、簡単ではないが。
+        → ERC721を使用している限り, 継承先でprivateなmappingに触れないため
+           migrationは極めて困難だった。
+           仕方がないので、外部functionとして「転生」を必要になったら実装することとする。
+           場面としては、ハッキングなどでwalletをどうしても変えたい、などの申し出時
+           新しいsummoner idを割り振り、ステータスを引き継ぐ
+           summonerのburn, nameのburn, NFTの移動などかなり煩雑になるが。
+           ガス代が足りるだろうか。
+       → _burn & _mintで行けるっぽい
+          internalの_mintはnext_token無視してtransfer可能な模様
+       *あとは、NFTのmigrationを実装する
+            freeFeeに指定したtransferableなコントラクトを用意し、
+            これを経由してoldからnewへ全NFTを移動させるか。
+            
+ ok かざぐるまの物理演算の改善
+        txCountを風と見立てて
+        それぞれのかざぐるまごとに別々の動的摩擦係数、静的摩擦係数を設定する
+        風は時間経過とともに減ってゆく
+        ブロックが更新されると新しい風力に書き換えられる
+
+ ok Strollコントラをstorageとfunctionに分割する
+        functioni部分はまだまだ粗削りで調整が必要だろう
+        Stroll本体とは別に、ロジック部分をCodexとして別コントラを用意する
+        → working_statusを別途用意
+        → コントラ移植時はaccumulated parametersのみをconvertすることとする
+        terminate_workingでworking_status=0とすれば、実質restingしていたと同等の扱いになる。
+
+    修正案
+     ok Candleの実装
+     ok footerの修正
+     ok infoページのiconを吟味・修正する
+     ok タイトルロゴの微修正
+     ok ローディング画面でロゴの家が徐々に完成してゆくように実装
+     ok fluffy festivalのend_votingにcheck_endを組み込むバグ修正。
+     ok マーケットのlist price初期値にbuyback priceを記載する
+     ok     1.00未満は1.00として最低価格を表示する
+     ok コントラクトマップのupgradable -> replacableへ編集
+     ok     ついでにstorage_extraなども追加
+     ok     合計コントラ数を記載する
+     ok upgradeウィンドウの説明編集
+     ok 楽器を3種類に減らす
+     ok     かわりにキャンドルを追加
+     ok     あとアイテム２つ。
+     ok     かざぐるまと王冠を交換する
+     ok     その他アイテム順の微調整
+     ng 散歩から帰ってきたら吹き出しを表示する？
+     ok wrong chainのエラーの実装
+     ok コントラクトの一括upgradeをmainで行う
+     ok     replacableコントラの全入れ替え
+     ok     contracts.pyのつじつま合わせ -> init.py実行
+     ok 全summoner合算のtotal countの実装
+     ok     全d20カウント数
+     ok     全mail open数
+     ok     全make friend数
+     ok     storage_extraに保存して、on-chain dataに表示させる
+     ok trial_converterにmssの追加分を修正
+     ok     ガス代許容可能かチェック
+     ok murasakisanコントラに一括call関数を実装する
+     ok stroll中のfeedingをどうするか
+     ok     可能にするか
+     ok     その場合、ボタンの位置と演出はどうするか。
+     ok infoとmurasakisanコントラを最新のmssに対応させる
+     ok コントラクトの総入れ替えが可能か施行する
+     ng コントラクトモニターの初期化時にdeployから参照させる
+     ok コントラクト書き換え環境を整備する
+     ok コントラクトモニターを見直す
+     ok コントラクト全てにpausableを導入する
+     ok     実際にはpauseするfunctionはなくとも、生きか死にかをpauseで判断できるため
+     ok mmとmnのburnを実装
+     ok マーケットコントラに統計情報を実装する
+     ok     総取引量
+     ok コストの引き上げ
+     ok     mint: 500, transfer fee: 50
+     ok お菓子の家の絵更新
+     ok     stakingなしの時の土台を用意する
+     ok     → グレースケールで
+
+ ok PoM → pippel
+        Pocket of Murasaki-san
+        むらさきさんの特定のactionに付随して、ランダムにアイテムが格納されるTBA
+            PoMをまだクラフトしていなくても該当アドレスに送ってしまう
+            ERC20は制御が難しいので、ERC721のみで考える
+            得られるERC721には金銭的価値を付与せず、また意識させない
+        得られるアイテム案
+            （接頭語）＋（素材）＋（アイテム名）＋（補正値）
+            例：Western Iron Amulet +1　など　+1はmasterpriceとかでもよいか
+            接頭語ごとか、最終的か、アイテムのrarityを設定する
+        アイテム案２
+            お花
+            tierでrarityを分けて、レアなお花などを表現する
+            接頭語、補正値などはつけるか？
+            １００種類など、とにかく数を多く
+            いくつか併せて「花束」をクラフト可能に？
+                素材にしたお花の数と種類で花束の性質やレアリティが決まる
+        実装
+            ERC721でseed値を割り振る
+                name()でcodexを参照してお花やレアリティを返す？
+                codex化することでreplacableにできるが。
+            あるいはmint時にstringとしてERC721に書き込んでしまう
+
+ ok 限定アイテムの構想　→ pippel
+        発行数、もしくは発行期間が制限された限定NFTのmint構想
+        コストはcoin/leafにするか、特殊なリソースにするか。
+        金銭的価値というよりは、継続プレイの実感を目的としたい。
+            プレイ期間の歴史をひと目に感じられるように。
+            「これはあの時こうやって手に入れたNFTだー」と実感できるように。
+        効果としては、全てLuck+0.1とかにするか。
+        もしくは、TBAに入るお花が期間や季節によって異なるようにするか。
+            夏の花が多い、秋はレアなお花がもらえた、など。
+        
+ ok 要置換絵
+        クラリネット
+        かざぐるま
+        日記帳
+        クレヨン
+        ゲームボーイ
+        フラワーリース
+        額縁
+
+ ok TBA用アイテム構想
+        お花
+            ピッペル
+        その日の誕生花からランダムで取得される
+        取得タイミング：
+            クラフト完了
+            メール開封
+            トータルcoin
+            トータルleaf
+            レベルアップ
+            トータル経験値
+        NFT情報
+            お花の名前（string）
+            取得理由（string）
+            取得日時
+            取得者（summoner）
+            seed
+            接頭語などの修飾語
+                rarityを演出する？
+                きれいな、かわいい、良い匂いのする、など？
+            部位？
+                つぼみ
+                お花
+                種
+        用途
+            何からのメカニズムで要求し消費させる？
+            トレードや売買の可否は？
+            所持NFT全体をスコア化する？
+                レア度計算は？
+            単純にLUKにプラスにするか
+
+ ok ランダム出現キャラの実装
+        クリックでtx飛ばしてTBAにお花を得る
+        直近5ブロックの判定が1なら実行可能とする
+        12sec/blockとすると、7200block/day
+        1日に1回出現とすると、7200d1
+        過去150block=30min以内に7200d1が1となるblockがあればmint関数の実行可とする
+            150blockのチェックが不可だろう。
+            せいぜいが30block=6minぐらいだろうか。
+            → solidityで過去のblock.timestampなどを取得することはできないようだ
+        乱数戦略
+            mfsのdnは過去のblock情報を取得できずに使えない
+            となると、7200block/dayのうち、例えば特定の100blockを返す乱数を考えるか
+            この方法だと解析していつpippelが出現するか逆算できてしまうが、まあ良いか。
+            d72で*100することで出現blockを決められる
+            d72の引数はsummonerIdのみにする。
+                つまり、summoner毎にその日のどこで出現するかが異なる。
+
+ ok ピッペルNFTの実装
+        block.timestampをUTFの日付（1-365）に変換する
+        日付ごとの誕生花を取得する
+            ランダム？
+        接頭語決定
+        部位決定
+        変数
+            mint_time
+            mint_summonerId
+            mint_summonerName
+            mint_type
+            flower_type
+            rarity_type
+                bud, opening, blossoming, blooming, bloomed
+            flower_name
+                rarity + flowerのstring
+            seed
+        集計方法
+            コントラ側
+                wallet内のNFTの総数
+                    balanceOfでOK
+                wallet内のrarityごとの総数
+                    balanceOfRarityを実装
+                wallet内のNFTの種類数（1以上のflower_type数）
+                    balanceOfTypeを実装
+                最終的なpippel score (= +luk)
+                    Pippel_Functionにスコアを計算する関数を実装
+                    rarityごとの所持数を集計したcount値を参照する
+            web側
+                wallet内の全NFT情報の一覧
+                    id, month, day, flowerName, rarity
+                    もしくはuint[367]として取得して、
+                        js側で文字列に変換するか。
+                    個数とrarityを判別する必要があるため、
+                        例えばcommon=1, uncoomon=10などを利用するか
+                        例：1 -> common x1
+                            11 -> comon x1, uncoomon x1
+                            12410 -> uncommon x1, rare x4, epic x2, leg x1
+                        これをuint[367]に格納して一度のcallで返す関数を実装する
+                        その都度計算するよりは、
+                            afterTransfer()内でwalletごとのスコアを随時更新するほうが良いだろうか。
+                    必要な表記は
+                        例：003 blossoming Tulip
+                        id, rarity, flowerTypeの3つがあればひとまずOKか
+                        idも表記しないほうが面白いだろうか。
+        関数
+            tokenURI
+                文字だけ情報で良いか
+                背景にpippelのsvg絵を透かしで入れる
+                前面に、mint日時、mint summoner名、rarity + flowerNameを表示する
+                可能であれば、rarityや月に対応して背景pippel絵を変化させる
+                    背景色でrarity、pippel絵で月、あるいは季節（春夏秋冬）を表せればよいか
+                    背景色は、薄めで
+                        common: 白
+                        uncommon: 緑
+                        rare:   青
+                        epic:   紫
+                        legend: オレンジ
+                    季節は、以下の色が多めのpippel花
+                        春：    ピンク、淡い赤
+                        夏：    青、濃い黄色
+                        秋：    オレンジ、茶
+                        冬：    白
+        web側UIの実装
+            お花バッグの実装
+            所持お花一覧ウィンドウの実装
+                366
+            rarity x seasonの全pippel絵の用意
+                背景色5 x 絵4種類 = 20 種類
+                アイコンに使用する、文字は入れない
+        ユースケース
+            バッグの達成度に応じてLukにブーストが掛かる
+            平均して1年で+3.00程度のブーストに。
+        rarity出現率
+            closedばかりでは面白くないので、中間のblossomingを基本とする
+            closed:     10% 補正-40%    6
+            opening:    20% 補正-20%    8
+            blossoming: 40% 基準100%    10
+            blooming:   20% 補正+20     12
+            bloomed:    10% 補正+40%    14
+            期待値: 100
+            Lukブースト:    分かりやすく, blooming x1 = 10point = 0.001 luck
+                blossoming pippel 1個がfluffy score 1点に相当する。
+                rarityを加味するためfluffy scoreより10倍単位に設定する
+                    10 pippel point = 1 fluffy score = 0.01 LUK
+                全種類blossoming集めると366 pippel point = +3.66 LUK
+
+ ok Pippel実装
+        NFT
+            construct
+                mint_time
+                mint_summoner
+                mint_type
+                flower_type
+                rarity_type
+                flower_name
+            function
+                tokenURI(_tokenId)
+            afterTransfer()
+                count_of_type更新
+                count_of_rarity更新
+        Function
+            call_luckBoost(_summoner)
+            calc_pippelScore(_summoner)
+                rarity scoreに係数をかけて算出する
+                面倒なので、重複OKとする
+                獲得itemに応じたrarity scoreを加減させる
+        Codex
+        UIUX
+            ぴっぺる出現とmint
+                何が得られたかわかるように
+            所持pippel NFTの一覧ウィンドウ
+                取得した順に並べる
+            pippel scoreの表示
+                ウィンドウ内に表記
+            pippel bagクリック時の演出
+                花びらが飛び出して一覧ウィンドウが開く、など。
+    
+ ng zkEVMコントラクトからwalletのdApps Staking量を参照可能か調べる。
+
+ ok init更新
+        ERC6551の用意
+            maを対象にデプロイ
+            saltは6539
+        maに以下を追加
+            address public address_Pippel_NFT;
+            address public address_Pippel_Function;
+            address public address_Pippel_Codex;
+            address public address_Murasaki_TBARegistry;
+            address public address_Murasaki_TBAAccount;
+        maに制御関数を用意
+            一括登録、一括callのつじつま合わせを行う。
+            どこで使ってたっけ？
+        python iniの更新
+            上記5コントラの更新コードの整備
+            pn
+                pfをpermit
+                pcを登録
+
+ ok TBAについて詰める
+        TBAはregistryでcreateAccountしないと使えない？
+        TBAのアドレス自体はaccountに必要情報を入れればcreate前でも参照できる
+        ERC6551AccountでexecuteCallするためにはRegistryでcreateが必要？
+        とすると、createはいつのタイミングで行わせるか。
+        また、create済みかどうかはどうやって判定するか。
+        create自体は何回でもエラーなくtx飛ばせるようだ。
+
+ ok pippel UIの実装
+        決まった時間にpippelが出現する
+        出現時間でも起動直後は出現させず、1-2サイクル後に出現させる
+        何かしらの目立つ演出を実装する
+        flower mint時に何を入手したか分かりやすく表示する
+        ただクリックするのではなく、珍しさを演出したい
+            タイマーを表示する？
+        クリックで開く、集めたお花を入れておくふくろを実装する
+
+ ok fluffy scoreの表記にpippelを追加する
+
+ ok pippelがtrialに対応していないので修正する
+        特にmurasaki_infoが値を返せない。
+        また、pippelコントラ群のtrial版をデプロイしていない。
+
+ ok クラフト後に寝てしまう
+        textureとhat位置に齟齬が内容修正
+
+ ok ピッペルの出現時間を、流石に3時間程度に伸ばす。
+        また、_setであとから変えれるように修正する。
+
+ ok EVM経由のdapps stakingに対応する
+        https://astar.subscan.io/address/0x0000000000000000000000000000000000005001?tab=contract
+        これの
+        read_staked_amount_on_contract
+        に、
+            contract_id = コントラのEVMアドレス
+            staker = ユーザーのEVMアドレス
+        で、対象コントラへのステーク量を参照できる
+        また、EVMからステーキング可能となったため、
+            self staking vaultから自動でセルフステーキングも可能となると思われる
+            コントラクトからステーキング可能か試す
+        ローカルで0x0000000000000000000000000000000000005001が有効になる条件を試す
+            コードが見当たらない
+            astar collatorプログラムを更新すればよいのか？
+        → stakingReword関数を修正し、EVM+WASMの合計値をreturnするよう修正した
+           5001にbyte変換したownerアドレスを渡せばおそらくOKだと思われる。
+           230911, 動作確認OK。EVMステーキング量の反映はshibuyaデプロイ後にでも。
+        EVM stakeについてHPに追記する。
+
+ ok スマホ画面での最適化
+        少なくともiphoneSE2である程度快適に見えるようにHPを修正する
+        JQueryテーブルのレスポンシブ設定
+            https://beginners-hp.com/create_smartphone_table.html
+
+ ok runpappaの実装
+        クリックで移動ON/OFF
+        アイテムを上にD&Dで乗せられる
+        fluffyと接触するとkickする
+        クリックしなくてもたまに移動OFF（寝る）になる
+
+ ok item_retrogameの実装
+        クリックでレトロゲーム系のキャラクターが飛び出すギミックを実装する
+            angband, @, J, P, g, DDD, j
+            cataclysm, @, ZZZ（みどり：ゾンビ、ピンク：boomer, &：ピンク, Mi-go
+            df, ☻, c, d, ドワーフが兵士に追いかけられているなど。Nに~:ネクロマンサー
+                tileをsheetとして読み込んでしまったら楽だと思われる
+            nethack, @, "
+        必要アスキー
+            D: 赤、白、灰色、水色、ピンク、黄色、緑、
+            j
+            J
+            Z: 緑、ピンク、
+            &: ピンク
+            N~: 緑
+
+ ok infoページの充実化
+     ok 売買回数、平均購入価格などを集計したマーケット情報ページを作成する？
+            総取引回数、総取引額、アイテムごとの取引回数・平均価格
+            info内にボタンで実装するか
+     ok コントラアップグレードしてtotal mail sentなどの表示を実装する
+     ig twitter投稿ボタンを設置する？
+            nameとstaking amountを非表示にするラジオボタンを実装する
+     ok 改善点
+         ok ageを表示する
+         ok ボタン押したあとのloading...を実装する
+         ok     ボタンは何回も押せないように一度押したらdisableにする
+         ok web3Init前にボタン押したときのエラー対策を実装する
+         ok 他のパラメータの検討
+                total_feeding
+                total_grooming
+                neglect_count
+                total critical
+     ok むらさきさんのパラメータ詳細をinfoに追加する
+            取得可能なパラメータをすべて表示する
+            所有するNFTをアイコンでばらばらと表示する
+
+ ok /test/から以下をmainへ移動すること
+        info.html
+        info.js
+
+ ok on-chainに保存するステータスの追加
+     ok summonerごと
+            total_feeding
+            total_grooming
+            total_neglect_count
+                happy <= 0でgroomingした回数
+            total critical count
+                feeding, grooming, craftingでcriticalを出した回数
+     ok global
+            total_feeding_count
+            total_grooming_count
+            total_coin_mined
+            total_coin_spent
+            total_leaf_farmed
+            total_leaf_spent
+            total_item_crafted
+            total_fluffy_discovered
+            total_mail_sent
+            total_mail_opened
+            total_dice_rolled
+            total_dice_critical
+            total_dice_fumble
+            total_stroll_distance
+            total_stroll_friend
+            total_practiceTime_Clarinet
+            total_practiceTime_Piano
+            total_practiceTime_Violin
+            
+ ok 散歩システムを詰める
+     ok 草原の実装
+     ok 山海草原の実装
+     ok     絵の置換
+     ok     川の廃止
+     ok htmlの記事を完成させる
+     ok 帰宅の演出を完成させる
+     ok     met summonerを表示させる
+            報告しているふうの吹き出しを実装する
+     ok stroll開始のUIを深慮し実装する
+     ok     ボタンにするか、D&Dにするか。
+     ok コントラから経過時間、終了までの時間、現在の歩行距離、の取得を実装する
+     ok strolling windowに情報を表示させる
+     ok waterbottleアイテムを実装する
+     ok strolling windowに現在までのmet summonerを表示させる
+     ok     人数にするか、名前にするか
+     ok     → stroll中は人数のみにする
+     ok Strollテスト
+     ok     flag_sync=0; local_farming_status = 0; local_crafting_status = 0
+     ok     local_strolling_status=1; local_crafting_status=0; local_direction=1; local_companion=1
+     ok     local_stroll_endable = 1;
+     ok     local_strolling_status=0
+
+
+ウォレットに住み着いてそこで生活しているバーチャルペットトークン
+
+ウォレットはweb3の世界で個人を表す重要な識別子である。このウォレットを「家」と見なして、この家に住み着いてそこで生活しているペットトークンを所有することで、web3における活動がより楽しいものになるのではないかと我々は考えた。
+
+「ウォレットに住み着く」ということを表現するため、むらさきさんトークンはSBT（untransfable ERC-721）で実装した。むらさきさんトークンには、mint時に、生まれた場所や性格、家の住所などが決定されるが、これらのパラメータはDom HofmannのLootの様にウォレットのアドレスに応じて決定される。これらの組み合わせパターンは約9,000通り存在し、ウォレットごとに異なる性質のむらさきさんトークンが住み着くわけである（これらのパラメータはゲームプレイへは今のところ直接の影響はないが）。
+
+「ウォレット内で生活している」ということを表現するため、むらさきさんの「満腹度」と「幸福度」は、時間経過とともに徐々に減少し、ウォレットのオーナーがお世話することで回復する。むらさきさんトークンはウォレットオーナーの継続的なお世話によって徐々に成長し、レベルやstrengthなどのステータスが増加してゆく。これらの処理は完全にon-chainでserverlessで処理されunstoppableであり、トークンのステータス値はブロックチェーン上にのみ保存される。
+
+家具やインテリアはNFTとして提供され、ウォレット内に所有することでむらさきさんの家に設置される。ウォレットのnonce値に応じて針が進む時計や、walletの年齢に応じて成長する金魚鉢の中の金魚、ウォレット内に所持している種類のトークンが飛び出すchest、ウォレット内に所持しているアート系NFTをランダムで表示する額縁など、ウォレットの状態を反映したアイテムがいくつか実装されている。使い込まれたウォレットほど、にぎやかな家とみなされるだろう。
+
+以上の様に、本プロジェクトの目的は、「ウォレットという「家」に一意に紐付けられ、時間経過と継続的なお世話によって成長するペットトークンを提供する」ことである。これは私達自身が所有してみたかったものそのものであり、それが開発の最大の動機と目的である。
+
+
+ ok BCGとして最も重きを置いているアピールポイントを明記する
+        より明確に、より丁寧に、より伝わりやすく明記する。
+        一言でいうと：
+            「人工生命」を表現したい
+        「電子生命」「人工生命」に興味があった。
+        ブロックチェーンの特性を利用
+            持続性、改竄耐性
+            人工生命を表現する上で、簡単にメモリ上のパラメタを書き換えられてしまうと良くない
+            また、単一のサーバー上に保存されて、そのサーバー上でしか生きられないのも違う
+            決して書き換えられず、かつ今後も半永久的に持続するブロックチェーンは、
+                私達が実現したい人工生命の特性に有用であると思った。
+        価値が劣化しないトークン
+            buyback treasuryによって常に裏付け資産があるtoken
+            人気の減少によって実質的に「死」んでしまうのは悲しいため
+            年齢の増加とともに、確実に価値が上昇するよう。
+        プロジェクトの目的と哲学
+            「人工生命」を表現する
+        「生命」のどの部分を表現したいのか
+            寿命と死：
+                生みの親である友人のたっての願いで、むらさきさんには寿命は設定していない
+                しかし、一定時間お世話されなかったトークンは石化してしまう
+            自己増殖：
+                増殖や世代などは考えていない。
+            成長と変化：
+            生きて住んでいる、生活している、を表現したい。
+                お世話した時間に応じて、確実に成長するトークン
+                課金によるブーストでは成長速度は変化せず、お世話した時間に応じて成長する。
+    
+        
+What we want to achieve in a blockchain game.
+
+ウォレットに住み着いてそこで生活しているバーチャルペットトークン
+
+ウォレットはweb3の世界で個人を表す重要な識別子である。このウォレットを「家」と見なして、この家に住み着いてそこで生活しているペットトークンを所有することで、web3における活動がより楽しいものになるのではないかと我々は考えた。
+        
+「ウォレットに住み着く」ということを表現するため、むらさきさんトークンはSBT（untransfable ERC-721）で実装した。むらさきさんトークンには、mint時に、生まれた場所や性格、家の住所などが決定されるが（これらのパラメータはゲームプレイへは今のところ直接の影響はないが）、これらのパラメータはDom HofmannのLootの様にウォレットのアドレスに応じて決定される。
+        
+「ウォレット内で生活している」ということを表現するため、むらさきさんの「満腹度」と「幸福度」は、時間経過とともに徐々に減少し、ウォレットのオーナーがお世話することで回復させることができる。むらさきさんトークンはウォレットオーナーの継続的なお世話によって徐々に成長し、レベルやstrengthなどのパラメーターが増加してゆく。これらの処理は完全にon-chainでserverlessで処理され、トークンの状態値はブロックチェーン上にのみ保存される。
+        
+家具やインテリアはNFTとして提供され、ウォレット内に所有することでむらさきさんの家に設置される。ウォレットのnonce値に応じて針が進む時計や、walletの年齢に応じて成長する金魚鉢の中の金魚、ウォレット内に所持している種類のトークンが飛び出すchest、ウォレット内に所持しているアート系NFTをランダムで表示する額縁など、ウォレットの状態を反映したUXを思いつく限り実装してみた。使い込まれたウォレットほど、にぎやかな家になるだろう。
+
+また、本プロジェクトの情報を統括したERC-721互換のコントラクトを用意した。このコントラクトにより、むらさきさんトークンは多数のパラメータを持つERC-721規格のトークンとして振る舞う。このコントラクトを利用することで、他のPJ（これは我々の次回作も含まれる）がむらさきさんのステータスやパラメータを容易に参照可能となった。
+        
+以上の様に、本プロジェクトの目的は、「ウォレットという「家」に一意に紐付けられ、時間経過と継続的なお世話によって成長するペットトークンを提供する」ことである。これは私達自身が欲しかったものであり、それが開発の最大の動機と目的である。
+
+ ok コントラクトのupgrade手順を整備する
+        upgradableをreplacableに修正
+        手動でaddressをセットするのか、スクリプトでinitializeするのか、
+            今後のためにupgradeスキームを確立しておく。
+        ABIの取得と更新が結構面倒か
+            コピペが可能な形式でabiを取得可能なスクリプトを用意しておく。
+        手順：
+            新しいコントラをデプロイ
+            share.jsのabiを部分修正
+            新しいコントラにmaをセット
+            mc, ms, mp, mss, msn, mseの必要なものへ新しいコントラのpermissionを追加
+                この時点で新しいコントラが動作可能になる
+            maのコントラを新しいコントラのアドレスへ書き換える
+            古いコントラのpauseフラグを立てて非活性化する
+        つまり、ソースファイルとコントラ名から、
+            コントラデプロイと、アドレスとABIの取得を行い、
+            mc, ms, mp, mss, msn, mseを指定してpermissionを書き込むスクリプトがあれば良い。
+                ["Stroll", ["ms", "mse"]]   など。
+            その後、古いアドレスと新しいアドレスを引数に、ma書き換えを行う。
+                ["Stroll", {old_address}, {new_address}]
+                    ma.Strollがold_addressであることをチェック
+                    ma.Strollをnew_addressへ書き換え
+                    old_addressのpauseをtrueへ書き込み
+        実装：
+            デプロイヤー:
+                デプロイするコントラクト名を指定する
+                ソースコードを読み込んでコントラクトをチェーン上へデプロイする
+                コントラクトのアドレスとabiを書き出す
+            イニシャライザー：
+                イニシャライズするコントラクト名を指定する
+                コントラクトのアドレスとabiを別ファイルから読み込む
+                コントラクト単位でトランザクション予約リストにappendする
+                トランザクション予約リストの重複を削除する
+                トランザクションを順に飛ばす
+
+ ng プレイヤーの「消費」行動を考える
+        楽しくて思わず「消費」してしまうメカニズムを組み入れたい。
+        「手数料」は望ましくない。
+            継続のための固定支出費、などはストレスだろう
+        「消費」すると、ワクワクするようなリターンが必ず得られ、
+            かつ少しばかりのランダム性（今回は何が起こるか楽しみ）要素がある行動
+        → coin/leafの消費がこれに該当するだろう。
+            
+ ok お菓子の家の実装
+     ok Solidity:
+            counterを返す関数
+            counter=0でmintする関数
+                NFTをランダムで送る
+            counterはfeeding時に減少する
+                0以下には減少しない
+       *実装案：
+            staking=0では土台だけ表示
+            staking>0で、量に応じたクッキー人形と進捗を表示
+            100%で、バンザイしているクッキー人形と完成した家を表示
+            クリックで家が消費されてNFTをランダムに取得する
+            完成した家を消費しないと次の進捗％は貯まり始めない
+        演出の深慮
+            お菓子の家が少しずつ完成してゆく
+                not stakingでは土台だけ
+                stakingすると作り始める
+                staking量と、進捗％を表示させる
+                staking量に応じて小人さんの人数が変わるとなお良いか
+            完成後はどうするか
+                別のお菓子の家がすぐ作られ始めるのか
+                    つまり、完成品2つは成り立つのか、または売れるのか
+                それとも、完成品を開けないと次の％がたまらないのか
+                NFTとして発行するのか、NFTを取得するコントラとして実装するのか
+        専用アニメーションの用意
+            棒の飴をふりふりしているクッキー人形
+            完成後は人形たちがバンザイしている
+        専用コントラクトの用意
+            presentboxと似ているが、取得できるアイテムと確率が異なる
+        中身案：
+            fluffy
+            fluffier
+            貯金箱
+            がま口お財布
+            散歩の宝物
+            発表会のトロフィー
+
+ ok コントラクトの修正
+        add-onコントラクトのtotal系スコアなど、代替が効かないデータは
+            一元的に拡張可能なstorageコントラに格納することとする。
+        storageコントラはmapping mappingで重ねて将来的に拡張可能とする。
+            こうすることで、貯めたスコアを消滅させずにlogicをupgradeできる
+        対象：
+            #101-
+                dice, critical_count
+                dice, fumble_count
+            #201-
+                mail, total_sent
+                mail, total_opened
+            #301-
+                stroll, total_strolledDistance
+                stroll, total_strolledDistance_ofCompanion1,2,3
+                stroll, stroll_level
+                stroll, met_level
+            #401-
+                ff, voteCount
+    
+ ok 構想：散歩システムII
+     ok バランス調整：
+            報酬期間: 3d, 7d, 14d, 28d, 
+            補正値: 最大で+50% (新規meetで+10% x 5)
+            ハズレ補正値: 稀に+100%などのクリティカル（期待値110%程度）
+     ok ToDo:
+         ok 散歩時間の調整
+         ok 散歩インターバルの調整
+         ok total_metに応じたmintの実装
+         ok petごとの歩行距離の実装
+         ok 報酬がNFTだけではインセンティブが弱く調和が薄い、要検討
+         ok     mining, farming, expそれぞれでboostを分ける
+         ok twinkleSparkleGlitterへlevelcapの導入
+         ok もう少し報酬の補正を強くする
+                ベストマッチの条件を引いても精々+3%程度のboostだと頑張りがいがない
+                未補正値を少なめに設定して、+50%など報酬を多めにする。
+         ok 誰にも合わなかったときに、一定確率でfluffyをmintできるように
+         ok     gas代が変わるから難しいだろうか
+         ok     → 強めの補正をかけることにする
+        UX：
+            好きな行き先に、好きなお供と好きな飲物を持って散歩しに出かける。
+            散歩先で新しいsummonerに出会うと楽しくて散歩距離がちょっと伸びる。
+            会ったsummonerと飲み物が一緒だと嬉しくて散歩距離がさらにちょっと伸びる。
+            総散歩距離が一定値に達するとtwinkle NFTが入手できる。
+            新しいsummonerに会った回数が一定値に達してもtwinkle NFTが入手できる。
+        意味論：
+            時間資源の若干のsink
+            選択と報酬に重点を置いたゲーム性の提供
+            他のプレイヤーの動向が気になる相互作用要素を提供
+            手に入る報酬がランダムであるガチャ要素の提供
+     ok 実装：
+            独立した専用コントラを用意
+                StorageとFunctionの2つ用意したほうが良いだろうか。
+            mapping で start_time を記録
+            mapping で end_time を記録
+            mapping で total_stroll_distance を記録
+            mapping mapping で 各summoner-summoner 間の meet 時間を記録
+            mapping uint[5] で 現在の metSummoner を記録
+            start_stroll関数
+                end_timeチェック
+                (_summoner, _direction, _companion, _drink)
+                li_dist_and_companionに_summonerを加える
+                start_timeにnowを代入
+            end_stroll関数
+                start_timeチェック
+                該当するli_dist_and_companionからランダムでsummonerを選出
+                自分のli_metSummonerと相手のli_metSummonerをチェック
+                両方とも代入可能ならmet成功
+                自分と相手のli_metSummonerに互いを代入
+                歩行距離を算出
+                補正値を算出して歩行距離を補正
+                総歩行距離に今回の歩行距離を足して保存
+                総歩行距離をチェックし条件を満たせばtwinkle NFTをmintする
+                li_metSummonerをクリア
+                grooming time更新
+            _calc_boost関数
+                (_summoner)
+                li_metSummonerを順にチェック
+                summoner-summoner 間の meet 時間をチェック
+                一定期間以上（7日？30日？）空いていたら補正値+1.00
+                    それ以下なら補正値+0.50
+                _drinkが一致すれば補正値x1.2（+1.20か+0.60）
+                互いの総歩行距離の乖離度によって+補正値
+                    乖離しているほど有利
+            _try_mintNFT関数
+                総歩行距離をチェック
+                条件を満たせばNFTをmint
+                mcにpermittedしておく
+            _mint_twinkle
+                mcでtwinkle level 1をcraftする
+                crafterは自分とする
+        問題点：
+            ただの脇道ミニゲームと化してしまっている
+            本来は時間資源を別に費やすためのsinkのハズだったのだが。
+                かといって散歩時間を6-8時間とするのもfeelingと乖離するだろう。
+                時間資源のsinkであるならば、拘束時間を長くするしか無いのだが。
+                長めの4時間でも4/24=17%程度のsinkにしかならない。
+                時間資源のsinkならば8時間は拘束する設計にしなければならないだろう。
+                2時間の散歩を1日3回まで可能とするか（maxで6時間=25%のsink）。
+            イマイチ目的が分かりにくく、一日一回の作業と化しやすいだろうか。
+                他の行動と選択のジレンマが発生せず、
+                また報酬もほぼ予測可能で驚きが薄く、
+                かつ実行しないより実行したほうが有利なため、作業化してしまいがち。
+                UXとして満足たりうるだろうか。
+            「運」要素をもう少し強めに、ギャンブル性、結果の不確実性、
+                もしくは能動的な選択と納得しうる報酬、
+                の部分にもう少し強めのゲーム性を考えてみる。
+            総met数、drink一致回数をNFTの条件にする、など。
+                総散歩距離, 総drink一致回数, 総metSummoner数, 
+                それぞれで一定数に達したときにNFTを発見、などとするか。
+                基本は総歩行距離だが、それ以外のベクトル軸でも報酬が発生する。
+                できるだけ談合しにくように設計したい。
+         ok 買い占め対策
+                twinkleによるexp boostはlevel capか総歩行距離capを設ける
+
+ ok 散歩システムUI実装：
+     ig 水筒を持って、お供を連れてお散歩に向かうむらさきさん絵
+            音符やハートを出しながら楽しそうに出発する
+            水筒を持って、喜びながらcompanionが来るのを待つ
+                一緒に連れ立って画面外に移動する
+                この時ハートや音符を出しながら移動する
+     ok 散歩条件を選択するウィンドウ
+            行き先、お供、水筒の中身を選択する
+            総歩行距離、総met数、現在のお散歩分布などを表示する
+            帰宅予定時間、インターバル残り時間、なども表示する？
+                → インターバル残り時間は水筒に表示
+                → 帰宅までの残り時間は散歩中ウィンドウに表示
+        散歩中のむらさきさんを眺める横長のウィンドウ
+            背景4パターン（山道、河川敷、海岸、草原）
+                ループ背景を用意する
+            お供を一緒に歩かせる
+            残り時間を数字と進行バーで表示させる
+            誰に会ったかのログを表示させる
+            何を拾ったかのNFTも表示させる（可能か？）
+        帰宅時の演出を考える
+            時間がすぎると、まだ帰ってないのか、もう帰ってるのか。
+            txを飛ばさなければならない事の必然性をうまく表現したい。
+                散歩から帰宅後は、ユーザーからの何かしらのアクションが必要な演出を考える
+                寝てる→お風呂はいる
+                水筒洗う、など
+            散歩を思い出しながら寝ている
+                → クリックしてtx飛ばすと、吹き出しを出して散歩内容を飼い主に報告して
+                　 総歩行距離と友達人数が更新される。
+
+    修正案
+     ok strollコントラより情報抜き出し
+     ok     終了時間、現在の歩行距離を取得する
+     ok feedingやgroomingを短い間隔で連打すると効率が上がるバグの修正
+     ok     98%以上では+0とするなど対策が必要だろうか。
+     ok     mining/farmingは大丈夫だろうか。
+     ng depthをspriteのy下段に設定する？
+     ng     マウスドラッグ時は前面に設定する？
+     ok connectボタンの設置
+     ok diceコントラに20を出した回数を記録させる
+     ok festivalのvote回数を記録させる
+     ok info_fromWalletにcat-mailを追加する
+     ok infoにtokenURIとERC721も統合する
+     ok フェスティバルのvoteのevent確認
+     ig tokenURI用jsonの用意
+     ok イベントの再考、集計しやすいように修正
+     ok twinkleのbuyback priceを設定する
+     ok uncommonのbuyback priceがcommonと一緒な点を修正
+     ok glitterが表示されないバグの修正
+     ok クラフト完了時にサウンド鳴らす
+     ok フェスティバルのサウンド修正
+     ok 可能ならmetamaskにNFT画像を表示させたい
+     ok     → ERC721規格でないとmetamaskには表示できない模様
+     ok     諦めるか、ERC721規格で考えるか、要検討。
+     ok     → ERC165のsupportsInterfaceでERC721識別子を返すよう実装すれば認識された
+     ok     この際なので、openzeppelinのERC721をもとにERC2665を再実装する
+     ok crafting中以外でcompleteするとインジケーターが残るバグの修正
+     ok musicbox off時にむらさきさんのlistingもoffに
+     ok スイッチon/off時はmusic boxもoffに
+     ok jsのworking_status部分を更新する
+     ok 夜用BGMの実装
+     ok 積み木を置く時のサウンドを実装
+     ok tokenChestのバグ修正
+     os mcに90万個の発行上限を設定
+     os strollでpetやdirectionの制限を導入する, require
+     ok ビットコ、イーサ猫の接触絵を用意する
+     ok trial時に作成可能ではないアイテムはnot availableにでもする
+     ok すべてのアイテムはクラフト完了時にお花まきで知らせるよう修正
+     ok 晴れ以外の天気でwindowの朝/夜変換ができないバグの修正
+     ok item_windowのカーテン閉じた時の絵を天気ごとに用意する
+     ng ボタンオーバーラップ時にFeedingやStart Miningなどのメッセージを表示させる
+     ok inactive buttonにrequired levelを表示する
+     ok Buybackでfluffyが有効になっていることを確認する
+     ok 他色ウィンドウの透明度を下げる
+     ok デプロイコントラでERC20など設定項目を先頭にもってくる
+     ok stakingコントラにSPEED補正をかける
+     ok craft完了時に寝る条件が変
+     ok     帽子の位置も
+     ok stakingのNFT補正が1/10なので修整
+     ok resume cancel時luckyとなるのを修正
+
+ ok html修正
+     ok buyback systemの弱点をきちんと述べる
+     ok     このシステムだけでは原資抜きに1-2年かかる
+     ok     つまり、結局ユーザーはfeeを支払って2年かかって回収するだけになる。
+     ok この点をどう説明し、どう納得してもらうか
+     ok     話が違う、となってしまうのは避けたい。
+     ok     実際はdapps stakingの量がわからないのでなんとも言えないのだが。
+     ok     一度、月3%を実現するために必要なtoken/userの値をきちんと計算してみる。
+     ok Buyback Treasuryが目立たないので、どこにどの程度アピールするのかはっきりする
+     ok     あまり目立たせすぎると混乱するので、マーケットとの棲み分けをどうするか。
+     ok 脱ポンジのパラグラフを洗練させる
+
+ ok SBTのNFT化を実装する
+        mmにトリガー管理可能なtransfer許可機構を実装する
+        permitted_address onlyにしておき、function側で
+            トリガーOn → transfer → トリガーOFFと一度に行う
+        よって、ユーザーの自由なtransferは抑制しつつ、
+            function側で条件を決めてtransferを許可できる。
+        → migrationとして実装済みだった
+
+ ok Murasaki_Addressの修正
+        Trial_Converterを追加で実装
+        addressはjs側には極力保存せず、maを参照させる
+        また、abiは別ファイルとする。
+
+ ok 経済雑記
+        持続可能な経済、穏やかだが確実に価値が上昇してゆくモデル
+            価値の裏付けに独自トークンの購入を促したり、NFTを継続的に購入させたりはしない
+            dApps StakingのRewardをプロジェクトの価値拡大へと当てる
+        継続的なゲームプレイとNFTのホールディングがインセンティブとなるモデル
+            NFTの最低限の価値はbuyback systemによって担保される
+            このbuyback priceは緩やかにインフレしてゆく
+            よって、継続的にプレイし、多くのNFTを所持し、
+            保持し続けるほど、プレイヤーの資産価値は上昇してゆく
+        ポンジスキームの否定
+            ここでのポンジスキームの定義：
+                「後のりのプレイヤーが支払った価値が先乗りのプレイヤーへと支払われる強力な先行者利益」
+            新規プレイヤーの参入は、プレイヤー１人当りに割り当てられた資産を増やしも減らしもしない
+            先行者利益は継続的なゲームプレイによってもたらされる
+            ただし、starting feeはbuyback priceのインフレと同率で緩やかに上昇してゆき、
+                マイルドな先行者利益を生じさせる。
+        以上のメカニズムを通して、中長期的にストレスの少ない経済システムを目指す。
+            つまり、短期間で大きな利益を取ることよりも、
+            中長期的に損をするストレスが少なく、ゲームプレイをのんびり楽しめるシステムを目指す。
+        Starting Fee：
+            45%はbuyback treasuryの初期資産と送られる
+            45%はstaking treasuryへ送られ、dApps Stakingへself stakeされることで、
+                将来のbuyback treasuryのインフレのための金利を得る
+            残りの10%はdeveloperへ送られる
+        Buyback Price Inflation：
+            dApps Staking Rewardとゲーム内のfeeはすべてBuffer Vaultへと集められる
+            Buyback TreasuryをX%上昇させる分の資金を送る
+            残った資金はstaking treasuryへと送られ、self staking量を増やす。
+            10%がdeveloperへと送られる
+        Inflation Rate:
+            Inflationをどのくらいの速度でおこせるかは、新しいinflowの量に依存する。
+            playerが多額の資金をdApps Stakinへと預けてくれればinflation圧力となる。
+            一方で、新規プレイヤーの参入は、アクティブプレイヤー当りの資金量を低下させるため、
+                インフレ抑制圧力となる。
+            アクティブユーザー数の減少、つまりドロップアウトプレイヤーの増加は、
+                残ったアクティブプレイヤー全員でドロッププレイヤーに
+                割り当てられたトークンを山分けするため、インフレ圧力となる。
+        総じて、本プロジェクトの資産価値の増加はdApps Staking量によって決定される。
+            Starting FeeはあくまでNFTの初期の値段を決定するに過ぎず、
+            またStarting Feeの45%を集めたself stakingだけでは、
+            僅かな将来のインフレ率しか担保できない。
+            developerは、アクティブプレイヤーあたりのdapps staking量ができるだけ多くなるよう、
+            プレイヤーのストレスを減らし、より良いUXをもたらせられるよう務める。    
+
+ ok html修正
+        NFTのtransfer feeについてどこかに記載
+            規制か規約かanti-botかに記載。
+            専用の区分を設けてもよいか？
+            item NFTがERC721拡張のERC2665であることも明記する。
+                「時間が資源の中心であるため、初期では特にマルチキャラ運用が有利である
+                そのため、マーケットを介さないNFTの直接のtransferにはfeeを設定する
+                feeはユーザー行動を監視して調節される
+                エコシステムの成熟を待って、
+                将来的にはtransfer feeを0にして制限なく移動できるようにする
+                また、feeはすべてbuffer vaultへ即座に送金され、
+                エコシステムの保持に使われる」
+        全アイテムリストの別ページを用意
+        経済について記載
+            feeはNFTの最低限の価値の担保とanti-botのために導入
+            合うか合わないかのtrialを用意
+            feeはエコシステムの拡大には直接使用されない
+                殆どはユーザー資産に回される
+            エコシステムの拡大（買取価格の上昇）は
+                主にはdapps stakinの金利収入によって賄われる
+        githubの整備
+        未執筆記事の整備
+        メールアドレスの用意
+        NFT transferのUIを修正する
+        イベント監視を修正
+        なぜAstarなのかを記載
+            課金メカニズムを入れたくない
+                dapps stakingを利用
+            dapps stakingを利用することで：
+                ・playerは自分の資産をハッキングリスクなどに晒すことない
+                ・課金せずにゲーム内インセンティブを得られる
+        for developer更新
+            greetingボタンのソース公開
+            NFTアイコンを表示するソース公開
+     ok anti-bod policyの整備
+     ok jsのminity化
+     ok privacy policyの整備
+     ok trialモードについて記載
+     ok 利用規約に法律対策の規約を明記
+     ok     「各NFTの発行上限はitem_type毎に90万個」
+     ok     「SBTの価格は1500円以上」
+     ok     「SBTの所持による金融資産の配当は一切無い（ASTRエアドロなど）」
+     ok     「NFTをいかなる決算手段としても使用してはならない（流動性の提供など）」
+     ok     「ERC20規格の独自トークンは一切発行しない」
+     ok 利用規約にプライバシーポリシーを明記
+     ok 注意事項の整理
+     ok     むらさきさんはSBTで売れない
+     ok     放置ペナルティがある
+     ok     マルチウォレットは禁止
+            
+ ok 経済について公開情報を整理する
+        実現したいこと
+            pump & dumpの抑制
+            持続可能な経済モデル
+            確実に価値が上昇してゆくモデル
+            継続プレイが有利になるモデル
+        ポンジスキームの否定
+            starting feeは直接の選考者利益には回されない
+        NFT価格の担保方法
+            バイバックシステムの位置づけと
+            担保資金の確保方法
+        価値の分配方法のポンチ絵
+        dapps stakingの位置づけ
+            なぜdapps stakingなのか
+                ハッキングリスクが小さい
+                資金を目減りさせるリスクがない
+                一方でin gameリターンを得られる楽しみがある
+                得られたstaking金利はすべてvaultへ格納される
+        継続プレイの有利性と価値上昇のメカニズム
+            脱落者が出るとその分の金融価値は残りのプレイヤーに分配される
+            新規プレイヤーの参入は現在の金融価値を増やしも減らしもしない
+            1ユーザーあたりのstaking量が減ると、エコシステムの拡大が遅くなる
+            ユーザー数が減り、1ユーザーあたりのstaking量が増えると、拡大が早くなる
+
+ ok むらさきさんをアイコンで一覧閲覧できるページを作成する
+        ランダムで10-20体のアイコンを表示する
+            クリックでその家に飛べる
+        ランキングも表示する
+            total_coin, total_leaf, total_exp, score, total_craft, critical
+            数値と順位と一緒にアイコンを表示する
+            ランキングはオフチェーンで行うか、オンチェーンで行うか
+                例えば、feeding時にupdate_ranking()を動かす、など
+                ランキング用コントラが別途必要だろう
+            また、murasakisanコントラにsummoner id -> address変換の関数を実装する
+                もしくは普通にinfoコントラを使えばよいか。
+            ランキングはちょっとストレスなのでNGとするか。
+        リアルタイムログもここに表示する
+            直近のログを予め表示する
+            新たなeventを監視してリアルタイムで更新していく
+        in-game infoもここに表示する
+            trial summoner数
+            main summoner数
+            total nft mint数
+            インフレ率
+                starting feeの初期値からの増加率を表示（currentry +3%など）
+            vault内のtoken量は生々しいので非表示とするか
+
+ ok Fluffyシステムについて情報を整理する
+        アップグレードの概念図のポンチ絵
+        fluffyがもらえる行動の一覧と詳細
+            crafting bonus, cat-mail, fluffy festival, staking bonus
+        festivalの詳細
+        dollのexp boostシステムの詳細
+
+ ok item detailsの完成
+        STR系アイテム
+        DEX系アイテム
+        INT系アイテム
+        Fluffy系（概要）
+        bank/pouch
+        cat-mail
+        presentbox
+        twinkle系(comming soom)
+
+ ig 覚書：コントラ更新手順
+        remixでコントラを手動でデプロイ
+        murasaki/deploy/3_init.pyのaddressを修正
+        murasaki/deploy/3_init.pyのabiを必要に応じて修正
+        murasaki/deploy/3_init.pyのabiから該当行を抜き出して実行
+        share.jsのaddressを修正
+        share.jsのabiを必要に応じて修正
+        permitted_addressを設定していたコントラは、旧アドレスにfalseを代入
+
+ ok なぜアスターなのか
+        dapps stakingの利用
+            ユーザーの資金を目減りさせずに安全に保管できる
+            購入やトークン発行以外のみんなが得をする開発インセンティブ
+        XCM?XVM?の利用
+            EVMは成約が多いがライブラリと知見が充実している
+            一方で、数年後の近い将来はWASMが主流になると予想されている
+            EVM資産をシームレスにWASMへリンクできるのはAstarが唯一
+            我々の第一目標はweb3の技術をリアルタイムでキャッチアップすることであり、
+                次のPJはWASMで開発したいため。
+        ガス代が安いため
+            ガス代などでトークン価格を維持しようとする他のチェーンとは異なり、
+                ゲームをストレスなく行えるほどガス代が安いため。
+        Polkadotチェーンにおいて最も有望なため
+            我々はpolkadotのビジョンに共感している。
+            Astarはpolkadotのパラチェーンにおいて、
+            上記３つの理由から最もbuildに向いていると考えるため。
+
+ ok functionコントラ群にサーキットブレイカーを実装する
+        旧コントラはpermittedを削除するより、
+        サーキットブレイカーをONにして凍結するほうが良いだろう
+        onlyOwnerのmodifierをつけているものはstoppableにしなくても良い
+
+
+ ok いらすとやの規約クリア
+        20点までの使用
+        アルファベットだけで20点を越えてしまっている。
+            アルファベット  まとめて1点
+            きらきら    3点
+            星  まとめて1点
+            本  置換予定
+            楽器　置換予定
+            ダンボール　1点
+            プレゼントボックス　1点
+            額縁
+            フラワーリース
+
+ ok info_walletの公開情報の整備
+        PJ外で有用なパラメータにできるだけ網羅的にアクセス可能とする
+            外部で使用するときに有用と思われる値を吟味する
+            各パラメータの簡単な説明を掲載する
+        interfaceとabiを公開する
+            コントラインポートへのリンクも明記する
+        jsを用いた使用例を公開する
+            greeting例、icon表示例のjsを公開する
+            lootlineな楽しみ方を紹介する
+
+ ok 新コントラのテストプレイ
+        other summoner feeding
+        market
+
+ ok マーケットプレイスの改善
+       *UIの実装
+            平均priceを表示する
+            ダッチオークションのルールを明記する
+            listPriceに達するまでの残り時間を表示する
+            マーケットコントラのget_itemInfoを使って情報取得を軽量化する
+        ダッチオークション形式にする
+        最低価格を決めてリストし、100 $Astarか最低価格x3の価格の
+            どちらか大きい値段を始値としてオークションを開始する
+        24時間かけて価格は下落し最低価格となる
+            その後は最低価格でリスティングされ続ける
+        また、売買成立時に平均落札価格を記録する
+            item typeごとに回数と平均値を記録しておき、
+            新しい落札価格を得るたびに回数と平均値を更新する
+
+ ok イベント監視システムの実装
+        pythonを用いて全eventを記録し続けるスクリプトを実装する
+        snapshotとは別に運用する
+        → node.jsで実装した
+        share.jsやindex.jsから読み込むスキームを確立したいところ。
+
+ ok bot対策の深慮
+        スタンス
+            手動でいちいち排除するよりは、
+            そもそもbotが有利になりにくいメカニズムをonChainに組み込んでおきたい。
+        考えられる有害行動：
+         ok マーケットプレイスのスナイピング
+                ダッチオークションの導入で耐性を持たせる
+                生身のプレイヤーに対する監視botの優位性を下げる
+         ok マーケットプレイスを利用したアイテム移動
+                listing→即buyによる実質の無料transfer
+                これもダッチオークションを導入することでほぼ不可能とする
+         ig フロントエンドを用いない直コン
+                スクリプトを用いたfeeding, groomingの定期実行化
+                必ずしも有害とはいえないか
+                saltをコントラ内に保持し、正しいsaltを渡したときのみfeed可能とする、
+                    などの対策は取れるが、過剰防衛だろう。
+                また、保母さんbotなどを公式で提供しても良いだろうか。
+                event監視により手動で監視し、他のユーザーに迷惑がかかっていれば対策を考える。
+         ok 直コンによる広範囲feeding
+                event監視により手動で監視する
+                あまりにも目に余るようなら手動でペナルティを課す
+                もしくは、他のsummonerに対するfeedingにインターバルを設けるか
+                対策済：追加expに24時間ごとの上限を設けて防ぐ。
+         ok マルチウォレットによる多キャラプレイ
+                1 summoner $20程度なので100体運用などは現実的ではないだろう。
+                1人が2-3体運用は許容範囲とするか。
+                キャラ間のアイテムの融通（fluffyの色合わせなど）は多少有利に働く。
+                また、植民地summonerとメインsummonerの分担プレイも有利だろう。
+                NFT transferに料金を設定することで抑制する
+        以上を踏まえた規約
+            単一ノードにつき4を超えるようなマルチsummonerの運用
+                1人がマルチウォレットで複数のsummonerを所有することは
+                推奨されないが禁止ではない
+                ただし、エコノミーを破壊しうるほど過剰なマルチウォレット運用は
+                ペナルティを受ける
+                現在の制限として、4体以上の基準を設定するが、
+                この基準とルールは今後変更になる可能性がある。
+            フロントエンドを介さない過剰な直コン（基準は明記しない）
+                このゲームはfull on-chainであるため、
+                直コンがゲームプレイに特に有利になる設計ではない。
+                そのため禁止はされないが、しかしエコシステムに有害な行動と
+                dev teamが判断した場合はペナルティを受ける可能性がある。
+            その他有害であると判断されたすべての行動
+                スクリプトや自動化が通常プレイより明らかに有利となり、
+                またはエコシステムに有害であるとdev teamが判断した行動は、
+                summonerの停止や石化と言ったペナルティを受ける可能性がある。
+    
+ ok working系ステータスをuint isWorkingへ統合する
+        0: notWorking, 1:Mining, 2:Farming, 3:Crafting, 4:Practice, 5:Strolling
+        各workingは開始時にisWorking==0を要求し, end時にisWorking==[該当No]を要求する
+        また、start時に各動的パラメータをリセットする
+        さらに、強制終了functionを用意しておく
+            forcedTermination(uint _summoner)
+            summonerのownerとadminのみが実行可能
+            isWorkingに0を入力する
+            つまり、その時点で行っているworkingを強制終了する
+            craftingでは払ったコストは帰ってこない
+            mining/farmingは溜まっていたcalc_coin/materialは得られない
+            次回start時は動的パラメータは0にリセットされる。
+
+ ok UI実装：Twinkle, Sparkle, Glitter
+     ok 当て絵を仮実装する
+            小さめの自然物
+            D&Dで自由に移動可能
+     ok むらさきさんとの何かしらのギミックを考える？
+            松ぼっくりを持って歩ける、など
+            むらさきさんに重ねるとくっつく、など。
+        所持twinkleリストの取得関数の実装
+        summon_twinkleの完成
+        
+ ok 開始後のUI/UXチェック
+        等速でのテストプレイ
+        最初の1日、3日、7日のUXは十分か
+        trial終了のタイミングは適切か
+
+ ok ウッドキューブの再実装
+        ユーザーがD&Dで並べて遊べる
+        むらさきさんが蹴って遊べる
+        1個に1桁スコアを表示する
+        1桁スコアはあとから更新可能にする
+
+ ok ゲーム開始時のバランス再調整
+        やはりまだ開始時のUXが悪い
+            Lv1ではまず何ができるのかさっぱりわからない
+            なにもできないつまらない画面に見えてしまう。
+        Lv2まですることがない
+            最初のlevel-upに数時間かかると大体のプレイヤーはやめてしまうだろう。
+            せめて30分程度でLv2が可能となり、mining/farming解禁としたい。
+            また、アイテムリストは最初から公開しておいたほうが良いだろうか。
+        Lv2までは、アイテムを眺めたり、feeding/groomingを試したりする時間とする。
+            その間にLv2に挙げられるタイミングが来るバランスで。
+            Lv2になるとminingとfarmingが解禁される。
+        Lv3は24hr程度かかっても良いか。
+            mining/farmingしてresourceをためつつ、作るアイテムを考える時間。
+            mining/farmingの出力が正確であるほうが望ましい。
+        メインのユーザー体験は何か：
+            継続したプレイによって、お部屋が少しずつ賑やかになっていくこと。
+            つまり、アイテムNFTの獲得がUXの中心だろうか。
+            ステータスアップはあくまでcraftの前提条件という位置づけ。
+            お世話によってレベルアップし、
+                レベルアップすると新しいアイテムNFTがクラフト可能となり、
+                NFTをクラフトするとお部屋がより賑やかになる。
+            お世話→レベルアップ→解禁→クラフト→賑やかに
+                これがプレイの中心となるUXだろう。
+                少なくともはじめの2-3日以内に上記サイクルを1回は体験できるように。
+
+ ok 最初の演出をもう少し頑張る
+        何もない部屋に全部作って足してゆく、感じを初めから演出する
+        くま、作業台、ちゃぶ台、砂場、植木鉢、は最初は無いようにしたい。
+        UXのみで良いので、大きな宝箱をクリックしたら展開されて配置される
+            お部屋のものは全部これから作ってゆく、というのを演出する。
+        プレゼントボックスから出現して、規定位置に収まる動作を定義する
+            もしくはシンプルにvisible=trueかつsummon_flowerでも良いか。
+        砂場のsprite化が必要
+                    
+ ok workingのUI改良
+        たまに勝手に休憩するように修正する
+        プレイヤーが「命令を出す」と言うよりは、
+            ふわっと「これやってほしいなー」程度の印象にする。
+        気が向いたらcoinほってほしいなー程度で。
+        むらさきさんは適度に休んで、適度に寝ちゃう感じに修正する。
+        よって、+XXXのテキスト表示は常に表示させておく。
+
+ ok lootlike要素の再考
+        わかりやすく、ロールプレイたりうるパラメータに改善する
+        引きあたった要素がもっとイメージしやすく、かつ要素間で大きな優劣が無いように。
+        十人十色な要素を3つほど考えたい。
+            性格（長所）
+            出身場所
+            weakpoint
+                寂しがり屋
+        もしくはpersonalityを3つとかにするか
+        https://mysuki.jp/english-personality-5486
+            birthplace:
+            personality: 外見・行動、客観性
+                "Friendly"：友好的
+                "Reliable"：信頼できる
+                "Frisky"：元気な、活発な
+                "Thoughtful"：思いやりがある
+                "Easygoing"：のんびりとした、気楽な
+                "Tolerant"：寛容な
+                "Affectionate"：愛情深い
+                "Intelligent"：知的な
+                "Faithful"：忠実な
+                "Innocent"：無邪気な、純真な
+                "Gentle"：穏やかな、優しい              
+                cheerful, 陽気な
+            character: 深層心理・価値観、主観的な信念
+                diligent, 努力家
+                optimist, 楽天家
+                realist, 現実主義者
+                ethical, 理論屋
+                sensitive, 多感
+                adventurous, 冒険家
+                compassionate, 同情的
+                empathetic, 共感的
+                patient, 我慢強い
+                courageous, 勇気のある
+                "Honest"：正直な
+
+            weakpoint: a bitをつけて愛嬌程度の弱点
+                気分屋,
+                寂しがり屋,
+                お寝坊,
+                神経質,
+                負けず嫌い,
+                頑固,
+                忘れっぽい,
+                完璧主義,
+                内気
+                おてんば
+            Scent:
+                華やかな香り (floral scent)
+                爽やかな香り (refreshing scent)
+                優しい香り (gentle scent)
+                穏やかな香り (mild scent)
+                フルーティーな香り (fruity scent)
+                お日様の香り（sunshine scent）
+                甘い香り（sweet scent）
+                ふんわりした香り (soft scent)
+                エキゾチックな香り (exotic scent)
+
+ ok demo→regularのテストプレイ
+
+ ok アイテム順の決定
+        クラフト、ダイス、猫メール、散歩、楽器練習、の順で解禁する
+
+ ok マーケットの改善
+        最低価格の導入
+            バイバックコントラを参照する
+            pouch/bankなど最低価格が存在しないものは決め打ちで設定できるようにしておく
+            スクリプトによるマーケットを利用したアイテム移動への対策
+     ng 可能なら、オークションの導入
+
+ ok フラワーリースの実装
+        クラフト後にのみ表示する
+        クラフト後にのにスコアによる補正を有効にする
+    
+    
+ ok 天気を実装する
+       *UI側だけの演出
+            ASTR価格が前日比プラスなら晴れ
+            前日比マイナスなら雨
+            基準はUTC0で（日本時間朝9時）
+            これぐらいのさりげない演出で良いだろう
+            あるいは、+10%>, 1-10%, -1~-10%, -10%<の5段階とかでも良いか。
+                大雨(<-10%)、小雨(-10%~-3%)、曇(-3%~+3%)、晴れ(+3%~+10%)、快晴(>+10%)、など
+        dexscreener API:
+            https://api.dexscreener.com/latest/dex/pairs/astar/0x806f746a7c4293092ac7aa604347be123322df1e
+     ok ASTR/USDT価格取得コード：
+            let request = new XMLHttpRequest();
+            astar_price_data = "";
+            request.open("GET", "https://api.dexscreener.com/latest/dex/pairs/astar/0x806f746a7c4293092ac7aa604347be123322df1e", URL, true);
+            request.onload = function () {
+                astar_price_data = this.response;
+                console.log(astar_price_data);
+            };
+            request.send();
+            let _json = JSON.parse(astar_price_data);
+            let _astar_priceChange_h24 = _json.pair.priceChange.h24
+
+
+ ok exp補正のUI実装
+        expをクリックで補正一覧を表示
+        現状：
+            ぬいちゃん
+            +exp小物
+            walletステータス
+        足し算ではなく掛け算になっているが、どうするか。
+
+
+ ok レベルアップの演出の改善
+        もう少し豪華に
+        新レベル値を大きく表示、など
+        付随して、文字表示の機構を実装する
+            happy new yearなどにも使えそう
+            文字が一つずつ可愛く出現する演出を考える
+        文字クラス
+            演出
+                真下に自由落下
+                真上に加速度上昇
+                小さくなって消える
+       *音の実装
+
+
+ ok Trialモードの修正
+     ok convert直後の挙動確認
+            適切なタイミングでcontract_update_summoner_of_wallet()を走らせて
+                gamemodeをtrialからregularへと変更させる
+            トリガーを何にするか。
+            切り替わり時の演出も考える
+            リロードを促す専用ウィンドウとリロードボタンを表示させる
+                初回起動時の演出とトリガーをどうするか
+                トリガーはローカル変数でよいか
+                flag_convertCelebration = 1など
+                flag=1のときだけ演出を行い、すぐflagを寝かせる
+                if (gamemode=="regular" && flag_convertCelebration==1) {
+                    //演出
+                    flag_convertCelebration=0;
+                }
+     ** trial表記の深慮
+            ひと目でtrialモードだとわかる表現を実装する
+            「TRIAL」の壁看板を表示させるか
+     ok level capの修正
+            クラフト可能なLv3以降にexpが全く入らないのはちょっとおもしろくない
+            expは貯まるがLevel-upができないように修正する
+     ok first craft bonusの導入
+            最初にクラフト完了したときにpresentboxを得る
+     ok trialではstaking bonusを表示させない
+
+ ok index.htmlのweb3周りのjs修正
+        walletを多重で読みに行っているのでエラーになっている
+        まずwallet接続を要求して待機し、
+            接続され次第onChainデータを読んで反映させるよう修正する
+
+ ok Depth整理
+        1-100:      background
+        200-1000:   sprites
+        2000:       system icon, text
+        3000:       staging1, 
+            3100:   draw_flower
+            3200:   fireworks
+            3300:   night
+        5000:       window
+        6000:       stating2
+            6100:   fallingFlower
+        9000:       pointer
+
+ ok Trial ConverterのUI実装
+        js実装
+            scene内でsummoner取得しに行くときにregularとtrialを両方取得しモード分岐させる
+            他のコントラは、
+            1:
+                share内ですべてtrialもコントラを作っておく
+                web3絡みはすべてflag_trialで通常コントラかtrialコントラか
+                    どちらを読みに行くか分岐させる
+            2:
+                メインコード内ではコントラは変化させない
+                shareなりどこかで、trialとregularで全コントラを入れ替える分岐を行う
+            また、trial→regularへとコンバートした直後の挙動も実装する必要あり
+                やはり、flag_trialと、各コントラ2重用意で分岐、が受けが広いだろうか。
+        運用
+            いつでもコンバート可能にするか
+            特定の条件を満たした後コンバート可能とするか
+            コンバート無しで正規mint可能とするか
+            → Trialで開始し, Lv3以上でいつでもregularへconvert可能、とする
+        UI実装
+            Lv3以上でconverting_summonボタンを表示する
+                ないないさんを使うか
+                もぐもぐさんを使うか
+     ok 開始画面のUI分岐を実装する
+            trialあり/正規なし　→　trial summonerで開始
+            trialあり正規あり　→　(ありえない)
+            trialなし/正規あり　→　正規summonerで開始
+            trialなし/正規なし　→　summon画面
+            つまり：
+                trial summoner own → trialコントラで開始
+                trial summoner not own → regular summoner own → regularコントラで開始
+                trial, regular summoner いずれもnot own → trial summon画面
+            また、visitはregular summonerのみとする
+                trial summonerはvisitできない
+                コントラとしてはfeeding可能だが、UIは実装せず想定しない
+     ok init
+            maは独立したコントラ
+            ただしmnだけは正規コントラと共通
+            mcのtransfer feeは巨大な数字
+            mp.PRICE=0
+            mp.isTrial=true
+            trialのma.address_Murasaki_Address_Regularに正規版のmaを格納する
+            regularのma.addressにはTrialのmaアドレスを格納する
+            mc_regにはtrialのconverterをpermitしておく
+            trialのffにはintervalを多めに設定しておく
+
+ ok クリック時の挙動統一
+        cat, festivalor, presentboxの仕様も統一する
+        現状これらはマウスオーバーとマウスクリックで挙動が異なるが、さてどうするか
+        クリックでtx飛ばしてしまうため、情報表示のUI設定がちょっと難しい
+        item_indicatorはどうするか
+            同時に、ステータス補正値の表示方法も考える
+
+ ig 体験summonerの設計II
+     ok コントラ群を別にすべて用意する
+            token, functionなどすべて
+            if(isTrial)トリガーを実装しコード自体はtrialと正式で共通とする
+     ok 制限をかける
+            mcのtransfer_feeを10000000など大きな数字に設定して事実上禁止
+            mfslのlevelup関数でrequire(level<=2): Lv3までしかあげれないよう制限
+            mfcでrequire(mss.total_item_crafted <=2): itemは3つまでしかcraftできないよう制限
+            mfcで、trialではfluffyが発生しないよう修正
+            そのかわり、mfslでLv2, Lv3などでpresentboxをもらえるよう修正
+            mpにisTrial変数を用意しtrueを代入する
+                他のmfも自前のisTrial()を持ち、中身はmp.isTrialを参照する
+                mf内ではif(isTrial){require()}で制限を実装する
+     ok 制限II
+         ok Lv>=3でfeeding, groomingのexp=0
+                Lv4にあげられないのではなく、expを得られなくする
+         ok start_crafting時にrequire(total_item_craft<3)
+                3個以上はクラフト開始できなくする
+         ok coin bank, leaf pouch, cat mailはtrialではクラフト不可とする
+                もしくは、クラフト可能品を絞る
+                require(_item_type==1 || _item_type==17 || _item_type==33)など
+         ok mc_trialはtransfer_fee=10000000000
+         ok 1ヶ月間放置されると再summonが必要なように設計する
+                isActive()を用意するか？
+                isPetrified & isTrialでresummon()とするか？
+                シンプルな設計を考える
+                → 石化し、cure cost=0とする（mint cost=0なのでそのままで良い）
+         ok coin, leafの取得上限も検討する
+                延々とcoin/leafを取得し続けるbotが成り立ってしまうため
+         ok onChain_Scoreによるexp boostは無効
+                item_wreathも表示させない
+         ok staking bonusも無効
+                メーターを貯めない
+                item_stakingも表示させない
+         ok uriで"Trial"と表示させる
+         ok presentboxはランダム送信しない
+                自分で作ったら自分でもらえる
+                → trialでは送らないこととする
+         ok summon時の条件の整備
+                trial, regularのsummonerのpossess条件に応じて、
+                trial, regularのsummonを許可・不許可する条件を整備する
+                いきなりregular summonerのsummonは許可するか？
+                trial所持 → convert許可
+                trial未所持・regular所持 → trial summon不許可・trial convert不許可
+     ** init
+            maは独立したコントラ
+            ただしmnだけは正規コントラと共通
+            mcのtransfer feeは巨大な数字
+            mp.PRICE=0
+            mp.isTrial=true
+            trialのma.address_Murasaki_Address_Regularに正規版のmaを格納する
+            regularのma.addressにはTrialのmaアドレスを格納する
+            mc_regにはtrialのconverterをpermitしておく
+            trialのffにはintervalを多めに設定しておく
+     ok コンバーターを用意する
+            mfslにconverting_summon()関数を実装する
+            まずsummonし新IDを割り振る
+            その後trialから正式へmm, ms, mssをコンバートする
+            所有trial_mcをすべて取得し、正式mcをmint、コンバートする
+        共通の情報
+            mnはtrial上で正式版をmintさせる
+                つまり、ma_trialには正規mnのアドレスを登録する
+            弊害としては、大量mintでnameが枯渇することだが、まあ大丈夫だろうか
+     ok 要修正
+            lootlike系はwalletアドレスとclassのみを参照するよう修正
+        要対策・要検討
+         ok coin/leafをひたすら掘り続けるtrial summoner
+         ok coin bank/leaf pouchを溜め込むtrial summoner
+            → 時間の制限か、total_coin/leafの制限を検討する
+         ok 長期間放置されたtrial summoner
+                石化する？
+                そのwalletで再開したいときはどうするか
+                trial summonerは石化しないようにするか
+                もしくは石化のタイミングで再mint必要にするか
+                正規summonerは石化し、trial summonerはリセットされる
+                普通に石化でも良いかもしれない
+                    trialではcureコストが0である、とする
+            trialを示すUI演出を考える
+                鬱陶しくなく、しかし変化がわかりやすく、かつ嬉しいUIが必要
+                → mogumoguさんを使う
+         ** 開始画面のUI分岐を実装する
+                trialあり/正規なし　→　trial summonerで開始
+                trialあり正規あり　→　(ありえない)
+                trialなし/正規あり　→　正規summonerで開始
+                trialなし/正規なし　→　summon画面
+            summonは必ずtrialからか、直接正規mint可とするか
+                条件を満たさないと正規へconvertできないのか、
+                feeを払えば初期から、もしくは度のタイミングでも正規summonerへconvert可能とするか
+                → Lv3でmogumoguさん出現とする
+
+ ig 体験SBTの設計
+        別のmmを用意する
+            summoner IDに紐付いたms, mss, mnも別コントラが必要
+            admin converterのようなコントラでパラメータをコンバートする必要がある
+            かなり複雑になるが、エラーなく実装できるだろうか
+        mint関数と、convert関数を別に用意する
+            convert関数は引数はsummoner IDのみとする
+                でないと引数上限に引っかかるだろうか
+            require(flag_convert=0)
+            require(owner check)
+        mint関数
+            正式mmでmintする
+            正式summoner idが割り振られる
+        convert関数
+            mint関数に続いて同一tx内でconvertする
+            convert_mm(summoner_trial, summoner)
+            convert_ms(summoner_trial, summoner)
+            convert_mss(summoner_trial, summoner)
+
+ ig free2play機構の検討、体験版機能の検討
+        いきなり$10-20払ってくれというのは参入障壁が高すぎる
+            加えて、NFTではなく移動できないSBTなので気軽に購入しにくいだろう
+            ape inした層から売れない移動できない、といった苦情やトラブルが多いと思われる
+        そのため、例えばLv3程度、最初の1週間程度は機能制限ありの体験summonerとする
+            気に入れば、正式SBTを購入して継続してプレイできる
+            このほうが、将来的な利益が大きいだろう
+        体験SBTの時は機能制限を付ける：
+            マーケットの使用不可
+                バイバックも使用不可
+            Lv4以上へあげられない
+            アイテムクラフトやfluffy NFTはどうするか
+                体験NFTとし、正式summoner mint時に正式NFTに変換される
+                正式NFTをmint可能とする
+            名前SBTはどうするか
+                特に弊害はないので正式SBTでよいだろうか
+            クラフト回数に制限をかける
+                3回、など。
+            fluffyはどうするか
+                3匹までしか得られない、など。
+        bot対策
+            体験summonerがfree mintの場合、大量にmintし運用することで
+                正式summoner側の経済が破壊されることは避けなければならない
+            例えば、正式NFTをmint可としておくと、
+                大量の体験summonerから低レベルとはいえ大量の正式NFTが放出されうる
+                bankやpouchなどが大量に出回るとまずい
+                これは公式マーケットを使用不可としていても、裏マーケットなどで起こりうること
+            また、体験summonerでひたすらcoinを掘り続けるというプレイも可能になる
+                どこかで蓄積coin<mint feeとなったところで正式summonerをmintし
+                profitを得るという力技が可能になってしまう。
+            かといって制限をかけすぎると面白くない体験playとなってしまうだろう
+                例えばNFTは一切mint/craftできない、などはつまらなさそう
+
+ ig 開始直後の調整の本質
+        初日中にゲーム性を体験できるイベントを発生させる
+            盛りすぎない、期待させすぎない
+            低頻度・長期間ほのぼのプレイであることを理解してもらう
+        3日目までは毎日新しい体験を提供する
+            1日目：
+                数回のお世話でレベルアップ
+                    Lv1 → Lv2
+                mining, farming解禁
+            2日目
+                Lv3へレベルアップ
+                crafting解禁
+                fluffyと出会う
+                    Lv3の特別報酬とするか
+            3日目
+                最初のクラフト品完成
+                    最初は低コスト、24 hrなどで完了とする
+            7日目までに
+                最低限のアイテムのクラフト完了
+                    iPad, Nameplate, MusicBoxの3つぐらい
+                    すべて資源1d, クラフト1d程度の難易度調整にする
+                    craft, 1d, coin or material: 1000程度
+        7日目までに一通りゲーム性が理解できるよう設計する
+            この7日目ぐらいで正式SBTのmintを促す
+        体験SBTの制限
+            マーケット不可
+            バイバック不可
+            Lv3上限
+        体験SBTの許可
+            名前SBTのmint
+            正式NFTのmint
+        問題点
+            体験SBTと正式SBTのIDが異なるため、lootlikeの属性が変わってしまう
+                lootlikeはwalletのみに依存させるよう修正が必要
+            無料なため、大量の体験SBTで大量のアイテムNFTをmintできてしまう
+            最初のクラフト時は低コストにする必要があるが、簡単にupgrade可能になってしまう
+                first ticketなどの別の機構が必要
+            体験SBT→正式SBTへのパラメータ引き継ぎが可能だろうか
+                msやmssなどもsummoner IDが変わるのですべてtransferする必要がある
+
+ ig mint直後の立ち上がりのバランス調整
+        流石にゲーム開始時の楽しみが弱すぎるだろう
+        初日中に何かしらのイベントを発生させる
+        1週間以内に必須のアイテムぐらいはクラフト可能にする
+        どこかのタイミングで正式SBTへの移行を促す
+        最も大事な、ゲーム開始から1-2週間のバランスを試行錯誤する
+        その後はmint feeがある意味人質になる
+            mint後は脱落者が増えるほど継続者の利益が増えるシステム
+        スタート直後：
+            presentboxを1つ同時にmintさせる
+            ないないさんを使って各種ボタンの説明を表示させる
+            24時間以内にLv2へレベルアップ可能にする
+        スタート3日後：
+            Lv3へレベルアップ可能にする
+        スタート7日後：
+            初期の1-2個のアイテムNFTをcraft完了可能にする
+            name plate, iPad, Musicbox
+        ゲーム性の中心はなにか
+            できるだけ早いタイミングで推しのゲーム性を体験してもらう
+            毎日継続してお世話することで少しずつ成長するNFT（SBT）
+                「成長」と「蓄積」を実感できる体験はなにか
+                    レベル？
+                    ステータス？
+                    資源の増加？
+            得た資源を支払って新しいNFTをmintする拡大再生産
+                拡大再生産を実感できる体験はなにか
+            目減りしない資産価値
+                バイバックで担保されたNFTの価値
+                「時価総額」としてUI内に表示させる
+
+ ig バランス調整の再考
+        優先ルール
+            2年程度で最大成長に達する
+            平均的なプレイで1週間に1個程度のitemがクラフト可能となる
+            1年で効率が2倍（+100%）程度のステータス上昇率に調整する
+        開始直後のバランス補正
+            7日間程度で一通りのゲーム性体験ができるように補正する
+            最初の3アイテムは24時間以内の難易度に設定する
+            資源あつめ1日 + クラフト1日 x 3 = 6日間、程度のバランスに補正する
+            1-2個のfluffyもボーナスでもらえる
+        バイバック調整
+            fluffy, fluffier, fluffiest, dollにも値段をつける
+            初期アイテムのコストを下げる
+                これに伴って、バイバック値段も引き下げる
+
+ ok インフォメーションの表示形式を統一する
+        クリックで表示させるのか、オーバーラップで表示させるのか
+        時間経過で消えるのか、オーバーラップ時のみ表示させるのか
+        マウスとタップで利便性が異なる
+            さて、どうするか
+        クリックで一定秒表示、が無難だろうか
+            マウスでもタップでも操作性が悪くはない
+
+ ok Buybackシステムの修正
+        fluffy NFTのbuyback価格の設定
+            fluffyは不可で、estやdollあたりからpriceを付けるか
+            どのitem levelが妥当だろうか。Lv10あたり？
+            ちゃんと計算して設定する。
+        fluffyやflyffierにも採算取れない程度に小さくて良いので価格を設定するか
+        fluffy系列分の割当も計算する
+        現在の時価総額を表示する
+            今すべてを売り切ったらいくらになるか
+            自分のHoMの金銭的価値の位置づけ
+            そしてこの最低時価総額は決して下がらず、未来に向けて必ず上昇してゆく
+        むらさきさんをburnしたらいくらか返金されるシステムはどうだろうか
+            決して目減りしないオンチェーン資産、を表現したい
+            そしてこの資産価格は継続的なゲームプレイで価値が上がってゆく
+
+ ok 初期アイテムのコスト減弱とバイバック値の減弱
+        同時にfluffyのバイバックコストの設定
+
+  ok Philandライクな戦略の検討
+        やはり何かしらのオブジェクトとしたい
+            移動可能なオブジェクト
+            おかしの家とは異なり、普遍的に発展/成長してゆく小物
+            小さな植木鉢？
+            お花のリーフはどうか
+       *独立したオブジェクトのitem_wrethとして実装させる
+            trialでは無いならば初期から所持する
+    	オンチェーンアクティビティに応じたオブジェクトを得る
+    		onChainAchievementコントラクト
+    	NFTではなくとも、落書きなど何かしらの表現を行いたい
+    	    落書きはin-gameアクティビティの表現で実装済みなので、バッティングするだろうか
+    		各PJのトレースデフォルメアイコンを用意するか
+    		    どこに表示するか
+    	また、インセンティブとしてはExp Boostボーナスを導入する
+        *よつば案：
+            1つ, 2つ, 3つ, 4つ葉の4段階
+            葉っぱが薄いor透明で現在の段階を表すか
+            もしくは、4つの別のイラストとするか
+                0-1%: 1つ葉
+                1-2%: 2つ葉
+                2-3%: 3つ葉
+                3-4%: 4つ葉
+                4%max: 4つ葉＋てんとう虫
+            マウスオーバーラップでスコア内訳を表示させる
+        スタンプ案
+            壁の空いているところにNFTをデフォルメしたスタンプを貼る
+
+ ok スナップショットスクリプトを実装する
+        pythonなどで、mm, mn, ms, mss, mns, mcの状態をローカルに記録するスクリプト
+            可能ならば、スナップショットからの回復コードの実装も検討する
+        また、ローカルに保存したデータの解析方法にも慣れておく
+
+ ok Petとのふれあい機能の実装
+        Petと当たり判定したときに専用の演出を実装する
+        ハマらないようクールタイムを用意する
+
+ ok working時にemitterを表示させる
+        mining: コインが飛び出す
+        farming: 葉っぱが降ってくる
+        crafing: ?
+
+ ok crafting UIの改善
+        item indicatorの下に進捗バーを表示させる
+        → 残り時間を％に変換するのが困難
+        → また、3日とかなので、％表記は不適切だろうか
+        → 解決した。導入OK
+    
+ ok random presentのコード修正
+        mailと同様に5回ループで候補を探すよう修正する
+        5回施行ならば：
+            active user 80%で失敗率0.032%
+            active user 50%で失敗率3.125%
+            active user 20%で失敗率32.76%
+        これならば、体験SBTと正式SBTをms内のフラグ管理しても大丈夫だろうか
+            体験SBTの20%が正式SBTに移行したとすると、成功率70%程度
+        しかし、やはり正式IDが汚染されるのは何かとコントロールが面倒そうなので、
+            正式IDを割り振るのはmint fee払ったwallet数にすべきか
+
+ ng free mintの可能性を考えてみる
+        → 体験play機構を実装することとする
+        現在の流行はfee 2 playのフリーミアムモデルが主流
+            mint feeをかけさせて2-3ヶ月で原資回収するモデルは主流ではない
+            課金しないライトユーザーは無視して、
+                ハマってくれたヘビーユーザーに青空天井の課金を促すモデル
+            また、本作品は原資回収を計算すると1年以上必要で魅力が少ない
+        よって、資金集めはdapps staking rewardを主軸とし、
+            mint feeを小さく抑えることで参入障壁を限りなく低くするモデルを考えてみる。
+            廃課金機構はつくらずに、有利に進めたい人はstaking量を多くしてもらう
+                Astarエコシステムにも良いだろう
+        デメリット：
+            dapps stakingインセンティブが現状では不十分
+                自発的にdapps stakingしてくれないと資金が入らない
+                現状、ステーキングによる恩恵が弱く、また分かりにくい
+            bot対策が弱くなる
+                mint feeを下げると大量のmulti-walletを利用したbotに脆弱になる
+                分散してstakingするのは手間ではあるのだが。
+                    しかし、stakingによるreward効率は量が増えると鈍化する設計なので、
+                    multi-walletによって分散させたstakingが最大効率になってしまうか。
+            バイバック資金の消失
+                staking rewardが貯まるには時間を要するので、
+                バイバックシステムでPJの価値を下支えすることが難しくなる。
+                参入人数が多くなればstaking報酬のみでバイバック資金を賄うのが難しくなる
+                多額のstakingをする人だけ集められればよいが、そうもいかないだろう
+                staking/wallet値はどのくらいになるのだろうか。
+                    500ぐらい行けば御の字だろうか。
+                単純な人気によってNFTの価値が決まるが、その分逃げ足も早くなるだろう
+            金銭的インセンティブの低下
+                無から有を生み出す必要があるため難易度が高くなる
+                最初の人質金が無いため、参入しやすく離れやすい
+            課金要素が貧弱
+                ヘビーユーザーからの集金機構が今のままでは弱いと思われる
+                完全なフリーミアムは課金機構とセットで考えるべきだろう。
+        メリット：
+            金たかり層を排除できる可能性
+                無料であるため、mint feeとリターンのバランスに対する不満などが出にくい
+                    原資抜きに時間がかかって怒られる、といったことが少ない
+                気楽にプレイしてもらえる
+            セキュリティ周り
+                コントラクト上にお金をプールしないので狙われにくい
+            金融性の低下
+                ユーザー側の金融要素はdapps stakingにステーキングするだけ
+                    持金を直接預けず、目減りもしないのでほぼノーリスク
+                ユーザーが原資抜きを考えなくて良い
+                開発側はdapps stakingに入れて欲しくなるシステムを作り続けるだけ
+                    staking rewardをゲーム性の中心に持ってくる改革が必要
+                トーケノミクスなどにあまり頭を悩ませなくても良いと予想される
+                総じて、のんびりプレイ可能なバランスに設計できる
+        設計：
+            mint fee
+                10 $ASTRなど少額に設定する
+                すべてdev報酬とする
+                    もしくは全てバイバックトレジャリーに入れる
+            stakingインセンティブ
+                dapps stakingをゲーム性の中心に据える必要がある
+                staking=0だと如実に不利にする
+                staking量に応じてrewardと演出が良くなる
+                ただし、継続的なgameplayが最もreward効率が高くする
+                    stakingはあくまで継続的なplayの「効率」を上昇させる
+            bot対策
+                少額でも良いのでmint feeを設定する
+                NFTのtransferにはfeeをかける
+                明らかなmulti-walletは監視して手動でbanする
+            ユーザーのearn設計
+                主な手段はcraftしたNFTの売却益となる
+                100%市場任せだと買い手がつかずにすぐに無価値化するだろうか
+                mint回数にlimitを設定し希少価値を付けるのも手だが、設計上不適切だろう
+                やはり、treasury資金によるバイバックが安定するだろうか
+                mint feeを少し多めに設定し、全額treasuryに入れるか
+            Staking Treasuryの使用方法
+                従来設計ではバイバックtreasuryに入れていた
+                ユーザーに還元したいが、適切な方法はなんだろうか
+                ユーザーとdevが同時にearnできるシステム設計にしたい
+
+ ig クラフトUIの改善
+        未クラフトアイテムをセレクトした時に、グレースケールのアイテムを表示させる
+            → 半透明とする
+        アイテム初期位置の調整
+
+ ok exp増加アイテムのsolidity実装
+        発表会、お散歩報酬、おもちゃのカンヅメ報酬などに使用する
+        一つ一つは+0.1%exp程度と小さな上昇率に留める
+        solidity実装案
+            種類ごとに別のitem_typeを用意するか？
+                countが大変なので、exp上昇率ごとに1種類にしたいところであるが
+            mcにsubtypeを実装してしまうか
+                exp補正率ごとに別typeで、その中での種類はsubtypeを参照する
+            例：
+                小さなきれいな石: すべてexp+0.03%, 色が12色ある
+                中くらいのきれいな石: すべてexp+0.05%, 色が6色ある、など
+            石シリーズ以外でも、exp+0.03%のアイテムはすべてこのitem_typeで処理する
+            amountOf * 0.03で補正率が算出しやすい
+        取得のタイミング
+            なにか特別なアクションの報酬としたい
+                散歩の報酬
+                    何も得られなかったら悲しいのでこれ以外の報酬も考える
+                発表会の報酬
+                    飾って楽しいトロフィー, シーズンごとに異なる
+
+ ok practice中のfeeding中にpracticeを抜けるとinstrumentが残っちゃうバグの修正
+
+ ok マーケットページの改善
+        → 実際の実装はdapps stakingの目処が立った後、かつローンチ後1ヶ月程度
+            よって、現時点で公開はできない。
+        情報取得のバッチ処理化
+       *バイバックシステムの組み込み
+            市場で売りに出すかバイバックするかを選択できるように
+            バイバックは気軽にはできないようにする
+        upgradeボタンの廃止
+        transfer機能はどうしようか。
+            present機能として残す。
+        transferに警告文を表示しておく。
+            「友人とのアイテムのやり取りに使用できます」
+            「present eventは監視されています」
+            「明らかにbotと思われるmulti-walletを用いたtransferは即座にbanされます」
+
+ ok バイバックシステムのUI実装
+        専用ページの用意
+            現在のバイバック価格の表示
+            バイバックボタンの実装
+            マーケットlistページと統合する？
+        意味論
+            アクティブユーザーが増えればインフレしにくくなる
+            ユーザー数に対してステーキング量が大きければインフレしやすくなる
+            脱落ユーザーはアクティブユーザーにカウントせず、
+                その分アクティブユーザー用のインフレに資金を回す
+                ただし、いきなりアクティブユーザー数で割らずに、
+                あくまで月ごとのインフレ率は小さく保つ
+            月ごとは3%-6%程度。
+                様子を見ながら調整する。
+                理想はdapps stakingで利益をとった上での定常状態化
+                アクティブユーザー数が多すぎるとインフレしにくいだろうか。
+
+ ok バイバックシステムのUIの実装
+        専用ページとするか、マーケットページに統合するか
+        マーケット売値はバイバック価格を下回れないよう修正する
+
+ ok バイバックコントラクトのテスト
+        バイバックのテスト
+        bufferVaultの挙動テスト
+        バイバックボタンの実装
+        マーケットでバイバック価格以下で売れないよう設定
+        バイバックコントラへのapproveボタンの実装
+       *必要なアマウント量で、ばいばっく済み量を考慮するよう修正する
+        コントラ内の必要量に関する考察：
+            btコントラには、active_summoner * amountPerSummoner - total_paied_amountがあれば良い
+            しかし、deactiveされたsummonerのpaied_amountを合算することが困難なため、
+            total_paied_amountを計算することができない
+            そのため、厳密には多いが、active_summoner * 現在のamountPerSummoner分だけ
+                常に入っているように計算してbufferからtransferさせる
+            active_summonerがbuyback済みであるほど、過剰量がbtに格納されることになる
+            また、各summonerはamountPerSummoner x2までbuybackすることができる
+                x2にする意味もあまりないので、ハッキング対策としてx1とする
+            bt内の量としては、active_summoner全員がamountPerSummoner x1売れるだけの量に相当する
+            もう少し減らしてstakingへ回しても良いかもしれないが、
+                蓄積金が多いのもそれはそれで良いだろうか
+            50%程度の量でも良いかもしれない。要検討。
+                しかし、ユーザーからの預り金という位置づけなので、十分量を公開する意味はあるか。
+
+ ok Practiceバグ修正
+        practice中にfeedingするとinstrumentが増殖するバグの修正
+
+ ok 楽器rarityを加味する
+        uncommon +10%
+        rare +20%
+
+ ok summonerクラスにpracticeモードを実装する
+        ルールは他のworkingと同様
+        ターゲットは部屋の中心あたり
+        practice中のアニメーションの用意
+            楽器を擬人化して一緒に遊んでいるイメージの絵
+            ランダムで歌いながら寝てしまう、など
+       *practice中のサウンドエフェクトの用意
+            楽器毎に変えずに、共通の明るいSEをあてがう
+       *終わったときの演出の検討
+            +expを表示させるか
+        
+ ok 楽器練習のUI実装
+        専用ボタンの実装
+        楽器選択のUIをどうするか。
+        習熟レベル：
+            beginner
+            talented
+            skilled
+            intermediate
+            skillful
+            seasoned
+            proficient
+            advanced
+            expert
+            master
+
+ ok 楽器練習の実装
+        意味論
+            むらさきさんの一人遊び用趣味
+            3種類の楽器ごとに異なる習熟レベルを設定する
+            楽器を指定した「れんしゅう」で習熟レベルを上げられる
+                習熟レベルの増加は遅くするか、MAXレベルをかなり大きくする
+            「れんしゅう」中の経験値はすべて楽器経験値へ転換される
+                れんしゅうした分は本体のExpが全く増えない仕様とする
+                Feedingはどうするか
+                → Feeding時はExpは増えず、れんしゅうが終わったら楽器経験値に加算する
+            Happy, Satietyが10以上でないと寝るようにする
+                寝てる間の練習時間は何も生じない
+                楽器expも本体expも加算されない
+            STR, DEX, INTの値ごとに楽器exp取得量に係数をかける
+                ステータスが小さいときはあまり楽器expが入らない
+                比例ではなくlogXグラフ
+                    ステータスが大きいほど寄与率が小さくなるモデル
+                しかし、「時間」が最も大きい資源となるバランスに設定する
+        練習実装
+            練習中のFeedingのexpは楽器expへ加算する
+            luck補正はなし
+            fluffyスコアとSTR/DEX/INT値でわずかに補正する？
+        実装未
+            ステータス補正をどこにどのくらいかけるか
+            EXPからLvを計算する計算式の決定
+                シグモイド？
+        init実装
+            init.htmlの修正
+        練習曲線
+            シグモイド曲線とする
+                Bottom	1.762
+                Hillslope	3.491
+                Top	20.46
+                EC50	15597275
+                Y=Bottom + (X^Hillslope)*(Top-Bottom)/(X^HillSlope + EC50^HillSlope)
+        パラメータ補正
+            単純に、対応するパラメータ分だけ+%ととする
+                例：STR 15 = Clarinetのdelta_sec +15%
+        楽器候補
+            ピアノ
+            バイオリン
+            クラリネット
+            トランペット/トロンボーン/チューバ/ホルン/サックス
+            チェロ/ウクレレ
+            小太鼓
+            
+ ok Practice expの加算修正
+        practice sec分はfeeding, groomingのsecとして加算しない
+        コードの実装が大変か
+        → 他のworkingと同様に、groomingのみ加算させない
+            Feedingは影響を与えない
+
+ ok バグ修正
+        ぬいちゃんクラフトのアイコン修正
+
+ ok fluffy festivalのUI改善
+        問題点：
+            festival後に結果がわからない
+            現在のfluffy所持数がわかりにくい
+        さて、どうするか。
+            もぐらさんを使うか？            
+
+ ok Astar Walletを所有する意味論の付加
+        Walletのパラメータによってin-gameインセンティブを付与する
+            保有tokenの種類, 上限1%, 0.1%/PJ
+                SDN, DOT, LAY, BAI, ARSW, ACA, MATIC, GLMR, JPYC, WETH, WBTC, aUSD, 
+            保有NFTの種類, 上限1%, 0.2%/PJ
+                CANDYGIRL, DGENE, ANAUT, ASTRJP, CAT, WITCH, Punks
+            dapps staking量, 上限1%, 0.1%/step
+                1, 500, 1000, 2000, 4000, 8000, 16000, 32000, 64000, 128000, 
+            オリジナルNFT, 上限1%, 0.1%/個
+                1-10個
+        すべてmaxとして+5%程度のEXP補正をかける
+            1項目100点で、4項目400点、+4%程度か
+            最後の1項目は、オリジナルな運営が発行するNFTとするか。
+                1日1枚発行されるAoAのむらさきさんやAstarなど。
+        現在のExp補正値を表示させる
+            クリックで補正値内訳を表示させる
+        また、Exp補正値を反映するアイテムか、落書きを表示させる        
+
+ ok クレヨンの実装
+        クレヨンクラフト後に実績落書きが表示されるように実装する
+        アイテム順を再考する
+
+ ok Murasaki_info_fromWalletの更新
+        achievementの実装
+            必要ない？
+
+ ok 集計情報
+        ユーザー数
+        石化ユーザー数
+        await web3.eth.getBalance(contract_bt.options.address) 
+        await web3.eth.getBalance(contract_bv.options.address) 
+        await web3.eth.getBalance(address_Staking_Wallet) 
+
+ ok イベント監視システムを構築する
+        眺めるようと、bot監視ように。
+        event垂れ流しを一般公開するかどうかは難しいところ。
+            テキストのストリーミング公開が難しそう
+            アクティビティが如実にわかるので冷めそうであるし
+        監視対象のコントラクト
+            mfsl
+            mffg
+            mfmf
+            mfc
+            mfn
+            mml
+            wd
+            (ff)
+
+ ok nuichanのitemIdの再実装検討
+        12種類の種類が設けられる場合、237-248を使用して別々のitemIdを当てたほうが良いか
+        あるいは, msnにtypeOfSourceパラメータを実装するか
+ ok nuiちゃんにclassパラメータを実装する？
+        mcのmemoを使うか、storage_nuiに追加するか。
+        class値は合成元のfluffyのtypeを継承する
+        → memoを実装
+        classパラメータに応じてリボンの色を変える
+    
+ ok ぬいちゃんの再実装
+        item id 197から240番台への修正
+
+ ok fluffy upgradeバグの修正
+
+ ok nyuinyuiさんのカウンターの統合
+        ロード画面とクラフト画面でカウンターを同じにする
+
+ ok bed中に行動させるとでっかくなるバグの修正
+        bedも消えてしまう
+        
+ ok ステーキング量反映アイテムの修正
+        以下のアイテムは現在のステーキング量を反映するものとする
+            鳩時計
+            金魚鉢
+            ネオンちゃん
+                ねおんふるっふぃーが必要
+            花瓶
+        それぞれ３～５段階とする
+        → *ネオンちゃんの画面を充実させる
+
+ ok wallet反映アイテムの実装
+        age反映アイテム：
+            なに？
+            → 金魚鉢
+        nonce反映アイテム：
+            時計の針を進める？
+            → 時計
+
+ ok 時計の実装
+        nonceの数に応じて長針と短針を動かす
+        長針・短針をプログラムで動かす機構を実装する
+        
+ ok fluffy houseの実装
+        fluffyとの接触処理
+        クリックでfluffyが飛び出してくる演出
+        くっついているfluffyの数に応じた段階絵
+
+ ok fishbowlの実装
+        wallet ageに応じて成長させる
+
+ ok fluffyのupgradeの実装
+        5アイテムのupgradeの実装
+
+ ok バイバックコントラの洗練
+       *アクティブユーザーのカウント方法の深慮
+            mm.next_summoner() - 1ではなく、not petrified summonersを
+                amount per summonerの分母に使用する
+            しかし、petrifiedは受動的な状態変化なので、
+                例えばpetrified時にカウントアップさせることはできない。
+            別でlast feeding timeを集計するバッチコントラを用意して、
+                adminコントラとして用意し、定期的に実行させるか。
+            last feedingよりpetrified summonerを割り出し、
+                msかmpのactive_summonersに有効summoner数を代入する関数。
+            これをbufferTreajuryのtransfer関数に組み込めればベストだが。
+            for関数のリミットはいくつだろうか。
+        あるいは, feeding時にpetrified summonerをカウント可能な機構を組み入れる
+            ある時間においてnow_time - last_feeding_time > 30dのsummonerをカウントしたい
+
+ ok 記念撮影用小物
+        むらさきさん本体
+        おにぎり
+       *さつまいも
+        ダイス
+        バイオリンバッグチャーム
+        小さなお花たくさん
+        くまさん
+        フローリングの床
+        ピンクのラグ
+        ビットコイン、イーサリアムのレプリカ
+        折り紙の本
+        アスタートークン
+        wallet
+        fluffys
+        ないないさん
+        プレゼントボックス
+
+ ok walletの状態を反映するギミックをもう少し実装する
+        所持NFT：photo frame内に表示される
+        所持token：tokenChestから出てくる
+        nonce：nonceが多いほど変化する何かを考える
+            wall stickerはやはりnonceを参照させるか。
+
+ ok fluffyシステムの個数調整
+        upgradeの個数調整
+            x3 -> x1は安すぎるか？
+            fluffy dollがあまりに量産されすぎるのも良くない
+            x3 , x4, x5と段階的に上げていっても良いか。
+        いずれにしても、要調整だろうか
+
+ ok tokenURIの実装
+        svg型tokenURIの解説：
+            https://qiita.com/hakumai-iida/items/c96d7c053379f42ba9b8
+        svg形式で絵を表示する方法を調べる
+        パラメータなどを表示したいが、クラスなどがせいぜいだろうか。
+        pngからsvgへの変換、カラー可能
+            https://onlineconvertfree.com/ja/convert/png/
+        むらさきさんの背景に、Lvやflowerなどを表示させる
+            アイコン絵をtokenURIで実装してみたい。
+            フルオンチェーンのSBT絵となる。
+        jsでwebでそのまま使用可能なコードも併せて用意する。
+        2パターン用意する
+         ok 1: mmのみで完結するtokenURI
+                むらさきさんのsvgにオーバーラップさせて最低限の情報を表示する
+                summoner ID, classのみを表示させる
+                classはflower名に置換するか
+                背景をflower colorにしても良いかもしれない
+            2: infoを反映した専用コントラのtokenURI
+                成長度を反映させたtokenURI
+                パット見てむらさきさんの成長度を視認できる情報はなんであろうか
+                    Name, Lv, age, scoreあたりだろうか。
+        svg化の手順を把握する：
+            https://qiita.com/hakumai-iida/items/c96d7c053379f42ba9b8
+            too deep stackをどうやって回避するか。
+
+ ok 実績システムのUI検討
+        一旦ボツにしたが、称号や勲章の様にあっても良いだろうか。
+        実績によって増える小さななにかを考える。
+            ちょうちょ？
+            お花？
+            小さな宝石？
+            壁にくっつくなにか？
+        これを見ることでゲームの進捗がすぐわかるように。
+            
+ ok 実績コントラクトの設計
+        実績達成をtrue/falseで判定するfunction
+            1つの実績につき1 function
+        達成済み実績をtrue/falseで記憶するstorage
+            achievement uint32[256]のようなarray
+        新たに達成した実績の数をuint32でreturnするfunction
+            もしくはarrayでreturnする
+            達成時は項目を表示させたいため
+        実績判定のタイミングをどうするか
+            mining/farmin時などにいちいち行っていたらgas代かさむか
+            level-up時にまとめて行うか
+        実績案
+            coin/material:max 500,000
+                gain 1,000
+                gain 10,000
+                gain 100,000...
+            craft:0-48
+                4,8,12,16,20,24
+                craft 10
+                craft 30
+                craft 100...
+            heart
+                received 10
+                received 30
+                received 100...
+            level-up:1-20
+                3,6,9,12,15,18
+
+ ok 動作軽量化対策
+        fpsを120などに上昇させ、何が重いのか調査する
+            全画面画像は重い？
+            透過処理画像が重い？
+        → 全画面画像が重かった
+            phaser3をupdateし、
+            かつachvをアイコン化した
+
+ ok バランス調整
+     ok item_dcテーブルの調整
+            後半のアイテムほど最低dcを大きくする
+     ok catインターバルの調整
+            5日 → 7日
+     ok fluffy必要量の調整
+            3個, 4個, 5個？
+     ok coin/materialの必要量の調整
+            後半のアイテムは3日分→5日分程度へ計算して調整
+     ng ffの補正修正
+            x2ではなくx1.5程度にする
+            → 割り算が困難なため保留
+     ok fluffy供給量の調整
+            現在のバランスだと0.5日に1個で多すぎるか
+            → cat-mailを7dに変更、stakingはmaxは出ないので大丈夫だろうか
+            また、fluffy合成コストを上昇、estができにくくなった。
+
+ ok marketコントラクトの修正
+        新maに対応させる
+
+ ok priceの係数計算
+        10**18で取得されるので整数化する
+
+ ok tokenURIの再実装
+        mcのuriにpngへのURLを返すように設定する
+
+ ok Treasuryシステムの刷新
+        mint feeの取り扱いと脱ポンジ
+            old userのbuybackTreajury分をnew userのmint feeで賄う構図は避ける
+            mint feeはbufferVaultへは入れない
+            即座にdev wallet, staking wallet, buybackTreasuryへ分割送金する
+        資金場所
+            BufferVault：コントラクト
+                全ての資金は一旦ここに集められる
+                Mint feeもここに入れることとする
+            BuybackTreajury：コントラクト
+                月に1回、資金量を増減させて調整する
+                常にactive user数 * amount per user量を確保する
+            StakingWallet：EOA
+                残りの資金はここに格納される
+                dApps stakingへ全額ステークする
+                余計なtxは飛ばさないように注意する
+            Administrator Wallet：EOA
+                全コントラクトの所有権を有する
+                必要な時だけ、コントラクトのメンテナンスを行う
+                余計なtxは飛ばさないように注意する
+            Developer wallet：EOA
+                BufferVaultから5% * 2を2つのプライベートwalletへ移動する            
+        BufferVaultからの資金移動を関数化する
+            Staking wallet -> BufferVaultは事前に手動で行う
+            BufferVault <-> BuybackTreajury, 相互移動
+            BufferVault -> Developer wallets, 5% x 2
+            BufferVault -> Staking Wallet, 残った資金全部, bufferをカラにする
+        手順：
+            手動でbuybackTreajuryにnot active user数を設定する
+                all user - not active user = active user数を算出する
+            手動でbufferTreajuryにインフレ率を設定する
+                関数でそのインフレ率を達成するために必要なamountを算出する
+            手動で不足amount分をstaking walletからbufferTreajuryへ送金する
+                不足しないようにインフレ率を設定したいところ
+                あるいはインフレ率を達成するamountがbufferに貯まるまで待つ
+            コントラで、buffer -> buyback, dev wallets, staking walletへの送金を一度に行う。
+                dev wallet: 5%
+                buyback: インフレ率を達成する分
+                staking: 残り全て
+            buybackに余剰資金がある場合は資金を逆流させる
+                not active userを設定した直後はbuyback価格が上昇してしまうので、
+                このタイミングでbuybackされない機構を考える。
+
+ ok buybackTreajuryの改善
+        active userの増減によってはbuyback -> bufferへと移動させることも必要になる
+        active user数を取得した上でインフレ率を計算するよう修正する
+        手順としては：
+            インフレ率を手動で設定
+            脱落ユーザー数を手動で集計して設定
+            インフレ率に基づいて、buybackTreajury <-> BufferTreajuryの資金移動を行う
+                これはコントラクトコードで実装する
+            続く処理でbufferTreajuryに残った資金はteamTreajuryへと移動する
+
+ ok コントラクトのuint32修正
+        エラーのもとで煩わしいので、全てuintへ置換する
+        コードとabiの全置換が必要
+    
+ ok wallet infoコントラの実装
+        web3精神を表すため
+        summoner infoとは異なり、情報はある程度吟味してもよいか
+        システムがほぼ完成してからで良いだろうか
+
+ ok winner fluffyの演出の実装
+        お花つける？
+        パーティー帽子？
+        パーティクルを使用する？
+
+ ok マーケットルールの改善
+        transfer fee導入後はsell即buyのitem移動が発生しうる
+        最低listing価格を決めておくか？
+            この場合、最低価格よりbuyback価格が低ければ印象が悪いだろう
+        0.1 $ASTRぐらいか？
+            しかし、0.1 * 0.05 $ASTRでアイテムの移動ができてしまうので、
+            list&buyを利用したmulti-walletは防げないだろうか。
+        offeringシステムを実装できれば、市場に最低価格を決めてもらうことができる。
+        summonerを有するwalletしかマーケットコントラを使えないので、
+            コントラをつかったlist&buyボットは使用することはできない。
+            手動でも十分だろうが。
+        つまり、event監視型の防衛botは運用可能
+            最低価格でlistされたものを監視して即座に買い取る防衛型bot
+            伝統金融では市場操作になって違法なのだろうが。
+
+ ok crafting windowのUI整理
+        crafting中itemの表示周りが弱い
+            ウィンドウを閉じるときしか更新しないので、
+            なにかの表紙にselect itemになるとずっとそのまま。
+            今何を作っているか不明なこともママある。
+        crafting中は定期的にselect itemをチェックして書き換える機構を実装する
+        また、resumeがあるときは残り時間とアイテム名を表示し続ける
+            itemをセレクトしても反映させない
+        cancelボタンの配置場所が難しい。
+
+ ok Fluffiestの動作バグ修正
+        画面外へ逃げていってしまう。
+
+ ok 発行上限を実装する
+        事故防止と、何かしらの希少価値をつけるため。
+        初期にadminのみmintする時など。
+
+ ok transfer feeの導入
+        https://github.com/ethereum/EIPs/issues/2665
+        やはりtransfer feeで複アカの効率をコントロールする戦略が、
+            UI的にもわかりやすいだろう
+        activationはUIの作り込みが少し面倒。
+            あとitem calculationが大変。
+            別にactivated count_of_typeの実装が必要
+            また、着払いはなんか嫌であるし。
+        複アカ使ってでもプレイしたい人は手数料を落としてもらう。
+            普通のプレイでは障害にならないfeeであるし。
+            もちろん、過剰な複アカのbottingは処罰する
+        将来的にopean seaやtofu NFT等を使えるよう、noFee addressの機構を組み込む
+        noFee address:
+            buybackTreasury
+            Market
+
+ ok murasaki_craftのitem移行関数の実装
+        next_itemの書き換えの実装
+        旧コントラからidを指定して新コントラにmintさせる関数の実装
+            制限をゆるくしたcraftを用意する
+            この際、item_idは異なっても仕方ないとする
+            item_idを指定してこのrecraft関数を叩く関数も用意する
+        すべてrecraftし終えたら、最後にnext_itemを修正して完了
+
+ ok msg.sender周りのコードの修正
+        もしかしたら、msg.senderはpublic, internal, externalで挙動が変わるのかも
+        同じコントラ内でも関数から呼び出される場合は、internalとpublicで中身が違う？
+        mining/farmingの数がtx前後で一致しないのはこれが原因だったのか？
+            msg.senderをつかってitem_countingしているため。
+        実験して把握すること。
+        どうやら、viewはmsg.senderが0になってしまうようだ！
+            https://medium.com/nayuta-inc/ethereum-solidity%E3%81%AEmsg-sender-f8c34c5653a4
+        これを回避するために、ownerはsummonerから逆引きを徹底する
+        むしろ、mining/farmingでmsg.senderを使ってしまうと、
+            他人のsummonerに自分のwalletのitem補正がかかってしまう。
+        一度msg.sender周りのコードを丁寧に洗い出すこと。
+            msg.senderの使用はcheck_summoner時以外は極力避ける。
+            また、check_summoner時もweb3js側でfrom:walletしていないとmsg.senderが0になる。
+            Remixのcallは自動的にfrom:walletが付くためわかりにくかった。
+        無用なエラーを避けるため、summoner主体のコードに修正する。
+            owner walletから直接叩くfunctionでのみmsg.senderを使う
+            むしろ、msg.senderはcheckOwner以外には使わない。
+
+ ok fluffy festivalのバグ修正
+        2人目が投票できないバグあり
+        isVotableがtrueにならない模様
+        msg.senderが原因か？要究明
+
+ ok SBTの規格合わせ
+        あまり有名ではないBadgeコードを使っている
+        これを所持上限1, non-transferableなERC721とする。
+        ERC721を利用したSBT例：
+            https://docs.chainstack.com/tutorials/gnosis/simple-soulbound-token-with-remix-and-openzeppelin#create-and-compile-the-soulbound-contract
+            _beforeTokenTransferを利用してnon-transferableを実装している
+            あとはこれにpossession limit = 1を組み込めば行けるか
+        ERC721に実装されていなtokenOfも実装する
+            現状、他で使用しているbadge由来のインターフェイスはtokenOfのみ。
+            tokenOfさえ実装しておけば、ERC721由来だろうがBadgeだろうが問題なし。
+
+ ok 移行戦略
+        mm, ms, mc, mss
+        一度新コントラで完全に動作を確認してから、
+        旧mm -> 新mmなどとパラメータをコピーする
+        mnは再ミントしてもらうこととする。
+        手順：
+            mcは1つもmintしてはいけない。
+            mcはaddress(0)もコンバート可能。何も考えずに1からコンバートする。
+            contract_adminを用意
+            contract_adminをmcとmsへadd_permitted
+            msとmcをコンバート
+
+ ok 新craftボタンの実装
+        start, pause, resume, cancel, completeの5つのtxを飛ばす
+        start/resume button
+            このときcancel buttonを少し離して表示
+        pause/complete button
+
+ ok craftingのレジューム機能の実装
+        craftカウンターはstart時にのみ決定される
+            statusによってカウンターの多さが異なる
+        中断時にレベルアップしたとしても、カウンターには影響しない
+        カウンターの進みは単純に秒数で減らす
+        start時に大量にアイテムを抱えてブーストすることもできるが、
+            transfer feeがあるのであまり問題にはならないだろうか。
+        calc_craftingは_dcからdelta_secを引いて残り時間を計算している
+            つまり、_toResume_dcをmsに記録しておき、
+            _toResume_dc>0ならばクラフト途中ということになる。
+            あとはstart_craft時に元の_dcの代わりに、
+            目減りした_toResume_dcを代入すれば良い。
+        上記の機構を実装する。
+            また、start -> 中断 -> cancel or resumeを選択させるUIとする。
+            つまり、中断中はcancelとresumeの2つのボタンを表示させる。
+
+ ok 存在しないsummoner指定時のバグ修正
+        isActive = falseのパターンと
+        まだsummonされていないパターンとある
+        また、petrifiedの動作もうまくいくか確認する
+
+ ok presentboxを開いた時に少しExpを得られるようにするか
+        ちょっとだけ嬉しいように。+50ぐらい。
+        1日のEXP量が+1000～2000, 平均+1500ぐらい。
+        +50で3%, +100で6%程度。
+        +50程度が妥当か。
+        presentboxは...
+            staking: 1/7d
+            mail: 2/5d
+            craft: 1/7d
+            festival: 1/30d
+            = 4/7d, 0.5/dぐらい
+        こまめに受け取れば、平均して+1-2% EXP効率がupする程度。
+        +100にすると、+3% up程度。
+        mpに記録して可変とする。
+            ひとまず+50で運用する
+
+ ok summon時の演出の改善
+        花火
+        on_click()
+
+ ok Level<3でvotingできないことの表示
+        →むしろできるようにするか
+        Level制限撤廃
+    
+ ok select itemはlevel 3から表示とする
+
+ ok Fluffy DollのLUK補正の実装
+        +0%だった。
+        LUK補正　＋　Exp補正　にするか。
+        EXP補正+3%はLUK+3.00相当で強力だが、
+            クラフトによってLUKが下がるのはあまりよろしくないだろう。
+        fluffy dollはfluffy x27個分
+        1ヶ月で10-15個とすると、2ヶ月で作成可能
+        また、市場で買えばもっと早めに作成可能
+            流石に安すぎるだろうか。
+            Lvキャップがあるのでバランス崩壊とはならないだろうが。
+                +0.4/Lv, +8/20Lvが上限
+        x3でup-gradeではなく、x4でup-gradeとするか？
+        x3で+33%は破格か？
+
+ ok Fluffy FestivalコントラのEvent実装
+        全く作っていなかった
+        start_voting
+        voting
+        end_voting
+
+ ok マーケットルールの改善
+        coin/leaf bagは70%しかearnできないようにする
+            移動手数料30%
+            miner/farmerキャラの抑制
+            自分でmining/farmingするインセンティブを大きくする
+     ng crafter royaltyの導入を検討する
+            platform feeとcrafter royaltyを別に設定する
+            しかし、upgrade素材に使われるとcrafter royaltyは消滅するのだが。
+            upgradeで生じたitemのcrafterはupgradeしたキャラとなるため。
+            fluffy dollについてはcrafter royaltyはある程度有効に働くだろうか。
+
+ ok ランダム住所の導入
+        lootlikeの拡張
+            320 Martin Ave/St, Tucson, AZ, USA
+            house #1, 0x2F7...8805, (Xxx) Ave/St, (Yyy), Astar Network EVM, United Chains of Polkadot, Web3.
+        通りの名前と、町の名前の2箇所を考える。
+
+ ig burn周りのコード改善
+        burnはpermitted addressなら自由に行えてしまう
+            NFTとSBTはユーザーの資産で、運営が全くタッチできない機構にするべき。
+            故に設計はシンプルかつ慎重に。
+        NFTとSBTについては、ユーザーの資産なので
+            ユーザーの許可がないとtransfer, burnできない設計にすることが望ましい。
+            運営側がいつでもburn可能な機構を残しておくのは印象が良くない。
+            仮に、将来高額の値段がついた際にネックになるし、
+            そもそもこういったユーザーがコントロールできない機構のNFTは
+            信用が低く価値が上がりにくいだろう。
+        ユーザーの許可を必要とするapprove & transferへと改善したいところだが。
+            しかしそうすると、upgradeにapproveが必要になってしまう。
+            approveのUIをどうするか。
+        改善が必要な機構：
+            ★ upgrade時のapprove不要のburn
+            しかしapproveが必要なfunctionが複数ありUIが阻害される
+        ひとまず、add permissionが可能なownerの権限を将来破棄する、という宣言で許してもらうか。
+        しかし、やはりNFTが勝手にburnされるのは良くないだろうか。
+            一応funcionコントラクトではowner checkはしているのだが。
+        別に一点物の絵画のような価値を付与したいのではなく、
+            あくまで運営の箱庭内の価値を担保できれば良いと考えるか。
+
+ ok change logの書き方
+        https://blog.yux3.net/entry/2017/05/04/035811
+
+ ok SummonページのUIの改善
+        最初は寝ている？表示させない？
+        summon直後の演出
+        Summonウィンドウでの選択はcolorのままで良いか？
+
+ ok Concepts
+        What's This?
+            Game Dapp on the Astar Network using NTT (SBT, Soul Bound Token) and NFT. 
+        What's the Concept?
+            Murasaki-san is the digital pet living in your wallet.
+            Murasaki-san and the house 
+        What is Murasaki-san?
+            One day, when I asked a friend to "create an original character that doesn't exist anywhere else", murasaki-san was born on the edge of our sketchbook.
+            Well, we all know that the name, Murasaki-san, is a bit strange: murasaki-san means "Mr. Purple" in Japanese.
+            My friend first painted this little character purple so we could only call it murasaki-san and we finally ended up naming it "Murasaki-san", even though it's actually a little pink.
+            That's why I started creating on a game to move, take care of, and grow murasaki-san. It was just two weeks after Astar Network launched.
+            After about a year of development, we are happy to launch House of Murasaki-san on Astar Network :). Cheers to ASTAR!
+        How to Play?
+            ・Mint your murasaki-san. Attention, it's NOT NFT but or SBT(NTT).
+            ・Feeding and Grooming your murasaki-san to ean EXP.
+            ・You can Level up your murasaki-san by accumulating EXP.
+            ・Work your murasaki-san for Mining to earn Coin or Farming to earn Leaf.
+            ・Murasaki-san can Crafting to mint item NFT.
+            ・House of murasaki-san will become more and more lively as you continue to take care of your murasaki-san diligently.
+        What's the Cost to Start?
+            200 $ASTR to mint your murasaki-san.
+            The mint price will inflate little by little as the game economy expands.
+            (Example: 3% inflation after a month, 206 $ASTR)
+        Dapps Staking Bonus!
+            There are in-game bonuses depending on the dapps staking amount!
+            ・You will get an extra presentbox. The higher the staking amount, the shorter the interval until the gift.
+            ・Some items change the picture or animation according to your staking amount.
+              Observe carefully, or spoiled below.
+        Attention Please!
+            Murasaki-san is not NFT but SBT. Cannot be transferred or sold.
+            If you leave your character alone for too long, you will receive a penalty.It will cost you to restart.
+        Item Market
+            Items can be freely bought and sold on the market with 5% commision.
+            We have not own token and $ASTR is used as trading currency.
+        Easy to Earn?
+            
+        Game Specifications
+            Status Details
+            Item Upgrading
+            All Item Details
+            Lucky Dice System
+            Buyback System
+            Taking care of other murasaki-san
+            About Fluffy: Overview
+            About Fluffy: Cat-mail Communication
+            About Fluffy: Crafting Bonus
+            About Fluffy: Fluffy Festival
+            About Fluffy: Dapps Staking Bonus
+        More Detailed Specifications
+            calculation methods
+        Economy Design
+            
+        Future Plan
+            Our top priority is to fix bags and control inflation rate.
+            It takes about two years for House of Murasaki-san to reach maximum growth.
+            Before that, we planed to create the next product using information of your murasaki-san SBT.
+            Since Astar Network supports both EVM and WASM, we are planning to create the next game on WASM with Rust, and interacting this House of Murasaki-san through XCM.
+            (Well, the coder is studying rust right now :) )
+        Who Are You?
+            Ordinary people who like Astar Network and Web3.
+            This is our fan project to support Astar blockchain.
+            Coder: degupoppo (wallet, twitter)
+            Illustrator: fumamo (wallet, twitter)
+            Any donation is greatly appreciated :)
+        Terms of Service
+            botting
+            multi-wallet
+        Special Thanks
+            Kokaon Lab      https://soundeffect-lab.info/
+            OtoLogic        https://otologic.jp/
+            Simple.css      https://simplecss.org/
+            DOVA-SYNDROME   https://dova-s.jp/
+        要検討
+            ２～３の複数アカウントは制限するか
+            直コンは制限するか
+
+ ok コンセプトの整理：簡潔にわかりやすく
+        これはなに？ What's This?
+            Astar Networkを利用したgame dapps
+            NTT（SBT）とNFTを利用した育成ゲーム
+        コンセプトはなに？ What's the concept?
+            あなたのwalletに住む電子ペットがコンセプト
+            また、私達製作者自身が遊んでて楽しいと思えるものを作っています。
+        どうやってあそぶの？ How to Play?
+            ゲームはゆっくり進みます。最も価値のある資源は「時間」です。
+            1日2回はご飯を上げる
+            3日に1回はなでてあげる
+            coin/leafを貯めさせて, item NFTをcraftさせる
+            忘れず献身的にお世話してあげると、あなたのHoMはどんどんにぎやかになってゆきます。
+        値段は What's the Cost?
+            200 $ASTR
+            priceはごく緩やかにインフレしていきます。
+            （1ヶ月後予定：210 $ASTR, +5%）
+        ステーキングをよろしく！ Dapps staking bonus!
+            presentboxがもらえます
+                より多くstakingすると短いスパンでもらえます
+            一部のアイテムの表現が変化します
+                よーく見てみてください。あるいは以下でスポイルされています。
+        ご注意ください, Attention Please
+            ・murasaki-san自体はNFTではなくNTT/SBTです。譲渡・売買は一切できません。
+            ・クラフトしたitem NFTはマーケットで自由に移動できます。
+            ・長く放置するとペナルティを受け、再開にコストが必要です。
+            ・
+        稼げる？ Easy to Earn ?
+            Don't expect too much.
+            ★かんたんに稼ぐ方法はありません★
+            できるだけゆるく長く続けたいと思っています。
+            独自トークンなし
+            ゲームの中心のキャラクターはNFTではないため売買不可
+            バイバックシステムの価格は絶対に下がらず、ゆっくりとインフレしてゆきます。
+                つまり、gameをexitするときは、
+                バイバックシステムですべて最低価格で売り切れることが確約されています。
+            この作品が注目されればNFTの価格が一時的に上昇することもあるかもしれませんし、
+                運良く儲かるかも知れませんが、一時的なものだと思われます。
+        仕様について Game Specifications
+            4つのステータスとNFT itemによる補正について
+            アイテムのアップグレードについて
+            presentboxとfluffyについて：概要
+            fluffyについて：cat mailについて
+            fluffyについて：festivalについて
+            fluffyについて：craft bonusについて
+            fluffyについて：ぬいちゃんについて
+            fluffyについて：dapps stakingボーナスについて
+            アイテムマーケットについて
+            全アイテムの詳細について
+            他のmurasaki-sanのお世話について
+        より詳しい仕様について more detailed game specifications
+            レベルとアイテムによるSTR, DEXの補正式
+            LUKによるクリティカルの補正式
+            INTによるクラフトレベルの補正式
+            バイバックトレジャリーの計算式
+                Mint priceとインフレ率について
+                作品は一般的にその価格で評価されがちです。
+                そのため、低いながらも緩やかに上昇し続ける価格メカニズムを導入しました。
+            コントラクト構成について
+            dapps stakingボーナスの計算式
+                影響を受けるアイテムについて
+            生誕秘話
+            キャラクター紹介
+                murasaki-san
+                fluffy
+                nainai-san
+                nyuinyui-san
+                    illustratorがアンニュイな気分で描いた子
+                neon-san
+                    コーダーが息抜きで描いた子
+                nayon-san
+                    illustratorが昔飼ってた猫がモデル
+                Astar/Ether/Bitco
+                    コーディングの合間に描いた生物たち
+        今後は？, future plan?
+            ゲームが最大成長するまでおよそ2年で設計しています
+            その時間の間に、この作品を更に拡張させるか、
+            あるいはmurasaki-san SBTの情報を使った次の作品を作りたいと思っています。
+            （進捗度：1%）
+            AstarはXCMが使える予定のため、次回作はWASMで作成予定です。
+                WASM環境は構築済み、現在coderはrustを勉強中です
+                フロントエンドエンジンは未定ですが、Bevyエンジンに興味を持っています
+        あなたはだれ？ Who are you?
+            ただのAstarファンの一般人2人です。
+            個人の趣味プロジェクトのため、マンパワーには限りがあります。
+            生暖かく見守ってください。
+            どんなトークンの寄付も大歓迎です。
+            Coder address:
+            Illustrator address:
 
 //### Picture
 

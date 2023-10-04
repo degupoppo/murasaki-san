@@ -70,6 +70,7 @@ function start_eventMonitor() {
     get_recent_activity(contract_mfp_wss, li_eventLog);
     get_recent_activity(contract_st_wss, li_eventLog);
     get_recent_activity(contract_trial_tc_wss, li_eventLog);
+    get_recent_activity(contract_pf_wss, li_eventLog);
 
     //start realtime monitoring
     eventMonitor(contract_mfsl_wss, li_eventLog);
@@ -85,6 +86,7 @@ function start_eventMonitor() {
     eventMonitor(contract_mfp_wss, li_eventLog);
     eventMonitor(contract_st_wss, li_eventLog);
     eventMonitor(contract_trial_tc_wss, li_eventLog);
+    eventMonitor(contract_pf_wss, li_eventLog);
 }
 
 function _show_realtimeLog() {

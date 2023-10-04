@@ -11853,7 +11853,7 @@ contract BufferVault is Ownable, ReentrancyGuard, Pausable {
 }
 
 
-//---BuybackTreasury
+//---BuybackTreasury*
 
 //for buyback items
 contract BuybackTreasury is Ownable, ReentrancyGuard, Pausable {
@@ -12130,11 +12130,11 @@ contract BuybackTreasury is Ownable, ReentrancyGuard, Pausable {
         //update amount paied
         amountPaied[_summoner] += _price;
         amountPaied_total += _price;
-        //pay
-        payable(msg.sender).transfer(_price);
         //do not exceed amount per summoner after paying
         //require(amountPaied[_summoner] <= amountPerSummoner * 2);
         require(amountPaied[_summoner] <= amountPerSummoner);
+        //pay
+        payable(msg.sender).transfer(_price);
         //event
         emit Buyback(_summoner, _item, _price);
     }
