@@ -1,6 +1,7 @@
 
 
-version = "v0.1.18";
+//231004
+version = "v0.1.19";
 
 
 //===Header==================================================================================
@@ -91,6 +92,10 @@ contract ERC721 is IERC721 {
 
 
     要修正・検討
+        pippelの出現サウンドの修正
+            生成音声に置換する
+     ok desktopアプリにpippel出現アイコンを実装する
+        fluffyポンチ絵のpresentboxの絵を修正
         pippelにレベルキャップを導入
             Lv5以上など、特定の条件を決める
             コントラのpippel_appearanceチェックに導入する
@@ -170,19 +175,6 @@ contract ERC721 is IERC721 {
         変数書き換え対策の実装, さてどうするか
 
 
-    HP修正
-        エコノミーの区分に加筆
-            ポンジ型なのか、バイバック型なのか、原資回収について記載
-                全員が儲かるモデル
-                ただし、原資回収には1年以上かかる
-            原資を超えるタイミングをグラフで計算してみる
-                まず-500でスタートし、通常プレイでどのあたりで原資回復できるのかのイメージグラフ
-            NFTの最低価格に対して"trustless"なシステムを目指す
-                dapps stakingとbuyback systemでコントラクトでtrustされている
-        pippelの説明文を記載する
-            fomulraに出現率とスコア補正値を記載
-
-
     ツイートボタンの設置
         ハッシュタグと、進捗を端的に表す一枚絵をツイートするボタン。
         一枚絵の案
@@ -228,6 +220,59 @@ contract ERC721 is IERC721 {
             happy, satietyに応じたアイコン
 
 
+    TBAについて詰めるII
+        Registryのaccount()に情報を入力すれば該当のTBAアドレスが参照できる
+        Registryでcreate()することでTBAを対象にnonce()やexecuteCall()が可能になる
+        TBAの操作は、account()で入手したアドレスを、AccountのABIで読み込む。
+        Accountはcreate()の前にデプロイしてアドレスを入手しておく。
+        このAccountのアドレスを用いてRegistryでcreate()することになる。
+        create()で生成された、あるいはaccount()で取得できるアドレスは、
+            AccountのABIで読み込むことができる。
+        Registryのcreate()はいつ行うか。
+            TBA内のNFTを動かさなければ行わなくても良いのだが。
+            create()の許可はどうするか。
+            permitted_addressのみ許可すると、別にfunctionコントラを作成可能
+            ある一定の進捗でTBAをmint可能で操作できるようになる、なども可能。
+       *Registryでcreate()済みかどうかはどのように判定するのか
+            最初のpippelをmintする時に、TBAの有無をチェックしてcreate()させるか。
+        現在のアドレス
+            ERC6551Registry
+                0x0fc20b4D97778d74De766DA7009Cf25B86b8F078
+            ERC6551Account
+                0x19A7865f181F18Af789D19BA1A3f5797945b64DF
+        Registryのaccount情報
+            implementation: 0x19A7865f181F18Af789D19BA1A3f5797945b64DF //ERC6551Account
+            chainId:        4369
+            tokenContract:  0x4925561b0a524B98F950F07A40F6DFc70B64CaD5  //mm
+            tokenId:        (summoner id)
+            salt:           6539
+
+
+    Strollのテストプレイ
+        itemエアドロしてテストプレイを繰り返す。
+        絵の置換
+        お散歩時間の吟味
+            4時間で固定にするか
+            出発時に1, 2, 4時間を選択し、長いほうが効率よくするか
+            1時間以上経過でいつでも帰宅可能で、4時間経つと寝てしまうとするか。
+     ok 片方ではmetとなっているのに、相手ではmetにならないバグの修正
+        ms.etherでエラーとなるバグの修正
+    
+
+    構想：staking walletの管理方法について深慮する
+        個人が管理するEOAで良いだろうか。
+        せめてマルチシグにするべきだろう。
+            マルチシグEOAの作成方法は？
+        他のDAOの、トレジャリーウォレットの管理方法について調べる
+            個人が管理可能なEOAが主流なのか
+            オンチェーンガバナンスはどの様に実装しているのか。
+            Nouns DAOなどが参考になるだろうか。
+            → コントラクトで管理されているようだ。
+                NounsDAOExecutor
+                本物？
+                https://etherscan.io/address/0xd5f279ff9EB21c6D40C8f345a66f2751C4eeA1fB#code
+
+
     NFT売買に対するゲーム性の付与について考える
         NFTのマーケットは、リタイアプレイヤーの資産整理や、
             効率プレイヤーの課金の場にしかならないだろうか。
@@ -262,7 +307,7 @@ contract ERC721 is IERC721 {
         admin_wallet        全コントラをdeployし管理するowner wallet
         
 
-    投機活動の想定
+    投機活動の想定と対策
         破壊的活動、アービトラージ、利益をかすめ取る活動の想定は？
             性悪説に則って考えてみる。
             すべての悪意を想定することはできないので、
@@ -303,35 +348,13 @@ contract ERC721 is IERC721 {
             よって、アービトラージの機会は極力排除したい。
             マーケットプレイスはSBTを持つwalletしか使用できず、
                 アービトラージをするにしても初期費用の支払と継続プレイが求められる。
-            保護・閉じた経済が成功しにくい点は、どうするか。
-
-
-    TBAについて詰めるII
-        Registryのaccount()に情報を入力すれば該当のTBAアドレスが参照できる
-        Registryでcreate()することでTBAを対象にnonce()やexecuteCall()が可能になる
-        TBAの操作は、account()で入手したアドレスを、AccountのABIで読み込む。
-        Accountはcreate()の前にデプロイしてアドレスを入手しておく。
-        このAccountのアドレスを用いてRegistryでcreate()することになる。
-        create()で生成された、あるいはaccount()で取得できるアドレスは、
-            AccountのABIで読み込むことができる。
-        Registryのcreate()はいつ行うか。
-            TBA内のNFTを動かさなければ行わなくても良いのだが。
-            create()の許可はどうするか。
-            permitted_addressのみ許可すると、別にfunctionコントラを作成可能
-            ある一定の進捗でTBAをmint可能で操作できるようになる、なども可能。
-       *Registryでcreate()済みかどうかはどのように判定するのか
-            最初のpippelをmintする時に、TBAの有無をチェックしてcreate()させるか。
-        現在のアドレス
-            ERC6551Registry
-                0x0fc20b4D97778d74De766DA7009Cf25B86b8F078
-            ERC6551Account
-                0x19A7865f181F18Af789D19BA1A3f5797945b64DF
-        Registryのaccount情報
-            implementation: 0x19A7865f181F18Af789D19BA1A3f5797945b64DF //ERC6551Account
-            chainId:        4369
-            tokenContract:  0x4925561b0a524B98F950F07A40F6DFc70B64CaD5  //mm
-            tokenId:        (summoner id)
-            salt:           6539
+        保護・閉じた経済が成功しにくい点は、どう考えるか。
+            polkadotが高度にルールで縛られた硬い経済圏であったのだが、
+                現状、ユーザーの自発的参加による玉石混交で発展し続けた
+                イーサリアム経済圏に押し負けてしまったように見える。
+            そもそもゲーム経済なので、完全に閉じた経済圏でも良い気もする。
+            オープンな経済はユーザーの能動的な参入に有利であるが、
+                そもそもゲームの小規模経済なので、能動的参入を期待してはならないだろう。
 
 
     dApps Stakingの改善
@@ -399,17 +422,6 @@ contract ERC721 is IERC721 {
                 select -> approve -> exchange!
                 attensiionでexchangeすると該当NFTを失うことを明記する
 
-
-    Strollのテストプレイ
-        itemエアドロしてテストプレイを繰り返す。
-        絵の置換
-        お散歩時間の吟味
-            4時間で固定にするか
-            出発時に1, 2, 4時間を選択し、長いほうが効率よくするか
-            1時間以上経過でいつでも帰宅可能で、4時間経つと寝てしまうとするか。
-     ok 片方ではmetとなっているのに、相手ではmetにならないバグの修正
-        ms.etherでエラーとなるバグの修正
-    
 
     Practiceのテストプレイ
         itemエアドロとテストプレイ
@@ -1365,6 +1377,19 @@ contract ERC721 is IERC721 {
 
 
 //### 3rd
+
+ ok HP修正
+     ok エコノミーの区分に加筆
+            「原資回収」のセクションを設ける
+            ポンジ型なのか、バイバック型なのか、原資回収について記載
+                全員が儲かるモデル
+                ただし、原資回収には1年以上かかる
+            原資を超えるタイミングをグラフで計算してみる
+                まず-500でスタートし、通常プレイでどのあたりで原資回復できるのかのイメージグラフ
+            NFTの最低価格に対して"trustless"なシステムを目指す
+                dapps stakingとbuyback systemでコントラクトでtrustされている
+     ok pippelの説明文を記載する
+            fomulraに出現率とスコア補正値を記載
 
 */
 
@@ -11620,7 +11645,7 @@ async function draw_pippelSummary (scene) {
     }
 
     // draw each pippel
-    let _count = 0;
+    let _count = 1;
     let _intervalMSec = 1000 / _countTotal; // draw all in 2 sec
     for (let i=0; i<_countTotal; i++) {
         // exec _do() with timeOut
@@ -12210,6 +12235,7 @@ function preload(scene) {
     scene.load.audio("woodcube", "src/sound/woodcube.mp3");
     scene.load.audio("ufo", "src/sound/ufo.mp3");
     scene.load.audio("wheel", "src/sound/wheel.mp3");
+    scene.load.audio("pippel", "src/sound/pippel.wav");
 
     //---particles
     //https://codepen.io/samme/pen/eYEearb
@@ -13425,6 +13451,7 @@ function create(scene) {
     sound_woodcube = scene.sound.add("woodcube", {volume:0.4});
     sound_ufo = scene.sound.add("ufo", {volume:0.1});
     sound_wheel = scene.sound.add("wheel", {volume:0.1});
+    sound_pippel = scene.sound.add("pippel", {volume:0.1});
 
 
     //---system message
@@ -14353,6 +14380,7 @@ function create(scene) {
         .setOrigin(0.5)
         .setScale(0.25)
         .setDepth(3000)
+        .setVisible(false)
         .setInteractive({useHandCursor: true})
         .on("pointerdown", () => {
             sound_button_on.play();
@@ -18788,17 +18816,26 @@ function update_checkItem(this_scene) {
     
     //### pippel
     if (local_check_pippel == 1 && count_sync >= 2) {
+        // when just pippel appearing
         if (pippel_basic.visible == false) {
             pippel_basic.visible = true;
             draw_flower3(this_scene, pippel_basic.x, pippel_basic.y);
             murasakisan.on_click();
+            sound_pippel.play();
         }
     } else {
+        // when pippel mint
+        if (
+            pippel_basic.visible == true
+            && local_pippel_score != previous_local_pippel_score
+        ) {
+            draw_flower3(this_scene, pippel_house.x, pippel_house.y);
+            sound_hat.play();
+        }
         pippel_basic.visible = false;
     }
     
     //### pippel house
-    //***TODO***
     if (local_pippel_score > 0 && typeof pippel_house == "undefined") {
         let _x = 460;
         let _y = 170;
