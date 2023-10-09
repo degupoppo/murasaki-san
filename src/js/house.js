@@ -1,7 +1,7 @@
 
 
-//231004
-version = "v0.1.19";
+//231005
+version = "v0.1.20";
 
 
 //===Header==================================================================================
@@ -92,6 +92,8 @@ contract ERC721 is IERC721 {
 
 
     要修正・検討
+        HPのfooterに(C)表記を追加する
+        dairybookにtotal pippelを追加
         pippelの出現サウンドの修正
             生成音声に置換する
      ok desktopアプリにpippel出現アイコンを実装する
@@ -10393,7 +10395,7 @@ async function open_window_strolling(scene) {
 
     //msg2
     _text = "";
-    _text += "・Strolling takes 4 hours with a 16 hour cooll time. Murasaki-san walks 500m per hour.\n";
+    _text += "・Strolling takes 4 hours with a 16 hour cool time. Murasaki-san walks 500 meter per hour.\n";
     _text += "・During the stroll, Murasaki-san has a chance to meet friends who have chosen the same direction and companion.\n";
     _text += "・Meeting friends makes Murasaki-san happy and slightly increases the distance of the stroll.\n";
     _text += "・Matching drinks with the friends met also makes Murasaki-san even happier.\n";
@@ -14386,6 +14388,18 @@ function create(scene) {
             sound_button_on.play();
             contract_mint_pippel(summoner);
         });
+    // test
+    pippel_basic.text = scene.add.text(_pippel_x, _pippel_y-40, " >> Mint Pippel << ", {
+        fontSize: "24px",
+        fontFamily: "Arial",
+        fill: "#000",
+        backgroundColor: "#ffffff"        
+    }).setVisible(false).setOrigin(0.5).setDepth(pippel_basic.depth+1);;
+    pippel_basic.on("pointerover", () => {
+        pippel_basic.text.visible = true;
+        sound_button_select.play();
+    });
+    pippel_basic.on("pointerout", () => {pippel_basic.text.visible = false});
 
     //---twitter
     /*
