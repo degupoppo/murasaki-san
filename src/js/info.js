@@ -186,11 +186,17 @@ function saveCanvas () {
     let _nowText = "" + _now.getFullYear() + (_now.getMonth()+1) + _now.getDate();
     
     // save as png
+    /*
     const base64 = document.getElementById('pic_of_house');
     const link = document.createElement('a');
     link.href = base64.toDataURL('image/png');
     link.download = "HoM_pic_" + _nowText + ".png";
     link.click();
+    */
+    
+    const canvas = document.getElementById('pic_of_house');
+    const image = canvas.toDataURL("image/png");
+    window.location.href=image
 }
 
 

@@ -1,7 +1,7 @@
 
 
-//231010
-version = "v0.1.21";
+//231011
+version = "v0.1.22";
 
 
 //===Header==================================================================================
@@ -11703,6 +11703,9 @@ async function draw_pippelSummary (scene) {
 
         // update msg4
         _text = "";
+        _text += "✿ Pippel NFTs are considered as different colored petals,\n";
+        _text += "    and unique Pippel picture in various colors are formed.\n";
+        _text += "\n";
         _text += "✿ Pippel blooms for only 3 hours a day.\n";
         _text += "    Clicking on it will mint an NFT in TBA.\n";
         _text += "\n";
@@ -11711,7 +11714,7 @@ async function draw_pippelSummary (scene) {
         _text += "\n";
         _text += "✿ Pippels will increase fluffy score by an average of 1.\n";
         _text += "    (depending on its rarity)";
-        let msg4 = scene.add.text(120, 600, _text)
+        let msg4 = scene.add.text(120, 550, _text)
                 .setFontSize(18).setFontFamily("Arial").setFill("#0000FF").setDepth(5001);
         group_pippelSummary.add(msg4);
 
