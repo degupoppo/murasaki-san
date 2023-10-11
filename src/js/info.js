@@ -186,6 +186,23 @@ function saveCanvas () {
     let _nowText = "" + _now.getFullYear() + (_now.getMonth()+1) + _now.getDate();
     
     // save as png
+    
+    let canvas = document.getElementById('pic_of_house');
+    let downloadLink = document.getElementById('download_link');
+    let filename = "HoM_pic_" + _nowText + ".png";
+    downloadLink.href = canvas.toDataURL('image/png');
+    downloadLink.download = filename;
+    downloadLink.click();
+    
+    /*
+    const canvas = document.getElementById('pic_of_house');
+    canvas.toBlob(function(result) {
+        console.log(result);
+        var imageURL = URL.createObjectURL(result);
+        document.getElementById('result').innerHTML = '<img src="' + imageURL + '">';
+    });
+    */
+
     /*
     const base64 = document.getElementById('pic_of_house');
     const link = document.createElement('a');
@@ -194,9 +211,11 @@ function saveCanvas () {
     link.click();
     */
     
+    /*
     const canvas = document.getElementById('pic_of_house');
     const image = canvas.toDataURL("image/png");
     window.location.href=image
+    */
 }
 
 
