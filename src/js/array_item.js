@@ -536,7 +536,7 @@ let _dic_items = {
         "item_id_uncommon":41+64,
         "item_id_rare":41+128,
         "img_name":"item_waterbottle",
-        "icon_png":"png/item_waterbottle.png",
+        "icon_png":"icon/item_waterbottle.png",
         "pos_x":730,
         "pos_y":780,
         "scale":0.45,

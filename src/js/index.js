@@ -1,4 +1,317 @@
 
+
+// top page animation
+function create_canvas () {
+
+    // prepare canvas
+    const canvas = document.getElementById('top_animation');
+    const ctx = canvas.getContext('2d');
+
+    // set canvas size
+    canvas.width = document.getElementById('top_p').offsetWidth*0.8;
+    //canvas.width = window.innerWidth * devicePixelRatio *0.5;
+    //canvas.width = document.body.clientWidth * devicePixelRatio *0.5;
+    //canvas.height = window.innerHeight * devicePixelRatio *0.5;
+    canvas.height = 64;
+    
+    // prepare sprite
+    // https://codepen.io/redspiderfish/pen/YPVvOz
+
+    // murasaki-san
+
+    let _murasaki = {
+        img:null, 
+        x:0, 
+        y:0, 
+        width:370, 
+        height:320, 
+        currentframe:0, 
+        totalframes:3
+    };
+    
+    _murasaki.img = new Image();
+    _murasaki.img.src = "src/png/murasaki_left.png";
+    
+    // fluffy
+
+    let _fluffy1_frame = Math.floor(Math.random()*12);
+    let _fluffy2_frame = Math.floor(Math.random()*12);
+    let _fluffy3_frame = Math.floor(Math.random()*12);
+    
+    let _fluffy1 = {
+        img:null, 
+        x:0, 
+        y:0, 
+        width:370, 
+        height:320, 
+        currentframe:5+8*_fluffy1_frame, 
+        startframe:5+8*_fluffy1_frame,
+        endframe:6+8*_fluffy1_frame
+    };
+    let _fluffy2 = {
+        img:null, 
+        x:0, 
+        y:0, 
+        width:370, 
+        height:320, 
+        currentframe:6+8*_fluffy2_frame, 
+        startframe:5+8*_fluffy2_frame,
+        endframe:6+8*_fluffy2_frame
+    };
+    let _fluffy3 = {
+        img:null, 
+        x:0, 
+        y:0, 
+        width:370, 
+        height:320, 
+        currentframe:5+8*_fluffy3_frame, 
+        startframe:5+8*_fluffy3_frame,
+        endframe:6+8*_fluffy3_frame
+    };
+
+    let _fluffy_img = new Image();
+    _fluffy_img.src = "src/png/fluffy_fluffys3.png";
+    
+    // ohana
+    
+    let _li_frame = [0,1,2,3,4,5,6,6,6,7,7,7];
+
+    let _flower1 = {
+        img:null, 
+        x:0, 
+        y:0, 
+        width:370, 
+        height:320, 
+        currentframe:_li_frame[Math.floor(Math.random() * _li_frame.length)]
+    };
+    let _flower2 = {
+        img:null, 
+        x:0, 
+        y:0, 
+        width:370, 
+        height:320, 
+        currentframe:_li_frame[Math.floor(Math.random() * _li_frame.length)]
+    };
+    let _flower3 = {
+        img:null, 
+        x:0, 
+        y:0, 
+        width:370, 
+        height:320, 
+        currentframe:_li_frame[Math.floor(Math.random() * _li_frame.length)]
+    };
+    let _flower4 = {
+        img:null, 
+        x:0, 
+        y:0, 
+        width:370, 
+        height:320, 
+        currentframe:_li_frame[Math.floor(Math.random() * _li_frame.length)]
+    };
+    let _flower5 = {
+        img:null, 
+        x:0, 
+        y:0, 
+        width:370, 
+        height:320, 
+        currentframe:_li_frame[Math.floor(Math.random() * _li_frame.length)]
+    };
+
+    let _flower_img = new Image();
+    _flower_img.src = "src/particle/par_flower2.png";
+    
+    // initiate variants
+    let x = canvas.width + 5;
+    let _turn = 0;
+    let _turn_ohana1 = 100 + Math.floor(Math.random()*50);
+    let _turn_ohana2 = _turn_ohana1 + 100;
+    let _turn_ohana3 = _turn_ohana2 + 100;
+    let _turn_ohana4 = _turn_ohana3 + 100;
+    let _turn_ohana5 = _turn_ohana4 + 100;
+
+    // start animation loop
+    setInterval(_loop, 30);
+
+    // animation loop function
+    function _loop(){
+        
+        _turn += 1;
+    
+        // increment frame No.
+        if (_turn % 20 == 0) {
+        
+            // murasakisan
+            _murasaki.currentframe++;
+            if (_murasaki.currentframe > _murasaki.totalframes){
+                _murasaki.currentframe = 0;
+            }
+            
+            // fluffy
+            _fluffy1.currentframe++;
+            if (_fluffy1.currentframe > _fluffy1.endframe){
+                _fluffy1.currentframe = _fluffy1.startframe;
+            }
+            _fluffy2.currentframe++;
+            if (_fluffy2.currentframe > _fluffy2.endframe){
+                _fluffy2.currentframe = _fluffy2.startframe;
+            }
+            _fluffy3.currentframe++;
+            if (_fluffy3.currentframe > _fluffy3.endframe){
+                _fluffy3.currentframe = _fluffy3.startframe;
+            }
+        }
+
+        // moving pos x
+        x -= 0.8;
+        
+        // reset pos x
+        if (x <= -1 * (_murasaki.width/5+60)) {
+            x = canvas.width + 5;
+            //_turn = 0;
+        }
+
+        // draw canvas
+
+        // reset canvas        
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // draw ohana
+        if (_turn == _turn_ohana1) {
+            _flower1.x = x+25;
+        }
+        if (_turn == _turn_ohana2) {
+            _flower2.x = x+25;
+        }
+        if (_turn == _turn_ohana3) {
+            _flower3.x = x+25;
+        }
+        if (_turn == _turn_ohana4) {
+            _flower4.x = x+25;
+        }
+        if (_turn == _turn_ohana5) {
+            _flower5.x = x+25;
+        }
+        if (_turn > _turn_ohana1) {
+            ctx.drawImage(
+                _flower_img, 
+                _flower1.currentframe*_flower1.width, 
+                0, 
+                _flower1.width, 
+                _flower1.height, 
+                _flower1.x, 
+                0+32, 
+                _flower1.width/11, 
+                _flower1.height/11
+            );
+        }
+        if (_turn > _turn_ohana2) {
+            ctx.drawImage(
+                _flower_img, 
+                _flower2.currentframe*_flower1.width, 
+                0, 
+                _flower1.width, 
+                _flower1.height, 
+                _flower2.x, 
+                0+32, 
+                _flower1.width/11, 
+                _flower1.height/11
+            );
+        }
+        if (_turn > _turn_ohana3) {
+            ctx.drawImage(
+                _flower_img, 
+                _flower3.currentframe*_flower1.width, 
+                0, 
+                _flower1.width, 
+                _flower1.height, 
+                _flower3.x, 
+                0+32, 
+                _flower1.width/11, 
+                _flower1.height/11
+            );
+        }
+        if (_turn > _turn_ohana4) {
+            ctx.drawImage(
+                _flower_img, 
+                _flower4.currentframe*_flower1.width, 
+                0, 
+                _flower1.width, 
+                _flower1.height, 
+                _flower4.x, 
+                0+32, 
+                _flower1.width/11, 
+                _flower1.height/11
+            );
+        }
+        if (_turn > _turn_ohana5) {
+            ctx.drawImage(
+                _flower_img, 
+                _flower5.currentframe*_flower1.width, 
+                0, 
+                _flower1.width, 
+                _flower1.height, 
+                _flower5.x, 
+                0+32, 
+                _flower1.width/11, 
+                _flower1.height/11
+            );
+        }
+
+        // draw murasaki-san
+        ctx.drawImage(
+            _murasaki.img, 
+            _murasaki.currentframe*_murasaki.width, 
+            0, 
+            _murasaki.width, 
+            _murasaki.height, 
+            x, 
+            0, 
+            _murasaki.width/5, 
+            _murasaki.height/5
+        );
+        
+        // draw fluffy1
+        ctx.drawImage(
+            _fluffy_img, 
+            (_fluffy1.currentframe%8)*_fluffy1.width, 
+            Math.floor(_fluffy1.currentframe/8)*320, 
+            _fluffy1.width, 
+            _fluffy1.height, 
+            x+58, 
+            0+30, 
+            _fluffy1.width/12, 
+            _fluffy1.height/12
+        );
+
+        // draw fluffy2
+        ctx.drawImage(
+            _fluffy_img, 
+            (_fluffy2.currentframe%8)*_fluffy1.width, 
+            Math.floor(_fluffy2.currentframe/8)*320, 
+            _fluffy2.width, 
+            _fluffy2.height, 
+            x+58+20*1, 
+            0+30, 
+            _fluffy2.width/12, 
+            _fluffy2.height/12
+        );
+
+        // draw fluffy3
+        ctx.drawImage(
+            _fluffy_img, 
+            (_fluffy3.currentframe%8)*_fluffy1.width, 
+            Math.floor(_fluffy3.currentframe/8)*320, 
+            _fluffy3.width, 
+            _fluffy3.height, 
+            x+58+20*2, 
+            0+30, 
+            _fluffy3.width/12, 
+            _fluffy3.height/12
+        );
+    }
+}
+
+
 //show icon2
 async function _show_icon2() {
     //if (typeof(wallet) != "undefined" && wallet != "") {

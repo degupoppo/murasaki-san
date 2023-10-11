@@ -1,4 +1,198 @@
 
+//---picture of house
+async function create_pic() {
+
+    // clear button
+    let _target = document.getElementById("take_a_picture");
+    _target.innerHTML = "";
+
+    // check web3 loaded
+    if (flag_web3Loaded && typeof(wallet) != "undefined") {
+
+        // prepare canvas
+        const canvas = document.getElementById('pic_of_house');
+        const ctx = canvas.getContext('2d');
+        //ctx.imageSmoothingQuality = "high";
+        
+        // set canvas size
+        canvas.width = 640;
+        canvas.height = 360;
+
+        // prepare back png
+        let _back = new Image();
+        _back.src = "src/pic/back.png";
+        _back.onload = function() {
+            ctx.drawImage(_back, 0, 0, canvas.width, canvas.height);
+        }
+        
+        // call on-chain data
+        let _summoner = await contract_mm_wss.methods.tokenOf(wallet).call();
+        let _all_dynamic_status = await contract_info_wss.methods.allDynamicStatus(_summoner).call({from:wallet});
+        let myListLength = await contract_mc_wss.methods.myListLength(wallet).call();
+        let myListsAt_withItemType = await contract_mc_wss.methods.myListsAt_withItemType(wallet, 0, myListLength).call();
+        let local_nftCount = await contract_mc.methods.balanceOf(wallet).call();
+        let local_age =                 Number(_all_dynamic_status[1]);
+
+        // prepare local status
+        let local_level = Number(_all_dynamic_status[2]);
+        let local_score = Number(_all_dynamic_status[34]);
+        let local_fluffyScore = Number(_all_dynamic_status[30]);
+        let local_pippelScore = Number(_all_dynamic_status[95]);
+        local_age = Math.floor(local_age / 86400);    //sec -> days
+        
+        // draw normal items
+        let _xi = 15;
+        let _yi = 15;
+        let _count = 0;
+        for (let i = 0; i < myListLength; i++) {
+            let _item_type = myListsAt_withItemType[i*2+1];
+            if (_item_type <= 195) {
+                let _item_name = dic_items_reverse[_item_type];
+                let _item_png = "src/" + dic_items[_item_name]["icon_png"];
+                let _img = new Image();
+                _img.src = _item_png;
+                _img.onload = () => {
+                    ctx.drawImage(_img, _xi+50*_count, _yi, 55, 48);
+                    _count += 1;
+                    if (_count > 11) {
+                        _count = 0;
+                        _yi += 46;
+                    }
+                }
+            }
+        }
+        
+        // draw fluffy
+        let _xf = 15;
+        let _yf = 250;
+        let _countf = 0;
+        for (let i = 0; i < myListLength; i++) {
+            let _item_type = myListsAt_withItemType[i*2+1];
+            if (_item_type >= 201 && _item_type <= 248) {
+                let _fluffy_type = _item_type;
+                let _src;
+                let _magni;
+                if (_fluffy_type >= 201 && _fluffy_type <= 212) {
+                    let _num = ( "00" + (_fluffy_type - 200) ).slice(-2);
+                    _src = "src/icon/fluffy_" + _num + ".png";
+                    _magni = 0.7;
+                } else if (_fluffy_type >= 213 && _fluffy_type <= 224) {
+                    let _num = ( "00" + (_fluffy_type - 212) ).slice(-2);
+                    _src = "src/icon/fluffier_" + _num + ".png";
+                    _magni = 0.85;
+                } else if (_fluffy_type >= 225 && _fluffy_type <= 236) {
+                    let _num = ( "00" + (_fluffy_type - 224) ).slice(-2);
+                    _src = "src/icon/fluffiest_" + _num + ".png";
+                    _magni = 1;
+                } else if (_fluffy_type >= 237 && _fluffy_type <= 248) {
+                    let _num = ( "00" + (_fluffy_type - 236) ).slice(-2);
+                    _src = "src/icon/doll_" + _num + ".png";
+                    _magni = 0.8;
+                }
+                let _img = new Image();
+                _img.src = _src;
+                _img.onload = () => {
+                    ctx.drawImage(_img, _xf+29*_countf, _yf, 44*_magni, 38*_magni);
+                    _countf += 1;
+                    if (_countf >= 16) {
+                        _countf = 0;
+                        _yf += 28;
+                    }
+                }
+            }
+        }
+
+        // draw pippel
+        let _pippel = new Image();
+        _pippel.src = "src/png/pippel_basic.png";
+        _pippel.onload = () => {
+            if (local_pippelScore > 0) {
+                ctx.drawImage(_pippel, 485, 275, 37*1.8, 32*1.8);
+            }
+            if (local_pippelScore > 500) {
+                ctx.drawImage(_pippel, 475, 280, 37*1.8, 32*1.8);
+            }
+            if (local_pippelScore > 1000) {
+                ctx.drawImage(_pippel, 465, 275, 37*1.8, 32*1.8);
+            }
+            if (local_pippelScore > 1500) {
+                ctx.drawImage(_pippel, 455, 280, 37*1.8, 32*1.8);
+            }
+            if (local_pippelScore > 2000) {
+                ctx.drawImage(_pippel, 445, 275, 37*1.8, 32*1.8);
+            }
+            if (local_pippelScore > 2500) {
+                ctx.drawImage(_pippel, 435, 280, 37*1.8, 32*1.8);
+            }
+            if (local_pippelScore > 3000) {
+                ctx.drawImage(_pippel, 425, 275, 37*1.8, 32*1.8);
+            }
+            if (local_pippelScore > 3500) {
+                ctx.drawImage(_pippel, 415, 280, 37*1.8, 32*1.8);
+            }
+        }
+        
+        // draw text
+        
+        // prepare parameter
+        let _text = "";
+        ctx.font = "10px Arial";
+        ctx.fillStyle = "#ff1493";
+
+        // draw date
+        let _now = new Date();
+        let _nowText = _now.getFullYear() + "." + (_now.getMonth()+1) + "." + _now.getDate();
+        ctx.textAlign = "left";
+        //_text = " " + _nowText + ", House of Murasaki-san";
+        _text = "  " + _nowText + " ";
+        ctx.fillText(_text, 2, 355);
+
+        // draw title
+        let _icon = new Image();
+        _icon.src = "src/icon/logo_mini.png";
+        _icon.onload = () => {
+            ctx.drawImage(_icon, 248, 342, 18, 15);
+        }
+        _text = "House of Murasaki-san";
+        ctx.textAlign = "center";
+        ctx.fillText(_text, 320, 355);
+
+        // draw status    
+        ctx.textAlign = "right";
+        _text = "Lv: " + local_level 
+        _text += ", Age: " + local_age 
+        _text += "d, Score: "+ Math.floor(local_score/1000)*1000 + "  ";
+        ctx.fillText(_text, 640, 355);
+        
+        // insert html
+        let _target2 = document.getElementById("take_a_picture_after");
+        let _html2 = "";
+        _html2 += "<button style='height:28px;font-size:75%' onclick='saveCanvas();' id='button_status'><b>Save as PNG</b></button>";
+        _html2 += "&nbsp;&nbsp;&nbsp;";
+        _html2 += "<button style='height:28px;font-size:75%' onclick=\"window.open('http://twitter.com/share?url=murasaki-san.com&hashtags=AstarNetwork,Murasakisan')\" ><b>Post on X/Twitter</b></button>";
+        _html2 += "<br>";
+        _html2 += "<font size='-1'><b>[Note]</b> Be cautious about <b>disclosing the name and ID of your Murasaki-san on social media, as it is possible to identify your wallet address</b> using on-chain data. The picture above includes level, age, and rounded score values, which are relatively difficult to use for wallet identification. You may utilize it for posting on X/Twitter and similar platforms.</font>";
+        _target2.innerHTML = _html2;
+        
+    } else {
+        setTimeout(create_pic, 1000);
+    }
+}
+
+function saveCanvas () {
+
+    // get date
+    let _now = new Date();
+    let _nowText = "" + _now.getFullYear() + (_now.getMonth()+1) + _now.getDate();
+    
+    // save as png
+    const base64 = document.getElementById('pic_of_house');
+    const link = document.createElement('a');
+    link.href = base64.toDataURL('image/png');
+    link.download = "HoM_pic_" + _nowText + ".png";
+    link.click();
+}
+
 
 //---eventMonitor
 
@@ -158,6 +352,11 @@ async function feedingCount() {
 async function _show_onChain_parameters() {
     //if (typeof(wallet) != "undefined" && wallet != "") {
     if (flag_web3Loaded && typeof(wallet) != "undefined") {
+
+        //disable button
+        let _button = document.getElementById("button_onchain")
+        _button.disabled = true;
+
         let _text
         let _target
         //total_summoned_trial

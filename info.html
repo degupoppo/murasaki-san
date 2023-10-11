@@ -70,12 +70,6 @@ recorded on the Astar Network EVM blockchain.
 <div id="page_top"><a href="#"></a></div>
 
 
-<!--- tweet button --->
-<!---
-<a href="https://twitter.com/share" class="twitter-share-button"  data-url="http://murasaki-san.com/" data-text="House of Murasaki-san" data-count="none" data-hashtags="AstarNetwork,HouseOfMurasakisan">Tweet Button</a>
---->
-
-
 <!--- random --->
 
 <h3 id="random">Random Murasaki-san &#x1f49e;</h3>
@@ -85,6 +79,28 @@ Five random Murasaki-san icons will be displayed. By clicking on an icon, you ca
 </p>
 
 <div id="output_murasakiIcon" style="height:64px"><b>&nbsp;&nbsp;&nbsp;Loading...</b></div>
+
+<br>
+<br>
+
+
+
+<!--- picture --->
+
+
+<h3 id="sns">Picture of Your House &#128247;</h3>
+
+<p>
+Take a photo of your house and share it on social media :)
+</p>
+
+<div id="take_a_picture">
+&nbsp;&nbsp;&nbsp;<button onclick="create_pic();" id="button_takepic" style="height:28px;font-size:80%"><b>Take a Picture</b></button>
+</div>
+
+<canvas id="pic_of_house" width=0 height=0></canvas><br>
+
+<div id="take_a_picture_after"></div>
 
 <br>
 <br>
@@ -164,8 +180,8 @@ Pressing the button will initiate real-time monitoring of events for each contra
 
 &nbsp;
 
-<button onclick="getMarketInfo();">
-Get Market Info
+<button style="height:28px;font-size:80%" onclick="getMarketInfo();">
+<b>Get Market Info</b>
 </button>
 
 </p>
@@ -187,6 +203,10 @@ Get Market Info
 <!--- parameter --->
 
 <h3 id="parameter">On-Chain Parameters &#x1f517;</h3>
+
+&nbsp;&nbsp;&nbsp;<button onclick="_show_onChain_parameters();" id="button_onchain" style="height:28px;font-size:80%">
+<b>Read parameters</b>
+</button>
 
 <ul>
 <li>Total trial SBT minted:&nbsp;&nbsp;<b><idv id="info_total_trial_summoned"></div></b>
@@ -255,7 +275,7 @@ Donation:&nbsp;<br class="br-sp">
     twemoji.parse(document.body);
     check_connected();
     _show_icon3();
-    _show_onChain_parameters();
+    //_show_onChain_parameters();
     loadItemSelector();
 </script>
 
