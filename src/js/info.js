@@ -169,7 +169,7 @@ async function create_pic() {
         let _html2 = "";
         _html2 += "<button style='height:28px;font-size:75%' onclick='saveCanvas();' id='button_status'><b>Save as PNG</b></button>";
         _html2 += "&nbsp;&nbsp;&nbsp;";
-        _html2 += "<button style='height:28px;font-size:75%' onclick=\"window.open('http://twitter.com/share?url=murasaki-san.com&hashtags=AstarNetwork,Murasakisan')\" ><b>Post on X/Twitter</b></button>";
+        _html2 += "<button style='height:28px;font-size:75%' onclick=\"window.open('http://twitter.com/share?text=%0a&url=murasaki-san.com&hashtags=AstarNetwork,Murasakisan')\" ><b>Post on X/Twitter</b></button>";
         _html2 += "<br>";
         _html2 += "<font size='-1'><b>[Note]</b> Be cautious about <b>disclosing the name and ID of your Murasaki-san on social media, as it is possible to identify your wallet address</b> using on-chain data. The picture above includes level, age, and rounded score values, which are relatively difficult to use for wallet identification. You may utilize it for posting on X/Twitter and similar platforms.</font>";
         _target2.innerHTML = _html2;
@@ -187,6 +187,7 @@ function saveCanvas () {
     
     // save as png
     
+    //https://blog.capilano-fw.com/?p=247
     let canvas = document.getElementById('pic_of_house');
     let downloadLink = document.getElementById('download_link');
     let filename = "HoM_pic_" + _nowText + ".png";

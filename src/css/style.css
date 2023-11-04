@@ -81,6 +81,14 @@ nav a.current {
   align-items: center;
 }
 
+/* 幅が閾値以下の場合に上下に並べる */
+@media (max-width: 720px) {
+  .vertical-middle {
+    flex-direction: column; /* 縦に並べる */
+  }
+}
+
+
 .showIconTop{
     display: inline-block; 
     width: 64px; 
@@ -121,3 +129,5 @@ https://labo.webis.co.jp/2021/04/br-sp/
   .br-sp {
     display: block;
 }
+
+

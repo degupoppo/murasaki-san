@@ -1333,7 +1333,7 @@ contract Murasaki_Main is SoulBoundBadge, Ownable, Pausable {
     }
 
     //permitted address
-    mapping(address => bool) public permitted_address;
+    mapping(address => bool) private permitted_address;
 
     //admin, add or remove permitted_address
     function _add_permitted_address(address _address) external onlyOwner {
@@ -1486,7 +1486,7 @@ contract Murasaki_Name is SoulBoundBadge, Ownable, Pausable {
     }
 
     //permitted address
-    mapping(address => bool) public permitted_address;
+    mapping(address => bool) private permitted_address;
 
     //admin, add or remove permitted_address
     function _add_permitted_address(address _address) external onlyOwner {
@@ -1561,7 +1561,7 @@ contract Murasaki_Craft is ERC2665, Ownable, Pausable {
     }
 
     //permitted address
-    mapping(address => bool) public permitted_address;
+    mapping(address => bool) private permitted_address;
 
     //admin, add or remove permitted_address
     function _add_permitted_address(address _address) external onlyOwner {
@@ -2313,7 +2313,7 @@ contract Murasaki_Address is Ownable {
 contract Murasaki_Parameter is Ownable {
 
     //permitted address
-    mapping(address => bool) public permitted_address;
+    mapping(address => bool) private permitted_address;
 
     //admin, add or remove permitted_address
     function _add_permitted_address(address _address) external onlyOwner {
@@ -2381,7 +2381,7 @@ contract Murasaki_Parameter is Ownable {
 contract Murasaki_Storage is Ownable {
 
     //permitted address
-    mapping(address => bool) public permitted_address;
+    mapping(address => bool) private permitted_address;
 
     //admin, add or remove permitted_address
     function _add_permitted_address(address _address) external onlyOwner {
@@ -2609,7 +2609,7 @@ contract Murasaki_Storage is Ownable {
 contract Murasaki_Storage_Score is Ownable {
 
     //permitted address
-    mapping(address => bool) public permitted_address;
+    mapping(address => bool) private permitted_address;
 
     //admin, add or remove permitted_address
     function _add_permitted_address(address _address) external onlyOwner {
@@ -2745,7 +2745,7 @@ contract Murasaki_Storage_Score is Ownable {
 contract Murasaki_Storage_Nui is Ownable {
 
     //permitted address
-    mapping(address => bool) public permitted_address;
+    mapping(address => bool) private permitted_address;
 
     //admin, add or remove permitted_address
     function _add_permitted_address(address _address) external onlyOwner {
@@ -2828,7 +2828,7 @@ contract Murasaki_Storage_Nui is Ownable {
 contract Murasaki_Storage_Extra is Ownable {
 
     //permitted address
-    mapping(address => bool) public permitted_address;
+    mapping(address => bool) private permitted_address;
 
     //admin, add or remove permitted_address
     function _add_permitted_address(address _address) external onlyOwner {
@@ -9742,7 +9742,7 @@ contract Pippel_NFT is ERC2665, Ownable, Pausable {
     }
 
     //permitted address
-    mapping(address => bool) public permitted_address;
+    mapping(address => bool) private permitted_address;
 
     //admin, add or remove permitted_address
     function _add_permitted_address(address _address) external onlyOwner {

@@ -293,7 +293,7 @@ nav ol li {
 nav a,
 nav a:visited {
 
-  margin: 0 0.5rem 1rem 0.5rem;
+  margin: 0 0.3rem 1rem 0.3rem;
   border: 2px solid var(--border);
   border-radius: var(--standard-border-radius);
   color: var(--text);
@@ -703,3 +703,7 @@ dialog::backdrop {
   padding: 1.5rem;
   margin: 2rem 0;
 }
+
+
+
+
