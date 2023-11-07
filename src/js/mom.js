@@ -1,6 +1,6 @@
 
-//231106
-version = "v0.1.2";
+//231107
+version = "v0.1.3";
 
 
 //===Header==================================================================================
@@ -522,7 +522,7 @@ async function show_bidLog() {
         _murasakiNameId = Number(_murasakiNameId);
         let _murasakiName = "";
         if (_murasakiNameId > 0) {
-            _murasakiName = await contract_mn.methods.names(1).call();
+            _murasakiName = await contract_mn.methods.names(_murasakiNameId).call();
         }
         return _murasakiName;
     }
