@@ -1,131 +1,4 @@
 
-
-/*
-
-//---ToDo
-
-    svgの修正
-        fluffyの目とpippelのpetalのぼかしフィルターを見直す
-        重くなるのなら、フレームのグラジエントも見直す
-        ロゴとメッセージの配置を見直す
-    init関数を用意する
-        addressとabiをどうやって管理するか
-        別ファイルとするかどうか。
-    リファクタリング
-        call回数の最適化
-            auctionなどは最初に1回だけcallする？
-            その他、on-chainデータ読み込み回数の最適化を図る
-        関数のモジュール化と整理整頓
- ok NFTポップアップウィンドウの実装
- ok     NFTのクリックでポップアップウィンドウを表示する。
- ok     フレーバーテキストも一緒に見れるように。
- ok     表示項目：
- ok         NFT題名と#
- ok         大きめのsvg
- ok         description
- ok         owner
- ok フレーバーテキストの吟味
- ok     物語のバックグラウンドを中心に
- ok     自分語りは避ける
- ok user NFT一覧表示を実装する
- ok     NFTを2つ以上表示すると、colorが混線するバグの修正
- ok ランダムNFT表示を実装する
- ng     クリックでTofuNFTへ飛ぶ？
- ok オークションメカニズムの試行
- ok     cycle早めで一通り挙動を確認する
- ok     NFT所持後、user NFTとrandom NFTを実装する
- ok     bidder lessオークションの挙動を確認する
- ok     可能であれば、end時にブラウザリロードなしでend button表示へ移行したい。
- ok 携帯への最適化
- ok     小さな画面での回り込みや<br>などの配置を詰める
- ok オークション終了時のUIを実装する
- ok     auction.settled=trueをチェックし、Conclude the auctionボタンを設置する
- ok     winnerとbid価格を表示する
- ok     下に処理の説明を記載する
- ok         winnerにNFTが転送される
- ok         次のオークションが開始される
- ok bid履歴にsummoner nameを表示するよう修正する
- ok     tableを使って左合わせをきれいにする
- ok オークションルールの整備
- ok presentbox連携の実装
- ok     オークションをmintするとHoMにもpresentboxが届くようにする
- ok         summonerウォレット限定
- ok     mcにauctionHouseをpermitし、auctionHouseにpresentbox_mintを実装する
- ok 要修正
- ok     bidderが現れずにtimeupした際の処理の実装
- ok         投票してから1時間、誰も投票しなければ勝ちとするか。
- ok         bidder=0なら、残り時間が1時間から減らないようにする
- ok         → 特に手を加えず、endTimeが来たらsettleして次のauctionを開始する
- ok            その際、bidder=0xならば何もしない。
- ok            おなじidのNFTが再度オークションにかけられる
- ok     flavorTextはコントラクトからのcallしか受け付けないようにする
- ok フロントエンド修正
- ok     読み込み中のローディングsvgを実装する
- ok インデックス128色でmain絵の用意
- ok 名前の決定
- ok     Memorabilia
- ok     Memento
- ig 説明文の用意と実装
- ok ピッペルの色決定
- ok オークションコントラの実装
- ok     オークション開始時にはNFTをmintせず、
- ok     勝利者決定後、オークションsettle時にmintしてtransferする
- ok     user msgはbid時に入力を受けて保持しつつ、settle時に渡してmintする。
- ok フロントエンドの実装
- ok     user msgの入力をいつ行うか。
- ok     オークションへのbid時に入力させるか。
- ok     オークション勝利後に入力しつつmintさせるか。
- ok     → 勝利後にmint待ちさせると次のオークションを始められないので
- ok     やはりbid時にメッセージ入力を聞くUIとする。
- ok オークション履歴用のstructを実装する
- ok     auction No
- ok     bidder address
- ok     price
- ok     MoM tokenId
- ok bid logを実装する
- ok     time
- ok     bidder
- ok     amount
- ok MoMにremarkableを実装する
- ok     wallet addressから所有tokenIdを取得できるように。
- ok Reveal前のSVG絵の用意
- ok     JSでuserMsgを動的に修正する
- ok         もしくはpreviewボタンで再読み込みさせる
- ok     実際はauction settle時にmintなのだが、
- ok         UI的にはsettle時にrevealされるのと同じだろうか。
- ok     よって、auction中はランダムな候補絵を表示するのではなく、
- ok         オークション終了時に決定するよう、未開封絵を表示させておく
- ok     実際の表示絵は、過去のMoMを下に表示させることで例示する。
- ok     つまり、Unrevealed用SVGと
- ok         これを表示するjs関数を実装する
- ok         userMsg, tokenId, Dateを引数にとり、
- ok         Unrevealed SVGを返すjs
-                
-
-init
-    MurasakiAuctionHouse    0xd675daceecafC225690327d38D652eFf4EE9cA0d
-        _set0_Murasaki_Craft(address_Murasaki_Craft)    0x143C0Fe403C0328B2AD77a0D1Cb0F6F2A66A8bDE
-        _set0_Murasaki_Main(address_Murasaki_Main)  0x4925561b0a524B98F950F07A40F6DFc70B64CaD5
-        _set0_NFTAddress(address_Murasaki_Memento)  0x20f18BeDd45a6d6631D3a92ac501d03a51Ac9D18
-        _set0_VaultAddress(address_BufferVault) 0xf2a7319Fd847fD79097D74de7F7Df5ae37b4871C
-    Murasaki_Memento    0x20f18BeDd45a6d6631D3a92ac501d03a51Ac9D18
-        _add_permitted_address(address_MurasakiAuctionHouse)    0xd675daceecafC225690327d38D652eFf4EE9cA0d
-        _set_address_Murasaki_Memento_codex(address_Murasaki_Memento_codex) 0xD647049142909C78C1B809dDeb283fb546012668
-    Murasaki_Memento_codex  0xD647049142909C78C1B809dDeb283fb546012668
-        _set_address_Murasaki_Memento   0x20f18BeDd45a6d6631D3a92ac501d03a51Ac9D18
-        _set_address_Murasaki_Memento_flavorText    0xEC0E79Ac007B898158b9e52cf4C50E23D744FD69
-        _set_address_Murasaki_Memento_mainPng_01    0x71c91F52135afdff323795dbe3Cb34BfC38654f6
-        _set_address_Murasaki_Memento_mainPng_02    0xdCCCd34d80f4CbeB34c5f58Ff34a1786525Ef4B1
-        _set_address_Murasaki_Memento_mainPng_03    0xB930d720F57924345B49894283b7fD1eA9850381
-        _set_address_Murasaki_Memento_mainPng_04    0xDcDc90a7776EF123e2d47bFc9D091D818f8ed8eC
-        _set_address_Murasaki_Memento_mainPng_05    0x07A44EaAaF3745cA6fECe7071ABe38c885b2D2d7
-        _set_address_Murasaki_Memento_mainPng_06    0x9552409fF6C4c3B1CddAB2DA6f2ac9892d50F47c
-    Murasaki_Craft
-        _add_permitted_address(MurasakiAuctionHouse)    0xd675daceecafC225690327d38D652eFf4EE9cA0d
-*/
-
-
-
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity =0.8.13;
 
@@ -320,20 +193,10 @@ contract Murasaki_AuctionHouse is Pausable, ReentrancyGuard, Ownable {
 
     // @MoM dev: initialization of first auction
     // @MoM dev: mom nft begin tokenId=1
-    /*
-    constructor() {
-        auction = Auction({
-            nounId: 1,
-            amount: 0,
-            startTime: block.timestamp,
-            endTime: block.timestamp + duration,
-            bidder: payable(0),
-            settled: false,
-            userMsg: ""
-        });
-    }
-    */
+    bool private isInitialized = false;
     function start_firstAuction () external onlyOwner {
+        require(!isInitialized);
+        isInitialized = true;
         auction = Auction({
             nounId: 1,
             amount: 0,
@@ -1029,9 +892,9 @@ contract Murasaki_Memento_codex is Ownable, Pausable {
         output = Base64.encode(bytes(string(abi.encodePacked(
             '{"name": "Memento of Murasaki-san #', 
             Strings.toString(_tokenId), 
-            '", "description": "This full-on-chain NFT is a side project of House of Murasaki-san (https://murasaki-san.com).   --- Rumor says, ',
+            '", "description": "This full-on-chain NFT is a side project of House of Murasaki-san (https://murasaki-san.com).  *** Rumor says, ',
             _flavorText,
-            ' ---", "image": "data:image/svg+xml;base64,', 
+            ' ***", "image": "data:image/svg+xml;base64,', 
             Base64.encode(bytes(output)), 
             '"}'
         ))));
@@ -1354,7 +1217,7 @@ contract Murasaki_Memento_flavorText is Ownable {
         // Pippel
         "Pippel is a new species of flower that blooms for only a few hours a day.",
         "the flower names of the Pippel NFTs are allocated based on the birth flowers of Eastern Asia.",
-        'the name "Pippel" was created by a tex generation AI.',
+        'the flower name, Pippel, was created by a tex generation AI.',
         
         // Nainai-san
         "Nainai-san's favorite food is konpeito.",
@@ -1389,21 +1252,6 @@ contract Murasaki_Memento_flavorText is Ownable {
         "the concept for House of Murasaki-san project was conceived on February 1, 2022.",
         
         ""
-
-        // NG
-        /*
-        "on the coder's desk, there is a Murasaki-san made of wool felt.",
-        "Nyuinyui-san was created on the illustrator's iPad when she feel a sense of ennui.",
-        "Nainai-san is modeled after the illustrator's favorite fluffy doll.",
-        "pets like Mr.Astar were drawn by the coder using a pen tablet.",
-        "there are a total of 20,736 possible combinations for this POAP artwork.",
-        "within this POAP artwork, there is one hidden Astar logo.",
-        "the house cat is modeled after a cat that the illustrator used to live with in the past.",
-        "Murasaki-san has four limbs.",
-        "coder's favorite flower is the sunflower, and the illustrator's favorite flower is the tulip.",
-        "House of Murasaki-san was influenced by the Rarity project created by Andre Cronje.",
-        "House of Murasaki-san was influenced by the Loot project created by Dom Hofmann."
-        */
     ];
 
     // getter
@@ -1421,149 +1269,4 @@ contract Murasaki_Memento_flavorText is Ownable {
         return size > 0;
     }
 }
-
-
-
-//---Done
-
-/*
-
-contract Murasaki_Memento_function is Ownable, Pausable, ReentrancyGuard {
-
-    // pausable
-    function pause() external onlyOwner {
-        _pause();
-    }
-    function unpause() external onlyOwner {
-        _unpause();
-    }
-
-    // address POAP
-    address public address_Murasaki_Memento;
-    function _set_address_Murasaki_Memento(address _address) external onlyOwner {
-        address_Murasaki_Memento = _address;
-    }
-
-    // admin, withdraw
-    function withdraw(address rec)public onlyOwner{
-        payable(rec).transfer(address(this).balance);
-    }
-
-    // max number of param
-    uint public numberOfColor = 12;
-    uint public numberOfMain = 6;
-    uint public numberOfOhana = 6;
-    uint public numberOfPippel = 5;
-    uint public numberOfFluffy = 12;
-    uint public numberOfFlavorText = 21;
-    function _set_numberOfColor (uint _val) external onlyOwner {
-        numberOfColor = _val;
-    }
-    function _set_numberOfMain (uint _val) external onlyOwner {
-        numberOfMain = _val;
-    }
-    function _set_numberOfOhana (uint _val) external onlyOwner {
-        numberOfOhana = _val;
-    }
-    function _set_numberOfPippel (uint _val) external onlyOwner {
-        numberOfPippel = _val;
-    }
-    function _set_numberOfFluffy (uint _val) external onlyOwner {
-        numberOfFluffy = _val;
-    }
-    function _set_numberOfFlavorText (uint _val) external onlyOwner {
-        numberOfFlavorText = _val;
-    }
-
-    // mint
-    function mintPOAP (string memory _userMsg) external payable nonReentrant whenNotPaused {
-
-        // def random params
-        uint _colorId = _dn(1,numberOfColor)+1;  // _dn(888,3)+1 -> 1-3
-        uint _mainId = _dn(2,numberOfMain)+1;
-        uint _ohanaId = _dn(3,numberOfOhana)+1;
-        uint _pippelId = _dn(4,numberOfPippel)+1;
-        uint _fluffyId = _dn(5,numberOfFluffy)+1;
-        uint _flavorTextId = _dn(6,numberOfFlavorText)+1;
-        uint _NFTSeed = _seed(7);
-        
-        // when emtpy, default user msg
-        if (bytes(_userMsg).length == 0) {
-            _userMsg = "&#x273f; House of Murasaki-san, built on Astar.";
-        } else {
-            require(validate_msg(_userMsg), "invalid msg");
-        }
-        
-        Murasaki_Memento(address_Murasaki_Memento).mint(
-            _colorId,
-            _mainId,
-            _ohanaId,
-            _pippelId,
-            _fluffyId,
-            _NFTSeed,
-            _userMsg,
-            msg.sender,
-            _flavorTextId
-        );
-    }
-    
-    // check msg, from rarity_names
-    function validate_msg(string memory str) internal pure returns (bool){
-        bytes memory b = bytes(str);
-        if(b.length < 1) return false;
-        if(b.length > 50) return false; // Cannot be longer than 12 characters
-        if(b[0] == 0x20) return false; // Leading space
-        if (b[b.length - 1] == 0x20) return false; // Trailing space
-        bytes1 last_char = b[0];
-        for(uint i; i<b.length; i++){
-            bytes1 char = b[i];
-            // can contain [0-9], [a-z], [A-z], [space], [#;&@.,!?-]
-            if(
-                !(char >= 0x30 && char <= 0x39) && //9-0
-                !(char >= 0x41 && char <= 0x5A) && //A-Z
-                !(char >= 0x61 && char <= 0x7A) && //a-z
-                !(char == 0x20) && //space
-                !(char == 0x23) && //#
-                !(char == 0x3b) && //;
-                !(char == 0x26) && //&
-                !(char == 0x2c) && //,
-                !(char == 0x2e) && //.
-                !(char == 0x21) && //!
-                !(char == 0x3f) && //?
-                !(char == 0x2d) && //-
-                !(char == 0x40)  //@
-            )
-                return false;
-            last_char = char;
-        }
-        return true;
-    }
-
-    // internal, random, salt
-    uint private _salt = 0;
-    function update_salt(uint _summoner) external onlyOwner {
-        _salt = _dn(_summoner, 10);
-    }
-    function _dn(uint _summoner, uint _number) internal view returns (uint) {
-        return _seed(_summoner) % _number;
-    }
-    function _random(string memory input) internal pure returns (uint256) {
-        return uint256(keccak256(abi.encodePacked(input)));
-    }
-    function _seed(uint _summoner) internal view returns (uint rand) {
-        rand = _random(
-            string(
-                abi.encodePacked(
-                    block.timestamp,
-                    blockhash(block.number - 1 - _salt),
-                    block.coinbase,
-                    _summoner,
-                    msg.sender
-                )
-            )
-        );
-    }
-}
-
-*/
 

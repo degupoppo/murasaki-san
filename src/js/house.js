@@ -91,6 +91,99 @@ contract ERC721 is IERC721 {
 //### 1st
 
 
+    野良猫の実装
+        UI2
+            catIdを入力して現在の情報を表示させる
+                現在のowner
+                年齢
+                NFT交換回数
+                現在の保持NFT一覧
+            userのNFT情報を入力して操作する
+                addressとtokenidを入力
+                show tokenURIで絵を確認
+                approve tokenでtokenIdだけをcatコントラへapprove
+                exchange!でNFT交換
+                注意書きを明記する
+            可能であればuserの所持するNFT一覧を表示する
+                可能だろうか。
+                scan系からERC721を取得できるだろうか。
+                blockscountのapiが使えそう
+                    https://blockscout.com/astar/api?module=account&action=tokenlist&address=0x2F7448B62134e52C2f46454d0089Ae21B5248805
+                jsonでパースして、typeが"ERC-721"を判別すればよいか。
+                blockscountではtokenIdまでは取得できなかった。
+                debankではtokenIdまで取得できるが、keyが必要
+                    https://docs.cloud.debank.com/en/readme/api-pro-reference/user#get-user-nft-list
+                さてどうするか。
+        UI:
+            TBA内のNFTの一覧
+                猫トークンに保持されている保持NFTリストを利用する
+            接続wallet内のNFTの一覧
+                tofuNFTのapiなどが使えないだろうか
+            select -> approve -> exchange!
+            attensiionでexchangeすると該当NFTを失うことを明記する
+        要修正
+            inactiveメカニズムを実装する
+                0アドレスからもgo homeできてしまうので、
+                _transferに何かしらのフラグを付けるか。
+         ok ownerがcatトークンを勝手にtransferできないように規制する
+                ERC2665でtransfer feeを設定しても良いか
+                もしくは、_transferをoverrideしても良いか
+                何れにせよ対策必要
+                → transfer系をrevert();へとoverrideした
+         ig mint onlyOwnerを実装する
+                mint時にそのcatIdの初期化を行う
+                initial NFTsはどのタイミングでどのようにしてgiveするか。
+        意味論
+            色んな人の家（＝wallet）を渡り歩くERC721トークン
+            自分の宝物入れを持っていてそこに色々入れている
+            宝物を1つ受け取ると自分の宝物１つをランダムでくれる
+            運営のみが新たにmintできる
+                アクティブプレイヤー数に応じて総mint数を調節する
+        NFT実装
+            年齢、交換回数、をカウント
+            mmのownerをランダムで抽出して自身をtransferする関数を実装する
+            mmを有するwalletにしかtransferされない
+            通常の方法でtransferもできるがmm所有walletのみ
+                つまりマケプレで売ることもできない
+        TBA実装
+            現在のownerからNFTを1つ受け取って1つ返す関数を実装する
+                この方法で受け取ったNFTを記録させる
+                他の方法で送りつけられたNFTと差別化する
+            初期値としてfluffyをいくつか入れておく
+            TBA内のNFTは通常の方法では取り出せない
+                NFT側のexchange()関数でしか触れない
+        要対策
+            一人の人がずっと野良猫を放さない
+                放置されたHoMに行ってしまうとtransferされずに居座ってしまう
+                    猫の居場所一覧ページを作る。
+                    滞在時間が一定日数以上で誰でもretransfer()関数を叩けるようにする
+            ゴミNFTで溢れかえってしまう
+                ERC721ならばなんでも宝物として認識されてしまうか
+                性善説、つまり価値のあるNFTをくれる人が多いかどうか
+                mcのbalanceOfが0になったら消滅させるか
+        野良猫トークンのownerはTBA内のfluffyを取り出せる
+            TBAは野良猫トークンownerからのtransferしか受け付けない
+        雑記
+            TBAに渡したいNFTを猫トークンに個別にapproveする
+            NFTをTBAにtransferして保持リストに登録、猫トークンに関数を実装
+                所持NFTから1つ選択してmsg.senderへtransferする
+                自分（猫トークン）をランダムにmmのownerへtransferする
+                    safetransferではなくapprove不要でtransferできるか。
+            TBAのexecuteCall()は猫トークンからしか受け付けない
+                猫トークンのownerからは実行できない
+                猫トークン内の関数でのみ実行できる
+            admin機能
+                猫トークンをadmin walletへ返す（transfer）関数
+                admin walletから無条件でTBAのexecuteCallを叩く関数（executeCall_admin()）
+                burn機能？
+            intervalの設定
+                猫トークンが新しい家にtransfer()されてから、しばらくは関数を叩けない
+                連続してNFT交換が行われて、一瞬で初期fluffyがなくなることを防ぐため。
+            NFT制限
+                total supplyが100以上のNFTのみTBAにtransferできる
+                即席発行のゴミNFTを防ぐため。
+
+
     要修正・検討
         HP, アセットは$ASTRベースで考えることを明記する
             USDベースではない。ASTRが上がればアセット評価もあがる。
@@ -187,99 +280,6 @@ contract ERC721 is IERC721 {
     必要絵
         ダンボール
         クレヨン
-        
-
-    フルオンチェーンのNFTを考える
-        Nounsが参考になるか。
-            https://zenn.dev/0xywzx/scraps/b8e61ccae71f51
-            https://nouns.wtf/noun/863
-            https://github.com/nounsDAO/nouns-monorepo/tree/master/packages/nouns-contracts/contracts
-        出力形式はSVG
-            複数コントラを組み合わせてtokenURIを出力させるか
-        形式はドット絵
-            Nounsは32x32
-            むらさきさんアイコンは128x128
-            プログラムでドット絵生成は困難なので、
-                予め生成、SVG化したいくつかのパーツを組み合わせてSVGを作るか。
-            部位ごとに、別コントラとするか。
-        1日～7日に1個、オークションによってmintできる。
-            オークション形式はどうするか。
-        部位・アクセサリーの候補
-            お花枠
-                左下
-            fluffy枠
-                右下
-            アクセサリー枠
-                右上の耳
-        予定枚数
-            1日1枚、2年間なら730枚
-                各部位9種類だと、9x9x9=729でちょうど
-            3日1枚、2年間なら243枚
-                6x6x7=252
-            fluffy*12 * flower*6 * pippel*4 = 288パターン
-        キャラクター
-            むらさきさんだと、tokenURIやアイコンと流石に被りまくるので、
-            別のNFTを表現するために、にゅいにゅいさんでも良いだろうか。
-        実装
-            NFT本体
-                基本的にはERC721
-                tokenURIはcodexを参照する
-                必要なアドレスはcpdex_tokenURIのみ
-                userMsgはNFT本体に保存する
-            codex_tokenURI
-                svg情報を統合してtokenURIを返す
-       *ユースケース
-            所有することでメインのゲームプレイでわかりやすい利益があると良いだろう。
-            expブーストが無難だが。
-            特別感を出すために、物体としても実装するか。
-
-    
-    POAP NFTのオークションコントラを実装する
-        期間72時間の公開オークション
-            前回価格より高値で落札されれば、次回の期間が10%縮まる
-            逆前回より安値なら10%伸びる
-            最低入札価格はstart feeの10%程度にするか
-                5%や3%でも良いだろうか。
-        Nounsのコントラコードを参考にする
-            bit時に料金をコントラに送金する
-            同時に、mint時のuser msgも入力する
-                user msgのプレビュー画面をhtmlで実装する
-        オークションの売上は全額bufferVaultへ転送する
-        統計値を集計する
-            オークション回数
-            各オークションごとに：
-                bit回数
-                落札価格
-                落札NFTのID
-            総落札額合計
-        NFTのパラメータをどのタイミングで決定するか
-            mint時にガチャの様に決定されるか
-            mint時に次回のパラメータが決定され次のNFTが公開されるか。
-            どのキャラが出るかわからない、ガチャの要素があったほうが面白いだろうか。
-
-
-    POAP NFTのオークションUIを実装する
-        Nounsを参考にする
-            現在の入札額
-            残り時間
-            入札履歴
-        user msgの入力UIを実装する
-            htmlベースでメッセージ表示のプレビューを表示させる
-            
-
-    Web3Authの導入を検討する
-        https://dev.classmethod.jp/articles/using-web3auth/
-        https://note.com/standenglish/n/ncb3ba174b500
-        Web3Authはgoogleアカウントなどでweb3アカウントを作成するプラットフォーム
-        自前サーバーで動かせば外部サービスなしで実装可能
-        ユーザーは、googleアカウントなどを提携してサインインすれば、
-            対応したEVMウォレットアドレスが取得できる。
-        バックエンド側にチェーンIDとAlchemyなどのRPCを登録しておけば、
-            ユーザーがチェーンの切り替えなども気にする必要がない。
-        Web3Auth接続されたブラウザからtxを飛ばす方法は？
-        AccountAbstructionを併用してgass lessでtx飛ばしたりできる？
-            将来的にはtreasuryの一部をAA用gassとして割り当てたりできるか。
-        EVMの秘密鍵はどこに保存されているのだろうか。
 
 
     TBAについて詰めるII
@@ -375,65 +375,6 @@ contract ERC721 is IERC721 {
         もしくは、EOAでスクリプトにより定期的にEVM側に預ける。
         コントラクトからEVMステーキングが可能か調べる。
         
-
-    野良猫の実装
-        意味論
-            色んな人の家（＝wallet）を渡り歩くERC721トークン
-            自分の宝物入れを持っていてそこに色々入れている
-            宝物を1つ受け取ると自分の宝物１つをランダムでくれる
-            運営のみが新たにmintできる
-                アクティブプレイヤー数に応じて総mint数を調節する
-        NFT実装
-            年齢、交換回数、をカウント
-            mmのownerをランダムで抽出して自身をtransferする関数を実装する
-            mmを有するwalletにしかtransferされない
-            通常の方法でtransferもできるがmm所有walletのみ
-                つまりマケプレで売ることもできない
-        TBA実装
-            現在のownerからNFTを1つ受け取って1つ返す関数を実装する
-                この方法で受け取ったNFTを記録させる
-                他の方法で送りつけられたNFTと差別化する
-            初期値としてfluffyをいくつか入れておく
-            TBA内のNFTは通常の方法では取り出せない
-                NFT側のexchange()関数でしか触れない
-        要対策
-            一人の人がずっと野良猫を放さない
-                放置されたHoMに行ってしまうとtransferされずに居座ってしまう
-                    猫の居場所一覧ページを作る。
-                    滞在時間が一定日数以上で誰でもretransfer()関数を叩けるようにする
-            ゴミNFTで溢れかえってしまう
-                ERC721ならばなんでも宝物として認識されてしまうか
-                性善説、つまり価値のあるNFTをくれる人が多いかどうか
-                mcのbalanceOfが0になったら消滅させるか
-        野良猫トークンのownerはTBA内のfluffyを取り出せる
-            TBAは野良猫トークンownerからのtransferしか受け付けない
-        雑記
-            TBAに渡したいNFTを猫トークンに個別にapproveする
-            NFTをTBAにtransferして保持リストに登録、猫トークンに関数を実装
-                所持NFTから1つ選択してmsg.senderへtransferする
-                自分（猫トークン）をランダムにmmのownerへtransferする
-                    safetransferではなくapprove不要でtransferできるか。
-            TBAのexecuteCall()は猫トークンからしか受け付けない
-                猫トークンのownerからは実行できない
-                猫トークン内の関数でのみ実行できる
-            admin機能
-                猫トークンをadmin walletへ返す（transfer）関数
-                admin walletから無条件でTBAのexecuteCallを叩く関数（executeCall_admin()）
-                burn機能？
-            intervalの設定
-                猫トークンが新しい家にtransfer()されてから、しばらくは関数を叩けない
-                連続してNFT交換が行われて、一瞬で初期fluffyがなくなることを防ぐため。
-            NFT制限
-                total supplyが100以上のNFTのみTBAにtransferできる
-                即席発行のゴミNFTを防ぐため。
-            UI:
-                TBA内のNFTの一覧
-                    猫トークンに保持されている保持NFTリストを利用する
-                接続wallet内のNFTの一覧
-                    tofuNFTのapiなどが使えないだろうか
-                select -> approve -> exchange!
-                attensiionでexchangeすると該当NFTを失うことを明記する
-
 
     Practiceのテストプレイ
         itemエアドロとテストプレイ
@@ -1390,6 +1331,95 @@ contract ERC721 is IERC721 {
 
 //### 3rd
 
+ ng Web3Authの導入を検討する
+        https://dev.classmethod.jp/articles/using-web3auth/
+        https://note.com/standenglish/n/ncb3ba174b500
+        Web3Authはgoogleアカウントなどでweb3アカウントを作成するプラットフォーム
+        自前サーバーで動かせば外部サービスなしで実装可能
+        ユーザーは、googleアカウントなどを提携してサインインすれば、
+            対応したEVMウォレットアドレスが取得できる。
+        バックエンド側にチェーンIDとAlchemyなどのRPCを登録しておけば、
+            ユーザーがチェーンの切り替えなども気にする必要がない。
+        Web3Auth接続されたブラウザからtxを飛ばす方法は？
+        AccountAbstructionを併用してgass lessでtx飛ばしたりできる？
+            将来的にはtreasuryの一部をAA用gassとして割り当てたりできるか。
+        EVMの秘密鍵はどこに保存されているのだろうか。
+
+ ok フルオンチェーンのNFTを考える
+        Nounsが参考になるか。
+            https://zenn.dev/0xywzx/scraps/b8e61ccae71f51
+            https://nouns.wtf/noun/863
+            https://github.com/nounsDAO/nouns-monorepo/tree/master/packages/nouns-contracts/contracts
+        出力形式はSVG
+            複数コントラを組み合わせてtokenURIを出力させるか
+        形式はドット絵
+            Nounsは32x32
+            むらさきさんアイコンは128x128
+            プログラムでドット絵生成は困難なので、
+                予め生成、SVG化したいくつかのパーツを組み合わせてSVGを作るか。
+            部位ごとに、別コントラとするか。
+        1日～7日に1個、オークションによってmintできる。
+            オークション形式はどうするか。
+        部位・アクセサリーの候補
+            お花枠
+                左下
+            fluffy枠
+                右下
+            アクセサリー枠
+                右上の耳
+        予定枚数
+            1日1枚、2年間なら730枚
+                各部位9種類だと、9x9x9=729でちょうど
+            3日1枚、2年間なら243枚
+                6x6x7=252
+            fluffy*12 * flower*6 * pippel*4 = 288パターン
+        キャラクター
+            むらさきさんだと、tokenURIやアイコンと流石に被りまくるので、
+            別のNFTを表現するために、にゅいにゅいさんでも良いだろうか。
+        実装
+            NFT本体
+                基本的にはERC721
+                tokenURIはcodexを参照する
+                必要なアドレスはcpdex_tokenURIのみ
+                userMsgはNFT本体に保存する
+            codex_tokenURI
+                svg情報を統合してtokenURIを返す
+       *ユースケース
+            所有することでメインのゲームプレイでわかりやすい利益があると良いだろう。
+            expブーストが無難だが。
+            特別感を出すために、物体としても実装するか。
+    
+ ok POAP NFTのオークションコントラを実装する
+        期間72時間の公開オークション
+            前回価格より高値で落札されれば、次回の期間が10%縮まる
+            逆前回より安値なら10%伸びる
+            最低入札価格はstart feeの10%程度にするか
+                5%や3%でも良いだろうか。
+        Nounsのコントラコードを参考にする
+            bit時に料金をコントラに送金する
+            同時に、mint時のuser msgも入力する
+                user msgのプレビュー画面をhtmlで実装する
+        オークションの売上は全額bufferVaultへ転送する
+        統計値を集計する
+            オークション回数
+            各オークションごとに：
+                bit回数
+                落札価格
+                落札NFTのID
+            総落札額合計
+        NFTのパラメータをどのタイミングで決定するか
+            mint時にガチャの様に決定されるか
+            mint時に次回のパラメータが決定され次のNFTが公開されるか。
+            どのキャラが出るかわからない、ガチャの要素があったほうが面白いだろうか。
+
+ ok POAP NFTのオークションUIを実装する
+        Nounsを参考にする
+            現在の入札額
+            残り時間
+            入札履歴
+        user msgの入力UIを実装する
+            htmlベースでメッセージ表示のプレビューを表示させる
+            
  ok 投機活動の想定と対策
         破壊的活動、アービトラージ、利益をかすめ取る活動の想定は？
             性悪説に則って考えてみる。

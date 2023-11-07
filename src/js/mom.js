@@ -1,4 +1,222 @@
 
+//231106
+version = "v0.1.2";
+
+
+//===Header==================================================================================
+
+/*
+
+interface IERC721 {
+    event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
+    event Approval(address indexed owner, address indexed approved, uint256 indexed tokenId);
+    event ApprovalForAll(address indexed owner, address indexed operator, bool approved);
+    function balanceOf(address owner) external view returns (uint256 balance);
+    function ownerOf(uint256 tokenId) external view returns (address owner);
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 tokenId
+    ) external;
+    function transferFrom(
+        address from,
+        address to,
+        uint256 tokenId
+    ) external;
+    function approve(address to, uint256 tokenId) external;
+    function getApproved(uint256 tokenId) external view returns (address operator);
+    function setApprovalForAll(address operator, bool _approved) external;
+    function isApprovedForAll(address owner, address operator) external view returns (bool);
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 tokenId,
+        bytes calldata data
+    ) external;
+}
+
+library Strings {
+    function toString(uint256 value) internal pure returns (string memory) {
+        if (value == 0) {
+            return "0";
+        }
+        uint256 temp = value;
+        uint256 digits;
+        while (temp != 0) {
+            digits++;
+            temp /= 10;
+        }
+        bytes memory buffer = new bytes(digits);
+        while (value != 0) {
+            digits -= 1;
+            buffer[digits] = bytes1(uint8(48 + uint256(value % 10)));
+            value /= 10;
+        }
+        return string(buffer);
+    }
+}
+
+interface IERC721Receiver {
+    function onERC721Received(
+        address operator,
+        address from,
+        uint256 tokenId,
+        bytes calldata data
+    ) external returns (bytes4);
+}
+
+contract ERC721 is IERC721 {
+    using Strings for uint256;
+
+    mapping(uint256 => address) private _owners;
+    mapping(address => uint256) private _balances;
+    mapping(uint256 => address) private _tokenApprovals;
+    mapping(address => mapping(address => bool)) private _operatorApprovals;
+    
+    function balanceOf(address owner) public view virtual override returns (uint256) {
+        require(owner != address(0), "ERC721: balance query for the zero address");
+        return _balances[owner];
+    }
+    
+*/
+
+
+//===ToDo====================================================================================
+/*
+
+//---ToDo
+
+    絵の追加
+        6パターンだけだと流石に寂しい
+        色々な表情のむらさきさんを追加するか、
+            ちょっと別バージョンのにゅいにゅいさんたちを追加するか。
+        目標30種類
+        伴って、unrevealedSvgも修正する
+    リファクタリング
+        call回数の最適化
+            auctionなどは最初に1回だけcallする？
+            その他、on-chainデータ読み込み回数の最適化を図る
+        関数のモジュール化と整理整頓
+    svgの修正
+ ok     fluffyの目とpippelのpetalのぼかしフィルターを見直す
+ ok     重くなるのなら、フレームのグラジエントも見直す
+ ng     ロゴとメッセージの配置を見直す
+        pippelの色合いの修正
+        pippelのバックにやはり白のcircleを置く
+        codexコントラの修正
+ ok init関数を用意する
+ ok     addressとabiをどうやって管理するか
+ ng     別ファイルとするかどうか。
+ ok NFTポップアップウィンドウの実装
+ ok     NFTのクリックでポップアップウィンドウを表示する。
+ ok     フレーバーテキストも一緒に見れるように。
+ ok     表示項目：
+ ok         NFT題名と#
+ ok         大きめのsvg
+ ok         description
+ ok         owner
+ ok フレーバーテキストの吟味
+ ok     物語のバックグラウンドを中心に
+ ok     自分語りは避ける
+ ok user NFT一覧表示を実装する
+ ok     NFTを2つ以上表示すると、colorが混線するバグの修正
+ ok ランダムNFT表示を実装する
+ ng     クリックでTofuNFTへ飛ぶ？
+ ok オークションメカニズムの試行
+ ok     cycle早めで一通り挙動を確認する
+ ok     NFT所持後、user NFTとrandom NFTを実装する
+ ok     bidder lessオークションの挙動を確認する
+ ok     可能であれば、end時にブラウザリロードなしでend button表示へ移行したい。
+ ok 携帯への最適化
+ ok     小さな画面での回り込みや<br>などの配置を詰める
+ ok オークション終了時のUIを実装する
+ ok     auction.settled=trueをチェックし、Conclude the auctionボタンを設置する
+ ok     winnerとbid価格を表示する
+ ok     下に処理の説明を記載する
+ ok         winnerにNFTが転送される
+ ok         次のオークションが開始される
+ ok bid履歴にsummoner nameを表示するよう修正する
+ ok     tableを使って左合わせをきれいにする
+ ok オークションルールの整備
+ ok presentbox連携の実装
+ ok     オークションをmintするとHoMにもpresentboxが届くようにする
+ ok         summonerウォレット限定
+ ok     mcにauctionHouseをpermitし、auctionHouseにpresentbox_mintを実装する
+ ok 要修正
+ ok     bidderが現れずにtimeupした際の処理の実装
+ ok         投票してから1時間、誰も投票しなければ勝ちとするか。
+ ok         bidder=0なら、残り時間が1時間から減らないようにする
+ ok         → 特に手を加えず、endTimeが来たらsettleして次のauctionを開始する
+ ok            その際、bidder=0xならば何もしない。
+ ok            おなじidのNFTが再度オークションにかけられる
+ ok     flavorTextはコントラクトからのcallしか受け付けないようにする
+ ok フロントエンド修正
+ ok     読み込み中のローディングsvgを実装する
+ ok インデックス128色でmain絵の用意
+ ok 名前の決定
+ ok     Memorabilia
+ ok     Memento
+ ig 説明文の用意と実装
+ ok ピッペルの色決定
+ ok オークションコントラの実装
+ ok     オークション開始時にはNFTをmintせず、
+ ok     勝利者決定後、オークションsettle時にmintしてtransferする
+ ok     user msgはbid時に入力を受けて保持しつつ、settle時に渡してmintする。
+ ok フロントエンドの実装
+ ok     user msgの入力をいつ行うか。
+ ok     オークションへのbid時に入力させるか。
+ ok     オークション勝利後に入力しつつmintさせるか。
+ ok     → 勝利後にmint待ちさせると次のオークションを始められないので
+ ok     やはりbid時にメッセージ入力を聞くUIとする。
+ ok オークション履歴用のstructを実装する
+ ok     auction No
+ ok     bidder address
+ ok     price
+ ok     MoM tokenId
+ ok bid logを実装する
+ ok     time
+ ok     bidder
+ ok     amount
+ ok MoMにremarkableを実装する
+ ok     wallet addressから所有tokenIdを取得できるように。
+ ok Reveal前のSVG絵の用意
+ ok     JSでuserMsgを動的に修正する
+ ok         もしくはpreviewボタンで再読み込みさせる
+ ok     実際はauction settle時にmintなのだが、
+ ok         UI的にはsettle時にrevealされるのと同じだろうか。
+ ok     よって、auction中はランダムな候補絵を表示するのではなく、
+ ok         オークション終了時に決定するよう、未開封絵を表示させておく
+ ok     実際の表示絵は、過去のMoMを下に表示させることで例示する。
+ ok     つまり、Unrevealed用SVGと
+ ok         これを表示するjs関数を実装する
+ ok         userMsg, tokenId, Dateを引数にとり、
+ ok         Unrevealed SVGを返すjs
+                
+
+init
+    MurasakiAuctionHouse    0xd675daceecafC225690327d38D652eFf4EE9cA0d
+        _set0_Murasaki_Craft(address_Murasaki_Craft)    0x143C0Fe403C0328B2AD77a0D1Cb0F6F2A66A8bDE
+        _set0_Murasaki_Main(address_Murasaki_Main)  0x4925561b0a524B98F950F07A40F6DFc70B64CaD5
+        _set0_NFTAddress(address_Murasaki_Memento)  0x20f18BeDd45a6d6631D3a92ac501d03a51Ac9D18
+        _set0_VaultAddress(address_BufferVault) 0xf2a7319Fd847fD79097D74de7F7Df5ae37b4871C
+    Murasaki_Memento    0x20f18BeDd45a6d6631D3a92ac501d03a51Ac9D18
+        _add_permitted_address(address_MurasakiAuctionHouse)    0xd675daceecafC225690327d38D652eFf4EE9cA0d
+        _set_address_Murasaki_Memento_codex(address_Murasaki_Memento_codex) 0xD647049142909C78C1B809dDeb283fb546012668
+    Murasaki_Memento_codex  0xD647049142909C78C1B809dDeb283fb546012668
+        _set_address_Murasaki_Memento   0x20f18BeDd45a6d6631D3a92ac501d03a51Ac9D18
+        _set_address_Murasaki_Memento_flavorText    0xEC0E79Ac007B898158b9e52cf4C50E23D744FD69
+        _set_address_Murasaki_Memento_mainPng_01    0x71c91F52135afdff323795dbe3Cb34BfC38654f6
+        _set_address_Murasaki_Memento_mainPng_02    0xdCCCd34d80f4CbeB34c5f58Ff34a1786525Ef4B1
+        _set_address_Murasaki_Memento_mainPng_03    0xB930d720F57924345B49894283b7fD1eA9850381
+        _set_address_Murasaki_Memento_mainPng_04    0xDcDc90a7776EF123e2d47bFc9D091D818f8ed8eC
+        _set_address_Murasaki_Memento_mainPng_05    0x07A44EaAaF3745cA6fECe7071ABe38c885b2D2d7
+        _set_address_Murasaki_Memento_mainPng_06    0x9552409fF6C4c3B1CddAB2DA6f2ac9892d50F47c
+    Murasaki_Craft
+        _add_permitted_address(MurasakiAuctionHouse)    0xd675daceecafC225690327d38D652eFf4EE9cA0d
+
+*/
+
+
 
 // prep contracts
 async function prep_contracts () {
@@ -16,7 +234,7 @@ async function prep_contracts () {
     contract_mom = await new web3.eth.Contract(abi_Murasaki_Memento, address_Murasaki_Memento);
 
     // momc
-    address_Murasaki_Memento_Codex = "0xE3F8B20FF46d273541CC3512C76d35F07EB48F3d";
+    address_Murasaki_Memento_Codex = "0x4b31f00d171a70a745Fc6A65642623745221D77C";
     let abi_Murasaki_Memento_Codex = [{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"account","type":"address"}],"name":"Paused","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"account","type":"address"}],"name":"Unpaused","type":"event"},{"inputs":[{"internalType":"address","name":"_address","type":"address"}],"name":"_set_address_Murasaki_Memento","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_address","type":"address"}],"name":"_set_address_Murasaki_Memento_flavorText","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_address","type":"address"}],"name":"_set_address_Murasaki_Memento_mainPng_01","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_address","type":"address"}],"name":"_set_address_Murasaki_Memento_mainPng_02","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_address","type":"address"}],"name":"_set_address_Murasaki_Memento_mainPng_03","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_address","type":"address"}],"name":"_set_address_Murasaki_Memento_mainPng_04","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_address","type":"address"}],"name":"_set_address_Murasaki_Memento_mainPng_05","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_address","type":"address"}],"name":"_set_address_Murasaki_Memento_mainPng_06","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_address","type":"address"}],"name":"_set_address_Murasaki_Memento_mainPng_07","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_address","type":"address"}],"name":"_set_address_Murasaki_Memento_mainPng_08","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_address","type":"address"}],"name":"_set_address_Murasaki_Memento_mainPng_09","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"address_Murasaki_Memento","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"address_Murasaki_Memento_flavorText","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"address_Murasaki_Memento_mainPng_01","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"address_Murasaki_Memento_mainPng_02","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"address_Murasaki_Memento_mainPng_03","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"address_Murasaki_Memento_mainPng_04","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"address_Murasaki_Memento_mainPng_05","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"address_Murasaki_Memento_mainPng_06","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"address_Murasaki_Memento_mainPng_07","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"address_Murasaki_Memento_mainPng_08","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"address_Murasaki_Memento_mainPng_09","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"pause","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"paused","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"_tokenId","type":"uint256"}],"name":"tokenURI","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"unpause","outputs":[],"stateMutability":"nonpayable","type":"function"}];
     contract_momc = await new web3.eth.Contract(abi_Murasaki_Memento_Codex, address_Murasaki_Memento_Codex);
 
@@ -29,7 +247,7 @@ async function prep_contracts () {
     address_Murasaki_Memento_mainPng_06 = "0x9552409fF6C4c3B1CddAB2DA6f2ac9892d50F47c";
 
     // address flavor text
-    address_Murasaki_Memento_flavorText = "0x8A4a5F713E8070730270232Bc0Ef5aD209964fDc";
+    address_Murasaki_Memento_flavorText = "0xF90E949395C942D67B47fA799bDA0a2Cd55031A0";
 }
 
 
@@ -71,7 +289,6 @@ async function init_auctionContracts () {
         
             // _update_html_to_endTheAuction
             _update_html_to_endTheAuction();
-
         }
 
         // show total auction volume
@@ -330,7 +547,12 @@ async function show_bidLog() {
     let _tokenId = Number(_auction.nounId);
     
     // call bidlogs
-    let _bidlog = await contract_mah.methods.call_bidLog(_tokenId).call();
+    let _bidlog;
+    try {
+        _bidlog = await contract_mah.methods.call_bidLog(_tokenId).call();
+    } catch (error) {
+        return 0;
+    }
     
     // prepare html
     let _html = "";
@@ -522,6 +744,11 @@ async function show_winner() {
     let _auction = await call_auction();
     let _bidder = _auction.bidder;
     
+    // return when bidder = (0)
+    if (_bidder == "0x0000000000000000000000000000000000000000") {
+        return 0;
+    }
+    
     // format winner
     _bidder = await formatWallet(_bidder);
 
@@ -624,7 +851,7 @@ async function show_randomNFT() {
         }
     }
     tokenList.sort();
-        
+    
     // prepare each svg
     let _html = "";
     //_html += "&nbsp;&nbsp;";

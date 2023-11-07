@@ -23,6 +23,8 @@ async function update_onMarketItems() {
         let _crafterName = _itemInfo[1];
         let _itemName = dic_items_reverse[_item_type];
         let _itemPng = dic_items[_itemName]["icon_png"];
+        
+        console.log(_itemInfo);
 
         //convert prices
         _listedPrice = web3.utils.fromWei(_listedPrice, "ether")
@@ -31,7 +33,7 @@ async function update_onMarketItems() {
         //define mode
         let _isPrelisting = false;
         if (
-            _listedPrice < 100
+            _listedPrice < 500
             //&& _auctionRestingTime <= 24 * 60 * 60
             && _auctionRestingTime > 0
         ) {
