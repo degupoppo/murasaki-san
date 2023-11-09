@@ -1,6 +1,6 @@
 
 //231107
-version = "v0.1.3";
+version = "v0.1.4";
 
 
 //===Header==================================================================================
@@ -292,13 +292,13 @@ async function init_auctionContracts () {
         }
 
         // show total auction volume
-        show_totalAuctionVolume();
+        await show_totalAuctionVolume();
                 
         // show tokenId
-        show_tokenId();
+        await show_tokenId();
         
         // show bid log
-        show_bidLog();
+        await show_bidLog();
         
         // show user NFT
         await show_userNFT();
@@ -770,16 +770,24 @@ async function show_userNFT() {
     // call user NFT list
     let myListLength = await contract_mom.methods.myListLength(wallet).call();
     let myListsAt = await contract_mom.methods.myListsAt(wallet, 0, myListLength).call();
-        
+    myListsAt = myListsAt.map(Number);
+    
     if (myListsAt.length > 0) {
     
         // show loading text
         let _target = document.getElementById("userNFT");
         _target.innerHTML = "&nbsp;&nbsp;Loading...";
+
+        // sort token list
+        function compareNumbers(a, b) {
+            return a - b;
+        }
+        myListsAt.sort(compareNumbers);
         
         // prepare each svg
         let _html = "";
         //_html += "&nbsp;&nbsp;";
+        _html += "You have minted " + myListsAt.length +" Memento NFTs:<br><br>";
         for (i=0; i < myListsAt.length; i++) {
         
             // prepare token id
@@ -850,7 +858,12 @@ async function show_randomNFT() {
             tokenList.push(_rnd);
         }
     }
-    tokenList.sort();
+    
+    // fort token list
+    function compareNumbers(a, b) {
+        return a - b;
+    }
+    tokenList.sort(compareNumbers);
     
     // prepare each svg
     let _html = "";

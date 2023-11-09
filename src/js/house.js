@@ -1,7 +1,7 @@
 
 
-//231106
-version = "v0.1.24";
+//231107
+version = "v0.1.25";
 
 
 //===Header==================================================================================
@@ -92,6 +92,9 @@ contract ERC721 is IERC721 {
 
 
     野良猫の実装
+        init
+            StrayCat
+                _set_Murasaki_Address(address_Murasaki_Address)
         UI2
             catIdを入力して現在の情報を表示させる
                 現在のowner
@@ -122,7 +125,7 @@ contract ERC721 is IERC721 {
             select -> approve -> exchange!
             attensiionでexchangeすると該当NFTを失うことを明記する
         要修正
-            inactiveメカニズムを実装する
+         ok inactiveメカニズムを実装する
                 0アドレスからもgo homeできてしまうので、
                 _transferに何かしらのフラグを付けるか。
          ok ownerがcatトークンを勝手にtransferできないように規制する
@@ -185,6 +188,16 @@ contract ERC721 is IERC721 {
 
 
     要修正・検討
+        account unificationに対応させる
+            やり方調べる。
+            EVM側からどうやってstaking amountを取得するのか。
+        額縁
+            クリックしないとNFTを読み込まないよう修正
+            1x1の正方形型へ修正
+        strollの修正
+            astar以外の実装
+            背景絵の置換
+            行き先アイコンの置換
         HP, アセットは$ASTRベースで考えることを明記する
             USDベースではない。ASTRが上がればアセット評価もあがる。
         HP, how to playに1, 3, 6, 12, 24moの経過絵を追加する

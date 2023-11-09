@@ -4,8 +4,8 @@
 pragma solidity =0.8.13;
 
 
-// 231003
-// House of Murasaki-san ver. 0.1.15
+// 231109
+// House of Murasaki-san ver. 0.1.16
 
 
 //===Import==================================================================================================================
@@ -10545,7 +10545,7 @@ contract StrayCat is ERC721, Ownable, Pausable, ReentrancyGuard, ERC721Holder {
     function transferFrom(address, address, uint256) public pure override {
         revert();
     }
-    
+
     // modify _transfer, need token isActive
     function _beforeTokenTransfer(address, address, uint256 _tokenId, uint256) internal view override {
         require(cats[_tokenId].isActive);
@@ -10596,7 +10596,8 @@ contract StrayCat is ERC721, Ownable, Pausable, ReentrancyGuard, ERC721Holder {
     
     // admin
 
-    // spawn the cat, usually to address(0)
+    // spawn cat
+    // only admin, mint to address(this), then toToNewOwner()
     function spawnCat (address _owner) external onlyOwner {
         cats[nextCat] = Cat(
             block.timestamp,
@@ -10608,10 +10609,10 @@ contract StrayCat is ERC721, Ownable, Pausable, ReentrancyGuard, ERC721Holder {
         nextCat++;
     }
     
-    // burn the cat
+    // burn cat
     function burnCat (uint _catId) external onlyOwner {
         // send to address(0)
-        admin_forcedToHome(_catId, address(0));
+        admin_forcedToHome(_catId, address(this));
         // forbit _transfer
         cats[_catId].isActive = false;
         cats[_catId].lastVisitingTime = 5364662400;
@@ -10657,6 +10658,9 @@ contract StrayCat is ERC721, Ownable, Pausable, ReentrancyGuard, ERC721Holder {
     function admin_set_visitingTimeLimit (uint _val) external onlyOwner {
         visitingTimeLimit = _val;
     }
+    function admin_set_coolTimeLimit (uint _val) external onlyOwner {
+        coolTime = _val;
+    }
     function admin_set_limitLevel (uint _val) external onlyOwner {
         limit_level = _val;
     }
@@ -10665,6 +10669,12 @@ contract StrayCat is ERC721, Ownable, Pausable, ReentrancyGuard, ERC721Holder {
     }
     function admin_set_limitSatiety (uint _val) external onlyOwner {
         limit_satiety = _val;
+    }
+    
+    // emergency, salvage ERC721 token
+    /// @notice this will destroy the integrity of the database
+    function admin_salvageNFT (address _tokenAddress, address _taker, uint _tokenId) external onlyOwner {
+        IERC721(_tokenAddress).safeTransferFrom(address(this), _taker, _tokenId);
     }
 
     
@@ -10679,13 +10689,16 @@ contract StrayCat is ERC721, Ownable, Pausable, ReentrancyGuard, ERC721Holder {
     ) external nonReentrant whenNotPaused {
     
         // check cool time
-        require(_isCooled(_catId));
+        require(_isCooled(_catId), "not cooled yet");
     
         // check ERC721 interface
         require(_isIERC721Compliant(_tokenAddress), "not ERC721 contract");
         
+        // check token owned
+        require(_isTokenOwned(_tokenAddress, _tokenId, msg.sender), "not owned token");
+
         // check token approval
-        require(_isTokenApproved(_tokenAddress, _tokenId), "not token aproval");
+        require(_isTokenApproved(_tokenAddress, _tokenId), "not approved token");
 
         // check msgSender
         require(_checkSender(_catId, msg.sender), "invalid sender");
@@ -10734,7 +10747,7 @@ contract StrayCat is ERC721, Ownable, Pausable, ReentrancyGuard, ERC721Holder {
         }
     }
     
-    // call cat
+    // check and call cat visiting, 0=no cat, >0=visiting catId
     function call_visitingCat (uint _summoner) external view returns (uint) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
@@ -10743,7 +10756,7 @@ contract StrayCat is ERC721, Ownable, Pausable, ReentrancyGuard, ERC721Holder {
         if (balanceOf(_owner) == 0) {
             _catId = 0;
         } else {
-            for (uint i=1; i<=10; i++) {
+            for (uint i=1; i<nextCat; i++) {
                 if (ownerOf(i) == _owner) {
                     _catId = i;
                 }
@@ -10779,12 +10792,12 @@ contract StrayCat is ERC721, Ownable, Pausable, ReentrancyGuard, ERC721Holder {
     // internal functions
     
     // internal, check cool time
-    function _isCooled (uint _catId) internal view returns (bool) {
+    function _isCooled (uint _catId) public view returns (bool) {
         return (block.timestamp - cats[_catId].lastVisitingTime > coolTime);
     }
        
     // internal, check the msg.sender, owner of summoner, owner of the cat, and is active.
-    function _checkSender (uint _catId, address _sender) internal view returns (bool) {
+    function _checkSender (uint _catId, address _sender) public view returns (bool) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
@@ -10800,7 +10813,7 @@ contract StrayCat is ERC721, Ownable, Pausable, ReentrancyGuard, ERC721Holder {
     }
     
     // internal, take random NFT
-    function _takeNFT (uint _catId, address _taker) internal {
+    function _takeNFT (uint _catId, address _taker) public {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         // prepare summoner
@@ -10821,7 +10834,7 @@ contract StrayCat is ERC721, Ownable, Pausable, ReentrancyGuard, ERC721Holder {
     }
     
     // internal, get random NFT info id to take
-    function _get_randomNFTId (uint _catId) internal view returns (uint) {
+    function _get_randomNFTId (uint _catId) public view returns (uint) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         uint _rnd = mfs.dn(_catId, catNFTs[_catId].length());
@@ -10830,7 +10843,7 @@ contract StrayCat is ERC721, Ownable, Pausable, ReentrancyGuard, ERC721Holder {
     }
     
     // internal, give NFT and store info
-    function _giveNFT (uint _catId, address _giver, address _tokenAddress, uint _tokenId) internal {
+    function _giveNFT (uint _catId, address _giver, address _tokenAddress, uint _tokenId) public {
         // transfer NFT to this
         IERC721(_tokenAddress).safeTransferFrom(_giver, address(this), _tokenId);
         // get summonerId
@@ -10857,7 +10870,7 @@ contract StrayCat is ERC721, Ownable, Pausable, ReentrancyGuard, ERC721Holder {
     }
     
     // internal, transfer self to the new owner of summoner
-    function _transferSelfToNewOwner (uint _catId) internal {
+    function _transferSelfToNewOwner (uint _catId) public {
         // prepare owners
         address _oldOwner = ownerOf(_catId);
         address _newOwner = _get_newOwner(_catId);    
@@ -10868,40 +10881,52 @@ contract StrayCat is ERC721, Ownable, Pausable, ReentrancyGuard, ERC721Holder {
     }
     
     // internal get new owner address
-    function _get_newOwner (uint _catId) internal view returns (address) {
+    function _get_newOwner (uint _catId) public view returns (address) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         // prepare old owner of summoner
         address _oldOwner = ownerOf(_catId);
         uint _oldOwnerSummoner;
-        if (_oldOwner != address(0)) {
-            _oldOwnerSummoner = mfs.get_summoner(_oldOwner);
-        } else {
+        if (_oldOwner == address(this)) {
+            // when owner is this (at thome), summoner=0
             _oldOwnerSummoner = 0;
+        } else {
+            _oldOwnerSummoner = mfs.get_summoner(_oldOwner);
         }
         // select new owner of summoner
         uint _newOwnerSummoner = _select_random_summoner_to(_oldOwnerSummoner);
-        // return owner address
-        address _newOwner = mfs.get_owner(_newOwnerSummoner);
+        // prepare owner address
+        address _newOwner;
+        if (_newOwnerSummoner == 0) {
+            // when sutable summoner was not found, return to the home address
+            _newOwner = address(this);
+        } else {
+            _newOwner = mfs.get_owner(_newOwnerSummoner);
+        }
         return _newOwner;
     }
     
     // internal, ERC721 validator
-    function _isIERC721Compliant(address contractAddress) internal view returns (bool) {
+    function _isIERC721Compliant(address contractAddress) public view returns (bool) {
         try IERC721(contractAddress).supportsInterface(type(IERC721).interfaceId) returns (bool isCompliant) {
             return isCompliant;
         } catch {
             return false;
         }
     }
+
+    // internal, token own
+    function _isTokenOwned (address _tokenAddress, uint _tokenId, address _owner) public view returns (bool) {
+        return (IERC721(_tokenAddress).ownerOf(_tokenId) == _owner);
+    }
     
     // internal, token approval checker
-    function _isTokenApproved (address _tokenAddress, uint _tokenId) internal view returns (bool) {
+    function _isTokenApproved (address _tokenAddress, uint _tokenId) public view returns (bool) {
         return (IERC721(_tokenAddress).getApproved(_tokenId) == address(this));
     }
     
     // internal, select random summoner, refered to Murasaki_Mail
-    function _select_random_summoner_to(uint _summoner_from) internal view returns (uint) {
+    function _select_random_summoner_to(uint _summoner_from) public view returns (uint) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         Murasaki_Main mm = Murasaki_Main(ma.address_Murasaki_Main());
