@@ -1,6 +1,6 @@
 
-//231107
-version = "v0.1.4";
+//231109
+version = "v0.1.5";
 
 
 //===Header==================================================================================
@@ -97,6 +97,7 @@ contract ERC721 is IERC721 {
             auctionなどは最初に1回だけcallする？
             その他、on-chainデータ読み込み回数の最適化を図る
         関数のモジュール化と整理整頓
+        wssの導入
     svgの修正
  ok     fluffyの目とpippelのpetalのぼかしフィルターを見直す
  ok     重くなるのなら、フレームのグラジエントも見直す
@@ -439,26 +440,9 @@ async function show_endTime() {
     let _auction = await call_auction();
     let _endTime = Number(_auction.endTime);
     
-    /*
-    let _date = new Date();
-    let _unix = Math.round(_date.getTime()/1000);
-    let _deltaSec = _endTime - _unix;
-    endTimer(_deltaSec);
-    */
-    
     endTimer2(_endTime);
 }
 
-
-// timer
-function endTimer(_deltaSec) {
-    let _hour = Math.floor(_deltaSec / 3600);
-    let _min = Math.floor(_deltaSec % 3600 / 60);
-    let _sec = _deltaSec % 60;
-    let _txt = _hour + "h " + _min + "m " + _sec + "s";
-    endTime.innerHTML = _txt;
-    endTimerNow = setTimeout( () => {endTimer(_deltaSec-1)}, 1000);
-}
 
 // timer2
 function endTimer2(_endTime) {
@@ -477,7 +461,7 @@ function endTimer2(_endTime) {
     let _txt = _hour + "h " + _min + "m " + _sec + "s";
     
     // color
-    if (_deltaSec <= 300) { //***TODO*** 5min -> 1hr
+    if (_deltaSec <= 3600) {
         _txt = '<font color="red">' + _txt + '</font>';
     }
     
@@ -1007,6 +991,6 @@ async function init_contract () {
     //contract_mah.methods._set_numberOfOhana(6).send({from:wallet});
     //contract_mah.methods._set_numberOfPippel(5).send({from:wallet});
     //contract_mah.methods._set_numberOfFluffy(12).send({from:wallet});
-    contract_mah.methods._set_numberOfFlavorText(30).send({from:wallet});
+    //contract_mah.methods._set_numberOfFlavorText(30).send({from:wallet});
 }
 

@@ -1,0 +1,280 @@
+
+<!doctype html>
+<html lang="en">
+
+
+<script src="lib/web3.min.js"></script>
+<script src="src/js/contracts.js"></script>
+<script src="src/js/share.js"></script>
+
+
+
+<script>
+
+
+    // get NFT list
+    // [ [ name, address, [ [tokenId, tokenURI], []... ] ], [], ... ]
+    async function get_nftList() {
+        web3 = await connect();
+        wallet = await get_wallet(web3);
+        let _nftContractList = await _call_nftContractList(wallet);
+        let _nftTokenList = await _call_nftTokenList(wallet, _nftContractList);
+        let _nftTokenURIList = await _call_nftTokenURIList(_nftTokenList);
+        return _nftTokenURIList;
+    }
+    
+    
+    // fetch tokenURI
+    async function _fetch_tokenUri (_tokenUri) {
+        // json, get image
+        // ipfs
+        // svg
+    }
+
+
+    // call user nft list from blockscount api
+    async function _call_nftContractList (_wallet) {
+        // prepare url, base on official example
+        let _url = "https://blockscout.com/astar/api?module=account&action=tokenlist&address=" + _wallet;
+        // fetch url
+        let _res = await fetch(_url, {method: "GET"}).then((data) => data.json());
+        // exclude result
+        _res = _res.result;
+        return _res;
+    }
+
+
+    // call NFT tokenId
+    async function _call_nftTokenList (_wallet, _nftContractList) {
+
+        // part of abi for AstarCats, ERC721Enumerable, tokenOfOwnerByIndex()
+        let _abi = [{"type":"function","stateMutability":"view","outputs":[{"type":"uint256","name":"","internalType":"uint256"}],"name":"tokenOfOwnerByIndex","inputs":[{"type":"address","name":"owner","internalType":"address"},{"type":"uint256","name":"index","internalType":"uint256"}]}];
+        
+        // prepare res
+        let _res = [];
+        
+        // process each NFT project
+        for (let i=0; i<_nftContractList.length; i++) {
+        
+            // check ERC-721
+            let _type = _nftContractList[i].type;
+            if (_type != "ERC-721") {
+                continue;
+            }
+
+            // prepare params
+            let _balance = Number(_nftContractList[i].balance);
+            let _contractAddress = _nftContractList[i].contractAddress;
+            let _name = _nftContractList[i].name;
+
+            // prepare contract
+            let _contract = await new web3.eth.Contract(_abi, _contractAddress);
+            
+            // call all tokenId owned by user
+            // using tokenOfOwnerByIndex() method
+            let _tokenIdList = [];
+            try {
+                for (let j=0; j<_balance; j++) {
+                    let _tokenId = await _contract.methods.tokenOfOwnerByIndex(_wallet, j).call();
+                    _tokenIdList.push(_tokenId);
+                }
+                console.log(_name, ":", "ok,", _tokenIdList);
+            } catch (err) {
+                console.log(_name, ":", "err, tokenIdList");
+            }
+            
+            // push result
+            _res.push([_contractAddress, _name, _tokenIdList]);
+        }
+        
+        // return
+        return _res;
+    }
+
+
+    // call tokenURI
+    async function _call_nftTokenURIList(_nftTokenList) {
+
+        // prepare abi, tokenURI()
+        let _abi = [{"type":"function","stateMutability":"view","outputs":[{"type":"string","name":"","internalType":"string"}],"name":"tokenURI","inputs":[{"type":"uint256","name":"tokenId","internalType":"uint256"}]}];
+
+        // prepare res
+        let _res = [];
+
+        // process each NFT
+        for (let k=0; k<_nftTokenList.length; k++) {
+        
+            // prepare NFT info
+            let _contractAddress = _nftTokenList[k][0];
+            let _name = _nftTokenList[k][1];
+            let _tokenIdList = _nftTokenList[k][2];
+            
+            // check tokenIdList
+            if (_tokenIdList.length == 0) {
+                continue
+            }
+
+            // prepare contract
+            let _contract = await new web3.eth.Contract(_abi, _contractAddress);
+
+            // process each tokenId, call tokenURI
+            let _tokenURIs = [];
+            for (let l=0; l<_tokenIdList.length; l++) {
+                let _tokenId = _tokenIdList[l];
+                let _tokenURI = await _contract.methods.tokenURI(k).call();
+                _tokenURIs.push([_tokenId, _tokenURI])
+            }
+            
+            // push res
+            _res.push([_name, _contractAddress, _tokenURIs]);
+        }
+        
+        // return result
+        return _res;
+    }
+
+
+</script>
+
+
+
+<!--- head --->
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=0.9">
+
+<title>House of Murasaki-san</title>
+<meta name="description" content="Murasaki-san is a virtual pet that lives in your wallet on Astar Network." />
+<link rel="stylesheet" href="src/css/simple2.css">
+<link rel="stylesheet" href="src/css/style.css">
+<link rel="stylesheet" href="src/css/modalWindow.css">
+
+<link rel="icon" href="src/png/favicon.png" />
+<link rel="apple-touch-icon" href="src/png/favicon.png">
+
+<meta property="og:title" content="House of Murasaki-san">
+<meta property="og:image" content="src/png/favicon.png">
+<meta property="og:url" content="https://murasaki-san.com/">
+<meta property="og:description" content="Murasaki-san is a virtual pet that lives in your wallet on Astar Network.">
+
+<script src="https://cdn.jsdelivr.net/npm/@twemoji/api@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
+
+<!---twitter card--->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="House of Murasaki-san" />
+<meta name="twitter:description" content="Murasaki-san is a virtual pet that lives in your wallet on Astar Network." />
+<meta name="twitter:image" content="https://murasaki-san.com/src/png/opening_logo.jpg" />
+
+</head>
+
+
+<body>
+
+
+<!--- header --->
+
+<header>
+
+<nav>
+<a href="index.html"><b>&#127969; Home</b></a>
+<a href="house.html" ><b>&#x2764; Play</b></a>
+<a href="market.html"><b>&#x1f6d2; Market</b></a>
+<a href="info.html"><b>&#x1f4d7; Info</b></a>
+<a href="mom.html" class="current"><b>&#127914; MoM</b></a>
+&nbsp;<span id="button_connect"><button onclick="init_web3();" style="width:110px;">Connect</button></span>
+</nav>
+
+
+
+<h1>
+Memento of <br class="br-sp">Murasaki-san
+</h1>
+
+<p>
+<center>
+Auction House of <br class="br-sp">Memento of Murasaki-san NFT.<br><br class="br-sp">
+One Memento NFT, <b>every 72 hours</b>.
+</center>
+</p>
+
+</header>
+
+
+<main>
+
+<!--- scroll up button --->
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.4/css/all.css">
+<link rel="stylesheet" href="src/css/scrollup.css">
+<div id="page_top"><a href="#"></a></div>
+
+
+
+<!--- first msg --->
+
+<br>
+<center>
+<code class="language-plaintext highlighter-rouge">
+This is NFT subproject of <br class="br-sp"><b>House of Murasaki-san</b>.<br>
+You can mint Memento NFT <br class="br-sp">with Nouns-like auction.
+</code>
+</center>
+
+
+
+<!--- Auction --->
+
+
+
+
+
+</main>
+
+
+<!--- Footer--->
+
+<footer class="footer">
+
+<p>
+<img src="logo_icon.png" width="18">
+Donation:&nbsp;<br class="br-sp">
+<button style="height:26px;font-size:75%" onclick="donate(1);">
+<script type="text/javascript">write_icon(1)</script>&nbsp;1 $ASTR
+</button>
+&nbsp;
+<button style="height:26px;font-size:75%" onclick="donate(10);">
+<script type="text/javascript">write_icon(10)</script>&nbsp;10 $ASTR
+</button>
+&nbsp;
+<button style="height:26px;font-size:75%" onclick="donate(100);">
+<script type="text/javascript">write_icon(100)</script>&nbsp;100 $ASTR
+</button>
+
+<br>
+
+<label><input type="radio" name="donationWallet" value="0x2F7448B62134e52C2f46454d0089Ae21B5248805">For Coder&#x1f400;: <br class="br-sp"><font size="-2">0x2F7448B62134e52C2f46454d0089Ae21B5248805</font></label><br>
+<label><input type="radio" name="donationWallet" checked value="0xe79d44309e4daD2CD7eaf3CA4CD1d80a6b8733f7">For Illustrator&#x1f408;: <br class="br-sp"><font size="-2">0xe79d44309e4daD2CD7eaf3CA4CD1d80a6b8733f7</font></label><br>
+</p>
+
+<p>
+(C) 2023 Project of Murasaki-san. All rights reserved.<br>
+</p>
+
+<p>
+Contact: murasakisan.info (at) gmail.com
+</p>
+
+</footer>
+
+
+</body>
+
+<script>
+    twemoji.parse(document.body);
+    check_connected();
+</script>
+
+</html>
+

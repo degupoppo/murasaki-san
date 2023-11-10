@@ -1,7 +1,7 @@
 
 
-//231107
-version = "v0.1.25";
+//231110
+version = "v0.1.27";
 
 
 //===Header==================================================================================
@@ -17074,7 +17074,7 @@ function update_checkItem(this_scene) {
         local_items[_item_id] == 0 
         && local_items[_item_id+64] == 0 
         && local_items[_item_id+128] == 0
-        && typeof item_clock != "undefined"
+        && typeof item_fishbowl != "undefined"
     ) {
         item_fishbowl.destroy(true);
         local_items_flag[_item_id] = false;
