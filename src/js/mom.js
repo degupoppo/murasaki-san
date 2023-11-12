@@ -1,6 +1,6 @@
 
-//231109
-version = "v0.1.5";
+//231110
+version = "v0.1.7";
 
 
 //===Header==================================================================================
@@ -298,6 +298,9 @@ async function init_auctionContracts () {
         // show tokenId
         await show_tokenId();
         
+        //show last winner
+        await show_lastWinner();
+        
         // show bid log
         await show_bidLog();
         
@@ -310,6 +313,66 @@ async function init_auctionContracts () {
     } else {
         setTimeout(init_auctionContracts, 1000);
     }
+}
+
+
+// show last winner
+async function show_lastWinner() {
+    
+    // wallet to summoner name
+    async function wallet2summonerNmae (_wallet) {
+        let _murasakiNameId = await contract_mn.methods.tokenOf(_wallet).call();
+        _murasakiNameId = Number(_murasakiNameId);
+        let _murasakiName = "";
+        if (_murasakiNameId > 0) {
+            _murasakiName = await contract_mn.methods.names(_murasakiNameId).call();
+        }
+        return _murasakiName;
+    }
+    
+    // wallet -> shorter wallet
+    async function formatWallet(_address) {
+        let _bidder = "";
+        let _summonerName = await wallet2summonerNmae(_address);
+        if (_summonerName != "") {
+            _bidder = _summonerName;
+        } else {
+            let _hash1 = _address.substring(0,4);
+            let _hash2 = _address.slice(-4);
+            let _txt = _hash1 + "..." + _hash2;
+            _bidder = _txt;
+        }
+        return _bidder;
+    }
+
+    // call current auction id
+    let _currentAuction = await contract_mah.methods.auction().call();
+    let _currentNoundId = _currentAuction.nounId;
+    
+    // call last auction log
+    let _lastNoundId = Number(_currentNoundId) - 1;
+    let _lastAuctionLog = await contract_mah.methods.auctionLogs(_lastNoundId).call();
+
+    // prepare last winner
+    let _lastBidder = _lastAuctionLog.bidder;
+    let _lastWinner = await formatWallet(_lastBidder);
+
+    // prepare amount
+    let _amount = _lastAuctionLog.amount;
+    _amount = web3.utils.fromWei(_amount, "ether");
+    _amount = Math.round(_amount*100)/100;
+    _amount = Number(_amount);
+
+    // prepare html
+    let _html = "";
+    _html += "&nbsp;&nbsp;&nbsp;Memento of Murasaki-san #" 
+    _html += _lastNoundId + "&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;" 
+    _html += _lastWinner + "&nbsp;&nbsp;&nbsp;(" 
+    _html += _amount.toFixed(2) + " $ASTR)";
+
+    // insert html
+    let _target = document.getElementById("lastWinner");
+    _target.innerHTML = _html;
 }
 
 
@@ -704,7 +767,7 @@ async function show_winner() {
         _murasakiNameId = Number(_murasakiNameId);
         let _murasakiName = "";
         if (_murasakiNameId > 0) {
-            _murasakiName = await contract_mn.methods.names(1).call();
+            _murasakiName = await contract_mn.methods.names(_murasakiNameId).call();
         }
         return _murasakiName;
     }
