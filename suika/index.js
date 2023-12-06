@@ -20,8 +20,8 @@ const wallPad = 64;
 const loseHeight = 84;
 const statusBarHeight = 48;
 const friction = {
-	friction: 0.006,
-	frictionStatic: 0.006,
+	friction: 0.006*10,
+	frictionStatic: 0.006*10,
 	frictionAir: 0,
 	restitution: 0.1
 };
