@@ -48,18 +48,18 @@ const Game = {
 	},
 	cache: { highscore: 0 },
 	sounds: {
-		click: new Audio('./assets/click.mp3'),
-		pop0: new Audio('./assets/pop0.mp3'),
-		pop1: new Audio('./assets/pop1.mp3'),
-		pop2: new Audio('./assets/pop2.mp3'),
-		pop3: new Audio('./assets/pop3.mp3'),
-		pop4: new Audio('./assets/pop4.mp3'),
-		pop5: new Audio('./assets/pop5.mp3'),
-		pop6: new Audio('./assets/pop6.mp3'),
-		pop7: new Audio('./assets/pop7.mp3'),
-		pop8: new Audio('./assets/pop8.mp3'),
-		pop9: new Audio('./assets/pop9.mp3'),
-		pop10: new Audio('./assets/pop10.mp3'),
+		click: new Audio('./assets/sound/click.mp3'),
+		pop0: new Audio('./assets/sound/pop0.mp3'),
+		pop1: new Audio('./assets/sound/pop1.mp3'),
+		pop2: new Audio('./assets/sound/pop2.mp3'),
+		pop3: new Audio('./assets/sound/pop3.mp3'),
+		pop4: new Audio('./assets/sound/pop4.mp3'),
+		pop5: new Audio('./assets/sound/pop5.mp3'),
+		pop6: new Audio('./assets/sound/pop6.mp3'),
+		pop7: new Audio('./assets/sound/pop7.mp3'),
+		pop8: new Audio('./assets/sound/pop8.mp3'),
+		pop9: new Audio('./assets/sound/pop9.mp3'),
+		pop10: new Audio('./assets/sound/pop10.mp3'),
 	},
 
 	stateIndex: GameStates.MENU,
@@ -152,7 +152,8 @@ const Game = {
 		Game.elements.endTitle.innerText = 'Game Over!';
 		Game.elements.ui.style.display = 'block';
 		Game.elements.end.style.display = 'none';
-		Game.elements.previewBall = Game.generateFruitBody(Game.width / 2, 0, 0, { isStatic: true });
+		//Game.elements.previewBall = Game.generateFruitBody(Game.width / 2, 0, 0, { isStatic: true });
+		Game.elements.previewBall = Game.generateFruitBody(Game.width / 2, 50, 0, { isStatic: true });
 		Composite.add(engine.world, Game.elements.previewBall);
 
 		setTimeout(() => {
@@ -252,7 +253,7 @@ const Game = {
 		const circle = Bodies.circle(x, y, size.radius, {
 			...friction,
 			...extraConfig,
-			render: { sprite: { texture: size.img, xScale: size.radius / 512, yScale: size.radius / 512 } },
+			render: { sprite: { texture: size.img, xScale: size.radius / 512, yScale: size.radius / 512 }, layer:0 },
 		});
 		circle.sizeIndex = sizeIndex;
 
@@ -265,15 +266,17 @@ const Game = {
 		Game.sounds.click.play();
 
 		Game.stateIndex = GameStates.DROP;
-		const latestFruit = Game.generateFruitBody(x, 0, Game.currentFruitSize);
+		//const latestFruit = Game.generateFruitBody(x, 0, Game.currentFruitSize);
+		const latestFruit = Game.generateFruitBody(x, 50, Game.currentFruitSize);
 		Composite.add(engine.world, latestFruit);
 
 		Game.currentFruitSize = Game.nextFruitSize;
-		Game.setNextFruitSize();
+		//Game.setNextFruitSize();
 		Game.calculateScore();
 
 		Composite.remove(engine.world, Game.elements.previewBall);
-		Game.elements.previewBall = Game.generateFruitBody(render.mouse.position.x, 0, Game.currentFruitSize, {
+		//Game.elements.previewBall = Game.generateFruitBody(render.mouse.position.x, 0, Game.currentFruitSize, {
+		Game.elements.previewBall = Game.generateFruitBody(render.mouse.position.x, 50, Game.currentFruitSize, {
 			isStatic: true,
 			collisionFilter: { mask: 0x0040 }
 		});
@@ -282,6 +285,9 @@ const Game = {
 			if (Game.stateIndex === GameStates.DROP) {
 				Composite.add(engine.world, Game.elements.previewBall);
 				Game.stateIndex = GameStates.READY;
+
+        		Game.setNextFruitSize();
+
 			}
 		}, 500);
 	}
@@ -296,7 +302,7 @@ const render = Render.create({
 		width: Game.width,
 		height: Game.height,
 		wireframes: false,
-		background: '#ffdcae'
+		background: '#fff1ff'
 	}
 });
 
