@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta property="og:title" content="Fluffy Game" />
+  <meta property="og:image" content="ss.png" />
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="icon" href="assets/png/circle0.png" />
+  <title>Fluffy Game</title>
+</head>
+
+<body>
+  <div class="container">
+    <div id="canvas">
+      <div id="ui">
+        <p id="current-score"></p>
+          <div class="status-item">
+            <div class="status-label2">Next:</div>
+            <img id="next-fluffy" src="./assets/png/circle0.png" />
+          </div>
+          <hr style="height: 80px;">
+        <div id="end-container">
+          <div id="end">
+            <div id="end-title">Too Many Fluffies!</div>
+            <a id="end-link" href="">Try Again.</a>
+          </div>
+        </div>
+        <div id="status">
+          <div class="status-item">
+            <div class="status-label">Best Score: </div>
+            <div id="highscore-value">0</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
+<script type="text/javascript" src="./matter.min.js"></script>
+<script type="text/javascript" src="./main.js?v=4"></script>
+
+</html>
