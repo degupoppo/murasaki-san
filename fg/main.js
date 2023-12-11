@@ -1,24 +1,28 @@
 
+
+//231211
+version = "v0.1.3";
+
 /*
 
 ToDo
-    SEの選別
-    bgmの設定
-    lose heightの調整
     ホームボタンの実装
-    bgmのボリュームコントロールボタンを実装
     スコア表示の独自化
     床の絵の変更HoMの床と同一とする
+ ok SEの選別
+ ok bgmの設定
+ ok lose heightの調整
+ ok 画面外に捨てれるバグの修正
+ ok 画面をちょっと動かす機能
+    BGMならない問題の修正
 */
 
 
-// def music
-const music = new Audio("./assets/music/パステルハウス.mp3");
-music.loop = true;
-
-
+// prepare matter.js
 const {Engine, Render, Runner, Composites, Common, MouseConstraint, Mouse, Composite, Bodies, Events} = Matter;
 
+
+// define game parameters
 const wallPad = 64;
 const loseHeight = 84;
 const statusBarHeight = 48;
@@ -29,166 +33,267 @@ const friction = {
     restitution: 0.1
 };
 
+
+// define e game status
 const GameStates = {
     MENU: 0,
     READY: 1,
     DROP: 2,
     LOSE: 3,
+    SHAKE: 4,
 };
 
-const Game = {
-	width: 640,
-	height: 960,
-	elements: {
-		canvas: document.getElementById('canvas'),
-		ui: document.getElementById('ui'),
-		score: document.getElementById('current-score'),
-		end: document.getElementById('end-container'),
-		endTitle: document.getElementById('end-title'),
-		statusValue: document.getElementById('highscore-value'),
-		nextFruitImg: document.getElementById('next-fluffy'),
-		previewBall: null,
-	},
-	cache: { highscore: 0 },
-	sounds: {
-		click: new Audio('./assets/sound/click.mp3'),
-		pop0: new Audio('./assets/sound/pop0.mp3'),
-		pop1: new Audio('./assets/sound/pop1.mp3'),
-		pop2: new Audio('./assets/sound/pop2.mp3'),
-		pop3: new Audio('./assets/sound/pop3.mp3'),
-		pop4: new Audio('./assets/sound/pop4.mp3'),
-		pop5: new Audio('./assets/sound/pop5.mp3'),
-		pop6: new Audio('./assets/sound/pop6.mp3'),
-		pop7: new Audio('./assets/sound/pop7.mp3'),
-		pop8: new Audio('./assets/sound/pop8.mp3'),
-		pop9: new Audio('./assets/sound/pop9.mp3'),
-		pop10: new Audio('./assets/sound/pop10.mp3'),
-		fluffy2: new Audio("./assets/sound/fluffy2.mp3"),
-		fluffy3: new Audio("./assets/sound/fluffy3.mp3"),
-		fluffy4: new Audio("./assets/sound/fluffy4.mp3"),
-		fluffy5: new Audio("./assets/sound/fluffy5.mp3"),
-	},
 
-	stateIndex: GameStates.MENU,
 
-	score: 0,
-	fruitsMerged: [],
-	calculateScore: function () {
-		const score = Game.fruitsMerged.reduce((total, count, sizeIndex) => {
-			const value = Game.fruitSizes[sizeIndex].scoreValue * count;
-			return total + value;
-		}, 0);
+//--- class: Game2
+class class_Game2 {
+    
+    //### constructor
+    constructor() {
 
-		Game.score = score;
-		Game.elements.score.innerText = Game.score;
-	},
+        this.width = 640;
+        this.height = 960;
 
-	fruitSizes: [
-		{ radius: 24,  scoreValue: 1,  img: './assets/png/circle0.png'  },
-		{ radius: 32,  scoreValue: 3,  img: './assets/png/circle1.png'  },
-		{ radius: 40,  scoreValue: 6,  img: './assets/png/circle2.png'  },
-		{ radius: 56,  scoreValue: 10, img: './assets/png/circle3.png'  },
-		{ radius: 64,  scoreValue: 15, img: './assets/png/circle4.png'  },
-		{ radius: 72,  scoreValue: 21, img: './assets/png/circle5.png'  },
-		{ radius: 84,  scoreValue: 28, img: './assets/png/circle6.png'  },
-		{ radius: 96,  scoreValue: 36, img: './assets/png/circle7.png'  },
-		{ radius: 128, scoreValue: 45, img: './assets/png/circle8.png'  },
-		{ radius: 160, scoreValue: 55, img: './assets/png/circle9.png'  },
-		{ radius: 192, scoreValue: 66, img: './assets/png/circle10.png' },
-	],
-	currentFruitSize: 0,
-	nextFruitSize: 0,
-	setNextFruitSize: function () {
-		//Game.nextFruitSize = Math.floor(rand() * 5);
-		Game.nextFruitSize = Math.floor(Math.random() * 5);
-		Game.elements.nextFruitImg.src = `./assets/png/circle${Game.nextFruitSize}.png`;
-	},
+    	this.elements = {
+    		canvas: document.getElementById('canvas'),
+    		ui: document.getElementById('ui'),
+    		score: document.getElementById('current-score'),
+    		end: document.getElementById('end-container'),
+    		endTitle: document.getElementById('end-title'),
+    		statusValue: document.getElementById('highscore-value'),
+    		nextFruitImg: document.getElementById('next-fluffy'),
+    		previewBall: null,
+    		shakeButton: document.getElementById('shakeButton'),
+    	};
 
-	showHighscore: function () {
-		Game.elements.statusValue.innerText = Game.cache.highscore;
-	},
-	loadHighscore: function () {
-		const gameCache = localStorage.getItem('suika-game-cache');
-		if (gameCache === null) {
-			Game.saveHighscore();
-			return;
-		}
+    	this.fruitSizes = [
+    		{ radius: 24,  scoreValue: 1,  img: './assets/png/circle0.png'  },
+    		{ radius: 32,  scoreValue: 3,  img: './assets/png/circle1.png'  },
+    		{ radius: 40,  scoreValue: 6,  img: './assets/png/circle2.png'  },
+    		{ radius: 56,  scoreValue: 10, img: './assets/png/circle3.png'  },
+    		{ radius: 64,  scoreValue: 15, img: './assets/png/circle4.png'  },
+    		{ radius: 72,  scoreValue: 21, img: './assets/png/circle5.png'  },
+    		{ radius: 84,  scoreValue: 28, img: './assets/png/circle6.png'  },
+    		{ radius: 96,  scoreValue: 36, img: './assets/png/circle7.png'  },
+    		{ radius: 128, scoreValue: 45, img: './assets/png/circle8.png'  },
+    		{ radius: 160, scoreValue: 55, img: './assets/png/circle9.png'  },
+    		{ radius: 192, scoreValue: 66, img: './assets/png/circle10.png' },
+    	];
+    	
+    	this.cache = { highscore: 0 };
+    	this.stateIndex = GameStates.MENU;
+    	this.score = 0;
+    	this.fruitsMerged = [];
+    	this.currentFruitSize = 0;
+    	this.nextFruitSize = 0;
+        
+        // prepare walls
+        const wallProps = {
+        	isStatic: true,
+        	render: { fillStyle: '#FDBEFF', layer: 1 },
+        	...friction,
+        };
+        this.gameStatics = [
+        	// Left
+        	Bodies.rectangle(-(wallPad / 2), this.height / 2, wallPad, this.height, wallProps),
+        	// Right
+        	Bodies.rectangle(this.width + (wallPad / 2), this.height / 2, wallPad, this.height, wallProps),
+        	// Bottom
+        	Bodies.rectangle(this.width / 2, this.height + (wallPad / 2) - statusBarHeight, this.width, wallPad, wallProps),
+        ];
+        
+    	// prepare sounds
+    	this.sounds = {
+    		click: new Audio('./assets/sound/click.mp3'),
+    		pop0: new Audio('./assets/sound/pop0.mp3'),
+    		pop1: new Audio('./assets/sound/pop1.mp3'),
+    		pop2: new Audio('./assets/sound/pop2.mp3'),
+    		pop3: new Audio('./assets/sound/pop3.mp3'),
+    		pop4: new Audio('./assets/sound/pop4.mp3'),
+    		pop5: new Audio('./assets/sound/pop5.mp3'),
+    		pop6: new Audio('./assets/sound/pop6.mp3'),
+    		pop7: new Audio('./assets/sound/pop7.mp3'),
+    		pop8: new Audio('./assets/sound/pop8.mp3'),
+    		pop9: new Audio('./assets/sound/pop9.mp3'),
+    		pop10: new Audio('./assets/sound/pop10.mp3'),
+    		fluffy2: new Audio("./assets/sound/fluffy2.mp3"),
+    		fluffy3: new Audio("./assets/sound/fluffy3.mp3"),
+    		fluffy4: new Audio("./assets/sound/fluffy4.mp3"),
+    		fluffy5: new Audio("./assets/sound/fluffy5.mp3"),
+    		shake: new Audio("./assets/sound/shake.mp3"),
+    	};
+    	this.sounds.fluffy2.volume = 0.3;
+    	this.sounds.fluffy3.volume = 0.3;
+    	this.sounds.fluffy4.volume = 0.3;
+    	this.sounds.fluffy5.volume = 0.3;
+    	this.sounds.shake.volume = 0.3;
 
-		Game.cache = JSON.parse(gameCache);
-		Game.showHighscore();
-	},
-	saveHighscore: function () {
-		Game.calculateScore();
-		if (Game.score < Game.cache.highscore) return;
+        // prepare music
+        this.music = new Audio("./assets/music/パステルハウス.mp3");
+        this.music.loop = true;
+		this.music.volume = 0.08;
+    }
 
-		Game.cache.highscore = Game.score;
-		Game.showHighscore();
-		Game.elements.endTitle.innerText = 'New Best Score!';
 
-		localStorage.setItem('suika-game-cache', JSON.stringify(Game.cache));
-	},
+    //### init
+	init() {
+		
+        // init matter.js
+        this.engine = Engine.create();
+        this.runner = Runner.create();
+        this.render = Render.create({
+        	element: this.elements.canvas,
+        	engine: this.engine,
+        	options: {
+        		width: this.width,
+        		height: this.height,
+        		wireframes: false,
+        		background: '#fff1ff'
+        	}
+        });
 
-	init: function () {
-		Render.run(render);
-		Runner.run(runner, engine);
+		// resize
+		this.resizeCanvas();
+        
+        // prepare menu statics
+        const menuStatics = [
+        	Bodies.rectangle(this.width / 2, this.height * 0.4, 512, 512, {
+        		isStatic: true,
+        		render: { sprite: { texture: './assets/png/bg-menu.png' } },
+        	}),
 
-		Composite.add(engine.world, menuStatics);
+        	// Add each fruit in a circle
+        	...Array.apply(null, Array(this.fruitSizes.length)).map((_, index) => {
+        		const x = (this.width / 2) + 192 * Math.cos((Math.PI * 2 * index)/12);
+        		const y = (this.height * 0.4) + 192 * Math.sin((Math.PI * 2 * index)/12);
+        		const r = 64;
 
-		Game.loadHighscore();
-		Game.elements.ui.style.display = 'none';
-		Game.fruitsMerged = Array.apply(null, Array(Game.fruitSizes.length)).map(() => 0);
+        		return Bodies.circle(x, y, r, {
+        			isStatic: true,
+        			render: {
+        				sprite: {
+        					texture: `./assets/png/circle${index}.png`,
+        					xScale: r / 1024,
+        					yScale: r / 1024,
+        				},
+        			},
+        		});
+        	}),
 
-		const menuMouseDown = function () {
-			if (mouseConstraint.body === null || mouseConstraint.body?.label !== 'btn-start') {
+        	Bodies.rectangle(this.width / 2, this.height * 0.75, 512, 96, {
+        		isStatic: true,
+        		label: 'btn-start',
+        		render: { sprite: { texture: './assets/png/btn-start.png' } },
+        	}),
+        ];
+        this.menuStatics = menuStatics;
+
+        // prepare mouse control
+        const mouse = Mouse.create(this.render.canvas);
+        const mouseConstraint = MouseConstraint.create(this.engine, {
+        	mouse: mouse,
+        	constraint: {
+        		stiffness: 0.2,
+        		render: {
+        			visible: false,
+        		},
+        	},
+        });
+        this.mouseConstraint = mouseConstraint;
+        this.render.mouse = mouse;
+
+        // start render
+		Render.run(this.render);
+		Runner.run(this.runner, this.engine);
+
+        // prepare game menu
+		Composite.add(this.engine.world, this.menuStatics);
+
+        // init
+		this.loadHighscore();
+		this.elements.ui.style.display = 'none';
+		this.fruitsMerged = Array.apply(null, Array(this.fruitSizes.length)).map(() => 0);
+
+        // prepare start button
+		const menuMouseDown = () => {
+			if (this.mouseConstraint.body === null || this.mouseConstraint.body?.label !== 'btn-start') {
 				return;
 			}
-
-			Events.off(mouseConstraint, 'mousedown', menuMouseDown);
-			Game.startGame();
+			Events.off(this.mouseConstraint, 'mousedown', menuMouseDown);
+			this.startGame();
 		}
+		Events.on(this.mouseConstraint, 'mousedown', menuMouseDown);
+	}
 
-		Events.on(mouseConstraint, 'mousedown', menuMouseDown);
-	},
 
-	startGame: function () {
-		//Game.sounds.click.play();
-		//Game.sounds.fluffy2.play();
-
-    	Game.sounds.fluffy2.volume = 0.3;
-    	Game.sounds.fluffy3.volume = 0.3;
-    	Game.sounds.fluffy4.volume = 0.3;
-    	Game.sounds.fluffy5.volume = 0.3;
+	//### startGame
+	startGame() {
 		
-		music.play();
-		music.volume = 0.08;
-
-		Composite.remove(engine.world, menuStatics);
-		Composite.add(engine.world, gameStatics);
-
-		Game.calculateScore();
-		Game.elements.endTitle.innerText = 'Too Many Fluffies!';
-		Game.elements.ui.style.display = 'block';
-		Game.elements.end.style.display = 'none';
-		//Game.elements.previewBall = Game.generateFruitBody(Game.width / 2, 0, 0, { isStatic: true });
-		Game.elements.previewBall = Game.generateFruitBody(Game.width / 2, 50, 0, { isStatic: true });
-		Composite.add(engine.world, Game.elements.previewBall);
+		// start music
+		this.music.play();
+        
+        // remove game menu
+		Composite.remove(this.engine.world, this.menuStatics);
+		
+		// prepare walls
+		Composite.add(this.engine.world, this.gameStatics);
+		
+		// prepare shake button
+	    this.shakeButton = Bodies.rectangle(
+	        615,
+	        935,
+	        10,
+	        10,
+	        {
+	            isStatic: true,
+	            render: {
+	                sprite: {
+	                    texture: './assets/png/icon_shake.png',
+    					xScale: 0.1,
+    					yScale: 0.1,
+	                },
+	                layer: 0,
+	            }
+	        }
+	    )
+		Composite.add(this.engine.world, [this.shakeButton]);
+        
+		this.calculateScore();
+		this.elements.endTitle.innerText = 'Too Many Fluffies!';
+		this.elements.ui.style.display = 'block';
+		this.elements.end.style.display = 'none';
+		this.elements.previewBall = this.generateFruitBody(this.width / 2, 50, 0, { isStatic: true });
+		Composite.add(this.engine.world, this.elements.previewBall);
 
 		setTimeout(() => {
-			Game.stateIndex = GameStates.READY;
+			this.stateIndex = GameStates.READY;
 		}, 250);
-
-		Events.on(mouseConstraint, 'mouseup', function (e) {
-			Game.addFruit(e.mouse.position.x);
+        
+        // event: mouse click
+		Events.on(this.mouseConstraint, 'mouseup', (e) => {
+		    // get mouse position
+		    const mousePosition = e.mouse.position;
+		    console.log(Math.floor(mousePosition.x), Math.floor(mousePosition.y));
+		    // shake button
+		    if (
+		        mousePosition.x > 595 
+		        && mousePosition.y > (this.height-statusBarHeight) 
+		    ) {
+		        this.shake();
+		    // drop fluffy
+		    } else if (mousePosition.y <= (this.height-statusBarHeight)) {
+    			this.addFruit(e.mouse.position.x);
+    	    }
+		});
+        
+        // event: mouse move
+		Events.on(this.mouseConstraint, 'mousemove', (e) => {
+			if (this.stateIndex !== GameStates.READY) return;
+			if (this.elements.previewBall === null) return;
+			this.elements.previewBall.position.x = e.mouse.position.x;
 		});
 
-		Events.on(mouseConstraint, 'mousemove', function (e) {
-			if (Game.stateIndex !== GameStates.READY) return;
-			if (Game.elements.previewBall === null) return;
-
-			Game.elements.previewBall.position.x = e.mouse.position.x;
-		});
-
-		Events.on(engine, 'collisionStart', function (e) {
+		Events.on(this.engine, 'collisionStart', (e) => {
 			for (let i = 0; i < e.pairs.length; i++) {
 				const { bodyA, bodyB } = e.pairs[i];
 
@@ -199,9 +304,12 @@ const Game = {
 				const bY = bodyB.position.y + bodyB.circleRadius;
 
 				// Uh oh, too high!
+				//***TODO*** lose line
 				if (aY < loseHeight || bY < loseHeight) {
-					Game.loseGame();
-					return;
+				    if (this.stateIndex !== GameStates.SHAKE) {
+    					this.loseGame();
+    					return;
+    			    }
 				}
 
 				// Skip different sizes
@@ -210,30 +318,74 @@ const Game = {
 				let newSize = bodyA.sizeIndex + 1;
 
 				// Go back to smallest size
-				if (bodyA.circleRadius >= Game.fruitSizes[Game.fruitSizes.length - 1].radius) {
+				if (bodyA.circleRadius >= this.fruitSizes[this.fruitSizes.length - 1].radius) {
 					newSize = 0;
 				}
 
-				Game.fruitsMerged[bodyA.sizeIndex] += 1;
+				this.fruitsMerged[bodyA.sizeIndex] += 1;
 
 				// Therefore, circles are same size, so merge them.
 				const midPosX = (bodyA.position.x + bodyB.position.x) / 2;
 				const midPosY = (bodyA.position.y + bodyB.position.y) / 2;
-
-				Game.sounds[`pop${bodyA.sizeIndex}`].play();
-				Composite.remove(engine.world, [bodyA, bodyB]);
-				Composite.add(engine.world, Game.generateFruitBody(midPosX, midPosY, newSize));
-				Game.addPop(midPosX, midPosY, bodyA.circleRadius);
-				Game.calculateScore();
+				
+				this.sounds[`pop${bodyA.sizeIndex}`].play();
+				Composite.remove(this.engine.world, [bodyA, bodyB]);
+				Composite.add(this.engine.world, this.generateFruitBody(midPosX, midPosY, newSize));
+				this.addPop(midPosX, midPosY, bodyA.circleRadius);
+				this.calculateScore();
 			}
 		});
-	},
+	}
 
-	addPop: function (x, y, r) {
+
+    //### other functions
+
+	calculateScore() {
+		const score = this.fruitsMerged.reduce((total, count, sizeIndex) => {
+			const value = this.fruitSizes[sizeIndex].scoreValue * count;
+			return total + value;
+		}, 0);
+		this.score = score;
+		this.elements.score.innerText = this.score;
+	}
+
+
+	setNextFruitSize() {
+		this.nextFruitSize = Math.floor(Math.random() * 5);
+		this.elements.nextFruitImg.src = `./assets/png/circle${this.nextFruitSize}.png`;
+	}
+
+
+	showHighscore() {
+		this.elements.statusValue.innerText = this.cache.highscore;
+	}
+
+
+	loadHighscore() {
+		const gameCache = localStorage.getItem('suika-game-cache');
+		if (gameCache === null) {
+			this.saveHighscore();
+			return;
+		}
+		this.cache = JSON.parse(gameCache);
+		this.showHighscore();
+	}
+
+
+	saveHighscore() {
+		this.calculateScore();
+		if (this.score < this.cache.highscore) return;
+		this.cache.highscore = this.score;
+		this.showHighscore();
+		this.elements.endTitle.innerText = 'New Best Score!';
+		localStorage.setItem('suika-game-cache', JSON.stringify(this.cache));
+	}
+
+
+	addPop (x, y, r) {
 		const circle = Bodies.circle(x, y, r, {
 			isStatic: true,
 			collisionFilter: { mask: 0x0040 },
-			//angle: rand() * (Math.PI * 2),
 			angle: Math.random() * (Math.PI * 2),
 			render: {
 				sprite: {
@@ -243,189 +395,137 @@ const Game = {
 				}
 			},
 		});
-
-		Composite.add(engine.world, circle);
+		Composite.add(this.engine.world, circle);
 		setTimeout(() => {
-			Composite.remove(engine.world, circle);
+			Composite.remove(this.engine.world, circle);
 		}, 100);
-	},
+	}
 
-	loseGame: function () {
-		Game.stateIndex = GameStates.LOSE;
-		Game.elements.end.style.display = 'flex';
-		runner.enabled = false;
-		Game.saveHighscore();
-	},
+
+	loseGame () {
+		this.stateIndex = GameStates.LOSE;
+		this.elements.end.style.display = 'flex';
+		this.runner.enabled = false;
+		this.saveHighscore();
+	}
+
 
 	// Returns an index, or null
-	lookupFruitIndex: function (radius) {
-		const sizeIndex = Game.fruitSizes.findIndex(size => size.radius == radius);
+	lookupFruitIndex (radius) {
+		const sizeIndex = this.fruitSizes.findIndex(size => size.radius == radius);
 		if (sizeIndex === undefined) return null;
-		if (sizeIndex === Game.fruitSizes.length - 1) return null;
-
+		if (sizeIndex === this.fruitSizes.length - 1) return null;
 		return sizeIndex;
-	},
+	}
 
-	generateFruitBody: function (x, y, sizeIndex, extraConfig = {}) {
-		const size = Game.fruitSizes[sizeIndex];
+
+	generateFruitBody (x, y, sizeIndex, extraConfig = {}) {
+		const size = this.fruitSizes[sizeIndex];
 		const circle = Bodies.circle(x, y, size.radius, {
 			...friction,
 			...extraConfig,
-			render: { sprite: { texture: size.img, xScale: size.radius / 512, yScale: size.radius / 512 }, layer:0 },
+			render: { sprite: { texture: size.img, xScale: size.radius / 512 *1.1, yScale: size.radius / 512 *1.1 }, layer:0 },
 		});
 		circle.sizeIndex = sizeIndex;
-
 		return circle;
-	},
+	}
 
-	addFruit: function (x) {
-		if (Game.stateIndex !== GameStates.READY) return;
 
-		//Game.sounds.click.play();
+	addFruit (x) {
+		if (this.stateIndex !== GameStates.READY) return;
+
+        // sound effect
 		let _rnd = Math.floor(Math.random()*4)+2;
-		//Game.sounds.fluffy`_soundName`.play();
-		eval("Game.sounds.fluffy" + _rnd + ".play();");
+		eval("this.sounds.fluffy" + _rnd + ".play();");
+		
+		// check x limit
+		if (x<1) {
+		    x = 1;
+		}
+		if (x>this.width-1) {
+		    x = this.width-1;
+		}
 
-		Game.stateIndex = GameStates.DROP;
-		//const latestFruit = Game.generateFruitBody(x, 0, Game.currentFruitSize);
-		const latestFruit = Game.generateFruitBody(x, 50, Game.currentFruitSize);
-		Composite.add(engine.world, latestFruit);
+        // drop new fluffy
+		this.stateIndex = GameStates.DROP;
+		const latestFruit = this.generateFruitBody(x, 50, this.currentFruitSize);
+		Composite.add(this.engine.world, latestFruit);
+		// set initial velocity
+		Matter.Body.setVelocity(latestFruit,{x:0, y:3});
+		let angleVelocity = (Math.random() * 0.02 - 0.01);
+		Matter.Body.setAngularVelocity(latestFruit, angleVelocity);
 
-		Game.currentFruitSize = Game.nextFruitSize;
-		//Game.setNextFruitSize();
-		Game.calculateScore();
+		this.currentFruitSize = this.nextFruitSize;
+		this.calculateScore();
 
-		Composite.remove(engine.world, Game.elements.previewBall);
-		//Game.elements.previewBall = Game.generateFruitBody(render.mouse.position.x, 0, Game.currentFruitSize, {
-		Game.elements.previewBall = Game.generateFruitBody(render.mouse.position.x, 50, Game.currentFruitSize, {
+		Composite.remove(this.engine.world, this.elements.previewBall);
+		this.elements.previewBall = this.generateFruitBody(this.render.mouse.position.x, 50, this.currentFruitSize, {
 			isStatic: true,
 			collisionFilter: { mask: 0x0040 }
 		});
 
 		setTimeout(() => {
-			if (Game.stateIndex === GameStates.DROP) {
-				Composite.add(engine.world, Game.elements.previewBall);
-				Game.stateIndex = GameStates.READY;
-
-        		Game.setNextFruitSize();
-
+			if (this.stateIndex === GameStates.DROP) {
+				Composite.add(this.engine.world, this.elements.previewBall);
+				this.stateIndex = GameStates.READY;
+        		this.setNextFruitSize();
 			}
 		}, 500);
 	}
+
+
+    resizeCanvas() {
+    	const screenWidth = document.body.clientWidth;
+    	const screenHeight = document.body.clientHeight;
+
+    	let newWidth = this.width;
+    	let newHeight = this.height;
+    	let scaleUI = 1;
+
+    	if (screenWidth * 1.5 > screenHeight) {
+    		newHeight = Math.min(this.height, screenHeight);
+    		newWidth = newHeight / 1.5;
+    		scaleUI = newHeight / this.height;
+    	} else {
+    		newWidth = Math.min(this.width, screenWidth);
+    		newHeight = newWidth * 1.5;
+    		scaleUI = newWidth / this.width;
+    	}
+
+    	this.render.canvas.style.width = `${newWidth}px`;
+    	this.render.canvas.style.height = `${newHeight}px`;
+
+    	this.elements.ui.style.width = `${this.width}px`;
+    	this.elements.ui.style.height = `${this.height}px`;
+    	this.elements.ui.style.transform = `scale(${scaleUI})`;
+    }
+
+
+    shake(_y=5) {
+        if (this.stateIndex == GameStates.READY) {
+            this.sounds.shake.play();
+            this.gameStatics[2].position.y -= _y;
+    		this.stateIndex = GameStates.SHAKE;
+        	setTimeout(() => {
+                this.gameStatics[2].position.y += _y;
+        	}, 100);
+        	setTimeout(() => {
+    			this.stateIndex = GameStates.READY;
+        	}, 1000);
+        }
+    }
 }
 
 
-// def matter.js
-const engine = Engine.create();
-const runner = Runner.create();
-const render = Render.create({
-	element: Game.elements.canvas,
-	engine,
-	options: {
-		width: Game.width,
-		height: Game.height,
-		wireframes: false,
-		background: '#fff1ff'
-	}
-});
-
-
-// def menu
-const menuStatics = [
-	Bodies.rectangle(Game.width / 2, Game.height * 0.4, 512, 512, {
-		isStatic: true,
-		render: { sprite: { texture: './assets/png/bg-menu.png' } },
-	}),
-
-	// Add each fruit in a circle
-	...Array.apply(null, Array(Game.fruitSizes.length)).map((_, index) => {
-		const x = (Game.width / 2) + 192 * Math.cos((Math.PI * 2 * index)/12);
-		const y = (Game.height * 0.4) + 192 * Math.sin((Math.PI * 2 * index)/12);
-		const r = 64;
-
-		return Bodies.circle(x, y, r, {
-			isStatic: true,
-			render: {
-				sprite: {
-					texture: `./assets/png/circle${index}.png`,
-					xScale: r / 1024,
-					yScale: r / 1024,
-				},
-			},
-		});
-	}),
-
-	Bodies.rectangle(Game.width / 2, Game.height * 0.75, 512, 96, {
-		isStatic: true,
-		label: 'btn-start',
-		render: { sprite: { texture: './assets/png/btn-start.png' } },
-	}),
-];
-
-const wallProps = {
-	isStatic: true,
-	render: { fillStyle: '#FFEEDB' },
-	...friction,
-};
-
-const gameStatics = [
-	// Left
-	Bodies.rectangle(-(wallPad / 2), Game.height / 2, wallPad, Game.height, wallProps),
-
-	// Right
-	Bodies.rectangle(Game.width + (wallPad / 2), Game.height / 2, wallPad, Game.height, wallProps),
-
-	// Bottom
-	Bodies.rectangle(Game.width / 2, Game.height + (wallPad / 2) - statusBarHeight, Game.width, wallPad, wallProps),
-];
-
-// add mouse control
-const mouse = Mouse.create(render.canvas);
-const mouseConstraint = MouseConstraint.create(engine, {
-	mouse: mouse,
-	constraint: {
-		stiffness: 0.2,
-		render: {
-			visible: false,
-		},
-	},
-});
-render.mouse = mouse;
-
-
-// def resize canvas
-function resizeCanvas() {
-	const screenWidth = document.body.clientWidth;
-	const screenHeight = document.body.clientHeight;
-
-	let newWidth = Game.width;
-	let newHeight = Game.height;
-	let scaleUI = 1;
-
-	if (screenWidth * 1.5 > screenHeight) {
-		newHeight = Math.min(Game.height, screenHeight);
-		newWidth = newHeight / 1.5;
-		scaleUI = newHeight / Game.height;
-	} else {
-		newWidth = Math.min(Game.width, screenWidth);
-		newHeight = newWidth * 1.5;
-		scaleUI = newWidth / Game.width;
-	}
-
-	render.canvas.style.width = `${newWidth}px`;
-	render.canvas.style.height = `${newHeight}px`;
-
-	Game.elements.ui.style.width = `${Game.width}px`;
-	Game.elements.ui.style.height = `${Game.height}px`;
-	Game.elements.ui.style.transform = `scale(${scaleUI})`;
-};
-
-
-// load game
+// load and init game
 window.onload = () => {
-  Game.init();
-  resizeCanvas();
+    // prepare Game2 class
+    Game2 = new class_Game2();
+    Game2.init();
 }
+
 // resize game
-window.onresize = resizeCanvas;
+window.onresize = () => {
+    Game2.resizeCanvas();
+};
 

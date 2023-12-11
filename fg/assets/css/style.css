@@ -112,8 +112,11 @@ hr{
   right: 0;
   bottom: 0;
   height: 48px;
-  background-color: var(--col-bg-lighter);
+  //background-color: var(--col-bg-lighter);
+  background-color: transparent;
   display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .status-item {
@@ -128,6 +131,7 @@ hr{
   font-size: 16px;
   margin-left: 24px;
   margin-right: 8px;
+  text-align: left;
 }
 
 .status-label2 {
@@ -136,7 +140,6 @@ hr{
   margin-left: 550px;
   margin-right: 8px;
   margin-top: 0px;
-  vertical-align: middle;
 }
 
 #highscore-value {
@@ -149,3 +152,4 @@ hr{
   width: 24px;
   height: 24px;
 }
+
