@@ -1,20 +1,26 @@
 
 
-//231211
-version = "v0.1.3";
+//231212
+version = "v0.1.4";
+document.getElementById("version").innerText = version;
 
 /*
 
 ToDo
-    ホームボタンの実装
-    スコア表示の独自化
-    床の絵の変更HoMの床と同一とする
+    pop演出の変更
+ ng     可能ならお花まきの演出
+    BGMならない問題の修正
+ ok 画面端の挙動の改善
+ ok     跳ね返ることがあったので、ランダムで回転させるのを無効化
+ ok 説明文の実装
+ ok スコア表示の独自化
+ ng 床の絵の変更HoMの床と同一とする
+ ng ホームボタンの実装
  ok SEの選別
  ok bgmの設定
  ok lose heightの調整
  ok 画面外に捨てれるバグの修正
  ok 画面をちょっと動かす機能
-    BGMならない問題の修正
 */
 
 
@@ -157,7 +163,7 @@ class class_Game2 {
         
         // prepare menu statics
         const menuStatics = [
-        	Bodies.rectangle(this.width / 2, this.height * 0.4, 512, 512, {
+        	Bodies.rectangle(this.width / 2, this.height * 0.35, 512, 512, {
         		isStatic: true,
         		render: { sprite: { texture: './assets/png/bg-menu.png' } },
         	}),
@@ -165,7 +171,7 @@ class class_Game2 {
         	// Add each fruit in a circle
         	...Array.apply(null, Array(this.fruitSizes.length)).map((_, index) => {
         		const x = (this.width / 2) + 192 * Math.cos((Math.PI * 2 * index)/12);
-        		const y = (this.height * 0.4) + 192 * Math.sin((Math.PI * 2 * index)/12);
+        		const y = (this.height * 0.35) + 192 * Math.sin((Math.PI * 2 * index)/12);
         		const r = 64;
 
         		return Bodies.circle(x, y, r, {
@@ -223,11 +229,20 @@ class class_Game2 {
 			this.startGame();
 		}
 		Events.on(this.mouseConstraint, 'mousedown', menuMouseDown);
+		
+		// show description
+		let _text = "- Combine two fluffies of the same size to evolve into one larger fluffy.<br>- Pressing the shake button will make the fluffies bounce a little.<br>- The game ends when the fluffies' lower limit exceeds the dashed line.<br>";
+		document.getElementById("description").innerHTML = _text;
+
 	}
 
 
 	//### startGame
 	startGame() {
+		
+		// remove version and description
+		document.getElementById("version").innerText = "";
+		document.getElementById("description").innerText = "";
 		
 		// start music
 		this.music.play();
@@ -291,6 +306,12 @@ class class_Game2 {
 			if (this.stateIndex !== GameStates.READY) return;
 			if (this.elements.previewBall === null) return;
 			this.elements.previewBall.position.x = e.mouse.position.x;
+			// check radius
+			if (this.elements.previewBall.position.x < this.fruitSizes[this.elements.previewBall.sizeIndex].radius) {
+			    this.elements.previewBall.position.x = this.fruitSizes[this.elements.previewBall.sizeIndex].radius;
+			} else if (this.elements.previewBall.position.x > this.width - this.fruitSizes[this.elements.previewBall.sizeIndex].radius) {
+			    this.elements.previewBall.position.x = this.width - this.fruitSizes[this.elements.previewBall.sizeIndex].radius;
+			}
 		});
 
 		Events.on(this.engine, 'collisionStart', (e) => {
@@ -306,7 +327,7 @@ class class_Game2 {
 				// Uh oh, too high!
 				//***TODO*** lose line
 				if (aY < loseHeight || bY < loseHeight) {
-				    if (this.stateIndex !== GameStates.SHAKE) {
+				    if (this.stateIndex != GameStates.SHAKE) {
     					this.loseGame();
     					return;
     			    }
@@ -392,6 +413,9 @@ class class_Game2 {
 					texture: './assets/png/pop.png',
 					xScale: r / 384,
 					yScale: r / 384,
+					//texture: './assets/png/ohana2.png',
+					//xScale: r / 200,
+					//yScale: r / 200,
 				}
 			},
 		});
@@ -439,11 +463,11 @@ class class_Game2 {
 		eval("this.sounds.fluffy" + _rnd + ".play();");
 		
 		// check x limit
-		if (x<1) {
-		    x = 1;
+		if (x<0) {
+		    x = 0;
 		}
-		if (x>this.width-1) {
-		    x = this.width-1;
+		if (x>this.width) {
+		    x = this.width;
 		}
 
         // drop new fluffy
@@ -452,8 +476,8 @@ class class_Game2 {
 		Composite.add(this.engine.world, latestFruit);
 		// set initial velocity
 		Matter.Body.setVelocity(latestFruit,{x:0, y:3});
-		let angleVelocity = (Math.random() * 0.02 - 0.01);
-		Matter.Body.setAngularVelocity(latestFruit, angleVelocity);
+		//let angleVelocity = (Math.random() * 0.02 - 0.01);
+		//Matter.Body.setAngularVelocity(latestFruit, angleVelocity);
 
 		this.currentFruitSize = this.nextFruitSize;
 		this.calculateScore();

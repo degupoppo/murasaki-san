@@ -46,13 +46,23 @@ body {
 }
 
 #current-score {
+  font-family: "Arial", Times, serif;
   position: absolute;
   width: 100%;
   font-size: 42px;
   font-weight: 900;
-  padding-left: 16px;
+  padding-left: 10px;
   color: var(--col-bg-light);
-  text-shadow: 3px 3px 0 var(--col-primary), -3px -3px 0 var(--col-primary), -3px 3px 0 var(--col-primary), 3px -3px 0 var(--col-primary);
+  text-shadow:
+    2px 2px 2px var(--col-primary), -2px -2px 2px var(--col-primary),
+    -2px 2px 2px var(--col-primary),  2px -2px 2px var(--col-primary),
+    2px 0px 2px var(--col-primary), -2px -0px 2px var(--col-primary),
+    0px 2px 2px var(--col-primary),  0px -2px 2px var(--col-primary);
+    //3px 3px 0 var(--col-primary), 
+    //-3px -3px 0 var(--col-primary), 
+    //-3px 3px 0 var(--col-primary), 
+    //3px -3px 0 var(--col-primary);
+  margin: 0;
 }
 
 hr{
@@ -153,3 +163,20 @@ hr{
   height: 24px;
 }
 
+#version {
+  font-size: 2vh;
+  color: #AFB2B5;
+  position: absolute;
+  top: 2px;
+  left: 5px;
+}
+
+#description {
+  font-family: "Times New Roman", Times, serif;
+  font-size: 2.2vh;
+  color: #fa66ff;
+  position: absolute;
+  bottom: 60px;
+  left: 15px;
+
+}
