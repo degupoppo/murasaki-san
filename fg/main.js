@@ -1,7 +1,7 @@
 
 
 //231212
-version = "v0.1.4";
+version = "v0.1.5";
 document.getElementById("version").innerText = version;
 
 /*
@@ -411,11 +411,11 @@ class class_Game2 {
 			render: {
 				sprite: {
 					texture: './assets/png/pop.png',
-					xScale: r / 384,
-					yScale: r / 384,
+					//xScale: r / 384,
+					//yScale: r / 384,
 					//texture: './assets/png/ohana2.png',
-					//xScale: r / 200,
-					//yScale: r / 200,
+					xScale: r / 100,
+					yScale: r / 100,
 				}
 			},
 		});
