@@ -410,7 +410,7 @@ class class_Game2 {
 			angle: Math.random() * (Math.PI * 2),
 			render: {
 				sprite: {
-					texture: './assets/png/pop.png',
+					texture: './assets/png/pop2.png',
 					//xScale: r / 384,
 					//yScale: r / 384,
 					//texture: './assets/png/ohana2.png',
