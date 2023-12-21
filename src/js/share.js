@@ -73,7 +73,6 @@ async function donate(_value) {
                 _to_wallet = elements.item(i).value;
             }
         }
-        //let _to_wallet = "0x2F7448B62134e52C2f46454d0089Ae21B5248805";
         let _value_wei = _web3.utils.toWei(String(_value));
         _web3.eth.sendTransaction({from: _wallet, to: _to_wallet, value: _value_wei});
     //}

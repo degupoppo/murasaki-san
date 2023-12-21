@@ -167,8 +167,8 @@ hr{
   font-size: 2vh;
   color: #AFB2B5;
   position: absolute;
-  top: 2px;
-  left: 5px;
+  top: 1vh;
+  left: 1vh;
 }
 
 #description {
@@ -176,7 +176,7 @@ hr{
   font-size: 2.2vh;
   color: #fa66ff;
   position: absolute;
-  bottom: 60px;
-  left: 15px;
+  bottom: 8vh;
+  left: 2vh;
 
 }

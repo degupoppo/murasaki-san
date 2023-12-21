@@ -28,30 +28,16 @@
 <meta property="og:url" content="https://murasaki-san.com/">
 <meta property="og:description" content="Murasaki-san is a virtual pet that lives in your wallet on Astar Network.">
 
-<script src="https://cdn.jsdelivr.net/npm/@twemoji/api@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
-
 <!---twitter card--->
 <meta name="twitter:card" content="summary_large_image" />
-<!---
-<meta name="twitter:site" content="@house_of_murasaki-san" />
---->
 <meta name="twitter:title" content="House of Murasaki-san" />
 <meta name="twitter:description" content="Murasaki-san is a virtual pet that lives in your wallet on Astar Network." />
 <meta name="twitter:image" content="https://murasaki-san.com/src/png/opening_logo.jpg" />
 
-
-
+<!-- twemoji -->
+<script src="https://cdn.jsdelivr.net/npm/@twemoji/api@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
 <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-E40NGYG49X"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-E40NGYG49X');
-</script>
-
-
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-E40NGYG49X"></script><script>window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', 'G-E40NGYG49X')</script>
 
 </head>
 
@@ -121,19 +107,22 @@ This is our fan project using <br class="br-sp"><b>Astar Substrate EVM</b> <img 
 
 <p class="notice">
 <b>&#127775; Attention! &#127775;</b><br>
-This project is currently being developed on a private chain. In the future, it will first be test-played on the Shibuya chain and eventually deployed on the Astar chain.<br>
 <br>
-The alpha version of Journy of Murasaki-san, the 2nd season project, can be tried <b><a href="JoM/">>>here<<</a></b>.<br>
-<br>
-Desktop application is available!<br>
-<b><a href="DdM/Desktop_de_Murasaki-san_v1.05.zip">>>Download Here<<</a></b> (for windows, v1.05)<br>
-<br>
-Murasaki Game is available <a href="fg/"><b>>>here!<<</b></a>
+This project is currently being developed on a private chain. In the future, it will first be test-played on the Shibuya chain and eventually deployed on the Astar Substrate EVM.<br>
+
 </p>
 
 <p class="notice">
 <b>&#x2764; Notice! &#x2764;</b><br>
+<br>
 We have released Murasaki-san <br class="br-sp"><b><a href="https://store.line.me/stickershop/product/16670298/en">LINE sticker</a></b> and <b><a href="https://store.line.me/emojishop/product/644a021e1033b65e5ca8ff7d/en">LINE emoji</a></b>!<br>
+<br>
+<b>Desktop de Murasaki-san</b> is released! (for windows)<br>
+<b><a href="DdM/Desktop_de_Murasaki-san_v1.05.zip">>> Download Here <<</a></b> <br>
+<br>
+<b>Fluffy Game</b> is released!<br>
+<a href="FG/"><b>>> Play Here! <<</b></a>
+
 </p>
 
 <br>
@@ -184,7 +173,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)<br>
 and this project adheres to [Semantic Versioning](http://semver.org/).<br>
 </p>
 <p>
-## [1.0.0] - 2023-XX-XX<br>
+## [1.0.0] - 2024-XX-XX<br>
 ### Released<br>
 - House of Murasaki-san was launched.<br>
 </p>
@@ -1221,6 +1210,38 @@ Projected graph of acceptable inflation rate and buyback price (NFT price) based
 
 </details>
 
+
+<!---### Developer --->
+
+<details>
+
+<summary>For developers &#128736;</summary>
+
+<p>
+We have prepared a contract that enables anyone to access information about Murasaki-san in this project. Although the contracts in this project are complex, you can access the major information using this contract. Consistent with web3 principles, the information within this contract is free to use without requiring any permissions.
+</p>
+
+<p>
+&nbsp;&nbsp;- Contract Address:&nbsp;&nbsp;&nbsp;<b>(not deploied yet)<a href="https://blockscout.com/astar/address/0x31d69b5125ce419a2948a58b7Aa0883D57c06850"></a></b><br>
+&nbsp;&nbsp;- Contract ABI:&nbsp;&nbsp;&nbsp;<b><a href="contracts/abi_Murasakisan.json">abi_Murasakisan.json</a></b><br>
+&nbsp;&nbsp;- Contract interface:&nbsp;&nbsp;&nbsp;<b><a href="contracts/IMurasakisan.sol">IMurasakisan.sol</a></b><br>
+</p>
+
+<p>
+With this contract, you can obtain status values of user's Murasaki-san such as Level, Age, Name, STR, present satiety, score, total_leaves_farmed, total_item_crafted, and more, using user's wallet address. This contract also meets the criteria for ERC165 and ERC721 standards and is compatible to Metamask etc, although transfers are not allowed since the Murasaki-san tokens are SBT.<br>
+</p>
+
+<p>
+This contract enables you to integrate Murasaki-san's information into your web pages or contracts. For example, you can display the name and the other status of the Murasaki-san associated with a connected wallet on your web page.
+</p>
+
+
+<p>
+Please feel free to use it :)
+</p>
+
+</details>
+
 <br>
 
 
@@ -1266,42 +1287,7 @@ Cheers to Astar :)
 
 <!--- Developer --->
 
-<h3 id="developer">For the Developers &#128736;</h3>
 
-<p>
-We have prepared a contract that enables anyone to access information about Murasaki-san in this project. Although the contracts in this project are complex, you can access the major information using this contract. Consistent with web3 principles, the information within this contract is free to use without requiring any permissions.
-</p>
-
-<p>
-&nbsp;&nbsp;- Contract Address:&nbsp;&nbsp;&nbsp;<b><font color="blue" size="-1"><a href="https://blockscout.com/astar/address/0x31d69b5125ce419a2948a58b7Aa0883D57c06850">0x31d69b5125ce419a2948a58b7Aa0883D57c06850</a></font></b><br>
-&nbsp;&nbsp;- Contract ABI:&nbsp;&nbsp;&nbsp;<b><a href="src/solidity/abi_Murasakisan.json">abi_Murasakisan.json</a></b><br>
-&nbsp;&nbsp;- Contract interface:&nbsp;&nbsp;&nbsp;<b><a href="src/solidity/IMurasakisan.sol">IMurasakisan.sol</a></b><br>
-</p>
-
-<p>
-With this contract, you can obtain status values of user's Murasaki-san such as Level, Age, Name, STR, present satiety, score, total_leaves_farmed, total_item_crafted, and more, using user's wallet address. This contract also meets the criteria for ERC165 and ERC721 standards and is compatible to Metamask etc, although transfers are not allowed since the Murasaki-san tokens are SBT.<br>
-</p>
-
-<p>
-This contract enables you to integrate Murasaki-san's information into your web pages or contracts. For example, you can display the name and the other status of the Murasaki-san associated with a connected wallet on your web page.
-</p>
-
-<p>
-<div id="output_murasakiInfo">
-    &nbsp;&nbsp;&nbsp;For example:&nbsp;
-    <button style="height:28px;font-size:80%" onclick="show_murasakiInfo();">
-        &nbsp;<b>Hello Murasaki-san!</b>&nbsp;
-    </button>
-</div>
-</p>
-
-<p>
-The example JavaScript code used <a href="src/js/murasakiInfo.txt">can be found here.</a> Other informations available in the contract can be found in <a href="src/solidity/IMurasaki_Info_from_wallet.sol">the interface file</a> described above.
-</p>
-
-<p>
-Please feel free to use it :)
-</p>
 
 <br>
 
@@ -1367,18 +1353,14 @@ We hope you enjoy it too :)
 </p>
 
 <ul>
-<li>The coder: <b>degupoppo&#x1f400;</b> <font color="blue" size="-1"><br class="br-sp">(wallet: 0x2F7448B62134e52C2f46454<br class="br-sp">d0089Ae21B5248805)</font><br>
+<li>The coder: <b>degupoppo&#x1f400;</b><br>
 A hobby coder with lots of typos who loves rodents like degue.
 </ul>
 
 <ul>
-<li>The illustrator: <b>fumacist&#x1f408;</b> <font color="blue" size="-1"><br class="br-sp">(wallet: 0xe79d44309e4daD2CD7<br class="br-sp">eaf3CA4CD1d80a6b8733f7)</font><br>
+<li>The illustrator: <b>fumacist&#x1f408;</b><br>
 A whimsical hobby illustrator who loves cats and fluffy dolls.
 </ul>
-
-<p>
-Any donation is greatly appreciated. The donations will be used to buy some coffee for the coder, pay for drawing software and Apple Pencil for the illustrator, and purchase fluffy wool for Murasaki-san ;)<br>
-</p>
 
 <p>
 <figure>
@@ -1492,36 +1474,10 @@ We would like to express our thanks to followings:
 <!--- Footer--->
 
 <footer class="footer">
-
-<p>
-<img src="logo_icon.png" width="18">
-Donation:&nbsp;<br class="br-sp">
-<button style="height:26px;font-size:75%" onclick="donate(1);">
-<script type="text/javascript">write_icon(1)</script>&nbsp;1 $ASTR
-</button>
-&nbsp;
-<button style="height:26px;font-size:75%" onclick="donate(10);">
-<script type="text/javascript">write_icon(10)</script>&nbsp;10 $ASTR
-</button>
-&nbsp;
-<button style="height:26px;font-size:75%" onclick="donate(100);">
-<script type="text/javascript">write_icon(100)</script>&nbsp;100 $ASTR
-</button>
-
-<br>
-
-<label><input type="radio" name="donationWallet" value="0x2F7448B62134e52C2f46454d0089Ae21B5248805">For Coder&#x1f400;: <br class="br-sp"><font size="-2">0x2F7448B62134e52C2f46454d0089Ae21B5248805</font></label><br>
-<label><input type="radio" name="donationWallet" checked value="0xe79d44309e4daD2CD7eaf3CA4CD1d80a6b8733f7">For Illustrator&#x1f408;: <br class="br-sp"><font size="-2">0xe79d44309e4daD2CD7eaf3CA4CD1d80a6b8733f7</font></label><br>
-</p>
-
-<p>
-(C) 2023 Project of Murasaki-san. All rights reserved.<br>
-</p>
-
-<p>
-Contact: murasakisan.info (at) gmail.com
-</p>
-
+<p>Donation: <font size="-1">0x6655B97171c8FA7dF052D95230951E80c5cB7e15</font></p>
+<p>&nbsp;</p>
+<p>(C) 2023 Project of Murasaki-san. All rights reserved.</p>
+<p>Contact: murasakisan.info (at) gmail.com</p>
 </footer>
 
 

@@ -6,10 +6,17 @@ document.getElementById("version").innerText = version;
 
 /*
 
+# minfier
+https://www.toptal.com/developers/javascript-minifier
+
+# obfuscator
+https://obfuscator.io/
+
 ToDo
-    pop演出の変更
- ng     可能ならお花まきの演出
     BGMならない問題の修正
+    ボリュームボタンの実装
+ ok pop演出の変更
+ ng     可能ならお花まきの演出
  ok 画面端の挙動の改善
  ok     跳ね返ることがあったので、ランダムで回転させるのを無効化
  ok 説明文の実装
@@ -546,6 +553,10 @@ window.onload = () => {
     // prepare Game2 class
     Game2 = new class_Game2();
     Game2.init();
+    var event = "click";
+    document.addEventListener(event, function() {
+        wa.playSilent();
+    });
 }
 
 // resize game

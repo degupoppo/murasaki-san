@@ -1,6 +1,6 @@
 
-//231110
-version = "v0.1.7";
+//231113
+version = "v0.1.8";
 
 
 //===Header==================================================================================
@@ -86,25 +86,41 @@ contract ERC721 is IERC721 {
 
 //---ToDo
 
+    svgの修正
+        pippelの色合いの修正？
     絵の追加
         6パターンだけだと流石に寂しい
         色々な表情のむらさきさんを追加するか、
             ちょっと別バージョンのにゅいにゅいさんたちを追加するか。
         目標30種類
         伴って、unrevealedSvgも修正する
+        追加案
+            にゅいにゅいさん別絵
+            寝てる猫
+            アスニャー
+            アスター君別絵
+            ないないさん別絵
+            くもさん？
     リファクタリング
         call回数の最適化
             auctionなどは最初に1回だけcallする？
             その他、on-chainデータ読み込み回数の最適化を図る
         関数のモジュール化と整理整頓
         wssの導入
-    svgの修正
+ ok Minted NFTの修正
+ ok     ランダムではなく直近5つに修正
+ ok     自分のNFTも全部表示ではなくする？
+ ok         そんなにたくさん所有を想定していないので、このままでも良いか。
+ ok svgの修正
+ ok     codexコントラの修正
+ ok         キャラ名のテキスト追加とガス代確認
+ ok         背景アスターの色変更
+ ok         ピッペルのバック透かし追加
+ ok         fluffy位置調整
  ok     fluffyの目とpippelのpetalのぼかしフィルターを見直す
  ok     重くなるのなら、フレームのグラジエントも見直す
  ng     ロゴとメッセージの配置を見直す
-        pippelの色合いの修正
-        pippelのバックにやはり白のcircleを置く
-        codexコントラの修正
+ ok     pippelのバックにやはり白のcircleを置く
  ok init関数を用意する
  ok     addressとabiをどうやって管理するか
  ng     別ファイルとするかどうか。
@@ -204,6 +220,7 @@ init
         _add_permitted_address(address_MurasakiAuctionHouse)    0xd675daceecafC225690327d38D652eFf4EE9cA0d
         _set_address_Murasaki_Memento_codex(address_Murasaki_Memento_codex) 0xD647049142909C78C1B809dDeb283fb546012668
     Murasaki_Memento_codex  0xD647049142909C78C1B809dDeb283fb546012668
+                                231212 new: 0x3BF5CADC24A10382cffA24081609AE93b9E28330
         _set_address_Murasaki_Memento   0x20f18BeDd45a6d6631D3a92ac501d03a51Ac9D18
         _set_address_Murasaki_Memento_flavorText    0xEC0E79Ac007B898158b9e52cf4C50E23D744FD69
         _set_address_Murasaki_Memento_mainPng_01    0x71c91F52135afdff323795dbe3Cb34BfC38654f6
@@ -308,7 +325,9 @@ async function init_auctionContracts () {
         await show_userNFT();
 
         // show random NFT
-        await show_randomNFT();
+        //await show_randomNFT();
+        // show last 5 NFTs
+        await show_lastFiveNFT();
         
     } else {
         setTimeout(init_auctionContracts, 1000);
@@ -904,6 +923,58 @@ async function show_randomNFT() {
         ){
             tokenList.push(_rnd);
         }
+    }
+    
+    // fort token list
+    function compareNumbers(a, b) {
+        return a - b;
+    }
+    tokenList.sort(compareNumbers);
+    
+    // prepare each svg
+    let _html = "";
+    //_html += "&nbsp;&nbsp;";
+    for (i=0; i < tokenList.length; i++) {
+    
+        // prepare token id
+        let _tokenId = tokenList[i];
+
+        // get svg and description
+        let _res = await _getSvg2(_tokenId);
+        let _svg = _res[0];
+        let _description = _res[1];
+
+        // onclick, open modal window
+        _html += '<img width="128" style="cursor: pointer;"';
+        _html += ' src="' + _svg + '" onclick="update_modal(' + _tokenId + ')" >';
+        _html += "&nbsp;&nbsp;&nbsp;";
+    }
+
+    // insert html
+    _target.innerHTML = _html;
+}
+
+
+// show last 5 NFTs
+async function show_lastFiveNFT() {
+
+    // show loading text
+    let _target = document.getElementById("randomNFT");
+    _target.innerHTML = "&nbsp;&nbsp;Loading...";
+    
+    // call total nft number
+    let _totalTokenNumber = await contract_mom.methods.next_nft().call();
+    _totalTokenNumber = Number(_totalTokenNumber);
+    _totalTokenNumber -= 1;
+
+    // get last 5 tokenId
+    let tokenList = [];
+    for (let i=0; i<5; i++){
+        let _tokenId = _totalTokenNumber - i;
+        if (_tokenId == 0) {
+            break;
+        }
+        tokenList.push(_tokenId);
     }
     
     // fort token list

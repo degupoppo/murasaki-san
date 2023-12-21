@@ -403,7 +403,7 @@ async function _show_onChain_parameters() {
         _target = document.getElementById("info_price");
         _target.innerHTML = _text;
         //inflation
-        let _infle = Math.round(_price/500 * 100 * 100)/100 -100;
+        let _infle = Math.round((_price - 500) / 500 * 100 * 100) / 100;
         _text = "+" + _infle + "%";
         _target = document.getElementById("info_inflation");
         _target.innerHTML = _text;        

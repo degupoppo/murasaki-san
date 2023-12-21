@@ -2902,7 +2902,7 @@ contract Murasaki_Storage_Extra is Ownable {
 //===Function==================================================================================================================
 
 
-//---Share
+//---Share*
 
 contract Murasaki_Function_Share is Ownable, Pausable {
 
@@ -3172,6 +3172,26 @@ contract Murasaki_Function_Share is Ownable, Pausable {
         }
         return _score;
     }
+    /*
+    function calc_score_ranking () external view returns (uint[10] memory, uint[10] memory) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Main mm = Murasaki_Main(ma.address_Murasaki_Main());
+        uint _total_summoner = mm.next_token() - 1;
+        uint[10] memory _summonerIds;
+        uint[10] memory _scores;
+        for (uint i=1; i<=_total_summoner; i++) {
+            uint _score = calc_score(i);
+            for (uint j=0; j<10; j++) {
+                if (_scores[j] < _score) {
+                    _summonerIds[j] = i;
+                    _scores[j] = _score;
+                    break;
+                }
+            }
+        }
+        return (_summonerIds, _scores);
+    }
+    */
         
     //calc_exp_addition_rate_from_nui, item_nui required
     //return XXX% * 100; 30000 = +300%
