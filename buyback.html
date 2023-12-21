@@ -1,0 +1,109 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<script src="lib/web3.min.js"></script>
+<script src="src/js/array_item.js"></script>
+<script src="src/js/contracts.js"></script>
+<script src="src/js/share.js"></script>
+<script src="src/js/market.js"></script>
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=0.9">
+
+<link rel="stylesheet" type="text/css" href="lib/DataTables/datatables.min.css"/>
+<link rel="stylesheet" type="text/css" href="src/css/datatable.css"/>
+<script type="text/javascript" language="javascript" src="lib/jquery-3.6.0.min.js"></script>
+<script type="text/javascript" language="javascript" src="lib/DataTables/datatables.min.js"></script>
+
+<title>Buyback Treasury</title>
+<meta name="description" content="Murasaki-san is a virtual pet that lives in your wallet on Astar Network." />
+<link rel="stylesheet" href="src/css/simple2.css">
+<link rel="stylesheet" href="src/css/style.css">
+
+<link rel="icon" href="src/png/favicon.png" />
+<link rel="apple-touch-icon" href="src/png/favicon.png">
+
+<meta property="og:title" content="Murasaki-san Item Market">
+<meta property="og:image" content="src/png/favicon.png">
+<meta property="og:url" content="https://murasaki-san.com/">
+<meta property="og:description" content="Murasaki-san is a virtual pet that lives in your wallet on Astar Network.">
+
+<!-- twemoji -->
+<script src="https://cdn.jsdelivr.net/npm/@twemoji/api@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-E40NGYG49X"></script><script>window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', 'G-E40NGYG49X')</script>
+
+</head>
+
+<body>
+
+<header>
+
+<nav>
+<a href="index.html"><b>&#x1f3e0; Home</b></a>
+<a href="house.html"><b>&#x2764; Play</b></a>
+<a href="market.html" class="current"><b>&#x1f6d2; Market</b></a>
+<a href="info.html"><b>&#x1f4d7; Info</b></a>
+&nbsp;<span id="button_connect"><button onclick="init_web3();" style="width:100px;">Connect</button></span>
+</nav>
+
+<h1>
+Buyback Market
+</h1>
+<p><center>
+NFT items can always be burned for getting a fixed price.<br>
+As the game economy expands, the buyback price will increase.
+</center></p>
+
+</header>
+
+<main>
+
+
+<p><center><code class="language-plaintext highlighter-rouge">
+Crafted item NFTs are available in the buyback market.<br>
+Fuluffy, bank/pouch and presentbox NFTs are not available.
+</code></center></p>
+
+    <h3>Buyback Market &#x1f33c;</h3>
+    <p><code class="language-plaintext highlighter-rouge">
+        Before buyback, please approve the BuybackTreasury contract:
+        <button id="button_approve_buyback" onclick='approve_buyback();'>Approve</button><br>
+    </code></p>
+	<table id="table_buyback" class="display" style="width:100%;">
+	    <thead><tr>
+            <th style="width:25px;"><center>ID</center></th>
+            <th><center>Type</center></th>
+            <th><center>Rarity</center></th>
+            <th><center>Crafter</center></th>
+            <th><center>Buyback Price<br><font color=blue>($ASTR)</font></center></th>
+        </tr></thead>
+        <tbody id="tbody_myItems"></tbody>
+	</table>
+
+<p><div id="total_paied" style="text-align:right"><div></p>
+
+</main>
+
+<!--- Footer--->
+
+<footer class="footer">
+<p>Donation: <font size="-1">0x6655B97171c8FA7dF052D95230951E80c5cB7e15</font></p>
+<p>&nbsp;</p>
+<p>(C) 2023 Project of Murasaki-san. All rights reserved.</p>
+<p>Contact: murasakisan.info (at) gmail.com</p>
+</footer>
+
+
+<script>
+    twemoji.parse(document.body);
+    check_connected();
+    loading_in_html_buyback();
+</script>
+
+</body>
+</html>

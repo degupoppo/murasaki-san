@@ -1,0 +1,182 @@
+@import url(https://fonts.bunny.net/css?family=azeret-mono:400,700,900);
+
+:root {
+  --col-bg: #eeeeee;
+  --col-bg-light: #fff1ff;
+  --col-bg-lighter: #FDBEFF;
+  --col-primary: #fb70ff;
+  --col-primary-dark: #FF2700;
+  --col-primary-light: #FF8800;
+  --col-shadow: rgba(0, 0, 0, 0.25);
+  --col-white: #fff;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+  line-height: 1;
+}
+
+body {
+  background-color: var(--col-bg);
+  font-family: 'Azeret Mono', sans-serif;
+}
+
+.container {
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  height: 100vh;
+}
+
+#canvas {
+  position: relative;
+}
+
+#ui {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  user-select: none;
+  font-weight: 700;
+  display: none;
+  transform-origin: top left;
+}
+
+#current-score {
+  font-family: "Arial", Times, serif;
+  position: absolute;
+  width: 100%;
+  font-size: 42px;
+  font-weight: 900;
+  padding-left: 10px;
+  color: var(--col-bg-light);
+  text-shadow:
+    2px 2px 2px var(--col-primary), -2px -2px 2px var(--col-primary),
+    -2px 2px 2px var(--col-primary),  2px -2px 2px var(--col-primary),
+    2px 0px 2px var(--col-primary), -2px -0px 2px var(--col-primary),
+    0px 2px 2px var(--col-primary),  0px -2px 2px var(--col-primary);
+    //3px 3px 0 var(--col-primary), 
+    //-3px -3px 0 var(--col-primary), 
+    //-3px 3px 0 var(--col-primary), 
+    //3px -3px 0 var(--col-primary);
+  margin: 0;
+}
+
+hr{
+    border: none;
+    border-bottom: 4px dotted #FDBEFF;
+    margin: 0;
+}
+
+#end-container {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-items: center;
+  background-color: var(--col-shadow);
+}
+
+#end {
+  text-align: center;
+  padding: 32px 48px;
+  background-color: var(--col-bg-lighter);
+  border: 5px solid var(--col-primary);
+  box-shadow: 0 4px 32px var(--col-shadow);
+  border-radius: 32px;
+  margin: 0 auto;
+  pointer-events: initial;
+  user-select: initial;
+}
+
+#end-title {
+  font-weight: 700;
+  font-size: 48px;
+  color: var(--col-primary-dark);
+}
+
+#end-link {
+  display: inline-block;
+  color: var(--col-white);
+  font-size: 24px;
+  text-decoration: none;
+  background-color: var(--col-primary-light);
+  margin-top: 16px;
+  padding: 16px;
+  border-radius: 16px;
+  box-shadow: 4px 4px 0 var(--col-shadow);
+}
+
+#end-link:hover {
+  background-color: var(--col-primary);
+  box-shadow: 6px 6px 0 var(--col-shadow);
+}
+
+#status {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 48px;
+  //background-color: var(--col-bg-lighter);
+  background-color: transparent;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.status-item {
+  display: flex;
+  line-height: 1;
+  align-items: center;
+  margin-right: 32px;
+}
+
+.status-label {
+  color: #666;
+  font-size: 16px;
+  margin-left: 24px;
+  margin-right: 8px;
+  text-align: left;
+}
+
+.status-label2 {
+  color: #666;
+  font-size: 16px;
+  margin-left: 550px;
+  margin-right: 8px;
+  margin-top: 0px;
+}
+
+#highscore-value {
+  color: #333;
+  font-weight: 700;
+  font-size: 24px;
+}
+
+#next-fluffy {
+  width: 24px;
+  height: 24px;
+}
+
+#version {
+  font-size: 2vh;
+  color: #AFB2B5;
+  position: absolute;
+  top: 1vh;
+  left: 1vh;
+}
+
+#description {
+  font-family: "Times New Roman", Times, serif;
+  font-size: 2.2vh;
+  color: #fa66ff;
+  position: absolute;
+  bottom: 8vh;
+  left: 2vh;
+
+}

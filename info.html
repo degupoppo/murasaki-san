@@ -1,0 +1,267 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<script src="lib/web3.min.js"></script>
+<script src="src/js/contracts.js"></script>
+<script src="src/js/share.js"></script>
+<script src="src/js/array_item.js"></script>
+<script src="src/js/info.js"></script>
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=0.9">
+
+<title>On-Chain Informations</title>
+<meta name="description" content="Murasaki-san is a virtual pet that lives in your wallet on Astar Network." />
+<link rel="stylesheet" href="src/css/simple2.css">
+<link rel="stylesheet" href="src/css/style.css">
+
+<link rel="icon" href="src/png/favicon.png" />
+<link rel="apple-touch-icon" href="src/png/favicon.png">
+
+<meta property="og:title" content="On-Chain Informations">
+<meta property="og:image" content="src/png/favicon.png">
+<meta property="og:url" content="https://murasaki-san.com/">
+<meta property="og:description" content="Murasaki-san is a virtual pet that lives in your wallet on Astar Network.">
+
+<!-- twemoji -->
+<script src="https://cdn.jsdelivr.net/npm/@twemoji/api@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-E40NGYG49X"></script><script>window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', 'G-E40NGYG49X')</script>
+
+</head>
+
+<body>
+
+<header>
+
+<nav>
+<a href="index.html"><b>&#127969; Home</b></a>
+<a href="house.html" ><b>&#x2764; Play</b></a>
+<a href="market.html"><b>&#x1f6d2; Market</b></a>
+<a href="info.html" class="current"><b>&#x1f4d7; Info</b></a>
+<a href="mom.html"><b>&#127914; MoM</b></a>
+&nbsp;<span id="button_connect"><button onclick="init_web3();" style="width:110px;">Connect</button></span>
+</nav>
+
+<h1>
+<p class="vertical-middle">
+On-Chain Informations
+</p>
+</h1>
+
+<p>
+<center>
+All the status and parameters of the House of Murasaki-san are<br>
+recorded on the Astar Network EVM blockchain.
+</center>
+</p>
+
+</header>
+
+
+<main>
+
+
+<!--- scroll up button --->
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.4/css/all.css">
+<link rel="stylesheet" href="src/css/scrollup.css">
+<div id="page_top"><a href="#"></a></div>
+
+
+<!--- random --->
+
+<h3 id="random">Random Murasaki-san &#x1f49e;</h3>
+
+<p>
+Five random Murasaki-san icons will be displayed. By clicking on an icon, you can visit the corresponding House of Murasaki-san.
+</p>
+
+<div id="output_murasakiIcon" style="height:64px"><b>&nbsp;&nbsp;&nbsp;Loading...</b></div>
+
+<br>
+<br>
+
+
+
+<!--- picture --->
+
+
+<h3 id="sns">Picture of Your House &#128247;</h3>
+
+<p>
+Take a photo of your house and share it on social media :)
+</p>
+
+<div id="take_a_picture">
+&nbsp;&nbsp;&nbsp;<button onclick="create_pic();" id="button_takepic" style="height:28px;font-size:80%"><b>Take a Picture</b></button>
+</div>
+
+<canvas id="pic_of_house" width=0 height=0></canvas><br>
+<a id="download_link"></a>
+
+<div id="take_a_picture_after"></div>
+
+<br>
+<br>
+
+
+
+<!--- Details --->
+
+<h3 id="details">Murasaki-san Details &#x1F48E;</h3>
+
+<p>
+If you know friend's Murasaki-san ID, you can call status, read introduction, and visit their house. You can feed their Murasaki-san and earn a little extra exp (2% of exp gained).
+</p>
+
+<p>
+&nbsp;&nbsp;&nbsp;<b>Murasaki-san ID:</b>&nbsp;
+<input type="number" style="width:100px;" text-align="center" id="input_summoner"><br>
+&nbsp;
+<button style="height:28px;font-size:80%" onclick="drawStatus();" id="button_status">
+<b>Call Status</b>
+</button>
+&nbsp;
+<button style="height:28px;font-size:80%" onclick="show_murasakiInfo2();" id="button_info">
+<b>Read Introduction</b>
+</button><br class="br-sp">
+&nbsp;
+<button style="height:28px;font-size:80%" onclick="button_select_summoner();" id="button_visit">
+<b>Visit House</b>
+</button>
+</p>
+
+<canvas id="canvas_status" width=0 height=0></canvas>
+<div id="output_murasakiInfo">&nbsp;&nbsp;&nbsp;---</div>
+
+<br>
+
+
+
+<!--- log --->
+
+<h3 id="log">Realtime Event Log &#x1fab5;</h3>
+
+<p>
+Pressing the button will initiate real-time monitoring of events for each contract.
+</p>
+
+<p>
+<div id="realtimeLog">
+&nbsp;
+<button style="height:28px;font-size:80%" onclick="_show_realtimeLog();">
+&nbsp;<b>Start Monitoring</b>&nbsp;
+</button>
+</div>
+</p>
+
+<br>
+
+
+
+<!--- market --->
+
+<h3 id="market">Market Information &#x1f514;</h3>
+
+<p>
+
+<b>Select Item:</b>
+
+&nbsp;
+
+<font size="-0.8">
+<span id="itemSelector">
+<select id="itemPulldown">
+<option value="0">Loading...</option>
+</select>
+</span>
+</font>
+
+&nbsp;
+
+<button style="height:28px;font-size:80%" onclick="getMarketInfo();">
+<b>Get Market Info</b>
+</button>
+
+</p>
+
+<p>
+<ul>
+<li>Item Type:&nbsp;&nbsp;<b><idv id="itemType"></div></b>
+<li>Number of Mint:&nbsp;&nbsp;<b><idv id="numberOfMint"></div></b>
+<li>Number of Trade:&nbsp;&nbsp;<b><idv id="numberOfTrade"></div></b>
+<li>Average Trading Price:&nbsp;&nbsp;<b><idv id="averageTradingPrice"></div></b>
+<li>Current Buyback Price:&nbsp;&nbsp;<b><idv id="currentBuybackPrice"></div></b>
+</ul>
+</p>
+
+<br>
+
+
+
+<!--- parameter --->
+
+<h3 id="parameter">On-Chain Parameters &#x1f517;</h3>
+
+&nbsp;&nbsp;&nbsp;<button onclick="_show_onChain_parameters();" id="button_onchain" style="height:28px;font-size:80%">
+<b>Read parameters</b>
+</button>
+
+<ul>
+<li>Total trial SBT minted:&nbsp;&nbsp;<b><idv id="info_total_trial_summoned"></div></b>
+<li>Total SBT minted:&nbsp;&nbsp;<b><idv id="info_total_summoned"></div></b>
+<li>Total NFT minted:&nbsp;&nbsp;<b><idv id="info_total_item_minted"></div></b>
+<br><br>
+<li>Current starting fee:&nbsp;&nbsp;<b><idv id="info_price"></div></b>
+<li>Current inflation rate:&nbsp;&nbsp;<b><idv id="info_inflation"></div></b>
+<li>Balance of Buffer Vault:&nbsp;<b><idv id="info_balanceOf_bv"></div></b>
+<li>Balance of Buyback Treasury:&nbsp;<b><idv id="info_balanceOf_bt"></div></b>
+<br><br>
+<li>Fluffy Festival Winner:&nbsp;&nbsp;<b><idv id="info_festivalWinner"></div></b>
+<li>Next Fluffy Festival:&nbsp;&nbsp;<b><idv id="info_festivalBlock"></div></b>
+<br><br>
+<li>Total Feeding Count:&nbsp;&nbsp;<b><idv id="info_feedingCount"></div></b>
+<li>Total Grooming Count:&nbsp;&nbsp;<b><idv id="info_groomingCount"></div></b>
+<li>Total Coin Mined:&nbsp;&nbsp;<b><idv id="info_coinMined"></div></b>
+<li>Total Leaf Farmed:&nbsp;&nbsp;<b><idv id="info_leafFarmed"></div></b>
+<li>Total Item Crafted:&nbsp;&nbsp;<b><idv id="info_itemCrafted"></div></b>
+<li>Total Fluffy Discovered:&nbsp;&nbsp;<b><idv id="info_fluffyDiscovered"></div></b>
+<li>Total Pippel Discovered:&nbsp;&nbsp;<b><idv id="info_pippelDiscovered"></div></b>
+</ul>
+
+<br>
+
+
+
+<!--- end --->
+
+</main>
+
+
+
+<!--- Footer--->
+
+<footer class="footer">
+<p>Donation: <font size="-1">0x6655B97171c8FA7dF052D95230951E80c5cB7e15</font></p>
+<p>&nbsp;</p>
+<p>(C) 2023 Project of Murasaki-san. All rights reserved.</p>
+<p>Contact: murasakisan.info (at) gmail.com</p>
+</footer>
+
+
+</body>
+
+<script>
+    twemoji.parse(document.body);
+    check_connected();
+    _show_icon3();
+    //_show_onChain_parameters();
+    loadItemSelector();
+</script>
+
+</html>
+

@@ -1,0 +1,133 @@
+.post-link {
+  font-size: 1.6rem;
+  font-weight: bold;
+}
+
+.meta {
+  color: var(--text-light);
+  font-size: 1rem;
+}
+
+.blog-item {
+  margin-bottom: 4rem;
+}
+
+nav a.current {
+  color: var(--accent) !important;
+  border-color: var(--accent);
+}
+
+.notice {
+  background: var(--accent-bg);
+  border: 2px solid var(--border);
+  border-radius: 5px;
+  padding: 1.5rem;
+  margin: 2rem 0;
+  text-align: center;
+}
+
+.medium {
+  font-size: 1.4rem;
+}
+
+.small {
+  font-size: 1rem;
+}
+
+.button {
+  border: none;
+  border-radius: 5px;
+  background: var(--accent);
+  font-size: 1rem;
+  color: var(--bg);
+  padding: 0.7rem 0.9rem;
+  margin: 0.5rem 0;
+}
+
+.button:hover,
+.button:focus {
+  filter: brightness(1.4);
+  cursor: pointer;
+}
+
+.icon {
+  vertical-align: sub;
+  padding-right: .25rem;
+  display: inline-block;
+  width: 1em;
+  height: 1.3em;
+  margin-right: 0.2rem;
+  stroke-width: 0;
+  stroke: currentColor;
+  fill: currentColor;
+}
+
+.box {
+    inline-size: 700px;
+    overflow-wrap: break-word;
+}
+
+.show_icon{
+    display: inline-block; 
+    width: 64px;
+}
+
+.vertical-middle{
+  //display: inline-block; /* インライン要素にすることで横に回り込む */
+  display: flex;
+  vertical-align: middle; /* 上下中央に寄せる */ 
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 幅が閾値以下の場合に上下に並べる */
+@media (max-width: 720px) {
+  .vertical-middle {
+    flex-direction: column; /* 縦に並べる */
+  }
+}
+
+
+.showIconTop{
+    display: inline-block; 
+    width: 64px; 
+    float: center; 
+    margin-right: 0px; 
+    margin-top: 0px;
+    vertical-align: middle; /* 上下中央に寄せる */ 
+}
+
+.footer{
+    line-height: 0px;
+}
+
+.textMiddle{
+    vertical-align: middle;
+}
+
+.lineHeight8{
+    line-height: 8px;
+}
+
+img.emoji {
+  height: 1em;
+  width: 1em;
+  margin: 0 .05em 0 .1em;
+  vertical-align: -0.1em;
+}
+
+/*
+スマホで改行
+https://labo.webis.co.jp/2021/04/br-sp/
+*/
+.br-sp {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  .br-sp {
+    display: block;
+}
+
+

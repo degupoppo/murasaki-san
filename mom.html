@@ -1,0 +1,295 @@
+
+<!doctype html>
+<html lang="en">
+
+
+<script src="lib/web3.min.js"></script>
+<script src="src/js/contracts.js"></script>
+<script src="src/js/share.js"></script>
+<script src="src/js/mom.js"></script>
+
+
+
+<!--- head --->
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=0.9">
+
+<title>House of Murasaki-san</title>
+<meta name="description" content="Murasaki-san is a virtual pet that lives in your wallet on Astar Network." />
+<link rel="stylesheet" href="src/css/simple2.css">
+<link rel="stylesheet" href="src/css/style.css">
+<link rel="stylesheet" href="src/css/modalWindow.css">
+
+<link rel="icon" href="src/png/favicon.png" />
+<link rel="apple-touch-icon" href="src/png/favicon.png">
+
+<meta property="og:title" content="House of Murasaki-san">
+<meta property="og:image" content="src/png/favicon.png">
+<meta property="og:url" content="https://murasaki-san.com/">
+<meta property="og:description" content="Murasaki-san is a virtual pet that lives in your wallet on Astar Network.">
+
+<!-- twemoji -->
+<script src="https://cdn.jsdelivr.net/npm/@twemoji/api@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-E40NGYG49X"></script><script>window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', 'G-E40NGYG49X')</script>
+
+</head>
+
+
+<body>
+
+
+<!--- header --->
+
+<header>
+
+<nav>
+<a href="index.html"><b>&#127969; Home</b></a>
+<a href="house.html" ><b>&#x2764; Play</b></a>
+<a href="market.html"><b>&#x1f6d2; Market</b></a>
+<a href="info.html"><b>&#x1f4d7; Info</b></a>
+<a href="mom.html" class="current"><b>&#127914; MoM</b></a>
+&nbsp;<span id="button_connect"><button onclick="init_web3();" style="width:110px;">Connect</button></span>
+</nav>
+
+
+
+<h1>
+Memento of <br class="br-sp">Murasaki-san
+</h1>
+
+<p>
+<center>
+Auction House of <br class="br-sp">Memento of Murasaki-san NFT.<br><br class="br-sp">
+One Memento NFT, <b>every 72 hours</b>.
+</center>
+</p>
+
+</header>
+
+
+<main>
+
+<!--- scroll up button --->
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.4/css/all.css">
+<link rel="stylesheet" href="src/css/scrollup.css">
+<div id="page_top"><a href="#"></a></div>
+
+
+
+<!--- first msg --->
+
+<br>
+<center>
+<code class="language-plaintext highlighter-rouge">
+This is NFT subproject of <br class="br-sp"><b>House of Murasaki-san</b>.<br>
+You can mint Memento NFT <br class="br-sp">with Nouns-like auction.
+</code>
+</center>
+
+
+
+<!--- Auction --->
+
+<h3 id="current">Current Auction &#127914;</h3>
+
+<p class="vertical-middle">
+
+    <!-- svg -->
+    <span id="unrevealedSvg">
+        <img src="./src/icon/mom_loading.svg" width=256>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    </span>
+    
+    <span><br></span>
+
+    <!-- info -->
+    <span id="auctionInfo">
+
+        <font size="+2"><b>Memento of Murasaki-san #<span id="tokenId">-</span></b></font><br>
+        <br>
+        &#128718; Current Bid:&nbsp;&nbsp;<b><font color="blue"><span id="currentBid">---</span> $ASTR</font></b>&nbsp;&nbsp;<span onclick="reload_onChainData();">&#x1f504;</span><br>
+        &#9200; Auction Ends in:&nbsp;&nbsp;<b><span id="endTime">---</span></b><br>
+        <br>
+
+        <input type="number" style="width:100px;height:30px;background-color:#fafafa;-webkit-appearance: none;-moz-appearance:textfield; font-weight:bold" id="bidAmount">&nbsp;<b>$ASTR</b>&nbsp;&nbsp;&nbsp;<button onclick="button_bid();"><b>Place bid ✿</b></button><br>
+
+        <font size="-1">Edit the text displayed on the NFT's border:<br>
+        <input type="text" style="width:250px;height:30px;ime-mode:disabled;background-color:#fafafa;" id="userMsg" value="&#x273f; House of Murasaki-san, built on Astar.">&nbsp;&nbsp;&nbsp;<button style="height:30px;font-size:90%; background-color:#4DA6FF" onclick="show_unrevealedSvg_with_inputText();"><b>Preview</b></button></font>
+        <br>
+
+    </span>
+</p>
+
+
+<br>
+
+<!--- bid log --->
+
+<style>
+    tr, th, td {
+      border: none;
+      background-color: #FDEFF5;
+      padding: 0.1rem;
+      width: 150px;
+      text-align: start;
+    }
+    .cell1 {
+      width: 160px;
+    }
+    .cell2 {
+      width: 120px;
+    }
+    .cell3 {
+      width: 80px;
+    }
+</style>
+
+<p>
+    <b>Bid log &#x1fab5;</b><br>
+    <font size="-0.5">
+        <span id="bidLog">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;---</span>
+    </font>
+</p>
+
+
+<br>
+
+
+<!-- last winner -->
+
+<p>
+
+    <b>Last winner &#x1f451;</b><br>
+    <font size="-0.5">
+        <span id="lastWinner">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;---</span>
+    </font>
+
+</p>
+
+
+<br>
+<br>
+
+
+<!--- Rules --->
+
+<h3>Auction Rules &#128216;</h3>
+
+<ul>
+<li><b>Memento of Murasaki-san (MoM)</b> is a <b>full-on-chain NFT</b> and does not reference any off-chain data, including IPFS. However, due to its SVG format, it may not display correctly in certain wallets, such as MetaMask.
+<li>NFTs will be minted in the Nouns format auction mechanism. However, they are not minted at the start; <b>minting and revealing occur at the end of the auction.</b>
+<li>The auction operates <b>in 72-hour cycles</b>, commencing with <b>a minimum price of 20 $ASTR</b>. The minimum bid price is set at the current bid price <b>plus 5%</b>. If bidding takes place <b>within the last hour</b> of the auction, it extends by an additional hour.
+<li>At the bidding, the bidder can edit the text to be displayed in the NFT's outer frame. At the end of the auction, <b>the text set by the winner is written into the NFT</b>. (Text rules: Less than 50 characters, can use [0-9], [a-z], [A-Z], [space], [#;&@.,!?-]).
+<li>If the wallet owning Murasaki-san SBT wins the auction, <b>a bonus presentbox will be delivered</b> to their House of Murasaki-san.
+<li>100% of the auction proceeds are transferred to the Buffer Vault of House of Murasaki-san project, where they will be utilized to expand their ecosystem.
+</ul>
+
+<br>
+<br>
+
+
+
+<!--- NFT details --->
+
+<h3>NFT Details &#128215;</h3>
+
+<ul>
+<li>Contract address of NFT: <br class="br-sp"><font size="-1">0x20f18BeDd45a6d6631D3a92ac501d03a51Ac9D18</font>
+<li>The artwork in the NFT is a programmable picture that combines PNG data and SVG code. By coordinating multiple contracts, SVG-format pictures are generated as tokenURI. All data is held within the contract, with no off-chain data included.
+<li>NFTs are minted by combining 6 types of characters, 12 background colors, 12 types of fluffy, 5 types of pippel, 6 types of floral decorations, and over 20 different flavor texts displayed in the NFT's description field. Each element may be subject to future additions and modifications.
+<li>The selection probability of each element in an NFT is the same, and there is no difference in NFT rarity.
+<li>The pippel within the NFT artwork grows slowly over time, and the size of the flower increases as time passes. It reaches its maximum growth in approximately six months.
+<li>There is a hidden Astar logo within the NFT artwork. Try to find it :)
+<li>MoM is an ERC721 standard NFT, and owners can freely buy, sell, and transfer it in any marketplace. There is no transfer fee set.
+</ul>
+
+<br>
+<br>
+
+
+<!--- user NFT --->
+
+<h3 id="current">Your Memento NFTs &#127752;</h3>
+
+<br>
+
+&nbsp;<span id="userNFT">You have not mint Memento NFTs yet.</span>
+
+
+
+<br>
+<br>
+<br>
+
+
+<!--- random NFT --->
+
+<h3 id="current">Minted Memento NFTs &#x1f49e;</h3>
+
+The last 5 Memento NFTs minted in the auction will be displayed here:<br>
+
+<br>
+
+&nbsp;<span id="randomNFT"></span>
+
+
+
+
+
+<br>
+<br>
+
+
+<!--- under msg --->
+
+<p style="text-align:right">
+Total Auction Volume:&nbsp;&nbsp;<b><span id="totalAuctionVolume">---</span> $ASTR</b><br>
+</p>
+
+
+
+<!-- modal window -->
+
+<div class="modal js-modal">
+  <div class="modal-container">
+
+    <!-- close button -->
+    <div class="modal-close js-modal-close" onclick="modalClose();">×</div>
+
+    <!-- modal window -->
+    <div class="modal-content">
+      <p id="svgDetail"></p>
+    </div>
+
+  </div>
+</div>
+
+
+
+</main>
+
+
+<!--- Footer--->
+
+<footer class="footer">
+<p>Donation: <font size="-1">0x6655B97171c8FA7dF052D95230951E80c5cB7e15</font></p>
+<p>&nbsp;</p>
+<p>(C) 2023 Project of Murasaki-san. All rights reserved.</p>
+<p>Contact: murasakisan.info (at) gmail.com</p>
+</footer>
+
+
+</body>
+
+<script>
+    twemoji.parse(document.body);
+    check_connected();
+    init_auctionContracts();
+</script>
+
+</html>
+
