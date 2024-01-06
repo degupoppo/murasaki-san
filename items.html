@@ -10,34 +10,53 @@
 <script src="src/js/market.js"></script>
 
 <head>
-	<meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=0.7">
-	<title>Murasaki-san Item Market</title>
-	<link rel="stylesheet" type="text/css" href="lib/datatables.min.css"/>
-	<script type="text/javascript" language="javascript" src="lib/jquery-3.6.0.min.js"></script>
-	<script type="text/javascript" language="javascript" src="lib/datatables.min.js"></script>
-    <link rel="stylesheet" href="src/css/simple.css">
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=0.9">
+
+    <link rel="stylesheet" type="text/css" href="lib/DataTables/datatables.min.css"/>
+    <link rel="stylesheet" type="text/css" href="src/css/datatable.css"/>
+    <script type="text/javascript" language="javascript" src="lib/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript" language="javascript" src="lib/DataTables/datatables.min.js"></script>
+
+    <title>Murasaki-san Item Market</title>
+    <meta name="description" content="Murasaki-san is a virtual pet that lives in your wallet on Astar Network." />
+    <link rel="stylesheet" href="src/css/simple2.css">
     <link rel="stylesheet" href="src/css/style.css">
-    <link rel="stylesheet" href="src/css/datatable.css">
+
     <link rel="icon" href="src/png/favicon.png" />
     <link rel="apple-touch-icon" href="src/png/favicon.png">
-    
+
+    <meta property="og:title" content="Murasaki-san Item Market">
+    <meta property="og:image" content="src/png/favicon.png">
+    <meta property="og:url" content="https://murasaki-san.com/">
+    <meta property="og:description" content="Murasaki-san is a virtual pet that lives in your wallet on Astar Network.">
+
     <!-- twemoji -->
-<script src="https://cdn.jsdelivr.net/npm/@twemoji/api@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-E40NGYG49X"></script><script>window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', 'G-E40NGYG49X')</script>
+    <script src="https://cdn.jsdelivr.net/npm/@twemoji/api@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z7XXV794SJ"></script><script>window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', 'G-Z7XXV794SJ');</script>
+
+    <!--- scroll up button --->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.4/css/all.css"><link rel="stylesheet" href="src/css/scrollup.css"><div id="page_top"><a href="#"></a></div>
 
 </head>
 
+
 <body>
 
+
 <header>
+
     <nav>
-      <a href="index.html"><b>&#x1f3e0; Home</b></a>
-      <a href="house.html" ><b>&#x1f497; Play</b></a>
-      <a href="market.html"><b>&#x1f6d2; Market</b></a>
-      <a href="https://twitter.com/degupoppo" >Twitter</a>
-      <a href="https://github.com/degupoppo/murasakisan/" >GitHub</a>
+    <a href="index.html"><b>&#127969; Home</b></a>
+    <a href="house.html" ><b>&#x2764; Play</b></a>
+    <a href="market.html"><b>&#x1f6d2; Market</b></a>
+    <a href="info.html"><b>&#x1f4d7; Info</b></a>
+    <a href="mom.html"><b>&#127914; MoM</b></a>
+    &nbsp;<span id="button_connect"><button onclick="init_web3();" style="width:110px;">Connect</button></span>
     </nav>
     <h1>
         <img src="src/png/item_basic_sweet_potato.png" width="40" height="40">
@@ -538,12 +557,17 @@ comming soon.
 <!--- Footer--->
 
 <footer class="footer">
-<p>Donation: <font size="-1">0x6655B97171c8FA7dF052D95230951E80c5cB7e15</font></p>
+<p><font size="-2"><b>Donations: </b></font><font size="-2" color="blue"><a href="https://blockscout.com/astar/address/0x6655B97171c8FA7dF052D95230951E80c5cB7e15" style="text-decoration:none;" target="_blank">0x6655B97171c8FA7dF052D95230951E80c5cB7e15&#x2764;</a></font></p>
 <p>&nbsp;</p>
-<p>(C) 2023 Project of Murasaki-san. All rights reserved.</p>
+<p>(C) 2023 Project of Murasaki-san.</p>
 <p>Contact: murasakisan.info (at) gmail.com</p>
 </footer>
 
 
 </body>
+
+<script>
+    twemoji.parse(document.body);
+</script>
+
 </html>

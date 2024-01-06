@@ -11,33 +11,34 @@
 
 <head>
 
-<meta charset="utf-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=0.9">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=0.9">
 
-<title>House of Murasaki-san</title>
-<meta name="description" content="Murasaki-san is a virtual pet that lives in your wallet on Astar Network." />
-<link rel="stylesheet" href="src/css/simple2.css">
-<link rel="stylesheet" href="src/css/style.css">
+    <title>House of Murasaki-san</title>
+    <meta name="description" content="Murasaki-san is a virtual pet that lives in your wallet on Astar Network." />
+    <link rel="stylesheet" href="src/css/simple2.css">
+    <link rel="stylesheet" href="src/css/style.css">
 
-<link rel="icon" href="src/png/favicon.png" />
-<link rel="apple-touch-icon" href="src/png/favicon.png">
+    <link rel="icon" href="src/png/favicon.png" />
+    <link rel="apple-touch-icon" href="src/png/favicon.png">
 
-<meta property="og:title" content="House of Murasaki-san">
-<meta property="og:image" content="src/png/favicon.png">
-<meta property="og:url" content="https://murasaki-san.com/">
-<meta property="og:description" content="Murasaki-san is a virtual pet that lives in your wallet on Astar Network.">
+    <meta property="og:title" content="House of Murasaki-san">
+    <meta property="og:image" content="src/png/favicon.png">
+    <meta property="og:url" content="https://murasaki-san.com/">
+    <meta property="og:description" content="Murasaki-san is a virtual pet that lives in your wallet on Astar Network.">
 
-<!---twitter card--->
-<meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="House of Murasaki-san" />
-<meta name="twitter:description" content="Murasaki-san is a virtual pet that lives in your wallet on Astar Network." />
-<meta name="twitter:image" content="https://murasaki-san.com/src/png/opening_logo.jpg" />
+    <!---twitter card--->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="House of Murasaki-san" />
+    <meta name="twitter:description" content="Murasaki-san is a virtual pet that lives in your wallet on Astar Network." />
+    <meta name="twitter:image" content="https://murasaki-san.com/src/png/opening_logo.jpg" />
 
-<!-- twemoji -->
-<script src="https://cdn.jsdelivr.net/npm/@twemoji/api@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-E40NGYG49X"></script><script>window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', 'G-E40NGYG49X')</script>
+    <!-- twemoji -->
+    <script src="https://cdn.jsdelivr.net/npm/@twemoji/api@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z7XXV794SJ"></script><script>window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', 'G-Z7XXV794SJ');</script>
 
 </head>
 
@@ -47,84 +48,86 @@
 
 <header>
 
-<nav>
-<a href="index.html"  class="current"><b>&#127969; Home</b></a>
-<a href="house.html" ><b>&#x2764; Play</b></a>
-<a href="market.html"><b>&#x1f6d2; Market</b></a>
-<a href="info.html"><b>&#x1f4d7; Info</b></a>
-<a href="mom.html"><b>&#127914; MoM</b></a>
-&nbsp;<span id="button_connect"><button onclick="init_web3();" style="width:110px;">Connect</button></span>
-</nav>
+    <nav>
+    <a href="index.html"  class="current"><b>&#127969; Home</b></a>
+    <a href="house.html" ><b>&#x2764; Play</b></a>
+    <a href="market.html"><b>&#x1f6d2; Market</b></a>
+    <a href="info.html"><b>&#x1f4d7; Info</b></a>
+    <a href="mom.html"><b>&#127914; MoM</b></a>
+    &nbsp;<span id="button_connect"><button onclick="init_web3();" style="width:110px;">Connect</button></span>
+    </nav>
 
 
-<!--- header --->
+    <!--- header --->
 
-<h1>
+    <h1>
 
-<p class="vertical-middle">
-<img src="logo_title.png" style="width:60%">
-&nbsp;
-<span id="output_murasakiIcon">
-<img src="src/icon/svg_loading.svg">
-</span>
-</p>
+    <p class="vertical-middle">
+    <img src="logo_title.png" style="width:60%">
+    &nbsp;
+    <span id="output_murasakiIcon">
+    <img src="src/icon/svg_loading.svg">
+    </span>
+    </p>
 
-</h1>
+    </h1>
 
-<p id="top_p">
-<center>
-<br>
-Murasaki-san is a virtual pet <br class="br-sp">that lives in your wallet on <a href="https://astar.network/">Astar Network</a>.<br><br class="br-sp">
-Their growth depends on your dedication <br class="br-sp">and time.
-</center>
-</p>
+    <p id="top_p">
+    <center>
+    <br>
+    Murasaki-san is a virtual pet <br class="br-sp">that lives in your wallet on <a href="https://astar.network/">Astar Network</a>.<br><br class="br-sp">
+    Their growth depends on your dedication <br class="br-sp">and time.
+    </center>
+    </p>
 
-<canvas id="top_animation" width=0 height=64></canvas>
+    <canvas id="top_animation" width=0 height=64></canvas>
+
+    <!--- scroll up button --->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.4/css/all.css">
+    <link rel="stylesheet" href="src/css/scrollup.css">
+    <div id="page_top"><a href="#"></a></div>
 
 </header>
 
 
 <main>
 
-<!--- scroll up button --->
-<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.4/css/all.css">
-<link rel="stylesheet" href="src/css/scrollup.css">
-<div id="page_top"><a href="#"></a></div>
 
-
+<!-- welcome message -->
 <br>
-<center>
-<code class="language-plaintext highlighter-rouge">
+<center><code class="language-plaintext highlighter-rouge">
 Welcome to <br class="br-sp"><b>House of Murasaki-san</b>!<img src="src/png/favicon.png" width="28" height="28"><br>
 <br class="br-sp">
 This is our fan project using <br class="br-sp"><b>Astar Substrate EVM</b> <img src="src/png/coin_color_ASTR.png" width="24" height="24"><br>
-</code>
-</center>
+</code></center>
 <br>
 
 
-<!--- News --->
+<!-- sns button -->
+<center><button style="font-size:65%; font-weight: bold;" onclick="window.open('https://twitter.com/MurasakisanDev')"><img width="15" height="15" src="src/icon/twitter_sns.png"/> Follow Us</button>&nbsp;
+<button style="font-size:65%; font-weight: bold;"><img width="15" height="15" src="src/icon/discord_sns.png"/> Join Community (upcoming)</button></center>
 
+
+<!--- attention --->
 <p class="notice">
 <b>&#127775; Attention! &#127775;</b><br>
-<br>
-This project is currently being developed on a private chain. In the future, it will first be test-played on the Shibuya chain and eventually deployed on the Astar Substrate EVM.<br>
-
+This project is currently being developed on a private chain.<br>
+In the near future, it will first be test-played on the Shibuya testnet and eventually deployed on the Astar Substrate EVM.<br>
 </p>
 
+
+<!--- notice --->
 <p class="notice">
 <b>&#x2764; Notice! &#x2764;</b><br>
 <br>
-We have released Murasaki-san <br class="br-sp"><b><a href="https://store.line.me/stickershop/product/16670298/en">LINE sticker</a></b> and <b><a href="https://store.line.me/emojishop/product/644a021e1033b65e5ca8ff7d/en">LINE emoji</a></b>!<br>
+Murasaki-san <br class="br-sp"><b><a href="https://store.line.me/stickershop/product/16670298/en">LINE sticker</a></b> and <b><a href="https://store.line.me/emojishop/product/644a021e1033b65e5ca8ff7d/en">LINE emoji</a></b> are released!<br>
 <br>
-<b>Desktop de Murasaki-san</b> is released! (for windows)<br>
+<b>Desktop de Murasaki-san</b> is released! <br class="br-sp">(Windows application)<br>
 <b><a href="DdM/Desktop_de_Murasaki-san_v1.05.zip">>> Download Here <<</a></b> <br>
 <br>
-<b>Fluffy Game</b> is released!<br>
+<b>Fluffy Game</b> is released! <br class="br-sp">(HTML5 game)<br>
 <a href="FG/"><b>>> Play Here! <<</b></a>
-
 </p>
-
 <br>
 
 
@@ -398,10 +401,10 @@ Item NFTs listed in the marketplace will be moved out of your house and will no 
 
 <!--- Attention --->
 
-<h3 id="attention">Attentions &#127775;</h3>
+<h3 id="attention">Attentions and Tips &#127775;</h3>
 
 <p>
-Before starting the game, please take note of the following precautions:
+<u>Before starting the game, please take note of the following precautions:</u>
 </p>
 
 <ul>
@@ -411,31 +414,15 @@ Before starting the game, please take note of the following precautions:
 <li><b>Botting play using multi-wallets is profibited</b>. You will be penalized for violating the <b><a href="#tos">anti-bot policy</a></b>.
 </ul>
 
-<br>
-
-
-
-<!--- Tips --->
-
-<h3 id="tips">And Then &#x1f4ac;</h3>
-
 <p>
-Here are some gameplay tips:
+<u>And here are some gameplay tips:</u>
 </p>
 
 <ul>
 <li>At the time of leveling up, Murasaki-san's status points will increase depending on their behavior. For example, if your Murasaki-san spend more time mining, their strength will increase.
 <li>The amount of EXP points gained by grooming depends on the amount of time your Murasaki-san did not work. This means that if you give your Murasaki-san a break from work, grooming will provide a lot of EXP points and help them level up faster.
 <li>If you leave your Murasaki-san unattended for an extended period (aboun a month), they will become deeply disappointed and turn into stone. Once petrified, your Murasaki-san will be unable to do anything. To cure petrification, you will need to pay an additional cost (currently set at the same price as the starting fee).
-<!---
-<li>If you want to reset the positions of items in your house, click:&nbsp;
-<button onclick="reset_item_position();">Reset Potision</button>
---->
 </ul>
-
-<p>
-Also see below for more detailed game specs.
-</p>
 
 <br>
 
@@ -474,22 +461,22 @@ Also see below for more detailed game specs.
 
 <!---### actions --->
 <details>
-<summary>Actions</summary>
+<summary>Actions <img src="src/png/button_feeding.png" width="30" height="30" style="vertical-align: middle;"></summary>
 <p>
 You can take care of your Murasaki-san with these actions.
 </p>
 <ul>
-<li><b><img src="src/png/button_feeding.png" width="25" height="25">&nbsp;Feeding:</b> Recover the satiety and earn some exp. You can feeding at anytime. Exp gained depends only on time.</li>
-<li><b><img src="src/png/button_grooming_enable.png" width="25" height="25">&nbsp;Grooming:</b> Recover the happy and earn some exp. You can grooming only when your Murasaki-san is not working. Exp gained depends on not-working time.</li>
-<li><b><img src="src/png/button_levelup_enable.png" width="25" height="25">&nbsp;Level-up:</b> You can level-up your Murasaki-san when the exp bar is accumulated. Status points will increase depends on the behavior of your Murasaki-san.</li>
-<li><b><img src="src/png/button_mining_enable.png" width="25" height="25">&nbsp;Mining:</b> Working to earn Ohana coin. Coin gained depends on mainly Strength. Lv 2 is required.</li>
-<li><b><img src="src/png/button_farming_enable.png" width="25" height="25">&nbsp;Farming:</b> Working to earn Kusa material. Material gained depends on mainly Dexterity. Lv 2 is required.</li>
-<li><b><img src="src/png/button_crafting_enable.png" width="25" height="25">&nbsp;Crafting:</b> Working to mint items (NFT). Coins and Leaves are needed to start crafting. Time needed to complete depends on mainly Intelligence. Lv 3 is required.</li>
+<li><b><img src="src/png/button_feeding.png" width="25" height="25" style="vertical-align: middle;">&nbsp;Feeding:</b> Recover the satiety and earn some exp. You can feeding at anytime. Exp gained depends only on time.</li>
+<li><b><img src="src/png/button_grooming_enable.png" width="25" height="25" style="vertical-align: middle;">&nbsp;Grooming:</b> Recover the happy and earn some exp. You can grooming only when your Murasaki-san is not working. Exp gained depends on not-working time.</li>
+<li><b><img src="src/png/button_levelup_enable.png" width="25" height="25" style="vertical-align: middle;">&nbsp;Level-up:</b> You can level-up your Murasaki-san when the exp bar is accumulated. Status points will increase depends on the behavior of your Murasaki-san.</li>
+<li><b><img src="src/png/button_mining_enable.png" width="25" height="25" style="vertical-align: middle;">&nbsp;Mining:</b> Working to earn Ohana coin. Coin gained depends on mainly Strength. Lv 2 is required.</li>
+<li><b><img src="src/png/button_farming_enable.png" width="25" height="25" style="vertical-align: middle;">&nbsp;Farming:</b> Working to earn Kusa material. Material gained depends on mainly Dexterity. Lv 2 is required.</li>
+<li><b><img src="src/png/button_crafting_enable.png" width="25" height="25" style="vertical-align: middle;">&nbsp;Crafting:</b> Working to mint items (NFT). Coins and Leaves are needed to start crafting. Time needed to complete depends on mainly Intelligence. Lv 3 is required.</li>
 </ul>
 </details>
 
 <!---### status --->
-<details><summary>Status</summary>
+<details><summary>Status <img src="src/png/icon_status_str.png" width="30" height="30" style="vertical-align: middle;"></summary>
 <p><table>
   <thead>
     <tr>
@@ -507,31 +494,31 @@ You can take care of your Murasaki-san with these actions.
       <td>Need to level-up. Can be earned by feeding and grooming.</td>
     </tr>
     <tr>
-      <td><b><center>Strength<br>(<img src="src/png/icon_status_str.png" width="25" height="25">STR)</center></b></td>
+      <td><b><center>Strength<br>(<img src="src/png/icon_status_str.png" width="25" height="25" style="vertical-align: middle;">STR)</center></b></td>
       <td>Affects mining efficiency. Increases by level-up and crafted items.</td>
     </tr>
     <tr>
-      <td><b><center>Dexterity<br>(<img src="src/png/icon_status_dex.png" width="25" height="25">&nbsp;DEX)</center></b></td>
+      <td><b><center>Dexterity<br>(<img src="src/png/icon_status_dex.png" width="25" height="25" style="vertical-align: middle;">&nbsp;DEX)</center></b></td>
       <td>Affects farming efficiency. Increases by level-up and crafted items.</td>
     </tr>
     <tr>
-      <td><b><center>Intelligence<br>(<img src="src/png/icon_status_int.png" width="25" height="25">INT)</center></b></td>
+      <td><b><center>Intelligence<br>(<img src="src/png/icon_status_int.png" width="25" height="25" style="vertical-align: middle;">INT)</center></b></td>
       <td>Affects crafting efficiency. Increases by level-up and crafted items.</td>
     </tr>
     <tr>
-      <td><b><center>Luck<br>(<img src="src/png/icon_status_luk.png" width="25" height="25">LUK)</center></b></td>
+      <td><b><center>Luck<br>(<img src="src/png/icon_status_luk.png" width="25" height="25" style="vertical-align: middle;">LUK)</center></b></td>
       <td>Affects critical judgment. Increases by level-up.<br>Critical success: earning x2 coin/material in mining/farming; crafting rare items; earning x2 exp in feeding/grooming.</td>
     </tr>
     <tr>
-      <td><b><center>Satiety&nbsp;<img src="src/png/icon_system_satiety.png" width="25" height="25"></center></b></td>
+      <td><b><center>Satiety&nbsp;<img src="src/png/icon_system_satiety.png" width="25" height="25" style="vertical-align: middle;"></center></b></td>
       <td>Decreases over time and reaches 0% in 12 hours. Be recovered by feeding. When below 20%, your Murasaki-san can not start new working.</td>
     </tr>
     <tr>
-      <td><b><center>Happy&nbsp;<img src="src/png/icon_system_happy.png" width="25" height="25"></center></b></td>
+      <td><b><center>Happy&nbsp;<img src="src/png/icon_system_happy.png" width="25" height="25" style="vertical-align: middle;"></center></b></td>
       <td>Decreases over time and reaches 0% in 72 hours. Be recovered by grooming. When below 20%, your Murasaki-san can not start new working.</td>
     </tr>
     <tr>
-      <td><b><center>Fluffy&nbsp;<img src="src/png/icon_system_heart.png" width="25" height="25"></center></b></td>
+      <td><b><center>Fluffy&nbsp;<img src="src/png/icon_system_heart.png" width="25" height="25" style="vertical-align: middle;"></center></b></td>
       <td>The fluffy score reflects the current amount of fluffies in your house (Fluffy: +2, Fluffier: +12, Fluffiest: +50, Fluffy doll: +152 per one). Your Murasaki-san's luck increases 0.01 per one fluffy score.</td>
     </tr>
   </tbody>
@@ -539,14 +526,14 @@ You can take care of your Murasaki-san with these actions.
 </details>
 
 <!---### items --->
-<details><summary>Items</summary>
+<details><summary>Items <img src="src/icon/item_musicbox.png" width="30" height="30"></summary>
 <p>Crafting items require costs and time. Items increase status point and make your house more lively.</p>
 <b><a href="items.html">>> All craftable item details are found in here <<</a></b><br>
 <br>
 </details>
 
 <!---### upgrade --->
-<details><summary>Item Rarity and Upgrading</summary>
+<details><summary>Item Rarity and Upgrading &#x2934;</summary>
 <p>
 <ul>
 <li>There are three levels of rarity: common, uncommon, and rare. Uncommon items provides a status boost of 1.5x compared to common items, while rare items provides a boost of 2.0x.
@@ -562,7 +549,7 @@ You can take care of your Murasaki-san with these actions.
 <!---### fluffy --->
 <details>
 
-<summary>Fluffy</summary>
+<summary>Fluffy <img src="src/icon/fluffiest_08.png" width="30" height="30" style="vertical-align: middle;"></summary>
 
 <p>
 Fluffy is a small housemate in your house who dreams of becomming Murasaki-san. The more fluffies that live in the house, <b>the more luck</b> your Murasaki-san will have (100 fluffy score is equivalent to +1 LUK). You can <b>upgrade</b> your fluffy from a lower level to an upper level by burning fluffies of the same color.
@@ -593,7 +580,7 @@ Summary chart of fluffy: acquisition method, effects, and upgrade methods. By co
 <!---### festival --->
 <details>
 
-<summary>Fluffy Festival</summary>
+<summary>Fluffy Festival <img src="src/icon/ohana.png" width="34" height="34" class="textMiddle"></summary>
 
 <p>
 Fluffy Festival is a <b>monthly event</b> where <b>the most popular color of fluffy is determined through player on-chain voting</b>. The elected color of fluffy will receive a bonus for the following month, with their fluffy score being calculated <b>as double</b>. Players who participate in the voting will receive a <b>present box</b> as a participation reward.
@@ -625,7 +612,7 @@ Fluffy Festival is a <b>monthly event</b> where <b>the most popular color of flu
 <!---### pippel --->
 <details>
 
-<summary>Pippel</summary>
+<summary>Pippel <img src="src/png/pippel_basic.png" width="32" height="32" class="textMiddle"></summary>
 
 <p>
 Pippel is a small flower tha occasionally blooms in the House of Murasaki-san. When you are lucky enough to find Pippel, you can mint a Pippel NFT by clicking/tapping on it. <b>Pippel NFTs are held within Token Bound Account (TBA, <a href="https://eips.ethereum.org/EIPS/eip-6551?ref=blog.thirdweb.com">ERC-6551</a>) of your Murasaki-san,</b> not in your wallet. Gathering many Pippels will increase fluffy score and raise luck of your Murasaki-san. The rarer the Pippel, the higher the score it provides.
@@ -672,7 +659,7 @@ Inspired by this stroy, the coder was determined to bring Pippel to life and thu
 <!---### flowerWreath --->
 <details>
 
-<summary>Flower Wreath and Exp Boost</summary>
+<summary>Flower Wreath and Exp Boost <img src="src/png/item_wreath.png" width="32" height="32" class="textMiddle"></summary>
 
 &nbsp;&nbsp;&nbsp;<img src="src/png/item_wreath.png" width="80" height="80" class="textMiddle">
 
@@ -711,7 +698,7 @@ The eligible types of tokens and NFTs may be subject to additions and modificati
 
 
 <!---### cat-mail --->
-<details><summary>Cat-Mail</summary>
+<details><summary>Cat-Mail <img src="src/png/cat_sitting.png" width="32" height="32" class="textMiddle"></summary>
 
 <img src="src/png/cat_sitting.png" width="96" height="96" class="textMiddle">
 
@@ -740,7 +727,7 @@ Having the cat cushion is necessary to send cat-mail, but <b>even if you don't h
 
 
 <!---### stroll --->
-<details><summary>Strolling</summary>
+<details><summary>Strolling<img src="src/icon/item_waterbottle.png" width="32" height="32" class="textMiddle"></summary>
 
 &nbsp;&nbsp;&nbsp;<img src="src/png/item_waterbottle.png" width="124" height="124">
 
@@ -790,7 +777,7 @@ comming soon.
 <!---### contracts --->
 
 <details>
-<summary>Contracts</summary>
+<summary>Contracts &#x1f4cb;</summary>
 <p>
 The project is currently implemented as a complex set of 31 contracts consisting of one NFT contract, two SBT contracts, six storage contracts, seven function contracts, and several add-on contracts.
 </p>
@@ -834,7 +821,7 @@ Due to the complexity of the project's contract system, a viewer contract has be
 
 <details>
 
-<summary>Calculation Formulas</summary>
+<summary>Calculation Formulas &#129518;</summary>
 
 <p>
 The calculations of the effect of each status value on the result of each action is performed entirely within the contracts, and the summary of the calculation formulas is as follows:
@@ -1067,7 +1054,7 @@ Reward NFT: Fluffy (61%), Fluffier (10%), Glitter (3%), Sparkle (3%), Twinkle (3
 
 <details>
 
-<summary>Buyback Treasury</summary>
+<summary>Buyback Treasury &#x1f4b5;</summary>
 
 <center>
 <p class="notice" style="width:80%;">
@@ -1141,7 +1128,7 @@ This buyback system is somewhat experimental, and its acceptance by players will
 
 <details>
 
-<summary>Economy</summary>
+<summary>Economy &#x1f4c8;</summary>
 
 <center>
 <p class="notice" style="width:80%;">
@@ -1152,6 +1139,10 @@ The contents described below are applicable if this project is adopted for dApps
 
 <p>
 Through the Buyback Sysmte and following economic strategies, the developers aim to create a low-stress economic system in the medium to long term. Our goal is to create a system where players can enjoy the gameplay for a longer period without the stress of incurring significant losses in the short term. Our focus is on fostering a relaxed and enjoyable experience over an extended period, rather than seeking quick and substantial profits.
+</p>
+
+<p>
+<i><b>Notice:</b> In this project, the asset value is considered on an $ASTR basis rather than in US dollar basis.</i>
 </p>
 
 <p>
@@ -1215,7 +1206,7 @@ Projected graph of acceptable inflation rate and buyback price (NFT price) based
 
 <details>
 
-<summary>For developers &#128736;</summary>
+<summary>For Developers &#128736;</summary>
 
 <p>
 We have prepared a contract that enables anyone to access information about Murasaki-san in this project. Although the contracts in this project are complex, you can access the major information using this contract. Consistent with web3 principles, the information within this contract is free to use without requiring any permissions.
@@ -1281,13 +1272,6 @@ When developing an on-chain project using Solidity, there are two options curren
 <p>
 Cheers to Astar :)
 </p>
-
-<br>
-
-
-<!--- Developer --->
-
-
 
 <br>
 
@@ -1474,9 +1458,9 @@ We would like to express our thanks to followings:
 <!--- Footer--->
 
 <footer class="footer">
-<p>Donation: <font size="-1">0x6655B97171c8FA7dF052D95230951E80c5cB7e15</font></p>
+<p><font size="-2"><b>Donations: </b></font><font size="-2" color="blue"><a href="https://blockscout.com/astar/address/0x6655B97171c8FA7dF052D95230951E80c5cB7e15" style="text-decoration:none;" target="_blank">0x6655B97171c8FA7dF052D95230951E80c5cB7e15&#x2764;</a></font></p>
 <p>&nbsp;</p>
-<p>(C) 2023 Project of Murasaki-san. All rights reserved.</p>
+<p>(C) 2023 Project of Murasaki-san.</p>
 <p>Contact: murasakisan.info (at) gmail.com</p>
 </footer>
 

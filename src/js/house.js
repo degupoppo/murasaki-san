@@ -90,6 +90,64 @@ contract ERC721 is IERC721 {
 
 //### 1st
 
+    # dApps Stakingへの申請
+        https://docs.astar.network/ja/docs/build/dapp-staking/for-devs/requirements/
+        Astarにデプロイ
+        DefilLamaに登録
+        DappRadarに登録
+        ecosystem page formに登録
+            https://docs.google.com/forms/d/e/1FAIpQLSfIYRpuj2sTT22cJyP7CFfXkIwKmhwJvCGEO96-Bq2S2lKi_g/viewform?pli=1
+        forum投稿用フォーマットの作成
+            https://forum.astar.network/t/xy-finance-dapp-staking-application/4056
+        forumへ投稿
+            https://forum.astar.network/c/initiatives/dapp-staking-applications/21
+
+    footerの更新
+
+    ガス代の見直し
+        特に頻度の高いfeeding, groomingはガス代軽減を目指してリファクタリングする
+        feeding, grooming: 1.4～1.5
+        craft complete: 2.0
+        mining stop: 1.7
+        このあたりをどうにかする。
+        mfsの以下の関数が0.7-0.8とガス代が高い
+            calc_score
+            calc_precious
+            おそらくforループがかなりかさむと思われる
+            一方、dn1000などの疑似乱数精製は0.02とあまりコストが高くない模様
+            調べ方は、viewを取ったラッパー関数を別途作ってtx飛ばせばガス代の推測値を得られる
+        原因関数
+            function get_balance_of_type_array_from_summoner(uint _summoner) public view returns (uint[320] memory) {
+            mfsの関数
+            返り値がuint[320]で、これだけで0.7ほどコストがかかっている
+            for処理はあまりコスト高に寄与していないようだった。
+            get_balance_of_type_arrayこれも同様
+            balance_of_type_arrayを使用するcalc_mining_itemなども全て0.7のコストがかかってしまっている。
+            さて、どうするか。
+        高コスト関数
+            share
+             ok calc_precious
+                    201-248に限定する
+                _calc_score_nft
+                    これが厄介
+                    1-255までのnft個数を集計している
+                    改善案としては、mcのafterTransfer時にscoreを計算させることが考えられるが
+                        後々計算係数などを変更できないのが難点
+            mining and farming
+             ok count_mining_items
+                    1-16, 65-80, 129-144に限定する
+             ok count_sparkles
+                    256-260に限定する
+             ok count_farming_items
+                    同上
+             ok count_glitter
+                    同上
+            crafting
+             ok count_crafting_items
+                    同上
+
+    minifier
+        https://www.toptal.com/developers/javascript-minifier
     deobfuscator
         https://deobfuscate.io/
     obfuscator
@@ -16496,7 +16554,7 @@ function update_checkItem(this_scene) {
     if (res1 != res2 && flag_window_craft == 0) {
         if (typeof group_window_crafting != "undefined") {
             group_window_crafting.destroy(true);
-            delete group_window_crafting;
+            //delete group_window_crafting;
         }
     }
 
@@ -20139,7 +20197,7 @@ class Loading_overlap extends Phaser.Scene {
         this.load.spritesheet("nyui_loading", "src/png/nyui_moving.png", {frameWidth: 370, frameHeight: 320});
         this.load.spritesheet("nyui_loading2", "src/png/nyui_happy.png", {frameWidth: 370, frameHeight: 320});
         this.load.spritesheet("ohana_loading", "src/particle/flowers.png", {frameWidth: 370, frameHeight: 320});
-        this.load.image("opening_logo", "src/png/opening_logo.jpg");
+        this.load.image("opening_logo", "src/png/opening_logo.png");
     }
     
     create() {

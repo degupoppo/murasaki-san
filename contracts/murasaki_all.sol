@@ -4,7 +4,7 @@
 pragma solidity =0.8.13;
 
 
-// 231109
+// 240105
 // House of Murasaki-san ver. 0.1.16
 
 
@@ -15,6 +15,7 @@ pragma solidity =0.8.13;
 // for remix
 
 // openzeppelin v4.8 for solidity 0.8.13
+
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v4.8/contracts/security/ReentrancyGuard.sol";
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v4.8/contracts/security/Pausable.sol";
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v4.8/contracts/access/Ownable.sol";
@@ -46,9 +47,8 @@ import "github.com/BuildBearLabs/Tutorials/ERC-6551/contracts/interface/IERC6551
 
 
 
-/*
 // for solc, 0.8.13
-
+/*
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -75,7 +75,6 @@ import "@Tutorials/ERC-6551/contracts/lib/Bytecode.sol";
 import "@Tutorials/ERC-6551/contracts/interface/IERC6551Account.sol";
 import "@Tutorials/ERC-6551/contracts/interface/IERC6551Registry.sol";
 */
-
 
 
 //===Basic==================================================================================================================
@@ -3012,7 +3011,7 @@ contract Murasaki_Function_Share is Ownable, Pausable {
     }
 
     //calc happy
-    function calc_happy(uint _summoner) public view returns (uint) {
+    function calc_happy (uint _summoner) public view returns (uint) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
         Murasaki_Parameter mp = Murasaki_Parameter(ma.address_Murasaki_Parameter());
@@ -3035,7 +3034,117 @@ contract Murasaki_Function_Share is Ownable, Pausable {
     }
 
     //calc fluffy
-    function calc_precious(uint _summoner) public view returns (uint) {
+    
+    //***TODO*** gas debug
+    function calc_precious_test (uint _summoner) public returns (uint) {
+        return calc_precious(_summoner);
+    }
+    function calc_precious_testOld (uint _summoner) public returns (uint) {
+        return calc_precious_old(_summoner);
+    }
+    function calc_pippelScore_test (uint _summoner) public returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Pippel_Function pf = Pippel_Function(ma.address_Pippel_Function());
+        return pf.calc_pippelScore(_summoner) / 10;
+    }
+
+    /* NG: less gas fee, but not matched the same score
+    function calc_precious2(uint _summoner) public view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Craft mc = Murasaki_Craft(ma.address_Murasaki_Craft());
+        Murasaki_Parameter mp = Murasaki_Parameter(ma.address_Murasaki_Parameter());
+
+        address _owner = get_owner(_summoner);
+        uint _precious_score = 0;
+        uint _elected_precious_type = mp.ELECTED_FLUFFY_TYPE();
+        uint256[4] memory multipliers = [uint256(2), 10, 20, 60]; // 計算のためのマルチプライヤー配列
+
+        for (uint i = 201; i <= 212; i++) {
+            for (uint j = 3; j > 0; j--) {
+                uint _tmp = mc.balance_of_type(_owner, i + j * 12);
+                if (_tmp > 0) {
+                    uint multiplier = multipliers[j];
+                    uint _modifier = 2;
+                    if (i == _elected_precious_type) {
+                        _modifier = 4;
+                    }
+                    _precious_score += (_tmp * multiplier + _modifier) * _modifier;
+                }
+            }
+        }
+
+        if (!mp.isTrial()) {
+            Pippel_Function pf = Pippel_Function(ma.address_Pippel_Function());
+            _precious_score += pf.calc_pippelScore(_summoner) / 10;
+        }
+
+        Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
+        uint _lv = ms.level(_summoner);
+        uint cap = _lv * 40;
+        if (_precious_score > cap) {
+            _precious_score = cap;
+        }
+
+        return _precious_score;
+    }
+    */
+
+    function calc_precious (uint _summoner) public view returns (uint) {    //0.23 $ASTR
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
+        Murasaki_Parameter mp = Murasaki_Parameter(ma.address_Murasaki_Parameter());
+        Pippel_Function pf = Pippel_Function(ma.address_Pippel_Function());
+        Murasaki_Craft mc = Murasaki_Craft(ma.address_Murasaki_Craft());
+        address _owner = get_owner(_summoner);
+        //uint[320] memory _balance_of_type = get_balance_of_type_array_from_summoner(_summoner);
+        uint _precious_score = 0;
+        //fluffy
+        uint _elected_precious_type = mp.ELECTED_FLUFFY_TYPE();
+        uint _balance_of_type;
+        uint _additionalScore = 0;
+        for (uint i = 201; i <= 212; i++) {
+            //doll, fluffy * 60
+            _balance_of_type = mc.balance_of_type(_owner, i+36);
+            if (_balance_of_type > 0) {
+                _additionalScore += _balance_of_type * 2*60 +30 +2;
+            }
+            //fluffiest, fluffy * 20
+            _balance_of_type = mc.balance_of_type(_owner, i+24);
+            if (_balance_of_type > 0) {
+                _additionalScore += _balance_of_type * 2*20 +8 +2;
+            }
+            //fluffier, fluffy * 5
+            _balance_of_type = mc.balance_of_type(_owner, i+12);
+            if (_balance_of_type > 0) {
+                _additionalScore += _balance_of_type * 2*5 +2;
+            }
+            //fluffy
+            _balance_of_type = mc.balance_of_type(_owner, i);
+            if (_balance_of_type > 0) {
+                _additionalScore += _balance_of_type * 2;
+            }
+            //fluffly festival modification, x2 score
+            if (i == _elected_precious_type) {
+                _additionalScore *= 2;
+            }
+            _precious_score += _additionalScore;
+        }
+        
+        // 230920
+        // pippe score addition 0.06 $ASTR
+        // 1 pippel NFT = 10 pippel score = 1 fluffy score = 0.01 LUK
+        if (mp.isTrial() == false) {
+            _precious_score += pf.calc_pippelScore(_summoner) / 10;
+        }
+        
+        //level cap, 800/Lv20 = 40/Lv
+        uint _lv = ms.level(_summoner);
+        if (_precious_score > _lv*40) {
+            _precious_score = _lv*40;
+        }
+        return _precious_score;
+    }
+    function calc_precious_old(uint _summoner) public view returns (uint) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
         Murasaki_Parameter mp = Murasaki_Parameter(ma.address_Murasaki_Parameter());
@@ -3302,7 +3411,7 @@ contract Murasaki_Function_Share is Ownable, Pausable {
     }
     
     //luck challenge
-    function luck_challenge(uint _summoner) external view returns (bool) {
+    function luck_challenge(uint _summoner) public view returns (bool) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
         Murasaki_Dice md = Murasaki_Dice(ma.address_Murasaki_Dice());
@@ -4110,7 +4219,45 @@ contract Murasaki_Function_Mining_and_Farming is Ownable, ReentrancyGuard, Pausa
         uint _earn_perDay = 1000 + 1000 * _mod / 100;
         return _earn_perDay;
     }
+
     function count_mining_items(address _address) public view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
+        Murasaki_Craft mc = Murasaki_Craft(ma.address_Murasaki_Craft());
+
+        uint _balance_of_type_rare;
+        uint _balance_of_type_uncommon;
+        uint _balance_of_type_common;
+
+        uint _mining_items = 0;
+        for (uint i = 1; i <= 16; i++) {
+
+            _balance_of_type_rare = mc.balance_of_type(_address, i+128);
+            _balance_of_type_uncommon = mc.balance_of_type(_address, i+64);
+            _balance_of_type_common = mc.balance_of_type(_address, i);
+
+            if (_balance_of_type_rare > 0) {
+                _mining_items += 200;
+            } else if (_balance_of_type_uncommon > 0) {
+                _mining_items += 150;
+            } else if (_balance_of_type_common > 0) {
+                _mining_items += 100;
+            }
+
+            //+10% per one additional item
+            if (_balance_of_type_common >= 2) {
+                _mining_items += (_balance_of_type_common - 1) * 10;
+            }
+            if (_balance_of_type_uncommon >= 2) {
+                _mining_items += (_balance_of_type_uncommon - 1) * 15;
+            }
+            if (_balance_of_type_rare >= 2) {
+                _mining_items += (_balance_of_type_rare - 1) * 20;
+            }
+        }
+        return _mining_items;
+    }
+    function count_mining_items_old(address _address) public view returns (uint) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         uint[320] memory _balance_of_type = mfs.get_balance_of_type_array(_address);
@@ -4136,7 +4283,36 @@ contract Murasaki_Function_Mining_and_Farming is Ownable, ReentrancyGuard, Pausa
         }
         return _mining_items;
     }
+    
     function count_sparkles (uint _summoner) public view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
+        Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
+        Murasaki_Craft mc = Murasaki_Craft(ma.address_Murasaki_Craft());
+        address _owner = mfs.get_owner(_summoner);
+        //uint[320] memory _balance_of_type = mfs.get_balance_of_type_array(_owner);
+        uint _sparkles = 0;
+        if (mc.balance_of_type(_owner, 256) > 0) {
+            _sparkles += 30;
+        }
+        if (mc.balance_of_type(_owner, 257) > 0) {
+            _sparkles += 60;
+        }
+        if (mc.balance_of_type(_owner, 258) > 0) {
+            _sparkles += 90;
+        }
+        if (mc.balance_of_type(_owner, 259) > 0) {
+            _sparkles += 120;
+        }
+        if (mc.balance_of_type(_owner, 260) > 0) {
+            _sparkles += 150;
+        }
+        if (_sparkles > ms.level(_summoner) * 50) {
+            _sparkles = ms.level(_summoner) * 50;    // limit: 0.5%/Lv
+        }
+        return _sparkles;   //percent x 100
+    }
+    function count_sparkles_old (uint _summoner) public view returns (uint) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
@@ -4274,6 +4450,43 @@ contract Murasaki_Function_Mining_and_Farming is Ownable, ReentrancyGuard, Pausa
     function count_farming_items(address _address) public view returns (uint) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
+        Murasaki_Craft mc = Murasaki_Craft(ma.address_Murasaki_Craft());
+
+        uint _balance_of_type_rare;
+        uint _balance_of_type_uncommon;
+        uint _balance_of_type_common;
+
+        uint _farming_items = 0;
+        for (uint i = 17; i <= 32; i++) {
+
+            _balance_of_type_rare = mc.balance_of_type(_address, i+128);
+            _balance_of_type_uncommon = mc.balance_of_type(_address, i+64);
+            _balance_of_type_common = mc.balance_of_type(_address, i);
+
+            if (_balance_of_type_rare > 0) {
+                _farming_items += 200;
+            } else if (_balance_of_type_uncommon > 0) {
+                _farming_items += 150;
+            } else if (_balance_of_type_common > 0) {
+                _farming_items += 100;
+            }
+
+            //+10% per one additional item
+            if (_balance_of_type_common >= 2) {
+                _farming_items += (_balance_of_type_common - 1) * 10;
+            }
+            if (_balance_of_type_uncommon >= 2) {
+                _farming_items += (_balance_of_type_uncommon - 1) * 15;
+            }
+            if (_balance_of_type_rare >= 2) {
+                _farming_items += (_balance_of_type_rare - 1) * 20;
+            }
+        }
+        return _farming_items;
+    }
+    function count_farming_items_old(address _address) public view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         uint[320] memory _balance_of_type = mfs.get_balance_of_type_array(_address);
         uint _farming_items = 0;
         for (uint i = 17; i <= 32; i++) {
@@ -4298,6 +4511,34 @@ contract Murasaki_Function_Mining_and_Farming is Ownable, ReentrancyGuard, Pausa
         return _farming_items;
     }
     function count_glitter (uint _summoner) public view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
+        Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
+        Murasaki_Craft mc = Murasaki_Craft(ma.address_Murasaki_Craft());
+        address _owner = mfs.get_owner(_summoner);
+        //uint[320] memory _balance_of_type = mfs.get_balance_of_type_array(_owner);
+        uint _glitters = 0;
+        if (mc.balance_of_type(_owner, 261) > 0) {
+            _glitters += 30;
+        }
+        if (mc.balance_of_type(_owner, 262) > 0) {
+            _glitters += 60;
+        }
+        if (mc.balance_of_type(_owner, 263) > 0) {
+            _glitters += 90;
+        }
+        if (mc.balance_of_type(_owner, 264) > 0) {
+            _glitters += 120;
+        }
+        if (mc.balance_of_type(_owner, 265) > 0) {
+            _glitters += 150;
+        }
+        if (_glitters > ms.level(_summoner) * 50) {
+            _glitters = ms.level(_summoner) * 50;    // limit: 0.5%/Lv
+        }
+        return _glitters;   //percent x 100
+    }
+    function count_glitter_old (uint _summoner) public view returns (uint) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
@@ -5208,6 +5449,43 @@ contract Murasaki_Function_Crafting_Codex is Ownable, Pausable {
 
     //count crafting items
     function count_crafting_items(address _address) public view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
+        Murasaki_Craft mc = Murasaki_Craft(ma.address_Murasaki_Craft());
+
+        uint _balance_of_type_rare;
+        uint _balance_of_type_uncommon;
+        uint _balance_of_type_common;
+
+        uint _crafting_items = 0;
+        for (uint i = 33; i <= 48; i++) {
+
+            _balance_of_type_rare = mc.balance_of_type(_address, i+128);
+            _balance_of_type_uncommon = mc.balance_of_type(_address, i+64);
+            _balance_of_type_common = mc.balance_of_type(_address, i);
+
+            if (_balance_of_type_rare > 0) {
+                _crafting_items += 200;
+            } else if (_balance_of_type_uncommon > 0) {
+                _crafting_items += 150;
+            } else if (_balance_of_type_common > 0) {
+                _crafting_items += 100;
+            }
+
+            //+10% per one additional item
+            if (_balance_of_type_common >= 2) {
+                _crafting_items += (_balance_of_type_common - 1) * 10;
+            }
+            if (_balance_of_type_uncommon >= 2) {
+                _crafting_items += (_balance_of_type_uncommon - 1) * 15;
+            }
+            if (_balance_of_type_rare >= 2) {
+                _crafting_items += (_balance_of_type_rare - 1) * 20;
+            }
+        }
+        return _crafting_items;
+    }
+    function count_crafting_items_old(address _address) public view returns (uint) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         uint[320] memory _balance_of_type = mfs.get_balance_of_type_array(_address);
