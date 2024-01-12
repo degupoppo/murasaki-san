@@ -114,7 +114,7 @@ This is our fan project using <br class="br-sp"><b>Astar Substrate EVM</b> <img 
 This project is currently being developed on a private chain.<br>
 In the near future, it will first be test-played on the Shibuya testnet and eventually deployed on the Astar Substrate EVM.<br>
 <br>
-<i>Approximate development progress: <b>80%</b></i><br>
+<i>Development Progress: <b><span id="percent">80</span></b></i><br>
 <span id="container"></span><br>
 <font size="-1" color="blue"><i>
 Developers are currently working on adjusting gas fees and implementing side events...
@@ -128,7 +128,26 @@ Developers are currently working on adjusting gas fees and implementing side eve
       color: '#FC7DFF',
       trailColor: '#CCCCCC',
       trailWidth: 3,
-      svgStyle: {width: '75%', height: '75%'}
+      svgStyle: {width: '75%', height: '75%'},
+  text: {
+    style: {
+      // Text color.
+      // Default: same as stroke color (options.color)
+      color: '#999',
+      position: 'absolute',
+      right: '0',
+      top: '30px',
+      padding: 0,
+      margin: 0,
+      transform: null
+    },
+    autoStyleContainer: false
+  },
+  from: {color: '#FFEA82'},
+  to: {color: '#ED6A5A'},
+  step: (state, bar) => {
+    document.getElementById("percent").innerHTML = (Math.round(bar.value() * 100) + ' %');
+  }
     });
     bar.animate(0.8); 
 </script>
