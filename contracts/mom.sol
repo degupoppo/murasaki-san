@@ -983,31 +983,31 @@ contract Murasaki_Memento_codex is Ownable, Pausable {
     // _mainColor
     function _get_mainColor (uint _tokenId) internal view returns (string memory) {
         Murasaki_Memento mm = Murasaki_Memento(address_Murasaki_Memento);
-        uint _mainId = mm.mainId(_tokenId);
+        uint _colorId = mm.colorId(_tokenId);
         string memory _mainColor;
-        if (_mainId == 1) {
+        if (_colorId == 1) {
             _mainColor = "#E60012";
-        } else if (_mainId == 2) {
+        } else if (_colorId == 2) {
             _mainColor = "#F39800";
-        } else if (_mainId == 3) {
+        } else if (_colorId == 3) {
             _mainColor = "#2f34d3";
-        } else if (_mainId == 4) {
+        } else if (_colorId == 4) {
             _mainColor = "#8FC31F";
-        } else if (_mainId == 5) {
+        } else if (_colorId == 5) {
             _mainColor = "#009944";
-        } else if (_mainId == 6) {
+        } else if (_colorId == 6) {
             _mainColor = "#009E96";
-        } else if (_mainId == 7) {
+        } else if (_colorId == 7) {
             _mainColor = "#00A0E9";
-        } else if (_mainId == 8) {
+        } else if (_colorId == 8) {
             _mainColor = "#0068B7";
-        } else if (_mainId == 9) {
+        } else if (_colorId == 9) {
             _mainColor = "#1D2088";
-        } else if (_mainId == 10) {
+        } else if (_colorId == 10) {
             _mainColor = "#920783";
-        } else if (_mainId == 11) {
+        } else if (_colorId == 11) {
             _mainColor = "#E4007F";
-        } else if (_mainId == 12) {
+        } else if (_colorId == 12) {
             _mainColor = "#E5004F";
         }
         return _mainColor;
