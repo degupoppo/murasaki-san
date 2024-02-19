@@ -111,7 +111,7 @@ contract Murasaki_AuctionHouse is Pausable, ReentrancyGuard, Ownable {
     
 
     // getter for bid logs
-    function call_bidLog (uint _tokenId) external view returns (
+    function call_bidLog (uint _tokenId) external view whenNotPaused returns (
         uint[10] memory, 
         address[10] memory, 
         uint[10] memory
@@ -159,7 +159,7 @@ contract Murasaki_AuctionHouse is Pausable, ReentrancyGuard, Ownable {
     
     // @MoM dev: predefine auction params
     //  timeBuffer = 1 hr
-    //  reservePrice = 25 $ASTR
+    //  reservePrice = 20 $ASTR
     //  minBidIncrement% = 5%
     //  duration = 72 hr
 
@@ -174,10 +174,10 @@ contract Murasaki_AuctionHouse is Pausable, ReentrancyGuard, Ownable {
     uint256 public timeBuffer = 3600;   // 1 hr
 
     // The minimum price accepted in an auction
-    uint256 public reservePrice = 20 * 10**18;  // 20 $ASTR = $1
+    uint256 public reservePrice = 10 * 10**18;  // 20 $ASTR = $1
 
     // The minimum percentage difference between the last bid amount and the current bid
-    uint8 public minBidIncrementPercentage = 5; // 5%
+    uint256 public minBidIncrementPercentage = 500; // 5%
 
     // The duration of a single auction
     uint256 public duration = 86400 * 3;    // 3 days
@@ -194,11 +194,11 @@ contract Murasaki_AuctionHouse is Pausable, ReentrancyGuard, Ownable {
     // @MoM dev: initialization of first auction
     // @MoM dev: mom nft begin tokenId=1
     bool private isInitialized = false;
-    function start_firstAuction () external onlyOwner {
+    function start_firstAuction (uint _tokenId) external onlyOwner {
         require(!isInitialized);
         isInitialized = true;
         auction = Auction({
-            nounId: 1,
+            nounId: _tokenId,
             amount: 0,
             startTime: block.timestamp,
             endTime: block.timestamp + duration,
@@ -241,15 +241,21 @@ contract Murasaki_AuctionHouse is Pausable, ReentrancyGuard, Ownable {
      * @notice Create a bid for a Noun, with a given amount.
      * @dev This contract only accepts payment in ETH.
      */
-    function createBid(uint256 nounId, string memory _userMsg) external payable nonReentrant {
+    function createBid (uint256 nounId, string memory _userMsg) external payable nonReentrant whenNotPaused {
         //INounsAuctionHouse.Auction memory _auction = auction;
         Auction memory _auction = auction;
 
         require(_auction.nounId == nounId, 'Noun not up for auction');
         require(block.timestamp < _auction.endTime, 'Auction expired');
         require(msg.value >= reservePrice, 'Must send at least reservePrice');
+        
+        // 240212
+        // increment rate
+        uint _minBidIncrementPercentage = calc_minBidIncrementPercentage();
+        
         require(
-            msg.value >= _auction.amount + ((_auction.amount * minBidIncrementPercentage) / 100),
+            //msg.value >= _auction.amount + ((_auction.amount * minBidIncrementPercentage) / 100),
+            msg.value >= _auction.amount + ((_auction.amount * _minBidIncrementPercentage) / 10000),
             'Must send more than last bid by minBidIncrementPercentage amount'
         );
 
@@ -287,6 +293,27 @@ contract Murasaki_AuctionHouse is Pausable, ReentrancyGuard, Ownable {
         }
     }
     
+    // calc mini bid percent based on auction resting time
+    // 24hr<: x1.0
+    // <24hr: x1.2
+    // <12hr: x1.3
+    // <6hr:  x1.5
+    // <1hr:  x2.0
+    function calc_minBidIncrementPercentage () public view whenNotPaused returns (uint) {
+        Auction memory _auction = auction;
+        uint _deltaSec = _auction.endTime - block.timestamp;
+        uint _minBidIncrementPercentage = minBidIncrementPercentage;
+        if (_deltaSec < 3600) { // 1hr
+            _minBidIncrementPercentage = _minBidIncrementPercentage * 20/10;
+        } else if (_deltaSec < 21600) { // 6hr
+            _minBidIncrementPercentage = _minBidIncrementPercentage * 15/10;
+        } else if (_deltaSec < 43200) { // 12hr
+            _minBidIncrementPercentage = _minBidIncrementPercentage * 13/10;
+        } else if (_deltaSec < 86400) { // 24hr
+            _minBidIncrementPercentage = _minBidIncrementPercentage * 12/10;
+        }
+        return _minBidIncrementPercentage;
+    }
 
     // @MoM dev: recode bid log
     function _recodeBidLog (
@@ -352,7 +379,8 @@ contract Murasaki_AuctionHouse is Pausable, ReentrancyGuard, Ownable {
      * @notice Set the auction minimum bid increment percentage.
      * @dev Only callable by the owner.
      */
-    function setMinBidIncrementPercentage(uint8 _minBidIncrementPercentage) external onlyOwner {
+    //function setMinBidIncrementPercentage(uint8 _minBidIncrementPercentage) external onlyOwner {
+    function setMinBidIncrementPercentage(uint _minBidIncrementPercentage) external onlyOwner {
         minBidIncrementPercentage = _minBidIncrementPercentage;
 
         emit AuctionMinBidIncrementPercentageUpdated(_minBidIncrementPercentage);

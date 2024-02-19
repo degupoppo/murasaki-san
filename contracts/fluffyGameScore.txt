@@ -1,0 +1,47 @@
+
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity =0.8.13;
+
+
+//import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v4.8/contracts/access/Ownable.sol";
+//import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v4.8/contracts/security/ReentrancyGuard.sol";
+//import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v4.8/contracts/security/Pausable.sol";
+
+
+contract FluffyGame_Score {
+    
+    mapping (uint => address) public rankers;
+    mapping (uint => uint) public scores;
+    
+    function get_ranking () external view returns (address[10] memory, uint[10] memory) {
+    }
+    
+    function post_score (address _player, uint _score) external {
+        // check top 10 ranking
+        uint _count;
+        for (_count=1; _count<12;) {
+            unchecked {
+                uint _rankerScore = scores[_count];
+                if (_score > _rankerScore) {
+                    break;
+                }
+            _count++;
+            }
+        }
+        // when new ranker, update ranking
+        if (_count <= 10) {
+            for (uint i=10; i>_count+1;) {
+                unchecked {
+                    rankers[i+1] = rankers[i];
+                    scores[i+1] = scores[i];
+                    i--;
+                }
+            }
+            rankers[_count] = _player;
+            scores[_count] = _score;
+        }
+    }
+}
+
+
+

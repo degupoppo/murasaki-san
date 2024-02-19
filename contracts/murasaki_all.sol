@@ -4,8 +4,8 @@
 pragma solidity =0.8.13;
 
 
-// 240122
-// House of Murasaki-san ver. 0.1.17
+// 240214
+// House of Murasaki-san ver. 0.1.22
 
 
 //===Import==================================================================================================================
@@ -1761,7 +1761,7 @@ contract Murasaki_Craft is ERC2665, Ownable, Pausable {
     mapping(address => bool) private noFee_address;
     
     //set transfer fee
-    uint public TRANSFER_FEE = 50 * 10**18;   //wei
+    uint public TRANSFER_FEE = 100 * 10**18;   //wei
     
     //a wallet collecting fees
     address private bufferTreasury_address;
@@ -2901,7 +2901,7 @@ contract Murasaki_Storage_Extra is Ownable {
 //===Function==================================================================================================================
 
 
-//---Share*
+//---Share
 
 contract Murasaki_Function_Share is Ownable, Pausable {
 
@@ -3115,6 +3115,69 @@ contract Murasaki_Function_Share is Ownable, Pausable {
         // 240123
         // add achievement on chain score, 0.11
         _precious_score += ac.get_score_itemChecked(_summoner);
+
+        return _precious_score;
+    }
+
+    //calc fluffy
+    // 0.31
+    function calc_precious_withoutAc (uint _summoner) public view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
+        Murasaki_Parameter mp = Murasaki_Parameter(ma.address_Murasaki_Parameter());
+        Pippel_Function pf = Pippel_Function(ma.address_Pippel_Function());
+        Murasaki_Craft mc = Murasaki_Craft(ma.address_Murasaki_Craft());
+        //Achievement_onChain ac = Achievement_onChain(ma.address_Achievement_onChain());
+        address _owner = get_owner(_summoner);
+        uint _precious_score = 0;
+        //fluffy
+        uint _elected_precious_type = mp.ELECTED_FLUFFY_TYPE();
+        uint _balance_of_type;
+        uint _additionalScore = 0;
+        for (uint i = 201; i <= 212; i++) {
+            //doll, fluffy * 60
+            _balance_of_type = mc.balance_of_type(_owner, i+36);
+            if (_balance_of_type > 0) {
+                _additionalScore += _balance_of_type * 2*60 +30 +2;
+            }
+            //fluffiest, fluffy * 20
+            _balance_of_type = mc.balance_of_type(_owner, i+24);
+            if (_balance_of_type > 0) {
+                _additionalScore += _balance_of_type * 2*20 +8 +2;
+            }
+            //fluffier, fluffy * 5
+            _balance_of_type = mc.balance_of_type(_owner, i+12);
+            if (_balance_of_type > 0) {
+                _additionalScore += _balance_of_type * 2*5 +2;
+            }
+            //fluffy
+            _balance_of_type = mc.balance_of_type(_owner, i);
+            if (_balance_of_type > 0) {
+                _additionalScore += _balance_of_type * 2;
+            }
+            //fluffly festival modification, x2 score
+            if (i == _elected_precious_type) {
+                _additionalScore *= 2;
+            }
+            _precious_score += _additionalScore;
+        }
+        
+        // 230920
+        // pippe score addition 0.06 $ASTR
+        // 1 pippel NFT = 10 pippel score = 1 fluffy score = 0.01 LUK
+        if (mp.isTrial() == false) {
+            _precious_score += pf.calc_pippelScore(_summoner) / 10;
+        }
+        
+        //level cap for fluffy, 800/Lv20 = 40/Lv
+        uint _lv = ms.level(_summoner);
+        if (_precious_score > _lv*40) {
+            _precious_score = _lv*40;
+        }
+
+        // 240123
+        // add achievement on chain score, 0.11
+        //_precious_score += ac.get_score_itemChecked(_summoner);
 
         return _precious_score;
     }
@@ -3453,13 +3516,71 @@ contract Murasaki_Function_Share is Ownable, Pausable {
     }
     
     //luck challenge
+    
+    // score buffer 
+    // To reduce gas fees, luck values are buffered during a interval.
     mapping (uint => uint) private _updated_lucks;   // summoner => luck
     mapping (uint => uint) private _last_updated_luck_time;  // summoner => time
-    uint _LUCK_UPDATE_DURATION = 28800; // 8 hr
+    uint _LUCK_UPDATE_DURATION = 72000; // 20 hr
     function _update_luck_update_duration (uint _val) external onlyOwner {
         _LUCK_UPDATE_DURATION = _val;
     }
+    
+    // score buffer, achievement on-chain
+    // ac scores are buffered for 5d
+    mapping (uint => uint) private _updated_ac;   // summoner => luck
+    mapping (uint => uint) private _last_updated_ac_time;  // summoner => time
+    uint _AC_UPDATE_DURATION = 432000; // 5 d
+    function _update_ac_update_duration (uint _val) external onlyOwner {
+        _AC_UPDATE_DURATION = _val;
+    }
+    
     function luck_challenge(uint _summoner) public returns (bool) {
+        // prepare luck
+        uint _luck;
+        // check updated time
+        // when more than 8 hr have passed since the last updated time, update the luck.
+        if (block.timestamp - _last_updated_luck_time[_summoner] >= _LUCK_UPDATE_DURATION) {
+            Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+            Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
+            Murasaki_Dice md = Murasaki_Dice(ma.address_Murasaki_Dice());
+            // calc luck
+            _luck = ms.luck(_summoner);
+            _luck += calc_precious_withoutAc(_summoner);
+            _luck += md.get_rolled_dice(_summoner); //0.06
+            
+            // check updated time for ac
+            // compared to normal method:
+            //   when update: +0.05-0.06
+            //   when not update: -0.08-0.09
+            uint _ac;
+            if (block.timestamp - _last_updated_ac_time[_summoner] >= _AC_UPDATE_DURATION) {
+                Achievement_onChain ac = Achievement_onChain(ma.address_Achievement_onChain());
+                _ac = ac.get_score_itemChecked(_summoner);
+                _updated_ac[_summoner] = _ac;
+                _last_updated_ac_time[_summoner] = block.timestamp;
+            } else {
+                _ac = _updated_ac[_summoner];
+            }
+            _luck += _ac;
+            
+            // update luck
+            _updated_lucks[_summoner] = _luck;
+            // update time
+            _last_updated_luck_time[_summoner] = block.timestamp;
+        } else {
+            _luck = _updated_lucks[_summoner];
+        }
+        // critical challenge, 0.02
+        if (dn(_summoner, 10000) <= _luck) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /*
+    function luck_challenge_old1(uint _summoner) public returns (bool) {
         // prepare luck
         uint _luck;
         // check updated time
@@ -3486,6 +3607,9 @@ contract Murasaki_Function_Share is Ownable, Pausable {
             return false;
         }
     }
+    */
+
+
     /*
     function luck_challenge_org(uint _summoner) public view returns (bool) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
@@ -3554,6 +3678,32 @@ contract Murasaki_Function_Share is Ownable, Pausable {
                 )
             )
         );
+    }
+    
+    // batch item call
+    function batch_itemCall (uint[] memory _items, uint _count) external view returns (
+        uint[] memory _item_types,
+        uint[] memory _crafted_summoners,
+        uint[] memory _item_subtypes
+    ) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Craft mc = Murasaki_Craft(ma.address_Murasaki_Craft());
+        _item_types = new uint[](_count);
+        _crafted_summoners = new uint[](_count);
+        _item_subtypes = new uint[](_count);
+        for (uint i = 0; i < _count; i++) {
+            (
+                uint _item_type,
+                ,
+                uint _crafted_summoner,
+                ,
+                ,
+                uint _item_subtype
+            ) = mc.items(_items[i]);
+            _item_types[i] = _item_type;
+            _crafted_summoners[i] = _crafted_summoner;
+            _item_subtypes[i] = _item_subtype;
+        }
     }
 }
 
@@ -3896,45 +4046,81 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable, ReentrancyGuard, Pau
     
     //variants
     uint public feedingInterval_forOtherSummoner = 24 * 60 * 60;
-    uint public gainMax_forOtherSummoner = 50;
+    uint public gainMax_forOtherSummoner = 200;
+    uint public satietyAndHappyLimit = 30;
     function _set_feedingInterval_forOtherSummoner(uint _value) external onlyOwner {
         feedingInterval_forOtherSummoner = _value;
     }
     function _set_gainMax_forOtherSummoner(uint _value) external onlyOwner {
         gainMax_forOtherSummoner = _value;
     }
+    function _set_satietyAndHappyLimit(uint _value) external onlyOwner {
+        satietyAndHappyLimit = _value;
+    }
     
-    //0.51
-    // 書き込み, 0.07
-    // クリティカル判定, 0.22
-    // 達成・twinkle判定, 0.14
     //feeding
     event Feeding(uint indexed _summoner, uint _exp_gained, bool _critical, bool _other);
     function feeding(uint _summoner, uint _item_nui) external nonReentrant whenNotPaused {
+        
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
         Murasaki_Parameter mp = Murasaki_Parameter(ma.address_Murasaki_Parameter());
         Murasaki_Storage_Score mss = Murasaki_Storage_Score(ma.address_Murasaki_Storage_Score());
-        require(mp.isPaused() == false);
+        
+        require(!mp.isPaused());
         require(ms.inHouse(_summoner));
         //require(mfs.check_owner(_summoner, msg.sender));
         require(not_petrified(_summoner));
+
+        // calc satiety and basic exp
         uint _now = block.timestamp;
         uint _satiety = mfs.calc_satiety(_summoner);
         uint _exp_add = 1000 * (100 - _satiety) / 100;  // 240122 500 -> 1000
 
-        /*
-        //achv onChain boost
-        _exp_add = _get_exp_add_from_achv_onChain(_summoner, _exp_add);
-        */
+        // other check
+        bool _other;
+        if (!mfs.check_owner(_summoner, msg.sender)) {
+            _other = true;
+        }
+
+        // when satiety <= 30, others can feed
+        require(!_other || (_satiety <= satietyAndHappyLimit));
+        
         //twinkle boost, multiplication
         _exp_add = _get_exp_add_from_twinkle(_summoner, _exp_add);
-
-        //nui boost, multiplication with onChain boost
+        
+        //***TODO*** nui
+        // gas reduction is needed
+        // nui boost, multiplication with onChain boost
         if (_item_nui > 0) {
             _exp_add = _get_exp_add_from_nui(_summoner, _item_nui, _exp_add);
         }
+        
+        // when owner, luck challenge
+        bool _critical;
+        if (!_other) {
+            if (mfs.luck_challenge(_summoner)) {
+                _exp_add = _exp_add * 2;
+                _critical = true;
+                _increment_criticalCount(_summoner);
+            }
+        }
+        
+        // 0.04@gas
+        // when others feed, others get some extra exp and reduce your exp
+        if (_other) {
+            uint _summoner_yours = mfs.get_summoner(msg.sender);
+            if (_summoner_yours != 0) {
+                uint _exp_add_extra = _get_exp_add_extra(_exp_add, msg.sender);
+                uint _exp_yours = ms.exp(_summoner_yours);
+                ms.set_exp(_summoner_yours, _exp_yours + _exp_add_extra);
+            }
+            _exp_add = _exp_add * 80 / 100;   // 80%
+        }
+
+
+        /*
         //luck challenge
         bool _critical;
         if (mfs.luck_challenge(_summoner)) {
@@ -3942,6 +4128,27 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable, ReentrancyGuard, Pau
             _critical = true;
             _increment_criticalCount(_summoner);
         }
+
+        // owner check
+        // when taking care of others summoners, reduce exp_add and taker get some extra exp.
+        uint _summoner_yours = mfs.get_summoner(msg.sender);
+        bool _other;
+        // when feed other player's summoner
+        if (_summoner_yours != 0 && _summoner != _summoner_yours) {
+            uint _exp_add_extra = _get_exp_add_extra(_exp_add, msg.sender, _summoner_yours);
+            //update last feeding time for others
+            //lastFeedingTime_forOtherSummoner[msg.sender] = _now;
+            uint _exp_yours = ms.exp(_summoner_yours);
+            ms.set_exp(_summoner_yours, _exp_yours + _exp_add_extra);
+            _other = true;
+        }
+        // when feeded by other player or contract, reduce exp
+        if (_other) {
+            _exp_add = _exp_add * 80 / 100;
+        }
+        */
+
+
         // update exp and last feeding time
         uint _exp = ms.exp(_summoner) + _exp_add;
         ms.set_exp(_summoner, _exp);
@@ -3950,18 +4157,7 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable, ReentrancyGuard, Pau
         uint _total_exp_gained = mss.total_exp_gained(_summoner);
         mss.set_total_exp_gained(_summoner, _total_exp_gained + _exp_add);
         _increment_feedingCount(_summoner);
-        // owner check, gain some exp when not your summoner
-        uint _summoner_yours = mfs.get_summoner(msg.sender);
-        bool _other;
-        // when feed other player's summoner
-        if (_summoner_yours != 0 && _summoner != _summoner_yours) {
-            uint _exp_add_extra = _get_exp_add_extra(_exp_add, msg.sender);
-            //update last feeding time for others
-            lastFeedingTime_forOtherSummoner[msg.sender] = _now;
-            uint _exp_yours = ms.exp(_summoner_yours);
-            ms.set_exp(_summoner_yours, _exp_yours + _exp_add_extra);
-            _other = true;
-        }
+
         // update staking reward counter
         _update_staking_reward_counter(_summoner);
         // event
@@ -4022,23 +4218,36 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable, ReentrancyGuard, Pau
     }
     */
 
-    function _get_exp_add_extra(uint _exp_add, address _sender) internal returns (uint) {
-        //calc deltaSec
+    function _get_exp_add_extra (uint _exp_add, address _sender) internal returns (uint) {
+        
+        // calc deltaSec
         uint _now = block.timestamp;
         uint _lastFeedTime = lastFeedingTime_forOtherSummoner[_sender];
         uint _deltaSec = _now - _lastFeedTime;
-        //when deltaSec >= limit, reset timen and point
+        
+        // prepare gain max, 1/2 of next level-up required exp
+        //Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        //Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
+        //uint _gainMax_forOtherSummoner = ms.next_exp_required(_summoner) /2;
+        
+        // when deltaSec >= limit, reset time and point
         if (_deltaSec >= feedingInterval_forOtherSummoner) {
             lastFeedingTime_forOtherSummoner[_sender] = _now;
             gained_expAddExtra[_sender] = 0;
         }
-        //extra exp = 2%
-        uint _exp_add_extra = _exp_add / 50;
-        //extra exp has an acquisition limit every 24 hr
+        
+        // extra exp = 2%
+        // 240207 -> 5%
+        uint _exp_add_extra = _exp_add * 5 / 100;
+        
+        // extra exp limit check
+        // 
+        // extra exp has an acquisition limit every 24 hr
         if (gained_expAddExtra[_sender] + _exp_add_extra >= gainMax_forOtherSummoner){
             _exp_add_extra = gainMax_forOtherSummoner - gained_expAddExtra[_sender];
         }
-        //increment total amount of extra exp gained
+        
+        // increment total amount of extra exp gained
         gained_expAddExtra[_sender] += _exp_add_extra;
         return _exp_add_extra;
     }
@@ -4133,6 +4342,79 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable, ReentrancyGuard, Pau
 
     //grooming
     event Grooming(uint indexed _summoner, uint _exp_gained, bool _critical);
+
+    function grooming(uint _summoner, uint _item_nui) external nonReentrant whenNotPaused {
+
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
+        Murasaki_Storage ms = Murasaki_Storage(ma.address_Murasaki_Storage());
+        Murasaki_Parameter mp = Murasaki_Parameter(ma.address_Murasaki_Parameter());
+        Murasaki_Storage_Score mss = Murasaki_Storage_Score(ma.address_Murasaki_Storage_Score());
+
+        require(mp.isPaused() == false);
+        require(ms.inHouse(_summoner));
+        //require(mfs.check_owner(_summoner, msg.sender));
+        require(not_petrified(_summoner));
+        require(ms.working_status(_summoner) == 0);
+        
+        // calc happy and basic exp
+        uint _now = block.timestamp;
+        uint _happy = _calc_happy_real(_summoner);
+        uint _exp_add = 3000 * (100 - _happy) / 100;
+        
+        // other check
+        bool _other;
+        if (!mfs.check_owner(_summoner, msg.sender)) {
+            _other = true;
+        }
+        
+        // when happy <= 30, others can feed
+        require(!_other || (_happy <= satietyAndHappyLimit));
+        
+        //twinkle boost, multiplication
+        _exp_add = _get_exp_add_from_twinkle(_summoner, _exp_add);
+        
+        //nui boost, multiplication with onChain boost
+        if (_item_nui > 0) {
+            _exp_add = _get_exp_add_from_nui(_summoner, _item_nui, _exp_add);
+        }
+
+        // when owner, luck challenge
+        bool _critical;
+        if (!_other) {
+            if (mfs.luck_challenge(_summoner)) {
+                _exp_add = _exp_add * 2;
+                _critical = true;
+                _increment_criticalCount(_summoner);
+            }
+        }
+
+        // when others feed, others get some extra exp and reduce your exp
+        if (_other) {
+            uint _summoner_yours = mfs.get_summoner(msg.sender);
+            if (_summoner_yours != 0) {
+                uint _exp_add_extra = _get_exp_add_extra(_exp_add, msg.sender);
+                uint _exp_yours = ms.exp(_summoner_yours);
+                ms.set_exp(_summoner_yours, _exp_yours + _exp_add_extra);
+            }
+            _exp_add = _exp_add * 80 / 100;   // 80%
+        }
+
+        //add exp
+        uint _exp = ms.exp(_summoner) + _exp_add;
+        ms.set_exp(_summoner, _exp);
+        //update score
+        uint _total_exp_gained = mss.total_exp_gained(_summoner);
+        mss.set_total_exp_gained(_summoner, _total_exp_gained + _exp_add);
+        _increment_groomingCount(_summoner);
+        _increment_neglectCount(_summoner);
+        //update lastTime
+        ms.set_last_grooming_time(_summoner, _now);
+        ms.set_last_grooming_time_plus_working_time(_summoner, _now);
+        //event
+        emit Grooming(_summoner, _exp_add, _critical);
+    }
+    /*
     function grooming(uint _summoner, uint _item_nui) external nonReentrant whenNotPaused {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
@@ -4141,18 +4423,13 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable, ReentrancyGuard, Pau
         Murasaki_Storage_Score mss = Murasaki_Storage_Score(ma.address_Murasaki_Storage_Score());
         require(mp.isPaused() == false);
         require(ms.inHouse(_summoner));
-        require(mfs.check_owner(_summoner, msg.sender));
+        //require(mfs.check_owner(_summoner, msg.sender));
         require(not_petrified(_summoner));
         require(ms.working_status(_summoner) == 0);
         uint _now = block.timestamp;
         uint _happy = _calc_happy_real(_summoner);
         uint _exp_add = 3000 * (100 - _happy) / 100;
         
-        /*
-        //achv onChain boost
-        _exp_add = _get_exp_add_from_achv_onChain(_summoner, _exp_add);
-        */
-
         //twinkle boost, multiplication
         _exp_add = _get_exp_add_from_twinkle(_summoner, _exp_add);
         
@@ -4181,6 +4458,8 @@ contract Murasaki_Function_Feeding_and_Grooming is Ownable, ReentrancyGuard, Pau
         //event
         emit Grooming(_summoner, _exp_add, _critical);
     }
+    */
+
     //calc happy, modified with working_time
     function _calc_happy_real(uint _summoner) internal view returns (uint) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
@@ -7406,7 +7685,7 @@ contract Murasaki_Function_Staking_Reward is Ownable, ReentrancyGuard, Pausable 
 
 contract Trial_Converter is Ownable, ReentrancyGuard, Pausable {
 
-    //pausable
+    // pausable
     function pause() external onlyOwner {
         _pause();
     }
@@ -7414,7 +7693,8 @@ contract Trial_Converter is Ownable, ReentrancyGuard, Pausable {
         _unpause();
     }
 
-    //address
+    // address
+    // *NOTICE* trial address_Murasaki_Address
     address public address_Murasaki_Address;
     function _set_Murasaki_Address(address _address) external onlyOwner {
         address_Murasaki_Address = _address;
@@ -9900,6 +10180,12 @@ contract Pippel_Function is Ownable, ReentrancyGuard, Pausable {
         mintInterval = _val;
     }
     
+    // set interval
+    uint public pippel_interval = 86400 * 2;
+    function _set_pippel_interval (uint _val) external onlyOwner {
+        pippel_interval = _val;
+    }
+    
     // store last mint pippel type for each player
     mapping (uint => uint) private lastMintType;
     
@@ -10161,7 +10447,7 @@ contract Pippel_Function is Ownable, ReentrancyGuard, Pausable {
                 abi.encodePacked(
                     _summoner,
                     //msg.sender,
-                    (block.timestamp / 86400),
+                    (block.timestamp / pippel_interval),
                     salt
                 )
             )
@@ -11386,7 +11672,7 @@ contract StrayCat is ERC721, Ownable, Pausable, ReentrancyGuard, ERC721Holder {
     }
     
     // internal, select random summoner, refered to Murasaki_Mail
-    function _select_random_summoner_to(uint _summoner_from) public view returns (uint) {
+    function _select_random_summoner_to (uint _summoner_from) public view returns (uint) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         Murasaki_Main mm = Murasaki_Main(ma.address_Murasaki_Main());
