@@ -70,7 +70,7 @@ contract Daycare is Ownable, Pausable, ReentrancyGuard {
     function _set_PRICE_PER_ACTION (uint _val) external onlyOwner {PRICE_PER_ACTION = _val;}
     function _set_FEE_PER_ACTION (uint _val) external onlyOwner {FEE_PER_ACTION = _val;}
 
-    //admin, add or remove permitted_address
+    // admin, add or remove permitted_address
     mapping(address => bool) private permitted_address;
     function _add_permitted_address(address _address) external onlyOwner {permitted_address[_address] = true;}
     function _remove_permitted_address(address _address) external onlyOwner {permitted_address[_address] = false;}
@@ -141,6 +141,7 @@ contract Daycare is Ownable, Pausable, ReentrancyGuard {
         }
         registered_count[_summoner] += _days;
     }
+    /*
     function register_dev (uint _summoner, uint _days) external payable nonReentrant whenNotPaused {
         //require(_check_summonerAndWallet(_summoner, msg.sender));
         require(_days>0);
@@ -151,6 +152,7 @@ contract Daycare is Ownable, Pausable, ReentrancyGuard {
         }
         registered_count[_summoner] += _days;
     }
+    */
 
     // unregister
     function unregister (uint _summoner, uint _days) external nonReentrant whenNotPaused {
@@ -202,7 +204,7 @@ contract Daycare is Ownable, Pausable, ReentrancyGuard {
                 registered_count[_summoner] -= 1;
                 // when days=0, remove from the set
                 if(registered_count[_summoner] == 0){
-                    registered_set.add(_summoner);
+                    registered_set.remove(_summoner);
                 }
                 if (_modes[_count] == 1) {
                     mffg.feeding(_summoner, 0);

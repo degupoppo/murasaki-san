@@ -4,6 +4,7 @@
 
 
 <script src="lib/web3.min.js"></script>
+<script src="lib/progressbar.min.js"></script>
 <script src="src/js/contracts.js"></script>
 <script src="src/js/share.js"></script>
 <script src="src/js/index.js"></script>
@@ -114,10 +115,10 @@ This is our fan project using <br class="br-sp"><b>Astar Substrate EVM</b> <img 
 This project is currently being developed on a private chain.<br>
 In the near future, it will first be test-played on the Shibuya testnet and eventually deployed on the Astar Substrate EVM.<br>
 <br>
-<i>Development Progress: <b><span id="percent">82</span></b><font size="-1"> (v0.1.33)</font></i><br>
+<i>Development Progress: <b><span id="percent">83</span></b><font size="-1"> (v0.1.34)</font></i><br>
 <span id="container"></span><br>
 <font size="-1" color="blue"><i>
-Developers are currently working on reducing gas costs and implementing PeddlerCat system...
+Developers are currently working on fixing minor bugs and polishing up the practice mode.
 </font></i>
 <script src="https://rawgit.com/kimmobrunfeldt/progressbar.js/master/dist/progressbar.min.js"></script>
 <script>
@@ -149,7 +150,7 @@ Developers are currently working on reducing gas costs and implementing PeddlerC
     document.getElementById("percent").innerHTML = (Math.round(bar.value() * 100) + '%');
   }
     });
-    bar.animate(0.82); 
+    bar.animate(0.83); 
 </script>
 </p>
 
@@ -215,7 +216,19 @@ All notable changes to this project will be documented in this section.<br>
 The format is based on [Keep a Changelog](http://keepachangelog.com/)<br>
 and this project adheres to [Semantic Versioning](http://semver.org/).<br>
 <br>
-## [0.1.33] - 2024-2-19<br>
+## [0.1.34] - 2024-4-1<br>
+### Fixed<br>
+- Updated to Phaser v3.80.0.<br>
+- Fixed the display bug of Memento of Murasaki-san.<br>
+- Fixed the depth of item indicator of violin.<br>
+- Fixed the summoning position of fluffy.<br>
+### Contract Replaced<br>
+- Crafting: Fixed the bugs in craft cancel.<br>
+- Daycare: Fixed the bugs in the waiting list.<br>
+### Contract Parameter Updated<br>
+- Updated the buyback prices (total inflation rate: +15.93%).<br>
+<br>
+## [v0.1.33] - 2024-2-19<br>
 ### Fixed<br>
 - Updated to Phaser v3.70.0<br>
 - Fixed the display of the flowers on the loading screen.<br>
@@ -252,14 +265,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).<br>
 - Memento: Updated the minimum bidding price to 10 $ASTR.<br>
 - Pippel Function: Updated the pippel interval to 48 hr.<br>
 <br>
-## [0.1.32] - 2024-1-28<br>
+## [v0.1.32] - 2024-1-28<br>
 ### Added<br>
 - The small insects hiding in the shadow of the radar chart have been added.<br>
 ### Fixed<br>
 - Fixed the inconveniences in the display of the crown and ribbon.<br>
 - Fixed the inconveniences in the display and sounds of the strolling window.<br>
 <br>
-## [0.1.31] - 2024-1-26<br>
+## [v0.1.31] - 2024-1-26<br>
 ### Fixed<br>
 - Fixed the crafting window bugs.<br>
 - Fixed the voting window bugs.<br>
