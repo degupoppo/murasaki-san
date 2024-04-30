@@ -40,7 +40,7 @@
 
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z7XXV794SJ"></script><script>window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', 'G-Z7XXV794SJ');</script>
-
+    
 </head>
 
 
@@ -115,17 +115,17 @@ This is our fan project using <br class="br-sp"><b>Astar Substrate EVM</b> <img 
 This project is currently being developed on a private chain.<br>
 In the near future, it will first be test-played on the Shibuya testnet and eventually deployed on the Astar Substrate EVM.<br>
 <br>
-<i>Development Progress: <b><span id="percent">83</span></b><font size="-1"> (v0.1.34)</font></i><br>
+<i>Development Progress: <b><span id="percent">84</span></b><font size="-1"> (v0.1.35)</font></i><br>
 <span id="container"></span><br>
 <font size="-1" color="blue"><i>
-Developers are currently working on fixing minor bugs and polishing up the practice mode.
+Developers are currently working on polishing up the strolling system and preparing the tokenURI of all NFTs.
 </font></i>
 <script src="https://rawgit.com/kimmobrunfeldt/progressbar.js/master/dist/progressbar.min.js"></script>
 <script>
     var bar = new ProgressBar.Line(container, {
       strokeWidth: 3,
       easing: 'easeOut',
-      duration: 4000,
+      duration: 3000,
       color: '#FC7DFF',
       trailColor: '#CCCCCC',
       trailWidth: 3,
@@ -150,7 +150,7 @@ Developers are currently working on fixing minor bugs and polishing up the pract
     document.getElementById("percent").innerHTML = (Math.round(bar.value() * 100) + '%');
   }
     });
-    bar.animate(0.83); 
+    bar.animate(0.84); 
 </script>
 </p>
 
@@ -181,7 +181,7 @@ Murasaki-san <br class="br-sp"><b><a href="https://store.line.me/stickershop/pro
 </p>
 
 <p>
-<b><a href="house.html?summoner=1">Demo Preview</a></b> is available for everyone. Meet developer's Murasaki-san and try <b>Feeding</b> them :)<br>
+<button style="font-size:80%; font-weight: bold; background-color:#FF4F6F;" onclick="location.href='house.html?summoner=999999999';">Demo Preview</button>&nbsp;&nbsp;is available to everyone. Take a peek into the developer's murasaki-san! (No wallet connection or network change is required)<br>
 </p>
 
 <p>
@@ -211,11 +211,6 @@ This product can be used accross multiple platforms. You can play the game using
 <code>
 <font size="-1" color="black">
 <p>
-# Change Log<br>
-All notable changes to this project will be documented in this section.<br>
-The format is based on [Keep a Changelog](http://keepachangelog.com/)<br>
-and this project adheres to [Semantic Versioning](http://semver.org/).<br>
-<br>
 ## [0.1.34] - 2024-4-1<br>
 ### Fixed<br>
 - Updated to Phaser v3.80.0.<br>
@@ -273,9 +268,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/).<br>
 - Fixed the inconveniences in the display and sounds of the strolling window.<br>
 <br>
 ## [v0.1.31] - 2024-1-26<br>
+### Added<br>
+- Prepared the web pages.<br>
+- Prepared the X/Twitter account.<br>
 ### Fixed<br>
 - Fixed the crafting window bugs.<br>
 - Fixed the voting window bugs.<br>
+<br>
+## [v0.1.1 to v0.1.30] - 2022-1-24 to 2024-1-25<br>
+- Developed in a closed test environment.<br>
+<br>
+## [v0.1.0] - 2022-1-24<br>
+- Embarked on the project :)<br>
 </p>
 </code>
 </font>
@@ -797,7 +801,7 @@ The eligible types of tokens and NFTs may be subject to additions and modificati
 <!---### cat-mail --->
 <details><summary>Cat-Mail <img src="src/png/cat_sitting.png" width="32" height="32" class="textMiddle"></summary>
 
-<img src="src/png/cat_sitting.png" width="96" height="96" class="textMiddle">
+<img src="src/png/cat_sitting.png" width="96" height="96" class="textMiddle">< You got mail!
 
 <p>
 Cat-mail is one of <b>the mechanisms to obtain present boxes</b>. It is unlocked when you have the <b>Cat Cushion</b><img src="src/png/item_cushion.png" width="40" height="40" class="textMiddle">in your house.
@@ -856,10 +860,38 @@ Detailed calculation methods for strolling efficiency can be referenced in <b><a
 
 
 <!---### practice --->
-<details><summary>Practicing  -comming soon-</summary>
+<details><summary>Practicing<img src="src/icon/item_piano.png" width="32" height="32" class="textMiddle"></summary>
+
 <p>
-comming soon.
+By crafting at least one musical instrument, Murasaki-san will be able to <b>start practicing instruments</b>.
 </p>
+
+&nbsp;<img src="src/png/item_clarinet.png" width="72" height="72">
+&nbsp;<img src="src/png/item_piano.png" width="72" height="72">
+&nbsp;<img src="src/png/item_violin.png" width="72" height="72">
+
+
+<p>
+At the beginning of practice, the player can choose one instrument out of three (piano, violin, clarinet) to start practicing. Mastery levels accumulate for each instrument. <b>The higher the rarity of the instrument used for practice, and the higher the parameters associated with the instrument (STR for clarinet, DEX for piano, INT for violin)</b>, the faster the mastery level will increase.
+</p>
+
+<p>
+The Mastery levels, listed in ascending order of proficiency, are as follows: <font color="#999999"><b>Inexperienced</font></b>, <font color="#228b22"><b>Beginner</font></b>, <font color="#006400"><b>Talented</font></b>, <font color="#0000ff"><b>Skilled</font></b>, <font color="#000080"><b>Intermediate</font></b>, <font color="#ff8c00"><b>Skillful</font></b>, <font color="#d2691e"><b>Seasoned</font></b>, <font color="#ff0000"><b>Proficient</font></b>, <font color="#ff00ff"><b>Advanced</font></b>, <font color="#8a2be2"><b>Expert</font></b>, and <font color="#800080"><b>Master</font></b>.
+</p>
+
+<p>
+When Murasaki-san starts practicing an instrument, their three pets and fluffies will gather around and join the practice together. Murasaki-san seems to love singing and playing music.
+</p>
+
+<p>
+The practice system has been designed as <b>a kind of endgame content</b>. Currently, increasing mastery level does not have any particular effect on the gameplay. Additionally, since mastery level increases very slowly, it requires a considerable amount of practice time to reach the maximum level. In the future, the developer would like to implement concerts and performances for Murasaki-san with their own favorite instrument, but this is still in the conceptual stage at the moment :)
+</p>
+
+&nbsp;&nbsp;&nbsp;<img src="src/pic/practice.png" width="128" height="128" class="textMiddle">
+
+<p><i><font size="-0.5">
+What is your favorite instrument? The coder enjoys playing the piano a bit (<font color="#0000ff"><b>Skilled</font></b>) and has recently started playing the violin (<font color="#228b22"><b>Beginner</font></b>). The illustrator is highly proficient at playing the violin (<font color="#8a2be2"><b>Expert</font></b>) and has recently started playing the ukulele (<font color="#006400"><b>Talented</font></b>).
+</font></i></p>
 </details>
 
 
@@ -891,7 +923,7 @@ Here is an overview of each contract:
 </p>
 
 <p>
-The solidity code for each contract can be referenced <a href="src/solidity/murasaki_all.sol">here</a>. The latest address of each contract is storaged in the <a href="https://blockscout.com/astar/address/0x176C5B3582C8C851B7aF4efac618fb17901cDDf1">Murasaki_Address</a> contract.
+The solidity code for each contract can be referenced <a href="https://github.com/degupoppo/murasaki-san/tree/main/contracts">on the github repository</a>. The latest address of each contract is storaged in the <a href="https://blockscout.com/astar/address/0x176C5B3582C8C851B7aF4efac618fb17901cDDf1">Murasaki_Address</a> contract.
 </p>
 
 <p>
@@ -1116,9 +1148,6 @@ Reward NFT: Fluffy (61%), Fluffier (10%), Glitter (3%), Sparkle (3%), Twinkle (3
 
 <p>
 <b>Pippel Score calculation:</b><br>
-</p>
-
-<p>
 <font size="-0.5">
 &nbsp;&nbsp;&nbsp;10 Pippel Score = 1 Fluffy Score<br>
 </font>
@@ -1142,6 +1171,16 @@ Reward NFT: Fluffy (61%), Fluffier (10%), Glitter (3%), Sparkle (3%), Twinkle (3
   </tbody>
 </table>
 </font>
+
+<p>
+<b>Practice Exp boost efficacy:</b><br>
+<font size="-0.5">
+&nbsp;&nbsp;&nbsp;Exp = PracticingSec * rarity_boost * status_boost<br>
+&nbsp;&nbsp;&nbsp;rarity_boost = 1.2 (rare), 1.1 (uncomon), or 1.0 (normal)<br>
+&nbsp;&nbsp;&nbsp;status_boost = (100 + status) / 100<br>
+&nbsp;&nbsp;&nbsp;*clarinet: STR, piano: DEX, violin: INT<br>
+</font>
+</p>
 
 </details>
 
@@ -1540,7 +1579,7 @@ We would like to express our thanks to followings:
 <li>Excellent game framework from <b><a href="https://phaser.io/phaser3">Phaser3</a></b>.
 <li>Useful sound effects from <b><a href="https://soundeffect-lab.info/">Kokaon Lab</a></b> and <b><a href="https://otologic.jp/">OtoLogic</a></b>.
 <li>Wealthy illustrations from <b><a href="https://www.irasutoya.com/">Irasuto-ya</a></b>.
-<li>Great musics from <b><a href="https://dova-s.jp/">DOVA-SYNDROME</a></b>.
+<li>Great musics from <b><a href="https://dova-s.jp/">DOVA-SYNDROME</a></b> and <b><a href="http://bgmer.net/">BGMer</a></b>.
 <li>Excellent CSS framework from <b><a href="https://simplecss.org/">Simple.css</a></b>.
 <li>Enhanced drawing environment from <b><a href="https://ibispaint.com/">ibisPaint</b></a>.
 <li>Amazing development environment and testnet from <b><a href="https://github.com/AstarNetwork/Astar">Astar Network</a></b>
@@ -1554,10 +1593,10 @@ We would like to express our thanks to followings:
 <!--- Footer--->
 
 <footer class="footer">
-<p><font size="-2"><b>Donations: </b></font><font size="-2" color="blue"><a href="https://blockscout.com/astar/address/0x6655B97171c8FA7dF052D95230951E80c5cB7e15" style="text-decoration:none;" target="_blank">0x6655B97171c8FA7dF052D95230951E80c5cB7e15&#x2764;</a></font></p>
+<p><font size="-2"><b>Donations: </b></font><font size="-2" color="blue"><a href="https://blockscout.com/astar/address/0x65393adc7AfBdF44ef4e473303bE57dFa8f1f2aE" style="text-decoration:none;" target="_blank">0x65393adc7AfBdF44ef4e473303bE57dFa8f1f2aE&#x2764;</a></font></p>
 <p>&nbsp;</p>
-<p>(C) 2023 Project of Murasaki-san.</p>
-<p>Contact: murasakisan.info (at) gmail.com</p>
+<p>(C) 2024 Project of Murasaki-san.</p>
+<p>Contact: info.murasakisan (at) gmail.com</p>
 </footer>
 
 

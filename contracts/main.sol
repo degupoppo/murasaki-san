@@ -5731,7 +5731,7 @@ contract Murasaki_Function_Crafting2 is Ownable, ReentrancyGuard, Pausable {
 }
 
 
-//---Crafting_Codex
+//---Crafting_Codex*
 
 contract Murasaki_Function_Crafting_Codex is Ownable, Pausable {
 
@@ -5809,6 +5809,16 @@ contract Murasaki_Function_Crafting_Codex is Ownable, Pausable {
         //calc remining sec
         uint _remining_time;
         uint _delta_time = ( block.timestamp - ms.crafting_start_time(_summoner) ) * mp.SPEED()/100;
+
+        // 240427 added
+        // happy limit, if happy=0, _delta_time=base_groming_sec
+        uint _delta_grooming = _now - ms.last_grooming_time(_summoner);
+        uint _base_grooming = mp.BASE_SEC() *3 *100/mp.SPEED();
+        if (_delta_grooming >= _base_grooming) {
+            _delta_time = _base_grooming;
+        }
+        
+        // calc reming sec
         if (_delta_time >= _dc_sec) {
             _remining_time = 0;
         }else {

@@ -118,6 +118,9 @@ Total Trading Count: <b><span id="totalTradingCount"></span></b><br>
 <br>
 
 <h3>Your Sellings on Market &#127926;</h3>
+<button onclick="update_sellingItems();" style="height:28px;font-size:80%"><b>Load Item Table</b></button>
+<div id="tbody_listedItems"></div>
+<!--
 <table id="talbe_sellingItems" class="display responsive nowrap" style="width:100%;">
 	<thead><tr>
 		<th><center>ID</center></th>
@@ -129,13 +132,21 @@ Total Trading Count: <b><span id="totalTradingCount"></span></b><br>
 	</tr></thead>
 	<tbody id="tbody_listedItems"></tbody>
 </table>
+-->
 <br>
 
+
 <h3>Your Items in the House &#127752;</h3>
+
 <p><code class="language-plaintext highlighter-rouge">
     Before listing, please approve the Market Contract:
     <button id="button_approve" onclick='approve();'>Approve</button><br>
 </code></p>
+
+<button onclick="update_userItems();" style="height:28px;font-size:80%"><b>Load Item Table</b></button>
+
+<div id="tbody_myItems">
+<!--
 <table id="table_userItems" class="display responsive nowrap" style="width:100%;">
     <thead><tr>
         <th><center>ID</center></th>
@@ -146,11 +157,13 @@ Total Trading Count: <b><span id="totalTradingCount"></span></b><br>
     </tr></thead>
     <tbody id="tbody_myItems"></tbody>
 </table>
+-->
+</div>
+
 <br>
 
-<p>
-<b><font size="+2">Send Item &#127873;</b></font><br>
-</p>
+<h3>Send Item &#127873;</h3>
+
 <p>
 The player can transfer or gift their items directly to another Murasaki-san without using the Marketplace, but they will need to pay <b>a transfer fee</b> to ensure fair gameplay and prevent botting. The transfer fee is subject to adjustment and it may be removed in the future.<br>
 </p>
@@ -230,10 +243,10 @@ Total Daycare Count: <b><span id="totalDaycareCount">***</span></b><br>
 <!--- Footer--->
 
 <footer class="footer">
-<p><font size="-2"><b>Donations: </b></font><font size="-2" color="blue"><a href="https://blockscout.com/astar/address/0x6655B97171c8FA7dF052D95230951E80c5cB7e15" style="text-decoration:none;" target="_blank">0x6655B97171c8FA7dF052D95230951E80c5cB7e15&#x2764;</a></font></p>
+<p><font size="-2"><b>Donations: </b></font><font size="-2" color="blue"><a href="https://blockscout.com/astar/address/0x65393adc7AfBdF44ef4e473303bE57dFa8f1f2aE" style="text-decoration:none;" target="_blank">0x65393adc7AfBdF44ef4e473303bE57dFa8f1f2aE&#x2764;</a></font></p>
 <p>&nbsp;</p>
-<p>(C) 2023 Project of Murasaki-san.</p>
-<p>Contact: murasakisan.info (at) gmail.com</p>
+<p>(C) 2024 Project of Murasaki-san.</p>
+<p>Contact: info.murasakisan (at) gmail.com</p>
 </footer>
 
 </body>
@@ -242,7 +255,7 @@ Total Daycare Count: <b><span id="totalDaycareCount">***</span></b><br>
     twemoji.parse(document.body);
     check_connected();
     loading_in_html();
-    init_daycare();
+    //init_daycare();
 </script>
 
 </html>
