@@ -5812,7 +5812,7 @@ contract Murasaki_Function_Crafting_Codex is Ownable, Pausable {
 
         // 240427 added
         // happy limit, if happy=0, _delta_time=base_groming_sec
-        uint _delta_grooming = _now - ms.last_grooming_time(_summoner);
+        uint _delta_grooming = block.timestamp - ms.last_grooming_time(_summoner);
         uint _base_grooming = mp.BASE_SEC() *3 *100/mp.SPEED();
         if (_delta_grooming >= _base_grooming) {
             _delta_time = _base_grooming;
