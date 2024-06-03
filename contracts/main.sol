@@ -4,8 +4,8 @@
 pragma solidity =0.8.13;
 
 
-// 240226
-// House of Murasaki-san ver. 0.1.23
+// 240508
+// House of Murasaki-san ver. 0.1.24
 
 
 //===Import==================================================================================================================
@@ -1708,7 +1708,7 @@ contract Murasaki_Craft is ERC2665, Ownable, Pausable {
     }
 
     //URI
-    string public baseURI = "https://murasaki-san.com/src/json/craft/";
+    string public baseURI = "https://murasaki-san.com/src/nftJson/";
     string public tailURI = ".json";
     function set_baseURI(string memory _string) external onlyOwner {
         baseURI = _string;
@@ -5731,7 +5731,7 @@ contract Murasaki_Function_Crafting2 is Ownable, ReentrancyGuard, Pausable {
 }
 
 
-//---Crafting_Codex*
+//---Crafting_Codex
 
 contract Murasaki_Function_Crafting_Codex is Ownable, Pausable {
 
@@ -5841,6 +5841,15 @@ contract Murasaki_Function_Crafting_Codex is Ownable, Pausable {
         //calc remining sec
         uint _remining_time;
         uint _delta_time = ( block.timestamp - ms.crafting_start_time(_summoner) ) * mp.SPEED()/100;
+
+        // 240508 added
+        // happy limit, if happy=0, _delta_time=base_groming_sec
+        uint _delta_grooming = block.timestamp - ms.last_grooming_time(_summoner);
+        uint _base_grooming = mp.BASE_SEC() *3 *100/mp.SPEED();
+        if (_delta_grooming >= _base_grooming) {
+            _delta_time = _base_grooming;
+        }
+
         if (_delta_time >= _dc_sec) {
             _remining_time = 0;
         }else {
@@ -12452,7 +12461,7 @@ contract Murasaki_tokenURI is Ownable, Pausable {
 //===Treasury======================================================================================================
 
 
-//---BufferVault
+//---BufferVault*
 
 //trading fee, dapps staking reward, other fees
 contract BufferVault is Ownable, ReentrancyGuard, Pausable {
@@ -12493,7 +12502,7 @@ contract BufferVault is Ownable, ReentrancyGuard, Pausable {
     }
 
     //admin, set transfer interval
-    uint public transferInterval = 86400 * 30;    //sec, 30 days
+    uint public transferInterval = 86400 * 25;    //sec, 25 days
     function set_transferInterval(uint _value) external onlyOwner {
         transferInterval = _value;
     }

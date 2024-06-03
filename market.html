@@ -162,11 +162,12 @@ Total Trading Count: <b><span id="totalTradingCount"></span></b><br>
 
 <br>
 
-<h3>Send Item &#127873;</h3>
+<h3 id="sendItem">Send Item &#127873;</h3>
 
 <p>
 The player can transfer or gift their items directly to another Murasaki-san without using the Marketplace, but they will need to pay <b>a transfer fee</b> to ensure fair gameplay and prevent botting. The transfer fee is subject to adjustment and it may be removed in the future.<br>
 </p>
+
 <p>
 Current transfer fee: <font color="blue"><b><idv id="transferFee">***</div></font> $ASTR</b> /item<br>
 </p>
@@ -185,7 +186,7 @@ NFT items can be burned for a fixed price at any time on the Buyback Treasury. B
 
 
 
-<h3>Daycare Service &#x1F3E8;</h3>
+<h3 id="daycare">Daycare Service &#x1F3E8;</h3>
 <p>
 By paying the upfront fee, you can register for daycare services and <b>request other players to take care of your Murasaki-san</b>. When taking care of other players' Murasaki-san through daycare services, <b>the caretaker can receive a reward</b> slightly higher than the gas cost incurred.
 </p>
@@ -220,6 +221,11 @@ Take care of Murasaki-san with low satiety/happy and receive a reward.<br>
 Current reward: <b><font color="blue"><idv id="currentReward">***</div></font> $ASTR</b> /care
 </p>
 
+<p>
+Batch transaction will save on gas fees: <button id="button_batch_caring" onclick="batch_caring();">Batch All Daycare</button><br>
+<b>Caution:</b> When batch transactions are not utilized, the caregiver will end up paying gas fees higher than the reward.
+</p>
+
 <table id="table_daycare" class="display responsive nowrap" style="width:100%;">
     <thead><tr>
         <th data-priority="1"><center>Name</center></th>
@@ -231,7 +237,6 @@ Current reward: <b><font color="blue"><idv id="currentReward">***</div></font> $
 </table>
 
 <p style="text-align:right">
-Batch transaction will save on gas fees: <button id="button_batch_caring" onclick="batch_caring();">Batch All Daycare</button><br>
 Total Daycare Reward: <b><span id="totalDaycareReward">***</span> $ASTR</b><br>
 Total Daycare Count: <b><span id="totalDaycareCount">***</span></b><br>
 </p>

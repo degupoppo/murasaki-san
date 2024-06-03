@@ -41,6 +41,9 @@
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z7XXV794SJ"></script><script>window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', 'G-Z7XXV794SJ');</script>
     
+    <!--- scroll up button --->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.4/css/all.css"><link rel="stylesheet" href="src/css/scrollup.css"><div id="page_top"><a href="#"></a></div>
+
 </head>
 
 
@@ -82,12 +85,6 @@
     </p>
 
     <canvas id="top_animation" width=0 height=64></canvas>
-
-    <!--- scroll up button --->
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.4/css/all.css">
-    <link rel="stylesheet" href="src/css/scrollup.css">
-    <div id="page_top"><a href="#"></a></div>
-
 </header>
 
 
@@ -115,10 +112,10 @@ This is our fan project using <br class="br-sp"><b>Astar Substrate EVM</b> <img 
 This project is currently being developed on a private chain.<br>
 In the near future, it will first be test-played on the Shibuya testnet and eventually deployed on the Astar Substrate EVM.<br>
 <br>
-<i>Development Progress: <b><span id="percent">85</span></b><font size="-1"> (v0.1.35)</font></i><br>
+<i>Development Progress: <b><span id="percent">86</span></b><font size="-1"> (v0.1.36)</font></i><br>
 <span id="container"></span><br>
 <font size="-1" color="blue"><i>
-Developers are currently working on polishing up the strolling system and preparing the tokenURI of all NFTs.
+The developer is currently reconstructing the economic system to reflect dApp Staking V3.
 </font></i>
 <script src="https://rawgit.com/kimmobrunfeldt/progressbar.js/master/dist/progressbar.min.js"></script>
 <script>
@@ -150,7 +147,7 @@ Developers are currently working on polishing up the strolling system and prepar
     document.getElementById("percent").innerHTML = (Math.round(bar.value() * 100) + '%');
   }
     });
-    bar.animate(0.85); 
+    bar.animate(0.86); 
 </script>
 </p>
 
@@ -177,11 +174,11 @@ Murasaki-san <br class="br-sp"><b><a href="https://store.line.me/stickershop/pro
 <h3 id="whats_this">What's This? &#127808;</h3>
 
 <p>
-<b>House of Murasaki-san</b> is a dApps game built on Astar Network (Substrate EVM). This fully on-chain game has a relaxed pace with low transactions and can be classified as <b>an idle game</b> or <b>a pet caring game</b>.<br>
+<b>House of Murasaki-san</b> is a dApp game built on Astar Network (Substrate EVM). This fully on-chain game has a relaxed pace with low transactions and can be classified as <b>an idle game</b> or <b>a pet caring game</b>.<br>
 </p>
 
 <p>
-<button style="font-size:80%; font-weight: bold; background-color:#FF4F6F;" onclick="location.href='house.html?summoner=999999999';">Demo Preview</button>&nbsp;&nbsp;is available to everyone. Take a peek into the developer's murasaki-san! (No wallet connection or network change is required)<br>
+<button style="font-size:80%; font-weight: bold; background-color:#FF4F6F;" onclick="location.href='house.html?summoner=999999999';">Demo Preview</button>&nbsp;&nbsp;is available to everyone. Take a peek into the developer's murasaki-san! (no wallet connection or network change is required)<br>
 </p>
 
 <p>
@@ -211,7 +208,35 @@ This product can be used accross multiple platforms. You can play the game using
 <code>
 <font size="-1" color="black">
 <p>
-## [0.1.35] - 2024-5-1<br>
+<u>## [0.1.36] - 2024-6-1</u><br>
+### Fixed<br>
+- Fixed the misspellings.<br>
+- Fixed the item names.<br>
+- Fixed the bug on the mining and farming button.<br>
+- Fixed the description about the strolling bonus.<br>
+- Fixed the contents of the Item Marketplace section on the Web page.<br>
+- Fixed the bug on the crafting when happy = 0%.<br>
+- Fixed the bug where the music did not play during practice.<br>
+- Fixed the content abount the account unification.<br>
+- Fixed the twinkles position and the contents on the web page.<br>
+- Added the progress bar on the strolling window.<br>
+- Updated the contents of Economy to the dApps Staking V3.<br>
+- Fixed the daycare fee from 0.30 to 0.22 and fixed the description about the daycare.<br>
+- Fixed the depth of the foods.<br>
+### Changed<br>
+- Renewed the Item Detail page with the latest content.<br>
+- The item upgrading section has been integrated into the items section.<br>
+### Added<br>
+- Prepared the json files and png files of NFTs.<br>
+- Added the content about the gas cost on the web page.<br>
+### Contract Replaced<br>
+- Crafting Codex: Fixed the bug of crafting time when happy = 0.<br>
+### Contract Parameter Updated<br>
+- Craft: Updated the json URL of NFTs.<br>
+- Daycare: Updated the daycare fee from 0.30 to 0.22 $ASTR.<br>
+- Buyback Vault: Updated the buyback prices (total inflation rate: +22.99%)<br>
+<br>
+<u>## [v0.1.35] - 2024-5-1</u><br>
 ### Fixed<br>
 - Updated to Phaser v3.80.1.<br>
 - Fixed the misspellings.<br>
@@ -233,11 +258,11 @@ This product can be used accross multiple platforms. You can play the game using
 ### Added<br>
 - Added a column and calculation formula for the practice system on the web page.<br>
 ### Contract Replaced<br>
-- Adjusted so that crafting does not progress further when 'happy' is 0.<br>
+- Crafting Codex: Adjusted so that crafting does not progress further when 'happy' is 0.<br>
 ### Contract Parameter Updated<br>
-- Updated the buyback prices (total inflation rate: +19.41%)<br>
+- Buyback Vault: Updated the buyback prices (total inflation rate: +19.41%)<br>
 <br>
-## [0.1.34] - 2024-4-1<br>
+<u>## [v0.1.34] - 2024-4-1</u><br>
 ### Fixed<br>
 - Updated to Phaser v3.80.0.<br>
 - Fixed the display bug of Memento of Murasaki-san.<br>
@@ -247,9 +272,9 @@ This product can be used accross multiple platforms. You can play the game using
 - Crafting: Fixed the bugs in craft cancel.<br>
 - Daycare: Fixed the bugs in the waiting list.<br>
 ### Contract Parameter Updated<br>
-- Updated the buyback prices (total inflation rate: +15.93%).<br>
+- Buyback Vault: Updated the buyback prices (total inflation rate: +15.93%).<br>
 <br>
-## [v0.1.33] - 2024-2-19<br>
+<u>## [v0.1.33] - 2024-2-19</u><br>
 ### Fixed<br>
 - Updated to Phaser v3.70.0<br>
 - Fixed the display of the flowers on the loading screen.<br>
@@ -286,14 +311,14 @@ This product can be used accross multiple platforms. You can play the game using
 - Memento: Updated the minimum bidding price to 10 $ASTR.<br>
 - Pippel Function: Updated the pippel interval to 48 hr.<br>
 <br>
-## [v0.1.32] - 2024-1-28<br>
+<u>## [v0.1.32] - 2024-1-28</u><br>
 ### Added<br>
 - The small insects hiding in the shadow of the radar chart have been added.<br>
 ### Fixed<br>
 - Fixed the inconveniences in the display of the crown and ribbon.<br>
 - Fixed the inconveniences in the display and sounds of the strolling window.<br>
 <br>
-## [v0.1.31] - 2024-1-26<br>
+<u>## [v0.1.31] - 2024-1-26</u><br>
 ### Added<br>
 - Prepared the web pages.<br>
 - Prepared the X/Twitter account.<br>
@@ -301,10 +326,10 @@ This product can be used accross multiple platforms. You can play the game using
 - Fixed the crafting window bugs.<br>
 - Fixed the voting window bugs.<br>
 <br>
-## [v0.1.1 to v0.1.30] - 2022-1-24 to 2024-1-25<br>
+<u>## [v0.1.1 to v0.1.30] - 2022-1-24 to 2024-1-25</u><br>
 - Developed in a closed test environment.<br>
 <br>
-## [v0.1.0] - 2022-1-24<br>
+<u>## [v0.1.0] - 2022-1-24</u><br>
 - Embarked on the project :)<br>
 </p>
 </code>
@@ -442,7 +467,7 @@ It usually takes about 5-7 days of play time to reach these limits. Once the tri
 </p>
 
 <p>
-Aside from <b><a href="#staking">the Dapps Staking Bonus</a></b>, we have not implemented any billing system that would impose additional costs affecting gameplay. If you want to buy or sell item NFTs on the Marketplace, you will need some $ASTR.
+Aside from <b><a href="#staking">the Dapp Staking Bonus</a></b>, we have not implemented any billing system that would impose additional costs affecting gameplay. If you want to buy or sell item NFTs on the Marketplace, you will need some $ASTR.
 </p>
 
 <p>
@@ -452,29 +477,33 @@ Aside from <b><a href="#staking">the Dapps Staking Bonus</a></b>, we have not im
 <br>
 
 
-<!--- dApps Staking --->
+<!--- dApp Staking --->
 
-<h3 id="staking">dApps Staking Bonus! &#x1f973;</h3>
+<h3 id="staking">dApp Staking Bonus! &#x1f973;</h3>
 
 <center><p class="notice" style="width:80%;">
 <b>&#127775; Attention &#127775;</b><br>
-The contents described below are applicable if this project is adopted for dApps Staking on the Astar Network
+The contents described below are applicable if this project is adopted for dApp Staking on the Astar Network
 </p></center>
 
 <p>
-There are <b>in-game bonuses</b> depending on your dApps staking amount for this project.<br>
+There are <b>in-game bonuses</b> depending on your dApp staking amount for this project.<br>
 </p>
 
 <p>
-<img src="src/png/item_staking.png" width="80" height="80" class="textMiddle" style="float:left; margin-right:15px;margin-bottom:10px; margin-top:10px">When you stake $ASTR in dApps Staking for this project, the construction of <b>a House of Gingerbread</b> will begin. <b>The more $ASTR you stake, the faster the construction will be</b>. Once the construction is complete, you will be able to mint <b>a random NFT</b>.
+<img src="src/png/item_staking.png" width="80" height="80" class="textMiddle" style="float:left; margin-right:15px;margin-bottom:10px; margin-top:10px">When you stake $ASTR in dApp Staking for this project, the construction of <b>a House of Gingerbread</b> will begin. <b>The more $ASTR you stake, the faster the construction will be</b>. Once the construction is complete, you will be able to mint <b>a random NFT</b>.
 </p>
 
 <p>
-The Murasaki-san living in the EVM wallet (Astar EVM H160 address) linked with the Polkadot wallet (Astar Native SS58 address) that is staking on the House of Murasaki-san on the dApps staking can receive the above bonuses. You can link your Astar Native wallet and Astar EVM wallet on <b><a href="https://astarpass.astar.network/">AstarPass</a></b>.
+The Murasaki-san living in the EVM wallet (Astar EVM H160 address) linked with the Polkadot wallet (Astar Native SS58 address) that is staking on the House of Murasaki-san on the dApp staking can receive the above bonuses. You can link your Astar Native wallet and Astar EVM wallet on <b><a href="https://astarpass.astar.network/">AstarPass</a></b>.
 </p>
 
 <p>
-Players can also participate in dApps Staking directly from their EVM wallets. The stake ammount for players is calculated as the sum of tokens staked by their EVM wallet and tokens staked by their Polkadot wallet linked by AstarPass.
+Players can also participate in dApp Staking directly from their EVM wallets. The stake ammount for players is calculated as the sum of tokens staked by their EVM wallet and tokens staked by their Polkadot wallet linked by AstarPass.
+</p>
+
+<p>
+Support for <b><a href="https://docs.astar.network/ja/docs/build/astar-beta-labs/account-unification/">Account Unification</a></b> is currently under consideration. It will be addressed after Feature A is officially launched on Astar mainnet.
 </p>
 
 <p>
@@ -482,7 +511,7 @@ By clicking on your House of Gingerbread, you can check the staked amount and th
 </p>
 
 <p>
-Participation in dApps staking benefits both the player and the product as a whole. Actually, 90% of staking rewards are spent on maintaining the product (see <b><a href="#detailedspecific">Economy Details</a></b> session).
+Participation in dApp staking benefits both the player and the product as a whole. Actually, 90% of staking rewards are spent on maintaining the product (see <b><a href="#detailedspecific">Economy Details</a></b> session).
 </p>
 
 <br>
@@ -523,6 +552,34 @@ Item NFTs listed in the marketplace will be moved out of your house and will no 
 <li><b><a href="buyback.html">Buyback Treasury</a>:</b> Players can choose to list their owned NFTs for auction on the Marketplace or burn them in the Buyback Treasury at a fixed price. The Minimum listing price is set at the buyback price or 1.00 $ASTR, whichever is higher.
 </ul>
 
+<p>
+<b>Other Services:</b><br>
+</p>
+
+<details><summary>Send Item Fees &#127873;</summary>
+<p>
+The player can transfer or gift their items directly to another Murasaki-san without using the Marketplace, but they will need to pay a transfer fee to ensure fair gameplay and prevent botting. The transfer fee is subject to adjustment and it may be removed in the future.
+</p>
+<p><b><a href="market.html#sendItem">>> Send Item Service <<</a></b></p>
+</details>
+
+<details><summary>Daycare Service &#x1F3E8;</summary>
+<p>
+By paying the upfront fee, you can register for daycare services and request other players to take care of your Murasaki-san. When taking care of other players' Murasaki-san through daycare services, the caretaker can receive a reward slightly higher than the gas cost incurred.
+</p>
+<p><b><a href="market.html#daycare">>> Daycare Service <<</a></b></p>
+</details>
+
+<details><summary>Buyback Treasury &#x1f33c;</summary>
+<p>
+Players also have the option to receive a fixed amount refund by burning their NFTs in the buyback treasury, in addition to selling NFTs on the marketplace. The buyback price of each NFT never decreases and steadily increases over time, albeit gradually. This buyback system aims to guarantee the value of NFTs in this project and achieve "trustless NFT price appreciation."
+</p>
+<p>
+For more details on the buyback system, please refer to <a href="#buyback">the Buyback Treasury section</a>.
+</p>
+<p><b><a href="buyback.html">>> Buyback Treasury <<</a></b></p>
+</details>
+
 <br>
 
 
@@ -562,7 +619,7 @@ Item NFTs listed in the marketplace will be moved out of your house and will no 
 <h3 id="faq">FAQ&#x2753;</h3>
 
 <details>
-<summary>How do I participate in dApps Staking?</summary>
+<summary>How do I participate in dApp Staking?</summary>
 <p>
 ***
 </p>
@@ -657,10 +714,7 @@ You can take care of your Murasaki-san with these actions.
 <p>Crafting items require costs and time. Items increase status point and make your house more lively.</p>
 <b><a href="items.html">>> All craftable item details are found in here <<</a></b><br>
 <br>
-</details>
-
-<!---### upgrade --->
-<details><summary>Item Rarity and Upgrading &#x2934;</summary>
+<b>Item Rarity and Upgrading</b><br>
 <p>
 <ul>
 <li>There are three levels of rarity: common, uncommon, and rare. Uncommon items provides a status boost of 1.5x compared to common items, while rare items provides a boost of 2.0x.
@@ -683,7 +737,7 @@ Fluffy is a small housemate in your house who dreams of becomming Murasaki-san. 
 </p>
 
 <p>
-<b>By opening the present boxes</b>, you will get a random color of fluffy. You can receive the present box in the following situations: <b>crafting bonus</b> (when Murasaki-san completes crafting an item, a random Murasaki-san will receive a present box), <b>cat-mail bonus</b> (when your Murasaki-san open a cat-mail, both the sender and recipient will receive a present box), <b>festival participation bonus</b> (your Murasaki-san receive a present box by voting during the Fluffy Festival. The first voter and the last voter can receive an additional one), <b>dApps staking bonus</b> (depending on your dApps staking amount, you can receive fluffy once every 7-30 days).
+<b>By opening the present boxes</b>, you will get a random color of fluffy. You can receive the present box in the following situations: <b>crafting bonus</b> (when Murasaki-san completes crafting an item, a random Murasaki-san will receive a present box), <b>cat-mail bonus</b> (when your Murasaki-san open a cat-mail, both the sender and recipient will receive a present box), <b>festival participation bonus</b> (your Murasaki-san receive a present box by voting during the Fluffy Festival. The first voter and the last voter can receive an additional one), <b>dApp staking bonus</b> (depending on your dApp staking amount, you can receive fluffy once every 7-30 days).
 </p>
 
 <img width="700" src="src/png/fig_fluffy.png" />
@@ -692,7 +746,7 @@ Summary chart of fluffy: acquisition method, effects, and upgrade methods. By co
 </figcaption>
 
 <p>
-<b>Fluffy:</b> <img src="src/icon/fluffy_08.png" width="20" height="20"> It's a smallest fluffy. You can mainly obtain it by opening present boxes. There are a total of 12 colors available (gray<img src="src/icon/fluffy_01.png" width="20" height="20">, beige<img src="src/icon/fluffy_02.png" width="20" height="20">, limegreen<img src="src/icon/fluffy_03.png" width="20" height="20">, lightblue<img src="src/icon/fluffy_04.png" width="20" height="20">, blue<img src="src/icon/fluffy_05.png" width="20" height="20">, purple<img src="src/icon/fluffy_06.png" width="20" height="20">, redpurple<img src="src/icon/fluffy_07.png" width="20" height="20">, red<img src="src/icon/fluffy_08.png" width="20" height="20">, orange<img src="src/icon/fluffy_09.png" width="20" height="20">, pink<img src="src/icon/fluffy_10.png" width="20" height="20">, yellow<img src="src/icon/fluffy_11.png" width="20" height="20">, white<img src="src/icon/fluffy_12.png" width="20" height="20">). Fluffies love Murasaki-san and dream of becoming like Murasaki-san. By collecting five fluffies of the same color, you can upgrade them to a slightly larger fluffier.<br>
+<b>Fluffy:</b> <img src="src/icon/fluffy_08.png" width="20" height="20"> It's a smallest fluffy. You can mainly obtain it by opening present boxes. There are a total of 12 colors available (gray<img src="src/icon/fluffy_01.png" width="20" height="20">, beige<img src="src/icon/fluffy_02.png" width="20" height="20">, limegreen<img src="src/icon/fluffy_03.png" width="20" height="20">, lightblue<img src="src/icon/fluffy_04.png" width="20" height="20">, blue<img src="src/icon/fluffy_05.png" width="20" height="20">, purple<img src="src/icon/fluffy_06.png" width="20" height="20">, redpurple<img src="src/icon/fluffy_07.png" width="20" height="20">, red<img src="src/icon/fluffy_08.png" width="20" height="20">, orange<img src="src/icon/fluffy_09.png" width="20" height="20">, pink<img src="src/icon/fluffy_10.png" width="20" height="20">, yellow<img src="src/icon/fluffy_11.png" width="20" height="20">, white<img src="src/icon/fluffy_12.png" width="20" height="20">). Fluffies love Murasaki-san and dream of becoming like Murasaki-san. By collecting fluffies of the same color, you can upgrade them to a slightly larger fluffier.<br>
 <br>
 <b>Fluffier:</b> <img src="src/icon/fluffier_08.png" width="25" height="25"> It's a little bigger fluffy. You can mainly obtain it by upgrading fluffies. They are cherished, and their sense of self has started to blossom. By collecting four fluffiers of the same color, you can upgrade them to a larger fluffiest. <br>
 <br>
@@ -791,7 +845,7 @@ Inspired by this stroy, the coder was determined to bring Pippel to life and thu
 &nbsp;&nbsp;&nbsp;<img src="src/png/item_wreath.png" width="80" height="80" class="textMiddle">
 
 <p>
-By crafting and placing a flower wreath in the house, it activates <b>an exp boost bonus that reflects the on-chain activity of the players's wallet</b>. The exp boost rate increases based on the number of token types owned in the wallet, the number of NFT types owned in the wallet, and the dApps staking amount for this project.
+By crafting and placing a flower wreath in the house, it activates <b>an exp boost bonus that reflects the on-chain activity of the players's wallet</b>. The exp boost rate increases based on the number of token types owned in the wallet, the number of NFT types owned in the wallet, and the dApp staking amount for this project.
 </p>
 
 <p>
@@ -869,7 +923,7 @@ Rules for strolling:
 <ul>
 <li>Before departing, decide on the <b>destination</b> (mountain, sea, or grassland), <b>companion</b> (Mr.Astar, Ms.Ether, or Dr.Bitco) and <b>drink</b> (Water, Coffee, Tea, or Juice). Murasaki-san walks at a speed of 500m per hour. The duration of the stroll is <b>4 hours</b>.
 <li>There is a chance of meeting another Murasaki-san who has chosen <b>the same destination and companion</b>. When Murasaki-san meets many friends during the stroll, they become happy and <b>get bonus on the strolling distance</b>.
-<li>When the total strolling distance or total number of friends reach a certain level, Murasaki-san may <b>discover a random NFT</b>.
+<li>When the total strolling distance or total number of friends reach a certain level, Murasaki-san may <b>discover a random <a href="items.html#twinkle">twinkle NFT</a></b>.
 </ul>
 
 &nbsp;&nbsp;&nbsp;<img src="src/icon/strolling.png" width="96" height="96" class="textMiddle">< Yaaay!<img src="src/png/icon_system_heart.png" width="24" height="24" class="textMiddle">
@@ -927,6 +981,34 @@ What is your favorite instrument? The coder enjoys playing the piano a bit (<fon
 <!--- Technical Details --->
 
 <h3 id="detailedspecific">Technical Details &#x1f9ec;</h3>
+
+
+<!-- gas cost -->
+
+<details>
+<summary>Gas Cost &#x26FD;</summary>
+
+<p>
+Since all computations and data storage are conducted on-chain in this project, developers consider the gas fees paid by players to be crucial for gameplay. 
+</p>
+
+<p>
+With the implementation of <a href="https://docs.astar.network/docs/learn/tokenomics2/">Astar Tokenomics 2.0</a> at the end of 2023, the gas fees on the Astar EVM saw a significant increase. Since the implementation of Tokenomics 2.0, efforts have been made to refactor and minimize the gas fees required for executing each contract, but unfortunately, a certain level of cost remains necessary.
+</p>
+
+<p>
+Currently, for standard gameplay, approximately <b>0.8-1.0 $ASTR</b> of gas fees per day are required.
+</p>
+
+<p>
+<b>The use of the daycare service:</b> To alleviate the stress of gas costs for players, a daycare service allowing batch transactions has been provided. By utilizing this daycare service, players can continue basic gameplay for around <b>0.4 $ASTR</b> per day (only Feeding and Grooming). However, receiving care through the daycare service means critical checks by LUK are not conducted, and the experience gained is reduced to 80%. Therefore, the growth of the player's character, murasaki-san, is slower compared to when caring for themselves. While caring for oneself may incur higher gas costs than using the daycare service, it guarantees 100% of the experience gained and, additionally, there is a possibility of doubling the experience gained if a critical check by LUK is successful.
+</p>
+
+<p>
+Developers are actively seeking ways to reduce gas fees and continuing their efforts to generate profits exceeding the gas fees paid by players.
+</p>
+
+</details>
 
 
 <!---### contracts --->
@@ -1169,6 +1251,8 @@ Reward NFT: Fluffy (61%), Fluffier (10%), Glitter (3%), Sparkle (3%), Twinkle (3
 <font size="-0.5">
 <sup>*</sup>The maximum number of friends meet during a stroll is 5.<br>
 <sup>*</sup>If Murasaki-san don't meet anyone, there is a low probability of receiving a large bonus (+100% chance at 1%, +50% chance at 3%, and +20% chance at 10%).<br>
+<sup>*</sup>When the total strolling distance reaches 6000, 20000, 40000, 64000, 92800, 127360, 168832, 218598, 278318, 349982, 435978, 539174, 663008, 811610, 989932, or 1203918, a random twinkle/sparkle/glitter NFT will be minted.<br>
+<sup>*</sup>When the total number of met friends reaches 10, 30, 70, 150, 310, 630, 1270, 2550, 5110, 10230, 20470, or 40950, a random twinkle/sparkle/glitter NFT will be minted.<br>
 </font>
 </p>
 
@@ -1214,14 +1298,14 @@ Reward NFT: Fluffy (61%), Fluffier (10%), Glitter (3%), Sparkle (3%), Twinkle (3
 
 <!---### buyback --->
 
-<details>
+<details id="buyback">
 
 <summary>Buyback Treasury &#x1f4b5;</summary>
 
 <center>
 <p class="notice" style="width:80%;">
 <b>&#127775; Attention &#127775;</b><br>
-The contents described below are applicable if this project is adopted for dApps Staking on the Astar Network
+The contents described below are applicable if this project is adopted for dApp Staking on the Astar Network
 </p>
 </center>
 
@@ -1295,12 +1379,12 @@ This buyback system is somewhat experimental, and its acceptance by players will
 <center>
 <p class="notice" style="width:80%;">
 <b>&#127775; Attention &#127775;</b><br>
-The contents described below are applicable if this project is adopted for dApps Staking on the Astar Network
+The contents described below are applicable if this project is adopted for dApp Staking on the Astar Network
 </p>
 </center>
 
 <p>
-Through the Buyback Sysmte and following economic strategies, the developers aim to create a low-stress economic system in the medium to long term. Our goal is to create a system where players can enjoy the gameplay for a longer period without the stress of incurring significant losses in the short term. Our focus is on fostering a relaxed and enjoyable experience over an extended period, rather than seeking quick and substantial profits.
+Through the Buyback Sysmte and following economic strategies, the developers aim to create a low-stress economic system in the medium to long term. Our goal is to create a system where players can enjoy the gameplay for a longer period without the stress of incurring significant losses in the short term. Our focus is on fostering a relaxed and enjoyable experience over an extended period, rather than seeking quick and substantial profits. We aim to realize the above ecosystem not through expectations or trust in the project, but rather as "trustless" rules defined by contracts.
 </p>
 
 <p>
@@ -1308,7 +1392,7 @@ Through the Buyback Sysmte and following economic strategies, the developers aim
 </p>
 
 <p>
-<b>Sustainable Economy:</b> In this project, our goal is to establish a sustainable economic model where the value of assets (NFTs) gradually and steadily increases. While it's beneficial to have a consistent influx of new players and sustained interest in purchasing NFTs, we acknowledge the challenges of maintaining long-term sustainability. Our primary focus is on preserving the asset value of active players by Buyback Treasury System. We do not require players to continuously buy tokens or NFTs as a means to support the project's asset value. Instead, the overall asset value of the project (equal to Buyback Price) is supported by the rewards generated through dApps Staking, where players stake their assets. The majority of dApps staking rewards (90%) will be used to inflate the Buyback Treasury, ensuring NFT values and increasing future rewards through self-staking. In this model, the generation of funds is not reliant on new player influx but rather on the dApps Staking activities of active players. In other words, even if the number of active players decreases, the asset value per active player does not diminish.
+<b>Sustainable Economy:</b> In this project, our goal is to establish a sustainable economic model where the value of assets (NFTs) gradually and steadily increases. While it's beneficial to have a consistent influx of new players and sustained interest in purchasing NFTs, we acknowledge the challenges of maintaining long-term sustainability. Our primary focus is on preserving the asset value of active players by Buyback Treasury System. We do not require players to continuously buy tokens or NFTs as a means to support the project's asset value. Instead, the overall asset value of the project (equal to Buyback Price) is supported by the rewards generated through dApp Staking, where players stake their assets. The majority of dApp staking rewards (90%) will be used to inflate the Buyback Treasury, ensuring NFT values and increasing future rewards through self-staking. In this model, the generation of funds is not reliant on new player influx but rather on the dApp Staking activities of active players. In other words, even if the number of active players decreases, the asset value per active player does not diminish.
 </p>
 
 <p>
@@ -1316,7 +1400,7 @@ Through the Buyback Sysmte and following economic strategies, the developers aim
 </p>
 
 <p>
-<b>Mitigating the Ponzi Scheme Effect:</b> Here, the term "Ponzi scheme" refers to a situation where latecomers are heavily exploited by early adopters due to excessively powerful early bird advantages (deviating slightly from the original meaning of a Ponzi scheme). While early bird advantages are not inherently negative, we believe that if they are too strong, the number of players who suffer disadvantages increases. In this project, the influx of new players does not increase the buyback price, nor does it increase or decrease the allocated asset value per player. The inflation of the buyback price is solely driven by the funding indicated by the blue arrows within the figure, representing the inflow of funds from the Buffer Vault. The red arrows, representing the inflow of funds from new players, increase the total assets of the buyback treasury but do not affect the buyback price. In this project, the increase in active players' monetary value is not driven by the influx of new players but mainly by the game fee and dApps Staking reword (the yellow arrows).
+<b>Mitigating the Ponzi Scheme Effect:</b> Here, the term "Ponzi scheme" refers to a situation where latecomers are heavily exploited by early adopters due to excessively powerful early bird advantages (deviating slightly from the original meaning of a Ponzi scheme). While early bird advantages are not inherently negative, we believe that if they are too strong, the number of players who suffer disadvantages increases. In this project, the influx of new players does not increase the buyback price, nor does it increase or decrease the allocated asset value per player. The inflation of the buyback price is solely driven by the funding indicated by the blue arrows within the figure, representing the inflow of funds from the Buffer Vault. The red arrows, representing the inflow of funds from new players, increase the total assets of the buyback treasury but do not affect the buyback price. In this project, the increase in active players' monetary value is not driven by the influx of new players but mainly by the game fee and dApp Staking reword (the yellow arrows).
 </p>
 
 <p>
@@ -1324,41 +1408,41 @@ Here is an overview of the token flow:<br>
 <center>
 <img width="650" src="src/png/fig_economy.png" />
 <figcaption>
-<sup>1)</sup>Irregular fees: petrification cure fees and direct item transfer fees.
+<sup>1)</sup>Extra Fees: petrification cure fees and direct item transfer fees.
 </figcaption>
 </center>
 </p>
 
-<b>Starting Fee:</b> 45% of it is sent to the buyback treasury as the initial capital. However, the buyback price remains unchanged. 45% is sent to the staking treasury and self-staked in dApps staking to generate income for future inflation of the buyback treasury. The remaining 10% is sent to developers. This processes are automatically performed by smart contracts on the blockchain.
+<b>Starting Fee:</b> 45% of it is sent to the buyback treasury as the initial capital. However, the buyback price remains unchanged. 45% is sent to the staking treasury and self-staked in dApp staking to generate income for future inflation of the buyback treasury. The remaining 10% is sent to developers. This processes are automatically performed by smart contracts on the blockchain.
 
 
 <p>
-<b>Buyback Price Inflation<sup>2)</sup>:</b> All dApps staking rewards and in-game fees are collected in the Buffer Vault. The funds necessary to increase the total assets of the Buyback Treasury, for example, by 3% per month, are transferred to the Buyback Treasury (X%). The remaining funds are sent to the Staking Treasury to increase the self-staking amount (Y%). 10% is allocated to developers. The appropriate inflation rate, currently planned to be around 3% per month, will be adjusted periodically based on the number of active users and dApps staking volume. This process is automatically executed by smart contracts on the blockchain, but the timing of when the process is carried out is determined manually by the developer.
+<b>Buyback Price Inflation<sup>2)</sup>:</b> All dApp staking rewards and in-game fees are collected in the Buffer Vault. The funds necessary to increase the total assets of the Buyback Treasury, for example, by 3% per month, are transferred to the Buyback Treasury (X%). The remaining funds are sent to the Staking Treasury to increase the self-staking amount (Y%). 10% is allocated to developers. The appropriate inflation rate, currently planned to be around 3% per month, will be adjusted periodically based on the number of active users and dApp staking volume. This process is automatically executed by smart contracts on the blockchain, but the timing of when the process is carried out is determined manually by the developer.
 </p>
 
 <p>
-<b>Self Staking:</b> After Buyback Price Inflating, any remaining funds are temporarily moved to the Staking Treasury (EOA) and self-staked in dApps Staking. Self-staking is a mechanism to secure funds for future inflation of the Buyback Price. These processes are currently done manually as there is no way to automate them, but they are planned to be automated using CA or other methods in the future.
+<b>Self Staking:</b> After Buyback Price Inflating, any remaining funds are moved to the Staking Treasury (EOA) and self-staked in dApp Staking. Self-staking is a mechanism to secure funds for future inflation of the Buyback Price. The amount of tokens in the self-staking wallet will essentially increase over time, and this balance is also intended to be used as the treasury for the next season. Developers aim to achieve sufficient inflation rates through only new fund inflows into the project, but will consider supplementing from the self-staking wallet if necessary. These processes are currently done manually as there is no way to automate them, but they are planned to be automated in the future.
 </p>
 
 <p>
-<b>Inflation Rate:</b> The inflation rate of Buyback Price depends on the amount of capital inflow per active player. As the dApps Staking amount per active player increases, it creates inflationary pressure. On the other hand, a large influx of new players is expected to decrease the dApps Staking amount per active player, which inhibit inflation. Conversely, an increase in dropout players results in the reallocation of tokens previously allocated to dropout players to the current active players, creating inflationary pressure. In other words, an increase in new players does not affect the current asset value of active players, and a decrease in active players increases the future asset value of remaining players, providing an incentive for continuous gameplay.
+<b>Inflation Rate:</b> The inflation rate of Buyback Price depends on the amount of capital inflow per active player. As the dApp Staking amount per active player increases, it creates inflationary pressure. On the other hand, a large influx of new players is expected to decrease the dApp Staking amount per active player, which inhibit inflation. Conversely, an increase in dropout players results in the reallocation of tokens previously allocated to dropout players to the current active players, creating inflationary pressure. In other words, an increase in new players does not affect the current asset value of active players, and a decrease in active players increases the future asset value of remaining players, providing an incentive for continuous gameplay.
 </p>
 
 <p>
-In summary, the expansion of the Buyback Treasury, which secures the overall value of the project, is determined by the amount of dApps Staking per active player. Only self-staking with a starting fee of 45% is unlikely to achieve an attractive inflation rate, and the voluntary participation of each player in dApps Staking is required. The developers are committed to actively encouraging players to participate in dApps Staking through ongoing development efforts.
+In summary, the expansion of the Buyback Treasury, which secures the overall value of the project, is determined by the amount of dApp Staking per active player. Only self-staking with a starting fee of 45% is unlikely to achieve an attractive inflation rate, and the voluntary participation of each player in dApp Staking is required. The developers are committed to actively encouraging players to participate in dApp Staking through ongoing development efforts.
 </p>
 
 <p>
 <center>
 <img width="500" src="src/png/fig_inflation.png" />
 <figcaption>
-Projected graph of acceptable inflation rate and buyback price (NFT price) based on dApps Staking amount per active player. The dApps Staking Reward was assumed to be APR 11% and the calculation was made under the assumption that the number of active players and dApps Staking amount remain constant for a period of 2 years. For example, if the average staking amount of all active players is 7,000 $ASTR, the buyback price of each NFT is expected to increase by approximately five times after two years. Furthermore, the rate of increase in the buyback price does not depend on the number of active players. Note that this calculation is based on a simplified model and Astar Tokenomics 1.0. In Astar Tokenomics 2.0 and dApp Staking V3, there may be different potential outcomes in the calculatins. IR: monthly inflation rate, ST: staking amount per active player.
+Projected graph of acceptable inflation rate and buyback price (NFT price) based on dApp Staking amount per active player. The dApp Staking Reward was assumed to be APR 11% and the calculation was made under the assumption that the number of active players and dApp Staking amount remain constant for a period of 2 years. For example, if the average staking amount of all active players is 7,000 $ASTR, the buyback price of each NFT is expected to increase by approximately five times after two years. Furthermore, the rate of increase in the buyback price does not depend on the number of active players. Note that this calculation is based on a simplified model and Astar Tokenomics 1.0. In Astar Tokenomics 2.0 and dApp Staking V3, there may be different potential outcomes in the calculatins. IR: monthly inflation rate, ST: staking amount per active player.
 </figcaption>
 </center>
 </p>
 
 <p>
-<b>Capital Recovery Strategy:</b> In this project, the buyback price has been adjusted to achieve a balance where the initial fee can be recovered in approximately two years of play by burning all 48 craftable items, assuming a 3% monthly inflation rate in the buyback price (This is attainable through DApps staking at abount 1000 $ASTR per active player at Astar Tokenomics 1.0). If the monthly buyback price inflation exceeds 3%, the recovery amount after two years will be higher; conversely, if the inflation is lower, the recovery amount will be less. The inflation of the buyback price is expected to increase with rising dApps Staking rewards and an increase in dropout players (those who become inactive). It is anticipated that recovering the initial investment using the buyback mechanism will become challenging if continuous play is discontinued before the two-year mark. Therefore, in this project, early entry and early exit are not considered effective capital recovery strategies, and long-term and continuous play is regarded as a rational capital recovery strategy.
+<b>Capital Recovery Strategy:</b> In this project, the buyback price has been adjusted to achieve a balance where the initial fee can be recovered in approximately two years of play by burning all 48 craftable items, assuming a 3% monthly inflation rate in the buyback price (This is attainable through dApp staking at abount 1000 $ASTR per active player at Astar Tokenomics 1.0). If the monthly buyback price inflation exceeds 3%, the recovery amount after two years will be higher; conversely, if the inflation is lower, the recovery amount will be less. The inflation of the buyback price is expected to increase with rising dApp Staking rewards and an increase in dropout players (those who become inactive). It is anticipated that recovering the initial investment using the buyback mechanism will become challenging if continuous play is discontinued before the two-year mark. Therefore, in this project, early entry and early exit are not considered effective capital recovery strategies, and long-term and continuous play is regarded as a rational capital recovery strategy.
 </p>
 
 </details>
@@ -1407,8 +1491,8 @@ Astar is a highly promising and excellent blockchain. The developers have chosen
 </p>
 
 <p>
-<b>dApps Staking:</b><br>
-The developers can focus on the project's development without worrying about financial sustainability, if their project were adopted for dApps staking. On the player's side, they can support the project financially without exposing their assets to hacking risks or depleting them by excessive purchases of the project's NFTs or tokens. In this project, players engaging in dApps staking are rewarded with in-game incentives, allowing both the project and players to benefit from low-risk profit. In other words, players who are fond of this project and want to play more efficiently have an incentive to stake more assets in dApps staking. This incentivizes the project's developers strive to make development that encourage players to stake more funds in dApps staking. To our knowledge, Astar Network is the first to advocate for this excellent mechanism.
+<b>dApp Staking:</b><br>
+The developers can focus on the project's development without worrying about financial sustainability, if their project were adopted for dApp staking. On the player's side, they can support the project financially without exposing their assets to hacking risks or depleting them by excessive purchases of the project's NFTs or tokens. In this project, players engaging in dApp staking are rewarded with in-game incentives, allowing both the project and players to benefit from low-risk profit. In other words, players who are fond of this project and want to play more efficiently have an incentive to stake more assets in dApp staking. This incentivizes the project's developers strive to make development that encourage players to stake more funds in dApp staking. To our knowledge, Astar Network is the first to advocate for this excellent mechanism.
 </p>
 
 <p>
@@ -1428,7 +1512,7 @@ We strongly believe in the future interoperability brought by Polkadot and parac
 
 <p>
 <b>Substrate EVM or zkEVM:</b><br>
-When developing an on-chain project using Solidity, there are two options currently available on Astar Network: using the Substrate EVM or using zkEVM supported by the Polygon CDK. We have chosen the Substrate EVM as the development environment for this project due to its compatibility with dApps Staking, strong integration with WASM, and cost-effectiveness in terms of gas fees. We are more interested in steadily and enjoyably developing this project over the long term rather than riding a transient momentum. We believe that the Astar Substrate EVM and WASM environment are the most suitable development environment for our motivations.
+When developing an on-chain project using Solidity, there are two options currently available on Astar Network: using the Substrate EVM or using zkEVM supported by the Polygon CDK. We have chosen the Substrate EVM as the development environment for this project due to its compatibility with dApp Staking, strong integration with WASM, and cost-effectiveness in terms of gas fees. We are more interested in steadily and enjoyably developing this project over the long term rather than riding a transient momentum. We believe that the Astar Substrate EVM and WASM environment are the most suitable development environment for our motivations.
 </p>
 
 <p>
@@ -1447,14 +1531,21 @@ Cheers to Astar :)
 </p>
 
 <p>
-Our priority is to control inflation rate and keep the game going.<br>
+House of Murasaki-san, the first season of this project, is nearly complete, so there are no major feature additions planned for the future. Additionally, since this project is a full-on-chain dApp created with contracts and a static html, there are no online servers that developers need to maintain. Game processing in response to player actions is all automatically handled on-chain.
+</p>
+
+<p>
+The only interventions developers need to make involve setting the buyback price inflation rate and updating prices. If other adjustments like bug fixes or game balance changes become necessary, developers will upgrade the relevant contracts as needed. Developers will also work on frontend adjustments for UI/UX improvements.
+</p>
+
+<p>
+After the launch of this project, developers will primarily engage in the following activities.
 </p>
 
 <ul>
 <li>Fixing bugs.
-<li>Improving UI details.
-<li>Correcting typo and misspelling.
-<li>Controling inflation rate of buyback system.
+<li>Improving UI/UX details of front-end.
+<li>Controling inflation rate of the buyback system.
 </ul>
 
 <p>
@@ -1466,15 +1557,20 @@ The project will move to the next season in a couple of years.<br>
 </p>
 
 <p>
-It takes at least about <b>two years</b> for House of Murasaki-san to reach maximum growth. Over this two years, the developers plan to create the next product which uses the information of <a href="#developer">the Murasakisan contract</a> descrived above. Since Astar Network supports both EVM and WASM, so the developers plan to use Rust to create our next product on WASM, and interacting with House of Murasaki-san on EVM via XVM (Well, the coder is enjoying learning Rust & ink! now).<br>
+It takes at least about <b>two years</b> for House of Murasaki-san to reach maximum growth. Over this two years, the developers plan to create the next product which uses the information of <a href="#developer">the Murasakisan contract</a> descrived above.
 </p>
 
 <p>
-The concept of the next product is still undecided yet, but we would like to make a work related to the travel. Actually, the last items Murasaki-san can craft are related to travel.
+The concept of the next product is still undecided yet, but we would like to make a work related to the travel or the journey. Actually, the last items Murasaki-san can craft are related to travel.
 </p>
 
 <p>
-One day, a grown your Murasaki-san may set off on a journey with their friends from your house.
+One day, a grown your Murasaki-san may set off on a journey with their friends from your house :)
+</p>
+
+<p>
+Alpha version of the next season:<br>
+&nbsp;&nbsp;&nbsp;Journey of Murasaki-san (tentative title)<br>
 </p>
 
 <br>
@@ -1560,7 +1656,7 @@ Happy gaming! :)
 <li>The mint price (starting price) for unlimited supply SBT will be adjusted to never fall below $10 in US dollars.
 <li>Holding NFT or SBT of this project does not entitle users to any financial asset diviends directly.
 <li>There are currently no plans to issue any cryptocurrency tokens following the ERC-20 or equivalent standard for this project.
-<li>This project is an experimental endeavor in Web3, and its primary goal is not profit-oriented. The developers receive a 10% donation from the tokens paid by users as a game fee and reward from dApps staking. The developers relinquish ownership over the remaining 90% of the assets for 2 years, which are either staked or held on the blockchain.
+<li>This project is an experimental endeavor in Web3, and its primary goal is not profit-oriented. The developers receive a 10% donation from the tokens paid by users as a game fee and reward from dApp staking. The developers relinquish ownership over the remaining 90% of the assets for 2 years, which are either staked or held on the blockchain.
 <li>This project does not have any "operators" or "managers" who engage in ongoing operational or managerial tasks. All program operations are automatically executed by on-chain smart contracts.
 <li>The above terms and conditions are subject to change in the event of tax regulation modifications or project transition to the next season.
 </ul>
