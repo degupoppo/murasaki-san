@@ -102,7 +102,7 @@ This is our fan project using <br class="br-sp"><b>Astar Substrate EVM</b> <img 
 
 
 <!-- sns button -->
-<center><button style="font-size:65%; font-weight: bold;" onclick="window.open('https://twitter.com/MurasakisanDev')"><img width="15" height="15" src="src/icon/twitter_sns.png"/> Follow Us</button>&nbsp;
+<center><button style="font-size:65%; font-weight: bold;" onclick="window.open('https://x.com/MurasakisanDev')"><img width="15" height="15" src="src/icon/twitter_sns.png"/> Follow Us</button>&nbsp;
 <button style="font-size:65%; font-weight: bold;"><img width="15" height="15" src="src/icon/discord_sns.png"/> Join Community (upcoming)</button></center>
 
 
@@ -112,10 +112,10 @@ This is our fan project using <br class="br-sp"><b>Astar Substrate EVM</b> <img 
 This project is currently being developed on a private chain.<br>
 In the near future, it will first be test-played on the Shibuya testnet and eventually deployed on the Astar Substrate EVM.<br>
 <br>
-<i>Development Progress: <b><span id="percent">86</span></b><font size="-1"> (v0.1.36)</font></i><br>
+<i>Development Progress: <b><span id="percent">90</span></b><font size="-1"> (v0.1.37)</font></i><br>
 <span id="container"></span><br>
 <font size="-1" color="blue"><i>
-The developer is currently reconstructing the economic system to reflect dApp Staking V3.
+The developer is currently preparing a new NFT side project, and rebuilding an economy that accommodates <a href="https://forum.astar.network/t/dapp-staking-v3-tier-algorithm-adjustment-proosal/6411">the changing rules of dApp Staking</a>.
 </font></i>
 <script src="https://rawgit.com/kimmobrunfeldt/progressbar.js/master/dist/progressbar.min.js"></script>
 <script>
@@ -147,7 +147,7 @@ The developer is currently reconstructing the economic system to reflect dApp St
     document.getElementById("percent").innerHTML = (Math.round(bar.value() * 100) + '%');
   }
     });
-    bar.animate(0.86); 
+    bar.animate(0.90); 
 </script>
 </p>
 
@@ -208,6 +208,16 @@ This product can be used accross multiple platforms. You can play the game using
 <code>
 <font size="-1" color="black">
 <p>
+<u>## [0.1.37] - 2024-7-1</u><br>
+### Fixed<br>
+- Fixed the sentence on the web page.<br>
+- Fixed the bug on the batch caring button of the daycare service on the web page.<br>
+- Fixed the icon pictures of the strolling window.<br>
+- Fixed the item depths.<br>
+- Fixed the economy fig. on the web page.<br>
+### Contract Parameter Updated<br>
+ - Buyback Vault: Updated the buyback prices (total inflation rate: +26.68%)<br>
+<br>
 <u>## [0.1.36] - 2024-6-1</u><br>
 ### Fixed<br>
 - Fixed the misspellings.<br>
@@ -220,7 +230,8 @@ This product can be used accross multiple platforms. You can play the game using
 - Fixed the content abount the account unification.<br>
 - Fixed the twinkles position and the contents on the web page.<br>
 - Added the progress bar on the strolling window.<br>
-- Fixed the daycare fee from 0.30 to 0.20 and fixed the description about the daycare.<br>
+- Updated the contents of Economy to the dApps Staking V3.<br>
+- Fixed the daycare fee from 0.30 to 0.22 and fixed the description about the daycare.<br>
 - Fixed the depth of the foods.<br>
 ### Changed<br>
 - Renewed the Item Detail page with the latest content.<br>
@@ -447,7 +458,7 @@ After trial, <u><i>Starting Fee</i>: <b>500 $ASTR <img src="src/png/coin_color_A
 </p>
 
 <p>
-<b>All you need for a trial of the game is a small gas fee.</b> Please feel free to try it out. If you enjoy the game, you can begin the main gameplay by paying the starting fee.<br>
+<b>All you need for a trial of the game is some gas fees.</b> Please feel free to try it out. If you enjoy the game, you can begin the main gameplay by paying the starting fee.<br>
 </p>
 
 <p>
@@ -466,11 +477,11 @@ It usually takes about 5-7 days of play time to reach these limits. Once the tri
 </p>
 
 <p>
-Aside from <b><a href="#staking">the Dapp Staking Bonus</a></b>, we have not implemented any billing system that would impose additional costs affecting gameplay. If you want to buy or sell item NFTs on the Marketplace, you will need some $ASTR.
+Except for <b><a href="#staking">the dApp Staking Bonus</a></b>, there is not any billing system that would impose additional costs affecting normal gameplay. When players want to buy or sell item NFTs on the Marketplace, some $ASTR will be needed. Additionally, for standard gameplay, approximately <b>0.8-1.0 $ASTR</b> of gas fees per day are required (details in the <b><a href="#detailedspecific">Gas Cost</a></b> session). 
 </p>
 
 <p>
-90% of the starting fee is allocated towards expanding the ecosystem. For more details, please refer to <b><a href="#detailedspecific">the Economy</a></b> section below.
+90% of the starting fee is allocated towards expanding the ecosystem and ensuring the NFT prices. For more details, please refer to <b><a href="#detailedspecific">the Economy</a></b> section below.
 </p>
 
 <br>
@@ -1405,7 +1416,7 @@ Through the Buyback Sysmte and following economic strategies, the developers aim
 <p>
 Here is an overview of the token flow:<br>
 <center>
-<img width="650" src="src/png/fig_economy.png" />
+<img width="650" src="src/png/fig_economy_2.png" />
 <figcaption>
 <sup>1)</sup>Extra Fees: petrification cure fees and direct item transfer fees.
 </figcaption>
