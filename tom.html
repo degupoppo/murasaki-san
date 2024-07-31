@@ -1,0 +1,518 @@
+
+<!doctype html>
+<html lang="en">
+
+
+<script src="lib/web3.min.js"></script>
+<script src="src/js/contracts.js"></script>
+<script src="src/js/share.js"></script>
+<script src="src/js/tom.js"></script>
+
+
+
+<!--- head --->
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=0.9">
+
+    <title>Terrarium of Murasaki-san</title>
+    <meta name="description" content="Murasaki-san is a virtual pet that lives in your wallet on Astar Network." />
+    <link rel="stylesheet" href="src/css/simple2.css">
+    <link rel="stylesheet" href="src/css/style.css">
+    <link rel="stylesheet" href="src/css/tom.css">
+
+    <link rel="icon" href="src/png/favicon.png" />
+    <link rel="apple-touch-icon" href="src/png/favicon.png">
+
+    <meta property="og:title" content="House of Murasaki-san">
+    <meta property="og:image" content="src/png/favicon.png">
+    <meta property="og:url" content="https://murasaki-san.com/">
+    <meta property="og:description" content="Murasaki-san is a virtual pet that lives in your wallet on Astar Network.">
+
+    <!-- twemoji -->
+    <script src="https://cdn.jsdelivr.net/npm/@twemoji/api@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-P69YXYZQ96"></script><script>window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', 'G-P69YXYZQ96');</script>
+
+</head>
+
+
+<body>
+
+
+<!--- header --->
+
+<header>
+
+    <nav>
+    <a href="index.html"><b>&#127969; Home</b></a>
+    <a href="house.html" ><b>&#x2764; Play</b></a>
+    <a href="market.html"><b>&#x1f6d2; Market</b></a>
+    <a href="info.html"><b>&#x1f4d7; Info</b></a><br class="br-sp">
+    <a href="mom.html"><b>&#127914; MoM</b></a>
+    <a href="tom.html" class="current"><b>&#x1fab4; ToM</b></a>
+    &nbsp;<span id="button_connect"><button onclick="init_web3();" style="width:110px;">Connect</button></span>
+    </nav>
+
+    <h1>
+    Terrarium of <br class="br-sp">Murasaki-san
+    </h1>
+
+    <p>
+    <center>
+    Terrarium NFT for raising Fluffy inside.<br><br class="br-sp">
+    Fluffies grow according to their environment and time</b>.
+    </center>
+    </p>
+    
+    <!--- scroll up button --->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.4/css/all.css">
+    <link rel="stylesheet" href="src/css/scrollup.css">
+    <div id="page_top"><a href="#"></a></div>
+
+</header>
+
+
+<main>
+
+
+<!--- first msg --->
+
+<br>
+<center>
+<code class="language-plaintext highlighter-rouge">
+Own a living NFT that evolves with your choices.
+</code>
+</center>
+
+<br>
+
+
+<!--- user NFT --->
+
+
+<div id="NftSelector" class="hiddenFirst"><center>
+    <span id="selectMenu"></span><br>
+    <font size="-0.5">
+        ( or visit Terrarium ID:&nbsp;
+        <input id="visitNft" type="number" style="width:80px;">&nbsp;
+        <button onclick="visitNft();">Visit</button>&nbsp;)
+    </font>
+</center></div>
+
+
+<div id="mintMessage" class="hiddenFirst"><center>
+    <p>
+        You have not mint Terrarium NFTs yet.<br>
+        Current Price:&nbsp;<b><font color="blue"><span id="mintPrice">--</span>&nbsp;$ASTR</b></font><br>
+        <br>
+        <img src="src/pic/ToM_example.svg" style="width: 180px;"><br>
+        <button onclick="send_mint(wallet);">Mint your Terrarium &#x1fab4;</button><br>
+        <font size="-1">
+            The NFTs are sold using a <b>step-up pricing</b> mechanism.<br>
+            For each NFT that is minted, the minting price <b>increases by 0.1%</b>.<br>
+            <b>Up to 3</b> Terrarium NFTs can be minted per wallet.<br>
+        </font>
+        <font size="-0.5">
+            ( or <b>preview</b> other Terrariums:&nbsp;
+            <input id="visitNft2" type="number" style="width:80px;">&nbsp;
+            <button onclick="visitNft2();">Visit</button>&nbsp;)
+        </font>
+    </p>
+</center></div>
+
+
+<center><span id="message"><br>Loading...</span></center>
+
+<div id="NFTDisplayInfos" class="hiddenFirst"><center>
+
+    <br>
+    <br>
+    
+    <span id="nftSvg"></span><br>
+    
+    <br>
+    
+    <button onclick="sendTx_updateStatus();">✨ Clean Terrarium ✨</button><br>
+    <font size="-1">Reset cleanliness and update socre & statuses.</font><br>
+    <font size="-1">The higher the cleanliness, the faster the growth speed of fluffies.</font><br>
+    
+    <br>
+    
+    <p>
+        <div class="input-group">
+          <span class="label">Temperature&#x1f321;</span>
+          <input id="param_temp1" class="tom" type="range" min="15" max="26" value="20" step="1">
+          <input id="param_temp2" type="number" class="num-input" min="15" max="26" value="20" step="1"><span>&#8451;</span>
+        </div>
+        <div class="input-group">
+          <span class="label">Watering Amount⛲</span>
+          <input id="param_water1" class="tom" type="range" min="0" max="400" value="200" step="5">
+          <input id="param_water2" type="number" class="num-input" min="0" max="400" value="200" step="5"><span>μL/day</span>
+        </div>
+        <div class="input-group">
+          <span class="label">Light Intensity&#x2600;</span>
+          <input id="param_light1" class="tom" type="range" min="0" max="1000" value="200" step="10">
+          <input id="param_light2" type="number" class="num-input" min="0" max="1000" value="200" step="10"><span>lux</span>
+        </div>
+        <div class="input-group">
+          <span class="label">Yarn ball color&#x1f170;</span>
+          <input id="param_bColor11" class="tom color-input" type="color" value="#000000">&nbsp;
+          <input id="param_bColor12" type="text" class="num-input color-text" value="#000000">
+        </div>
+        <div class="input-group">
+          <span class="label">Yarn ball color&#x1f171;</span>
+          <input id="param_bColor21" class="tom color-input" type="color" value="#000000">&nbsp;
+          <input id="param_bColor22" type="text" class="num-input color-text" value="#000000">
+        </div>
+        <div class="input-group">
+          <span class="label">Bottle color&#x1FAD9;</span>
+          <input id="param_fColor1" class="tom color-input" type="color" value="#000000">&nbsp;
+          <input id="param_fColor2" type="text" class="num-input color-text" value="#000000">
+        </div>
+    </p>
+    
+    <p>
+        <button id="setParam" onclick="setAllParams();">Change Parameters ✏️</button>&nbsp;&nbsp;
+            <button onclick="resetParam();" style="background-color:#8B8D8C">Reset ↩️</button><br>
+        <font size="-1">
+            Temperature, humidity (influenced by the amount of watering), <br>
+            and colors affect which type of fluffy is more likely to grow.<br>
+            Light intensity affects the growth speed and nutrition consumption.<br>
+        </font>
+    </p>
+    
+    <br>
+    
+    <p>
+        
+        <b>Current Statuses &#128216;</b>
+        
+        <div class="input-group">
+          <span class="label2">Age🎂</span>
+          <span class="info"><span id="info_age">2</span>&nbsp;days</span>
+        </div>
+        <div class="input-group">
+          <span class="label2">Weather🌈</span>
+          <span class="info"><span id="info_weather">&#x2601;CLD</span>&nbsp;(next:&nbsp;<span id="info_nextWeather">&#x2601;</span>)</span>
+        </div>
+        <div class="input-group">
+          <span class="label2">Cleanliness✨</span>
+          <span class="info"><span id="info_clean">80</span>%&nbsp;(<span id="info_cleanAgo">5</span>&nbsp;days ago)</span>
+        </div>
+        <div class="input-group">
+          <span class="label2">Humidity💧</span>
+          <span class="info"><span id="info_humid">48</span>%&nbsp;(target: <span id="info_targetHumid">+2</span>%)</span>
+        </div>
+        <div class="input-group">
+          <span class="label2">Nutrition🍰</span>
+          <span class="info"><span id="info_nut">64</span>&nbsp;mg&nbsp;(<span id="info_nutAdd">+1</span>&nbsp;mg/hr)</span>
+        </div>
+        <div class="input-group">
+          <span class="label2">Staking bonus🌸</span>
+          <span class="info"><span id="info_staking">x1.20</span>&nbsp;(<span id="info_stakingAmount">10000</span>&nbsp;$ASTR)</span>
+        </div>
+        <div class="input-group">
+          <span class="label2">Total score💕</span>
+          <span class="info"><span id="info_fTotalScore">210000</span> (cleaned <span id="info_cleanCount">55</span> times)</span>
+        </div>
+    </p>
+    
+    <p>
+        <div class="input-group">
+          <span class="label">Fluffy1️⃣</span>
+          <span id="info_fName1">Curious white fluffy</span>
+        </div>
+        <div class="input-group">
+          <span class="label">Fluffy2️⃣</span>
+          <span id="info_fName2">Curious white fluffy</span>
+        </div>
+        <div class="input-group">
+          <span class="label">Fluffy3️⃣</span>
+          <span id="info_fName3">Curious white fluffy</span>
+        </div>
+        <div class="input-group">
+          <span class="label">Fluffy4️⃣</span>
+          <span id="info_fName4">Curious white fluffy</span>
+        </div>
+        <div class="input-group">
+          <span class="label">Fluffy5️⃣</span>
+          <span id="info_fName5">Curious white fluffy</span>
+        </div>
+    </p>
+    
+    <br>
+    
+    <details style="width:500px;"><summary>Hash the Message 🔨</summary>
+        <p><center>
+            You can hash the message on the bottle's frame:<br>
+            <br>
+            <input id="messageText" type="text" class="num-input color-text" value="" 
+                placeholder="Enter the message to display in the NFT." style="width: 400px;"><br>
+            <br>
+            Message color:&nbsp;<input id="messageColor1" class="tom color-input" type="color" value="#000000">
+                <input id="messageColor2" type="text" class="num-input color-text" value="#000000"><br>
+            <br>
+            <button id="setMessage" onclick="setMessage();">Hash the Message 🔨</button><br>
+            <font size="-1">
+                Less than 40 characters; use [0-9], [a-z], [A-Z], [space], [#;&@.,!?-].<br>
+                The content and color of the message do not affect growth efficiency.
+            </font>
+        </center></p>
+    </details>
+    
+</center></div>
+
+
+<br>
+
+
+<!--- Conpect --->
+
+<h3>The Main Concept 🪴</h3>
+
+<p>
+<font color="#E12E7D"><i>
+A fully on-chain NFT where the artwork changes based on time and your decisions.
+</font></i>
+</p>
+
+<p>
+This NFT artwork is a subproject of House of Murasaki-san. By minting a Terrarium NFT, players can own a glass jar containing fluffies. <b>The types of fluffies that will appear and grow in your Terrarium depend on the environment you place your Terrarium in.</b>
+</p>
+
+<p>
+This NFT is a fully on-chain work, with the artwork generated based solely on on-chain data. All proceeds from the sale of this NFT will be immediately transferred to House of Murasaki-san’s Buffer Vault.
+</p>
+
+<p>
+<b><i>[Note]</b> This NFT does not have any monetization mechanisms to guarantee value or future resale profits. Additionally, there are no plans for financial asset airdrops or rewards for high-ranking players. We recommend purchasing this NFT only if you are interested in purely owning and playing with it.</i>
+</p>
+
+<br>
+
+
+<!--- Rules --->
+
+<h3>NFT Details &#128216;</h3>
+<style type="text/css">ul li {margin-bottom: 10px;}</style>
+<ul>
+<li>ToM NFTs will be sold using a <b>step-up pricing</b> model. The mint price <b>increases by 0.1% with each NFT minted</b>. Each wallet can mint up to three NFTs. There is no fixed limit on the total number of NFTs issued, but the mint price will double after approximately 700 NFTs are minted and quadruple after around 1,380 NFTs are minted. After that, the mint price will continue to rise exponentially, leading to an effective issuance cap determined by market principles.
+<li>The artwork of this NFT is provided in a programmable SVG format and <b>changes in real-time</b> based on the NFT's state. All NFT artwork is generated <b>on-chain</b> and does not reference any off-chain data. Some features, like Metamask, may not display the artwork correctly.
+<li>NFT owners can determine the environment within the terrarium by setting three parameters: <b>Temperature</b>, <b>Watering Amount</b>, and <b>Light Intensity</b>. The value of the Watering Amount affects the target humidity. Additionally, owners can specify Yarn ball colors and bottle frame color to determine the appearance of the terrarium.
+<li>NFT owners can change the text displayed on the terrarium frame at any time by <b>hashing a message</b>.
+<li>There are <b>12 types of Fluffy</b>, each with different optimal colors, temperatures, and humidity levels. <b>The closer the environment is to the optimal conditions, the faster the Fluffy of that type will grow.</b>
+<li><b>A higher Light Intensity increases the growth rate of Fluffy</b> but also increases nutrition consumption. When nutrition reaches 0 mg, Fluffy's growth stops. Nutrition consumption decreases with good weather and increases as the Fluffy score rises.
+<li><b>Weather</b> is categorized into five stages and changes in a 3-day cycle <b>based on the ASTR to USD exchange rate</b>. When the ASTR price rises, the weather improves. In good weather, nutrition consumption decreases, which benefits Fluffy's growth.
+<li>If the terrarium is left uncleaned for too long, <b>cleanliness</b> will decrease, and <b>Fluffy's growth speed will slow down</b>. Cleanliness will reach 0% in approximately <b>30 days</b>, and growth will stop at 0%.
+<li>A bonus is added to Fluffy's growth speed based on <b>the amount of dApp Staking</b> for House of Murasaki-san. Additional bonuses are granted based on <b>the number of MoM NFTs</b> owned.
+<li>Current values for nutrition, cleanliness, and humidity change in real-time, but values such as score and weather are updated when the <b>"Clean Terrarium" button</b> is executed. Scores will not be updated within an hour to save on gas costs.
+<li>It takes a long time for the fluffy in the Terrarium to reach full growth. Please be patient and enjoy the process leisurely :)
+</ul>
+
+<br>
+
+<details><summary>Calculation Formulas 🧮</summary>
+
+<p>
+<b>Fluffy score increase:</b><br>
+<font size="-0.5">
+&nbsp;&nbsp;&nbsp;scoreIncrease = deltaScore * (coefEmv + coefColor) / 2<br>
+&nbsp;&nbsp;&nbsp;&nbsp;deltaScore = deltaSec / 2 * coefLight * coefClean * coefStaking<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;coefLight = lightIntencity / 1000<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;coefClean = (cleanliness + 1000) / 11000<br>
+&nbsp;&nbsp;&nbsp;&nbsp;coefEmv = coefTemp * coefHumid<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;coefTemp = 1 - abs(Temperature - optimalTemperature) / 12<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;coefHumid = 1 - abs(Humidity - optimalHumidity) / 70<br>
+&nbsp;&nbsp;&nbsp;&nbsp;coefColor = ( (coefR + coefG + coefB) / 3 ) ** 5<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;coefR/G/B = 1 - abs(averageColor_R/G/B - optimalColor_R/G/B) / 255<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;averageColor_R/G/B = (ballColorA_R/G/B * 3 + ballColorB_R/G/B * 2 + frameColor_R/G/B) / 6<br>
+</font>
+</p>
+
+
+<p>
+<b>dApp Staking Bonus:</b><br>
+<table style="font-size: 0.8em;">
+  <thead>
+    <tr>
+      <th><center>Staking ($ASTR)</center></th>
+      <th><center>coefStaking<sup>&#134;</sup></center></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td><center>>=128000</center></td><td><center>+32%</center></td></tr>
+    <tr><td><center>>=64000</center></td><td><center>+28%</center></td></tr>
+    <tr><td><center>>=32000</center></td><td><center>+24%</center></td></tr>
+    <tr><td><center>>=16000</center></td><td><center>+20%</center></td></tr>
+    <tr><td><center>>=8000</center></td><td><center>+16%</center></td></tr>
+    <tr><td><center>>=4000</center></td><td><center>+12%</center></td></tr>
+    <tr><td><center>>=2000</center></td><td><center>+8%</center></td></tr>
+    <tr><td><center>>=1000</center></td><td><center>+4%</center></td></tr>
+    <tr><td><center><1000</center></td><td><center>+0%</center></td></tr>
+  </tbody>
+</table>
+<font size="-0.5">
+<sup>&#134;</sup>An additional 1% bonus is added for each MoM NFT held in the wallet.
+</font>
+</p>
+
+
+<p>
+<b>Optimal Environments for fluffy:</b><br>
+<font size="-0.5">
+<table style="font-size: 0.8em;">
+  <thead>
+    <tr>
+      <th><center>Fluffy type</center></th>
+      <th><center>Color R</center></th>
+      <th><center>Color G</center></th>
+      <th><center>Color B</center></th>
+      <th><center>Temperature</center></th>
+      <th><center>Humidity</center></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td><center>White</center></td><td><center>251</center></td><td><center>255</center></td><td><center>240</center></td><td><center>26</center></td><td><center>38</center></td></tr>
+    <tr><td><center>Yellow</center></td><td><center>255</center></td><td><center>227</center></td><td><center>129</center></td><td><center>25</center></td><td><center>40</center></td></tr>
+    <tr><td><center>Pink</center></td><td><center>255</center></td><td><center>213</center></td><td><center>213</center></td><td><center>24</center></td><td><center>42</center></td></tr>
+    <tr><td><center>Orange</center></td><td><center>255</center></td><td><center>189</center></td><td><center>168</center></td><td><center>23</center></td><td><center>44</center></td></tr>
+    <tr><td><center>Red</center></td><td><center>255</center></td><td><center>104</center></td><td><center>107</center></td><td><center>22</center></td><td><center>46</center></td></tr>
+    <tr><td><center>Redpurple</center></td><td><center>253</center></td><td><center>190</center></td><td><center>255</center></td><td><center>21</center></td><td><center>48</center></td></tr>
+    <tr><td><center>Purple</center></td><td><center>218</center></td><td><center>179</center></td><td><center>255</center></td><td><center>20</center></td><td><center>50</center></td></tr>
+    <tr><td><center>Blue</center></td><td><center>142</center></td><td><center>172</center></td><td><center>255</center></td><td><center>19</center></td><td><center>52</center></td></tr>
+    <tr><td><center>Lightblue</center></td><td><center>169</center></td><td><center>232</center></td><td><center>255</center></td><td><center>18</center></td><td><center>54</center></td></tr>
+    <tr><td><center>Limegreen</center></td><td><center>183</center></td><td><center>255</center></td><td><center>208</center></td><td><center>17</center></td><td><center>56</center></td></tr>
+    <tr><td><center>Beige</center></td><td><center>216</center></td><td><center>191</center></td><td><center>172</center></td><td><center>16</center></td><td><center>58</center></td></tr>
+    <tr><td><center>Gray</center></td><td><center>179</center></td><td><center>191</center></td><td><center>199</center></td><td><center>15</center></td><td><center>60</center></td></tr>
+  </tbody>
+</table>
+</font>
+</p>
+
+<p>
+<b>Target humidity:</b><br>
+<font size="-0.5">
+&nbsp;&nbsp;&nbsp;targetHumidity = wateringAmount / 4 + (weatherIntencity - 5000) / 10 + (Temperature - 20)<br>
+</font>
+</p>
+
+<p>
+<b>Current humidity:</b><br>
+<font size="-0.5">
+&nbsp;&nbsp;&nbsp;humidity = lastHumidity + (targetHumidity - lastHumidity) * deltaHour / (2 + deltaHour)<br>
+</font>
+</p>
+
+<p>
+<b>Nutrition increase per hr:</b><br>
+<font size="-0.5">
+&nbsp;&nbsp;&nbsp;nutrition_increase_per_hr = 2 + weatherIntencity / 25 - score / 52500 - lightIntencity * 10 / 25<br>
+</font>
+</p>
+
+<p>
+<b>Current nutrition:</b><br>
+<font size="-0.5">
+&nbsp;&nbsp;&nbsp;nutrition = lastNutrition + deltaHour * Nutrition_increase_per_hr<br>
+</font>
+</p>
+
+<p>
+<b>Cleanliness:</b><br>
+<font size="-0.5">
+&nbsp;&nbsp;&nbsp;cleanliness = 100 - (deltaSec / 2592000) * 100 <br>
+</font>
+</p>
+
+<p>
+<b>Score:</b><br>
+<font size="-0.5">
+&nbsp;&nbsp;&nbsp;score = [sumo of the top 5 types of fluffyScores]<br>
+</font>
+</p>
+
+<p>
+<b>Global weather intencity:</b><br>
+<font size="-0.5">
+&nbsp;&nbsp;&nbsp;weatherIntencity = 5000 + deltaValue<br>
+&nbsp;&nbsp;&nbsp;&nbsp;deltaValue<sup>&#134;</sup> = ( (current_astarPrice - last_astarPrice) / last_astarPrice ) * 100 * 5000 / 10<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<sup>&#134;</sup>max of deltaValue = 5000, min ox deltaValue = -5000<br>
+</font>
+</p>
+
+</details>
+
+<br>
+
+<!--- Ranking --->
+
+<h3>Terrarium Ranking 🏆</h3>
+
+--- Comming soon ---<br>
+
+<br>
+
+
+<!--- etc --->
+
+<h3>Other Services 🌿</h3>
+
+<details><summary>Mint Additional Terrariums 🛒</summary>
+    <p>
+        Additional Terrarium NFTs can be minted here:<br>
+        Current Price:&nbsp;<b><font color="blue"><span id="mintPrice2">--</span>&nbsp;$ASTR</font></b><br>
+        <br>
+        &nbsp;&nbsp;&nbsp;<button onclick="send_mint(wallet);">Mint Terrarium 🪴</button><br>
+        <font size="-1">
+            &nbsp;&nbsp;&nbsp;The NFTs are sold using a <b>step-up pricing</b> mechanism.<br>
+            &nbsp;&nbsp;&nbsp;For each NFT that is minted, the minting price <b>increases by 0.1%</b>.<br>
+            &nbsp;&nbsp;&nbsp;<b>Up to 3</b> Terrarium NFTs can be minted per wallet.
+        </font>
+    </p>
+</details>
+
+
+<details><summary>Terrarium Fusion 🌀</summary>
+    <p>
+        You can merge two terrarium NFTs to combine their Fluffy growth levels. Parameters such as NFT ID are inherited from the destination NFT. The source NFT is burned. 50% of the source NFT's score and nutrition are added to the destination NFT.<br>
+    </p>
+    <p>
+        &nbsp;&nbsp;&nbsp;Destination Terrarium ID: <input id="fusionId_1" type="number" class="num-input" min="1"><br>
+    </p>
+    <p>
+        &nbsp;&nbsp;&nbsp;Source Terrarium ID: <input id="fusionId_2" type="number" class="num-input" min="1">&nbsp;<font color="red" size="-0.5">It will be burned.</font><br>
+    </p>
+    <p>
+        &nbsp;&nbsp;&nbsp;<button onclick="fusion();">Execute Fusion 🌀</button>
+    </p>
+</details>
+
+
+</main>
+
+
+<!--- Footer--->
+
+<footer class="footer">
+<p><font size="-2"><b>Donations: </b></font><font size="-2" color="blue"><a href="https://blockscout.com/astar/address/0xB688651CdAF260E5943FE03240E63783A9C0ffee" style="text-decoration:none;" target="_blank">0xb688651cdaf260e5943fe03240e63783a9<b><font color="brown">c0ffee</font></b>&nbsp;&#x2615;</a></font></p>
+<p>&nbsp;</p>
+<p>(C) 2024 Project of Murasaki-san.</p>
+<p>Contact: info.murasakisan (at) gmail.com</p>
+</footer>
+
+
+</body>
+
+<script>
+    twemoji.parse(document.body);
+    check_connected();
+    init_page();
+</script>
+
+</html>
+
