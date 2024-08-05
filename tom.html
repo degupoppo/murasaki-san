@@ -65,7 +65,7 @@
     <p>
     <center>
     Terrarium NFT for raising Fluffy inside.<br><br class="br-sp">
-    Fluffies grow according to their environment and time</b>.
+    Fluffies grow according to their <br class="br-sp">environment and time</b>.
     </center>
     </p>
     
@@ -85,7 +85,7 @@
 <br>
 <center>
 <code class="language-plaintext highlighter-rouge">
-Own a living NFT that evolves with your choices.
+Own a living NFT <br class="br-sp">that evolves with your choices.
 </code>
 </center>
 
@@ -150,12 +150,12 @@ Own a living NFT that evolves with your choices.
           <input id="param_temp2" type="number" class="num-input" min="15" max="26" value="20" step="1"><span>&#8451;</span>
         </div>
         <div class="input-group">
-          <span class="label">Watering Amount⛲</span>
+          <span class="label">Watering⛲</span>
           <input id="param_water1" class="tom" type="range" min="0" max="400" value="200" step="5">
-          <input id="param_water2" type="number" class="num-input" min="0" max="400" value="200" step="5"><span>μL/day</span>
+          <input id="param_water2" type="number" class="num-input" min="0" max="400" value="200" step="5"><span>μL</span>
         </div>
         <div class="input-group">
-          <span class="label">Light Intensity&#x2600;</span>
+          <span class="label">Light&#x2600;</span>
           <input id="param_light1" class="tom" type="range" min="0" max="1000" value="200" step="10">
           <input id="param_light2" type="number" class="num-input" min="0" max="1000" value="200" step="10"><span>lux</span>
         </div>
@@ -180,9 +180,9 @@ Own a living NFT that evolves with your choices.
         <button id="setParam" onclick="setAllParams();">Change Parameters ✏️</button>&nbsp;&nbsp;
             <button onclick="resetParam();" style="background-color:#8B8D8C">Reset ↩️</button><br>
         <font size="-1">
-            Temperature, humidity (influenced by the amount of watering), <br>
-            and colors affect which type of fluffy is more likely to grow.<br>
-            Light intensity affects the growth speed and nutrition consumption.<br>
+            Temperature, humidity, and colors affects, <br>
+            which type of fluffy is more likely to grow.<br>
+            Light affects the growth speed and nutrition consumption.<br>
         </font>
     </p>
     
@@ -218,7 +218,7 @@ Own a living NFT that evolves with your choices.
         </div>
         <div class="input-group">
           <span class="label2">Total score💕</span>
-          <span class="info"><span id="info_fTotalScore">210000</span> (cleaned <span id="info_cleanCount">55</span> times)</span>
+          <span class="info"><span id="info_fTotalScore">210000</span><!-- (cleaned <span id="info_cleanCount">55</span> times)</span>-->
         </div>
     </p>
     
@@ -247,19 +247,19 @@ Own a living NFT that evolves with your choices.
     
     <br>
     
-    <details style="width:500px;"><summary>Hash the Message 🔨</summary>
+    <details style="max-width: 500px; width: 100%;"><summary>Hash the Message 🔨</summary>
         <p><center>
             You can hash the message on the bottle's frame:<br>
             <br>
             <input id="messageText" type="text" class="num-input color-text" value="" 
                 placeholder="Enter the message to display in the NFT." style="width: 400px;"><br>
             <br>
-            Message color:&nbsp;<input id="messageColor1" class="tom color-input" type="color" value="#000000">
+            Message color:&nbsp;<br class="br-sp"><input id="messageColor1" class="tom color-input" type="color" value="#000000">
                 <input id="messageColor2" type="text" class="num-input color-text" value="#000000"><br>
             <br>
             <button id="setMessage" onclick="setMessage();">Hash the Message 🔨</button><br>
             <font size="-1">
-                Less than 40 characters; use [0-9], [a-z], [A-Z], [space], [#;&@.,!?-].<br>
+                Less than 40 characters; <br class="br-sp">use [0-9], [a-z], [A-Z], [space], [#;&@.,!?-].<br>
                 The content and color of the message do not affect growth efficiency.
             </font>
         </center></p>
@@ -365,15 +365,15 @@ This NFT is a fully on-chain work, with the artwork generated based solely on on
 <p>
 <b>Optimal Environments for fluffy:</b><br>
 <font size="-0.5">
-<table style="font-size: 0.8em;">
+<table style="font-size: 0.6em;">
   <thead>
     <tr>
-      <th><center>Fluffy type</center></th>
-      <th><center>Color R</center></th>
-      <th><center>Color G</center></th>
-      <th><center>Color B</center></th>
-      <th><center>Temperature</center></th>
-      <th><center>Humidity</center></th>
+      <th><center>Type</center></th>
+      <th><center>ColorR</center></th>
+      <th><center>ColorG</center></th>
+      <th><center>ColorB</center></th>
+      <th><center>Temp.</center></th>
+      <th><center>Humid.</center></th>
     </tr>
   </thead>
   <tbody>
