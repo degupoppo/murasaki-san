@@ -51,13 +51,19 @@ input[type="range"].tom:focus::-moz-range-thumb {
     max-width: 800px;
     font-size: 90%;
 }
-.label {
+.label_30 {
     width: 30%;
     text-align: right;
     padding-right: 10px;
     box-sizing: border-box;
 }
-.label2 {
+.label_40 {
+    width: 40%;
+    text-align: right;
+    padding-right: 10px;
+    box-sizing: border-box;
+}
+.label_50 {
     width: 50%;
     text-align: right;
     padding-right: 10px;
