@@ -52,7 +52,7 @@ input[type="range"].tom:focus::-moz-range-thumb {
     font-size: 90%;
 }
 .label {
-    width: 40%;
+    width: 30%;
     text-align: right;
     padding-right: 10px;
     box-sizing: border-box;
