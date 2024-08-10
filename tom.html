@@ -99,7 +99,7 @@ Own a living NFT <br class="br-sp">that evolves with your choices.
     <span id="selectMenu"></span><br>
     <font size="-0.5">
         ( or visit Terrarium ID:&nbsp;
-        <input id="visitNft" type="number" style="width:80px;">&nbsp;
+        <input id="visitNft" type="number" style="width:80px;" min="1">&nbsp;
         <button onclick="visitNft();">Visit</button>&nbsp;)
     </font>
 </center></div>
@@ -190,7 +190,7 @@ Own a living NFT <br class="br-sp">that evolves with your choices.
     
 
 
-    <details style="max-width: 500px; width: 100%;"><summary>Current Statuses &#128216;</summary>
+    <details style="max-width: 500px; width: 100%;"><summary>NFT Statuses &#128216;</summary>
         <p>
             
             <div class="input-group">
@@ -312,6 +312,7 @@ This NFT is a fully on-chain work, with the artwork generated based solely on on
 <li>If the terrarium is left uncleaned for too long, <b>cleanliness</b> will decrease, and <b>Fluffy's growth speed will slow down</b>. Cleanliness will reach 0% in approximately <b>30 days</b>, and growth will stop at 0%.
 <li>A bonus is added to Fluffy's growth speed based on <b>the amount of dApp Staking</b> for House of Murasaki-san. Additional bonuses are granted based on <b>the number of MoM NFTs</b> owned.
 <li>Current values for nutrition, cleanliness, and humidity change in real-time, but values such as score and weather are updated when the <b>"Clean Terrarium" button</b> is executed. Scores will not be updated within an hour to save on gas costs.
+<li>If the wallet owning the Murasaki-san SBT mints the Terrarium NFT, <b>a bonus present box</b> will be delivered to their House of Murasaki-san.
 <li>It takes a long time for the fluffy in the Terrarium to reach full growth. Please be patient and enjoy the process leisurely :)
 </ul>
 
@@ -450,13 +451,6 @@ This NFT is a fully on-chain work, with the artwork generated based solely on on
 
 <br>
 
-<!--- Ranking --->
-
-<h3>Terrarium Ranking 🏆</h3>
-
---- Comming soon ---<br>
-
-<br>
 
 
 <!--- etc --->
@@ -492,6 +486,21 @@ This NFT is a fully on-chain work, with the artwork generated based solely on on
         &nbsp;&nbsp;&nbsp;<button onclick="fusion();">Execute Fusion 🌀</button>
     </p>
 </details>
+
+<br>
+
+<!--- Ranking --->
+
+<h3>Terrarium Ranking 🏆</h3>
+
+The terrariums where the fluffiest fluffies live are here:<br>
+
+<ul>
+<span id="ranking">Loading...</span>
+</ul>
+
+
+<br>
 
 
 </main>

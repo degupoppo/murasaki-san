@@ -87,7 +87,7 @@ input[type="color"].tom {
   appearance: none;
   outline: none;
   cursor: pointer;
-  width: 80px;
+  width: 100px;
   background: #efafda;
   height: 36px;
   border-radius: 8px;
