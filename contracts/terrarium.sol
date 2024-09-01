@@ -153,17 +153,19 @@ contract Murasaki_Terrarium_Storage is Ownable, Pausable {
     function _remove_permitted_address(address _address) external onlyOwner {permitted_address[_address] = false;}
     modifier onlyPermitted {require(permitted_address[msg.sender]);_;}
     
-    // Global parameters
+    // Global parameters, onlyOwner
     uint public CLEANING_LIMIT = 86400 * 30;   // 30 days
     uint public WEATHER_INVERVAL = 86400 * 3;   // 3 days
     uint public FLUFFY_CUTOFFSCORE = 100000;
     uint public SPEED = 100;    // 100=x1, 200=x2
-    uint public LAST_ASTRPRICE = 1000000;   // $1 x 10**6
     function set_CLEANING_LIMIT (uint _val) external onlyOwner {CLEANING_LIMIT = _val;}
     function set_WEATHER_INVERVAL (uint _val) external onlyOwner {WEATHER_INVERVAL = _val;}
     function set_FLUFFY_CUTOFFSCORE (uint _val) external onlyOwner {FLUFFY_CUTOFFSCORE = _val;}
     function set_SPEED (uint _val) external onlyOwner {SPEED = _val;}
-    function set_LAST_ASTRPRICE (uint _val) external onlyOwner {LAST_ASTRPRICE = _val;}
+    
+    // Global parameters, onlyPermitted
+    uint public LAST_ASTRPRICE = 1000000;   // $1 x 10**6
+    function set_LAST_ASTRPRICE (uint _val) external onlyPermitted {LAST_ASTRPRICE = _val;}
     
     // fluffy optimal parameter definitions
     mapping (uint => string) public fluffyColorsHex;
@@ -351,6 +353,7 @@ contract Murasaki_Terrarium_Function1 is Ownable, Pausable, ReentrancyGuard {
     // Astar: 0x8E2fa5A4D4e4f0581B69aF2f8F2Ef2CF205aE8F0
     address public address_AstarBase = 0xD0b9D72CcA4f7257181c62bAED1f466b842507f6;
     address public address_Murasaki_Main;
+    address public address_Murasaki_Terrarium_Ranking;
     function _set_address_Murasaki_Terrarium(address _address) external onlyOwner {address_Murasaki_Terrarium = _address;}
     function _set_address_Murasaki_Terrarium_Storage (address _address) external onlyOwner {address_Murasaki_Terrarium_Storage = _address;}
     function _set_address_Murasaki_Terrarium_Codex (address _address) external onlyOwner {address_Murasaki_Terrarium_Codex = _address;}
@@ -359,6 +362,7 @@ contract Murasaki_Terrarium_Function1 is Ownable, Pausable, ReentrancyGuard {
     function _set_address_Murasaki_Terrarium_AstarPrice (address _address) external onlyOwner {address_Murasaki_Terrarium_AstarPrice = _address;}
     function _set_address_AstarBase (address _address) external onlyOwner {address_AstarBase = _address;}
     function _set_address_Murasaki_Main (address _address) external onlyOwner {address_Murasaki_Main = _address;}
+    function _set_address_Murasaki_Terrarium_Ranking (address _address) external onlyOwner {address_Murasaki_Terrarium_Ranking = _address;}
     
     // permittable
     mapping(address => bool) private permitted_address;
@@ -457,17 +461,17 @@ contract Murasaki_Terrarium_Function1 is Ownable, Pausable, ReentrancyGuard {
         mts.set_temperature(_nftId, _temp);
         string memory _floorOpaci;
         if (_temp >= 24) {
-            _floorOpaci = ".200";
+            _floorOpaci = ".20";
         } else if (_temp >= 22) {
-            _floorOpaci = ".160";
+            _floorOpaci = ".16";
         } else if (_temp >= 20) {
-            _floorOpaci = ".120";
+            _floorOpaci = ".12";
         } else if (_temp >= 18) {
-            _floorOpaci = ".80";
+            _floorOpaci = ".08";
         } else if (_temp >= 16) {
-            _floorOpaci = ".40";
+            _floorOpaci = ".04";
         } else {
-            _floorOpaci = ".0";
+            _floorOpaci = ".00";
         }
         mts.set_floorOpaci(_nftId, _floorOpaci);
         // water
@@ -590,6 +594,9 @@ contract Murasaki_Terrarium_Function1 is Ownable, Pausable, ReentrancyGuard {
             mts.set_last_updatedTime(_nftId, block.timestamp);
             // increment cleaning count
             mts.increment_cleanCount(_nftId);
+            // update ranking
+            Murasaki_Terrarium_Ranking mtr = Murasaki_Terrarium_Ranking(address_Murasaki_Terrarium_Ranking);
+            mtr.try_updateRanking(_nftId);
         }
         // update local weather, before humid and nut updating
         mts.set_local_weather(_nftId, mts.global_weather());
@@ -1186,26 +1193,33 @@ contract Murasaki_Terrarium_Function2 is Ownable, Pausable {
         Murasaki_Terrarium_Codex mtc = Murasaki_Terrarium_Codex(address_Murasaki_Terrarium_Codex);
         Murasaki_Terrarium_Storage mts = Murasaki_Terrarium_Storage(address_Murasaki_Terrarium_Storage);
         Murasaki_Terrarium_Function1 mtf1 = Murasaki_Terrarium_Function1(address_Murasaki_Terrarium_Function1);
-        string[7] memory _str;
+        string[8] memory _str;
         _str[0] = mts.colorOfFlame_hex(_nftId);
         _str[1] = mts.colorOfYarnBall1_hex(_nftId);
         _str[2] = mts.colorOfYarnBall2_hex(_nftId);
-        _str[3] = mts.floorOpaci(_nftId);
         string memory _bedOpaci;    
+        string memory _glassStain;
         uint _clean = mtf1.call_cleanliness(_nftId);
         if (_clean >= 7500) {
             _bedOpaci = "0";
+            _glassStain = "0";
         } else if (_clean >= 5000) {
             _bedOpaci = ".050";
+            _glassStain = "10";
         } else if (_clean >= 2500) {
             _bedOpaci = ".100";
+            _glassStain = "20";
         } else if (_clean >= 1000) {
             _bedOpaci = ".150";
+            _glassStain = "30";
         } else {
             _bedOpaci = ".200";
+            _glassStain = "40";
         }
-        _str[4] = _bedOpaci;    // dynamic
-        _str[5] = mts.lumpScale(_nftId);
+        _str[3] = _glassStain;    // dynamic
+        _str[5] = _bedOpaci;    // dynamic
+        _str[4] = mts.floorOpaci(_nftId);
+        _str[6] = mts.lumpScale(_nftId);
         string memory _dropScale;
         uint _humid = mtf1.call_humidity(_nftId);
         if (_humid >= 8000) {
@@ -1219,7 +1233,7 @@ contract Murasaki_Terrarium_Function2 is Ownable, Pausable {
         } else {
             _dropScale = "2";
         }
-        _str[6] = _dropScale;    // dynamic
+        _str[7] = _dropScale;    // dynamic
         return mtc.svg_basic(_str);
     }
     function _prep_pippel (uint _nftId) internal view returns (string memory) {
@@ -1257,18 +1271,44 @@ contract Murasaki_Terrarium_Function2 is Ownable, Pausable {
         Murasaki_Terrarium_Function1 mtf1 = Murasaki_Terrarium_Function1(address_Murasaki_Terrarium_Function1);
         string[11] memory _str;
         _str[0] = Strings.toString(_nftId);
-        _str[1] = mts.local_weather_str(_nftId);
-        _str[2] = Strings.toString(mts.temperature(_nftId));
-        _str[3] = Strings.toString(mts.lightIntensity(_nftId));
-        _str[4] = Strings.toString(mtf1.call_cleanliness(_nftId)/100);  // dynamic
-        _str[5] = Strings.toString(mtf1.call_humidity(_nftId)/100);     // dynamic
-        _str[6] = Strings.toString(mtf1.call_nutrition(_nftId)/100);    // dynamic
-        _str[7] = Strings.toString(mts.last_score(_nftId));
-        _str[8] = Strings.toString(mt.get_blockNumber(_nftId));
-        _str[9] = mts.messageColor(_nftId);
-        _str[10] = mts.messageText(_nftId);
+        _str[1] = __formatNumber(mts.last_score(_nftId));
+        _str[2] = Strings.toString(mt.get_blockNumber(_nftId));
+        _str[3] = mts.messageColor(_nftId);
+        _str[4] = mts.messageText(_nftId);
+        _str[5] = mts.local_weather_str(_nftId);
+        _str[6] = Strings.toString(mts.temperature(_nftId));
+        _str[7] = Strings.toString(mts.lightIntensity(_nftId));
+        _str[8] = Strings.toString(mtf1.call_cleanliness(_nftId)*40/100/100);  // dynamic
+        _str[9] = Strings.toString(mtf1.call_nutrition(_nftId)*40/100/255);    // dynamic
+        _str[10] = Strings.toString(mtf1.call_humidity(_nftId)*40/100/100);     // dynamic
         return mtc.svg_text(_str);
     }
+    // internal, uint -> comma-separeted number
+    function __formatNumber(uint256 number) internal pure returns (string memory) {
+        require(number <= 99000000, "Number exceeds maximum value");
+        uint8 MAX_LENGTH = 10;
+        bytes10 DIGITS = "0123456789";
+        if (number == 0) return "0";
+        bytes memory buffer = new bytes(MAX_LENGTH);
+        uint8 index = MAX_LENGTH;
+        uint8 count = 0;
+        while (number > 0) {
+            if (count > 0 && count % 3 == 0) {
+                index--;
+                buffer[index] = ',';
+            }
+            index--;
+            buffer[index] = DIGITS[number % 10];
+            number /= 10;
+            count++;
+        }
+        bytes memory result = new bytes(MAX_LENGTH - index);
+        for (uint8 i = 0; i < result.length; i++) {
+            result[i] = buffer[index + i];
+        }
+        return string(result);
+    }
+    
     function _prep_footer (uint _nftId) internal view returns (string memory) {
         Murasaki_Terrarium_Codex mtc = Murasaki_Terrarium_Codex(address_Murasaki_Terrarium_Codex);
         Murasaki_Terrarium_Storage mts = Murasaki_Terrarium_Storage(address_Murasaki_Terrarium_Storage);
@@ -1329,6 +1369,7 @@ contract Murasaki_Terrarium_Function2 is Ownable, Pausable {
         "beige fluffy",
         "gray fluffy"
     ];
+    
     function _call_fluffyCharacter (uint _nftId, uint _fluffyType) internal view returns (string memory) {
         Murasaki_Terrarium mt = Murasaki_Terrarium(address_Murasaki_Terrarium);
         uint _seed = mt.get_NFTSeed(_nftId);
@@ -1472,13 +1513,14 @@ contract Murasaki_Terrarium_Codex is Ownable, Pausable {
     function unpause() external onlyOwner {_unpause();}
     
     // basic
-    // mainColor, ballColor1, ballColor2, floorOpaci, bedOpaci, lumpScale, dropScale, , 
-    function svg_basic (string[7] memory _str) external view whenNotPaused returns (string memory) {
+    // mainColor, ballColor1, ballColor2, glassStain, floorOpaci, bedOpaci, lumpScale, dropScale, , 
+    function svg_basic (string[8] memory _str) external view whenNotPaused returns (string memory) {
         string memory part1 = _svg_basic1(_str);
         string memory part2 = _svg_basic2(_str);
-        return string(abi.encodePacked(part1, part2));
+        string memory part3 = _svg_basic3(_str);
+        return string(abi.encodePacked(part1, part2, part3));
     }
-    function _svg_basic1 (string[7] memory _str) private pure returns (string memory) {
+    function _svg_basic1 (string[8] memory _str) private pure returns (string memory) {
         return string(abi.encodePacked(
             '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" preserveAspectRatio="xMinYMin meet" viewBox="0 0 500 500"><style>:root{--bc1:',
             _str[0],
@@ -1486,31 +1528,37 @@ contract Murasaki_Terrarium_Codex is Ownable, Pausable {
             _str[1],
             ';--kc2:',
             _str[2],
-            ';}</style><defs><filter id="b.5"><feGaussianBlur stdDeviation=".5"/></filter><filter id="b1"><feGaussianBlur stdDeviation="1"/></filter><filter id="b2"><feGaussianBlur stdDeviation="2"/></filter><filter id="b3"><feGaussianBlur stdDeviation="2"/></filter><filter id="b5"><feGaussianBlur stdDeviation="5"/></filter></defs><g><rect width="500" height="500" fill="var(--bc1)" fill-opacity=".15"/><circle cx="250" cy="250" r="250" fill="#FFF" fill-opacity="0.5"><animate attributeName="r" values="250;260;250" dur="5s" repeatCount="indefinite"/></circle><g filter="url(#b1)"><rect y="463" width="323" height="37" fill="#E1CBBD"/><rect x="276" y="463" width="224" height="37" fill="#F7E1C3"/><rect y="430" width="163" height="40" fill="#F7E1C3"/><rect x="109" y="430" width="391" height="40" fill="#F5DBCD"/><line x1="1" y1="429" x2="500" y2="430" stroke="#A6A6A6" stroke-width="2"/></g><rect y="430" width="500" height="70" fill="#F15A22" fill-opacity="',
+            ';}</style><defs><filter id="b.5"><feGaussianBlur stdDeviation=".5"/></filter><filter id="b1"><feGaussianBlur stdDeviation="1"/></filter><filter id="b2"><feGaussianBlur stdDeviation="2"/></filter><filter id="b3"><feGaussianBlur stdDeviation="2"/></filter><filter id="b5"><feGaussianBlur stdDeviation="5"/></filter><path id="x" d="m38 260 92-183h242l92 183-92 184H130L38 260Z"/><filter id="yugami" filterUnits="userSpaceOnUse" x="0" y="0" width="500" height="500"><feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="1" seed="1" stitchTiles="noStitch" result="img"/><feDisplacementMap in="SourceGraphic" in2="img" xChannelSelector="R" yChannelSelector="B" scale="',
             _str[3]
         ));
     }
-    function _svg_basic2 (string[7] memory _str) private pure returns (string memory) {
+    function _svg_basic2 (string[8] memory _str) private pure returns (string memory) {
         return string(abi.encodePacked(
-            '"/><ellipse cx="250" cy="449" rx="175" ry="14" fill="var(--bc1)" fill-opacity=".3"/><linearGradient id="h" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFF"/><stop offset="1" stop-color="var(--bc1)"/></linearGradient><g style="fill-opacity:0.25;" fill="url(#h)"><path d="m38 260 92-183h242l92 183-92 184H130L38 260Z"/></g><linearGradient id="b" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFF"/><stop offset="0.7" stop-color="var(--kc1)"/><stop offset="1" stop-color="var(--kc1)"/></linearGradient><linearGradient id="c" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFF"/><stop offset="0.7" stop-color="var(--kc2)"/><stop offset="1" stop-color="var(--kc2)"/></linearGradient><g filter="url(#b2)"><circle cx="230" cy="274" r="82" fill="url(#b)"/><circle cx="193" cy="237" r="20" fill="#FFF" fill-opacity="0.2"/></g><g filter="url(#b1)"><circle cx="146" cy="294" r="59" fill="url(#c)"/><circle cx="116" cy="264" r="10" fill="#FFF" fill-opacity="0.2"/></g><linearGradient id="d" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFF"/><stop offset="0.3" stop-color="#F2EBD3"/><stop offset="1" stop-color="#d9d3bd"/></linearGradient><pattern id="ct" width="20" height="20" patternUnits="userSpaceOnUse" fill="#717375"><circle cx="5" cy="5" r="2" fill-opacity="0.2"/><circle cx="15" cy="15" r="2" fill-opacity="0.2"/><circle cx="10" cy="10" r="1.5" fill-opacity="0.1"/></pattern><polygon points="74,339 428,339 374,445 128,445" fill="url(#d)" stroke="rgba(0,0,0,0.05)" stroke-width="3"/><polygon points="74,339 428,339 374,445 128,445" fill="url(#ct)" fill-opacity="0.7"/><polygon points="74,339 428,339 374,445 128,445" fill="000" fill-opacity="',
+            '"/></filter></defs><g><rect width="500" height="500" fill="var(--bc1)" fill-opacity=".15"/><circle cx="250" cy="250" r="250" fill="#FFF" fill-opacity="0.5"><animate attributeName="r" values="250;260;250" dur="5s" repeatCount="indefinite"/></circle><g filter="url(#b1)"><rect y="463" width="323" height="37" fill="#E1CBBD"/><rect x="276" y="463" width="224" height="37" fill="#F7E1C3"/><rect y="430" width="163" height="40" fill="#F7E1C3"/><rect x="109" y="430" width="391" height="40" fill="#F5DBCD"/><line x1="1" y1="429" x2="500" y2="430" stroke="#A6A6A6" stroke-width="2"/></g><rect y="430" width="500" height="70" fill="#F15A22" fill-opacity="',
             _str[4],
-            '"/><g fill="#8B4513" filter="url(#b.5)"><path d="M342 93h5v68h-5V93Zm18 0h5v68h-5V93Z"/><path d="M342 93h23v5h-23v-5Zm0 63h23v5h-23v-5Zm0-63 11-9 12 9h-23Z"/><circle cx="353.5" cy="84" r="4"/></g><circle cx="353" cy="125" fill="#f5e247" fill-opacity=".7" filter="url(#b3)"><animate attributeName="r" values="12;',
-            _str[5],
-            ';12" dur="5s" repeatCount="indefinite"/></circle><circle cx="180" cy="78" r="',
+            '"/><ellipse cx="250" cy="449" rx="175" ry="14" fill="var(--bc1)" fill-opacity=".3"/><g filter="url(#yugami)"><linearGradient id="h" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFF"/><stop offset="1" stop-color="var(--bc1)"/></linearGradient><g style="fill-opacity:0.25;" fill="url(#h)"><path d="m38 260 92-183h242l92 183-92 184H130L38 260Z"/></g><linearGradient id="b" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFF"/><stop offset="0.7" stop-color="var(--kc1)"/><stop offset="1" stop-color="var(--kc1)"/></linearGradient><linearGradient id="c" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFF"/><stop offset="0.7" stop-color="var(--kc2)"/><stop offset="1" stop-color="var(--kc2)"/></linearGradient><g filter="url(#b1)"><circle cx="230" cy="274" r="82" fill="url(#b)" fill-opacity="0.8"/><circle cx="193" cy="237" r="20" fill="#FFF" fill-opacity="0.2"/></g><g filter="url(#b.5)"><circle cx="146" cy="294" r="59" fill="url(#c)"/><circle cx="116" cy="264" r="10" fill="#FFF" fill-opacity="0.2"/></g><linearGradient id="d" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFF"/><stop offset="0.3" stop-color="#F2EBD3"/><stop offset="1" stop-color="#d9d3bd"/></linearGradient><pattern id="ct" width="20" height="20" patternUnits="userSpaceOnUse" fill="#717375"><circle cx="5" cy="5" r="2" fill-opacity="0.2"/><circle cx="15" cy="15" r="2" fill-opacity="0.2"/><circle cx="10" cy="10" r="1.5" fill-opacity="0.1"/></pattern><polygon points="74,339 428,339 374,445 128,445" fill="url(#d)" stroke="rgba(0,0,0,0.05)" stroke-width="3"/><polygon points="74,339 428,339 374,445 128,445" fill="url(#ct)" fill-opacity="0.7"/><polygon points="74,339 428,339 374,445 128,445" fill="000" fill-opacity="',
+            _str[5]
+        ));
+    }
+    function _svg_basic3 (string[8] memory _str) private pure returns (string memory) {
+        return string(abi.encodePacked(
+            '"/><g fill="#8B4513"><path d="M342 93h5v68h-5V93Zm18 0h5v68h-5V93Z"/><path d="M342 93h23v5h-23v-5Zm0 63h23v5h-23v-5Zm0-63 11-9 12 9h-23Z"/><circle cx="353.5" cy="84" r="4"/></g><circle cx="353" cy="125" fill="#f5e247" fill-opacity=".7" filter="url(#b3)"><animate attributeName="r" values="14;',
             _str[6],
-            '" fill="#A6CAEC"><animateTransform attributeName="transform" type="translate" values="0 0;0 300;0 300;0 0" keyTimes="0;0.8;1;1" dur="8s" repeatCount="indefinite"/><animate attributeName="opacity" keyTimes="0;0.8;1;1" values="0.7;0;0;0" dur="8s" repeatCount="indefinite" /></circle><circle cx="310" cy="78" r="',
-            _str[6],
-            '" fill="#c0d9f1"><animateTransform attributeName="transform" type="translate" values="0 0;0 300;0 300;0 0" keyTimes="0;0.8;1;1" dur="8s" repeatCount="indefinite" begin="4s"/><animate attributeName="opacity" keyTimes="0;0.8;1;1" values="0.7;0;0;0" dur="8s" repeatCount="indefinite" begin="4s"/></circle><linearGradient id="a" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ab7152"/><stop offset="1" stop-color="#933d10"/></linearGradient><g><path fill="#933D10" fill-rule="evenodd" d="M240 45a11 11 0 1 1 22 0 11 11 0 0 1-22 0Z"/><rect x="145" y="44" width="210" height="34" rx="7" ry="7" fill="url(#a)"/></g><linearGradient id="e" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFF"/><stop offset="0.2" stop-color="var(--bc1)"/><stop offset="1" stop-color="var(--bc1)"/></linearGradient><use xlink:href="#x" style="fill-opacity:0; stroke-opacity:0.8" stroke="url(#e)" stroke-width="18" stroke-linejoin="round" filter="url(#b.5)"/></g>'
+            ';14" dur="5s" repeatCount="indefinite"/></circle><circle cx="180" cy="70" r="',
+            _str[7],
+            '" fill="#A6CAEC"><animateTransform attributeName="transform" type="translate" values="0 0;0 300;0 300;0 0" keyTimes="0;0.8;1;1" dur="8s" repeatCount="indefinite"/><animate attributeName="opacity" keyTimes="0;0.8;1;1" values="0.7;0;0;0" dur="8s" repeatCount="indefinite" /></circle><circle cx="310" cy="70" r="',
+            _str[7],
+            '" fill="#c0d9f1"><animateTransform attributeName="transform" type="translate" values="0 0;0 300;0 300;0 0" keyTimes="0;0.8;1;1" dur="8s" repeatCount="indefinite" begin="4s"/><animate attributeName="opacity" keyTimes="0;0.8;1;1" values="0.7;0;0;0" dur="8s" repeatCount="indefinite" begin="4s"/></circle></g><linearGradient id="a" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ab7152"/><stop offset="1" stop-color="#933d10"/></linearGradient><g><path fill="#933D10" fill-rule="evenodd" d="M240 45a11 11 0 1 1 22 0 11 11 0 0 1-22 0Z"/><rect x="145" y="44" width="210" height="34" rx="7" ry="7" fill="url(#a)"/></g><linearGradient id="e" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFF"/><stop offset="0.2" stop-color="var(--bc1)"/><stop offset="1" stop-color="var(--bc1)"/></linearGradient><use xlink:href="#x" style="fill-opacity:0; stroke-opacity:0.65" stroke="url(#e)" stroke-width="18" stroke-linejoin="round"/></g>'
         ));
     }
     
     // pippel
-    // color1, 2, 3, 4
+    // color string
     function svg_pippel (string memory _str) external view whenNotPaused returns (string memory) {
         string memory _res = string(abi.encodePacked(
             '<style>:root {',
             _str,
-            '}</style><g transform="translate(390 277) scale(2)"><g transform="translate(0 31.5) scale(0.25)"><g stroke="#ffffff" stroke-opacity="0.2" stroke-width="10"><path d="m0 0c2.5-16.4 5.6-33.3 5.7-47.8 0-14.5-4.4-32.3-5.4-39.4-1-7.1-1.5-8.8-1.7-12-.2-3.2.2-6.7.6-9.8" id="pippelStem" fill="none" stroke-linecap="round"/></g><linearGradient id="grad2" x1="0%" y1="500%" x2="0%" y2="0%"><stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#73EAA1"/></linearGradient><use xlink:href="#pippelStem" stroke-opacity="1" stroke="url(#grad2)" stroke-width="8"/><g fill="#73EAA1" stroke="#ffffff" stroke-opacity="0.2" stroke-width="1" fill-opacity="1"><path d="m8 -45c.1-.1-.2-3.3 2-5.2 2.1-1.9 9.3-10.8 12.4-10.8 3 0 5.3 7.5 5.8 10.8.5 3.2-.9 6.5-2.9 8.7-2 2.2-6.6 4.3-9.2 4.7-2.6.4-5-1-6.4-2.4-1.4-1.4-1.5-3.6-1.7-5.8z"/><path d="m0 -20c-1.1-1.9-4.3-5.2-6.8-7.2-2.5-2-6-4.2-8-4.7-2-.5-3.2.6-4 1.7-.7 1.2-.5 3.5-.3 5.2.1 1.7.5 3.6 1 5.2.5 1.5 1.2 2.8 1.9 3.9.7 1.1 1.1 1.9 2.5 2.5 1.3.6 3.7 1.3 5.6 1.1 1.8-.2 4.1-1.5 5.4-2.1 1.3-.6 2.2-.7 2.6-1.5.5-.9 1.1-2.1 0-4z"/></g></g><g transform="translate(0 3) scale(1.0)" fill-opacity="0.5"><circle cx="0" cy="0" r="8" fill="#ffffff" fill-opacity="0.6" filter="url(#b1)"/><circle cx="0" cy="0" r="1.5" fill="var(--pc1)" fill-opacity="0.6"/><g transform="scale(3 3)"><circle cx="2" cy="0" r="1" fill="var(--pc1)"/><circle cx="1.73" cy="1" r="0.8" fill="var(--pc2)"/><circle cx="1" cy="1.73" r="1" fill="var(--pc3)"/><circle cx="0" cy="2" r="0.8" fill="var(--pc1)"/><circle cx="-1" cy="1.73" r="1" fill="var(--pc2)"/><circle cx="-1.73" cy="1" r="0.8" fill="var(--pc1)"/><circle cx="-2" cy="0" r="1" fill="var(--pc3)"/><circle cx="-1.73" cy="-1" r="0.8" fill="var(--pc1)"/><circle cx="-1" cy="-1.73" r="1" fill="var(--pc2)"/><circle cx="0" cy="-2" r="0.8" fill="var(--pc4)"/><circle cx="1" cy="-1.73" r="1" fill="var(--pc1)" /><circle cx="1.73" cy="-1" r="0.8" fill="var(--pc3)"/><animateTransform attributeName="transform" type="rotate" from="360 0 0" to="0 0 0" dur="90s" repeatCount="indefinite" additive="sum"/></g><g transform="scale(2 2)"><circle cx="2" cy="0" r="1.5" fill="var(--pc1)"/><circle cx="1.73" cy="1" r="1" fill="var(--pc2)"/><circle cx="1" cy="1.73" r="1" fill="var(--pc1)"/><circle cx="0" cy="2" r="1.5" fill="var(--pc4)"/><circle cx="-1" cy="1.73" r="1" fill="var(--pc1)"/><circle cx="-1.73" cy="1" r="1" fill="var(--pc2)"/><circle cx="-2" cy="0" r="1.5" fill="var(--pc3)"/><circle cx="-1.73" cy="-1" r="1" fill="var(--pc2)"/><circle cx="-1" cy="-1.73" r="1" fill="var(--pc3)"/><circle cx="0" cy="-2" r="1.5" fill="var(--pc1)"/><circle cx="1" cy="-1.73" r="1" fill="var(--pc4)"/><circle cx="1.73" cy="-1" r="1" fill="var(--pc3)"/><animateTransform attributeName="transform" type="rotate" from="0 0 0" to="360 0 0" dur="60s" repeatCount="indefinite" additive="sum"/></g></g></g>'
+            '}</style><g filter="url(#yugami)"><g transform="translate(390 277) scale(2)"><g transform="translate(0 31.5) scale(0.25)"><g stroke="#ffffff" stroke-opacity="0.2" stroke-width="10"><path d="m0 0c2.5-16.4 5.6-33.3 5.7-47.8 0-14.5-4.4-32.3-5.4-39.4-1-7.1-1.5-8.8-1.7-12-.2-3.2.2-6.7.6-9.8" id="pippelStem" fill="none" stroke-linecap="round"/></g><linearGradient id="grad2" x1="0%" y1="500%" x2="0%" y2="0%"><stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#73EAA1"/></linearGradient><use xlink:href="#pippelStem" stroke-opacity="1" stroke="url(#grad2)" stroke-width="8"/><g fill="#73EAA1" stroke="#ffffff" stroke-opacity="0.2" stroke-width="1" fill-opacity="1"><path d="m8 -45c.1-.1-.2-3.3 2-5.2 2.1-1.9 9.3-10.8 12.4-10.8 3 0 5.3 7.5 5.8 10.8.5 3.2-.9 6.5-2.9 8.7-2 2.2-6.6 4.3-9.2 4.7-2.6.4-5-1-6.4-2.4-1.4-1.4-1.5-3.6-1.7-5.8z"/><path d="m0 -20c-1.1-1.9-4.3-5.2-6.8-7.2-2.5-2-6-4.2-8-4.7-2-.5-3.2.6-4 1.7-.7 1.2-.5 3.5-.3 5.2.1 1.7.5 3.6 1 5.2.5 1.5 1.2 2.8 1.9 3.9.7 1.1 1.1 1.9 2.5 2.5 1.3.6 3.7 1.3 5.6 1.1 1.8-.2 4.1-1.5 5.4-2.1 1.3-.6 2.2-.7 2.6-1.5.5-.9 1.1-2.1 0-4z"/></g></g><g transform="translate(0 3) scale(1.0)" fill-opacity="0.5"><circle cx="0" cy="0" r="8" fill="#ffffff" fill-opacity="0.6" filter="url(#b1)"/><circle cx="0" cy="0" r="1.5" fill="var(--pc1)" fill-opacity="0.6"/><g transform="scale(3 3)"><circle cx="2" cy="0" r="1" fill="var(--pc1)"/><circle cx="1.73" cy="1" r="0.8" fill="var(--pc2)"/><circle cx="1" cy="1.73" r="1" fill="var(--pc3)"/><circle cx="0" cy="2" r="0.8" fill="var(--pc1)"/><circle cx="-1" cy="1.73" r="1" fill="var(--pc2)"/><circle cx="-1.73" cy="1" r="0.8" fill="var(--pc1)"/><circle cx="-2" cy="0" r="1" fill="var(--pc3)"/><circle cx="-1.73" cy="-1" r="0.8" fill="var(--pc1)"/><circle cx="-1" cy="-1.73" r="1" fill="var(--pc2)"/><circle cx="0" cy="-2" r="0.8" fill="var(--pc4)"/><circle cx="1" cy="-1.73" r="1" fill="var(--pc1)" /><circle cx="1.73" cy="-1" r="0.8" fill="var(--pc3)"/><animateTransform attributeName="transform" type="rotate" from="360 0 0" to="0 0 0" dur="90s" repeatCount="indefinite" additive="sum"/></g><g transform="scale(2 2)"><circle cx="2" cy="0" r="1.5" fill="var(--pc1)"/><circle cx="1.73" cy="1" r="1" fill="var(--pc2)"/><circle cx="1" cy="1.73" r="1" fill="var(--pc1)"/><circle cx="0" cy="2" r="1.5" fill="var(--pc4)"/><circle cx="-1" cy="1.73" r="1" fill="var(--pc1)"/><circle cx="-1.73" cy="1" r="1" fill="var(--pc2)"/><circle cx="-2" cy="0" r="1.5" fill="var(--pc3)"/><circle cx="-1.73" cy="-1" r="1" fill="var(--pc2)"/><circle cx="-1" cy="-1.73" r="1" fill="var(--pc3)"/><circle cx="0" cy="-2" r="1.5" fill="var(--pc1)"/><circle cx="1" cy="-1.73" r="1" fill="var(--pc4)"/><circle cx="1.73" cy="-1" r="1" fill="var(--pc3)"/><animateTransform attributeName="transform" type="rotate" from="0 0 0" to="360 0 0" dur="60s" repeatCount="indefinite" additive="sum"/></g></g></g></g>'
         ));
         return _res;
     }
@@ -1539,7 +1587,7 @@ contract Murasaki_Terrarium_Codex is Ownable, Pausable {
         return string(abi.encodePacked(
             ';--fc5:',
             _str[4],
-            ';}</style><g><filter id="fluffyShadow"><feGaussianBlur in="SourceAlpha" stdDeviation="0.5"/><feOffset dx="2" dy="2" result="offsetblur"/><feComponentTransfer><feFuncA type="linear" slope="0.75"/></feComponentTransfer><feMerge> <feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter><style>.f1 circle,.f1 use{animation:moveX 3.3s linear infinite;}.f2 circle,.f2 use{animation:moveX 3.0s linear infinite;}.f3 circle,.f3 use{animation:moveX 3.9s linear infinite;}.f4 circle,.f4 use{animation:moveX 3.6s linear infinite;}.f5 circle,.f5 use{animation:moveX 3.0s linear infinite;}@keyframes moveX {0%,49%,100%{transform:translateY(0);}50%,99%{transform:translateY(-2px);}}</style><defs><g id="f"><circle cx="2" cy="2" r="12" fill="#FFF" fill-opacity="0.4" filter="url(#b1)"/><circle cx="2" cy="2" r="11" filter="url(#b.5)"/><g fill="#000000" fill-opacity="0.5"><circle cx="-3" cy="-1" r="1"/><circle cx="7" cy="-1" r="1"/><animateTransform attributeName="transform" type="scale" values="1,1;1,1;1,0.2;1,0.2;1,1;1,1" keyTimes="0;0.4;0.4;0.42;0.42;1" dur="10s" repeatCount="indefinite" additive="sum"/></g><g fill="#FBAED2" fill-opacity="0.5"><circle cx="-6" cy="4" r="2"/><circle cx="10" cy="4" r="2"/></g></g></defs><g filter="url(#fluffyShadow)"><g transform="translate(240 330) scale(',
+            ';}</style><g filter="url(#yugami)"><style>.f1 circle,.f1 use{animation:moveX 3.3s linear infinite;}.f2 circle,.f2 use{animation:moveX 3.0s linear infinite;}.f3 circle,.f3 use{animation:moveX 3.9s linear infinite;}.f4 circle,.f4 use{animation:moveX 3.6s linear infinite;}.f5 circle,.f5 use{animation:moveX 3.0s linear infinite;}@keyframes moveX {0%,49%,100%{transform:translateY(0);}50%,99%{transform:translateY(-2px);}}</style><defs><g id="f"><!--<circle cx="2" cy="2" r="12" fill="#FFF" fill-opacity="0.4" filter="url(#b.5)"/><circle cx="2" cy="2" r="11" filter="url(#b.5)"/>--><circle cx="2" cy="2" r="11"/><circle cx="2" cy="2" r="11.5" fill="none" stroke-width="1" stroke="#FFF" stroke-opacity="0.3"/><g fill="#000000" fill-opacity="0.5"><circle cx="-3" cy="-1" r="1"/><circle cx="7" cy="-1" r="1"/><animateTransform attributeName="transform" type="scale" values="1,1;1,1;1,0.2;1,0.2;1,1;1,1" keyTimes="0;0.4;0.4;0.42;0.42;1" dur="10s" repeatCount="indefinite" additive="sum"/></g><g fill="#FBAED2" fill-opacity="0.5"><circle cx="-6" cy="4" r="2"/><circle cx="10" cy="4" r="2"/></g></g></defs><g><g transform="translate(240 330) scale(',
             _str[5],
             ')" fill="var(--fc1)" class="f1"><use xlink:href="#f"/></g><g transform="translate(290 330) scale(',
             _str[6],
@@ -1559,11 +1607,11 @@ contract Murasaki_Terrarium_Codex is Ownable, Pausable {
     
     // basic2
     function svg_basic2 () external view whenNotPaused returns (string memory) {
-        return '<g style="fill-opacity:0.1;"><path id="x" d="m38 260 92-183h242l92 183-92 184H130L38 260Z"/><animate attributeName="fill" values="#E60012;#F39800;#2f34d3;#8FC31F;#009944;#009E96;#00A0E9;#0068B7;#1D2088;#920783;#E4007F;#E5004F" keyTimes="0.00;0.09;0.18;0.27;0.36;0.45;0.55;0.64;0.73;0.82;0.91;1.00" dur="120s" repeatCount="indefinite"/></g><radialGradient id="str"><stop offset="0%" stop-color="#FFF" stop-opacity="1"/><stop offset="100%" stop-color="#FFF" stop-opacity="0"/></radialGradient><g fill="url(#str)"><circle cx="150" cy="150" r="6"><animate attributeName="opacity" values="0;1;0" dur="3s" repeatCount="indefinite"/></circle><circle cx="200" cy="120" r="5"><animate attributeName="opacity" values="1;0;1" dur="3.5s" repeatCount="indefinite"/></circle><circle cx="250" cy="160" r="3"><animate attributeName="opacity" values="0;1;0" dur="4s" repeatCount="indefinite"/></circle><circle cx="300" cy="130" r="3"><animate attributeName="opacity" values="1;0;1" dur="4.5s" repeatCount="indefinite"/></circle><circle cx="350" cy="200" r="5"><animate attributeName="opacity" values="0;1;0" dur="3.2s" repeatCount="indefinite"/></circle></g>';
+        return '<use xlink:href="#x" fill="var(--bc1)" fill-opacity="0.1"/><radialGradient id="str"><stop offset="0%" stop-color="#FFF" stop-opacity="1"/><stop offset="100%" stop-color="#FFF" stop-opacity="0"/></radialGradient><g fill="url(#str)" filter="url(#yugami)"><circle cx="150" cy="150" r="6"><animate attributeName="opacity" values="0;1;0" dur="3s" repeatCount="indefinite"/></circle><circle cx="200" cy="120" r="5"><animate attributeName="opacity" values="1;0;1" dur="3.5s" repeatCount="indefinite"/></circle><circle cx="250" cy="160" r="3"><animate attributeName="opacity" values="0;1;0" dur="4s" repeatCount="indefinite"/></circle><circle cx="300" cy="130" r="3"><animate attributeName="opacity" values="1;0;1" dur="4.5s" repeatCount="indefinite"/></circle><circle cx="350" cy="200" r="5"><animate attributeName="opacity" values="0;1;0" dur="3.2s" repeatCount="indefinite"/></circle></g>';
     }
     
     // text
-    // id, weather, temp, light, clean, humid, nut, score, block
+    // id, score, block, messageColor, messageText, weather, temp, light, cleanBar, nutBar, humidBar
     function svg_text (string[11] memory _str) external view whenNotPaused returns (string memory) {
         string memory part1 = _svg_text1(_str);
         string memory part2 = _svg_text2(_str);
@@ -1572,40 +1620,37 @@ contract Murasaki_Terrarium_Codex is Ownable, Pausable {
     }
     function _svg_text1 (string[11] memory _str) private pure returns (string memory) {
         return string(abi.encodePacked(
-            '<g font-family="Segoe UI Emoji" text-anchor="end"><text fill="#FFF" font-size="15" x="348" y="63">#',
+            '<g font-family="Segoe UI Emoji"><g text-anchor="end"><text fill="#FFF" font-size="15" x="348" y="63">#',
             _str[0],
-            '</text><text font-size="11" x="365" y="413">',
+            '</text><text fill="#00F" font-size="18" x="7" y="493" text-anchor="start">&#x2764;',
             _str[1],
-            ' &#x1f321;',
+            '</text><text fill="var(--bc1)" font-size="9" x="495" y="484">Terrarium of Murasaki-san</text><text fill="var(--bc1)" font-size="9" x="495" y="495">Minted at #',
             _str[2],
-            'C &#x2600;',
+            ' on the Astar EVM</text><text font-size="14"><textPath href="#x" text-anchor="start" fill="',
             _str[3],
-            ' lx</text>'
+            '"><tspan dx="10" dy="5">'
         ));
     }
     function _svg_text2 (string[11] memory _str) private pure returns (string memory) {
         return string(abi.encodePacked(
-            '<text font-size="11" x="365" y="429">&#x2728;',
             _str[4],
-            '% &#128167;',
+            '</tspan></textPath></text></g><g font-size="12"><text x="6" y="17">',
             _str[5],
-            '% &#127856;',
+            ' &#x1f321;',
             _str[6],
-            ' mg</text>'
+            'C &#x2600;',
+            _str[7],
+            ' lx</text></g><g font-size="11" text-anchor="middle"><text x="445" y="14">&#x2728;</text><rect width="40" height="10" x="455" y="5" fill="#F8C5AC"/><rect width="'
         ));
     }
     function _svg_text3 (string[11] memory _str) private pure returns (string memory) {
         return string(abi.encodePacked(
-            '<text fill="#00F" font-size="18" x="7" y="493" text-anchor="start">&#x2764;',
-            _str[7],
-            '</text><text fill="var(--bc1)" font-size="9" x="495" y="484">Terrarium of Murasaki-san</text><text fill="var(--bc1)" font-size="9" x="495" y="495">Minted at #',
             _str[8],
-            ' on the Astar EVM</text></g>',
-            '<text font-size="14"><textPath href="#x" text-anchor="start" fill="',
+            '" height="10" x="455" y="5" fill="#E60012"/><text x="445" y="30">&#127856;</text><rect width="40" height="10" x="455" y="21" fill="#FCE2BA"/><rect width="',
             _str[9],
-            '"><tspan dx="10" dy="5">',
+            '" height="10" x="455" y="21" fill="#F39800"/><text x="445" y="46">&#128167;</text><rect width="40" height="10" x="455" y="37" fill="#BBCCE9"/><rect width="',
             _str[10],
-            '</tspan></textPath></text>'
+            '" height="10" x="455" y="37" fill="#0068B7"/><g stroke="#EEE" stroke-width="0.75"><path d="M475 40 L475 46.5"/><path d="M468 42 L468 46.5"/><path d="M482 42 L482 46.5"/></g></g></g>'
         ));
     }
     
@@ -1683,7 +1728,20 @@ contract Murasaki_Terrarium_WalletScore is Ownable, Pausable {
 
 
 //---Auction
-// need to add permit in mtf1
+// need to add permit in mtf1 and mc
+interface Murasaki_Craft {
+    function craft(
+        uint _item_type, 
+        uint _summoner, 
+        address _wallet, 
+        uint _seed, 
+        string memory _memo,
+        uint _item_subtype
+    ) external;
+}
+interface Murasaki_Main {
+    function tokenOf(address _owner) external view returns (uint);
+}
 contract Murasaki_Terrarium_StepupAuction is Ownable, Pausable, ReentrancyGuard {
     
     // pausable
@@ -1727,6 +1785,10 @@ contract Murasaki_Terrarium_StepupAuction is Ownable, Pausable, ReentrancyGuard 
         // mint NFT
         _mint(msg.sender);
         mintedCount[msg.sender] += 1;
+        // check HoM and presentbox bonus
+        if (Murasaki_Main(address_Murasaki_Main).tokenOf(msg.sender) > 0) {
+            _mint_presentbox(msg.sender);
+        }
         // transfer fee
         payable(address_BufferVault).transfer(address(this).balance);
     }
@@ -1735,6 +1797,26 @@ contract Murasaki_Terrarium_StepupAuction is Ownable, Pausable, ReentrancyGuard 
     function _mint (address _wallet) internal {
         Murasaki_Terrarium_Function1 mtf1 = Murasaki_Terrarium_Function1(address_Murasaki_Terrarium_Function1);
         mtf1.mint(_wallet);
+    }
+    
+    // ### presentbox bonus for HoM ###
+    // set Murasaki_Craft address of HoM
+    address public address_Murasaki_Craft;
+    function _set_address_Murasaki_Craft(address _address) external onlyOwner {
+        address_Murasaki_Craft = _address;
+    }
+    // set Murasaki_Main address of HoM
+    // used in _settle function
+    address public address_Murasaki_Main;
+    function _set_address_Murasaki_Main(address _address) external onlyOwner {
+        address_Murasaki_Main = _address;
+    }
+    //internal, mint presentbox
+    function _mint_presentbox(address _wallet_to) internal {
+        Murasaki_Craft mc = Murasaki_Craft(address_Murasaki_Craft);
+        uint _item_type = 200;
+        string memory _memo = "Terrarium Purchase Bonus!";
+        mc.craft(_item_type, 0, _wallet_to, 0, _memo, 0);
     }
 }
 
@@ -1770,6 +1852,85 @@ contract Murasaki_Terrarium_AstarPrice is Ownable, Pausable {
     function _call_priceTest () internal view returns (uint) {
         uint _rnd = uint(keccak256(abi.encodePacked(block.timestamp))) % 400000;
         return 800000 + _rnd;   // 4000000-12000000 random uint
+    }
+}
+
+
+//---Ranking
+
+contract Murasaki_Terrarium_Ranking is Ownable, Pausable {
+    
+    // pausable
+    function pause() external onlyOwner {_pause();}
+    function unpause() external onlyOwner {_unpause();}
+    
+    // permittable
+    mapping(address => bool) private permitted_address;
+    function _add_permitted_address(address _address) external onlyOwner {permitted_address[_address] = true;}
+    function _remove_permitted_address(address _address) external onlyOwner {permitted_address[_address] = false;}
+    modifier onlyPermitted {require(permitted_address[msg.sender]);_;}
+    
+    // address
+    address public address_Murasaki_Terrarium_Storage;
+    function _set_address_Murasaki_Terrarium_Storage (address _address) external onlyOwner {address_Murasaki_Terrarium_Storage = _address;}
+    
+    // varinats
+    mapping (uint => uint) public rankerId;  // rank => nftId
+    mapping (uint => uint) public rankerScore;  // rank => score
+    uint public rankLimit = 6;
+    function _set_rankLimit (uint _val) external onlyOwner {rankLimit = _val;}
+    
+    // update ranker
+    function try_updateRanking (uint _nftId) external onlyPermitted {
+        Murasaki_Terrarium_Storage mts = Murasaki_Terrarium_Storage(address_Murasaki_Terrarium_Storage);
+        uint _score = mts.last_score(_nftId);
+        _try_updateRanking(_nftId, _score);
+    }
+    
+    // internal, the score is not expected to decrease.
+    function _try_updateRanking (uint _id, uint _score) internal {
+        for (uint i=0; i<rankLimit; i++) {
+            if (_score > rankerScore[i]) {
+                _removeRanker(_id);
+                _insertRanker(_id, i, _score);
+                break;
+            }
+        }
+    }
+    function _removeRanker (uint _id) internal {
+        for (uint i=0; i<rankLimit; i++) {
+            if (rankerId[i] == _id) {
+                for (uint j=i; j<rankLimit; j++) {
+                    rankerId[j] = rankerId[j+1];
+                    rankerScore[j] = rankerScore[j+1];
+                }
+                break;
+            }
+        }
+    }
+    function _insertRanker (uint _id, uint _rank, uint _score) internal {
+        for (uint i=rankLimit-1; i>_rank;) {
+            rankerId[i] = rankerId[i-1];
+            rankerScore[i] = rankerScore[i-1];
+            unchecked{i--;}
+        }
+        rankerId[_rank] = _id;
+        rankerScore[_rank] = _score;
+    }
+    
+    // call ranker
+    function getRanking () external view returns (string[6] memory) {
+        string[6] memory _rankers;
+        for (uint i=0; i<rankLimit; i++) {
+            _rankers[i] = string(abi.encodePacked(
+                Strings.toString(i+1),
+                ",",
+                Strings.toString(rankerId[i]),
+                ",",
+                Strings.toString(rankerScore[i])
+            ));
+        }
+        return _rankers;
     }
 }
 
