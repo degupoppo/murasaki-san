@@ -85,7 +85,8 @@
 <br>
 <center>
 <code class="language-plaintext highlighter-rouge">
-Own a living NFT <br class="br-sp">that evolves with your choices.
+Own a living NFT <br class="br-sp">that evolves with your choices.<br>
+Keep your terrarium clean and in optimal conditions.
 </code>
 </center>
 
@@ -98,7 +99,7 @@ Own a living NFT <br class="br-sp">that evolves with your choices.
 <div id="NftSelector" class="hiddenFirst"><center>
     <span id="selectMenu"></span><br>
     <font size="-0.5">
-        ( or visit Terrarium ID:&nbsp;
+        ( visit Terrarium ID:&nbsp;
         <input id="visitNft" type="number" style="width:80px;" min="1">&nbsp;
         <button onclick="visitNft();">Visit</button>&nbsp;)
     </font>
@@ -107,18 +108,20 @@ Own a living NFT <br class="br-sp">that evolves with your choices.
 
 <div id="mintMessage" class="hiddenFirst"><center>
     <p>
-        You have not mint Terrarium NFTs yet.<br>
-        Current Price:&nbsp;<b><font color="blue"><span id="mintPrice">--</span>&nbsp;$ASTR</b></font><br>
+        <b>You have not minted Terrarium NFTs yet.</b><br>
         <br>
-        <img src="src/pic/ToM_example.svg" style="width: 180px;"><br>
-        <button onclick="send_mint(wallet);">Mint your Terrarium &#x1fab4;</button><br>
+        <img src="src/pic/ToM_example.svg" style="width: 240px; border: solid 3px #FBD4E5;"><br>
+        <br>
+        <button onclick="send_mint(wallet);" style="background-color:#FF4F6F">⭐ Mint your Terrarium ⭐</button><br>
+        Current mint price:&nbsp;<b><font color="blue"><span id="mintPrice">--</span>&nbsp;$ASTR</b></font><br>
+        <br>
         <font size="-1">
             The NFTs are sold using a <b>step-up pricing</b> mechanism.<br>
             For each NFT that is minted, the minting price <b>increases by 0.1%</b>.<br>
             <b>Up to 3</b> Terrarium NFTs can be minted per wallet.<br>
         </font>
         <font size="-0.5">
-            ( or <b>preview</b> other Terrariums:&nbsp;
+            ( <b>preview</b> other Terrariums:&nbsp;
             <input id="visitNft2" type="number" style="width:80px;">&nbsp;
             <button onclick="visitNft2();">Visit</button>&nbsp;)
         </font>
@@ -143,50 +146,51 @@ Own a living NFT <br class="br-sp">that evolves with your choices.
     
     <br>
     
-    <p>
-        <div class="input-group">
-          <span class="label_40">Temperature&#x1f321;</span>
-          <input id="param_temp1" class="tom" type="range" min="15" max="26" value="20" step="1">
-          <input id="param_temp2" type="number" class="num-input" min="15" max="26" value="20" step="1"><span>&#8451;</span>
-        </div>
-        <div class="input-group">
-          <span class="label_40">Watering⛲</span>
-          <input id="param_water1" class="tom" type="range" min="0" max="400" value="200" step="5">
-          <input id="param_water2" type="number" class="num-input" min="0" max="400" value="200" step="5"><span>μL</span>
-        </div>
-        <div class="input-group">
-          <span class="label_40">Light&#x2600;</span>
-          <input id="param_light1" class="tom" type="range" min="0" max="1000" value="200" step="10">
-          <input id="param_light2" type="number" class="num-input" min="0" max="1000" value="200" step="10"><span>lux</span>
-        </div>
-        <div class="input-group">
-          <span class="label_40">Yarn ball color&#x1f170;</span>
-          <input id="param_bColor11" class="tom color-input" type="color" value="#000000">&nbsp;
-          <input id="param_bColor12" type="text" class="num-input color-text" value="#000000">
-        </div>
-        <div class="input-group">
-          <span class="label_40">Yarn ball color&#x1f171;</span>
-          <input id="param_bColor21" class="tom color-input" type="color" value="#000000">&nbsp;
-          <input id="param_bColor22" type="text" class="num-input color-text" value="#000000">
-        </div>
-        <div class="input-group">
-          <span class="label_40">Bottle color&#x1FAD9;</span>
-          <input id="param_fColor1" class="tom color-input" type="color" value="#000000">&nbsp;
-          <input id="param_fColor2" type="text" class="num-input color-text" value="#000000">
-        </div>
-    </p>
     
-    <p>
-        <button id="setParam" onclick="setAllParams();">Change Parameters ✏️</button>&nbsp;&nbsp;
-            <button onclick="resetParam();" style="background-color:#8B8D8C">Reset ↩️</button><br>
-        <font size="-1">
-            Temperature, humidity, and colors affects, <br>
-            which type of fluffy is more likely to grow.<br>
-            Light affects the growth speed and nutrition consumption.<br>
-        </font>
-    </p>
-    
-    <br>
+    <details style="max-width: 500px; width: 100%;"><summary>Change Parameters ✏️</summary>
+        <p>
+            <div class="input-group">
+              <span class="label_40">Temperature&#x1f321;</span>
+              <input id="param_temp1" class="tom" type="range" min="15" max="26" value="20" step="1">
+              <input id="param_temp2" type="number" class="num-input" min="15" max="26" value="20" step="1"><span>&#8451;</span>
+            </div>
+            <div class="input-group">
+              <span class="label_40">Watering⛲</span>
+              <input id="param_water1" class="tom" type="range" min="0" max="400" value="200" step="5">
+              <input id="param_water2" type="number" class="num-input" min="0" max="400" value="200" step="5"><span>μL</span>
+            </div>
+            <div class="input-group">
+              <span class="label_40">Light&#x2600;</span>
+              <input id="param_light1" class="tom" type="range" min="0" max="1000" value="200" step="10">
+              <input id="param_light2" type="number" class="num-input" min="0" max="1000" value="200" step="10"><span>lux</span>
+            </div>
+            <div class="input-group">
+              <span class="label_40">Yarn ball color&#x1f170;</span>
+              <input id="param_bColor11" class="tom color-input" type="color" value="#000000">&nbsp;
+              <input id="param_bColor12" type="text" class="num-input color-text" value="#000000">
+            </div>
+            <div class="input-group">
+              <span class="label_40">Yarn ball color&#x1f171;</span>
+              <input id="param_bColor21" class="tom color-input" type="color" value="#000000">&nbsp;
+              <input id="param_bColor22" type="text" class="num-input color-text" value="#000000">
+            </div>
+            <div class="input-group">
+              <span class="label_40">Bottle color&#x1FAD9;</span>
+              <input id="param_fColor1" class="tom color-input" type="color" value="#000000">&nbsp;
+              <input id="param_fColor2" type="text" class="num-input color-text" value="#000000">
+            </div>
+        </p>
+        
+        <p>
+            <button id="setParam" onclick="setAllParams();">Change Parameters ✏️</button>&nbsp;&nbsp;
+                <button onclick="resetParam();" style="background-color:#8B8D8C">Reset ↩️</button><br>
+            <font size="-1">
+                Temperature, humidity, and colors affects, <br>
+                which type of fluffy is more likely to grow.<br>
+                Light affects the growth speed and nutrition consumption.<br>
+            </font>
+        </p>
+    </details>
     
 
 
@@ -253,10 +257,10 @@ Own a living NFT <br class="br-sp">that evolves with your choices.
             You can hash the message on the bottle's frame:<br>
             <br>
             <input id="messageText" type="text" class="num-input color-text" value="" 
-                placeholder="Enter the message to display in the NFT." style="width: 400px;"><br>
+                placeholder="Enter the message to display in your NFT." style="width: 400px;"><br>
             <br>
-            Message color:&nbsp;<br class="br-sp"><input id="messageColor1" class="tom color-input" type="color" value="#000000">
-                <input id="messageColor2" type="text" class="num-input color-text" value="#000000"><br>
+            Message color:&nbsp;<br class="br-sp"><input id="messageColor1" class="tom color-input" type="color" value="#f0f0f0">
+                <input id="messageColor2" type="text" class="num-input color-text" value="#f0f0f0"><br>
             <br>
             <button id="setMessage" onclick="setMessage();">Hash the Message 🔨</button><br>
             <font size="-1">

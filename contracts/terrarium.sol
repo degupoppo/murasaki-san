@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity =0.8.13;
 
-// 240801, v0.1.0
+// 240911, v0.1.3
 
 // openzeppelin v4.8
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v4.8/contracts/security/ReentrancyGuard.sol";
@@ -155,7 +155,7 @@ contract Murasaki_Terrarium_Storage is Ownable, Pausable {
     
     // Global parameters, onlyOwner
     uint public CLEANING_LIMIT = 86400 * 30;   // 30 days
-    uint public WEATHER_INVERVAL = 86400 * 3;   // 3 days
+    uint public WEATHER_INVERVAL = 86400 * 7;   // 7 days
     uint public FLUFFY_CUTOFFSCORE = 100000;
     uint public SPEED = 100;    // 100=x1, 200=x2
     function set_CLEANING_LIMIT (uint _val) external onlyOwner {CLEANING_LIMIT = _val;}
@@ -1197,27 +1197,27 @@ contract Murasaki_Terrarium_Function2 is Ownable, Pausable {
         _str[0] = mts.colorOfFlame_hex(_nftId);
         _str[1] = mts.colorOfYarnBall1_hex(_nftId);
         _str[2] = mts.colorOfYarnBall2_hex(_nftId);
-        string memory _bedOpaci;    
+        //string memory _bedOpaci;    
         string memory _glassStain;
         uint _clean = mtf1.call_cleanliness(_nftId);
         if (_clean >= 7500) {
-            _bedOpaci = "0";
+            //_bedOpaci = "0";
             _glassStain = "0";
         } else if (_clean >= 5000) {
-            _bedOpaci = ".050";
+            //_bedOpaci = ".050";
             _glassStain = "10";
         } else if (_clean >= 2500) {
-            _bedOpaci = ".100";
+            //_bedOpaci = ".100";
             _glassStain = "20";
         } else if (_clean >= 1000) {
-            _bedOpaci = ".150";
+            //_bedOpaci = ".150";
             _glassStain = "30";
         } else {
-            _bedOpaci = ".200";
+            //_bedOpaci = ".200";
             _glassStain = "40";
         }
         _str[3] = _glassStain;    // dynamic
-        _str[5] = _bedOpaci;    // dynamic
+        //_str[5] = _bedOpaci;    // dynamic
         _str[4] = mts.floorOpaci(_nftId);
         _str[6] = mts.lumpScale(_nftId);
         string memory _dropScale;
@@ -1513,42 +1513,35 @@ contract Murasaki_Terrarium_Codex is Ownable, Pausable {
     function unpause() external onlyOwner {_unpause();}
     
     // basic
-    // mainColor, ballColor1, ballColor2, glassStain, floorOpaci, bedOpaci, lumpScale, dropScale, , 
+    // mainColor, ballColor1, ballColor2, glassStain, floorOpaci, (bedOpaci -> ignored), lumpScale, dropScale, , 
     function svg_basic (string[8] memory _str) external view whenNotPaused returns (string memory) {
         string memory part1 = _svg_basic1(_str);
         string memory part2 = _svg_basic2(_str);
-        string memory part3 = _svg_basic3(_str);
-        return string(abi.encodePacked(part1, part2, part3));
+        return string(abi.encodePacked(part1, part2));
     }
     function _svg_basic1 (string[8] memory _str) private pure returns (string memory) {
         return string(abi.encodePacked(
-            '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" preserveAspectRatio="xMinYMin meet" viewBox="0 0 500 500"><style>:root{--bc1:',
+            '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 500 500" width="500" height="500"><style>:root{--bc1:',
             _str[0],
             ';--kc1:',
             _str[1],
             ';--kc2:',
             _str[2],
-            ';}</style><defs><filter id="b.5"><feGaussianBlur stdDeviation=".5"/></filter><filter id="b1"><feGaussianBlur stdDeviation="1"/></filter><filter id="b2"><feGaussianBlur stdDeviation="2"/></filter><filter id="b3"><feGaussianBlur stdDeviation="2"/></filter><filter id="b5"><feGaussianBlur stdDeviation="5"/></filter><path id="x" d="m38 260 92-183h242l92 183-92 184H130L38 260Z"/><filter id="yugami" filterUnits="userSpaceOnUse" x="0" y="0" width="500" height="500"><feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="1" seed="1" stitchTiles="noStitch" result="img"/><feDisplacementMap in="SourceGraphic" in2="img" xChannelSelector="R" yChannelSelector="B" scale="',
-            _str[3]
+            ';}</style><defs><filter id="b1"><feGaussianBlur stdDeviation="1"/></filter><filter id="yugami" filterUnits="userSpaceOnUse" x="0" y="0" width="500" height="500"><feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="1" seed="1" stitchTiles="noStitch" result="img"/><feDisplacementMap in="SourceGraphic" in2="img" xChannelSelector="R" yChannelSelector="B" scale="',
+            _str[3],
+            '"/></filter></defs><g><rect width="500" height="500" fill="var(--bc1)" fill-opacity=".15"/><circle cx="250" cy="250" r="250" fill="#FFF" fill-opacity="0.5"><animate attributeName="r" values="250;260;250" dur="5s" repeatCount="indefinite"/></circle><g filter="url(#b1)"><rect y="463" width="323" height="37" fill="#E1CBBD"/><rect x="276" y="463" width="224" height="37" fill="#F7E1C3"/><rect y="430" width="163" height="40" fill="#F7E1C3"/><rect x="109" y="430" width="391" height="40" fill="#F5DBCD"/><line x1="1" y1="429" x2="500" y2="430" stroke="#A6A6A6" stroke-width="2"/></g><rect y="430" width="500" height="70" fill="#F15A22" fill-opacity="',
+            _str[4]
         ));
     }
     function _svg_basic2 (string[8] memory _str) private pure returns (string memory) {
         return string(abi.encodePacked(
-            '"/></filter></defs><g><rect width="500" height="500" fill="var(--bc1)" fill-opacity=".15"/><circle cx="250" cy="250" r="250" fill="#FFF" fill-opacity="0.5"><animate attributeName="r" values="250;260;250" dur="5s" repeatCount="indefinite"/></circle><g filter="url(#b1)"><rect y="463" width="323" height="37" fill="#E1CBBD"/><rect x="276" y="463" width="224" height="37" fill="#F7E1C3"/><rect y="430" width="163" height="40" fill="#F7E1C3"/><rect x="109" y="430" width="391" height="40" fill="#F5DBCD"/><line x1="1" y1="429" x2="500" y2="430" stroke="#A6A6A6" stroke-width="2"/></g><rect y="430" width="500" height="70" fill="#F15A22" fill-opacity="',
-            _str[4],
-            '"/><ellipse cx="250" cy="449" rx="175" ry="14" fill="var(--bc1)" fill-opacity=".3"/><g filter="url(#yugami)"><linearGradient id="h" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFF"/><stop offset="1" stop-color="var(--bc1)"/></linearGradient><g style="fill-opacity:0.25;" fill="url(#h)"><path d="m38 260 92-183h242l92 183-92 184H130L38 260Z"/></g><linearGradient id="b" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFF"/><stop offset="0.7" stop-color="var(--kc1)"/><stop offset="1" stop-color="var(--kc1)"/></linearGradient><linearGradient id="c" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFF"/><stop offset="0.7" stop-color="var(--kc2)"/><stop offset="1" stop-color="var(--kc2)"/></linearGradient><g filter="url(#b1)"><circle cx="230" cy="274" r="82" fill="url(#b)" fill-opacity="0.8"/><circle cx="193" cy="237" r="20" fill="#FFF" fill-opacity="0.2"/></g><g filter="url(#b.5)"><circle cx="146" cy="294" r="59" fill="url(#c)"/><circle cx="116" cy="264" r="10" fill="#FFF" fill-opacity="0.2"/></g><linearGradient id="d" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFF"/><stop offset="0.3" stop-color="#F2EBD3"/><stop offset="1" stop-color="#d9d3bd"/></linearGradient><pattern id="ct" width="20" height="20" patternUnits="userSpaceOnUse" fill="#717375"><circle cx="5" cy="5" r="2" fill-opacity="0.2"/><circle cx="15" cy="15" r="2" fill-opacity="0.2"/><circle cx="10" cy="10" r="1.5" fill-opacity="0.1"/></pattern><polygon points="74,339 428,339 374,445 128,445" fill="url(#d)" stroke="rgba(0,0,0,0.05)" stroke-width="3"/><polygon points="74,339 428,339 374,445 128,445" fill="url(#ct)" fill-opacity="0.7"/><polygon points="74,339 428,339 374,445 128,445" fill="000" fill-opacity="',
-            _str[5]
-        ));
-    }
-    function _svg_basic3 (string[8] memory _str) private pure returns (string memory) {
-        return string(abi.encodePacked(
-            '"/><g fill="#8B4513"><path d="M342 93h5v68h-5V93Zm18 0h5v68h-5V93Z"/><path d="M342 93h23v5h-23v-5Zm0 63h23v5h-23v-5Zm0-63 11-9 12 9h-23Z"/><circle cx="353.5" cy="84" r="4"/></g><circle cx="353" cy="125" fill="#f5e247" fill-opacity=".7" filter="url(#b3)"><animate attributeName="r" values="14;',
+            '"/><g transform="translate(-40 -40) scale(1.15)"><path d="M123 391c0-6.5 57-11.5 127-11.5s127 5 127 11.5v45c0 6.5-55 11.5-127 11.5s-127-5-127-11.5z" fill="#48241E"/><circle cx="250" cy="250" r="180" fill="var(--bc1)" fill-opacity=".15"/></g><g fill-opacity=".3" fill="none" stroke="#fff" stroke-width="3" stroke-opacity=".25" filter="url(#yugami)"><g><g><polygon points="136 117,172 168,100 168"/><animateTransform attributeName="transform" type="rotate" from="0 136 151" to="360 136 151" dur="6s" repeatCount="indefinite" additive="sum"/></g><animateTransform attributeName="transform" type="translate" from="-20 -20" to="-20 200" dur="8.1s" repeatCount="indefinite" additive="sum"/></g><g><g><rect x="200" y="56" width="54" height="54"/><animateTransform attributeName="transform" type="rotate" from="0 227 83" to="360 227 83" dur="7s" repeatCount="indefinite" additive="sum"/></g><animateTransform attributeName="transform" type="translate" from="-20 0" to="-20 200" dur="5.2s" repeatCount="indefinite" additive="sum"/></g><g><g><polygon points="300,55 270,144 345,84 255,84 330,144"/><animateTransform attributeName="transform" type="rotate" from="0 300 102" to="360 300 102" dur="10s" repeatCount="indefinite" additive="sum"/></g><animateTransform attributeName="transform" type="translate" from="0 0" to="0 230" dur="7.3s" repeatCount="indefinite" additive="sum"/></g><g><g><polygon points="385 136,421 187,349 187"/><animateTransform attributeName="transform" type="rotate" from="0 385 170" to="360 385 170" dur="6s" repeatCount="indefinite" additive="sum"/></g><animateTransform attributeName="transform" type="translate" from="0 -25" to="0 150" dur="6.4s" repeatCount="indefinite" additive="sum"/></g></g><g transform="translate(-40 -40) scale(1.15)"><path d="m420 315a180 180 0 01-230 107 180 180 0 01-107-107z" fill="#f7e1c3"/></g><g filter="url(#yugami)"><g transform="translate(-40 -40) scale(1.15)"><ellipse cx="250" cy="315" rx="165" ry="23" fill="#fff6f5"/></g><ellipse cx="120" cy="120" rx="60" ry="12" fill="#fff" fill-opacity="0.4" transform="rotate(-45 120 120)"><animateTransform attributeName="transform" type="translate" values="5 0; -5 0; 5 0" dur="5s" repeatCount="indefinite" additive="sum"/></ellipse><linearGradient id="b" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFF"/><stop offset="0.7" stop-color="var(--kc1)"/><stop offset="1" stop-color="var(--kc1)"/></linearGradient><linearGradient id="c" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFF"/><stop offset="0.7" stop-color="var(--kc2)"/><stop offset="1" stop-color="var(--kc2)"/></linearGradient><g filter="url(#b1)"><circle cx="225" cy="224" r="82" fill="url(#b)" fill-opacity="0.8"/><circle cx="188" cy="187" r="20" fill="#FFF" fill-opacity="0.2"/></g><g filter="url(#b1)"><circle cx="141" cy="254" r="59" fill="url(#c)"/><circle cx="111" cy="224" r="10" fill="#FFF" fill-opacity="0.2"/></g><g fill="#a26a42" transform="translate(0,-7)"><path d="M342 93h5v68h-5V93Zm18 0h5v68h-5V93Z"/><path d="M342 93h23v5h-23v-5Zm0 63h23v5h-23v-5Zm0-63 11-9 12 9h-23Z"/><circle cx="353.5" cy="84" r="4"/></g><circle cx="353" cy="118" fill="#f5e247" fill-opacity=".7" filter="url(#b1)"><animate attributeName="r" values="14;',
             _str[6],
-            ';14" dur="5s" repeatCount="indefinite"/></circle><circle cx="180" cy="70" r="',
+            ';14" dur="5s" repeatCount="indefinite"/></circle><circle cx="180" cy="55" r="',
             _str[7],
-            '" fill="#A6CAEC"><animateTransform attributeName="transform" type="translate" values="0 0;0 300;0 300;0 0" keyTimes="0;0.8;1;1" dur="8s" repeatCount="indefinite"/><animate attributeName="opacity" keyTimes="0;0.8;1;1" values="0.7;0;0;0" dur="8s" repeatCount="indefinite" /></circle><circle cx="310" cy="70" r="',
+            '" fill="#A6CAEC"><animateTransform attributeName="transform" type="translate" values="0 0;0 320;0 0" keyTimes="0;1;1" dur="8s" repeatCount="indefinite"/><animate attributeName="opacity" keyTimes="0;0.8;1;1" values="0.7;0;0;0" dur="8s" repeatCount="indefinite" /></circle><circle cx="310" cy="375" r="',
             _str[7],
-            '" fill="#c0d9f1"><animateTransform attributeName="transform" type="translate" values="0 0;0 300;0 300;0 0" keyTimes="0;0.8;1;1" dur="8s" repeatCount="indefinite" begin="4s"/><animate attributeName="opacity" keyTimes="0;0.8;1;1" values="0.7;0;0;0" dur="8s" repeatCount="indefinite" begin="4s"/></circle></g><linearGradient id="a" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ab7152"/><stop offset="1" stop-color="#933d10"/></linearGradient><g><path fill="#933D10" fill-rule="evenodd" d="M240 45a11 11 0 1 1 22 0 11 11 0 0 1-22 0Z"/><rect x="145" y="44" width="210" height="34" rx="7" ry="7" fill="url(#a)"/></g><linearGradient id="e" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFF"/><stop offset="0.2" stop-color="var(--bc1)"/><stop offset="1" stop-color="var(--bc1)"/></linearGradient><use xlink:href="#x" style="fill-opacity:0; stroke-opacity:0.65" stroke="url(#e)" stroke-width="18" stroke-linejoin="round"/></g>'
+            '" fill="#c0d9f1" opacity="0"><animateTransform attributeName="transform" type="translate" values="0 0;0 -320;0 0" keyTimes="0;0;1" dur="8s" repeatCount="indefinite" begin="4s"/><animate attributeName="opacity" keyTimes="0;0.8;1;1" values="0.7;0;0;0" dur="8s" repeatCount="indefinite" begin="4s"/></circle><g stroke="#FFF" transform="translate(95 30) scale(2.4) rotate(10 100 100)" stroke-opacity="0.4" stroke-linecap="round" fill="none"><g stroke-width="0.8"><path d="M102 142.5l1.7 1.7 1.6.1.7-.3.5-.6.6-.4.7-.4h.6l.4.3.3.9.3 1.5.4 1.5 2.5 5.8.2 1.2-.2 1.3-.6 1.1-1 1-.8.1-1.1-.6-1-.5-.4.3-.6 1-.6.4h-.7l-.6-.3-.7-.7-.5-.3h-.6l-.4.4-.8.9-.4.1-.4-.2-.4-.5-.3-.6-.4-.1-.4.2-.3.4-.3.2-.2-.1-.5-.9-.2-1.2-.1-1.6.1-1.7.3-2 .4-1.7.8-1.8.7-1.7.4-1.2.5-.8.3-.3.3-.1z"/></g><g stroke-width="0.4"><path d="M100.5,147.7l0.6,0.3-0.4,0.4"/><path d="M106.1,147.8l-0.6,0.3 0.6,0.3"/><path d="m103.929 148.788.368.057.272.142.159.136.062.113-.023.328-.096.227-.227.221-.328.187-.453.17-.493.057-.419-.007-.408-.102-.289-.153-.21-.159-.238-.272-.125-.198-.051-.17.028-.187.085-.153.181-.153.221-.068z"/></g></g><g stroke="#FFF" transform="translate(-63 63) scale(2.2) rotate(-10 100 100)" stroke-opacity="0.4" stroke-linecap="round" fill="none"><path d="M99.4 142.9l1 .7.8.6.3.1.4-.1 1.6-1.8.6-.4.7-.1.5.2 1.6 2.4.6 1.7.5 1.6.3.4.4.4.9.3.5.2.1.3v.4l-.2.4-1.1 1.8-.4.7-.8 1.7-.7 1.3-1 1.2-.5.4-.5.2h-.3l-.4-.1-1.4-.7-.5-.2h-.4l-.5.1-2.1.9-.4.1h-.5l-.6-.1-.6-.3-.8-.7-1.8-2.3-.3-.2-.4-.2-.7-.2-.6-.3-.4-.4-.1-.4.1-.4.5-.6.6-.9.6-1.4.5-2.3.6-2.5.6-1.7.5-.9.3-.3.4-.1h.5l.3.1z" stroke-width=".8"/><path d="m102.33,149.26l0.32,-0.16 0.24,-0.02 0.16,0.15 0.03,0.25-0.06,0.33-0.35,0.31-0.39,0.01-0.40,-0.05-0.31,-0.18-0.18,-0.22-0.01,-0.29 0.19,-0.23 0.27,-0.01 0.23,0.01 0.18,0.14z" stroke-width="0.4"/><g fill="#fff" stroke="none" fill-opacity="0.4"><circle cx="98.26" cy="148.33" r="0.6"/><circle cx="105.51" cy="147.86" r="0.6"/><animateTransform attributeName="transform" type="scale" values="1,1;1,1;0,0;0,0;1,1;1,1" keyTimes="0;0.5;0.5;0.505;0.505;1" dur="30s" repeatCount="indefinite" additive="sum"/></g></g><g transform="translate(250,397)" stroke="#fff" stroke-opacity="0.4" fill="none"><circle cx="2" cy="2" r="11.5" stroke-width="1.6"/><g fill="#fff" fill-opacity="0.5" stroke="none"><circle cx="-3" cy="-1" r="1.2"/><circle cx="7" cy="-1" r="1.2"/><circle cx="-6" cy="4" r="2"/><circle cx="10" cy="4" r="2"/></g></g></g><g transform="translate(-40 -40) scale(1.15)"><circle cx="250" cy="250" r="180" fill="none" stroke="var(--bc1)" stroke-width="7.5" stroke-opacity="0.5"/></g></g>'
         ));
     }
     
@@ -1558,7 +1551,7 @@ contract Murasaki_Terrarium_Codex is Ownable, Pausable {
         string memory _res = string(abi.encodePacked(
             '<style>:root {',
             _str,
-            '}</style><g filter="url(#yugami)"><g transform="translate(390 277) scale(2)"><g transform="translate(0 31.5) scale(0.25)"><g stroke="#ffffff" stroke-opacity="0.2" stroke-width="10"><path d="m0 0c2.5-16.4 5.6-33.3 5.7-47.8 0-14.5-4.4-32.3-5.4-39.4-1-7.1-1.5-8.8-1.7-12-.2-3.2.2-6.7.6-9.8" id="pippelStem" fill="none" stroke-linecap="round"/></g><linearGradient id="grad2" x1="0%" y1="500%" x2="0%" y2="0%"><stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#73EAA1"/></linearGradient><use xlink:href="#pippelStem" stroke-opacity="1" stroke="url(#grad2)" stroke-width="8"/><g fill="#73EAA1" stroke="#ffffff" stroke-opacity="0.2" stroke-width="1" fill-opacity="1"><path d="m8 -45c.1-.1-.2-3.3 2-5.2 2.1-1.9 9.3-10.8 12.4-10.8 3 0 5.3 7.5 5.8 10.8.5 3.2-.9 6.5-2.9 8.7-2 2.2-6.6 4.3-9.2 4.7-2.6.4-5-1-6.4-2.4-1.4-1.4-1.5-3.6-1.7-5.8z"/><path d="m0 -20c-1.1-1.9-4.3-5.2-6.8-7.2-2.5-2-6-4.2-8-4.7-2-.5-3.2.6-4 1.7-.7 1.2-.5 3.5-.3 5.2.1 1.7.5 3.6 1 5.2.5 1.5 1.2 2.8 1.9 3.9.7 1.1 1.1 1.9 2.5 2.5 1.3.6 3.7 1.3 5.6 1.1 1.8-.2 4.1-1.5 5.4-2.1 1.3-.6 2.2-.7 2.6-1.5.5-.9 1.1-2.1 0-4z"/></g></g><g transform="translate(0 3) scale(1.0)" fill-opacity="0.5"><circle cx="0" cy="0" r="8" fill="#ffffff" fill-opacity="0.6" filter="url(#b1)"/><circle cx="0" cy="0" r="1.5" fill="var(--pc1)" fill-opacity="0.6"/><g transform="scale(3 3)"><circle cx="2" cy="0" r="1" fill="var(--pc1)"/><circle cx="1.73" cy="1" r="0.8" fill="var(--pc2)"/><circle cx="1" cy="1.73" r="1" fill="var(--pc3)"/><circle cx="0" cy="2" r="0.8" fill="var(--pc1)"/><circle cx="-1" cy="1.73" r="1" fill="var(--pc2)"/><circle cx="-1.73" cy="1" r="0.8" fill="var(--pc1)"/><circle cx="-2" cy="0" r="1" fill="var(--pc3)"/><circle cx="-1.73" cy="-1" r="0.8" fill="var(--pc1)"/><circle cx="-1" cy="-1.73" r="1" fill="var(--pc2)"/><circle cx="0" cy="-2" r="0.8" fill="var(--pc4)"/><circle cx="1" cy="-1.73" r="1" fill="var(--pc1)" /><circle cx="1.73" cy="-1" r="0.8" fill="var(--pc3)"/><animateTransform attributeName="transform" type="rotate" from="360 0 0" to="0 0 0" dur="90s" repeatCount="indefinite" additive="sum"/></g><g transform="scale(2 2)"><circle cx="2" cy="0" r="1.5" fill="var(--pc1)"/><circle cx="1.73" cy="1" r="1" fill="var(--pc2)"/><circle cx="1" cy="1.73" r="1" fill="var(--pc1)"/><circle cx="0" cy="2" r="1.5" fill="var(--pc4)"/><circle cx="-1" cy="1.73" r="1" fill="var(--pc1)"/><circle cx="-1.73" cy="1" r="1" fill="var(--pc2)"/><circle cx="-2" cy="0" r="1.5" fill="var(--pc3)"/><circle cx="-1.73" cy="-1" r="1" fill="var(--pc2)"/><circle cx="-1" cy="-1.73" r="1" fill="var(--pc3)"/><circle cx="0" cy="-2" r="1.5" fill="var(--pc1)"/><circle cx="1" cy="-1.73" r="1" fill="var(--pc4)"/><circle cx="1.73" cy="-1" r="1" fill="var(--pc3)"/><animateTransform attributeName="transform" type="rotate" from="0 0 0" to="360 0 0" dur="60s" repeatCount="indefinite" additive="sum"/></g></g></g></g>'
+            '}</style><g filter="url(#yugami)"><g transform="translate(400 255) scale(2)"><g transform="translate(0 31.5) scale(0.25)"><g stroke="#ffffff" stroke-opacity="0.2" stroke-width="10"><path d="m0 0c2.5-16.4 5.6-33.3 5.7-47.8 0-14.5-4.4-32.3-5.4-39.4-1-7.1-1.5-8.8-1.7-12-.2-3.2.2-6.7.6-9.8" id="pippelStem" fill="none" stroke-linecap="round"/></g><linearGradient id="grad2" x1="0%" y1="500%" x2="0%" y2="0%"><stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#73EAA1"/></linearGradient><use xlink:href="#pippelStem" stroke-opacity="1" stroke="url(#grad2)" stroke-width="8"/><g fill="#73EAA1" stroke="#ffffff" stroke-opacity="0.2" stroke-width="1" fill-opacity="1"><path d="m8 -45c.1-.1-.2-3.3 2-5.2 2.1-1.9 9.3-10.8 12.4-10.8 3 0 5.3 7.5 5.8 10.8.5 3.2-.9 6.5-2.9 8.7-2 2.2-6.6 4.3-9.2 4.7-2.6.4-5-1-6.4-2.4-1.4-1.4-1.5-3.6-1.7-5.8z"/><path d="m0 -20c-1.1-1.9-4.3-5.2-6.8-7.2-2.5-2-6-4.2-8-4.7-2-.5-3.2.6-4 1.7-.7 1.2-.5 3.5-.3 5.2.1 1.7.5 3.6 1 5.2.5 1.5 1.2 2.8 1.9 3.9.7 1.1 1.1 1.9 2.5 2.5 1.3.6 3.7 1.3 5.6 1.1 1.8-.2 4.1-1.5 5.4-2.1 1.3-.6 2.2-.7 2.6-1.5.5-.9 1.1-2.1 0-4z"/></g></g><g transform="translate(0 3) scale(1.0)" fill-opacity="0.5"><circle cx="0" cy="0" r="8" fill="#ffffff" fill-opacity="0.6" filter="url(#b1)"/><circle cx="0" cy="0" r="1.5" fill="var(--pc1)" fill-opacity="0.6"/><g transform="scale(3 3)"><circle cx="2" cy="0" r="1" fill="var(--pc1)"/><circle cx="1.73" cy="1" r="0.8" fill="var(--pc2)"/><circle cx="1" cy="1.73" r="1" fill="var(--pc3)"/><circle cx="0" cy="2" r="0.8" fill="var(--pc1)"/><circle cx="-1" cy="1.73" r="1" fill="var(--pc2)"/><circle cx="-1.73" cy="1" r="0.8" fill="var(--pc1)"/><circle cx="-2" cy="0" r="1" fill="var(--pc3)"/><circle cx="-1.73" cy="-1" r="0.8" fill="var(--pc1)"/><circle cx="-1" cy="-1.73" r="1" fill="var(--pc2)"/><circle cx="0" cy="-2" r="0.8" fill="var(--pc4)"/><circle cx="1" cy="-1.73" r="1" fill="var(--pc1)" /><circle cx="1.73" cy="-1" r="0.8" fill="var(--pc3)"/><animateTransform attributeName="transform" type="rotate" from="360 0 0" to="0 0 0" dur="90s" repeatCount="indefinite" additive="sum"/></g><g transform="scale(2 2)"><circle cx="2" cy="0" r="1.5" fill="var(--pc1)"/><circle cx="1.73" cy="1" r="1" fill="var(--pc2)"/><circle cx="1" cy="1.73" r="1" fill="var(--pc1)"/><circle cx="0" cy="2" r="1.5" fill="var(--pc4)"/><circle cx="-1" cy="1.73" r="1" fill="var(--pc1)"/><circle cx="-1.73" cy="1" r="1" fill="var(--pc2)"/><circle cx="-2" cy="0" r="1.5" fill="var(--pc3)"/><circle cx="-1.73" cy="-1" r="1" fill="var(--pc2)"/><circle cx="-1" cy="-1.73" r="1" fill="var(--pc3)"/><circle cx="0" cy="-2" r="1.5" fill="var(--pc1)"/><circle cx="1" cy="-1.73" r="1" fill="var(--pc4)"/><circle cx="1.73" cy="-1" r="1" fill="var(--pc3)"/><animateTransform attributeName="transform" type="rotate" from="0 0 0" to="360 0 0" dur="60s" repeatCount="indefinite" additive="sum"/></g></g></g></g>'
         ));
         return _res;
     }
@@ -1587,19 +1580,19 @@ contract Murasaki_Terrarium_Codex is Ownable, Pausable {
         return string(abi.encodePacked(
             ';--fc5:',
             _str[4],
-            ';}</style><g filter="url(#yugami)"><style>.f1 circle,.f1 use{animation:moveX 3.3s linear infinite;}.f2 circle,.f2 use{animation:moveX 3.0s linear infinite;}.f3 circle,.f3 use{animation:moveX 3.9s linear infinite;}.f4 circle,.f4 use{animation:moveX 3.6s linear infinite;}.f5 circle,.f5 use{animation:moveX 3.0s linear infinite;}@keyframes moveX {0%,49%,100%{transform:translateY(0);}50%,99%{transform:translateY(-2px);}}</style><defs><g id="f"><!--<circle cx="2" cy="2" r="12" fill="#FFF" fill-opacity="0.4" filter="url(#b.5)"/><circle cx="2" cy="2" r="11" filter="url(#b.5)"/>--><circle cx="2" cy="2" r="11"/><circle cx="2" cy="2" r="11.5" fill="none" stroke-width="1" stroke="#FFF" stroke-opacity="0.3"/><g fill="#000000" fill-opacity="0.5"><circle cx="-3" cy="-1" r="1"/><circle cx="7" cy="-1" r="1"/><animateTransform attributeName="transform" type="scale" values="1,1;1,1;1,0.2;1,0.2;1,1;1,1" keyTimes="0;0.4;0.4;0.42;0.42;1" dur="10s" repeatCount="indefinite" additive="sum"/></g><g fill="#FBAED2" fill-opacity="0.5"><circle cx="-6" cy="4" r="2"/><circle cx="10" cy="4" r="2"/></g></g></defs><g><g transform="translate(240 330) scale(',
+            ';}</style><g filter="url(#yugami)"><style>.f1 circle,.f1 use{animation:moveX 3.3s linear infinite;} .f2 circle,.f2 use{animation:moveX 3.0s linear infinite;} .f3 circle,.f3 use{animation:moveX 3.9s linear infinite;} .f4 circle,.f4 use{animation:moveX 3.6s linear infinite;} .f5 circle,.f5 use{animation:moveX 3.0s linear infinite;} @keyframes moveX {0%,49%,100%{transform:translateY(0);}50%,99%{transform:translateY(-2px);}}</style><defs><g id="f"><circle cx="2" cy="2" r="11"/><circle cx="2" cy="2" r="11.5" fill="none" stroke-width="1" stroke="#FFF" stroke-opacity="0.3"/><g fill="#000000" fill-opacity="0.5"><circle cx="-3" cy="-1" r="1"/><circle cx="7" cy="-1" r="1"/><animateTransform attributeName="transform" type="scale" values="1,1;1,1;1,0.2;1,0.2;1,1;1,1" keyTimes="0;0.4;0.4;0.42;0.42;1" dur="10s" repeatCount="indefinite" additive="sum"/></g><g fill="#FBAED2" fill-opacity="0.5"><circle cx="-6" cy="4" r="2"/><circle cx="10" cy="4" r="2"/></g></g></defs><g><g transform="translate(240 317) scale(',
             _str[5],
-            ')" fill="var(--fc1)" class="f1"><use xlink:href="#f"/></g><g transform="translate(290 330) scale(',
+            ')" fill="var(--fc1)" class="f1"><use xlink:href="#f"/></g><g transform="translate(300 316) scale(',
             _str[6],
-            ')" fill="var(--fc2)" class="f2"><use xlink:href="#f"/></g><g transform="translate(190 330) scale(',
+            ')" fill="var(--fc2)" class="f2"><use xlink:href="#f"/></g><g transform="translate(180 316) scale(',
             _str[7]
         ));
     }
     function _svg_fluffy3 (string[10] memory _str) private pure returns (string memory) {
         return string(abi.encodePacked(
-            ')" fill="var(--fc3)" class="f3"><use xlink:href="#f"/></g><g transform="translate(340 330) scale(',
+            ')" fill="var(--fc3)" class="f3"><use xlink:href="#f"/></g><g transform="translate(360 315) scale(',
             _str[8],
-            ')" fill="var(--fc4)" class="f4"><use xlink:href="#f"/></g><g transform="translate(140 330) scale(',
+            ')" fill="var(--fc4)" class="f4"><use xlink:href="#f"/></g><g transform="translate(120 315) scale(',
             _str[9],
             ')" fill="var(--fc5)" class="f5"><use xlink:href="#f"/></g></g></g>'
         ));
@@ -1607,7 +1600,7 @@ contract Murasaki_Terrarium_Codex is Ownable, Pausable {
     
     // basic2
     function svg_basic2 () external view whenNotPaused returns (string memory) {
-        return '<use xlink:href="#x" fill="var(--bc1)" fill-opacity="0.1"/><radialGradient id="str"><stop offset="0%" stop-color="#FFF" stop-opacity="1"/><stop offset="100%" stop-color="#FFF" stop-opacity="0"/></radialGradient><g fill="url(#str)" filter="url(#yugami)"><circle cx="150" cy="150" r="6"><animate attributeName="opacity" values="0;1;0" dur="3s" repeatCount="indefinite"/></circle><circle cx="200" cy="120" r="5"><animate attributeName="opacity" values="1;0;1" dur="3.5s" repeatCount="indefinite"/></circle><circle cx="250" cy="160" r="3"><animate attributeName="opacity" values="0;1;0" dur="4s" repeatCount="indefinite"/></circle><circle cx="300" cy="130" r="3"><animate attributeName="opacity" values="1;0;1" dur="4.5s" repeatCount="indefinite"/></circle><circle cx="350" cy="200" r="5"><animate attributeName="opacity" values="0;1;0" dur="3.2s" repeatCount="indefinite"/></circle></g>';
+        return '<g transform="translate(-40 -40) scale(1.15)"><circle cx="250" cy="250" r="180" fill="var(--bc1)" fill-opacity="0.1"/><path d="M123 391c0 6.5 57 11.5 127 11.5s127-5 127-11.5v45c0 6.5-55 11.5-127 11.5s-127-5-127-11.5z" fill="#7A3E34" stroke="#CCC" stroke-width="0.5"/></g><radialGradient id="str"><stop offset="0%" stop-color="#FFF" stop-opacity="1"/><stop offset="100%" stop-color="#FFF" stop-opacity="0"/></radialGradient><g fill="url(#str)" filter="url(#yugami)"><circle cx="120" cy="160" r="6"><animate attributeName="opacity" values="0;1;0" dur="3s" repeatCount="indefinite"/></circle><circle cx="200" cy="90" r="5"><animate attributeName="opacity" values="1;0;1" dur="3.5s" repeatCount="indefinite"/></circle><circle cx="250" cy="130" r="3"><animate attributeName="opacity" values="0;1;0" dur="4s" repeatCount="indefinite"/></circle><circle cx="290" cy="100" r="3"><animate attributeName="opacity" values="1;0;1" dur="4.5s" repeatCount="indefinite"/></circle><circle cx="390" cy="150" r="5"><animate attributeName="opacity" values="0;1;0" dur="3.2s" repeatCount="indefinite"/></circle></g>';
     }
     
     // text
@@ -1620,15 +1613,15 @@ contract Murasaki_Terrarium_Codex is Ownable, Pausable {
     }
     function _svg_text1 (string[11] memory _str) private pure returns (string memory) {
         return string(abi.encodePacked(
-            '<g font-family="Segoe UI Emoji"><g text-anchor="end"><text fill="#FFF" font-size="15" x="348" y="63">#',
+            '<defs><path id="msg" d="m101.45 443.65c0 7.475 65.55 13.225 143.55 12.35s146.05-5.75 146.05-13.225"/><path id="msg2" d="m101.45 424.65c0 7.475 65.55 13.225 143.55 12.35s146.05-5.75 146.05-13.225"/></defs><g font-family="Segoe UI Emoji, Helvetica Neue"><g text-anchor="end"><text fill="#FFF" font-size="12" ><textPath href="#msg2" text-anchor="end" startOffset="100%" fill="#CCCCCC"><tspan dx="-3" dy="0">#',
             _str[0],
-            '</text><text fill="#00F" font-size="18" x="7" y="493" text-anchor="start">&#x2764;',
+            '</tspan></textPath></text><text fill="#00F" font-size="18" x="7" y="493" text-anchor="start">&#x2764;',
             _str[1],
             '</text><text fill="var(--bc1)" font-size="9" x="495" y="484">Terrarium of Murasaki-san</text><text fill="var(--bc1)" font-size="9" x="495" y="495">Minted at #',
             _str[2],
-            ' on the Astar EVM</text><text font-size="14"><textPath href="#x" text-anchor="start" fill="',
+            ' on Astar Substrate EVM</text><text font-size="12"><textPath href="#msg" startOffset="50%" text-anchor="middle" fill="',
             _str[3],
-            '"><tspan dx="10" dy="5">'
+            '"><tspan dx="5" dy="0">'
         ));
     }
     function _svg_text2 (string[11] memory _str) private pure returns (string memory) {
@@ -1638,7 +1631,7 @@ contract Murasaki_Terrarium_Codex is Ownable, Pausable {
             _str[5],
             ' &#x1f321;',
             _str[6],
-            'C &#x2600;',
+            '&#8451; &#x2600;',
             _str[7],
             ' lx</text></g><g font-size="11" text-anchor="middle"><text x="445" y="14">&#x2728;</text><rect width="40" height="10" x="455" y="5" fill="#F8C5AC"/><rect width="'
         ));
@@ -1658,7 +1651,7 @@ contract Murasaki_Terrarium_Codex is Ownable, Pausable {
     // blackOpaci
     function svg_footer (string memory _blackOpaci) external view whenNotPaused returns (string memory) {
         string memory _res = string(abi.encodePacked(
-            '<g fill="none" transform="translate(384 476) scale(0.07)" stroke="var(--bc1)" id="stroke"><style>#stroke{stroke-dasharray:500 500;stroke-dashoffset:500;animation:_logo 3s linear forwards;}@keyframes _logo{0%{stroke-dashoffset:500;}20%{stroke-dashoffset:500;}100%{stroke-dashoffset:0;}}</style><path d="M48.8 71v35.7c0 4.6-3.7 8.3-8.3 8.3h-81.2a8.3 8.3 0 0 1-8.3-8.3v-60" stroke-width="10.56"/><path d="M-31.4 50.4c0-1.5 1.2-2.7 2.7-2.7H9.7c1.5 0 2.7 1.2 2.7 2.7v38.3c0 1.5-1.2 2.7-2.7 2.7h-38.4a2.7 2.7 0 0 1-2.7-2.7Z" stroke-width="6.6"/><path d="m0 0-70.8 41M-.1 0l70.8 41" stroke-width="17.16" stroke-linecap="round"/></g><rect width="500" height="500" fill-opacity="',
+            '<g fill="none" transform="translate(382 476) scale(0.07)" stroke="var(--bc1)" id="stroke"><style>#stroke{stroke-dasharray:500 500;stroke-dashoffset:500;animation:_logo 3s linear forwards;}@keyframes _logo{0%{stroke-dashoffset:500;}20%{stroke-dashoffset:500;}100%{stroke-dashoffset:0;}}</style><path d="M48.8 71v35.7c0 4.6-3.7 8.3-8.3 8.3h-81.2a8.3 8.3 0 0 1-8.3-8.3v-60" stroke-width="10.56"/><path d="M-31.4 50.4c0-1.5 1.2-2.7 2.7-2.7H9.7c1.5 0 2.7 1.2 2.7 2.7v38.3c0 1.5-1.2 2.7-2.7 2.7h-38.4a2.7 2.7 0 0 1-2.7-2.7Z" stroke-width="6.6"/><path d="m0 0-70.8 41M-.1 0l70.8 41" stroke-width="17.16" stroke-linecap="round"/></g><rect width="500" height="500" fill-opacity="',
             _blackOpaci, // .000 - .200
             '"/></svg>'
         ));
@@ -1836,7 +1829,7 @@ contract Murasaki_Terrarium_AstarPrice is Ownable, Pausable {
     function _set_address_USDC(address _address) external onlyOwner {address_USDC = _address;}
     function _set_address_LP(address _address) external onlyOwner {address_LP = _address;}
     
-    // call price
+    // call ASTR price
     function call_price () external view whenNotPaused returns (uint) {
         //***TODO*** price test
         return _call_priceTest();

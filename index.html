@@ -114,10 +114,10 @@ This is our fan project using <br class="br-sp"><b>Astar Substrate EVM</b> <img 
 This project is currently being developed on a private chain.<br>
 In the near future, it will first be test-played on the Shibuya testnet and eventually deployed on the Astar Substrate EVM.<br>
 <br>
-<i>Development Progress: <b><span id="percent">92</span></b><font size="-1"> (v0.1.39)</font></i><br>
+<i>Development Progress: <b><span id="percent">93</span></b><font size="-1"> (v0.1.40)</font></i><br>
 <span id="container"></span><br>
 <font size="-1" color="blue"><i>
-The developer is brushing up ToM and redesigning the economy that considering <a href="https://docs.astar.network/ja/docs/learn/dapp-staking/dapp-staking-protocol/#tier-ranking-system">the Ranked Tier System</a>.
+The developer is redesigning the economy while considering <a href="https://docs.astar.network/ja/docs/learn/dapp-staking/dapp-staking-protocol/#tier-ranking-system">the Ranked Tier System</a> <br>and looking forward to the <a href="https://soneium.org/en/">Soneium</a> mainnet launch :)
 </font></i>
 <script src="https://rawgit.com/kimmobrunfeldt/progressbar.js/master/dist/progressbar.min.js"></script>
 <script>
@@ -149,7 +149,7 @@ The developer is brushing up ToM and redesigning the economy that considering <a
     document.getElementById("percent").innerHTML = (Math.round(bar.value() * 100) + '%');
   }
     });
-    bar.animate(0.92); 
+    bar.animate(0.93); 
 </script>
 </p>
 
@@ -210,170 +210,196 @@ This product can be used accross multiple platforms. You can play the game using
 <code>
 <font size="-1" color="black">
 <p>
+# Changelog<br>
+<br>
+<u>## [0.1.40] - 2024-10-1</u><br>
+### Fixed<br>
+- Updated to Phaser v3.85.1.<br>
+- Fixed a bug where the music would not stop playing after completing practice.<br>
+- Fixed the bugs of the daycare service in the market web page.<br>
+- Fixed the bugs of the window item.<br>
+- ToM: Fixed the bug of floor opacity.<br>
+- ToM: Optimized the design of the web page.<br>
+- ToM: minor adjustments to the drop design.<br>
+- MoM: Fixed NFT loading UI of the web page.<br>
+### Changed<br>
+- Replaced the music during practicing.<br>
+- Updated the anti-bot logging system.<br>
+- ToM: Changed the design of the NFT picture.<br>
+### Added<br>
+- MoM: Added the button to download the PNG file of MoM NFT picture.<br>
+### Contract Replaced<br>
+- ToM, function1: fixed the bug of floor opacity.<br>
+- ToM, function2: changed the method of generating the tokenURI.<br>
+- ToM, codex: changed the method of generating the tokenURI.<br>
+- ToM, codex: minor adjustments to the drop design.<br>
+### Contract Parameter Updated<br>
+- ToM, storage: Updated the WEATEHRINTERVAL parameter from 3 days to 7 days.<br>
+- Buyback Vault: Updated the buyback prices (total inflation rate: +38.42%)<br>
+<br>
 <u>## [0.1.39] - 2024-9-1</u><br>
 ### Fixed<br>
-- Correction of typos and spelling errors on the web page.<br>
+- Corrected typos and spelling errors on the web page.<br>
 ### Changed<br>
-- Fixed the display bug of the strolling window.<br>
-- Fixed the display bug of the window item.<br>
-- ToM: Changed the design of the web page.<br>
-- ToM: Modify so that the glass fogs up as the cleanliness value decreases.<br>
-- ToM: Added the bonus presentbox for HoM when ToM minting.<br>
-- ToM: Fixed the ranking system.<br>
+- Fixed display bug in the strolling window.<br>
+- Fixed display bug for window items.<br>
+- ToM: Updated the web page design.<br>
+- ToM: Modified glass fogging effect to correlate with decreasing cleanliness value.<br>
+- ToM: Added bonus present box for HoM when minting ToM.<br>
+- ToM: Improved the ranking system.<br>
 ### Added<br>
-- ToM: Ranking sysmtem was launched.<br>
+- ToM: Launched ranking system.<br>
 ### Contract Replaced<br>
-- ToM, function1: changed the calculatin methods of the parameters.<br>
-- ToM, function2: changed the design of the SVG picture.<br>
-- ToM, StepupAuction: added the bonus of presentbox when NFT minting.<br>
+- ToM, function1: Changed parameter calculation methods.<br>
+- ToM, function2: Updated SVG picture design.<br>
+- ToM, StepupAuction: Added present box bonus for NFT minting.<br>
 ### Contract Deployed<br>
-- ToM: Ranking contract was deployed<br>
+- ToM: Deployed ranking contract.<br>
 ### Contract Parameter Updated<br>
- - Buyback Vault: Updated the buyback prices (total inflation rate: +34.39%)<br>
+- Buyback Vault: Updated buyback prices (total inflation rate: +34.39%)<br>
 <br>
 <u>## [0.1.38] - 2024-8-1</u><br>
 ### Fixed<br>
-- Fixed the "Batch All Daycares" button design on the Web page.<br>
+- Improved "Batch All Daycares" button design on the web page.<br>
 ### Added<br>
-- Terrarium of Murasaki-san was launched!<br>
+- <b>Launched Terrarium of Murasaki-san!</b><br>
 ### Contract Deployed<br>
-- Contracts for Terrarium of Murasaki-san were deployed.<br>
+- Deployed contracts for Terrarium of Murasaki-san.<br>
 ### Contract Parameter Updated<br>
- - Buyback Vault: Updated the buyback prices (total inflation rate: +30.48%)<br>
+- Buyback Vault: Updated buyback prices (total inflation rate: +30.48%)<br>
 <br>
 <u>## [0.1.37] - 2024-7-1</u><br>
 ### Fixed<br>
-- Fixed the sentence on the web page.<br>
-- Fixed the bug on the batch caring button of the daycare service on the web page.<br>
-- Fixed the icon pictures of the strolling window.<br>
-- Fixed the item depths.<br>
-- Fixed the economy fig. on the web page.<br>
+- Corrected text on the web page.<br>
+- Fixed bug in the batch caring button for daycare service on the web page.<br>
+- Updated icon images in the strolling window.<br>
+- Adjusted item depths.<br>
+- Corrected economy figure on the web page.<br>
 ### Contract Parameter Updated<br>
- - Buyback Vault: Updated the buyback prices (total inflation rate: +26.68%)<br>
+- Buyback Vault: Updated buyback prices (total inflation rate: +26.68%)<br>
 <br>
 <u>## [0.1.36] - 2024-6-1</u><br>
 ### Fixed<br>
-- Fixed the misspellings.<br>
-- Fixed the item names.<br>
-- Fixed the bug on the mining and farming button.<br>
-- Fixed the description about the strolling bonus.<br>
-- Fixed the contents of the Item Marketplace section on the Web page.<br>
-- Fixed the bug on the crafting when happy = 0%.<br>
-- Fixed the bug where the music did not play during practice.<br>
-- Fixed the content abount the account unification.<br>
-- Fixed the twinkles position and the contents on the web page.<br>
-- Added the progress bar on the strolling window.<br>
-- Updated the contents of Economy to the dApps Staking V3.<br>
-- Fixed the daycare fee from 0.30 to 0.22 and fixed the description about the daycare.<br>
-- Fixed the depth of the foods.<br>
+- Corrected misspellings.<br>
+- Updated item names.<br>
+- Fixed bug in mining and farming buttons.<br>
+- Clarified description of strolling bonus.<br>
+- Updated content in the Item Marketplace section on the web page.<br>
+- Fixed crafting bug when happiness is at 0%.<br>
+- Resolved issue where music didn't play during practice.<br>
+- Updated content regarding account unification.<br>
+- Adjusted twinkle positions and content on the web page.<br>
+- Added progress bar to the strolling window.<br>
+- Updated Economy section to reflect dApps Staking V3.<br>
+- Adjusted daycare fee from 0.30 to 0.22 and updated daycare description.<br>
+- Corrected food item depths.<br>
 ### Changed<br>
-- Renewed the Item Detail page with the latest content.<br>
-- The item upgrading section has been integrated into the items section.<br>
+- Revamped Item Detail page with latest content.<br>
+- Integrated item upgrading section into the items section.<br>
 ### Added<br>
-- Prepared the json files and png files of NFTs.<br>
-- Added the content about the gas cost on the web page.<br>
+- Prepared JSON files and PNG files for NFTs.<br>
+- Added information about gas costs on the web page.<br>
 ### Contract Replaced<br>
-- Crafting Codex: Fixed the bug of crafting time when happy = 0.<br>
+- Crafting Codex: Fixed crafting time bug when happiness is at 0.<br>
 ### Contract Parameter Updated<br>
-- Craft: Updated the json URL of NFTs.<br>
-- Daycare: Updated the daycare fee from 0.30 to 0.22 $ASTR.<br>
-- Buyback Vault: Updated the buyback prices (total inflation rate: +22.99%)<br>
+- Craft: Updated JSON URL for NFTs.<br>
+- Daycare: Adjusted daycare fee from 0.30 to 0.22 $ASTR.<br>
+- Buyback Vault: Updated buyback prices (total inflation rate: +22.99%)<br>
 <br>
 <u>## [v0.1.35] - 2024-5-1</u><br>
 ### Fixed<br>
 - Updated to Phaser v3.80.1.<br>
-- Fixed the misspellings.<br>
-- Fixed the gas price at the marketplace.<br>
-- Fixed the picture of the selected waterbottle.<br>
-- Fixed the position of the practice button.<br>
-- Fixed the design of the practice window.<br>
-- Fixed the design of the practice button.<br>
-- Fixed the pippel position.<br>
-- Fixed the picture of the House of Gingerbread.<br>
-- Added the gingerbread men depending on daps staking amount.<br>
-- Fixed the design of the Daycare table.<br>
-- Fixed the design of the violin practice.<br>
-- Fixed the display of Practice Level in the Detail window on the On-Chain Information page.<br>
-- Fixed the picture of the clarinet during practice.<br>
-- Fixed the picture of the notes during practice.<br>
+- Corrected misspellings.<br>
+- Updated gas price display in the marketplace.<br>
+- Fixed image of selected water bottle.<br>
+- Adjusted position of practice button.<br>
+- Improved design of practice window and button.<br>
+- Corrected pippel position.<br>
+- Updated image of the House of Gingerbread.<br>
+- Added gingerbread men based on dApps staking amount.<br>
+- Improved design of Daycare table.<br>
+- Enhanced design of violin practice.<br>
+- Fixed display of Practice Level in the Detail window on the On-Chain Information page.<br>
+- Corrected image of clarinet during practice.<br>
+- Adjusted image of notes during practice.<br>
 ### Changed<br>
-- Modified demo preview to eliminate the need for connection to both the wallet and the chain.<br>
+- Modified demo preview to remove requirement for wallet and chain connection.<br>
 ### Added<br>
-- Added a column and calculation formula for the practice system on the web page.<br>
+- Added column and calculation formula for practice system on the web page.<br>
 ### Contract Replaced<br>
-- Crafting Codex: Adjusted so that crafting does not progress further when 'happy' is 0.<br>
+- Crafting Codex: Adjusted to halt crafting progress when 'happiness' is 0.<br>
 ### Contract Parameter Updated<br>
-- Buyback Vault: Updated the buyback prices (total inflation rate: +19.41%)<br>
+- Buyback Vault: Updated buyback prices (total inflation rate: +19.41%)<br>
 <br>
 <u>## [v0.1.34] - 2024-4-1</u><br>
 ### Fixed<br>
 - Updated to Phaser v3.80.0.<br>
-- Fixed the display bug of Memento of Murasaki-san.<br>
-- Fixed the depth of item indicator of violin.<br>
-- Fixed the summoning position of fluffy.<br>
+- Resolved display bug for Memento of Murasaki-san.<br>
+- Corrected depth of item indicator for violin.<br>
+- Adjusted summoning position for fluffy.<br>
 ### Contract Replaced<br>
-- Crafting: Fixed the bugs in craft cancel.<br>
-- Daycare: Fixed the bugs in the waiting list.<br>
+- Crafting: Fixed bugs in craft cancellation.<br>
+- Daycare: Resolved bugs in the waiting list.<br>
 ### Contract Parameter Updated<br>
-- Buyback Vault: Updated the buyback prices (total inflation rate: +15.93%).<br>
+- Buyback Vault: Updated buyback prices (total inflation rate: +15.93%).<br>
 <br>
 <u>## [v0.1.33] - 2024-2-19</u><br>
 ### Fixed<br>
-- Updated to Phaser v3.70.0<br>
-- Fixed the display of the flowers on the loading screen.<br>
-- Fixed the picture frame design.<br>
-- Fixed default gas price.<br>
-- Fixed the text in the game start window.<br>
-- Fixed the display of the strolling window.<br>
-- Fixed the display bug of item indicator.<br>
-- Fixed the position of the score meter woodcubes.<br>
-- Fixed the background colors of message windows.<br>
-- Fixed the display of practice.<br>
-- Fixed the depth of sprites.<br>
-- Fixed the staking house display.<br>
-- Fixed the behavior of the feeding and grooming button.<br>
-- Fixed the status window height on the Info page.<br>
+- Updated to Phaser v3.70.0.<br>
+- Improved flower display on the loading screen.<br>
+- Enhanced picture frame design.<br>
+- Adjusted default gas price.<br>
+- Updated text in the game start window.<br>
+- Improved strolling window display.<br>
+- Fixed item indicator display bug.<br>
+- Adjusted position of score meter woodcubes.<br>
+- Updated background colors of message windows.<br>
+- Improved practice display.<br>
+- Corrected sprite depths.<br>
+- Enhanced staking house display.<br>
+- Fixed behavior of feeding and grooming buttons.<br>
+- Adjusted status window height on the Info page.<br>
 ### Changed<br>
-- Changed the ribbon color based on the network gas fees.<br>
-- Changed the music on the strolling.<br>
-- Changed the rule of feeding and grooming.<br>
-  (Other players can feed/groom the summoner when satiety/happy <= 30%<br>
-   and get 5% extra exp and player get only 80% exp)<br>
+- Updated ribbon color based on network gas fees.<br>
+- Changed music for strolling.<br>
+- Modified feeding and grooming rules:<br>
+  (Other players can feed/groom the summoner when satiety/happiness &lt;= 30%,<br>
+  receiving 5% extra exp while the player gets 80% exp)<br>
 ### Added<br>
-- Added the daycare service.<br>
+- Implemented daycare service.<br>
 ### Contract Replaced<br>
-- Crafting: Fixed bugs in craft complete.<br>
-- Function Share: Modified the calculation method of luck challenge to reduce gas cost.<br>
-- Feeding & Grooming: Modified the calclation method of feeding and grooming.<br>
-- Function Share: Added the function to batch calling of item infos.<br>
-- Memento: Fixed the calculation method of the minimum bidding price.<br>
-- Pippel Function: Added the pippel interval parameter.<br>
+- Crafting: Fixed bugs in craft completion.<br>
+- Function Share: Optimized luck challenge calculation to reduce gas costs.<br>
+- Feeding & Grooming: Updated calculation method for feeding and grooming.<br>
+- Function Share: Added function for batch calling of item info.<br>
+- Memento: Adjusted calculation method for minimum bidding price.<br>
+- Pippel Function: Added pippel interval parameter.<br>
 ### Contract Deployed<br>
-- Deployed the daycare service contract.<br>
+- Deployed daycare service contract.<br>
 ### Contract Parameter Updated<br>
-- Memento: Updated the minimum bidding price to 10 $ASTR.<br>
-- Pippel Function: Updated the pippel interval to 48 hr.<br>
+- Memento: Updated minimum bidding price to 10 $ASTR.<br>
+- Pippel Function: Updated pippel interval to 48 hours.<br>
 <br>
 <u>## [v0.1.32] - 2024-1-28</u><br>
 ### Added<br>
-- The small insects hiding in the shadow of the radar chart have been added.<br>
+- Implemented small insects hiding in the shadow of the radar chart.<br>
 ### Fixed<br>
-- Fixed the inconveniences in the display of the crown and ribbon.<br>
-- Fixed the inconveniences in the display and sounds of the strolling window.<br>
+- Improved display of crown and ribbon.<br>
+- Enhanced display and sounds in the strolling window.<br>
 <br>
 <u>## [v0.1.31] - 2024-1-26</u><br>
 ### Added<br>
-- Prepared the web pages.<br>
-- Prepared the X/Twitter account.<br>
+- Prepared web pages.<br>
+- Set up X/Twitter account.<br>
 ### Fixed<br>
-- Fixed the crafting window bugs.<br>
-- Fixed the voting window bugs.<br>
+- Resolved crafting window bugs.<br>
+- Fixed voting window bugs.<br>
 <br>
 <u>## [v0.1.1 to v0.1.30] - 2022-1-24 to 2024-1-25</u><br>
 - Developed in a closed test environment.<br>
 <br>
 <u>## [v0.1.0] - 2022-1-24</u><br>
-- Embarked on the project :)<br>
+- <b>Project initiated :)</b><br>
 </p>
 </code>
 </font>
@@ -1554,8 +1580,8 @@ We strongly believe in the future interoperability brought by Polkadot and parac
 </p>
 
 <p>
-<b>Substrate EVM or zkEVM:</b><br>
-When developing an on-chain project using Solidity, there are two options currently available on Astar Network: using the Substrate EVM or using zkEVM supported by the Polygon CDK. We have chosen the Substrate EVM as the development environment for this project due to its compatibility with dApp Staking, strong integration with WASM, and cost-effectiveness in terms of gas fees. We are more interested in steadily and enjoyably developing this project over the long term rather than riding a transient momentum. We believe that the Astar Substrate EVM and WASM environment are the most suitable development environment for our motivations.
+<b>Substrate EVM or L2 EVM:</b><br>
+When developing an on-chain project using Solidity, there are two options currently available on Astar Network: using the Substrate EVM or using Soneium (Ethereum L2). We have chosen the Substrate EVM as the development environment for this project due to its compatibility with dApp Staking, strong integration with WASM, and sustainability of blockchain. We are more interested in steadily and enjoyably developing this project over the long term rather than riding a transient momentum. We believe that the Astar Substrate EVM and WASM environment are the most suitable development environment for our motivations.
 </p>
 
 <p>
