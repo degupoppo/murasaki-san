@@ -8,6 +8,7 @@
 <script src="src/js/contracts.js"></script>
 <script src="src/js/share.js"></script>
 <script src="src/js/index.js"></script>
+<script src="lib/keccak256.js"></script>
 
 
 <head>
@@ -114,10 +115,11 @@ This is our fan project using <br class="br-sp"><b>Astar Substrate EVM</b> <img 
 This project is currently being developed on a private chain.<br>
 In the near future, it will first be test-played on the Shibuya testnet and eventually deployed on the Astar Substrate EVM.<br>
 <br>
-<i>Development Progress: <b><span id="percent">94</span></b><font size="-1"> (v0.1.41)</font></i><br>
+<i>Development Progress: <b><span id="percent">95</span></b><font size="-1"> (v0.1.42, 2024/12/1)</font></i><br>
 <span id="container"></span><br>
 <font size="-1" color="blue"><i>
-The developer is redesigning the economy while considering <a href="https://docs.astar.network/ja/docs/learn/dapp-staking/dapp-staking-protocol/#tier-ranking-system">the Ranked Tier System</a> <br>and waiting for the <a href="https://soneium.org/en/">Soneium</a> mainnet launch :)
+The developer is currently contemplating marketing strategies and conceptualizing plans for the next season.
+
 </font></i>
 <script src="https://rawgit.com/kimmobrunfeldt/progressbar.js/master/dist/progressbar.min.js"></script>
 <script>
@@ -149,7 +151,7 @@ The developer is redesigning the economy while considering <a href="https://docs
     document.getElementById("percent").innerHTML = (Math.round(bar.value() * 100) + '%');
   }
     });
-    bar.animate(0.94); 
+    bar.animate(0.95); 
 </script>
 </p>
 
@@ -160,14 +162,24 @@ The developer is redesigning the economy while considering <a href="https://docs
 <br>
 Murasaki-san <br class="br-sp"><b><a href="https://store.line.me/stickershop/product/16670298/en">LINE sticker</a></b> and <b><a href="https://store.line.me/emojishop/product/644a021e1033b65e5ca8ff7d/en">LINE emoji</a></b> are released!<br>
 <br>
+</p>
 <!--
 <b>Desktop de Murasaki-san</b> is released! <br class="br-sp">(Windows application)<br>
 <b><a href="DdM/Desktop_de_Murasaki-san_v1.05.zip">>> Download Here <<</a></b> <br>
 <br>
 -->
-<b>Fluffy Game</b> is released! <br class="br-sp">(HTML5 game)<br>
-<a href="FG/"><b>>> Play Here! <<</b></a>
+<p class="notice">
+<b>&#x2764; Notice! &#x2764;</b><br>
+<br>
+<b>Fluffy Game</b> is released!<br>
+<br>
+<a href="FG/"><img src="FG/assets/fig/screenshot.png" width="168" class="textMiddle"><br>
+<b>>> Play Here! <<</b></a><br>
+<font size="-1">This game is a clone of the popular physics puzzle game,<br>
+created by the developer as a simple hobby project ;)</font><br>
+<font size="-1" color="blue"><i>The ranking feature is currently only available on the private testnet.</i></font><br>
 </p>
+
 <br>
 
 
@@ -210,6 +222,44 @@ This product can be used accross multiple platforms. You can play the game using
 <code>
 <font size="-1" color="black">
 <p>
+<u>## [0.1.42] - 2024-12-1</u><br>
+### Fixed<br>
+- Updated to Phaser v3.86.0.<br>
+- Added the sounds and message effect for some actions.<br>
+- Modified to retain the light ON/OFF and music ON/OFF settings between sessions.<br>
+- Modified the candle to light at the night.<br>
+- Fixed the fluffy summoning tyming.<br>
+- Fixed a bug where Fluffy immediately jumps out when opening a present box.<br>
+- Fixed a bug preventing the practice button from displaying when viewing other summoners.<br>
+- Updated the web page to display the buyback treasury limit.<br>
+- Modified Fortune Statue so its eyes glow at night.<br>
+- Added the icon display when possessing both ToM and MoM.<br>
+- Fixed a bug related to pet depth at working.<br>
+- FG: Changed the music and title screen text.<br>
+- FG: Fixed the effect of the shake button.<br>
+- FG: Fixed the the lose line method.<br>
+- FG: Fixed a bug of fluffy fusion.<br>
+### Changed<br>
+- Changed the description of the flower wreath.<br>
+- Changed the description of the fluffy festival.<br>
+- Modified the marketplace call method to utilize Multicall2.<br>
+- Updated the contents of Economy on the Web page.<br>
+- FG: Added the Ranking function.<br>
+### Added<br>
+- "dApp Staking V3" section was added on the web page.<br>
+### Contract Replaced<br>
+- Murasaki_Function_Share: Modified the calculation method for gingerbread house construction.<br>
+- Murasaki_Function_Staking_Reward: Modified the calculation method for gingerbread house construction.<br>
+- Achievement_onChain: Modified the calculation method for flower wreath experience boost.<br>
+- Fluffy_Festival: Introduced a new voting power mechanism.<br>
+- BufferVault: Added a function allowing any player to execute transfers.<br>
+### Contract Deployed<br>
+- FG: Deployed ranking contract.<br>
+- FG: Deployed signature verifier contract.<br>
+- Deployed the Multicall2 contract.<br>
+### Contract Parameter Updated<br>
+- Buyback Vault: Updated the buyback prices (total inflation rate: +46.85%).<br>
+<br>
 <u>## [0.1.41] - 2024-11-1</u><br>
 ### Changed<br>
 - Added visual effects for NFT minting, critical success, and fluffy acquisition.<br>
@@ -497,7 +547,7 @@ In summary, the purpose of this project is to provide a pet token that is unique
 <li>Your Murasaki-san can <b>Mining</b> to earn Coins or <b>Farming</b> to earn Leaves.<br>
 <li>You can <b>Crafting</b> item NFTs with your Murasaki-san by paying Coins and Leaves.<br>
 <li><b>Fluffy</b> NFT will be awarded for certain actions and will settle into your house.<br>
-<li>You can buy and sell item NFTs on the <b>Marketplace</b> using $ASTAR.<br>
+<li>You can buy and sell item NFTs on the <b>Marketplace</b> using $ASTR.<br>
 <li>Your House of Murasaki-san will become more vibrant and lively as you continue to take care of your Murasaki-san attentively.<br>
 </ul>
 </p>
@@ -862,6 +912,36 @@ Fluffy Festival is a <b>monthly event</b> where <b>the most popular color of flu
 <b>First and Last Voter Bonus:</b> Players who vote first or last will receive an additional presentbox. This is a reward for paying higher gas fees, as the start and end processes of the festival require more gas than usual. The festival's end process can be initiated by players who have already voted as well as those who haven't specified their vote yet. Once the festival becomes ready for conclusion, Nainai-san leaves an election report at the house, notifying everyone immediately
 </p>
 
+<p>
+<b>Voting Power:</b> Voting power bonuses are awarded to players based on their dApp Staking amount for this project, as shown in the table below. A base voting power of 1.00 is assigned to players who have not performed dApp Staking, and the voting power can be increased up to 2.00 (equivalent to two votes) depending on the dApp Staking amount.
+</p>
+
+<font size="-0.5">
+<table>
+  <thead>
+    <tr>
+      <th><center>Stakied $ASTR</center></th>
+      <th><center>Voting Power</center></th>
+      <th></th>
+      <th><center>Stakied $ASTR</center></th>
+      <th><center>Voting Power</center></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td><b><center>500</center></b></td><td><center>1.00</center></td><td></td><td><b><center>10000</center></b></td><td><center>1.60</center></td></tr>
+    <tr><td><b><center>1000</center></b></td><td><center>1.01</center></td><td></td><td><b><center>20000</center></b></td><td><center>1.80</center></td></tr>
+    <tr><td><b><center>2000</center></b></td><td><center>1.01</center></td><td></td><td><b><center>30000</center></b></td><td><center>1.85</center></td></tr>
+    <tr><td><b><center>3000</center></b></td><td><center>1.02</center></td><td></td><td><b><center>40000</center></b></td><td><center>1.90</center></td></tr>
+    <tr><td><b><center>4000</center></b></td><td><center>1.04</center></td><td></td><td><b><center>50000</center></b></td><td><center>1.94</center></td></tr>
+    <tr><td><b><center>5000</center></b></td><td><center>1.08</center></td><td></td><td><b><center>75000</center></b></td><td><center>1.97</center></td></tr>
+    <tr><td><b><center>6000</center></b></td><td><center>1.14</center></td><td></td><td><b><center>100000</center></b></td><td><center>1.99</center></td></tr>
+    <tr><td><b><center>7000</center></b></td><td><center>1.22</center></td><td></td><td><b><center>>100000</center></b></td><td><center>2.00</center></td></tr>
+    <tr><td><b><center>8000</center></b></td><td><center>1.32</center></td><td></td><td><b><center></center></b></td><td><center></center></td></tr>
+    <tr><td><b><center>9000</center></b></td><td><center>1.44</center></td><td></td><td><b><center></center></b></td><td><center></center></td></tr>
+  </tbody>
+</table>
+</font>
+
 </details>
 
 
@@ -915,7 +995,7 @@ Inspired by this story, the coder was determined to bring Pippel to life and thu
 <!---### flowerWreath --->
 <details>
 
-<summary>Flower Wreath and Exp Boost <img src="src/png/item_wreath.png" width="32" height="32" class="textMiddle"></summary>
+<summary>Flower Wreath <img src="src/png/item_wreath.png" width="32" height="32" class="textMiddle"></summary>
 
 &nbsp;&nbsp;&nbsp;<img src="src/png/item_wreath.png" width="80" height="80" class="textMiddle">
 
@@ -928,8 +1008,16 @@ This is an experimental initiative aimed at increasing the on-chain activity of 
 </p>
 
 <p>
+Players receive a +0.1% EXP boost bonus for each type of token they own in their wallet. The bonus is based on the number of different token types owned (quantity must be greater than 0), and owning a large number of tokens of the same type does not increase the bonus. The boost cap for the token category is +1.0%.
+</p>
+
+<p>
 <b>Corresponding tokens are:</b><br>
 $ACA, $ASTR, $BNB, $BTC, $BUSD, $DAI, $DOT, $ETH, $GMLR, $KSM, $LAY, $MATIC, $SDN, $USDC, $USDT
+</p>
+
+<p>
+Players receive a +0.1% EXP boost bonus for each type of NFT from the following projects they own in their wallet. Owning multiple NFTs from the same project still provides a flat +0.1% boost bonus. The boost cap for the NFT category is +1.0%.
 </p>
 
 <p>
@@ -938,16 +1026,48 @@ AstarDegens, CandyGirl, AstarCats, AstarPunks, HEALTHREE
 </p>
 
 <p>
-<b>The step of Staking amount:</b><br>
-500, 1000, 2000, 4000, 8000, 16000, 32000, 64000, 128000, >128000 $ASTR
+Players receive an EXP boost bonus according to the table below, based on their dApp Staking amount. The boost bonus increases as the dApp Staking amount increases. The maximum boost bonus is +2.0%.
+</p>
+
+<font size="-0.5">
+<table>
+  <thead>
+    <tr>
+      <th><center>Stakied $ASTR</center></th>
+      <th><center>Exp Boost</center></th>
+      <th></th>
+      <th><center>Stakied $ASTR</center></th>
+      <th><center>Exp Boost</center></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td><b><center>500</center></b></td><td><center>+0.00</center></td><td></td><td><b><center>10000</center></b></td><td><center>+1.20</center></td></tr>
+    <tr><td><b><center>1000</center></b></td><td><center>+0.01</center></td><td></td><td><b><center>20000</center></b></td><td><center>+1.60</center></td></tr>
+    <tr><td><b><center>2000</center></b></td><td><center>+0.02</center></td><td></td><td><b><center>30000</center></b></td><td><center>+1.70</center></td></tr>
+    <tr><td><b><center>3000</center></b></td><td><center>+0.04</center></td><td></td><td><b><center>40000</center></b></td><td><center>+1.80</center></td></tr>
+    <tr><td><b><center>4000</center></b></td><td><center>+0.08</center></td><td></td><td><b><center>50000</center></b></td><td><center>+1.88</center></td></tr>
+    <tr><td><b><center>5000</center></b></td><td><center>+0.16</center></td><td></td><td><b><center>75000</center></b></td><td><center>+1.94</center></td></tr>
+    <tr><td><b><center>6000</center></b></td><td><center>+0.28</center></td><td></td><td><b><center>100000</center></b></td><td><center>+1.98</center></td></tr>
+    <tr><td><b><center>7000</center></b></td><td><center>+0.44</center></td><td></td><td><b><center>>100000</center></b></td><td><center>+2.00</center></td></tr>
+    <tr><td><b><center>8000</center></b></td><td><center>+0.64</center></td><td></td><td><b><center></center></b></td><td><center></center></td></tr>
+    <tr><td><b><center>9000</center></b></td><td><center>+0.88</center></td><td></td><td><b><center></center></b></td><td><center></center></td></tr>
+  </tbody>
+</table>
+</font>
+
+
+
+<p>
+Players receive a +0.1% boost bonus for each NFT of Murasaki-san's side projects. In this category, the boost value increases with the number of NFTs owned (for example, owning 2 NFTs from the same side project provides double the boost value). The boost bonus cap for this category is +1.0%.
 </p>
 
 <p>
-If a player has one or more tokens/NFTs of a specific type in the wallet, the player will receive an exp boost bonus of +0.1% for each of that type. In token category, the boost bonus is valid as long as the player holds more than zero tokens (it does not have to be in denominations of 1 currency, for example, 1 $BTC). In NFT category, having two ore more NFTs from the same project does not increase the exp boost bonus. In staking category, by staking an amount equal or greater than each step, the player can increase the bonus by an additional +0.1% per step. The exp boost bonus values do not exceed +1% in each category (maximum +1% for tokens, maximum +1% for NFTs, maximum +1% for staking).
+<b>Corresponding projects are:</b><br>
+Memento of Murasaki-san, Terrarium of Murasaki-san
 </p>
 
 <p>
-The eligible types of tokens and NFTs may be subject to additions and modifications in the future. Additionally, when this project issues its own original NFTs, holding them will provide an exp boost bonus as a separate category.
+A total EXP boost bonus of +5.0% can be earned by meeting all conditions. The eligible types of tokens and NFTs may be subject to additions and modifications in the future. Additionally, when this project issues its own original NFTs, holding them will provide an exp boost bonus.
 </p>
 
 </details>
@@ -1266,15 +1386,23 @@ The following exp point table has been set based on the Dungeons & Dragons 3.5e 
   </thead>
   <tbody>
     <tr><td><center><500</center></td><td><center>x0</center></td><td><center>---</center></td></tr>
-    <tr><td><center><1000</center></td><td><center>x1.00</center></td><td><center>30 days</center></td></tr>
-    <tr><td><center><2000</center></td><td><center>x1.25</center></td><td><center>24 days</center></td></tr>
-    <tr><td><center><4000</center></td><td><center>x1.50</center></td><td><center>20 days</center></td></tr>
-    <tr><td><center><8000</center></td><td><center>x2.00</center></td><td><center>15 days</center></td></tr>
-    <tr><td><center><16000</center></td><td><center>x2.50</center></td><td><center>12 days</center></td></tr>
-    <tr><td><center><32000</center></td><td><center>x3.00</center></td><td><center>10 days</center></td></tr>
-    <tr><td><center><64000</center></td><td><center>x3.50</center></td><td><center>8.6 days</center></td></tr>
-    <tr><td><center><128000</center></td><td><center>x4.00</center></td><td><center>7.5 days</center></td></tr>
-    <tr><td><center>>=128000</center></td><td><center>x4.28</center></td><td><center>7 days</center></td></tr>
+    <tr><td><center><1000</center></td><td><center>x1.02</center></td><td><center>29.5 days</center></td></tr>
+    <tr><td><center><2000</center></td><td><center>x1.03</center></td><td><center>29.2 days</center></td></tr>
+    <tr><td><center><3000</center></td><td><center>x1.07</center></td><td><center>28.2 days</center></td></tr>
+    <tr><td><center><4000</center></td><td><center>x1.13</center></td><td><center>26.5 days</center></td></tr>
+    <tr><td><center><5000</center></td><td><center>x1.26</center></td><td><center>23.8 days</center></td></tr>
+    <tr><td><center><6000</center></td><td><center>x1.46</center></td><td><center>20.6 days</center></td></tr>
+    <tr><td><center><7000</center></td><td><center>x1.72</center></td><td><center>17.4 days</center></td></tr>
+    <tr><td><center><8000</center></td><td><center>x2.05</center></td><td><center>14.6 days</center></td></tr>
+    <tr><td><center><9000</center></td><td><center>x2.44</center></td><td><center>12.3 days</center></td></tr>
+    <tr><td><center><10000</center></td><td><center>x2.970</center></td><td><center>10.1 days</center></td></tr>
+    <tr><td><center><20000</center></td><td><center>x3.62</center></td><td><center>8.3 days</center></td></tr>
+    <tr><td><center><30000</center></td><td><center>x3.79</center></td><td><center>7.9 days</center></td></tr>
+    <tr><td><center><40000</center></td><td><center>x3.95</center></td><td><center>7.6 days</center></td></tr>
+    <tr><td><center><50000</center></td><td><center>x4.08</center></td><td><center>7.3 days</center></td></tr>
+    <tr><td><center><75000</center></td><td><center>x4.18</center></td><td><center>7.2 days</center></td></tr>
+    <tr><td><center><100000</center></td><td><center>x4.25</center></td><td><center>7.1 days</center></td></tr>
+    <tr><td><center>>=100000</center></td><td><center>x4.28</center></td><td><center>7.0 days</center></td></tr>
   </tbody>
 </table>
 </font>
@@ -1380,7 +1508,7 @@ Reward NFT: Fluffy (61%), Fluffier (10%), Glitter (3%), Sparkle (3%), Twinkle (3
 <center>
 <p class="notice" style="width:80%;">
 <b>&#127775; Attention &#127775;</b><br>
-The contents described below are applicable if this project is adopted for dApp Staking on the Astar Network
+The contents described below are applicable if this project is selected for Tier 4 or higher in dApp staking on the Astar Network.
 </p>
 </center>
 
@@ -1421,13 +1549,14 @@ In general, the price of NFTs is believed to be determined by trus in the projec
 <center>
 <img width="400" src="src/png/fig_price.png" />
 <figcaption>
-The price trend model secured by the buyback system for NFTs. The rate of increase is not very high, but the price never decreases and gradually rises over time.
+<b>Figure, The price trend model secured by the buyback system for NFTs.</b><br>
+The NFTs in this project can be sold at any time to the Buyback Treasury at a fixed value (Buyback Price). This means that the value of NFTs in this project is continuously guaranteed by the Buyback Price. This Buyback Price increases gradually as time passes and as the project's ecosystem expands. The rate of increase is not very high, but the price never decreases and gradually rises over time.
 </figcaption>
 </center>
 </p>
 
 <p>
-Regarding the rate of increase in the buyback price, developers plan to tradually raise it, but developers don't have specific calculations for the appropriate rate of increase at the moment. The buyback price will increase faster as additional funds flow into this project (see the Economy Details session). As an example, developers are considering a rate of increase of approximately 1-3% per month. Additionally, if there are many dropout players who have stopped playing the game, the buyback prices for players who continue to play will be more likely to increase (the buyback tokens allocated for dropout players will be reallocated to the remaining players). On the other hand, interestingly, a large influx of new players is expected to make it difficult to increase the buyback price (as the increase of the buyback price is equivalent to the new inflow value divided by the total active players).
+Regarding the rate of increase in the buyback price, developers plan to tradually raise it, but developers don't have determined the rate of increase at the moment. The buyback price will increase faster as additional funds flow into this project (see the Economy Details session). As an example, developers are considering a rate of increase of approximately 1-3% per month. Additionally, if there are many dropout players who have stopped playing the game, the buyback prices for players who continue to play will be more likely to increase (the buyback tokens allocated for dropout players will be reallocated to the remaining players). On the other hand, interestingly, a large influx of new players is expected to make it difficult to increase the buyback price (as the increase of the buyback price is equivalent to the new inflow value divided by the total active players).
 </p>
 
 <p>
@@ -1454,7 +1583,7 @@ This buyback system is somewhat experimental, and its acceptance by players will
 <center>
 <p class="notice" style="width:80%;">
 <b>&#127775; Attention &#127775;</b><br>
-The contents described below are applicable if this project is adopted for dApp Staking on the Astar Network
+The contents described below are applicable if this project is selected for Tier 4 or higher in dApp staking on the Astar Network.
 </p>
 </center>
 
@@ -1481,14 +1610,15 @@ Through the Buyback Sysmte and following economic strategies, the developers aim
 <p>
 Here is an overview of the token flow:<br>
 <center>
-<img width="650" src="src/png/fig_economy_2.png" />
+<img width="650" src="src/png/fig_economy_3.png" />
 <figcaption>
-<sup>1)</sup>Extra Fees: petrification cure fees and direct item transfer fees.
+<b>Figure, Conceptual flow of funds in this project.</b><br>
+The Starting Fee paid by new players (shown in red) is allocated solely to expand the Buyback Treasury by one player's worth, without affecting the Buyback Price. All other funds flowing into the project are first collected in the Buffer Vault (shown in yellow). Funds flow into the Buffer Vault through various sources including dApp Staking rewards, Platform Fees from the Marketplace, and revenue from side projects. At regular intervals (planned for once a month), funds are transferred from the Buffer Vault to the Buyback Treasury (shown in blue). As a result of this transfer, the Buyback Price increases, effectively raising the overall value floor of the project's NFTs. Any remaining funds are sent to the Staking Treasury and are Self-Staked in dApp Staking. The Developer receives 10% of both the Starting Fee and Buffer Vault funds as development compensation (shown in red and blue dotted lines). <sup>1)</sup>Extra Fees: petrification cure fees and direct item transfer fees.
 </figcaption>
 </center>
 </p>
 
-<b>Starting Fee:</b> 45% of it is sent to the buyback treasury as the initial capital. However, the buyback price remains unchanged. 45% is sent to the staking treasury and self-staked in dApp staking to generate income for future inflation of the buyback treasury. The remaining 10% is sent to developers. This processes are automatically performed by smart contracts on the blockchain.
+<b>Starting Fee<sup>1)</sup>:</b> 45% of it is sent to the buyback treasury as the initial capital. However, the buyback price remains unchanged. 45% is sent to the staking treasury and self-staked in dApp staking to generate income for future inflation of the buyback treasury. The remaining 10% is sent to developers. This processes are automatically performed by smart contracts on the blockchain.
 
 
 <p>
@@ -1496,7 +1626,7 @@ Here is an overview of the token flow:<br>
 </p>
 
 <p>
-<b>Self Staking:</b> After Buyback Price Inflating, any remaining funds are moved to the Staking Treasury (EOA) and self-staked in dApp Staking. Self-staking is a mechanism to secure funds for future inflation of the Buyback Price. The amount of tokens in the self-staking wallet will essentially increase over time, and this balance is also intended to be used as the treasury for the next season. Developers aim to achieve sufficient inflation rates through only new fund inflows into the project, but will consider supplementing from the self-staking wallet if necessary. These processes are currently done manually as there is no way to automate them, but they are planned to be automated in the future.
+<b>Self Staking<sup>3)</sup>:</b> After Buyback Price Inflating, any remaining funds are moved to the Staking Treasury (EOA) and self-staked in dApp Staking. Self-staking is a mechanism to secure funds for future inflation of the Buyback Price. The amount of tokens in the self-staking wallet will essentially increase over time, and this balance is also intended to be used as the treasury for the next season. Developers aim to achieve sufficient inflation rates through only new fund inflows into the project, but will consider supplementing from the self-staking wallet if necessary. These processes are currently done manually as there is no way to automate them, but they are planned to be automated in the future.
 </p>
 
 <p>
@@ -1504,20 +1634,122 @@ Here is an overview of the token flow:<br>
 </p>
 
 <p>
+<b>Other inflows<sup>4)</sup>:</b> While the main source of funds flowing into the Buffer Vault comes from dApp Staking rewards, all revenue from this project's side services is also transferred to the Buffer Vault. When users buy and sell NFTs through this project's Market Place, a 5% fee is charged, and this fee is transferred to the Buffer Vault. Furthermore, auction proceeds from Memen of Murasaki-san and NFT sales revenue from Terrarium of Murasaki-san are also collected in the Buffer Vault and used to support the increase of the Buyback Price.
+</p>
+
+<p>
 In summary, the expansion of the Buyback Treasury, which secures the overall value of the project, is determined by the amount of dApp Staking per active player. Only self-staking with a starting fee of 45% is unlikely to achieve an attractive inflation rate, and the voluntary participation of each player in dApp Staking is required. The developers are committed to actively encouraging players to participate in dApp Staking through ongoing development efforts.
+</p>
+
+<br>
+
+<p>
+<b>Capital Recovery Strategy:</b> In this project, the buyback price has been adjusted to achieve a balance where the initial fee can be recovered in approximately two years of play by burning all 48 craftable items, assuming a 3% monthly inflation rate in the buyback price (This is achieved by staking approximately 7,500 $ASTR per active player in Tier 4 of the dApp Staking V3. Please refer to the "dApp Staking V3" section for more details) If the monthly buyback price inflation exceeds 3%, the recovery amount after two years will be higher; conversely, if the inflation is lower, the recovery amount will be less. The inflation of the buyback price is expected to increase with rising dApp Staking rewards and an increase in dropout players (those who become inactive). It is anticipated that recovering the initial investment using the buyback mechanism will become challenging if continuous play is discontinued before the two-year mark. Therefore, in this project, early entry and early exit are not considered effective capital recovery strategies, and long-term and continuous play is regarded as a rational capital recovery strategy.
+</p>
+
+</details>
+
+
+<!---### rankedTier --->
+
+<details id="staking">
+
+<summary>dApp Staking V3 &#x1f4ca;</summary>
+
+<p>
+With the implementation of Astar dApp Staking V3 in early 2024, a Tier System was introduced for rewards received by each dApp. This revision fixed the amount of $ASTR received as rewards for each Tier. Furthermore, with the Ranked Tier System implemented in mid-2024, each Tier was divided into 10 ranks. This revision meant that within a specific Tier, as the staking amount for a project increases, its rank rises, and rewards increase accordingly.
+</p>
+
+<p>
+This project initially aims to meet Tier 4 conditions. The increase in our project's NFT value comes not from the increase in new players but from the increase in dApp Staking rewards. 90% of dApp Staking rewards are used to back the NFT's value. When our project achieves Tier 4, the buyback price increase mechanism begins as rewards flow into the buffer vault. As this project has no venture capital funding and the developers have limited personal funds, The Tier 4 criteria aims to be achieved through active players participating in dApp Staking.
+</p>
+
+<p>
+This section examines how the number of active players (AP) and total staking amount affect this project's buyback price increase under the Ranked Tier System dApp Staking.</p>
+
+
+<p>
+<b>The Ranked Tier System:</b> With the introduction of the Tier system in dApp Staking V3, the reward amount became fixed for each Tier. Tier 4 requires 1.5M $ASTR staking, and when $ASTR price is $0.1, it brings approximately 3,000 $ASTR in monthly rewards to the ecosystem. Tier 3 requires 15M $ASTR staking and brings approximately 38,000 $ASTR in monthly rewards to the ecosystem. For staking amounts between 1.5M and 15M, rewards increase up to double (3,000 x 2 = 6,000 $ASTR) as rank increases according to the staking amount. For staking amounts below 1.5M, no rewards are received. 90% of these rewards are used to increase the buyback price (refer to the "Economy" section).
+</p>
+
+<p>
+<b>Rank System in Tier 4:</b> Particularly in Tier 4, the increase in rewards due to rank advancement is very small and has minimal impact. This is because the difference in reward amounts between Tier 4 and Tier 3 is set very large (Figure 1). Therefore, in our project, where rewards per active player are important, rank advancement within Tier 4 holds little significance.
+</p>
+
+<br>
+
+<p>
+<center>
+<img width="400" src="src/png/fig_dAppStaking_1.png" />
+<figcaption>
+<b>Figure 1, The relationship between total staking amount and rewards in dApp Staking V3.</b><br>
+This graph was calculated using Rewards per era values for each Tier as of November 2024 (Tier 4: 146, Tier 3: 1,849, Tier 2: 5,131, and Tier 1: 11,464 $ASTR/era). The vertical axis shows monthly rewards, and the horizontal axis shows the logarithmic value of total staking amount. In dApp Staking V3, rewards increase incrementally according to Tier and Rank. With the adoption of the Ranked System, even within the same Tier, as staking amount increases, rewards increase by 10% per Rank advancement. Since there is more than a tenfold difference in rewards between Tier 4 and Tier 3, the impact of rank advancement on reward amount in Tier 4 is limited. However, in Tier 3 and above, the increase in rewards due to rank advancement effectively bridges the gaps between Tiers.
+</figcaption>
+</center>
+</p>
+
+<br>
+
+<p>
+In this project, simply put, dApp Staking rewards are distributed equally among all active players. From this perspective, since the reward amount gained from increasing Rank is small compared to the staking amount required for Rank advancement, increasing Rank in Tier 4 actually decreases rather than increases the reward return efficiency per active player.
+</p>
+
+<p>
+<b>Relationship between AP and IR:</b> In dApp Staking V3, the amount of dApp Staking rewards flowing into the Buffer Vault is determined by which Tier this project achieves. This means that the fewer active players maintaining a Tier, the easier it becomes for the Buyback price to increase. For example, the buyback price increases more easily when 100 active players stake 1.5M $ASTR and 3,000 $ASTR rewards are allocated to 100 players, compared to when 500 active players stake 1.5M $ASTR and 3,000 $ASTR rewards are allocated to 500 players (returned as buyback price increases). In summary, the buyback price increase rate becomes higher as the average staking amount per active player increases. However, after achieving Tier 4 conditions, until the staking amount reaches Tier 3 conditions, the return rate to players decreases as the number of active players increases. Although rewards also increase slightly with staking amount increases within Tier 4 due to the Rank System, since the reward increase rate is minimal compared to the staking amount (maximum about double), the reward amount per staking amount decreases as the staking amount increases (Figure 2 and Table 1).
+</p>
+
+<br>
+
+<p>
+<center>
+<img width="700" src="src/png/fig_inflation_2.png" />
+<figcaption>
+<b>Figure 2, The relationship between the number of active players and the allowable buyback price inflation rate for each Rank in Tier 4.</b><br>
+The horizontal axis represents time (months), and the vertical axis represents NFT buyback price (%). This model assumes Tier 4's threshold at 1,500,000 $ASTR, rewards at 3,000 $ASTR per month, and assumes the number of active players remains constant over two years. For example, if 200 active players stake an average of 7,500 $ASTR each, this project exactly meets Tier 4 Rank 0, resulting in a monthly IR of approximately 3.3% and a two-year buyback price increase rate of about 218%. As rank increases, the monthly IR rate and two-year buyback price increase, but the required staking amount per active player increases significantly (see Table 1). To recover the capital recovery through the buyback system alone in 2 years, the buyback price would need to increase to approximately 220% (red dotted line). ap: active player, IR: inflation rate of buyback price.
+</figcaption>
+</center>
+</p>
+
+<br>
+
+<p>
+<center>
+<img width="450" src="src/png/table_inflation_2.png" />
+<figcaption>
+<b>Table 1, Required staking amount per active player for each Rank in Tier 4.</b><br>
+The table shows the number of active players (AP), monthly buyback price inflation rate, two-year buyback price increase rate, and required staking amount per active player to maintain each rank in Tier 4. Rank advancement requires either an increase in the number of active players or an increase in staking amount per active player. Even if rank increases due to increased total staking from more active players, the monthly inflation rate increase gradually slows. Conversely, when rank increases due to higher staking amount per active player, the monthly inflation rate rises. Initial recovery after two years requires the buyback price to increase to about 220%, which can be achieved with, for example, Rank 0, 200 AP, 7,500 $ASTR/AP staking (highlighted row).
+</figcaption>
+</center>
+</p>
+
+<br>
+
+<p>
+In summary, the most important factor for increasing NFT value is the increase in staking amount per active player in dApp Staking. The developers are committed to actively encouraging players to participate in dApp Staking through ongoing development efforts. Achieving Tier 3 requires at least 1,500 active players who will stake 10,000 tokens, and in the future, this achievement will also be aimed for.
+</p>
+
+<p>
+<b>Staking Incentives:</b> As compensation for player staking, this project has set up the following in-game incentives:<br>
+<ul>
+<li>Increased gingerbread man house construction speed<br>
+<li>Increased flower wreath EXP boost rate<br>
+<li>Increased fluffy festival voting power<br>
+</ul>
+Also, to increase the average staking amount per active player, these bonuses are set to be most efficient when staking 10,000 $ASTR. For staking amounts below 10,000 $ASTR, the bonus value per $ASTR is small, and for staking amounts above 10,000 $ASTR, bonus efficiency slows down (though the bonus itself continues to increase up to a maximum staking amount of 100,000 $ASTR, Figure 3).
 </p>
 
 <p>
 <center>
-<img width="500" src="src/png/fig_inflation.png" />
+<img width="450" src="src/png/fig_stakingEfficacy_1.png" />
 <figcaption>
-Projected graph of acceptable inflation rate and buyback price (NFT price) based on dApp Staking amount per active player. The dApp Staking Reward was assumed to be APR 11% and the calculation was made under the assumption that the number of active players and dApp Staking amount remain constant for a period of 2 years. For example, if the average staking amount of all active players is 7,000 $ASTR, the buyback price of each NFT is expected to increase by approximately five times after two years. Furthermore, the rate of increase in the buyback price does not depend on the number of active players. Note that this calculation is based on a simplified model and Astar Tokenomics 1.0. In Astar Tokenomics 2.0 and dApp Staking V3, there may be different potential outcomes in the calculatins. IR: monthly inflation rate, ST: staking amount per active player.
+<b>Figure 3, Conceptual diagram of the player's staking amount and in-game reward efficiency.</b><br>
+The horizontal axis represents the amount of tokens staked by active players in the dApp Staking, and the vertical axis represents the amount (%) of various in-game rewards. The various in-game rewards increase exponentially until the staking amount reaches 10,000, and when the staking amount is 10,000, the efficiency of the rewards obtained relative to the staking amount is maximized. If more than 10,000 tokens are staked, the efficiency will gradually diminish, but the rewards will continue to increase.
 </figcaption>
 </center>
 </p>
 
 <p>
-<b>Capital Recovery Strategy:</b> In this project, the buyback price has been adjusted to achieve a balance where the initial fee can be recovered in approximately two years of play by burning all 48 craftable items, assuming a 3% monthly inflation rate in the buyback price (This is attainable through dApp staking at abount 1000 $ASTR per active player at Astar Tokenomics 1.0). If the monthly buyback price inflation exceeds 3%, the recovery amount after two years will be higher; conversely, if the inflation is lower, the recovery amount will be less. The inflation of the buyback price is expected to increase with rising dApp Staking rewards and an increase in dropout players (those who become inactive). It is anticipated that recovering the initial investment using the buyback mechanism will become challenging if continuous play is discontinued before the two-year mark. Therefore, in this project, early entry and early exit are not considered effective capital recovery strategies, and long-term and continuous play is regarded as a rational capital recovery strategy.
+dApp Staking rules are expected to be revised in the future. The developer will continue to explore better ways to build the ecosystem with each revision of dApp Staking rules.
 </p>
 
 </details>
@@ -1780,11 +2012,11 @@ We would like to express our thanks to followings:
 <li>Excellent game framework from <b><a href="https://phaser.io/phaser3">Phaser3</a></b>.
 <li>Useful sound effects from <b><a href="https://soundeffect-lab.info/">Kokaon Lab</a></b> and <b><a href="https://otologic.jp/">OtoLogic</a></b>.
 <li>Wealthy illustrations from <b><a href="https://www.irasutoya.com/">Irasuto-ya</a></b>.
-<li>Great musics from <b><a href="https://dova-s.jp/">DOVA-SYNDROME</a></b> and <b><a href="http://bgmer.net/">BGMer</a></b>.
+<li>Great musics from <b><a href="https://dova-s.jp/">DOVA-SYNDROME</a></b>, <b><a href="http://bgmer.net/">BGMer</a></b> and <b><a href="https://mozeen.com/">MOZZEN</a></b>.
 <li>Excellent CSS framework from <b><a href="https://simplecss.org/">Simple.css</a></b>.
 <li>Enhanced drawing environment from <b><a href="https://ibispaint.com/">ibisPaint</b></a>.
 <li>Amazing development environment and testnet from <b><a href="https://github.com/AstarNetwork/Astar">Astar Network</a></b>
-<li>The exciting future vision presented by <b><a href="https://twitter.com/watanabesota">Sota Watanabe</a></b> and all the Web3 contributors including <b><a href="https://https://twitter.com/you425you">you425</a></b>, as one of the best Astar Ambassadors.
+<li>The exciting future vision presented by <b><a href="https://x.com/watanabesota">Sota Watanabe</a></b> and all the Web3 contributors including <b><a href="https://x.com/you425you">you425</a></b>, as one of the best Astar Ambassadors.
 </ul>
 
 

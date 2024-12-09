@@ -7,6 +7,7 @@
 <script src="src/js/contracts.js"></script>
 <script src="src/js/share.js"></script>
 <script src="src/js/market.js"></script>
+<script src="lib/keccak256.js"></script>
 
 
 
@@ -119,21 +120,11 @@ Total Trading Count: <b><span id="totalTradingCount"></span></b><br>
 <br>
 
 <h3>Your Sellings on Market &#127926;</h3>
-<button onclick="update_sellingItems();" style="height:28px;font-size:80%"><b>Load Item Table</b></button>
-<div id="tbody_listedItems"></div>
 <!--
-<table id="talbe_sellingItems" class="display responsive nowrap" style="width:100%;">
-	<thead><tr>
-		<th><center>ID</center></th>
-		<th data-priority="1"><center>Type</center></th>
-        <th><center>Rarity</center></th>
-		<th><center>Crafter</center></th>
-		<th data-priority="2"><center>Price<br>($ASTR)</center></th>
-		<th data-priority="3"><center>Action</center></th>
-	</tr></thead>
-	<tbody id="tbody_listedItems"></tbody>
-</table>
+<button onclick="update_sellingItems();" style="height:28px;font-size:80%"><b>Load Item Table</b></button>
 -->
+<div id="tbody_listedItems"></div>
+
 <br>
 
 
@@ -144,21 +135,12 @@ Total Trading Count: <b><span id="totalTradingCount"></span></b><br>
     <button id="button_approve" onclick='approve();'>Approve</button><br>
 </code></p>
 
+<!--
 <button onclick="update_userItems();" style="height:28px;font-size:80%"><b>Load Item Table</b></button>
+-->
 
 <div id="tbody_myItems">
-<!--
-<table id="table_userItems" class="display responsive nowrap" style="width:100%;">
-    <thead><tr>
-        <th><center>ID</center></th>
-        <th data-priority="1"><center>Type</center></th>
-        <th><center>Rarity</center></th>
-        <th><center>Crafter</center></th>
-        <th data-priority="2"><center>Listing Price<br>($ASTR)</center></th>
-    </tr></thead>
-    <tbody id="tbody_myItems"></tbody>
-</table>
--->
+
 </div>
 
 <br>
@@ -182,7 +164,7 @@ Current transfer fee: <font color="blue"><b><idv id="transferFee">***</div></fon
 <p>
 NFT items can be burned for a fixed price at any time on the Buyback Treasury. Buyback prices of each items will increase as the ecosystem grows.
 </p>
-<p><button onclick="location.href='buyback.html'">Visit Buyback Market</a></button></p>
+<p><button style="font-weight: bold; background-color:#FF4F6F;" onclick="location.href='buyback.html'">Visit Buyback Market</a></button></p>
 <br>
 
 

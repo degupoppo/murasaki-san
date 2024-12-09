@@ -18,6 +18,7 @@
     <div id="canvas">
         <div id="version"></div>
         <div id="description"></div>
+        <div id="ranking"></div>
       <div id="ui">
         <p id="current-score"></p>
           <div class="status-item">
@@ -35,6 +36,7 @@
           <div class="status-item">
             <div class="status-label">Best Score: </div>
             <div id="highscore-value">0</div>
+            <div id="looseCount"></div>
           </div>
         </div>
       </div>
@@ -42,8 +44,12 @@
   </div>
 </body>
 
-<script type="text/javascript" src="./wa.min.js"></script>
-<script type="text/javascript" src="./matter.min.js"></script>
-<script type="text/javascript" src="./main.min.js"></script>
+<script type="text/javascript" src="../lib/web3.min.js"></script>
+<script type="text/javascript" src="../src/js/share.js"></script>
+
+<script type="module" src="./assets/wasm/load.js"></script>
+<script type="text/javascript" src="./assets/lib/wa.min.js"></script>
+<script type="text/javascript" src="./assets/lib/matter.min.js"></script>
+<script type="text/javascript" src="index.js"></script>
 
 </html>

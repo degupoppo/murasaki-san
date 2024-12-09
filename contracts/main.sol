@@ -1,11 +1,11 @@
 
 
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: MIT
 pragma solidity =0.8.13;
 
 
-// 240508
-// House of Murasaki-san ver. 0.1.24
+// 241201
+// House of Murasaki-san ver. 0.1.26
 
 
 //===Import==================================================================================================================
@@ -3491,6 +3491,7 @@ contract Murasaki_Function_Share is Ownable, Pausable {
         address _owner = get_owner(_summoner);
         uint _staker = calc_dapps_staking_amount(_owner);
         uint _speed;
+        /*
         if (_staker < 500) {
             _speed = 0;
         } else if (_staker < 1000) {
@@ -3510,6 +3511,45 @@ contract Murasaki_Function_Share is Ownable, Pausable {
         } else if (_staker < 128000) {
             _speed = 400;
         } else if (_staker >= 128000) {
+            _speed = 428;
+        }
+        */
+        // 241114, updated
+        if (_staker < 500) {
+            _speed = 0;
+        } else if (_staker < 1000) {
+            _speed = 102;
+        } else if (_staker < 2000) {
+            _speed = 103;
+        } else if (_staker < 3000) {
+            _speed = 107;
+        } else if (_staker < 4000) {
+            _speed = 113;
+        } else if (_staker < 5000) {
+            _speed = 126;
+        } else if (_staker < 6000) {
+            _speed = 146;
+        } else if (_staker < 7000) {
+            _speed = 172;
+        } else if (_staker < 8000) {
+            _speed = 205;
+        } else if (_staker < 9000) {
+            _speed = 244;
+        } else if (_staker < 10000) {
+            _speed = 297;
+        } else if (_staker < 20000) {
+            _speed = 362;
+        } else if (_staker < 30000) {
+            _speed = 379;
+        } else if (_staker < 40000) {
+            _speed = 395;
+        } else if (_staker < 50000) {
+            _speed = 408;
+        } else if (_staker < 75000) {
+            _speed = 418;
+        } else if (_staker < 100000) {
+            _speed = 425;
+        } else if (_staker >= 100000) {
             _speed = 428;
         }
         return _speed;
@@ -7453,6 +7493,7 @@ contract Murasaki_Function_Staking_Reward is Ownable, ReentrancyGuard, Pausable 
     function get_staking_counter_speed (uint _summoner) public view returns (uint) {
         uint _staker = get_staking_amount(_summoner);
         uint _speed;
+        /*
         if (_staker < 500) {
             _speed = 0;
         } else if (_staker < 1000) {
@@ -7472,6 +7513,45 @@ contract Murasaki_Function_Staking_Reward is Ownable, ReentrancyGuard, Pausable 
         } else if (_staker < 128000) {
             _speed = 400;
         } else if (_staker >= 128000) {
+            _speed = 428;
+        }
+        */
+        // 241114, updated
+        if (_staker < 500) {
+            _speed = 0;
+        } else if (_staker < 1000) {
+            _speed = 102;
+        } else if (_staker < 2000) {
+            _speed = 103;
+        } else if (_staker < 3000) {
+            _speed = 107;
+        } else if (_staker < 4000) {
+            _speed = 113;
+        } else if (_staker < 5000) {
+            _speed = 126;
+        } else if (_staker < 6000) {
+            _speed = 146;
+        } else if (_staker < 7000) {
+            _speed = 172;
+        } else if (_staker < 8000) {
+            _speed = 205;
+        } else if (_staker < 9000) {
+            _speed = 244;
+        } else if (_staker < 10000) {
+            _speed = 297;
+        } else if (_staker < 20000) {
+            _speed = 362;
+        } else if (_staker < 30000) {
+            _speed = 379;
+        } else if (_staker < 40000) {
+            _speed = 395;
+        } else if (_staker < 50000) {
+            _speed = 408;
+        } else if (_staker < 75000) {
+            _speed = 418;
+        } else if (_staker < 100000) {
+            _speed = 425;
+        } else if (_staker >= 100000) {
             _speed = 428;
         }
         return _speed;
@@ -8890,6 +8970,7 @@ contract Fluffy_Festival is Ownable, ReentrancyGuard, Pausable {
         uint blocknumber;
         uint summoner;
         uint value;
+        uint power;
     }
     mapping(uint => vote) public votes;
     uint[320] each_voting_count;
@@ -8959,12 +9040,15 @@ contract Fluffy_Festival is Ownable, ReentrancyGuard, Pausable {
         }
         //check votable of summoner
         require(check_votable(_summoner));
+        // get voting power
+        uint _power = _get_votingPower(_summoner);
         //vote
         uint _block = block.number;
-        votes[next_vote] = vote(_block, _summoner, _select);
+        votes[next_vote] = vote(_block, _summoner, _select, _power);
         last_voting_block[_summoner] = _block;
         last_voting_type[_summoner] = _select;
-        each_voting_count[_select] += 1;
+        //each_voting_count[_select] += 1;
+        each_voting_count[_select] += _power;
         //voteCount[_summoner] += 1;
         _add_voteCount(_summoner, 1);
         next_vote += 1;
@@ -8998,6 +9082,51 @@ contract Fluffy_Festival is Ownable, ReentrancyGuard, Pausable {
         } else {
             return false;
         }
+    }
+    function _get_votingPower (uint _summoner) internal view returns (uint) {
+        Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
+        Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
+        address _owner = mfs.get_owner(_summoner);
+        uint _staker = mfs.calc_dapps_staking_amount(_owner);
+        uint _power = 100;
+        if (_staker < 500) {
+            _power += 0;
+        } else if (_staker < 1000) {
+            _power += 1;
+        } else if (_staker < 2000) {
+            _power += 1;
+        } else if (_staker < 3000) {
+            _power += 2;
+        } else if (_staker < 4000) {
+            _power += 4;
+        } else if (_staker < 5000) {
+            _power += 8;
+        } else if (_staker < 6000) {
+            _power += 14;
+        } else if (_staker < 7000) {
+            _power += 22;
+        } else if (_staker < 8000) {
+            _power += 32;
+        } else if (_staker < 9000) {
+            _power += 44;
+        } else if (_staker < 10000) {
+            _power += 60;
+        } else if (_staker < 20000) {
+            _power += 80;
+        } else if (_staker < 30000) {
+            _power += 85;
+        } else if (_staker < 40000) {
+            _power += 90;
+        } else if (_staker < 50000) {
+            _power += 94;
+        } else if (_staker < 75000) {
+            _power += 97;
+        } else if (_staker < 100000) {
+            _power += 99;
+        } else if (_staker >= 100000) {
+            _power += 100;
+        }        
+        return _power;
     }
     function _check_summoner (uint _summoner) internal view returns (bool) {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
@@ -9203,7 +9332,7 @@ contract Fluffy_Festival is Ownable, ReentrancyGuard, Pausable {
 
 
 
-//---Achievement_onChain*
+//---Achievement_onChain
 
 contract Achievement_onChain is Ownable, Pausable {
 
@@ -9356,6 +9485,7 @@ contract Achievement_onChain is Ownable, Pausable {
         Murasaki_Function_Share mfs = Murasaki_Function_Share(ma.address_Murasaki_Function_Share());
         uint _staker = mfs.calc_dapps_staking_amount(_owner);
         uint _score;
+        /*
         if (_staker == 0) {
             _score = 0;
         } else if (_staker < 500) {
@@ -9378,6 +9508,45 @@ contract Achievement_onChain is Ownable, Pausable {
             _score = 90;
         } else if (_staker >= 128000) {
             _score = 100;
+        }
+        */
+        // 241114, updated
+        if (_staker < 500) {
+            _score = 0;
+        } else if (_staker < 1000) {
+            _score = 1;
+        } else if (_staker < 2000) {
+            _score = 2;
+        } else if (_staker < 3000) {
+            _score = 4;
+        } else if (_staker < 4000) {
+            _score = 8;
+        } else if (_staker < 5000) {
+            _score = 16;
+        } else if (_staker < 6000) {
+            _score = 28;
+        } else if (_staker < 7000) {
+            _score = 44;
+        } else if (_staker < 8000) {
+            _score = 64;
+        } else if (_staker < 9000) {
+            _score = 88;
+        } else if (_staker < 10000) {
+            _score = 120;
+        } else if (_staker < 20000) {
+            _score = 160;
+        } else if (_staker < 30000) {
+            _score = 170;
+        } else if (_staker < 40000) {
+            _score = 180;
+        } else if (_staker < 50000) {
+            _score = 188;
+        } else if (_staker < 75000) {
+            _score = 194;
+        } else if (_staker < 100000) {
+            _score = 198;
+        } else if (_staker >= 100000) {
+            _score = 200;
         }
         return _score;
     }
@@ -12521,33 +12690,52 @@ contract BufferVault is Ownable, ReentrancyGuard, Pausable {
         return false;
     }
     
-    //admin, transfer
+    // admin, transfer tokens
     function transfer_for_buybackTreasury() external nonReentrant onlyOwner whenNotPaused {
+        _transfer_for_buybackTreasury();
+    }
+    // internal
+    event TransferForBuybackTreasury (
+        address indexed _wallet, uint _devReward, bool _reflex, uint _amountNeeded_forTransfer, uint _forStaking);
+    function _transfer_for_buybackTreasury() internal {
         Murasaki_Address ma = Murasaki_Address(address_Murasaki_Address);
         BuybackTreasury bbt = BuybackTreasury(payable(ma.address_BuybackTreasury()));
         Murasaki_Parameter mp = Murasaki_Parameter(ma.address_Murasaki_Parameter());
         require(check_transferable());
-        //10%: transfer to developer reward
+        // 10%: transfer to developer reward
         uint _devReward = address(this).balance * developerRewardRate/10000 /2;
         payable(ma.address_Coder_Wallet()).transfer(_devReward);
         payable(ma.address_Illustrator_Wallet()).transfer(_devReward);
-        //amountNeeded: transfer to/from buybackTreasury
+        // amountNeeded: transfer to/from buybackTreasury
         (uint _amountNeeded_forTransfer, bool _reflex) = calc_amountNeeded_forTransfer();
         if (_reflex) {
             bbt.reflex_to_bufferVault(_amountNeeded_forTransfer);
         } else {
             payable(ma.address_BuybackTreasury()).transfer(_amountNeeded_forTransfer);
         }
-        //all the rest: transfer to staking wallet
-        payable(ma.address_Staking_Wallet()).transfer(address(this).balance);
-        //inflate amountPerSummoner
+        // all the rest: transfer to staking wallet
+        uint _forStaking = address(this).balance;
+        //payable(ma.address_Staking_Wallet()).transfer(address(this).balance);
+        payable(ma.address_Staking_Wallet()).transfer(_forStaking);
+        // inflate amountPerSummoner
         uint _amountPerSummoner = bbt.amountPerSummoner();
         bbt.set_amountPerSummoner(_amountPerSummoner * (10000 + inflationRate) / 10000);
-        //inflate summon price
+        // inflate summon price
         uint _price = mp.PRICE();
         mp._set_price(_price * (10000 + inflationRate) / 10000);
-        //update timestamp
+        // update timestamp
         last_transfer_time = block.timestamp;
+        emit TransferForBuybackTreasury(msg.sender, _devReward, _reflex, _amountNeeded_forTransfer, _forStaking);
+    }
+    
+    // For future sustainability, make transfers executable by anyone.
+    bool public transferableByAnyone;
+    function set_transferableByAnyone (bool _value) external onlyOwner {
+        transferableByAnyone = _value;
+    }
+    function transfer_for_buybackTreasury_byPlayer () external nonReentrant whenNotPaused {
+        require(transferableByAnyone);
+        _transfer_for_buybackTreasury();
     }
 }
 

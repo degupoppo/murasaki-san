@@ -178,5 +178,99 @@ hr{
   position: absolute;
   bottom: 8vh;
   left: 2vh;
-
 }
+
+#ranking {
+
+  //position: absolute;
+  //width: 100%;
+  //height: 100%;
+  //display: flex;
+  //align-items: center;
+  //justify-items: center;
+
+  /*
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  height: 100vh;
+  */
+  
+  //width: 100%;
+  //transform-origin: center center;
+
+  font-family: "arial";
+  font-size: 2.9vh;
+  line-height: 2.9vh;
+  color: #FFFFFF;
+  position: absolute;
+  top: 8vh;
+  left: 2vh;
+}
+
+
+
+.custom-number-input {
+    text-align: center; /* 中央揃え */
+    background-color: transparent; /* 背景透明 */
+    border: 0.4vh solid white; /* 青色の枠線 */
+    border-radius: 4px; /* 丸角 */
+    color: white; /* 入力文字の色を青に */
+    font-weight: bold; /* 太字 */
+    padding: 8px 12px; /* 内側の余白 */
+    outline: none; /* フォーカス時の枠線を除去 */
+    appearance: textfield; /* デフォルトの矢印を一旦削除 */
+    -moz-appearance: textfield; /* Firefox対応 */
+    //width: 100px; /* 幅の調整 */
+    width:12vh; 
+    height:4vh; 
+    font-size: 2vh;
+}
+
+/* Webkit（ChromeとSafari）用のスクロールバー非表示 */
+.custom-number-input::-webkit-inner-spin-button,
+.custom-number-input::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* カスタム矢印スタイル */
+.number-input-container {
+    position: relative;
+    display: inline-block;
+}
+
+.number-input-container .custom-arrows {
+    position: absolute;
+    right: 0.5vh;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+}
+
+.number-input-container .arrow {
+    width: 0;
+    height: 0;
+    border-left: 0.5vh solid transparent;
+    border-right: 0.5vh solid transparent;
+    cursor: pointer;
+}
+
+.number-input-container .arrow-up {
+    border-bottom: 1vh solid white;
+    margin-bottom: 0.2vh;
+}
+
+.number-input-container .arrow-down {
+    border-top: 1vh solid white;
+}
+
+
+#looseCount {
+  align-items: center;
+  color: #F00;
+  font-weight: 700;
+  font-size: 24px;
+}
+
