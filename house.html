@@ -2,6 +2,20 @@
 <!DOCTYPE html>
 <html lang="en">
 
+<script>
+// redirect
+const redirectUrl = 'index_maintenance.html';
+const redirectDate = new Date(2025, 1, 22, 0, 0, 0);
+function checkAndRedirect() {
+    const currentDate = new Date();
+    if (currentDate >= redirectDate) {
+        window.location.replace(redirectUrl);
+    }
+}
+checkAndRedirect();
+</script>
+
+
     <head>
     
     <!-- Google tag (gtag.js) -->

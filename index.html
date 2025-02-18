@@ -11,7 +11,23 @@
 <script src="lib/keccak256.js"></script>
 
 
+
 <head>
+
+
+<script>
+// redirect
+const redirectUrl = 'index_maintenance.html';
+const redirectDate = new Date(2025, 1, 22, 0, 0, 0);
+function checkAndRedirect() {
+    const currentDate = new Date();
+    if (currentDate >= redirectDate) {
+        window.location.replace(redirectUrl);
+    }
+}
+checkAndRedirect();
+</script>
+
 
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -88,6 +104,142 @@
     </p>
 
     <canvas id="top_animation" width=0 height=64></canvas>
+
+
+
+
+
+
+
+<!-- countdown timer -->
+
+<br>
+<br>
+<center><code class="language-plaintext highlighter-rouge">
+<!--This project will enter a major maintenance phase: <b><span id="targetDate">February 1th, 2025<span></b><br>-->
+This project will undergo scheduled maintenance:<br>
+<div class="countdown-container">
+    <div class="time-container">
+        <div class="time">
+            <span id="day"></span>
+            <span class="time-label">days</span>
+        </div>
+        <div class="time">
+            <span id="hour"></span>
+            <span class="time-label">hours</span>
+        </div>
+        <div class="time">
+            <span id="min"></span>
+            <span class="time-label">minutes</span>
+        </div>
+        <div class="time">
+            <span id="sec"></span>
+            <span class="time-label">seconds</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    
+    // ***PUBLIC RELEASE DATE***
+    const targetDate = new Date(2025, 1, 22, 0, 0, 0);
+    //const targetDate = 0;
+    
+    function getDaySuffix(day) {
+        if (day >= 11 && day <= 13) return "th";
+        switch (day % 10) {
+            case 1: return "st";
+            case 2: return "nd";
+            case 3: return "rd";
+            default: return "th";
+        }
+    }
+    function showTargetDate(targetDate) {
+        if (targetDate == 0) {
+            document.getElementById("targetDate").innerHTML = "***";
+            return;
+        }
+        const monthNames = [
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        ];
+        const month = monthNames[targetDate.getMonth()];
+        const day = targetDate.getDate();
+        const year = targetDate.getFullYear();
+        const suffix = getDaySuffix(day);
+        const formattedDate = `${month} ${day}${suffix}, ${year}`;
+        document.getElementById("targetDate").innerHTML = formattedDate;
+    }
+    
+    function showCountDown(targetDate) {
+        const day = document.getElementById("day");
+        const hour = document.getElementById("hour");
+        const min = document.getElementById("min");
+        const sec = document.getElementById("sec");
+        if (targetDate == 0) {
+            day.innerHTML = "**";
+            hour.innerHTML = "**";
+            min.innerHTML = "**";
+            sec.innerHTML = "**";
+            return;
+        }
+        function countdown() {
+            const now = new Date();
+            const diff = targetDate.getTime() - now.getTime();
+            const calcDay = Math.floor(diff / 1000 / 60 / 60 /24);
+            const calcHour = Math.floor(diff / 1000 / 60 / 60) % 24;
+            const calcMin = Math.floor(diff / 1000 / 60) % 60;
+            const calcSec = Math.floor(diff / 1000) % 60;
+            day.innerHTML = calcDay < 10 ? '0' + calcDay : calcDay;
+            hour.innerHTML = calcHour < 10 ? '0' + calcHour : calcHour;
+            min.innerHTML = calcMin < 10 ? '0' + calcMin : calcMin;
+            sec.innerHTML = calcSec < 10 ? '0' + calcSec : calcSec;
+        }
+        countdown();
+        setInterval(countdown,1000);
+    }
+    
+    //showTargetDate(targetDate);
+    showCountDown(targetDate);
+</script>
+
+<style>
+    .countdown-container {
+        text-align: center;
+    }
+    .time-container {
+        display: flex;
+        justify-content: center;
+    }
+    .time {
+        margin: 0.3rem;
+        background-color: lightpink;
+        border-radius: 1rem;
+        padding: 0.1rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100px;
+        height: 78px;
+    }
+    #day, #hour, #min, #sec {
+        font-size: 2rem;
+        margin-bottom: 0rem;
+    }
+    .time-label {
+        font-size: 0.8rem;
+        color: #666;
+    }
+</style>
+
+</code></center><br>
+
+
+
+
+    
+    
+    
 </header>
 
 
@@ -115,10 +267,10 @@ This is our fan project using <br class="br-sp"><b>Astar Substrate EVM</b> <img 
 This project is currently being developed on a private chain.<br>
 In the near future, it will first be test-played on the Shibuya testnet and eventually deployed on the Astar Substrate EVM.<br>
 <br>
-<i>Development Progress: <b><span id="percent">95</span></b><font size="-1"> (v0.1.42, 2024/12/1)</font></i><br>
+<i>Development Progress: <b><span id="percent">96</span></b><font size="-1"> (v0.1.43, 2025/2/18)</font></i><br>
 <span id="container"></span><br>
 <font size="-1" color="blue"><i>
-The developer is currently contemplating marketing strategies and conceptualizing plans for the next season.
+The developer is planning to migrate to Soneium chain.
 
 </font></i>
 <script src="https://rawgit.com/kimmobrunfeldt/progressbar.js/master/dist/progressbar.min.js"></script>
@@ -151,7 +303,7 @@ The developer is currently contemplating marketing strategies and conceptualizin
     document.getElementById("percent").innerHTML = (Math.round(bar.value() * 100) + '%');
   }
     });
-    bar.animate(0.95); 
+    bar.animate(0.96); 
 </script>
 </p>
 
@@ -192,7 +344,7 @@ created by the developer as a simple hobby project ;)</font><br>
 </p>
 
 <p>
-<button style="font-size:80%; font-weight: bold; background-color:#FF4F6F;" onclick="location.href='house.html?summoner=999999999';">Demo Preview</button>&nbsp;&nbsp;is available to everyone. Take a peek into the developer's murasaki-san! (no wallet connection or network change is required)<br>
+<button style="font-size:80%; font-weight: bold; background-color:#FF4F6F;" onclick="location.href='house.html?summoner=999999999';">Demo Preview</button>&nbsp;&nbsp;is available to everyone. Take a peek into the developer's murasaki-san! (no wallet connection or network setting is required)<br>
 </p>
 
 <p>
@@ -222,6 +374,26 @@ This product can be used accross multiple platforms. You can play the game using
 <code>
 <font size="-1" color="black">
 <p>
+<u>## [0.1.43] - 2025-2-18</u><br>
+### Fixed<br>
+- Fixed a bug of displaying voting power at the festival.<br>
+- Added some new joke messages on the loading screen.<br>
+- Fixed a bug of bank/pouch destroying.<br>
+- Changed the picture of house of fluffy.<br>
+- FG: show summoner name on the ranking system.<br>
+- Fixed Fomula section to use MathJax.<br>
+- Adjusted the cat cushion depth.<br>
+- Changed the picture of Crayon.<br>
+- Fixed the info window of ribbon.<br>
+- Fixed pippel summary to blink lates pippel petal.<br>
+- Changed the icon in the game play to reflect the staking amount.<br>
+### Added<br>
+- Added the Terms of Service window at the minting main SBT.<br>
+### Contract Replaced<br>
+- Murasaki_Function_Share: added function to call summoner name from wallet address<br>
+### Contract Parameter Updated<br>
+- Buyback Vault: Updated the buyback prices (total inflation rate: +51.26%).<br>
+<br>
 <u>## [0.1.42] - 2024-12-1</u><br>
 ### Fixed<br>
 - Updated to Phaser v3.86.0.<br>
@@ -1255,49 +1427,119 @@ Due to the complexity of the project's contract system, a viewer contract has be
 
 <summary>Calculation Formulas &#129518;</summary>
 
+<!--
+<script type="text/javascript"
+  src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+-->
+
+<script type="text/javascript" async
+    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+  </script>
+<script type="text/x-mathjax-config">
+/*
+  MathJax.Hub.Config({
+    TeX: { equationNumbers: { autoNumber: "AMS" }},
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    },
+    "HTML-CSS": { matchFontHeight: false },
+    displayAlign: "left",
+    displayIndent: "2em"
+  });
+  */
+</script>
+
 <p>
 The calculations of the effect of each status value on the result of each action is performed entirely within the contracts, and the summary of the calculation formulas is as follows:
 </p>
 
+<br>
+
 <p>
 <b>Feeding efficacy:</b><br>
-<font size="-0.5">
+</p>
+
+<!--
 &nbsp;&nbsp;&nbsp;Exp Gained = (500 * (100 - Satiety) / 100) * ExpBoost<br>
 &nbsp;&nbsp;&nbsp;Satiety = 100 - SEC / 432<br>
 &nbsp;&nbsp;&nbsp;ExpBoost = Boost_from_FlowerWreath * Boost_from_FluffyDoll
-</font>
+-->
+
+<p style="font-size:80%;">
+    \( \text{Exp Gained} = \left(500 \times \frac{100 - \text{Satiety}}{100}\right) \times \text{ExpBoost} \)<br>
 </p>
+<p style="font-size:80%;">
+    \( \text{Satiety} = 100 - \frac{\text{SEC}}{432} \)<br>
+</p>
+<p style="font-size:80%;">
+    \( \text{ExpBoost} = \text{Boost}_{\text{from FlowerWreath}} \times \text{Boost}_{\text{from FluffyDoll}} \)<br>
+</p>
+
+<br>
 
 <p>
 <b>Grooming efficacy:</b><br>
-<font size="-0.5">
+</p>
+
+<!--
 &nbsp;&nbsp;&nbsp;Exp Gained = (3000 * (100 - Happy * Coefficient) / 100) * ExpBoost<br>
 &nbsp;&nbsp;&nbsp;Happy = 100 - SEC / 2592<br>
 &nbsp;&nbsp;&nbsp;ExpBoost = Boost_from_FlowerWreath * Boost_from_FluffyDoll<br>
 &nbsp;&nbsp;&nbsp;Coefficient = (Now - LastGroomingTime - WorkingTime) / (Now - LastGroomingTime)
-&nbsp;&nbsp;&nbsp;Working: Mining, Farming, Crafting, Strolling, Practicing</font>
+&nbsp;&nbsp;&nbsp;Working: Mining, Farming, Crafting, Strolling, Practicing
+-->
+
+<p style="font-size:80%;">
+    \( \text{Exp Gained} = \left(3000 \times \frac{100 - \text{Happy} \times \text{Coefficient}}{100}\right) \times \text{ExpBoost} \)
 </p>
+<p style="font-size:80%;">
+    \( \text{Happy} = 100 - \frac{\text{SEC}}{2592} \)
+</p>
+<p style="font-size:80%;">
+    \( \text{ExpBoost} = \text{Boost}_{\text{from FlowerWreath}} \times \text{Boost}_{\text{from FluffyDoll}} \)
+</p>
+<p style="font-size:80%;">
+    \( \text{Coefficient} = \frac{\text{Now} - \text{LastGroomingTime} - \text{WorkingTime}}{\text{Now} - \text{LastGroomingTime}} \)
+</p>
+<p style="font-size:80%;">
+    *WorkingTime: time spent for Mining, Farming, Crafting, Strolling and Practicing
+</p>
+
+<br>
+
+
+
+
 
 <p>
 <b>Mining efficacy:</b><br>
-<font size="-0.5">
-&nbsp;&nbsp;&nbsp;Mining Coins = (SEC / 86400 * 1000) * ( 1 + (STR + Lv + STR_item) * 5/100 )
-</font>
 </p>
+<p style="font-size:80%;">
+    \( \text{Mining Coins} = \left( \frac{\text{SEC}}{86400} \times 1000 \right) \times \left( 1 + \left( \text{STR} + \text{Lv} + \text{STR_item} \right) \times \frac{5}{100} \right) \)
+</p>
+
+<br>
 
 <p>
 <b>Farming efficacy:</b><br>
-<font size="-0.5">
-&nbsp;&nbsp;&nbsp;Farming Leaves = (SEC / 86400 * 1000) * ( 1 + (DEX + Lv + DEX_item) * 5/100 )
-</font>
 </p>
+<p style="font-size:80%;">
+    \( \text{Farming Leaves} = \left( \frac{\text{SEC}}{86400} \times 1000 \right) \times \left( 1 + \left( \text{DEX} + \text{Lv} + \text{DEX_item} \right) \times \frac{5}{100} \right) \)
+</p>
+
+<br>
 
 <p>
 <b>Crafting efficacy:</b><br>
-<font size="-0.5">
-&nbsp;&nbsp;&nbsp;Crafting Sec = item_DC * (INT + Lv + INT_item - 400) / (item_Lv * 300) * 86400 / 1000<br>
-&nbsp;&nbsp;&nbsp;Crafting Sec >= [Sec Limit set for each item]<br>
-</font>
+</p>
+<p style="font-size:80%;">
+    \( \text{Crafting Sec} = \frac{\text{item_DC} \times \left( \text{INT} + \text{Lv} + \text{INT_item} - 400 \right)}{\text{item_Lv} \times 300} \times \frac{86400}{1000} \)
+</p>
+
+<p style="font-size:80%;">
+    \( \text{Crafting Sec} \geq \left[ \text{Sec Limit set for each item} \right] \)
 </p>
 
 <font size="-0.5">
@@ -1324,20 +1566,29 @@ The calculations of the effect of each status value on the result of each action
 </table>
 </font>
 <font size="-1">
-<sup>*</sup>The item Lv is equal to the order of craftable items.
+<sup>*</sup>The item Lv is equal to the order of craftable items.<br>
 </font>
+
+<br>
 
 <p>
 <b>Critical efficacy:</b><br>
-<font size="-0.5">
-&nbsp;&nbsp;&nbsp;Conditional Expression: D100 <= LUK + FluffyScore/100 + RolledDice/10<br>
-&nbsp;&nbsp;&nbsp;Success: gain x2 Exp, earn x2 Coin/Leaf, craft uncommon item
-</font>
 </p>
+
+<p style="font-size:80%;">
+    \( D100 \leq \text{LUK} + \frac{\text{FluffyScore}}{100} + \frac{\text{RolledDice}}{10} \)
+</p>
+<p style="font-size:80%;">
+Success: gain x2 Exp, earn x2 Coin/Leaf, craft uncommon item<br>
+</p>
+
+<br>
 
 
 <p>
 <b>Exp Required for Next Level-up:</b><br>
+</p>
+<p style="font-size:80%;">
 The following exp point table has been set based on the Dungeons & Dragons 3.5e rulebook. Upon leveling up, all exp points are paid and reset to 0.
 </p>
 
@@ -1367,12 +1618,17 @@ The following exp point table has been set based on the Dungeons & Dragons 3.5e 
 </table>
 </font>
 
+<br>
+
 <p>
 <b>Staking efficacy:</b><br>
-<font size="-0.5">
-&nbsp;&nbsp;&nbsp;Construction Progress (%) = SEC * Speed / 2592000<br>
-&nbsp;&nbsp;&nbsp;(Construction Progress will be updated when Feeding)
-</font>
+</p>
+
+<p style="font-size:80%;">
+\( \text{Construction Progress (%)} = \frac{\text{SEC} \times \text{Speed}}{2592000} \)
+</p>
+<p style="font-size:80%;">
+(Construction Progress will be updated when Feeding)
 </p>
 
 <font size="-0.5">
@@ -1413,26 +1669,61 @@ Reward NFT: Fluffy (61%), Fluffier (10%), Glitter (3%), Sparkle (3%), Twinkle (3
 </font>
 </p>
 
+<br>
+
 <p>
 <b>Comfortable Score calculation:</b><br>
-<font size="-0.5">
-&nbsp;&nbsp;&nbsp;Comfortable Score = ItemScore + FluffyScore + TotalScore + Extra1 + Extra2<br>
-&nbsp;&nbsp;&nbsp;ItemScore = Common * 600 + Uncommon * 2400 + Rare * 9600<br>
-&nbsp;&nbsp;&nbsp;FluffyScore = Fluffy * 100 + Fluffier * 400 + Fluffiest * 1600 + Doll * 6400<br>
-&nbsp;&nbsp;&nbsp;TotalScore = TotalExpGained + TotalCoinMined + TotalLeavesFarmed<br>
-&nbsp;&nbsp;&nbsp;Extra1 = TotalItemCrafted * 3000 + TotalItemCrafted ** 2 * 300<br>
-&nbsp;&nbsp;&nbsp;Extra2 = TotalFluffyReceived * 500 + TotalFluffyReceived ** 2 * 50<br>
-</font>
 </p>
+
+
+<p style="font-size:80%;">
+    \( \text{Comfortable Score} = \text{ItemScore} + \text{FluffyScore} + \text{TotalScore} + \text{Extra1} + \text{Extra2} \)
+  </p>
+
+<p style="font-size:80%;">
+    \( \text{ItemScore} = \text{Common} \times 600 + \text{Uncommon} \times 2400 + \text{Rare} \times 9600 \)
+  </p>
+
+<p style="font-size:80%;">
+    \( \text{FluffyScore} = \text{Fluffy} \times 100 + \text{Fluffier} \times 400 + \text{Fluffiest} \times 1600 + \text{Doll} \times 6400 \)
+  </p>
+
+<p style="font-size:80%;">
+    \( \text{TotalScore} = \text{TotalExpGained} + \text{TotalCoinMined} + \text{TotalLeavesFarmed} \)
+  </p>
+
+<p style="font-size:80%;">
+    \( \text{Extra1} = \text{TotalItemCrafted} \times 3000 + \text{TotalItemCrafted}^2 \times 300 \)
+  </p>
+
+<p style="font-size:80%;">
+    \( \text{Extra2} = \text{TotalFluffyReceived} \times 500 + \text{TotalFluffyReceived}^2 \times 50 \)
+  </p>
+
+<br>
 
 <p>
 <b>Strolling efficacy:</b><br>
-<font size="-0.5">
-&nbsp;&nbsp;&nbsp;Strolling Distance = StrollingSec * 500 / 3600 * BoostRate<br>
-&nbsp;&nbsp;&nbsp;StrollingSec = 14400<br>
-&nbsp;&nbsp;&nbsp;BoostRate = 100% + [Sum of Friend Bonus]<br>
-</font>
 </p>
+
+<p style="font-size:80%;">
+    \(
+    \text{Strolling Distance} = \frac{\text{StrollingSec} \times 500}{3600} \times \text{BoostRate}
+    \)
+  </p>
+
+<p style="font-size:80%;">
+    \(
+    \text{StrollingSec} = 14400
+    \)
+  </p>
+
+<p style="font-size:80%;">
+    \(
+    \text{BoostRate} = 100\% + \left[ \text{Sum of Friend Bonus} \right]
+    \)
+  </p>
+
 
 <font size="-0.5">
 <table>
@@ -1450,21 +1741,24 @@ Reward NFT: Fluffy (61%), Fluffier (10%), Glitter (3%), Sparkle (3%), Twinkle (3
 </table>
 </font>
 
-<p>
-<font size="-0.5">
+<p style="font-size:80%;">
 <sup>*</sup>The maximum number of friends meet during a stroll is 5.<br>
 <sup>*</sup>If Murasaki-san don't meet anyone, there is a low probability of receiving a large bonus (+100% chance at 1%, +50% chance at 3%, and +20% chance at 10%).<br>
 <sup>*</sup>When the total strolling distance reaches 6000, 20000, 40000, 64000, 92800, 127360, 168832, 218598, 278318, 349982, 435978, 539174, 663008, 811610, 989932, or 1203918, a random twinkle/sparkle/glitter NFT will be minted.<br>
 <sup>*</sup>When the total number of met friends reaches 10, 30, 70, 150, 310, 630, 1270, 2550, 5110, 10230, 20470, or 40950, a random twinkle/sparkle/glitter NFT will be minted.<br>
-</font>
 </p>
+
+<br>
 
 <p>
 <b>Pippel Score calculation:</b><br>
-<font size="-0.5">
-&nbsp;&nbsp;&nbsp;10 Pippel Score = 1 Fluffy Score<br>
-</font>
 </p>
+
+<p style="font-size:80%;">
+    \(
+    10 \, \text{Pippel Score} = 1 \, \text{Fluffy Score}
+    \)
+  </p>
 
 <font size="-0.5">
 <table>
@@ -1485,15 +1779,39 @@ Reward NFT: Fluffy (61%), Fluffier (10%), Glitter (3%), Sparkle (3%), Twinkle (3
 </table>
 </font>
 
+<br>
+
 <p>
 <b>Practice Exp boost efficacy:</b><br>
-<font size="-0.5">
-&nbsp;&nbsp;&nbsp;Exp = PracticingSec * rarity_boost * status_boost<br>
-&nbsp;&nbsp;&nbsp;rarity_boost = 1.2 (rare), 1.1 (uncomon), or 1.0 (normal)<br>
-&nbsp;&nbsp;&nbsp;status_boost = (100 + status) / 100<br>
-&nbsp;&nbsp;&nbsp;*clarinet: STR, piano: DEX, violin: INT<br>
-</font>
 </p>
+
+<p style="font-size:80%;">
+    \(
+    \text{Exp} = \text{PracticingSec} \times \text{rarity_boost} \times \text{status_boost}
+    \)
+  </p>
+
+<p style="font-size:80%;">
+    \(
+    \text{rarity_boost} = 
+    \begin{cases} 
+      1.2 & \text{(rare)} \\
+      1.1 & \text{(uncommon)} \\
+      1.0 & \text{(normal)}
+    \end{cases}
+    \)
+  </p>
+
+<p style="font-size:80%;">
+    \(
+    \text{status_boost} = \frac{100 + \text{status}}{100}
+    \)
+  </p>
+<p style="font-size:80%;">
+*clarinet: STR, piano: DEX, violin: INT<br>
+</p>
+
+<br>
 
 </details>
 
@@ -1772,7 +2090,7 @@ We have prepared a contract that enables anyone to access information about Mura
 </p>
 
 <p>
-With this contract, you can obtain status values of user's Murasaki-san such as Level, Age, Name, STR, present satiety, score, total_leaves_farmed, total_item_crafted, and more, using user's wallet address. This contract also meets the criteria for ERC165 and ERC721 standards and is compatible to Metamask etc, although transfers are not allowed since the Murasaki-san tokens are SBT.<br>
+With this contract, you can obtain status values of user's Murasaki-san such as Level, Age, Name, STR, present satiety, score, total_leaves_farmed, total_item_crafted, and more, using user's wallet address. This contract also meets the criteria for ERC165 and ERC721 standards and is compatible with Metamask etc., therefore this contract behaves as an NFT with numerous complex parameters, although transfers are not allowed since the Murasaki-san tokens are SBT.<br>
 </p>
 
 <p>

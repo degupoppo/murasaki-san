@@ -1,0 +1,361 @@
+
+<!doctype html>
+<html lang="en">
+
+
+<script src="lib/web3.min.js"></script>
+<script src="src/js/contracts.js"></script>
+<script src="src/js/share.js"></script>
+<script src="src/js/index.js"></script>
+
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=0.9">
+
+    <title>House of Murasaki-san</title>
+    <meta name="description" content="Murasaki-san is a virtual pet that lives in your wallet on Astar Network." />
+    <link rel="stylesheet" href="src/css/simple2.css">
+    <link rel="stylesheet" href="src/css/style.css">
+
+    <link rel="icon" href="src/png/favicon.png" />
+    <link rel="apple-touch-icon" href="src/png/favicon.png">
+
+    <meta property="og:title" content="House of Murasaki-san">
+    <meta property="og:image" content="src/png/favicon.png">
+    <meta property="og:url" content="https://murasaki-san.com/">
+    <meta property="og:description" content="Murasaki-san is a virtual pet that lives in your wallet on Astar Network.">
+
+    <!---twitter card--->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="House of Murasaki-san" />
+    <meta name="twitter:description" content="Murasaki-san is a virtual pet that lives in your wallet on Astar Network." />
+    <meta name="twitter:image" content="https://murasaki-san.com/src/png/opening_logo.jpg" />
+
+    <!-- twemoji -->
+    <script src="https://cdn.jsdelivr.net/npm/@twemoji/api@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-P69YXYZQ96"></script><script>window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', 'G-P69YXYZQ96');</script>
+    
+    <!--- scroll up button --->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.4/css/all.css"><link rel="stylesheet" href="src/css/scrollup.css"><div id="page_top"><a href="#"></a></div>
+
+</head>
+
+
+<body>
+
+
+<header>
+    <nav>
+        <a href="index.html"><b>&#127969; Main Page</b></a>&nbsp;
+        <button style="font-size:100%; font-weight: bold;" onclick="window.open('https://x.com/MurasakisanDev')"><img width="15" height="15" src="src/icon/twitter_sns.png"/> Follow Us</button>&nbsp;&nbsp;
+        <button style="font-size:100%; font-weight: bold;" onclick="window.open('http://twitter.com/share?text=%0a&url=https://murasaki-san.com/intro.html&hashtags=AstarNetwork,Murasakisan')">🤝 Share Us</button>
+    </nav>
+    <!--- header --->
+    <h1>
+        <p class="vertical-middle">
+        <img src="logo_title.png" style="width:60%">
+        </p>
+    </h1>
+    <p id="top_p">
+    </p>
+</header>
+
+
+<main>
+
+
+<br>
+
+
+<center><code class="language-plaintext highlighter-rouge">
+Raise your own <b>Murasaki-san</b> in your Astar wallet!<br>
+This fully on-chain virtual pet grows with your care and attention.<br>
+</code></center>
+
+
+<br>
+<br>
+
+<!-- countdown timer -->
+
+<center><code class="language-plaintext highlighter-rouge">
+Public release date: <b><span id="targetDate">February 1th, 2025<span></b><br>
+<br>
+<div class="countdown-container">
+    <div class="time-container">
+        <div class="time">
+            <span id="day"></span>
+            <span class="time-label">days</span>
+        </div>
+        <div class="time">
+            <span id="hour"></span>
+            <span class="time-label">hours</span>
+        </div>
+        <div class="time">
+            <span id="min"></span>
+            <span class="time-label">minutes</span>
+        </div>
+        <div class="time">
+            <span id="sec"></span>
+            <span class="time-label">seconds</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    
+    // ***PUBLIC RELEASE DATE***
+    const targetDate = new Date(2025, 1, 1, 0, 0, 0);
+    //const targetDate = 0;
+    
+    function getDaySuffix(day) {
+        if (day >= 11 && day <= 13) return "th";
+        switch (day % 10) {
+            case 1: return "st";
+            case 2: return "nd";
+            case 3: return "rd";
+            default: return "th";
+        }
+    }
+    function showTargetDate(targetDate) {
+        if (targetDate == 0) {
+            document.getElementById("targetDate").innerHTML = "***";
+            return;
+        }
+        const monthNames = [
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        ];
+        const month = monthNames[targetDate.getMonth()];
+        const day = targetDate.getDate();
+        const year = targetDate.getFullYear();
+        const suffix = getDaySuffix(day);
+        const formattedDate = `${month} ${day}${suffix}, ${year}`;
+        document.getElementById("targetDate").innerHTML = formattedDate;
+    }
+    
+    function showCountDown(targetDate) {
+        const day = document.getElementById("day");
+        const hour = document.getElementById("hour");
+        const min = document.getElementById("min");
+        const sec = document.getElementById("sec");
+        if (targetDate == 0) {
+            day.innerHTML = "**";
+            hour.innerHTML = "**";
+            min.innerHTML = "**";
+            sec.innerHTML = "**";
+            return;
+        }
+        function countdown() {
+            const now = new Date();
+            const diff = targetDate.getTime() - now.getTime();
+            const calcDay = Math.floor(diff / 1000 / 60 / 60 /24);
+            const calcHour = Math.floor(diff / 1000 / 60 / 60) % 24;
+            const calcMin = Math.floor(diff / 1000 / 60) % 60;
+            const calcSec = Math.floor(diff / 1000) % 60;
+            day.innerHTML = calcDay < 10 ? '0' + calcDay : calcDay;
+            hour.innerHTML = calcHour < 10 ? '0' + calcHour : calcHour;
+            min.innerHTML = calcMin < 10 ? '0' + calcMin : calcMin;
+            sec.innerHTML = calcSec < 10 ? '0' + calcSec : calcSec;
+        }
+        countdown();
+        setInterval(countdown,1000);
+    }
+    
+    showTargetDate(targetDate);
+    showCountDown(targetDate);
+</script>
+
+<style>
+    .countdown-container {
+        text-align: center;
+    }
+    .time-container {
+        display: flex;
+        justify-content: center;
+    }
+    .time {
+        margin: 0.3rem;
+        background-color: lightpink;
+        border-radius: 1rem;
+        padding: 0.1rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100px;
+        height: 78px;
+    }
+    #day, #hour, #min, #sec {
+        font-size: 2rem;
+        margin-bottom: 0rem;
+    }
+    .time-label {
+        font-size: 0.8rem;
+        color: #666;
+    }
+</style>
+
+</code></center><br>
+
+
+
+<br>
+<br>
+
+
+<center>
+
+<figure>
+<img alt="Game screen" src="src/png/screen_launch.png" width="100%"/>
+</figure>
+
+<br>
+
+<!-- preview button -->
+
+<p>
+Until the public release date, the developer's character is undergoing early testing.<br>
+You can preview the developer's character using the button below.<br>
+<br>
+<button style="font-size:100%; font-weight: bold; background-color:#FF4F6F;" onclick="location.href='house.html?summoner=999999999';">>> Demo Preview <<</button><br>
+<font size="-1" color="blue"><i>
+No wallet connection or network setting is required.<br>
+No gas fees and transactions.<br>
+</font></i>
+</p>
+
+
+</center>
+
+<br>
+
+
+
+<!-- FAQ -->
+
+<h3>FAQ &#127808;</h3>
+
+<details>
+<summary>What kind of game is this?</summary>
+<p>
+This game is a fully on-chan dApp game where you nurture Murasaki-san, a virtual pet that lives in your wallet on <b>the Astar Substrate EVM chain</b>. It falls under the categories of idle games or pet-raising games. By feeding and grooming Murasaki-san, your pet will gradually grow. You can also create items together with Murasaki-san and trade these items in the marketplace. The goal of the game is to provide a unique pet token tied exclusively to your wallet, which grows through time and consistent care.<br>
+<br>
+Mode details: <a href="index.html#whats_this"><b>"What's This"</b> section on the main page.</a><br>
+<br>
+</p>
+</details>
+
+<details>
+<summary>What is Murasaki-san?</summary>
+<p>
+Murasaki-san is a virtual pet that resides in your wallet on the Astar Network. It is <b>a Soulbound Token (SBT)</b>, meaning it cannot be traded or sold like an NFT. Each wallet has a unique Murasaki-san with its own personality.<br>
+<br>
+Mode details: <a href="index.html#concept"><b>"The Main Concept"</b> section on the main page.</a><br>
+<br>
+</p>
+</details>
+
+<details>
+<summary>How do I play the game?</summary>
+<p>
+Once you summon your Murasaki-san, you can take care of it by feeding and grooming it to earn EXP and level up. You can also craft item NFTs with your Murasaki-san, collect fluffy companions to liven up your house, and buy and sell item NFTs on the marketplace.
+<br>
+<br>
+Mode details: <a href="index.html#howto"><b>"How to Play"</b> section on the main page.</a><br>
+<br>
+</p>
+</details>
+
+<details>
+<summary>How much does it cost to play?</summary>
+<p>
+The trial version of the game is free to play; all you need is to cover the gas fees. If you enjoy the game, you can start the main gameplay by paying a starting fee, which allows you to play without limitations.<br>
+<br>
+Staring Fee: <b>500 $ASTR</b><br>
+<br>
+Additionally, you will need approximately <b>0.8-1.0 $ASTR</b> per day for gas fees during standard gameplay.<br>
+<br>
+Mode details: <a href="index.html#cost"><b>"Cost to Play and Trial"</b> section on the main page.</a><br>
+<br>
+
+</p>
+</details>
+
+<details>
+<summary>How do I obtain item NFTs?</summary>
+<p>
+You can craft item NFTs using coins and leaves with your Murasaki-san. You can also purchase them from the marketplace. Item NFTs help increase your Murasaki-san's status points and make your house livelier.<br>
+<br>
+Mode details: <a href="index.html#details"><b>"Game System Details"</b> section on the main page.</a><br>
+<br>
+
+</p>
+</details>
+
+<details>
+<summary>What are the dApp Staking bonuses?</summary>
+<p>
+By staking $ASTR in dApp Staking for this project on the Astar Network, you can receive in-game bonuses. The more $ASTR you stake, the faster the construction of your House of Gingerbread will be, leading to acquiring reward NFTs. You also receive bonuses such as an increased EXP boost rate for your flower wreath and increased voting power in the Fluffy Festival.<br>
+<br>
+Mode details: <a href="index.html#staking"><b>"dApp Staking Bonus!"</b> section on the main page.</a><br>
+<br>
+
+</p>
+</details>
+
+<details>
+<summary>What is the Buyback Treasury?</summary>
+<p>
+The Buyback Treasury allows players to sell their NFTs to the treasury at a fixed price at any time. This system ensures that the asset value of the project's NFTs is consistently guaranteed. Buyback prices never decrease and increase gradually over time.  The developers aim to achieve a "trustless" price increase of NFTs through this mechanism.<br>
+<br>
+Mode details: <a href="index.html#detailedspecific"><b>"Technical Details"</b> section on the main page.</a><br>
+<br>
+
+</p>
+</details>
+
+<details>
+<summary>Why was Astar chosen for this project?</summary>
+<p>
+The developers chose Astar as the platform to launch this project due to its numerous attractive features, including dApp Staking, Cross-Virtual Machine (XVM), and low gas fees.<br>
+<br>
+Mode details: <a href="index.html#astar"><b>"Why Astar?"</b> section on the main page.</a><br>
+<br>
+</p>
+</details>
+
+<br>
+
+For more detailed information, please refer to <a href="index.html">the main page</a>.
+
+<br>
+
+
+</main>
+
+
+<!--- Footer--->
+
+<footer class="footer">
+<p><font size="-2"><b>Donations: </b></font><font size="-2" color="blue"><a href="https://blockscout.com/astar/address/0xB688651CdAF260E5943FE03240E63783A9C0ffee" style="text-decoration:none;" target="_blank">0xb688651cdaf260e5943fe03240e63783a9<b><font color="brown">c0ffee</font></b>&nbsp;&#x2615;</a></font></p>
+<p>&nbsp;</p>
+<p>(C) 2024 Project of Murasaki-san.</p>
+<p>Contact: info.murasakisan (at) gmail.com</p>
+</footer>
+
+
+</body>
+
+<script>
+    twemoji.parse(document.body);
+    _show_icon2();
+    //create_canvas();
+</script>
+
+</html>
+
