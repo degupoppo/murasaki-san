@@ -2,6 +2,21 @@
 <html lang="en">
 
 <head>
+
+<script>
+// redirect
+const redirectUrl = '../index_maintenance.html';
+const redirectDate = new Date(2025, 1, 22, 0, 0, 0);
+function checkAndRedirect() {
+    const currentDate = new Date();
+    if (currentDate >= redirectDate) {
+        window.location.replace(redirectUrl);
+    }
+}
+checkAndRedirect();
+</script>
+
+
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta property="og:title" content="Fluffy Game" />
